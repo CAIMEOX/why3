@@ -552,6 +552,7 @@ let view_name_column =
   v#pack name_renderer;
   v#add_attribute name_renderer "text" name_column;
   (* v#set_sizing `AUTOSIZE; *)
+  v#set_expand true;
   v#set_resizable true;
   (*  v#set_max_width 1000;*)
   v
@@ -686,7 +687,7 @@ let monitor =
 
 let command_entry =
   GEdit.entry
-    ~text:"type commands here"
+    ~placeholder_text:"type commands here"
     ~packing:hbox22221#add ()
 
 (* Part 2.2.2.2.2 contains messages returned by the IDE/server *)
@@ -1444,15 +1445,6 @@ let (_ : GtkSignal.id) =
         interp cmd
       end in
   command_entry#connect#activate ~callback
-
-(* remove the helper text from the command entry the first time it gets the focus *)
-let () =
-  let id = ref None in
-  let callback _ =
-    clear_command_entry ();
-    GtkSignal.disconnect command_entry#as_entry (Opt.get !id);
-    false in
-  id := Some (command_entry#event#connect#focus_in ~callback)
 
 let on_selected_row r =
   try
