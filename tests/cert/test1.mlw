@@ -1,0 +1,8 @@
+predicate a
+predicate b
+predicate c
+
+axiom A : a
+axiom B : b
+
+goal G : c
