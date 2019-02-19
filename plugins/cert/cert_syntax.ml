@@ -77,7 +77,7 @@ let assumption_cert t =
   try let l, cert = assumption_task t in
       let t' = translate_task t in
       match check_step t' cert with
-        | Some [] -> l
+        | Some l' when l' = List.map translate_task l -> l
         | _ -> failwith "certif verification failed"
   with e -> raise (Trans.TransFailure ("test_cert", e))
 
