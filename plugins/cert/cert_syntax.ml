@@ -11,7 +11,7 @@ type step = Axiom of ident
 type certif = step list
 
 
-(* traducteur des taches *)
+(* Translating Why3 tasks to simplified certificate tasks *)
 let translate_term (t : term) : cterm =
   match t.t_node with
   | Tapp (ls, []) -> CTapp ls.ls_name
@@ -40,14 +40,23 @@ let translate_task (t : task) =
     | _ -> assert false in
   {cctxt = translate_ctxt t; cgoal = g}
 
-(* checker de certificats *)
+(* Checker *)
 let check_step {cctxt = c; cgoal = t} (s : step) =
   match s with
     | Axiom id -> begin match List.assoc_opt id c with
                   | Some t' when t = t' -> Some []
                   | _ -> None end
 
-(* transformation assumption *)
+(* Creates a certified tactic from a tactic that produces certificates *)
+let checked_tactic tac task =
+  try let ltask, step = tac task in
+      let ctask = translate_task task in
+      match check_step ctask step with
+      | Some lctask when lctask = List.map translate_task ltask -> ltask
+      | _ -> failwith "Certif verification failed."
+  with e -> raise (Trans.TransFailure ("test_cert", e))
+
+(* Assumption with certificate *)
 let assumption_decl g (d : decl) =
   match d.d_node with
   | Dprop (_, pr, f) -> if t_equal_nt_na g f
@@ -67,20 +76,17 @@ let rec assumption_ctxt g = function
       | None -> assumption_ctxt g p end
   | None -> raise (Generic_arg_trans_utils.Arg_trans "No such assumption.")
 
-let assumption_task (t : task) : task list * step =
+let assumption_step (t : task) : task list * step =
   let g = try task_goal_fmla t
           with GoalNotFound -> invalid_arg "Cert_syntax.assumption_task" in
   let _, t = task_separate_goal t in
-  [], Axiom (assumption_ctxt g t)
+  let h = assumption_ctxt g t in
+  [], Axiom h
 
-let assumption_cert t =
-  try let l, cert = assumption_task t in
-      let t' = translate_task t in
-      match check_step t' cert with
-        | Some l' when l' = List.map translate_task l -> l
-        | _ -> failwith "certif verification failed"
-  with e -> raise (Trans.TransFailure ("test_cert", e))
+
+(* Certified tactic *)
+let cert_assumption = checked_tactic assumption_step
 
 let () =
-  Trans.register_transform_l "assumption_cert" (Trans.store assumption_cert)
+  Trans.register_transform_l "cert_assumption" (Trans.store cert_assumption)
     ~desc:"test certificates"

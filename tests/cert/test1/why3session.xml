@@ -7,8 +7,6 @@
 <path name="test1.mlw"/>
 <theory name="Top">
  <goal name="G">
- <transf name="assumption_cert" proved="true" >
- </transf>
  </goal>
 </theory>
 </file>
