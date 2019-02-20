@@ -10,6 +10,12 @@ type ctask = { cctxt : (ident * cterm) list; cgoal : cterm }
 type step = Axiom of ident
 type certif = step list
 
+type tactic = AutomaticProver of string
+            | Admitted
+            | Uncertified of (task -> task list)
+            | Certified of (task -> task list * step)
+
+type proof_tree = PT of tactic * proof_tree list
 
 (* Translating Why3 tasks to simplified certificate tasks *)
 let translate_term (t : term) : cterm =
@@ -47,8 +53,22 @@ let check_step {cctxt = c; cgoal = t} (s : step) =
                   | Some t' when t = t' -> Some []
                   | _ -> None end
 
+(* Checks a proof tree *)
+let rec check_pt events task (PT (tac, lpt)) =
+  let ltask, ev = match tac with
+    | AutomaticProver p -> [], ["Prover " ^ p ^ " was called"]
+    | Admitted -> [], ["(Sub)goal Admitted"]
+    | Uncertified tac -> tac task, ["Uncertified tactic called"]
+    | Certified tac ->
+        let ltask, step = tac task in
+        let ctask = translate_task task in
+        match check_step ctask step with
+        | Some lctask when lctask = List.map translate_task ltask -> ltask, []
+        | _ -> failwith "Could not verify step" in
+  List.fold_left2 check_pt (ev @ events) ltask lpt
+
 (* Creates a certified tactic from a tactic that produces certificates *)
-let checked_tactic tac task =
+let cert_tactic tac task =
   try let ltask, step = tac task in
       let ctask = translate_task task in
       match check_step ctask step with
@@ -85,7 +105,7 @@ let assumption_step (t : task) : task list * step =
 
 
 (* Certified tactic *)
-let cert_assumption = checked_tactic assumption_step
+let cert_assumption = cert_tactic assumption_step
 
 let () =
   Trans.register_transform_l "cert_assumption" (Trans.store cert_assumption)
