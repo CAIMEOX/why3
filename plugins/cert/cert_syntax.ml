@@ -44,22 +44,22 @@ let translate_task (t : task) =
 
 (* Checker *)
 exception Certif_verif_failed
-let rec check_certif ({cctxt = c; cgoal = t} as ct) (cert : certif)  : ctask list =
+let rec check_certif ({cctxt = c; cgoal = t} as ctask) (cert : certif)  : ctask list =
   match cert with
-    | Skip -> [ct]
+    | Skip -> [ctask]
     | Axiom id -> begin match List.assoc_opt id c with
                   | Some t' when t = t' -> []
                   | _ -> raise Certif_verif_failed end
     | Split (c1, c2) -> begin match t with
-                          | CTand (t1, t2) -> check_certif {ct with cgoal = t1} c1 @
-                                                check_certif {ct with cgoal = t2} c2
+                          | CTand (t1, t2) -> check_certif {ctask with cgoal = t1} c1 @
+                                                check_certif {ctask with cgoal = t2} c2
                           | _ -> raise Certif_verif_failed end
 
 (* Creates a certified transformation from a ctrans *)
-let ctrans_to_trans tr task =
-  try let ltask, step = tr task in
+let checker_ctrans ctr task =
+  try let ltask, cert = ctr task in
       let ctask = translate_task task in
-      let lctask = check_certif ctask step in
+      let lctask = check_certif ctask cert in
       if lctask = List.map translate_task ltask then ltask
       else failwith "Certif verification failed."
   with e -> raise (Trans.TransFailure ("cert_trans", e))
@@ -128,13 +128,13 @@ let compose2 tr tr1 tr2 task =
 
 
 (* Certified transformations *)
-let split_trans = ctrans_to_trans split_ctrans
-let assumption_trans = ctrans_to_trans assumption_ctrans
+let split_trans = checker_ctrans split_ctrans
+let assumption_trans = checker_ctrans assumption_ctrans
 
 let intuition_cert_start =
   compose2 split_trans assumption_trans assumption_trans
 
-let split_assumption_cert = ctrans_to_trans split_assumption_ctrans
+let split_assumption_cert = checker_ctrans split_assumption_ctrans
 
 let () =
   Trans.register_transform_l "assumption_cert" (Trans.store assumption_trans)
