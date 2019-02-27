@@ -20,7 +20,9 @@ type certif = Skip
 
 type ctrans = task -> task list * certif
 
-(* Translating Why3 tasks to simplified certificate tasks *)
+
+(** Translating Why3 tasks to simplified certificate tasks *)
+
 let rec translate_term (t : term) : cterm =
   match t.t_node with
   | Tapp (ls, []) -> CTapp ls.ls_name
@@ -51,6 +53,9 @@ let translate_task (t : task) =
     | _ -> assert false in
   {cctxt = translate_ctxt t; cgoal = g}
 
+
+(** Using ctask and certificates *)
+
 (* check_certif replays the certificate on a ctask *)
 exception Certif_verif_failed
 let rec check_certif ({cctxt = c; cgoal = t} as ctask) (cert : certif)  : ctask list =
@@ -80,6 +85,12 @@ let checker_ctrans ctr task =
       if lctask = List.map translate_task ltask then ltask
       else failwith "Certif verification failed."
   with e -> raise (Trans.TransFailure ("cert_trans", e))
+
+
+(** Primitive transformations with certificate *)
+
+(* Identity transformation with certificate *)
+let id_ctrans task = [task], Skip
 
 (* Assumption with certificate *)
 let assumption_decl g (d : decl) =
@@ -131,13 +142,13 @@ let dir_ctrans d t =
       [tf], Dir (d, Skip)
   | _ -> [t], Skip
 
-(* Compose transformations with certificate *)
-let compose_ctrans (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
-  let ts, c = tr1 task in
+(** Transformials *)
+
+let ctrans_gen tr (ts, c) =
   let rec fill c ts = match c with
       | Skip -> begin match ts with
                 | [] -> assert false
-                | t::ts -> let l2, c2 = tr2 t in
+                | t::ts -> let l2, c2 = tr t in
                            c2, l2, ts end
       | Axiom _ -> c, [], ts
       | Split (c1, c2) -> let c1, l1, ts1 = fill c1 ts in
@@ -150,9 +161,27 @@ let compose_ctrans (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
   assert (ts = []);
   l, c
 
+(* Compose transformations with certificate *)
+let compose_ctrans (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
+  tr1 task |> ctrans_gen tr2
+
+
+(* If Then Else on transformations with certificate *)
+let ite (tri : ctrans) (trt : ctrans) (tre : ctrans) : ctrans = fun task ->
+  let arg = [task], Skip in
+  let tri_arg = ctrans_gen tri arg in
+  if tri_arg = arg
+  then ctrans_gen trt tri_arg
+  else ctrans_gen tre tri_arg
+
+
+(** Derived transformations with certificate *)
+
 let split_assumption_ctrans = compose_ctrans split_ctrans assumption_ctrans
 
-(* Certified transformations *)
+
+(** Certified transformations *)
+
 let assumption_trans = checker_ctrans assumption_ctrans
 let split_trans = checker_ctrans split_ctrans
 let split_assumption_trans = checker_ctrans split_assumption_ctrans
