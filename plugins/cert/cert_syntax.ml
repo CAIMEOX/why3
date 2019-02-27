@@ -5,9 +5,11 @@ open Theory
 open Task
 
 type ident = Ident.ident
+
 type cterm = CTapp of ident
            | CTand of cterm * cterm
            | CTor of cterm * cterm
+
 type ctask = { cctxt : (ident * cterm) list; cgoal : cterm }
 
 type dir = Left | Right
@@ -49,25 +51,28 @@ let translate_task (t : task) =
     | _ -> assert false in
   {cctxt = translate_ctxt t; cgoal = g}
 
-(* Checker *)
+(* check_certif replays the certificate on a ctask *)
 exception Certif_verif_failed
 let rec check_certif ({cctxt = c; cgoal = t} as ctask) (cert : certif)  : ctask list =
   match cert with
     | Skip -> [ctask]
-    | Axiom id -> begin match List.assoc_opt id c with
-                  | Some t' when t = t' -> []
-                  | _ -> raise Certif_verif_failed end
-    | Split (c1, c2) -> begin match t with
-                          | CTand (t1, t2) -> check_certif {ctask with cgoal = t1} c1 @
-                                                check_certif {ctask with cgoal = t2} c2
-                          | _ -> raise Certif_verif_failed end
+    | Axiom id ->
+        begin match List.assoc_opt id c with
+        | Some t' when t = t' -> []
+        | _ -> raise Certif_verif_failed end
+    | Split (c1, c2) ->
+        begin match t with
+        | CTand (t1, t2) -> check_certif {ctask with cgoal = t1} c1 @
+                              check_certif {ctask with cgoal = t2} c2
+        | _ -> raise Certif_verif_failed end
     | Dir (d, c) ->
         begin match t, d with
-        | CTor (t, _), Left | CTor (_, t), Right -> check_certif {ctask with cgoal = t} c
+        | CTor (t, _), Left | CTor (_, t), Right ->
+            check_certif {ctask with cgoal = t} c
         | _ -> raise Certif_verif_failed end
 
 
-(* Creates a certified transformation from a ctrans *)
+(* Creates a certified transformation from a transformation with certificate *)
 let checker_ctrans ctr task =
   try let ltask, cert = ctr task in
       let ctask = translate_task task in
@@ -110,33 +115,23 @@ let split_ctrans t =
   let _, c = task_separate_goal t in
   match g.t_node with
   | Tbinop (Tand, f1, f2) ->
-      let t1 = Task.add_decl c (create_prop_decl Pgoal pr f1) in
-      let t2 = Task.add_decl c (create_prop_decl Pgoal pr f2) in
-      [t1;t2], Split (Skip, Skip)
+      let tf1 = add_decl c (create_prop_decl Pgoal pr f1) in
+      let tf2 = add_decl c (create_prop_decl Pgoal pr f2) in
+      [tf1;tf2], Split (Skip, Skip)
   | _ -> [t], Skip
 
 (* Direction with certificate *)
-let left_ctrans t =
+let dir_ctrans d t =
   let pr, g = try task_goal t, task_goal_fmla t
               with GoalNotFound -> invalid_arg "Cert_syntax.split_certif" in
   let _, c = task_separate_goal t in
-  match g.t_node with
-  | Tbinop (Tor, f1, _) ->
-      let t1 = Task.add_decl c (create_prop_decl Pgoal pr f1) in
-      [t1], Dir (Left, Skip)
+  match g.t_node, d with
+  | Tbinop (Tor, f, _), Left | Tbinop (Tor, _, f), Right ->
+      let tf = add_decl c (create_prop_decl Pgoal pr f) in
+      [tf], Dir (d, Skip)
   | _ -> [t], Skip
 
-let right_ctrans t =
-  let pr, g = try task_goal t, task_goal_fmla t
-              with GoalNotFound -> invalid_arg "Cert_syntax.split_certif" in
-  let _, c = task_separate_goal t in
-  match g.t_node with
-  | Tbinop (Tor, _, f2) ->
-      let t2 = Task.add_decl c (create_prop_decl Pgoal pr f2) in
-      [t2], Dir (Right, Skip)
-  | _ -> [t], Skip
-
-(* Compose *)
+(* Compose transformations with certificate *)
 let compose_ctrans (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
   let ts, c = tr1 task in
   let rec fill c ts = match c with
@@ -161,9 +156,8 @@ let split_assumption_ctrans = compose_ctrans split_ctrans assumption_ctrans
 let assumption_trans = checker_ctrans assumption_ctrans
 let split_trans = checker_ctrans split_ctrans
 let split_assumption_trans = checker_ctrans split_assumption_ctrans
-let left_trans = checker_ctrans left_ctrans
-let right_trans = checker_ctrans right_ctrans
-
+let left_trans = checker_ctrans (dir_ctrans Left)
+let right_trans = checker_ctrans (dir_ctrans Right)
 
 let () =
   Trans.register_transform_l "assumption_cert" (Trans.store assumption_trans)
