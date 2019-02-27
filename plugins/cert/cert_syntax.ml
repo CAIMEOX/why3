@@ -114,7 +114,7 @@ let compose_ctrans (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
       | Axiom _ -> c, [], ts
       | Split (c1, c2) -> let c1, l1, ts1 = fill c1 ts in
                           let c2, l2, ts2 = fill c2 ts1 in
-                          c, l1 @ l2, ts2 in
+                          Split (c1, c2), l1 @ l2, ts2 in
   let c, l, ts = fill c ts in
   assert (ts = []);
   l, c
