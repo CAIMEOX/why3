@@ -5,11 +5,17 @@ open Theory
 open Task
 
 type ident = Ident.ident
-type cterm = CTapp of ident | CTand of cterm * cterm
+type cterm = CTapp of ident
+           | CTand of cterm * cterm
+           | CTor of cterm * cterm
 type ctask = { cctxt : (ident * cterm) list; cgoal : cterm }
+
+type dir = Left | Right
 type certif = Skip
             | Axiom of ident
             | Split of certif * certif
+            | Dir of dir * certif
+
 type ctrans = task -> task list * certif
 
 (* Translating Why3 tasks to simplified certificate tasks *)
@@ -17,6 +23,7 @@ let rec translate_term (t : term) : cterm =
   match t.t_node with
   | Tapp (ls, []) -> CTapp ls.ls_name
   | Tbinop (Tand, t1, t2) -> CTand (translate_term t1, translate_term t2)
+  | Tbinop (Tor, t1, t2) -> CTor (translate_term t1, translate_term t2)
   | _ -> invalid_arg "Cert_syntax.translate_term"
 
 let translate_decl (d : decl) : (ident * cterm) list =
@@ -54,6 +61,11 @@ let rec check_certif ({cctxt = c; cgoal = t} as ctask) (cert : certif)  : ctask 
                           | CTand (t1, t2) -> check_certif {ctask with cgoal = t1} c1 @
                                                 check_certif {ctask with cgoal = t2} c2
                           | _ -> raise Certif_verif_failed end
+    | Dir (d, c) ->
+        begin match t, d with
+        | CTor (t, _), Left | CTor (_, t), Right -> check_certif {ctask with cgoal = t} c
+        | _ -> raise Certif_verif_failed end
+
 
 (* Creates a certified transformation from a ctrans *)
 let checker_ctrans ctr task =
@@ -103,6 +115,27 @@ let split_ctrans t =
       [t1;t2], Split (Skip, Skip)
   | _ -> [t], Skip
 
+(* Direction with certificate *)
+let left_ctrans t =
+  let pr, g = try task_goal t, task_goal_fmla t
+              with GoalNotFound -> invalid_arg "Cert_syntax.split_certif" in
+  let _, c = task_separate_goal t in
+  match g.t_node with
+  | Tbinop (Tor, f1, _) ->
+      let t1 = Task.add_decl c (create_prop_decl Pgoal pr f1) in
+      [t1], Dir (Left, Skip)
+  | _ -> [t], Skip
+
+let right_ctrans t =
+  let pr, g = try task_goal t, task_goal_fmla t
+              with GoalNotFound -> invalid_arg "Cert_syntax.split_certif" in
+  let _, c = task_separate_goal t in
+  match g.t_node with
+  | Tbinop (Tor, _, f2) ->
+      let t2 = Task.add_decl c (create_prop_decl Pgoal pr f2) in
+      [t2], Dir (Right, Skip)
+  | _ -> [t], Skip
+
 (* Compose *)
 let compose_ctrans (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
   let ts, c = tr1 task in
@@ -114,34 +147,32 @@ let compose_ctrans (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
       | Axiom _ -> c, [], ts
       | Split (c1, c2) -> let c1, l1, ts1 = fill c1 ts in
                           let c2, l2, ts2 = fill c2 ts1 in
-                          Split (c1, c2), l1 @ l2, ts2 in
+                          Split (c1, c2), l1 @ l2, ts2
+      | Dir (d, c) -> let c, l, ts = fill c ts in
+                      Dir (d, c), l, ts
+  in
   let c, l, ts = fill c ts in
   assert (ts = []);
   l, c
 
 let split_assumption_ctrans = compose_ctrans split_ctrans assumption_ctrans
 
-let compose2 tr tr1 tr2 task =
-  match tr task with
-    | [task1; task2] -> tr1 task1 @ tr2 task2
-    | _ -> failwith "wrong arity"
-
-
 (* Certified transformations *)
-let split_trans = checker_ctrans split_ctrans
 let assumption_trans = checker_ctrans assumption_ctrans
+let split_trans = checker_ctrans split_ctrans
+let split_assumption_trans = checker_ctrans split_assumption_ctrans
+let left_trans = checker_ctrans left_ctrans
+let right_trans = checker_ctrans right_ctrans
 
-let intuition_cert_start =
-  compose2 split_trans assumption_trans assumption_trans
-
-let split_assumption_cert = checker_ctrans split_assumption_ctrans
 
 let () =
   Trans.register_transform_l "assumption_cert" (Trans.store assumption_trans)
     ~desc:"A certified version of coq tactic [assumption]";
   Trans.register_transform_l "split_cert" (Trans.store split_trans)
     ~desc:"A certified version of (simplified) coq tactic [split]";
-  Trans.register_transform_l "intuition_cert_start" (Trans.store intuition_cert_start)
-    ~desc:"A certified version of (simplified) coq tactic [intuition]";
-  Trans.register_transform_l "split_assumption_cert" (Trans.store split_assumption_cert)
-    ~desc:"A certified version of (simplified) coq tactic [split; assumption]"
+  Trans.register_transform_l "split_assumption_cert" (Trans.store split_assumption_trans)
+    ~desc:"A certified version of (simplified) coq tactic [split; assumption]";
+  Trans.register_transform_l "left_cert" (Trans.store left_trans)
+    ~desc:"A certified version of coq tactic [left]";
+  Trans.register_transform_l "right_cert" (Trans.store right_trans)
+    ~desc:"A certified version of coq tactic [right]"
