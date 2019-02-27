@@ -1,0 +1,13 @@
+predicate a
+predicate b
+predicate c
+predicate d
+axiom A : a
+axiom B : b
+
+
+goal G1 : a /\ b
+goal G2 : a /\ (b \/ d)
+goal G3 : (a \/ c) /\ (d \/ b)
+goal G4 : a /\ (c \/ d)
+
