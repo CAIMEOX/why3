@@ -54,7 +54,7 @@ let translate_task (t : task) =
   {cctxt = translate_ctxt t; cgoal = g}
 
 
-(** Using ctask and certificates *)
+(** Using ctasks and certificates *)
 
 (* check_certif replays the certificate on a ctask *)
 exception Certif_verif_failed
@@ -62,9 +62,8 @@ let rec check_certif ({cctxt = c; cgoal = t} as ctask) (cert : certif)  : ctask 
   match cert with
     | Skip -> [ctask]
     | Axiom id ->
-        begin match List.assoc_opt id c with
-        | Some t' when t = t' -> []
-        | _ -> raise Certif_verif_failed end
+        begin try if List.assoc id c <> t then raise Not_found else []
+              with Not_found -> raise Certif_verif_failed end
     | Split (c1, c2) ->
         begin match t with
         | CTand (t1, t2) -> check_certif {ctask with cgoal = t1} c1 @
@@ -86,11 +85,36 @@ let checker_ctrans ctr task =
       else failwith "Certif verification failed."
   with e -> raise (Trans.TransFailure ("cert_trans", e))
 
+(* Generalize ctrans on (task list * certif) *)
+let ctrans_gen (ctr : ctrans) (ts, c) =
+  let rec fill c ts = match c with
+      | Skip -> begin match ts with
+                | [] -> assert false
+                | t::ts -> let l2, c2 = ctr t in
+                           c2, l2, ts end
+      | Axiom _ -> c, [], ts
+      | Split (c1, c2) -> let c1, l1, ts1 = fill c1 ts in
+                          let c2, l2, ts2 = fill c2 ts1 in
+                          Split (c1, c2), l1 @ l2, ts2
+      | Dir (d, c) -> let c, l, ts = fill c ts in
+                      Dir (d, c), l, ts
+  in
+  let c, l, ts = fill c ts in
+  assert (ts = []);
+  l, c
+
+let rec nocuts = function
+  | Skip -> false
+  | Axiom _ -> true
+  | Split (c1, c2) -> nocuts c1 && nocuts c2
+  | Dir (_, c) -> nocuts c
+
+let same_cert (_, cert1) (_, cert2) = cert1 = cert2
 
 (** Primitive transformations with certificate *)
 
 (* Identity transformation with certificate *)
-let id_ctrans task = [task], Skip
+let id task = [task], Skip
 
 (* Assumption with certificate *)
 let assumption_decl g (d : decl) =
@@ -112,7 +136,7 @@ let rec assumption_ctxt g = function
       | None -> assumption_ctxt g p end
   | None -> raise Not_found
 
-let assumption_ctrans t =
+let assumption t =
   let g = try task_goal_fmla t
           with GoalNotFound -> invalid_arg "Cert_syntax.assumption_task" in
   let _, t' = task_separate_goal t in
@@ -120,7 +144,7 @@ let assumption_ctrans t =
   with Not_found -> [t], Skip
 
 (* Split with certificate *)
-let split_ctrans t =
+let split t =
   let pr, g = try task_goal t, task_goal_fmla t
               with GoalNotFound -> invalid_arg "Cert_syntax.split_certif" in
   let _, c = task_separate_goal t in
@@ -132,7 +156,7 @@ let split_ctrans t =
   | _ -> [t], Skip
 
 (* Direction with certificate *)
-let dir_ctrans d t =
+let dir d t =
   let pr, g = try task_goal t, task_goal_fmla t
               with GoalNotFound -> invalid_arg "Cert_syntax.split_certif" in
   let _, c = task_separate_goal t in
@@ -142,51 +166,60 @@ let dir_ctrans d t =
       [tf], Dir (d, Skip)
   | _ -> [t], Skip
 
+
 (** Transformials *)
 
-let ctrans_gen tr (ts, c) =
-  let rec fill c ts = match c with
-      | Skip -> begin match ts with
-                | [] -> assert false
-                | t::ts -> let l2, c2 = tr t in
-                           c2, l2, ts end
-      | Axiom _ -> c, [], ts
-      | Split (c1, c2) -> let c1, l1, ts1 = fill c1 ts in
-                          let c2, l2, ts2 = fill c2 ts1 in
-                          Split (c1, c2), l1 @ l2, ts2
-      | Dir (d, c) -> let c, l, ts = fill c ts in
-                      Dir (d, c), l, ts
-  in
-  let c, l, ts = fill c ts in
-  assert (ts = []);
-  l, c
-
 (* Compose transformations with certificate *)
-let compose_ctrans (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
+let compose (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
   tr1 task |> ctrans_gen tr2
-
 
 (* If Then Else on transformations with certificate *)
 let ite (tri : ctrans) (trt : ctrans) (tre : ctrans) : ctrans = fun task ->
-  let arg = [task], Skip in
-  let tri_arg = ctrans_gen tri arg in
-  if tri_arg = arg
-  then ctrans_gen trt tri_arg
-  else ctrans_gen tre tri_arg
+  let ((lt, cert) as tri_task) = tri task in
+  if not (Lists.equal task_equal lt [task] && cert = Skip)
+  then ctrans_gen trt tri_task
+  else ctrans_gen tre tri_task
+
+(* Try on transformations with certificate *)
+let rec try_close (lctr : ctrans list) : ctrans = fun task ->
+  match lctr with
+  | [] -> id task
+  | h::t -> let lctask_h, cert_h = h task in
+            if lctask_h = []
+            then [], cert_h
+            else try_close t task
+
+(* Repeat on transformations with certificate *)
+let repeat (ctr : ctrans) : ctrans = fun task ->
+  let gen_task = id task in
+  let gen_tr = ctrans_gen ctr in
+  let rec loop gt =
+    let new_gt = gen_tr gt in
+    if Lists.equal task_equal (fst new_gt) (fst gt)
+    then gt
+    else loop new_gt in
+  loop gen_task
 
 
 (** Derived transformations with certificate *)
 
-let split_assumption_ctrans = compose_ctrans split_ctrans assumption_ctrans
+let split_assumption = compose split assumption
+
+let rec intuition task =
+  repeat (compose assumption
+          (compose split
+           (try_close [ite (dir Left) intuition id;
+                       ite (dir Right) intuition id]))) task
 
 
 (** Certified transformations *)
 
-let assumption_trans = checker_ctrans assumption_ctrans
-let split_trans = checker_ctrans split_ctrans
-let split_assumption_trans = checker_ctrans split_assumption_ctrans
-let left_trans = checker_ctrans (dir_ctrans Left)
-let right_trans = checker_ctrans (dir_ctrans Right)
+let assumption_trans = checker_ctrans assumption
+let split_trans = checker_ctrans split
+let left_trans = checker_ctrans (dir Left)
+let right_trans = checker_ctrans (dir Right)
+let split_assumption_trans = checker_ctrans split_assumption
+let intuition_trans = checker_ctrans intuition
 
 let () =
   Trans.register_transform_l "assumption_cert" (Trans.store assumption_trans)
@@ -198,4 +231,6 @@ let () =
   Trans.register_transform_l "left_cert" (Trans.store left_trans)
     ~desc:"A certified version of coq tactic [left]";
   Trans.register_transform_l "right_cert" (Trans.store right_trans)
-    ~desc:"A certified version of coq tactic [right]"
+    ~desc:"A certified version of coq tactic [right]";
+  Trans.register_transform_l "intuition_cert" (Trans.store intuition_trans)
+    ~desc:"A certified version of (simplified) coq tactic [intuition]"
