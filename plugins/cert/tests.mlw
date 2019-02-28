@@ -12,4 +12,4 @@ goal G3 : (b /\ a) /\ ( (a /\ a) /\ c)
 goal G4 : a /\ (b \/ d)
 goal G5 : (a \/ c) /\ (d \/ b)
 goal G6 : a /\ (c \/ d)
-
+goal G7 : (a /\ (d \/ c) ) \/ ( ((a /\ b) /\ (b \/d)) \/ (a /\ c) )

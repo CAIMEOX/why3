@@ -114,7 +114,7 @@ let same_cert (_, cert1) (_, cert2) = cert1 = cert2
 (** Primitive transformations with certificate *)
 
 (* Identity transformation with certificate *)
-let id_ctrans task = [task], Skip
+let id task = [task], Skip
 
 (* Assumption with certificate *)
 let assumption_decl g (d : decl) =
@@ -136,7 +136,7 @@ let rec assumption_ctxt g = function
       | None -> assumption_ctxt g p end
   | None -> raise Not_found
 
-let assumption_ctrans t =
+let assumption t =
   let g = try task_goal_fmla t
           with GoalNotFound -> invalid_arg "Cert_syntax.assumption_task" in
   let _, t' = task_separate_goal t in
@@ -144,7 +144,7 @@ let assumption_ctrans t =
   with Not_found -> [t], Skip
 
 (* Split with certificate *)
-let split_ctrans t =
+let split t =
   let pr, g = try task_goal t, task_goal_fmla t
               with GoalNotFound -> invalid_arg "Cert_syntax.split_certif" in
   let _, c = task_separate_goal t in
@@ -156,7 +156,7 @@ let split_ctrans t =
   | _ -> [t], Skip
 
 (* Direction with certificate *)
-let dir_ctrans d t =
+let dir d t =
   let pr, g = try task_goal t, task_goal_fmla t
               with GoalNotFound -> invalid_arg "Cert_syntax.split_certif" in
   let _, c = task_separate_goal t in
@@ -166,38 +166,36 @@ let dir_ctrans d t =
       [tf], Dir (d, Skip)
   | _ -> [t], Skip
 
+
 (** Transformials *)
 
-
 (* Compose transformations with certificate *)
-let compose_ctrans (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
+let compose (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
   tr1 task |> ctrans_gen tr2
-
 
 (* If Then Else on transformations with certificate *)
 let ite (tri : ctrans) (trt : ctrans) (tre : ctrans) : ctrans = fun task ->
-  let arg = [task], Skip in
-  let ((_, cert) as tri_arg) = ctrans_gen tri arg in
+  let ((_, cert) as tri_task) = tri task in
   if cert <> Skip (* égalité de task fait (error : compare on functional values) *)
-  then ctrans_gen trt tri_arg
-  else ctrans_gen tre tri_arg
+  then ctrans_gen trt tri_task
+  else ctrans_gen tre tri_task
 
 (* Try on transformations with certificate *)
-let rec try_close ltr task =
-  match ltr with
-  | [] -> [task], Skip
+let rec try_close (lctr : ctrans list) : ctrans = fun task ->
+  match lctr with
+  | [] -> id task
   | h::t -> let lctask_h, cert_h = h task in
-            match lctask_h with
-            | [] -> [], cert_h
-            | _ -> try_close t task
+            if lctask_h = []
+            then [], cert_h
+            else try_close t task
 
 (* Repeat on transformations with certificate *)
-let repeat tr task =
-  let gen_task = [task], Skip in
-  let gen_tr = ctrans_gen tr in
+let repeat (ctr : ctrans) : ctrans = fun task ->
+  let gen_task = id task in
+  let gen_tr = ctrans_gen ctr in
   let rec loop gt =
     let new_gt = gen_tr gt in
-    if same_cert new_gt gt (* égalité de task fait (error : compare on functional values) *)
+    if same_cert new_gt gt (* [new_gt = gt] égalité de task fait (error : compare on functional values) *)
     then gt
     else loop new_gt in
   loop gen_task
@@ -205,23 +203,23 @@ let repeat tr task =
 
 (** Derived transformations with certificate *)
 
-let split_assumption_ctrans = compose_ctrans split_ctrans assumption_ctrans
-let rec intuition_ctrans task =
-  repeat (compose_ctrans assumption_ctrans
-          (compose_ctrans split_ctrans
-           (try_close [ite (dir_ctrans Left) intuition_ctrans id_ctrans;
-                       ite (dir_ctrans Right) intuition_ctrans id_ctrans]))) task
+let split_assumption = compose split assumption
 
+let rec intuition task =
+  repeat (compose assumption
+          (compose split
+           (try_close [ite (dir Left) intuition id;
+                       ite (dir Right) intuition id]))) task
 
 
 (** Certified transformations *)
 
-let assumption_trans = checker_ctrans assumption_ctrans
-let split_trans = checker_ctrans split_ctrans
-let left_trans = checker_ctrans (dir_ctrans Left)
-let right_trans = checker_ctrans (dir_ctrans Right)
-let split_assumption_trans = checker_ctrans split_assumption_ctrans
-let intuition_trans = checker_ctrans intuition_ctrans
+let assumption_trans = checker_ctrans assumption
+let split_trans = checker_ctrans split
+let left_trans = checker_ctrans (dir Left)
+let right_trans = checker_ctrans (dir Right)
+let split_assumption_trans = checker_ctrans split_assumption
+let intuition_trans = checker_ctrans intuition
 
 let () =
   Trans.register_transform_l "assumption_cert" (Trans.store assumption_trans)

@@ -36,6 +36,10 @@
   </goal>
  </transf>
  </goal>
+ <goal name="G7" proved="true">
+ <transf name="intuition_cert" proved="true" >
+ </transf>
+ </goal>
 </theory>
 </file>
 </why3session>
