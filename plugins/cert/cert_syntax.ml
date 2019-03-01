@@ -175,8 +175,8 @@ let compose (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
 
 (* If Then Else on transformations with certificate *)
 let ite (tri : ctrans) (trt : ctrans) (tre : ctrans) : ctrans = fun task ->
-  let ((_, cert) as tri_task) = tri task in
-  if cert <> Skip (* égalité de task fait (error : compare on functional values) *)
+  let ((lt, cert) as tri_task) = tri task in
+  if not (Lists.equal task_equal lt [task] && cert = Skip)
   then ctrans_gen trt tri_task
   else ctrans_gen tre tri_task
 
@@ -195,7 +195,7 @@ let repeat (ctr : ctrans) : ctrans = fun task ->
   let gen_tr = ctrans_gen ctr in
   let rec loop gt =
     let new_gt = gen_tr gt in
-    if same_cert new_gt gt (* [new_gt = gt] égalité de task fait (error : compare on functional values) *)
+    if Lists.equal task_equal (fst new_gt) (fst gt)
     then gt
     else loop new_gt in
   loop gen_task
