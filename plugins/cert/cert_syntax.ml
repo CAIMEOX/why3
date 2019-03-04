@@ -3,12 +3,13 @@ open Term
 open Decl
 open Theory
 open Task
+open Format
 
 type ident = Ident.ident
 
+type binop = CTand | CTor | CTiff | CTimplies
 type cterm = CTapp of ident
-           | CTand of cterm * cterm
-           | CTor of cterm * cterm
+           | CTbinop of binop * cterm * cterm
 
 type ctask = { cctxt : (ident * cterm) list; cgoal : cterm }
 
@@ -17,8 +18,27 @@ type certif = Skip
             | Axiom of ident
             | Split of certif * certif
             | Dir of dir * certif
+            | Intro of ident * certif
 
 type ctrans = task -> task list * certif
+
+(* for debugging *)
+let rec print_certif where cert =
+  let oc = open_out where in
+  let fmt = formatter_of_out_channel oc in
+  fprintf fmt "%a@." prc cert;
+  close_out oc
+and prc (fmt : formatter) = function
+  | Skip -> fprintf fmt "Skip"
+  | Axiom i -> fprintf fmt "Axiom %a" pri i
+  | Split (c1, c2) -> fprintf fmt "Split @[(%a,@ %a)@]" prc c1 prc c2
+  | Dir (d, c) -> fprintf fmt "Dir @[(%a,@ %a)@]" prd d prc c
+  | Intro (i, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri i prc c
+and pri fmt i =
+  fprintf fmt "%s" Ident.(id_clone i |> preid_name)
+and prd fmt = function
+  | Left -> fprintf fmt "Left"
+  | Right -> fprintf fmt "Right"
 
 
 (** Translating Why3 tasks to simplified certificate tasks *)
@@ -26,8 +46,10 @@ type ctrans = task -> task list * certif
 let rec translate_term (t : term) : cterm =
   match t.t_node with
   | Tapp (ls, []) -> CTapp ls.ls_name
-  | Tbinop (Tand, t1, t2) -> CTand (translate_term t1, translate_term t2)
-  | Tbinop (Tor, t1, t2) -> CTor (translate_term t1, translate_term t2)
+  | Tbinop (Tand, t1, t2) -> CTbinop (CTand, translate_term t1, translate_term t2)
+  | Tbinop (Tor , t1, t2) -> CTbinop (CTor , translate_term t1, translate_term t2)
+  | Tbinop (Tiff, t1, t2) -> CTbinop (CTiff, translate_term t1, translate_term t2)
+  | Tbinop (Timplies, t1, t2) -> CTbinop (CTimplies, translate_term t1, translate_term t2)
   | _ -> invalid_arg "Cert_syntax.translate_term"
 
 let translate_decl (d : decl) : (ident * cterm) list =
@@ -58,32 +80,43 @@ let translate_task (t : task) =
 
 (* check_certif replays the certificate on a ctask *)
 exception Certif_verif_failed
-let rec check_certif ({cctxt = c; cgoal = t} as ctask) (cert : certif)  : ctask list =
+
+let rec check_certif ({cctxt = ctx; cgoal = t} as ctask) (cert : certif)  : ctask list =
   match cert with
     | Skip -> [ctask]
     | Axiom id ->
-        begin try if List.assoc id c <> t then raise Not_found else []
+        begin try if List.assoc id ctx <> t then raise Not_found else []
               with Not_found -> raise Certif_verif_failed end
     | Split (c1, c2) ->
         begin match t with
-        | CTand (t1, t2) -> check_certif {ctask with cgoal = t1} c1 @
-                              check_certif {ctask with cgoal = t2} c2
+        | CTbinop (CTand, t1, t2) -> check_certif {ctask with cgoal = t1} c1 @
+                                       check_certif {ctask with cgoal = t2} c2
+        | CTbinop (CTiff, t1, t2) -> let direct = CTbinop (CTimplies, t1, t2) in
+                                     let indirect = CTbinop (CTimplies, t2, t1) in
+                                     check_certif {ctask with cgoal = direct} c1 @
+                                       check_certif {ctask with cgoal = indirect} c2
         | _ -> raise Certif_verif_failed end
-    | Dir (d, c) ->
+    | Dir (d, cer) ->
         begin match t, d with
-        | CTor (t, _), Left | CTor (_, t), Right ->
-            check_certif {ctask with cgoal = t} c
+        | CTbinop(CTor, t, _), Left | CTbinop (CTor, _, t), Right ->
+            check_certif {ctask with cgoal = t} cer
         | _ -> raise Certif_verif_failed end
-
+    | Intro (i, c) ->
+        begin match t with
+        | CTbinop (CTimplies, f1, f2) ->
+            let new_ctask = {cctxt = (i, f1) :: ctx; cgoal = f2} in
+            check_certif new_ctask c
+        | _ -> raise Certif_verif_failed end
 
 (* Creates a certified transformation from a transformation with certificate *)
 let checker_ctrans ctr task =
   try let ltask, cert = ctr task in
+      print_certif "/tmp/certif.log" cert;
       let ctask = translate_task task in
       let lctask = check_certif ctask cert in
       if lctask = List.map translate_task ltask then ltask
-      else failwith "Certif verification failed."
-  with e -> raise (Trans.TransFailure ("cert_trans", e))
+      else raise Certif_verif_failed
+  with e -> raise (Trans.TransFailure ("Cert_syntax.checker_trans", e))
 
 (* Generalize ctrans on (task list * certif) *)
 let ctrans_gen (ctr : ctrans) (ts, c) =
@@ -98,6 +131,8 @@ let ctrans_gen (ctr : ctrans) (ts, c) =
                           Split (c1, c2), l1 @ l2, ts2
       | Dir (d, c) -> let c, l, ts = fill c ts in
                       Dir (d, c), l, ts
+      | Intro (i, c) -> let c, l, ts = fill c ts in
+                        Intro (i, c), l, ts
   in
   let c, l, ts = fill c ts in
   assert (ts = []);
@@ -108,8 +143,7 @@ let rec nocuts = function
   | Axiom _ -> true
   | Split (c1, c2) -> nocuts c1 && nocuts c2
   | Dir (_, c) -> nocuts c
-
-let same_cert (_, cert1) (_, cert2) = cert1 = cert2
+  | Intro (_, c) -> nocuts c
 
 (** Primitive transformations with certificate *)
 
@@ -138,27 +172,49 @@ let rec assumption_ctxt g = function
 
 let assumption t =
   let g = try task_goal_fmla t
-          with GoalNotFound -> invalid_arg "Cert_syntax.assumption_task" in
+          with GoalNotFound -> invalid_arg "Cert_syntax.assumption" in
   let _, t' = task_separate_goal t in
-  try let h = assumption_ctxt g t' in [], Axiom h
+  try let h = assumption_ctxt g t' in
+      [], Axiom h
   with Not_found -> [t], Skip
 
 (* Split with certificate *)
 let split t =
   let pr, g = try task_goal t, task_goal_fmla t
-              with GoalNotFound -> invalid_arg "Cert_syntax.split_certif" in
+              with GoalNotFound -> invalid_arg "Cert_syntax.split" in
+  let _, c = task_separate_goal t in
+  let splitted = match g.t_node with
+    | Tbinop (Tand, f1, f2) -> Some (f1, f2)
+    | Tbinop (Tiff, f1, f2) ->
+        let direct = t_implies f1 f2 in
+        let indirect = t_implies f2 f1 in
+        Some (direct, indirect)
+    | _ -> None in
+  match splitted with
+    | Some (f1, f2) ->
+        let tf1 = add_decl c (create_prop_decl Pgoal pr f1) in
+        let tf2 = add_decl c (create_prop_decl Pgoal pr f2) in
+        [tf1;tf2], Split (Skip, Skip)
+    | None -> [t], Skip
+
+(* Intro with certificate *)
+let intro t =
+  let i = Decl.create_prsymbol (Ident.id_fresh "i") in
+  let pr, g = try task_goal t, task_goal_fmla t
+              with GoalNotFound -> invalid_arg "Cert_syntax.split" in
   let _, c = task_separate_goal t in
   match g.t_node with
-  | Tbinop (Tand, f1, f2) ->
-      let tf1 = add_decl c (create_prop_decl Pgoal pr f1) in
-      let tf2 = add_decl c (create_prop_decl Pgoal pr f2) in
-      [tf1;tf2], Split (Skip, Skip)
+  | Tbinop (Timplies, f1, f2) ->
+      let decl1 = create_prop_decl Paxiom i f1 in
+      let tf1 = add_decl c decl1 in
+      let tf2 = add_decl tf1 (create_prop_decl Pgoal pr f2) in
+      [tf2], Intro (i.pr_name, Skip)
   | _ -> [t], Skip
 
 (* Direction with certificate *)
 let dir d t =
   let pr, g = try task_goal t, task_goal_fmla t
-              with GoalNotFound -> invalid_arg "Cert_syntax.split_certif" in
+              with GoalNotFound -> invalid_arg "Cert_syntax.dir" in
   let _, c = task_separate_goal t in
   match g.t_node, d with
   | Tbinop (Tor, f, _), Left | Tbinop (Tor, _, f), Right ->
@@ -207,15 +263,17 @@ let split_assumption = compose split assumption
 
 let rec intuition task =
   repeat (compose assumption
-          (compose split
-           (try_close [ite (dir Left) intuition id;
-                       ite (dir Right) intuition id]))) task
+            (compose intro
+               (compose split
+                  (try_close [ite (dir Left) intuition id;
+                              ite (dir Right) intuition id])))) task
 
 
 (** Certified transformations *)
 
 let assumption_trans = checker_ctrans assumption
 let split_trans = checker_ctrans split
+let intro_trans = checker_ctrans intro
 let left_trans = checker_ctrans (dir Left)
 let right_trans = checker_ctrans (dir Right)
 let split_assumption_trans = checker_ctrans split_assumption
@@ -228,6 +286,8 @@ let () =
     ~desc:"A certified version of (simplified) coq tactic [split]";
   Trans.register_transform_l "split_assumption_cert" (Trans.store split_assumption_trans)
     ~desc:"A certified version of (simplified) coq tactic [split; assumption]";
+  Trans.register_transform_l "intro_cert" (Trans.store intro_trans)
+    ~desc:"A certified version of (simplified) coq tactic [intro]";
   Trans.register_transform_l "left_cert" (Trans.store left_trans)
     ~desc:"A certified version of coq tactic [left]";
   Trans.register_transform_l "right_cert" (Trans.store right_trans)
