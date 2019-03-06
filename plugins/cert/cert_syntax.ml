@@ -3,6 +3,7 @@ open Term
 open Decl
 open Theory
 open Task
+open Format
 
 type ident = Ident.ident
 
@@ -20,6 +21,24 @@ type certif = Skip
             | Intro of ident * certif
 
 type ctrans = task -> task list * certif
+
+(* for debugging *)
+let rec print_certif where cert =
+  let oc = open_out where in
+  let fmt = formatter_of_out_channel oc in
+  fprintf fmt "%a@." prc cert;
+  close_out oc
+and prc (fmt : formatter) = function
+  | Skip -> fprintf fmt "Skip"
+  | Axiom i -> fprintf fmt "Axiom %a" pri i
+  | Split (c1, c2) -> fprintf fmt "Split @[(%a,@ %a)@]" prc c1 prc c2
+  | Dir (d, c) -> fprintf fmt "Dir @[(%a,@ %a)@]" prd d prc c
+  | Intro (i, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri i prc c
+and pri fmt i =
+  fprintf fmt "%s" Ident.(id_clone i |> preid_name)
+and prd fmt = function
+  | Left -> fprintf fmt "Left"
+  | Right -> fprintf fmt "Right"
 
 
 (** Translating Why3 tasks to simplified certificate tasks *)
@@ -89,16 +108,15 @@ let rec check_certif ({cctxt = ctx; cgoal = t} as ctask) (cert : certif)  : ctas
             check_certif new_ctask c
         | _ -> raise Certif_verif_failed end
 
-
-
 (* Creates a certified transformation from a transformation with certificate *)
 let checker_ctrans ctr task =
   try let ltask, cert = ctr task in
+      print_certif "/tmp/certif.log" cert;
       let ctask = translate_task task in
       let lctask = check_certif ctask cert in
       if lctask = List.map translate_task ltask then ltask
       else raise Certif_verif_failed
-  with e -> raise (Trans.TransFailure ("cert_trans", e))
+  with e -> raise (Trans.TransFailure ("Cert_syntax.checker_trans", e))
 
 (* Generalize ctrans on (task list * certif) *)
 let ctrans_gen (ctr : ctrans) (ts, c) =
@@ -126,8 +144,6 @@ let rec nocuts = function
   | Split (c1, c2) -> nocuts c1 && nocuts c2
   | Dir (_, c) -> nocuts c
   | Intro (_, c) -> nocuts c
-
-let same_cert (_, cert1) (_, cert2) = cert1 = cert2
 
 (** Primitive transformations with certificate *)
 
@@ -182,7 +198,8 @@ let split t =
     | None -> [t], Skip
 
 (* Intro with certificate *)
-let intro (i : ident) t =
+let intro t =
+  let i = Decl.create_prsymbol (Ident.id_fresh "i") in
   let pr, g = try task_goal t, task_goal_fmla t
               with GoalNotFound -> invalid_arg "Cert_syntax.split" in
   let _, c = task_separate_goal t in
@@ -191,7 +208,7 @@ let intro (i : ident) t =
       let decl1 = create_prop_decl Paxiom i f1 in
       let tf1 = add_decl c decl1 in
       let tf2 = add_decl tf1 (create_prop_decl Pgoal pr f2) in
-      [tf2], Intro (i, Skip)
+      [tf2], Intro (i.pr_name, Skip)
   | _ -> [t], Skip
 
 (* Direction with certificate *)
@@ -246,15 +263,17 @@ let split_assumption = compose split assumption
 
 let rec intuition task =
   repeat (compose assumption
-          (compose split
-           (try_close [ite (dir Left) intuition id;
-                       ite (dir Right) intuition id]))) task
+            (compose intro
+               (compose split
+                  (try_close [ite (dir Left) intuition id;
+                              ite (dir Right) intuition id])))) task
 
 
 (** Certified transformations *)
 
 let assumption_trans = checker_ctrans assumption
 let split_trans = checker_ctrans split
+let intro_trans = checker_ctrans intro
 let left_trans = checker_ctrans (dir Left)
 let right_trans = checker_ctrans (dir Right)
 let split_assumption_trans = checker_ctrans split_assumption
@@ -267,6 +286,8 @@ let () =
     ~desc:"A certified version of (simplified) coq tactic [split]";
   Trans.register_transform_l "split_assumption_cert" (Trans.store split_assumption_trans)
     ~desc:"A certified version of (simplified) coq tactic [split; assumption]";
+  Trans.register_transform_l "intro_cert" (Trans.store intro_trans)
+    ~desc:"A certified version of (simplified) coq tactic [intro]";
   Trans.register_transform_l "left_cert" (Trans.store left_trans)
     ~desc:"A certified version of coq tactic [left]";
   Trans.register_transform_l "right_cert" (Trans.store right_trans)

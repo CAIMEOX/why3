@@ -9,8 +9,6 @@
  <goal name="G1" proved="true">
  <transf name="intuition_cert" proved="true" >
  </transf>
- <transf name="split_assumption_cert" proved="true" >
- </transf>
  </goal>
  <goal name="G2" proved="true">
  <transf name="intuition_cert" proved="true" >
@@ -36,7 +34,25 @@
   </goal>
  </transf>
  </goal>
- <goal name="G7" proved="true">
+ <goal name="G7">
+ </goal>
+ <goal name="G8" proved="true">
+ <transf name="intuition_cert" proved="true" >
+ </transf>
+ </goal>
+ <goal name="G9">
+ <transf name="intuition_cert" >
+  <goal name="G9.0">
+  </goal>
+  <goal name="G9.1">
+  </goal>
+  <goal name="G9.2">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G10">
+ </goal>
+ <goal name="G11" proved="true">
  <transf name="intuition_cert" proved="true" >
  </transf>
  </goal>

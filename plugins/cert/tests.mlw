@@ -2,6 +2,8 @@ predicate a
 predicate b
 predicate c
 predicate d
+predicate e
+predicate f
 axiom A : a
 axiom B : b
 
@@ -12,5 +14,8 @@ goal G3 : (b /\ a) /\ ( (a /\ a) /\ c)
 goal G4 : a /\ (b \/ d)
 goal G5 : (a \/ c) /\ (d \/ b)
 goal G6 : a /\ (c \/ d)
-goal G7 : (a /\ (d \/ c) ) \/ ( ((a /\ b) /\ (b \/d)) \/ (a /\ c) )
-goal G8 : (a /\ c) <-> b
+goal G7 : (a /\ (d \/ c) ) \/ ( ((a /\ b) /\ ((b /\ (d \/ e \/ a)) \/d)) \/ (a /\ c) )
+goal G8 : ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\ (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a)))) /\ ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\ (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))))
+goal G9 : c /\ (d \/ f) <-> (c /\ d) \/ (c /\ f)
+goal G10 : c -> d
+goal G11 : a /\ (d -> d)
