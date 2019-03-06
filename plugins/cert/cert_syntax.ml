@@ -22,6 +22,19 @@ type certif = Skip
 
 type ctrans = task -> task list * certif
 
+let rec cterm_equal t1 t2 =
+  match t1, t2 with
+  | CTapp i1, CTapp i2 -> Ident.id_equal i1 i2
+  | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
+      op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
+  | _ -> false
+
+let ctxt_equal = Lists.equal (fun (i1, cte1) (i2, cte2) ->
+                     Ident.id_equal i1 i2 && cterm_equal cte1 cte2)
+
+let ctask_equal {cctxt = c1; cgoal = g1} {cctxt = c2; cgoal = g2} =
+  ctxt_equal c1 c2 && cterm_equal g1 g2
+
 (* for debugging *)
 let rec print_certif where cert =
   let oc = open_out where in
@@ -114,7 +127,8 @@ let checker_ctrans ctr task =
       print_certif "/tmp/certif.log" cert;
       let ctask = translate_task task in
       let lctask = check_certif ctask cert in
-      if lctask = List.map translate_task ltask then ltask
+      if Lists.equal ctask_equal lctask (List.map translate_task ltask)
+      then ltask
       else raise Certif_verif_failed
   with e -> raise (Trans.TransFailure ("Cert_syntax.checker_trans", e))
 
