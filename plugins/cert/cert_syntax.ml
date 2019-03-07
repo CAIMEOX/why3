@@ -13,14 +13,18 @@ type cterm = CTapp of ident
 
 type ctask = { cctxt : (ident * cterm) list; cgoal : cterm }
 
+
 type dir = Left | Right
+type path = dir list
 type certif = Skip
             | Axiom of ident
             | Split of certif * certif
             | Dir of dir * certif
             | Intro of ident * certif
+            | Rewrite of path * cterm * cterm * certif
 
 type ctrans = task -> task list * certif
+
 
 let rec cterm_equal t1 t2 =
   match t1, t2 with
@@ -35,6 +39,7 @@ let ctxt_equal = Lists.equal (fun (i1, cte1) (i2, cte2) ->
 let ctask_equal {cctxt = c1; cgoal = g1} {cctxt = c2; cgoal = g2} =
   ctxt_equal c1 c2 && cterm_equal g1 g2
 
+
 (* for debugging *)
 let rec print_certif where cert =
   let oc = open_out where in
@@ -47,11 +52,13 @@ and prc (fmt : formatter) = function
   | Split (c1, c2) -> fprintf fmt "Split @[(%a,@ %a)@]" prc c1 prc c2
   | Dir (d, c) -> fprintf fmt "Dir @[(%a,@ %a)@]" prd d prc c
   | Intro (i, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri i prc c
+  | Rewrite (p, _, _, c) -> fprintf fmt "Rewrite @[([%a],@ term1,@ term2,@ %a)@]" pp p prc c
 and pri fmt i =
   fprintf fmt "%s" Ident.(id_clone i |> preid_name)
 and prd fmt = function
   | Left -> fprintf fmt "Left"
   | Right -> fprintf fmt "Right"
+and pp = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "; ") prd
 
 
 (** Translating Why3 tasks to simplified certificate tasks *)
@@ -94,6 +101,19 @@ let translate_task (t : task) =
 (* check_certif replays the certificate on a ctask *)
 exception Certif_verif_failed
 
+let rec check_rewrite p tl tr t =
+  match p, t with
+  | [], t when cterm_equal t tl -> Some tr
+  | Left::prest, CTbinop (op, t1, t2) ->
+      begin match check_rewrite prest tl tr t1 with
+      | Some nt1 -> Some (CTbinop (op, nt1, t2))
+      | None -> None end
+  | Right::prest, CTbinop (op, t1, t2) ->
+      begin match check_rewrite prest tl tr t2 with
+      | Some nt2 -> Some (CTbinop (op, t1, nt2))
+      | None -> None end
+  | _ -> None
+
 let rec check_certif ({cctxt = ctx; cgoal = t} as ctask) (cert : certif)  : ctask list =
   match cert with
     | Skip -> [ctask]
@@ -120,6 +140,10 @@ let rec check_certif ({cctxt = ctx; cgoal = t} as ctask) (cert : certif)  : ctas
             let new_ctask = {cctxt = (i, f1) :: ctx; cgoal = f2} in
             check_certif new_ctask c
         | _ -> raise Certif_verif_failed end
+    | Rewrite (p, tl, tr, c) ->
+        begin match check_rewrite p tl tr t with
+        | Some nt -> check_certif {ctask with cgoal = nt} c
+        | None -> raise Certif_verif_failed end
 
 (* Creates a certified transformation from a transformation with certificate *)
 let checker_ctrans ctr task =
@@ -147,6 +171,8 @@ let ctrans_gen (ctr : ctrans) (ts, c) =
                       Dir (d, c), l, ts
       | Intro (i, c) -> let c, l, ts = fill c ts in
                         Intro (i, c), l, ts
+      | Rewrite (p, t1, t2, c) -> let c, l, ts = fill c ts in
+                                  Rewrite (p, t1, t2, c), l, ts
   in
   let c, l, ts = fill c ts in
   assert (ts = []);
@@ -156,8 +182,9 @@ let rec nocuts = function
   | Skip -> false
   | Axiom _ -> true
   | Split (c1, c2) -> nocuts c1 && nocuts c2
-  | Dir (_, c) -> nocuts c
-  | Intro (_, c) -> nocuts c
+  | Dir (_, c)
+  | Intro (_, c)
+  | Rewrite (_, _, _, c) -> nocuts c
 
 (** Primitive transformations with certificate *)
 
@@ -236,6 +263,40 @@ let dir d t =
       [tf], Dir (d, Skip)
   | _ -> [t], Skip
 
+let rec replace_in_term tl tr t : (term * path) option =
+  if t_equal tl t
+  then Some (tr, [])
+  else match t.t_node with
+       | Tbinop (op, t1, t2) ->
+           begin match replace_in_term tl tr t1 with
+           | Some (nt1, p) -> Some (t_binary op nt1 t2, Left::p)
+           | None -> match replace_in_term tl tr t2 with
+                     | Some (nt2, p) -> Some (t_binary op t1 nt2, Right::p)
+                     | None -> None end
+       | _ -> None
+
+let rewrite (h : prsymbol) task =
+  let prg, termg = try task_goal task, task_goal_fmla task
+                   with GoalNotFound -> invalid_arg "Cert_syntax.dir" in
+  let _, task_no_g = task_separate_goal task in
+  let rew_terms =
+    List.fold_left (fun acc d ->
+        match d.d_node with
+        | Dprop (Paxiom, pr, t) when Ident.id_equal pr.pr_name h.pr_name ->
+            (match t.t_node with
+             | Tbinop (Tiff, t1, t2) -> Some (t1, t2)
+             | _ -> raise Not_found)
+        | _ -> acc) None (task_decls task) in
+  match rew_terms with
+  | Some (tl, tr) ->
+      begin match replace_in_term tl tr termg with
+      | Some (ntg, p) ->
+          let task_new_g = add_decl task_no_g (create_prop_decl Pgoal prg ntg) in
+          let ctl, ctr = translate_term tl, translate_term tr in
+          [task_new_g], Rewrite (p, ctl, ctr, Skip)
+      | _ -> [task], Skip end
+  | _ -> raise Not_found
+
 
 (** Transformials *)
 
@@ -290,6 +351,8 @@ let split_trans = checker_ctrans split
 let intro_trans = checker_ctrans intro
 let left_trans = checker_ctrans (dir Left)
 let right_trans = checker_ctrans (dir Right)
+let rewrite_trans pr = checker_ctrans (rewrite pr)
+
 let split_assumption_trans = checker_ctrans split_assumption
 let intuition_trans = checker_ctrans intuition
 
@@ -303,7 +366,12 @@ let () =
   Trans.register_transform_l "intro_cert" (Trans.store intro_trans)
     ~desc:"A certified version of (simplified) coq tactic [intro]";
   Trans.register_transform_l "left_cert" (Trans.store left_trans)
-    ~desc:"A certified version of coq tactic [left]";
+    ~desc:"A certified version of coq tactic [left]"
+  (* Args_wrapper.(wrap_and_register "rewrite_cert"
+   *   (Tprsymbol Ttrans_l) rewrite_trans) *)
+
+
+let () =
   Trans.register_transform_l "right_cert" (Trans.store right_trans)
     ~desc:"A certified version of coq tactic [right]";
   Trans.register_transform_l "intuition_cert" (Trans.store intuition_trans)
