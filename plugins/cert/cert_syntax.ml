@@ -1,4 +1,5 @@
 open Why3
+open Ident
 open Term
 open Decl
 open Theory
@@ -11,8 +12,7 @@ type binop = CTand | CTor | CTiff | CTimplies
 type cterm = CTapp of ident
            | CTbinop of binop * cterm * cterm
 
-type ctask = { cctxt : (ident * cterm) list; cgoal : cterm }
-
+type ctask = {hyp : cterm Mid.t; concl : cterm Mid.t}
 
 type dir = Left | Right
 type path = dir list
@@ -21,10 +21,9 @@ type certif = Skip
             | Split of certif * certif
             | Dir of dir * certif
             | Intro of ident * certif
-            | Rewrite of path * cterm * cterm * certif
+            | Rewrite of ident * ident option * path * certif
 
 type ctrans = task -> task list * certif
-
 
 let rec cterm_equal t1 t2 =
   match t1, t2 with
@@ -33,12 +32,20 @@ let rec cterm_equal t1 t2 =
       op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
   | _ -> false
 
-let ctxt_equal = Lists.equal (fun (i1, cte1) (i2, cte2) ->
-                     Ident.id_equal i1 i2 && cterm_equal cte1 cte2)
+let ctask_equal {hyp = h1; concl = c1} {hyp = h2; concl = c2} =
+  Mid.equal cterm_equal h1 h2 && Mid.equal cterm_equal c1 c2
 
-let ctask_equal {cctxt = c1; cgoal = g1} {cctxt = c2; cgoal = g2} =
-  ctxt_equal c1 c2 && cterm_equal g1 g2
+exception Not_normalized_task
+let normalized_goal (cta : ctask) : cterm option =
+  try let fold_concl g_opt _ ng = match g_opt with
+        | None -> Some ng
+        | Some _ -> raise Not_normalized_task in
+      match Mid.fold_left fold_concl None cta.concl with
+      | None -> raise Not_normalized_task
+      | Some x -> Some x
+  with Not_normalized_task -> None
 
+let new_ctask mid1 mid2 = { hyp = mid1; concl = mid2 }
 
 (* for debugging *)
 let rec print_certif where cert =
@@ -52,14 +59,15 @@ and prc (fmt : formatter) = function
   | Split (c1, c2) -> fprintf fmt "Split @[(%a,@ %a)@]" prc c1 prc c2
   | Dir (d, c) -> fprintf fmt "Dir @[(%a,@ %a)@]" prd d prc c
   | Intro (i, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri i prc c
-  | Rewrite (p, _, _, c) -> fprintf fmt "Rewrite @[([%a],@ term1,@ term2,@ %a)@]" pp p prc c
+  | Rewrite (_, _, p, c) -> fprintf fmt "Rewrite @[([%a],@ term1,@ term2,@ %a)@]" pp p prc c
 and pri fmt i =
   fprintf fmt "%s" Ident.(id_clone i |> preid_name)
 and prd fmt = function
   | Left -> fprintf fmt "Left"
   | Right -> fprintf fmt "Right"
-and pp = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "; ") prd
+and pp l = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "; ") prd l
 
+let mct mid1 mid2 = {hyp = mid1; concl = mid2}
 
 (** Translating Why3 tasks to simplified certificate tasks *)
 
@@ -72,29 +80,32 @@ let rec translate_term (t : term) : cterm =
   | Tbinop (Timplies, t1, t2) -> CTbinop (CTimplies, translate_term t1, translate_term t2)
   | _ -> invalid_arg "Cert_syntax.translate_term"
 
-let translate_decl (d : decl) : (ident * cterm) list =
+let translate_decl (d : decl) : ctask =
   match d.d_node with
-  | Dprop (_, pr, f) -> [pr.pr_name, translate_term f]
-  | _ -> []
+  | Dprop (Pgoal, pr, f) ->
+      let hyp = Mid.singleton pr.pr_name (translate_term f) in
+      mct hyp Mid.empty
+  | Dprop (_, pr, f) ->
+      let concl = Mid.singleton pr.pr_name (translate_term f) in
+      mct Mid.empty concl
+  | _ -> mct Mid.empty Mid.empty
 
-let translate_tdecl (td : tdecl) : (ident * cterm) list =
+let translate_tdecl (td : tdecl) : ctask =
   match td.td_node with
   | Decl d -> translate_decl d
-  | _ -> []
+  | _ -> mct Mid.empty Mid.empty
 
-let rec translate_ctxt = function
+let union_ctask {hyp = h1; concl = c1} {hyp = h2; concl = c2} =
+  mct (Mid.set_union h1 h2) (Mid.set_union c1 c2)
+
+let rec translate_task_acc acc = function
   | Some {task_decl = d; task_prev = p} ->
-      translate_tdecl d @ translate_ctxt p
-  | None -> []
+      let new_acc = union_ctask acc (translate_tdecl d) in
+      translate_task_acc new_acc p
+  | None -> acc
 
-let translate_task (t : task) =
-  let gd, t = try task_separate_goal t
-              with GoalNotFound -> invalid_arg "Cert_syntax.translate_task" in
-  let g = match translate_tdecl gd with
-    | [_, g] -> g
-    | _ -> assert false in
-  {cctxt = translate_ctxt t; cgoal = g}
-
+let translate_task t =
+  translate_task_acc (mct Mid.empty Mid.empty) t
 
 (** Using ctasks and certificates *)
 
@@ -114,12 +125,13 @@ let rec check_rewrite p tl tr t =
       | None -> None end
   | _ -> None
 
-let rec check_certif ({cctxt = ctx; cgoal = t} as ctask) (cert : certif)  : ctask list =
+let rec check_certif cta (cert : certif) : ctask list =
   match cert with
-    | Skip -> [ctask]
+    | Skip -> [cta]
     | Axiom id ->
-        begin try if List.assoc id ctx <> t then raise Not_found else []
-              with Not_found -> raise Certif_verif_failed end
+        begin match Mid.find_opt id cta with
+        | Some (te, b) when b = false -> []
+        | _ -> raise Certif_verif_failed end
     | Split (c1, c2) ->
         begin match t with
         | CTbinop (CTand, t1, t2) -> check_certif {ctask with cgoal = t1} c1 @
@@ -140,9 +152,10 @@ let rec check_certif ({cctxt = ctx; cgoal = t} as ctask) (cert : certif)  : ctas
             let new_ctask = {cctxt = (i, f1) :: ctx; cgoal = f2} in
             check_certif new_ctask c
         | _ -> raise Certif_verif_failed end
-    | Rewrite (p, tl, tr, c) ->
-        begin match check_rewrite p tl tr t with
-        | Some nt -> check_certif {ctask with cgoal = nt} c
+    | Rewrite (rew_hyp, h, p, c) ->
+        begin match check_rewrite p rew_hyp h t with
+        | Some nt -> let ntask = change rew_hyp nt ctask in
+                     check_certif ntask c
         | None -> raise Certif_verif_failed end
 
 (* Creates a certified transformation from a transformation with certificate *)
@@ -366,9 +379,11 @@ let () =
   Trans.register_transform_l "intro_cert" (Trans.store intro_trans)
     ~desc:"A certified version of (simplified) coq tactic [intro]";
   Trans.register_transform_l "left_cert" (Trans.store left_trans)
-    ~desc:"A certified version of coq tactic [left]"
-  (* Args_wrapper.(wrap_and_register "rewrite_cert"
-   *   (Tprsymbol Ttrans_l) rewrite_trans) *)
+    ~desc:"A certified version of coq tactic [left]";
+  Args_wrapper.(wrap_and_register ~desc:"A certified version of transformation rewrite"
+                                  "rewrite_cert"
+                                  (Tprsymbol Ttrans_l)
+                                  (fun pr -> Trans.store (rewrite_trans pr)))
 
 
 let () =

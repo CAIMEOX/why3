@@ -19,3 +19,4 @@ goal G8 : ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\ (((a /\ a) /\ (
 goal G9 : c /\ (d \/ f) <-> (c /\ d) \/ (c /\ f)
 goal G10 : c -> d
 goal G11 : a /\ (d -> d)
+goal G12 : (c <-> a) -> (d \/ c)
