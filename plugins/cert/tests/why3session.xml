@@ -34,7 +34,9 @@
   </goal>
  </transf>
  </goal>
- <goal name="G7">
+ <goal name="G7" proved="true">
+ <transf name="intuition_cert" proved="true" >
+ </transf>
  </goal>
  <goal name="G8" proved="true">
  <transf name="intuition_cert" proved="true" >
@@ -51,6 +53,10 @@
  </transf>
  </goal>
  <goal name="G10">
+ <transf name="intro_cert" >
+  <goal name="G10.0">
+  </goal>
+ </transf>
  </goal>
  <goal name="G11" proved="true">
  <transf name="intuition_cert" proved="true" >
@@ -61,7 +67,7 @@
   <goal name="G12.0" proved="true">
   <transf name="rewrite_cert" proved="true" arg1="i">
    <goal name="G12.0.0" proved="true">
-   <transf name="assumption_cert" proved="true" >
+   <transf name="intuition_cert" proved="true" >
    </transf>
    </goal>
   </transf>

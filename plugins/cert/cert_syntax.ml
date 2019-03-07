@@ -16,6 +16,10 @@ type cterm = CTapp of ident
 type ctask = {hyp : cterm Mid.t; concl : cterm Mid.t}
 let mct mid1 mid2 = {hyp = mid1; concl = mid2}
 
+let map_ctask (f : bool -> ident -> cterm -> cterm) {hyp = hyp; concl = concl} =
+  let hyp = Mid.mapi (f false) hyp in
+  let concl = Mid.mapi (f true) concl in
+  {hyp = hyp; concl = concl}
 
 type dir = Left | Right
 type path = dir list
@@ -65,15 +69,6 @@ and prd fmt = function
 and prp l = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "; ") prd l
 
 
-(* Ensures the goal has exactly one cterm *)
-exception Not_normalized_task
-let normalized_goal (cta : ctask) : ident * cterm =
-  let fold_concl g_opt id ng = match g_opt with
-        | None -> Some (id, ng)
-        | Some _ -> raise Not_normalized_task in
-  match Mid.fold_left fold_concl None cta.concl with
-  | None -> raise Not_normalized_task
-  | Some t -> t
 
 
 (** Translating Why3 tasks to simplified certificate tasks *)
@@ -90,11 +85,11 @@ let rec translate_term (t : term) : cterm =
 let translate_decl (d : decl) : ctask =
   match d.d_node with
   | Dprop (Pgoal, pr, f) ->
-      let hyp = Mid.singleton pr.pr_name (translate_term f) in
-      mct hyp Mid.empty
-  | Dprop (_, pr, f) ->
       let concl = Mid.singleton pr.pr_name (translate_term f) in
       mct Mid.empty concl
+  | Dprop (_, pr, f) ->
+      let hyp = Mid.singleton pr.pr_name (translate_term f) in
+      mct hyp Mid.empty
   | _ -> mct Mid.empty Mid.empty
 
 let translate_tdecl (td : tdecl) : ctask =
@@ -117,35 +112,54 @@ let translate_task t =
 (** Using ctasks and certificates *)
 
 (* check_certif replays the certificate on a ctask *)
-exception Certif_verif_failed
+exception Certif_verification_failed of string
+let verif_failed s = raise (Certif_verification_failed s)
+
+(* Ensures the goal has exactly one cterm *)
+let normalized_goal concl : ident * cterm =
+  let fold_concl g_opt id ng = match g_opt with
+        | None -> Some (id, ng)
+        | Some _ -> verif_failed "Multiple goals" in
+  match Mid.fold_left fold_concl None concl with
+  | None -> verif_failed "No goal"
+  | Some t -> t
 
 let rec check_rewrite_term tl tr t p =
   match p, t with
-  | [], t when cterm_equal t tl -> Some tr
+  | [], t when cterm_equal t tl -> tr
   | Left::prest, CTbinop (op, t1, t2) ->
-      begin match check_rewrite_term tl tr t1 prest with
-      | Some nt1 -> Some (CTbinop (op, nt1, t2))
-      | None -> None end
+      let nt1 = check_rewrite_term tl tr t1 prest in
+      CTbinop (op, nt1, t2)
   | Right::prest, CTbinop (op, t1, t2) ->
-      begin match check_rewrite_term tl tr t2 prest with
-      | Some nt2 -> Some (CTbinop (op, t1, nt2))
-      | None -> None end
-  | _ -> None
+      let nt2 = check_rewrite_term tl tr t2 prest in
+      CTbinop (op, t1, nt2)
+  | _ -> verif_failed "Can't follow the rewrite path"
 
-let rec check_rewrite cta rh th p : ctask option =
-  assert false
+let check_rewrite cta rh th p : ctask =
+  let found = ref false in
+  let tl, tr = match Mid.find_opt rh cta.hyp with
+    | Some (CTbinop (CTiff, t1, t2)) -> t1, t2
+    | _ -> verif_failed "Can't find the hypothesis used to rewrite" in
+  let rewrite_decl _ id te =
+    if id_equal id th
+    then begin found := true;
+               check_rewrite_term tl tr te p end
+    else te in
+  let res = map_ctask rewrite_decl cta in
+  if !found then res else verif_failed "Can't find the hypothesis to be rewritten"
+
 
 let rec check_certif ({hyp = hyp; concl = concl} as cta) (cert : certif) : ctask list =
   match cert with
     | Skip -> [cta]
     | Axiom id ->
         let found = Mid.find_opt id hyp in
-        let _, teg = normalized_goal cta in
+        let _, teg = normalized_goal concl in
         begin match found with
         | Some tef when tef = teg -> []
-        | _ -> raise Certif_verif_failed end
+        | _ -> verif_failed "No such assumption" end
     | Split (c1, c2) ->
-        let idg, teg = normalized_goal cta in
+        let idg, teg = normalized_goal concl in
         begin match teg with
         | CTbinop (CTand, t1, t2) ->
             let cta1 = {cta with concl = Mid.singleton idg t1} in
@@ -155,25 +169,25 @@ let rec check_certif ({hyp = hyp; concl = concl} as cta) (cert : certif) : ctask
             let cta1 = {cta with concl = Mid.singleton idg (CTbinop (CTimplies, t1, t2))} in
             let cta2 = {cta with concl = Mid.singleton idg (CTbinop (CTimplies, t2, t1))} in
             check_certif cta1 c1 @ check_certif cta2 c2
-        | _ -> raise Certif_verif_failed end
+        | _ -> verif_failed "Goal is not splittable" end
     | Dir (d, c) ->
-        let idg, teg = normalized_goal cta in
+        let idg, teg = normalized_goal concl in
         begin match teg, d with
         | CTbinop(CTor, t, _), Left | CTbinop (CTor, _, t), Right ->
             let cta = {cta with concl = Mid.singleton idg t} in
             check_certif cta c
-        | _ -> raise Certif_verif_failed end
+        | _ -> verif_failed "Can't follow a direction" end
     | Intro (i, c) ->
-        let idg, teg = normalized_goal cta in
+        let idg, teg = normalized_goal concl in
         begin match teg with
         | CTbinop (CTimplies, f1, f2) ->
             let cta = {hyp = Mid.add i f1 hyp; concl = Mid.singleton idg f2 } in
             check_certif cta c
-        | _ -> raise Certif_verif_failed end
+        | _ -> verif_failed "Nothing to introduce" end
     | Rewrite (rh, th, p, c) ->
-        begin match check_rewrite cta rh th p with
-        | Some cta -> check_certif cta c
-        | None -> raise Certif_verif_failed end
+        let th, _ = normalized_goal concl in
+        let cta = check_rewrite cta rh th p in
+        check_certif cta c
 
 (* Creates a certified transformation from a transformation with certificate *)
 let checker_ctrans ctr task =
@@ -183,7 +197,7 @@ let checker_ctrans ctr task =
       let lctask = check_certif ctask cert in
       if Lists.equal ctask_equal lctask (List.map translate_task ltask)
       then ltask
-      else raise Certif_verif_failed
+      else verif_failed "Replaying certif gives different result"
   with e -> raise (Trans.TransFailure ("Cert_syntax.checker_trans", e))
 
 (* Generalize ctrans on (task list * certif) *)
