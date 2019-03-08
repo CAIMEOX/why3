@@ -20,3 +20,4 @@ goal G9 : c /\ (d \/ f) <-> (c /\ d) \/ (c /\ f)
 goal G10 : c -> d
 goal G11 : a /\ (d -> d)
 goal G12 : (c <-> a) -> (d \/ c)
+goal G13 : (c <-> d) -> c -> d

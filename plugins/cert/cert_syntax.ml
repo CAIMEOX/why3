@@ -28,7 +28,7 @@ type certif = Skip
             | Split of certif * certif
             | Dir of dir * certif
             | Intro of ident * certif
-            | Rewrite of ident * ident option * path * certif
+            | Rewrite of ident * ident * path * certif
 
 
 type ctrans = task -> task list * certif
@@ -57,12 +57,9 @@ and prc (fmt : formatter) = function
   | Dir (d, c) -> fprintf fmt "Dir @[(%a,@ %a)@]" prd d prc c
   | Intro (i, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri i prc c
   | Rewrite (rh, th, p, c) ->
-      fprintf fmt "Rewrite @[(%a,@ %a,@ %a,@ %a)@]" pri rh prio th prp p prc c
+      fprintf fmt "Rewrite @[(%a,@ %a,@ %a,@ %a)@]" pri rh pri th prp p prc c
 and pri fmt i =
   fprintf fmt "%s" Ident.(id_clone i |> preid_name)
-and prio fmt = function
-  | None -> fprintf fmt "None"
-  | Some i -> fprintf fmt "Some (%a)" pri i
 and prd fmt = function
   | Left -> fprintf fmt "Left"
   | Right -> fprintf fmt "Right"
@@ -185,7 +182,6 @@ let rec check_certif ({hyp = hyp; concl = concl} as cta) (cert : certif) : ctask
             check_certif cta c
         | _ -> verif_failed "Nothing to introduce" end
     | Rewrite (rh, th, p, c) ->
-        let th, _ = normalized_goal concl in
         let cta = check_rewrite cta rh th p in
         check_certif cta c
 
@@ -321,12 +317,9 @@ let rec replace_in_term tl tr t : (term * path) option =
        | _ -> None
 
 let rewrite (rh : prsymbol) (th : prsymbol option) task =
+  try
   let rh = rh.pr_name in
-  let th = None in
-  let prg, termg = try task_goal task, task_goal_fmla task
-                   with GoalNotFound -> invalid_arg "Cert_syntax.dir" in
-  let _, task_no_g = task_separate_goal task in
-  let rew_terms =
+  let rew_opt =
     List.fold_left (fun acc d ->
         match d.d_node with
         | Dprop (Paxiom, pr, t) when Ident.id_equal pr.pr_name rh ->
@@ -334,15 +327,24 @@ let rewrite (rh : prsymbol) (th : prsymbol option) task =
              | Tbinop (Tiff, t1, t2) -> Some (t1, t2)
              | _ -> raise Not_found)
         | _ -> acc) None (task_decls task) in
-  match rew_terms with
-  | Some (tl, tr) ->
-      begin match replace_in_term tl tr termg with
-      | Some (ntg, p) ->
-          let task_new_g = add_decl task_no_g (create_prop_decl Pgoal prg ntg) in
-          [task_new_g], Rewrite (rh, th, p, Skip)
-      | _ -> [task], Skip end
-  | _ -> raise Not_found
-
+  let tl, tr = match rew_opt with
+      | Some (t1, t2) -> t1, t2
+      | None -> raise Not_found in
+  let {pr_name = th} = match th with
+    | Some th -> th
+    | None -> task_goal task in
+  let path = ref [] in
+  let new_task = Trans.apply (Trans.decl (fun d -> match d.d_node with
+      | Dprop (p, pr, t) when (id_equal pr.pr_name th && (p = Paxiom || p = Pgoal)) ->
+          begin match replace_in_term tl tr t with
+          | Some (nt, pat) ->
+              path := pat;
+              let decl_nt = create_prop_decl p pr nt in
+              [decl_nt]
+          | None -> failwith "Can't find something to rewrite" end
+      | _ -> [d]) None) task in
+  [new_task], Rewrite (rh, th, !path, Skip)
+  with e -> raise (Trans.TransFailure ("rewrite", e))
 
 (** Transformials *)
 
@@ -413,10 +415,10 @@ let () =
     ~desc:"A certified version of (simplified) coq tactic [intro]";
   Trans.register_transform_l "left_cert" (Trans.store left_trans)
     ~desc:"A certified version of coq tactic [left]";
-  Args_wrapper.(wrap_and_register ~desc:"A certified version of transformation rewrite"
-                                  "rewrite_cert"
-                                  (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l))))
-                                  (fun rh th -> Trans.store (rewrite_trans rh th)))
+  let open Args_wrapper in
+  wrap_and_register ~desc:"A certified version of transformation rewrite"
+    "rewrite_cert" (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l))))
+    (fun rh th -> Trans.store (rewrite_trans rh th))
 
 
 let () =
