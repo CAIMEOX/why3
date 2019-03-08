@@ -4,6 +4,7 @@ open Term
 open Decl
 open Theory
 open Task
+open Generic_arg_trans_utils
 open Format
 
 type ident = Ident.ident
@@ -28,7 +29,7 @@ type certif = Skip
             | Split of certif * certif
             | Dir of dir * certif
             | Intro of ident * certif
-            | Rewrite of ident * ident * path * certif
+            | Rewrite of bool * ident * ident * path * certif list
 
 
 type ctrans = task -> task list * certif
@@ -56,14 +57,18 @@ and prc (fmt : formatter) = function
   | Split (c1, c2) -> fprintf fmt "Split @[(%a,@ %a)@]" prc c1 prc c2
   | Dir (d, c) -> fprintf fmt "Dir @[(%a,@ %a)@]" prd d prc c
   | Intro (i, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri i prc c
-  | Rewrite (rh, th, p, c) ->
-      fprintf fmt "Rewrite @[(%a,@ %a,@ %a,@ %a)@]" pri rh pri th prp p prc c
+  | Rewrite (rev, rh, th, p, lc) ->
+      fprintf fmt "Rewrite @[(%b,@ %a,@ %a,@ %a,@ %a)@]"
+        rev pri rh pri th (prle prd) p (prle prc) lc
 and pri fmt i =
   fprintf fmt "%s" Ident.(id_clone i |> preid_name)
 and prd fmt = function
   | Left -> fprintf fmt "Left"
   | Right -> fprintf fmt "Right"
-and prp l = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "; ") prd l
+and prle : type a. (formatter -> a -> unit) -> formatter -> a list -> unit = fun pre fmt le ->
+  let prl le = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "; ") pre le in
+  fprintf fmt "[%a]" prl le
+
 
 
 
@@ -132,19 +137,18 @@ let rec check_rewrite_term tl tr t p =
       CTbinop (op, t1, nt2)
   | _ -> verif_failed "Can't follow the rewrite path"
 
-let check_rewrite cta rh th p : ctask =
-  let found = ref false in
-  let tl, tr = match Mid.find_opt rh cta.hyp with
-    | Some (CTbinop (CTiff, t1, t2)) -> t1, t2
-    | _ -> verif_failed "Can't find the hypothesis used to rewrite" in
+let check_rewrite cta rev rh th p : ctask list =
+  let rec introduce acc = function
+    | CTbinop (CTimplies, t1, t2) -> introduce (t1::acc) t2
+    | t -> acc, t in
+  let lp, tl, tr = match introduce [] (Mid.find rh cta.hyp) with
+      | lp, CTbinop (CTiff, t1, t2) -> if rev then lp, t1, t2 else lp, t2, t1
+      | _ -> verif_failed "Can't find the hypothesis used to rewrite" in
   let rewrite_decl _ id te =
     if id_equal id th
-    then begin found := true;
-               check_rewrite_term tl tr te p end
+    then check_rewrite_term tl tr te p
     else te in
-  let res = map_ctask rewrite_decl cta in
-  if !found then res else verif_failed "Can't find the hypothesis to be rewritten"
-
+  [map_ctask rewrite_decl cta]
 
 let rec check_certif ({hyp = hyp; concl = concl} as cta) (cert : certif) : ctask list =
   match cert with
@@ -181,9 +185,9 @@ let rec check_certif ({hyp = hyp; concl = concl} as cta) (cert : certif) : ctask
             let cta = {hyp = Mid.add i f1 hyp; concl = Mid.singleton idg f2 } in
             check_certif cta c
         | _ -> verif_failed "Nothing to introduce" end
-    | Rewrite (rh, th, p, c) ->
-        let cta = check_rewrite cta rh th p in
-        check_certif cta c
+    | Rewrite (rev, rh, th, p, lc) ->
+        let lcta = check_rewrite cta rev rh th p in
+        List.map2 check_certif lcta lc |> List.concat
 
 (* Creates a certified transformation from a transformation with certificate *)
 let checker_ctrans ctr task =
@@ -194,37 +198,44 @@ let checker_ctrans ctr task =
       if Lists.equal ctask_equal lctask (List.map translate_task ltask)
       then ltask
       else verif_failed "Replaying certif gives different result"
-  with e -> raise (Trans.TransFailure ("Cert_syntax.checker_trans", e))
+  with e -> raise (Trans.TransFailure ("Cert_syntax.checker_ctrans", e))
 
 (* Generalize ctrans on (task list * certif) *)
 let ctrans_gen (ctr : ctrans) (ts, c) =
-  let rec fill c ts = match c with
+  let rec fill acc c ts = match c with
       | Skip -> begin match ts with
                 | [] -> assert false
-                | t::ts -> let l2, c2 = ctr t in
-                           c2, l2, ts end
-      | Axiom _ -> c, [], ts
-      | Split (c1, c2) -> let c1, l1, ts1 = fill c1 ts in
-                          let c2, l2, ts2 = fill c2 ts1 in
-                          Split (c1, c2), l1 @ l2, ts2
-      | Dir (d, c) -> let c, l, ts = fill c ts in
-                      Dir (d, c), l, ts
-      | Intro (i, c) -> let c, l, ts = fill c ts in
-                        Intro (i, c), l, ts
-      | Rewrite (p, t1, t2, c) -> let c, l, ts = fill c ts in
-                                  Rewrite (p, t1, t2, c), l, ts
+                | t::ts -> let lt, ct = ctr t in
+                           lt :: acc, ct, ts end
+      | Axiom _ -> [], c, ts
+      | Split (c1, c2) -> let acc1, c1, ts1 = fill acc c1 ts in
+                          let acc2, c2, ts2 = fill acc1 c2 ts1 in
+                          acc2, Split (c1, c2), ts2
+      | Dir (d, c) -> let acc, c, ts = fill acc c ts in
+                      acc, Dir (d, c), ts
+      | Intro (i, c) -> let acc, c, ts = fill acc c ts in
+                        acc, Intro (i, c), ts
+      | Rewrite (rev, p, t1, t2, lc) ->
+          let acc, lc, ts = List.fold_left (fun (acc, lc, ts) nc ->
+                                let acc, c, ts = fill acc nc ts in
+                                (acc, c::lc, ts)) (acc, [], ts) lc in
+          acc, Rewrite (rev, p, t1, t2, List.rev lc), ts
   in
-  let c, l, ts = fill c ts in
+  let acc, c, ts = fill [] c ts in
   assert (ts = []);
-  l, c
+  let rec rev_concat l1 l2 =
+    match l1 with
+    | [] -> l2
+    | h::t -> rev_concat t (h @ l2) in
+  rev_concat acc [], c
 
 let rec nocuts = function
   | Skip -> false
   | Axiom _ -> true
   | Split (c1, c2) -> nocuts c1 && nocuts c2
   | Dir (_, c)
-  | Intro (_, c)
-  | Rewrite (_, _, _, c) -> nocuts c
+  | Intro (_, c) -> nocuts c
+  | Rewrite (_, _, _, _, lc) -> List.for_all nocuts lc
 
 (** Primitive transformations with certificate *)
 
@@ -304,47 +315,89 @@ let dir d t =
   | _ -> [t], Skip
 
 (* Rewrite with certificate *)
-let rec replace_in_term tl tr t : (term * path) option =
+let rec rewrite_in_term tl tr t : (term * path) option =
   if t_equal tl t
   then Some (tr, [])
   else match t.t_node with
        | Tbinop (op, t1, t2) ->
-           begin match replace_in_term tl tr t1 with
+           begin match rewrite_in_term tl tr t1 with
            | Some (nt1, p) -> Some (t_binary op nt1 t2, Left::p)
-           | None -> match replace_in_term tl tr t2 with
+           | None -> match rewrite_in_term tl tr t2 with
                      | Some (nt2, p) -> Some (t_binary op t1 nt2, Right::p)
                      | None -> None end
        | _ -> None
 
-let rewrite (rh : prsymbol) (th : prsymbol option) task =
-  try
-  let rh = rh.pr_name in
-  let rew_opt =
-    List.fold_left (fun acc d ->
-        match d.d_node with
-        | Dprop (Paxiom, pr, t) when Ident.id_equal pr.pr_name rh ->
-            (match t.t_node with
-             | Tbinop (Tiff, t1, t2) -> Some (t1, t2)
-             | _ -> raise Not_found)
-        | _ -> acc) None (task_decls task) in
-  let tl, tr = match rew_opt with
-      | Some (t1, t2) -> t1, t2
-      | None -> raise Not_found in
-  let {pr_name = th} = match th with
-    | Some th -> th
-    | None -> task_goal task in
+let rec intro_premises acc t = match t.t_node with
+  | Tbinop (Timplies, f1, f2) -> intro_premises (f1::acc) f2
+  | _ -> acc, t
+
+let rewrite_in rev h h1 task =
+  let h = h.pr_name and h1 = h1.pr_name in
   let path = ref [] in
-  let new_task = Trans.apply (Trans.decl (fun d -> match d.d_node with
-      | Dprop (p, pr, t) when (id_equal pr.pr_name th && (p = Paxiom || p = Pgoal)) ->
-          begin match replace_in_term tl tr t with
-          | Some (nt, pat) ->
-              path := pat;
-              let decl_nt = create_prop_decl p pr nt in
-              [decl_nt]
-          | None -> failwith "Can't find something to rewrite" end
-      | _ -> [d]) None) task in
-  [new_task], Rewrite (rh, th, !path, Skip)
-  with e -> raise (Trans.TransFailure ("rewrite", e))
+  let found_eq =
+    (* Used to find the equality we are rewriting on *)
+    (* TODO here should fold with a boolean stating if we found equality yet to
+       not go through all possible hypotheses *)
+    Trans.fold_decl (fun d acc ->
+      match d.d_node with
+      | Dprop (Paxiom, pr, t) when Ident.id_equal pr.pr_name h ->
+          let lp, f = intro_premises [] t in
+          let t1, t2 = (match f.t_node with
+          | Tapp (ls, [t1; t2]) when ls_equal ls ps_equ ->
+              (* Support to rewrite from the right *)
+              if rev then (t1, t2) else (t2, t1)
+          | Tbinop (Tiff, t1, t2) ->
+              (* Support to rewrite from the right *)
+              if rev then (t1, t2) else (t2, t1)
+          | _ -> raise (Arg_bad_hypothesis ("rewrite", f))) in
+          Some (lp, t1, t2)
+      | _ -> acc)
+      None
+  in
+  (* Return instantiated premises and the hypothesis correctly rewritten *)
+  let lp_new found_eq =
+    match found_eq with
+    | None -> raise (Args_wrapper.Arg_error "rewrite") (* Should not happen *)
+    | Some (lp, t1, t2) ->
+      Trans.fold_decl (fun d acc ->
+        match d.d_node with
+        | Dprop (p, pr, t) when id_equal pr.pr_name h1 && (p = Pgoal || p = Paxiom)->
+            let new_term, pat = match rewrite_in_term t1 t2 t with
+              | Some (new_term, pat) -> new_term, pat
+              | None -> failwith "Nothing to rewrite" in
+            path := pat;
+            Some (lp, create_prop_decl p pr new_term)
+        | _ -> acc) None in
+  (* Pass the premises as new goals. Replace the former toberewritten
+     hypothesis to the new rewritten one *)
+  let recreate_tasks lp_new =
+    match lp_new with
+    | None -> raise (Arg_trans "recreate_tasks")
+    | Some (lp, new_decl) ->
+      let trans_rewriting =
+        Trans.decl (fun d -> match d.d_node with
+        | Dprop (p, pr, _t) when id_equal pr.pr_name h1 && (p = Paxiom || p = Pgoal) ->
+            [new_decl]
+        | _ -> [d]) None in
+      let list_par =
+        List.map (fun e ->
+            Trans.decl (fun d -> match d.d_node with
+            | Dprop (Pgoal, _, _) ->
+                [create_goal ~expl:"rewrite premises" (create_prsymbol (gen_ident "G")) e]
+            | _ -> [d])
+          None) lp in
+      Trans.par (trans_rewriting :: list_par) in
+
+  (* Composing previous functions *)
+  let gen_task = Trans.apply (Trans.bind (Trans.bind found_eq lp_new) recreate_tasks) task in
+  gen_task, Rewrite (rev, h, h1, !path, [Skip])
+
+let rewrite rev h h1 task =
+  let h1 = match h1 with
+    | Some pr -> pr
+    | None -> task_goal task in
+  rewrite_in (not rev) h h1 task
+
 
 (** Transformials *)
 
@@ -382,7 +435,7 @@ let repeat (ctr : ctrans) : ctrans = fun task ->
 
 (** Derived transformations with certificate *)
 
-let split_assumption = compose split assumption
+let intros = repeat intro
 
 let rec intuition task =
   repeat (compose assumption
@@ -399,9 +452,9 @@ let split_trans = checker_ctrans split
 let intro_trans = checker_ctrans intro
 let left_trans = checker_ctrans (dir Left)
 let right_trans = checker_ctrans (dir Right)
-let rewrite_trans rh th = checker_ctrans (rewrite rh th)
+let rewrite_trans rev rh th = checker_ctrans (rewrite rev rh th)
 
-let split_assumption_trans = checker_ctrans split_assumption
+let intros_trans = checker_ctrans intros
 let intuition_trans = checker_ctrans intuition
 
 let () =
@@ -409,20 +462,20 @@ let () =
     ~desc:"A certified version of coq tactic [assumption]";
   Trans.register_transform_l "split_cert" (Trans.store split_trans)
     ~desc:"A certified version of (simplified) coq tactic [split]";
-  Trans.register_transform_l "split_assumption_cert" (Trans.store split_assumption_trans)
-    ~desc:"A certified version of (simplified) coq tactic [split; assumption]";
   Trans.register_transform_l "intro_cert" (Trans.store intro_trans)
     ~desc:"A certified version of (simplified) coq tactic [intro]";
   Trans.register_transform_l "left_cert" (Trans.store left_trans)
     ~desc:"A certified version of coq tactic [left]";
+  Trans.register_transform_l "right_cert" (Trans.store right_trans)
+    ~desc:"A certified version of coq tactic [right]";
   let open Args_wrapper in
   wrap_and_register ~desc:"A certified version of transformation rewrite"
-    "rewrite_cert" (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l))))
-    (fun rh th -> Trans.store (rewrite_trans rh th))
+    "rewrite_cert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l))))))
+    (fun rev rh th -> Trans.store (rewrite_trans rev rh th))
 
 
 let () =
-  Trans.register_transform_l "right_cert" (Trans.store right_trans)
-    ~desc:"A certified version of coq tactic [right]";
+  Trans.register_transform_l "intros_cert" (Trans.store intros_trans)
+    ~desc:"A certified version of coq tactic [intros]";
   Trans.register_transform_l "intuition_cert" (Trans.store intuition_trans)
     ~desc:"A certified version of (simplified) coq tactic [intuition]"
