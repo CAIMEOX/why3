@@ -208,25 +208,22 @@ let ctrans_gen (ctr : ctrans) (ts, c) =
                 | t::ts -> let lt, ct = ctr t in
                            lt :: acc, ct, ts end
       | Axiom _ -> [], c, ts
-      | Split (c1, c2) -> let acc1, c1, ts1 = fill acc c1 ts in
-                          let acc2, c2, ts2 = fill acc1 c2 ts1 in
-                          acc2, Split (c1, c2), ts2
+      | Split (c1, c2) -> let acc, c1, ts = fill acc c1 ts in
+                          let acc, c2, ts = fill acc c2 ts in
+                          acc, Split (c1, c2), ts
       | Dir (d, c) -> let acc, c, ts = fill acc c ts in
                       acc, Dir (d, c), ts
       | Intro (i, c) -> let acc, c, ts = fill acc c ts in
                         acc, Intro (i, c), ts
-      | Rewrite (rev, p, t1, t2, lc) ->
+      | Rewrite (rev, t1, t2, p, lc) ->
           let acc, lc, ts = List.fold_left (fun (acc, lc, ts) nc ->
                                 let acc, c, ts = fill acc nc ts in
                                 (acc, c::lc, ts)) (acc, [], ts) lc in
-          acc, Rewrite (rev, p, t1, t2, List.rev lc), ts
+          acc, Rewrite (rev, t1, t2, p, List.rev lc), ts
   in
   let acc, c, ts = fill [] c ts in
   assert (ts = []);
-  let rec rev_concat l1 l2 =
-    match l1 with
-    | [] -> l2
-    | h::t -> rev_concat t (h @ l2) in
+  let rev_concat l1 l2 = List.fold_left (fun acc l -> l @ acc) l2 l1 in
   rev_concat acc [], c
 
 let rec nocuts = function
