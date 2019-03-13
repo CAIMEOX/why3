@@ -46,6 +46,15 @@ let ctask_equal {hyp = h1; concl = c1} {hyp = h2; concl = c2} =
 
 
 (* For debugging purposes *)
+let rec pri fmt i =
+  fprintf fmt "%s" Ident.(id_clone i |> preid_name)
+and prd fmt = function
+  | Left -> fprintf fmt "Left"
+  | Right -> fprintf fmt "Right"
+and prle pre fmt le =
+  let prl = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "; ") pre in
+  fprintf fmt "[%a]" prl le
+
 let rec print_certif where cert =
   let oc = open_out where in
   let fmt = formatter_of_out_channel oc in
@@ -60,17 +69,6 @@ and prc (fmt : formatter) = function
   | Rewrite (rev, rh, th, p, lc) ->
       fprintf fmt "Rewrite @[(%b,@ %a,@ %a,@ %a,@ %a)@]"
         rev pri rh pri th (prle prd) p (prle prc) lc
-and pri fmt i =
-  fprintf fmt "%s" Ident.(id_clone i |> preid_name)
-and prd fmt = function
-  | Left -> fprintf fmt "Left"
-  | Right -> fprintf fmt "Right"
-and prle : type a. (formatter -> a -> unit) -> formatter -> a list -> unit = fun pre fmt le ->
-  let prl le = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "; ") pre le in
-  fprintf fmt "[%a]" prl le
-
-
-
 
 
 (** Translating Why3 tasks to simplified certificate tasks *)
