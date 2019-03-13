@@ -172,11 +172,11 @@ let check_rewrite cta rev rh th p : ctask list =
     if id_equal id th
     then check_rewrite_term tl tr te p
     else te in
-  (* let new_goal ct =
-   *   let idg = gen_ident "G" in
-   *   {cta with concl = Mid.singleton idg ct } in
-   * map_ctask rewrite_decl cta :: List.map new_goal mlp *)
-  map_ctask rewrite_decl cta :: List.map (set_goal cta) lp
+  let new_goal ct =
+    let idg = gen_ident "G" in
+    {cta with concl = Mid.singleton (id_register idg) ct } in
+  map_ctask rewrite_decl cta :: List.map new_goal lp
+  (* map_ctask rewrite_decl cta :: List.map (set_goal cta) lp *)
 
 let rec check_certif ({hyp = hyp; concl = concl} as cta) (cert : certif) : ctask list =
   match cert with
@@ -398,6 +398,7 @@ let rewrite_in rev h h1 task =
         | _ -> acc) None in
   (* Pass the premises as new goals. Replace the former toberewritten
      hypothesis to the new rewritten one *)
+
   let recreate_tasks lp_new =
     match lp_new with
     | None -> raise (Arg_trans "recreate_tasks")
