@@ -98,9 +98,23 @@
   </goal>
  </transf>
  </goal>
- <goal name="G15">
- <transf name="intros_cert" >
-  <goal name="G15.0">
+ <goal name="G15" proved="true">
+ <transf name="intros_cert" proved="true" >
+  <goal name="G15.0" proved="true">
+  <transf name="rewrite_cert" proved="true" arg1="&lt;-" arg2="i1" arg3="in" arg4="i">
+   <goal name="G15.0.0" proved="true">
+   <transf name="assumption_cert" proved="true" >
+   </transf>
+   </goal>
+   <goal name="G15.0.1" expl="rewrite premises" proved="true">
+   <transf name="assumption_cert" proved="true" >
+   </transf>
+   </goal>
+   <goal name="G15.0.2" expl="rewrite premises" proved="true">
+   <transf name="assumption_cert" proved="true" >
+   </transf>
+   </goal>
+  </transf>
   </goal>
  </transf>
  </goal>
