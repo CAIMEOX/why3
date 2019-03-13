@@ -51,8 +51,8 @@ let pri fmt i =
 and prd fmt = function
   | Left -> fprintf fmt "Left"
   | Right -> fprintf fmt "Right"
-and prle pre fmt le =
-  let prl = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "; ") pre in
+and prle sep pre fmt le =
+  let prl = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt sep) pre in
   fprintf fmt "[%a]" prl le
 
 let rec print_certif where cert =
@@ -68,7 +68,29 @@ and prc (fmt : formatter) = function
   | Intro (i, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri i prc c
   | Rewrite (rev, rh, th, p, lc) ->
       fprintf fmt "Rewrite @[(%b,@ %a,@ %a,@ %a,@ %a)@]"
-        rev pri rh pri th (prle prd) p (prle prc) lc
+        rev pri rh pri th (prle "; " prd) p (prle "; " prc) lc
+
+let rec pcte fmt = function
+  | CTapp i -> pri fmt i
+  | CTbinop (op, t1, t2) ->
+      fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
+and pro fmt = function
+  | CTor -> fprintf fmt "\\/"
+  | CTand -> fprintf fmt "/\\"
+  | CTimplies -> fprintf fmt "->"
+  | CTiff -> fprintf fmt "<->"
+
+let prmid fmt mid =
+  Mid.iter (fun i cte -> fprintf fmt "%a ==> %a\n" pri i pcte cte) mid
+
+let pcta fmt cta =
+  fprintf fmt "HYPS :\n%a\nCONCL:\n%a\n" prmid cta.hyp prmid cta.concl
+
+let print_ctasks where lcta =
+  let oc = open_out where in
+  let fmt = formatter_of_out_channel oc in
+  fprintf fmt "%a@." (prle "==========\n" pcta) lcta;
+  close_out oc
 
 
 (** Translating Why3 tasks to simplified certificate tasks *)
@@ -124,6 +146,10 @@ let normalized_goal concl : ident * cterm =
   | None -> verif_failed "No goal"
   | Some t -> t
 
+let set_goal cta ct =
+  let idg, _ = Mid.choose cta.concl in
+  {cta with concl = Mid.singleton idg ct }
+
 let rec check_rewrite_term tl tr t p =
   match p, t with
   | [], t when cterm_equal t tl -> tr
@@ -146,7 +172,11 @@ let check_rewrite cta rev rh th p : ctask list =
     if id_equal id th
     then check_rewrite_term tl tr te p
     else te in
-  [map_ctask rewrite_decl cta]
+  (* let new_goal ct =
+   *   let idg = gen_ident "G" in
+   *   {cta with concl = Mid.singleton idg ct } in
+   * map_ctask rewrite_decl cta :: List.map new_goal mlp *)
+  map_ctask rewrite_decl cta :: List.map (set_goal cta) lp
 
 let rec check_certif ({hyp = hyp; concl = concl} as cta) (cert : certif) : ctask list =
   match cert with
@@ -195,7 +225,10 @@ let checker_ctrans ctr task =
       let lctask = check_certif ctask cert in
       if Lists.equal ctask_equal lctask (List.map translate_task ltask)
       then ltask
-      else verif_failed "Replaying certif gives different result"
+      else begin
+          print_ctasks "/tmp/from_trans.log" (List.map translate_task ltask);
+          print_ctasks "/tmp/from_cert.log" lctask;
+          verif_failed "Replaying certif gives different result" end
   with e -> raise (Trans.TransFailure ("Cert_syntax.checker_ctrans", e))
 
 (* Generalize ctrans on (task list * certif) *)
@@ -328,7 +361,7 @@ let rec intro_premises acc t = match t.t_node with
 
 let rewrite_in rev h h1 task =
   let h = h.pr_name and h1 = h1.pr_name in
-  let path = ref [] in
+  let clues = ref None in
   let found_eq =
     (* Used to find the equality we are rewriting on *)
     (* TODO here should fold with a boolean stating if we found equality yet to
@@ -357,10 +390,10 @@ let rewrite_in rev h h1 task =
       Trans.fold_decl (fun d acc ->
         match d.d_node with
         | Dprop (p, pr, t) when id_equal pr.pr_name h1 && (p = Pgoal || p = Paxiom)->
-            let new_term, pat = match rewrite_in_term t1 t2 t with
-              | Some (new_term, pat) -> new_term, pat
+            let new_term, path = match rewrite_in_term t1 t2 t with
+              | Some (new_term, path) -> new_term, path
               | None -> failwith "Nothing to rewrite" in
-            path := pat;
+            clues := Some (path, Skip :: List.map (fun _ -> Skip) lp);
             Some (lp, create_prop_decl p pr new_term)
         | _ -> acc) None in
   (* Pass the premises as new goals. Replace the former toberewritten
@@ -385,7 +418,10 @@ let rewrite_in rev h h1 task =
 
   (* Composing previous functions *)
   let gen_task = Trans.apply (Trans.bind (Trans.bind found_eq lp_new) recreate_tasks) task in
-  gen_task, Rewrite (rev, h, h1, !path, [Skip])
+  match !clues with
+  | None -> [task], Skip
+  | Some (path, lc) ->
+      gen_task, Rewrite (rev, h, h1, path, lc)
 
 let rewrite rev h h1 task =
   let h1 = match h1 with
