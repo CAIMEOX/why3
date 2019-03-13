@@ -99,6 +99,10 @@
  </transf>
  </goal>
  <goal name="G15">
+ <transf name="intros_cert" >
+  <goal name="G15.0">
+  </goal>
+ </transf>
  </goal>
 </theory>
 </file>
