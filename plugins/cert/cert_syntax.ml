@@ -15,8 +15,6 @@ type cterm = CTapp of ident
 
 
 type ctask = {hyp : cterm Mid.t; concl : cterm Mid.t}
-let mct mid1 mid2 = {hyp = mid1; concl = mid2}
-
 let map_ctask (f : bool -> ident -> cterm -> cterm) {hyp = hyp; concl = concl} =
   let hyp = Mid.mapi (f false) hyp in
   let concl = Mid.mapi (f true) concl in
@@ -29,6 +27,7 @@ type certif = Skip
             | Split of certif * certif
             | Dir of dir * certif
             | Intro of ident * certif
+            | Weakening of ident * certif
             | Rewrite of bool * ident * ident * path * certif list
 
 
@@ -66,6 +65,7 @@ and prc (fmt : formatter) = function
   | Split (c1, c2) -> fprintf fmt "Split @[(%a,@ %a)@]" prc c1 prc c2
   | Dir (d, c) -> fprintf fmt "Dir @[(%a,@ %a)@]" prd d prc c
   | Intro (i, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri i prc c
+  | Weakening (i, c) -> fprintf fmt "Weakning @[(%a,@ %a)@]" pri i prc c
   | Rewrite (rev, rh, th, p, lc) ->
       fprintf fmt "Rewrite @[(%b,@ %a,@ %a,@ %a,@ %a)@]"
         rev pri rh pri th (prle "; " prd) p (prle "; " prc) lc
@@ -95,32 +95,36 @@ let print_ctasks where lcta =
 
 (** Translating Why3 tasks to simplified certificate tasks *)
 
+let translate_op = function
+  | Tand -> CTand
+  | Tor -> CTor
+  | Timplies -> CTimplies
+  | Tiff -> CTiff
+
 let rec translate_term (t : term) : cterm =
   match t.t_node with
   | Tapp (ls, []) -> CTapp ls.ls_name
-  | Tbinop (Tand, t1, t2) -> CTbinop (CTand, translate_term t1, translate_term t2)
-  | Tbinop (Tor , t1, t2) -> CTbinop (CTor , translate_term t1, translate_term t2)
-  | Tbinop (Tiff, t1, t2) -> CTbinop (CTiff, translate_term t1, translate_term t2)
-  | Tbinop (Timplies, t1, t2) -> CTbinop (CTimplies, translate_term t1, translate_term t2)
+  | Tbinop (op, t1, t2) -> CTbinop (translate_op op, translate_term t1, translate_term t2)
   | _ -> invalid_arg "Cert_syntax.translate_term"
 
 let translate_decl (d : decl) : ctask =
   match d.d_node with
   | Dprop (Pgoal, pr, f) ->
       let concl = Mid.singleton pr.pr_name (translate_term f) in
-      mct Mid.empty concl
+      {hyp = Mid.empty; concl = concl}
   | Dprop (_, pr, f) ->
       let hyp = Mid.singleton pr.pr_name (translate_term f) in
-      mct hyp Mid.empty
-  | _ -> mct Mid.empty Mid.empty
+      {hyp = hyp; concl = Mid.empty}
+  | _ ->
+      {hyp = Mid.empty; concl = Mid.empty}
 
 let translate_tdecl (td : tdecl) : ctask =
   match td.td_node with
   | Decl d -> translate_decl d
-  | _ -> mct Mid.empty Mid.empty
+  | _ -> {hyp = Mid.empty; concl = Mid.empty}
 
 let union_ctask {hyp = h1; concl = c1} {hyp = h2; concl = c2} =
-  mct (Mid.set_union h1 h2) (Mid.set_union c1 c2)
+  {hyp = Mid.set_union h1 h2; concl = Mid.set_union c1 c2}
 
 let rec translate_task_acc acc = function
   | Some {task_decl = d; task_prev = p} ->
@@ -129,7 +133,8 @@ let rec translate_task_acc acc = function
   | None -> acc
 
 let translate_task t =
-  translate_task_acc (mct Mid.empty Mid.empty) t
+  translate_task_acc {hyp = Mid.empty; concl = Mid.empty} t
+
 
 (** Using ctasks and certificates *)
 
@@ -148,7 +153,7 @@ let normalized_goal concl : ident * cterm =
 
 let set_goal cta ct =
   let idg, _ = Mid.choose cta.concl in
-  {cta with concl = Mid.singleton idg ct }
+  {cta with concl = Mid.singleton idg ct}
 
 let rec check_rewrite_term tl tr t p =
   match p, t with
@@ -210,12 +215,15 @@ let rec check_certif ({hyp = hyp; concl = concl} as cta) (cert : certif) : ctask
         let idg, teg = normalized_goal concl in
         begin match teg with
         | CTbinop (CTimplies, f1, f2) ->
-            let cta = {hyp = Mid.add i f1 hyp; concl = Mid.singleton idg f2 } in
+            let cta = {hyp = Mid.add i f1 hyp; concl = Mid.singleton idg f2} in
             check_certif cta c
         | _ -> verif_failed "Nothing to introduce" end
+    | Weakening (i, c) ->
+        check_certif {hyp = Mid.remove i hyp; concl = Mid.remove i concl} c
     | Rewrite (rev, rh, th, p, lc) ->
         let lcta = check_rewrite cta rev rh th p in
         List.map2 check_certif lcta lc |> List.concat
+
 
 (* Creates a certified transformation from a transformation with certificate *)
 let checker_ctrans ctr task =
@@ -246,11 +254,14 @@ let ctrans_gen (ctr : ctrans) (ts, c) =
                       acc, Dir (d, c), ts
       | Intro (i, c) -> let acc, c, ts = fill acc c ts in
                         acc, Intro (i, c), ts
+      | Weakening (i, c) -> let acc, c, ts = fill acc c ts in
+                            acc, Weakening (i, c), ts
       | Rewrite (rev, t1, t2, p, lc) ->
           let acc, lc, ts = List.fold_left (fun (acc, lc, ts) nc ->
                                 let acc, c, ts = fill acc nc ts in
                                 (acc, c::lc, ts)) (acc, [], ts) lc in
           acc, Rewrite (rev, t1, t2, p, List.rev lc), ts
+
   in
   let acc, c, ts = fill [] c ts in
   assert (ts = []);
@@ -262,6 +273,7 @@ let rec nocuts = function
   | Axiom _ -> true
   | Split (c1, c2) -> nocuts c1 && nocuts c2
   | Dir (_, c)
+  | Weakening (_, c)
   | Intro (_, c) -> nocuts c
   | Rewrite (_, _, _, _, lc) -> List.for_all nocuts lc
 
@@ -389,12 +401,13 @@ let rewrite_in rev h h1 task =
     | Some (lp, t1, t2) ->
       Trans.fold_decl (fun d acc ->
         match d.d_node with
-        | Dprop (p, pr, t) when id_equal pr.pr_name h1 && (p = Pgoal || p = Paxiom)->
-            let new_term, path = match rewrite_in_term t1 t2 t with
-              | Some (new_term, path) -> new_term, path
-              | None -> failwith "Nothing to rewrite" in
-            clues := Some (path, Skip :: List.map (fun _ -> Skip) lp);
-            Some (lp, create_prop_decl p pr new_term)
+        | Dprop (p, pr, t)
+              when id_equal pr.pr_name h1 && (p = Pgoal || p = Paxiom) ->
+            begin match rewrite_in_term t1 t2 t with
+              | Some (new_term, path) ->
+                  clues := Some (path, Skip :: List.map (fun _ -> Skip) lp);
+                  Some (lp, create_prop_decl p pr new_term)
+              | None -> None end
         | _ -> acc) None in
   (* Pass the premises as new goals. Replace the former toberewritten
      hypothesis to the new rewritten one *)
@@ -413,6 +426,7 @@ let rewrite_in rev h h1 task =
             Trans.decl (fun d -> match d.d_node with
             | Dprop (Pgoal, pr, _) ->
                 [create_goal ~expl:"rewrite premises" pr e]
+             (* [create_goal ~expl:"rewrite premises" (create_prsymbol (gen_ident "G")) e] *)
             | _ -> [d])
           None) lp in
       Trans.par (trans_rewriting :: list_par) in
