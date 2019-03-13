@@ -46,7 +46,7 @@ let ctask_equal {hyp = h1; concl = c1} {hyp = h2; concl = c2} =
 
 
 (* For debugging purposes *)
-let rec pri fmt i =
+let pri fmt i =
   fprintf fmt "%s" Ident.(id_clone i |> preid_name)
 and prd fmt = function
   | Left -> fprintf fmt "Left"
@@ -205,7 +205,7 @@ let ctrans_gen (ctr : ctrans) (ts, c) =
                 | [] -> assert false
                 | t::ts -> let lt, ct = ctr t in
                            lt :: acc, ct, ts end
-      | Axiom _ -> [], c, ts
+      | Axiom _ -> acc, c, ts
       | Split (c1, c2) -> let acc, c1, ts = fill acc c1 ts in
                           let acc, c2, ts = fill acc c2 ts in
                           acc, Split (c1, c2), ts

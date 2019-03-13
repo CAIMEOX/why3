@@ -98,6 +98,8 @@
   </goal>
  </transf>
  </goal>
+ <goal name="G15">
+ </goal>
 </theory>
 </file>
 </why3session>
