@@ -19,8 +19,7 @@ type ctask = (cterm * bool) Mid.t
 type dir = Left | Right
 type path = dir list
 type certif = Skip
-            | True
-            | Axiom of ident * certif * ident
+            | Axiom of ident * ident
             (* first ident indicates an hypothesis, the second indicates a goal *)
             | Split of certif * certif * ident
             | Dir of dir * certif * ident
@@ -69,9 +68,8 @@ let rec print_certif where cert =
   fprintf fmt "%a@." prc cert;
   close_out oc
 and prc (fmt : formatter) = function
-  | True -> fprintf fmt "True"
   | Skip -> fprintf fmt "Skip"
-  | Axiom (ih, c, ig) -> fprintf fmt "Axiom @[(%a,@ %a,@ %a)@]" pri ih prc c pri ig
+  | Axiom (ih, ig) -> fprintf fmt "Axiom @[(%a,@ %a)@]" pri ih pri ig
   | Split (c1, c2, i) -> fprintf fmt "Split @[(%a,@ %a,@ %a)@]" prc c1 prc c2 pri i
   | Dir (d, c, i) -> fprintf fmt "Dir @[(%a,@ %a,@ %a)@]" prd d prc c pri i
   | Intro (name, c, i) -> fprintf fmt "Intro @[(%a,@ %a,@ %a)@]" pri name prc c pri i
@@ -207,16 +205,12 @@ let check_rewrite cta rev rh th p : ctask list =
 let rec check_certif cta (cert : certif) : ctask list =
   match cert with
     | Skip -> [cta]
-    | True -> if Mid.(is_empty (filter (fun _ (_, isg) -> isg) cta))
-              then []
-              else verif_failed "Not a trivial goal"
-    | Axiom (ih, c, ig) ->
+    | Axiom (ih, ig) ->
         let cth, posh = find_ident ih cta in
         let ctg, posg = find_ident ig cta in
         if not posh && posg
         then if cterm_equal cth ctg
-             then let cta = Mid.remove ig cta in
-                  check_certif cta c
+             then []
              else verif_failed "The hypothesis and goal given do not match"
         else verif_failed "Terms have wrong positivities in the task"
     | Split (c1, c2, i) ->
@@ -272,13 +266,11 @@ let checker_ctrans ctr task =
 (* Generalize ctrans on (task list * certif) *)
 let ctrans_gen (ctr : ctrans) (ts, c) =
   let rec fill acc c ts = match c with
-    | True -> acc, True, ts
     | Skip -> begin match ts with
               | [] -> assert false
               | t::ts -> let lt, ct = ctr t in
                          lt :: acc, ct, ts end
-    | Axiom (ih, c, ig) -> let acc, c, ts = fill acc c ts in
-                           acc, Axiom (ih, c, ig), ts
+    | Axiom _ -> acc, c, ts
     | Split (c1, c2, i) -> let acc, c1, ts = fill acc c1 ts in
                            let acc, c2, ts = fill acc c2 ts in
                            acc, Split (c1, c2, i), ts
@@ -301,7 +293,6 @@ let ctrans_gen (ctr : ctrans) (ts, c) =
   rev_concat acc [], c
 
 let rec nocuts = function
-  | True
   | Skip -> false
   | Axiom _ -> true
   | Split (c1, c2, _) -> nocuts c1 && nocuts c2
@@ -340,7 +331,7 @@ let assumption t  =
           with GoalNotFound -> invalid_arg "Cert_syntax.assumption" in
   let _, t' = task_separate_goal t in
   try let h = assumption_ctxt g t' in
-      [], Axiom (h, True, pr.pr_name)
+      [], Axiom (h, pr.pr_name)
   with Not_found -> [t], Skip
 
 (* Split with certificate *)
