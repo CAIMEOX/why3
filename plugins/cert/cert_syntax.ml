@@ -19,7 +19,8 @@ type ctask = (cterm * bool) Mid.t
 type dir = Left | Right
 type path = dir list
 type certif = Skip
-            | Axiom of ident * ident
+            | True
+            | Axiom of ident * certif * ident
             (* first ident indicates an hypothesis, the second indicates a goal *)
             | Split of certif * certif * ident
             | Dir of dir * certif * ident
@@ -68,8 +69,9 @@ let rec print_certif where cert =
   fprintf fmt "%a@." prc cert;
   close_out oc
 and prc (fmt : formatter) = function
+  | True -> fprintf fmt "True"
   | Skip -> fprintf fmt "Skip"
-  | Axiom (ih, ig) -> fprintf fmt "Axiom @[(%a,@ %a)@]" pri ih pri ig
+  | Axiom (ih, c, ig) -> fprintf fmt "Axiom @[(%a,@ %a,@ %a)@]" pri ih prc c pri ig
   | Split (c1, c2, i) -> fprintf fmt "Split @[(%a,@ %a,@ %a)@]" prc c1 prc c2 pri i
   | Dir (d, c, i) -> fprintf fmt "Dir @[(%a,@ %a,@ %a)@]" prd d prc c pri i
   | Intro (name, c, i) -> fprintf fmt "Intro @[(%a,@ %a,@ %a)@]" pri name prc c pri i
@@ -205,12 +207,18 @@ let check_rewrite cta rev rh th p : ctask list =
 let rec check_certif cta (cert : certif) : ctask list =
   match cert with
     | Skip -> [cta]
-    | Axiom (ih, ig) ->
+    | True -> if Mid.(is_empty (filter (fun _ (_, isg) -> isg) cta))
+              then []
+              else verif_failed "Not a trivial goal"
+    | Axiom (ih, c, ig) ->
         let cth, posh = find_ident ih cta in
         let ctg, posg = find_ident ig cta in
-        if posh || not posg then verif_failed "Terms have wrong positivities in the task"
-        else if cterm_equal cth ctg then []
-        else verif_failed "The hypothesis and goal given do not match"
+        if not posh && posg
+        then if cterm_equal cth ctg
+             then let cta = Mid.remove ig cta in
+                  check_certif cta c
+             else verif_failed "The hypothesis and goal given do not match"
+        else verif_failed "Terms have wrong positivities in the task"
     | Split (c1, c2, i) ->
         let ct, pos = find_ident i cta in
         begin match ct, pos with
@@ -264,25 +272,26 @@ let checker_ctrans ctr task =
 (* Generalize ctrans on (task list * certif) *)
 let ctrans_gen (ctr : ctrans) (ts, c) =
   let rec fill acc c ts = match c with
-      | Skip -> begin match ts with
-                | [] -> assert false
-                | t::ts -> let lt, ct = ctr t in
-                           lt :: acc, ct, ts end
-      | Axiom _ -> acc, c, ts
-      | Split (c1, c2, i) -> let acc, c1, ts = fill acc c1 ts in
-                             let acc, c2, ts = fill acc c2 ts in
-                             acc, Split (c1, c2, i), ts
-      | Dir (d, c, i) -> let acc, c, ts = fill acc c ts in
-                         acc, Dir (d, c, i), ts
-      | Intro (name, c, i) -> let acc, c, ts = fill acc c ts in
-                              acc, Intro (name, c, i), ts
-      | Weakening (c, i) -> let acc, c, ts = fill acc c ts in
-                            acc, Weakening (c, i), ts
-      | Rewrite (rev, t1, p, lc, t2) ->
-          let acc, lc, ts = List.fold_left (fun (acc, lc, ts) nc ->
-                                let acc, c, ts = fill acc nc ts in
-                                (acc, c::lc, ts)) (acc, [], ts) lc in
-          acc, Rewrite (rev, t1, p, List.rev lc, t2), ts
+    | True -> acc, True, ts
+    | Skip -> begin match ts with
+              | [] -> assert false
+              | t::ts -> let lt, ct = ctr t in
+                         lt :: acc, ct, ts end
+    | Axiom _ -> acc, c, ts
+    | Split (c1, c2, i) -> let acc, c1, ts = fill acc c1 ts in
+                           let acc, c2, ts = fill acc c2 ts in
+                           acc, Split (c1, c2, i), ts
+    | Dir (d, c, i) -> let acc, c, ts = fill acc c ts in
+                       acc, Dir (d, c, i), ts
+    | Intro (name, c, i) -> let acc, c, ts = fill acc c ts in
+                            acc, Intro (name, c, i), ts
+    | Weakening (c, i) -> let acc, c, ts = fill acc c ts in
+                          acc, Weakening (c, i), ts
+    | Rewrite (rev, t1, p, lc, t2) ->
+        let acc, lc, ts = List.fold_left (fun (acc, lc, ts) nc ->
+                              let acc, c, ts = fill acc nc ts in
+                              (acc, c::lc, ts)) (acc, [], ts) lc in
+        acc, Rewrite (rev, t1, p, List.rev lc, t2), ts
 
   in
   let acc, c, ts = fill [] c ts in
@@ -291,6 +300,7 @@ let ctrans_gen (ctr : ctrans) (ts, c) =
   rev_concat acc [], c
 
 let rec nocuts = function
+  | True
   | Skip -> false
   | Axiom _ -> true
   | Split (c1, c2, _) -> nocuts c1 && nocuts c2
@@ -329,7 +339,7 @@ let assumption t  =
           with GoalNotFound -> invalid_arg "Cert_syntax.assumption" in
   let _, t' = task_separate_goal t in
   try let h = assumption_ctxt g t' in
-      [], Axiom (h, pr.pr_name)
+      [], Axiom (h, True, pr.pr_name)
   with Not_found -> [t], Skip
 
 (* Split with certificate *)
