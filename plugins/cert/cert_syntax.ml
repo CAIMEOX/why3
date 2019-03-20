@@ -14,21 +14,25 @@ type cterm = CTapp of ident
            | CTbinop of binop * cterm * cterm
 
 
-type ctask = {hyp : cterm Mid.t; concl : cterm Mid.t}
-let map_ctask (f : bool -> ident -> cterm -> cterm) {hyp = hyp; concl = concl} =
-  let hyp = Mid.mapi (f false) hyp in
-  let concl = Mid.mapi (f true) concl in
-  {hyp = hyp; concl = concl}
+type ctask = (cterm * bool) Mid.t
 
 type dir = Left | Right
 type path = dir list
 type certif = Skip
-            | Axiom of ident
-            | Split of certif * certif
-            | Dir of dir * certif
-            | Intro of ident * certif
-            | Weakening of ident * certif
-            | Rewrite of bool * ident * ident * path * certif list
+            | Axiom of ident * ident
+            (* first ident indicates an hypothesis, the second indicates a goal *)
+            | Split of certif * certif * ident
+            | Dir of dir * certif * ident
+            | Intro of ident * certif * ident
+            (* the first ident is the name of the new hypothesis, the second is
+             where is the hypothesis to introduce *)
+            | Weakening of certif * ident
+            | Rewrite of bool * ident * path * certif list * ident
+              (* bool : order of rewriting,
+               * first ident : what will be used to rewrite
+               * second ident : what will be rewritten
+               * path : where to rewrite
+               * certif list : the equality to rewrite may have some premisses *)
 
 
 type ctrans = task -> task list * certif
@@ -40,13 +44,17 @@ let rec cterm_equal t1 t2 =
       op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
   | _ -> false
 
-let ctask_equal {hyp = h1; concl = c1} {hyp = h2; concl = c2} =
-  Mid.equal cterm_equal h1 h2 && Mid.equal cterm_equal c1 c2
+let cterm_pos_equal (t1, p1) (t2, p2) =
+  cterm_equal t1 t2 && p1 = p2
+
+let ctask_equal = Mid.equal cterm_pos_equal
 
 
 (* For debugging purposes *)
+let ip = create_ident_printer []
+
 let pri fmt i =
-  fprintf fmt "%s" Ident.(id_clone i |> preid_name)
+  fprintf fmt "%s" (id_unique ip i)
 and prd fmt = function
   | Left -> fprintf fmt "Left"
   | Right -> fprintf fmt "Right"
@@ -61,14 +69,14 @@ let rec print_certif where cert =
   close_out oc
 and prc (fmt : formatter) = function
   | Skip -> fprintf fmt "Skip"
-  | Axiom i -> fprintf fmt "Axiom %a" pri i
-  | Split (c1, c2) -> fprintf fmt "Split @[(%a,@ %a)@]" prc c1 prc c2
-  | Dir (d, c) -> fprintf fmt "Dir @[(%a,@ %a)@]" prd d prc c
-  | Intro (i, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri i prc c
-  | Weakening (i, c) -> fprintf fmt "Weakning @[(%a,@ %a)@]" pri i prc c
-  | Rewrite (rev, rh, th, p, lc) ->
+  | Axiom (ih, ig) -> fprintf fmt "Axiom @[(%a,@ %a)@]" pri ih pri ig
+  | Split (c1, c2, i) -> fprintf fmt "Split @[(%a,@ %a,@ %a)@]" prc c1 prc c2 pri i
+  | Dir (d, c, i) -> fprintf fmt "Dir @[(%a,@ %a,@ %a)@]" prd d prc c pri i
+  | Intro (name, c, i) -> fprintf fmt "Intro @[(%a,@ %a,@ %a)@]" pri name prc c pri i
+  | Weakening (c, i) -> fprintf fmt "Weakning @[(%a,@ %a)@]" pri i prc c
+  | Rewrite (rev, ih, p, lc, ig) ->
       fprintf fmt "Rewrite @[(%b,@ %a,@ %a,@ %a,@ %a)@]"
-        rev pri rh pri th (prle "; " prd) p (prle "; " prc) lc
+        rev pri ih (prle "; " prd) p (prle "; " prc) lc pri ig
 
 let rec pcte fmt = function
   | CTapp i -> pri fmt i
@@ -80,11 +88,15 @@ and pro fmt = function
   | CTimplies -> fprintf fmt "->"
   | CTiff -> fprintf fmt "<->"
 
+let prpos fmt = function
+  | true  -> fprintf fmt "GOAL: "
+  | false -> fprintf fmt "HYP : "
+
 let prmid fmt mid =
-  Mid.iter (fun i cte -> fprintf fmt "%a ==> %a\n" pri i pcte cte) mid
+  Mid.iter (fun i (cte, pos) -> fprintf fmt "%a%a ==> %a\n" prpos pos pri i pcte cte) mid
 
 let pcta fmt cta =
-  fprintf fmt "HYPS :\n%a\nCONCL:\n%a\n" prmid cta.hyp prmid cta.concl
+  fprintf fmt "%a\n" prmid cta
 
 let print_ctasks where lcta =
   let oc = open_out where in
@@ -110,21 +122,17 @@ let rec translate_term (t : term) : cterm =
 let translate_decl (d : decl) : ctask =
   match d.d_node with
   | Dprop (Pgoal, pr, f) ->
-      let concl = Mid.singleton pr.pr_name (translate_term f) in
-      {hyp = Mid.empty; concl = concl}
+       Mid.singleton pr.pr_name (translate_term f, true)
   | Dprop (_, pr, f) ->
-      let hyp = Mid.singleton pr.pr_name (translate_term f) in
-      {hyp = hyp; concl = Mid.empty}
-  | _ ->
-      {hyp = Mid.empty; concl = Mid.empty}
+      Mid.singleton pr.pr_name (translate_term f, false)
+  | _ -> Mid.empty
 
 let translate_tdecl (td : tdecl) : ctask =
   match td.td_node with
   | Decl d -> translate_decl d
-  | _ -> {hyp = Mid.empty; concl = Mid.empty}
+  | _ -> Mid.empty
 
-let union_ctask {hyp = h1; concl = c1} {hyp = h2; concl = c2} =
-  {hyp = Mid.set_union h1 h2; concl = Mid.set_union c1 c2}
+let union_ctask = Mid.set_union
 
 let rec translate_task_acc acc = function
   | Some {task_decl = d; task_prev = p} ->
@@ -132,8 +140,8 @@ let rec translate_task_acc acc = function
       translate_task_acc new_acc p
   | None -> acc
 
-let translate_task t =
-  translate_task_acc {hyp = Mid.empty; concl = Mid.empty} t
+let translate_task =
+  translate_task_acc Mid.empty
 
 
 (** Using ctasks and certificates *)
@@ -142,18 +150,30 @@ let translate_task t =
 exception Certif_verification_failed of string
 let verif_failed s = raise (Certif_verification_failed s)
 
+let find_ident i cta =
+  match Mid.find_opt i cta with
+  | Some x -> x
+  | None -> verif_failed "Can't find ident in the task"
+
 (* Ensures the goal has exactly one cterm *)
 let normalized_goal concl : ident * cterm =
-  let fold_concl g_opt id ng = match g_opt with
-        | None -> Some (id, ng)
-        | Some _ -> verif_failed "Multiple goals" in
+  let fold_concl g_opt id (ng, is_goal) = match g_opt with
+        | None when is_goal -> Some (id, ng)
+        | _ -> verif_failed "Multiple goals" in
   match Mid.fold_left fold_concl None concl with
   | None -> verif_failed "No goal"
   | Some t -> t
 
-let set_goal cta ct =
-  let idg, _ = Mid.choose cta.concl in
-  {cta with concl = Mid.singleton idg ct}
+let split_cta cta =
+  let open Mid in
+  fold (fun i (cte, pos) (mh, mg) ->
+      if pos then mh, add i (cte, pos) mg
+      else add i (cte, pos) mh, mg) cta (empty, empty)
+
+let set_goal (cta : ctask) =
+  let mh, mg = split_cta cta in
+  let idg, _ = Mid.choose mg in
+  fun ct -> Mid.add idg (ct, true) mh
 
 let rec check_rewrite_term tl tr t p =
   match p, t with
@@ -170,57 +190,58 @@ let check_rewrite cta rev rh th p : ctask list =
   let rec introduce acc = function
     | CTbinop (CTimplies, t1, t2) -> introduce (t1::acc) t2
     | t -> acc, t in
-  let lp, tl, tr = match introduce [] (Mid.find rh cta.hyp) with
+  let lp, tl, tr =
+    let ct, pos = find_ident rh cta in
+    if pos then verif_failed "Can't use goal as an hypothesis to rewrite" else
+      match introduce [] ct with
       | lp, CTbinop (CTiff, t1, t2) -> if rev then lp, t1, t2 else lp, t2, t1
       | _ -> verif_failed "Can't find the hypothesis used to rewrite" in
-  let rewrite_decl _ id te =
+  let rewrite_decl id (te, b) =
     if id_equal id th
-    then check_rewrite_term tl tr te p
-    else te in
-  (* let new_goal ct =
-   *   let idg = gen_ident "G" in
-   *   {cta with concl = Mid.singleton (id_register idg) ct } in
-   * map_ctask rewrite_decl cta :: List.map new_goal lp *)
-  map_ctask rewrite_decl cta :: List.map (set_goal cta) lp
+    then check_rewrite_term tl tr te p, b
+    else te, b in
+  Mid.mapi rewrite_decl cta :: List.map (set_goal cta) lp
 
-let rec check_certif ({hyp = hyp; concl = concl} as cta) (cert : certif) : ctask list =
+let rec check_certif cta (cert : certif) : ctask list =
   match cert with
     | Skip -> [cta]
-    | Axiom id ->
-        let found = Mid.find_opt id hyp in
-        let _, teg = normalized_goal concl in
-        begin match found with
-        | Some tef when tef = teg -> []
-        | _ -> verif_failed "No such assumption" end
-    | Split (c1, c2) ->
-        let idg, teg = normalized_goal concl in
-        begin match teg with
-        | CTbinop (CTand, t1, t2) ->
-            let cta1 = {cta with concl = Mid.singleton idg t1} in
-            let cta2 = {cta with concl = Mid.singleton idg t2} in
+    | Axiom (ih, ig) ->
+        let cth, posh = find_ident ih cta in
+        let ctg, posg = find_ident ih cta in
+        if posh || not posg then verif_failed "Terms have wrong positivities in the task"
+        else if cterm_equal cth ctg then []
+        else verif_failed "The hypothesis and goal given do not match"
+    | Split (c1, c2, i) ->
+        let ct, pos = find_ident i cta in
+        begin match ct, pos with
+        | CTbinop (CTand, t1, t2), true ->
+            let cta1 = Mid.add i (t1, pos) cta in
+            let cta2 = Mid.add i (t2, pos) cta in
             check_certif cta1 c1 @ check_certif cta2 c2
-        | CTbinop (CTiff, t1, t2) ->
-            let cta1 = {cta with concl = Mid.singleton idg (CTbinop (CTimplies, t1, t2))} in
-            let cta2 = {cta with concl = Mid.singleton idg (CTbinop (CTimplies, t2, t1))} in
-            check_certif cta1 c1 @ check_certif cta2 c2
-        | _ -> verif_failed "Goal is not splittable" end
-    | Dir (d, c) ->
-        let idg, teg = normalized_goal concl in
-        begin match teg, d with
-        | CTbinop(CTor, t, _), Left | CTbinop (CTor, _, t), Right ->
-            let cta = {cta with concl = Mid.singleton idg t} in
-            check_certif cta c
+        (* | CTbinop (CTiff, t1, t2) ->
+         *     let cta1 = {cta with concl = Mid.singleton idg (CTbinop (CTimplies, t1, t2))} in
+         *     let cta2 = {cta with concl = Mid.singleton idg (CTbinop (CTimplies, t2, t1))} in
+         *     check_certif cta1 c1 @ check_certif cta2 c2 *)
+        | _ -> verif_failed "Not splittable" end
+    | Dir (d, c, i) ->
+        let ct, pos = find_ident i cta in
+        begin match ct, d, pos with
+        | CTbinop (CTor, t, _), Left, true | CTbinop (CTor, _, t), Right, true
+        | CTbinop (CTand, t, _), Left, false | CTbinop (CTand, _, t), Right, false ->
+          let cta = Mid.add i (t, pos) cta in
+          check_certif cta c
         | _ -> verif_failed "Can't follow a direction" end
-    | Intro (i, c) ->
-        let idg, teg = normalized_goal concl in
-        begin match teg with
-        | CTbinop (CTimplies, f1, f2) ->
-            let cta = {hyp = Mid.add i f1 hyp; concl = Mid.singleton idg f2} in
+    | Intro (name, c, i) ->
+        let ct, pos = find_ident i cta in
+        begin match ct, pos with
+        | CTbinop (CTimplies, f1, f2), true ->
+            let cta = Mid.add i (f2, true) cta |> Mid.add name (f1, false) in
             check_certif cta c
         | _ -> verif_failed "Nothing to introduce" end
-    | Weakening (i, c) ->
-        check_certif {hyp = Mid.remove i hyp; concl = Mid.remove i concl} c
-    | Rewrite (rev, rh, th, p, lc) ->
+    | Weakening (c, i) ->
+        let cta = Mid.remove i cta in
+        check_certif cta c
+    | Rewrite (rev, rh, p, lc, th) ->
         let lcta = check_rewrite cta rev rh th p in
         List.map2 check_certif lcta lc |> List.concat
 
@@ -247,20 +268,20 @@ let ctrans_gen (ctr : ctrans) (ts, c) =
                 | t::ts -> let lt, ct = ctr t in
                            lt :: acc, ct, ts end
       | Axiom _ -> acc, c, ts
-      | Split (c1, c2) -> let acc, c1, ts = fill acc c1 ts in
-                          let acc, c2, ts = fill acc c2 ts in
-                          acc, Split (c1, c2), ts
-      | Dir (d, c) -> let acc, c, ts = fill acc c ts in
-                      acc, Dir (d, c), ts
-      | Intro (i, c) -> let acc, c, ts = fill acc c ts in
-                        acc, Intro (i, c), ts
-      | Weakening (i, c) -> let acc, c, ts = fill acc c ts in
-                            acc, Weakening (i, c), ts
-      | Rewrite (rev, t1, t2, p, lc) ->
+      | Split (c1, c2, i) -> let acc, c1, ts = fill acc c1 ts in
+                             let acc, c2, ts = fill acc c2 ts in
+                             acc, Split (c1, c2, i), ts
+      | Dir (d, c, i) -> let acc, c, ts = fill acc c ts in
+                         acc, Dir (d, c, i), ts
+      | Intro (name, c, i) -> let acc, c, ts = fill acc c ts in
+                              acc, Intro (name, c, i), ts
+      | Weakening (c, i) -> let acc, c, ts = fill acc c ts in
+                            acc, Weakening (c, i), ts
+      | Rewrite (rev, t1, p, lc, t2) ->
           let acc, lc, ts = List.fold_left (fun (acc, lc, ts) nc ->
                                 let acc, c, ts = fill acc nc ts in
                                 (acc, c::lc, ts)) (acc, [], ts) lc in
-          acc, Rewrite (rev, t1, t2, p, List.rev lc), ts
+          acc, Rewrite (rev, t1, p, List.rev lc, t2), ts
 
   in
   let acc, c, ts = fill [] c ts in
@@ -271,11 +292,11 @@ let ctrans_gen (ctr : ctrans) (ts, c) =
 let rec nocuts = function
   | Skip -> false
   | Axiom _ -> true
-  | Split (c1, c2) -> nocuts c1 && nocuts c2
-  | Dir (_, c)
-  | Weakening (_, c)
-  | Intro (_, c) -> nocuts c
-  | Rewrite (_, _, _, _, lc) -> List.for_all nocuts lc
+  | Split (c1, c2, _) -> nocuts c1 && nocuts c2
+  | Dir (_, c, _)
+  | Weakening (c, _)
+  | Intro (_, c, _) -> nocuts c
+  | Rewrite (_, _, _, lc, _) -> List.for_all nocuts lc
 
 (** Primitive transformations with certificate *)
 
@@ -302,7 +323,7 @@ let rec assumption_ctxt g = function
       | None -> assumption_ctxt g p end
   | None -> raise Not_found
 
-let assumption t =
+let assumption t  =
   let g = try task_goal_fmla t
           with GoalNotFound -> invalid_arg "Cert_syntax.assumption" in
   let _, t' = task_separate_goal t in
