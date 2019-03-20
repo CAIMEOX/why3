@@ -28,11 +28,11 @@ type certif = Skip
              where is the hypothesis to introduce *)
             | Weakening of certif * ident
             | Rewrite of bool * ident * path * certif list * ident
-              (* bool : order of rewriting,
-               * first ident : what will be used to rewrite
-               * second ident : what will be rewritten
-               * path : where to rewrite
-               * certif list : the equality to rewrite may have some premisses *)
+            (* bool : left to right or right to left rewriting
+             * first ident : what will be used to rewrite
+             * second ident : what will be rewritten
+             * path : where to rewrite
+             * certif list : the equality to rewrite may have some premisses *)
 
 
 type ctrans = task -> task list * certif
@@ -207,7 +207,7 @@ let rec check_certif cta (cert : certif) : ctask list =
     | Skip -> [cta]
     | Axiom (ih, ig) ->
         let cth, posh = find_ident ih cta in
-        let ctg, posg = find_ident ih cta in
+        let ctg, posg = find_ident ig cta in
         if posh || not posg then verif_failed "Terms have wrong positivities in the task"
         else if cterm_equal cth ctg then []
         else verif_failed "The hypothesis and goal given do not match"
@@ -218,10 +218,10 @@ let rec check_certif cta (cert : certif) : ctask list =
             let cta1 = Mid.add i (t1, pos) cta in
             let cta2 = Mid.add i (t2, pos) cta in
             check_certif cta1 c1 @ check_certif cta2 c2
-        (* | CTbinop (CTiff, t1, t2) ->
-         *     let cta1 = {cta with concl = Mid.singleton idg (CTbinop (CTimplies, t1, t2))} in
-         *     let cta2 = {cta with concl = Mid.singleton idg (CTbinop (CTimplies, t2, t1))} in
-         *     check_certif cta1 c1 @ check_certif cta2 c2 *)
+        | CTbinop (CTiff, t1, t2), true ->
+            let cta1 = Mid.add i (CTbinop (CTimplies, t1, t2), pos) cta in
+            let cta2 = Mid.add i (CTbinop (CTimplies, t2, t1), pos) cta in
+            check_certif cta1 c1 @ check_certif cta2 c2
         | _ -> verif_failed "Not splittable" end
     | Dir (d, c, i) ->
         let ct, pos = find_ident i cta in
@@ -249,8 +249,9 @@ let rec check_certif cta (cert : certif) : ctask list =
 (* Creates a certified transformation from a transformation with certificate *)
 let checker_ctrans ctr task =
   try let ltask, cert = ctr task in
-      print_certif "/tmp/certif.log" cert;
       let ctask = translate_task task in
+      print_certif "/tmp/certif.log" cert;
+      print_ctasks "/tmp/init_ctask.log" [ctask];
       let lctask = check_certif ctask cert in
       if Lists.equal ctask_equal lctask (List.map translate_task ltask)
       then ltask
@@ -324,11 +325,11 @@ let rec assumption_ctxt g = function
   | None -> raise Not_found
 
 let assumption t  =
-  let g = try task_goal_fmla t
+  let pr, g = try task_goal t, task_goal_fmla t
           with GoalNotFound -> invalid_arg "Cert_syntax.assumption" in
   let _, t' = task_separate_goal t in
   try let h = assumption_ctxt g t' in
-      [], Axiom h
+      [], Axiom (h, pr.pr_name)
   with Not_found -> [t], Skip
 
 (* Split with certificate *)
@@ -347,7 +348,7 @@ let split t =
     | Some (f1, f2) ->
         let tf1 = add_decl c (create_prop_decl Pgoal pr f1) in
         let tf2 = add_decl c (create_prop_decl Pgoal pr f2) in
-        [tf1;tf2], Split (Skip, Skip)
+        [tf1;tf2], Split (Skip, Skip, pr.pr_name)
     | None -> [t], Skip
 
 (* Intro with certificate *)
@@ -361,7 +362,7 @@ let intro t =
       let decl1 = create_prop_decl Paxiom i f1 in
       let tf1 = add_decl c decl1 in
       let tf2 = add_decl tf1 (create_prop_decl Pgoal pr f2) in
-      [tf2], Intro (i.pr_name, Skip)
+      [tf2], Intro (i.pr_name, Skip, pr.pr_name)
   | _ -> [t], Skip
 
 (* Direction with certificate *)
@@ -372,7 +373,7 @@ let dir d t =
   match g.t_node, d with
   | Tbinop (Tor, f, _), Left | Tbinop (Tor, _, f), Right ->
       let tf = add_decl c (create_prop_decl Pgoal pr f) in
-      [tf], Dir (d, Skip)
+      [tf], Dir (d, Skip, pr.pr_name)
   | _ -> [t], Skip
 
 (* Rewrite with certificate *)
@@ -457,7 +458,7 @@ let rewrite_in rev h h1 task =
   match !clues with
   | None -> [task], Skip
   | Some (path, lc) ->
-      gen_task, Rewrite (rev, h, h1, path, lc)
+      gen_task, Rewrite (rev, h, path, lc, h1)
 
 let rewrite rev h h1 task =
   let h1 = match h1 with
