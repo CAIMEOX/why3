@@ -208,9 +208,11 @@ let rec check_certif cta (cert : certif) : ctask list =
     | Axiom (ih, ig) ->
         let cth, posh = find_ident ih cta in
         let ctg, posg = find_ident ig cta in
-        if posh || not posg then verif_failed "Terms have wrong positivities in the task"
-        else if cterm_equal cth ctg then []
-        else verif_failed "The hypothesis and goal given do not match"
+        if not posh && posg
+        then if cterm_equal cth ctg
+             then []
+             else verif_failed "The hypothesis and goal given do not match"
+        else verif_failed "Terms have wrong positivities in the task"
     | Split (c1, c2, i) ->
         let ct, pos = find_ident i cta in
         begin match ct, pos with
@@ -264,25 +266,25 @@ let checker_ctrans ctr task =
 (* Generalize ctrans on (task list * certif) *)
 let ctrans_gen (ctr : ctrans) (ts, c) =
   let rec fill acc c ts = match c with
-      | Skip -> begin match ts with
-                | [] -> assert false
-                | t::ts -> let lt, ct = ctr t in
-                           lt :: acc, ct, ts end
-      | Axiom _ -> acc, c, ts
-      | Split (c1, c2, i) -> let acc, c1, ts = fill acc c1 ts in
-                             let acc, c2, ts = fill acc c2 ts in
-                             acc, Split (c1, c2, i), ts
-      | Dir (d, c, i) -> let acc, c, ts = fill acc c ts in
-                         acc, Dir (d, c, i), ts
-      | Intro (name, c, i) -> let acc, c, ts = fill acc c ts in
-                              acc, Intro (name, c, i), ts
-      | Weakening (c, i) -> let acc, c, ts = fill acc c ts in
-                            acc, Weakening (c, i), ts
-      | Rewrite (rev, t1, p, lc, t2) ->
-          let acc, lc, ts = List.fold_left (fun (acc, lc, ts) nc ->
-                                let acc, c, ts = fill acc nc ts in
-                                (acc, c::lc, ts)) (acc, [], ts) lc in
-          acc, Rewrite (rev, t1, p, List.rev lc, t2), ts
+    | Skip -> begin match ts with
+              | [] -> assert false
+              | t::ts -> let lt, ct = ctr t in
+                         lt :: acc, ct, ts end
+    | Axiom _ -> acc, c, ts
+    | Split (c1, c2, i) -> let acc, c1, ts = fill acc c1 ts in
+                           let acc, c2, ts = fill acc c2 ts in
+                           acc, Split (c1, c2, i), ts
+    | Dir (d, c, i) -> let acc, c, ts = fill acc c ts in
+                       acc, Dir (d, c, i), ts
+    | Intro (name, c, i) -> let acc, c, ts = fill acc c ts in
+                            acc, Intro (name, c, i), ts
+    | Weakening (c, i) -> let acc, c, ts = fill acc c ts in
+                          acc, Weakening (c, i), ts
+    | Rewrite (rev, t1, p, lc, t2) ->
+        let acc, lc, ts = List.fold_left (fun (acc, lc, ts) nc ->
+                              let acc, c, ts = fill acc nc ts in
+                              (acc, c::lc, ts)) (acc, [], ts) lc in
+        acc, Rewrite (rev, t1, p, List.rev lc, t2), ts
 
   in
   let acc, c, ts = fill [] c ts in
