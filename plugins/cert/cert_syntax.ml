@@ -277,7 +277,8 @@ let ctrans_gen (ctr : ctrans) (ts, c) =
               | [] -> assert false
               | t::ts -> let lt, ct = ctr t in
                          lt :: acc, ct, ts end
-    | Axiom _ -> acc, c, ts
+    | Axiom (ih, c, ig) -> let acc, c, ts = fill acc c ts in
+                           acc, Axiom (ih, c, ig), ts
     | Split (c1, c2, i) -> let acc, c1, ts = fill acc c1 ts in
                            let acc, c2, ts = fill acc c2 ts in
                            acc, Split (c1, c2, i), ts
