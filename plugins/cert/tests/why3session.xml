@@ -148,6 +148,18 @@
   </goal>
  </transf>
  </goal>
+ <goal name="G18" proved="true">
+ <transf name="intros_cert" proved="true" >
+  <goal name="G18.0" proved="true">
+  <transf name="clear_cert" proved="true" arg1="H4,H2,H1,H,A,B">
+   <goal name="G18.0.0" proved="true">
+   <transf name="assumption_cert" proved="true" >
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
 </theory>
 </file>
 </why3session>
