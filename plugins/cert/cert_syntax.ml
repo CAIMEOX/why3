@@ -77,7 +77,7 @@ and prc (fmt : formatter) = function
                                      prc c pri i1 pri i2 pri where
   | Dir (d, c, where) -> fprintf fmt "Dir @[(%a,@ %a,@ %a)@]" prd d prc c pri where
   | Intro (name, c, where) -> fprintf fmt "Intro @[(%a,@ %a,@ %a)@]" pri name prc c pri where
-  | Weakening (c, where) -> fprintf fmt "Weakning @[(%a,@ %a)@]" prc c pri where
+  | Weakening (c, where) -> fprintf fmt "Weakening @[(%a,@ %a)@]" prc c pri where
   | Rewrite (rev, h, p, lc, where) ->
       fprintf fmt "Rewrite @[(%b,@ %a,@ %a,@ %a,@ %a)@]"
         rev pri h (prle "; " prd) p (prle "; " prc) lc pri where
@@ -526,12 +526,20 @@ let rewrite rev h h1 task =
   let h1 = pr_arg_opt task h1 in
   rewrite_in (not rev) h h1 task
 
+let clear_one i task =
+  let trans = Trans.decl (fun d -> match d.d_node with
+    | Dprop (_, pr, _) when id_equal i pr.pr_name -> []
+    | _ -> [d]) None in
+  [Trans.apply trans task], Weakening (Skip, i)
+
 
 (** Transformials *)
 
 (* Compose transformations with certificate *)
 let compose (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
   tr1 task |> ctrans_gen tr2
+
+let compose_list l = List.fold_left compose id l
 
 (* If Then Else on transformations with certificate *)
 let ite (tri : ctrans) (trt : ctrans) (tre : ctrans) : ctrans = fun task ->
@@ -553,7 +561,7 @@ let rec try_close (lctr : ctrans list) : ctrans = fun task ->
 
 (* Repeat on transformations with certificate *)
 let repeat (ctr : ctrans) : ctrans = fun task ->
-  (* keep applying [ctr] while the task changes *)
+  (* keep applying [ctr] as long as the task changes *)
   let gen_task = id task in
   let gen_tr = ctrans_gen ctr in
   let rec loop gt =
@@ -562,7 +570,6 @@ let repeat (ctr : ctrans) : ctrans = fun task ->
     then gt
     else loop new_gt in
   loop gen_task
-
 
 (** Derived transformations with certificate *)
 
@@ -579,6 +586,8 @@ let rec intuition task =
                   (try_close [ite (dir Left) intuition id;
                               ite (dir Right) intuition id])))) task
 
+let clear l = compose_list (List.map (fun pr -> clear_one pr.pr_name) l)
+
 
 (** Certified transformations *)
 
@@ -588,6 +597,7 @@ let intro_trans = checker_ctrans intro
 let left_trans = checker_ctrans (dir Left)
 let right_trans = checker_ctrans (dir Right)
 let rewrite_trans rev rh where = checker_ctrans (rewrite rev rh where)
+let clear_trans l = checker_ctrans (clear l)
 
 let intros_trans = checker_ctrans intros
 let intuition_trans = checker_ctrans intuition
@@ -602,6 +612,9 @@ let () =
     ~desc:"A certified version of coq tactic [left]";
   Trans.register_transform_l "right_cert" (Trans.store right_trans)
     ~desc:"A certified version of coq tactic [right]";
+  wrap_and_register ~desc:"A certified version of (simplified) coq tactic [clear]"
+    "clear_cert" (Tprlist Ttrans_l)
+    (fun l -> Trans.store (clear_trans l));
   wrap_and_register ~desc:"A certified version of (simplified) coq tactic [split]"
     "split_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
     (fun h -> Trans.store (split_trans h));

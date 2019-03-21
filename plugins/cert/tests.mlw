@@ -25,3 +25,4 @@ goal G14 : (d <-> c) -> c -> d
 goal G15 : (a -> b -> d <-> c) -> c -> d
 goal G16 : d \/ c -> c
 goal G17 : (d <-> a) -> d
+goal G18 : a -> d -> b -> c -> a -> d
