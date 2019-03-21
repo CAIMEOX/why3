@@ -364,7 +364,6 @@ let destruct where task = (* destructs /\ in the premisses or \/ in the goal *)
   let trans_t = Trans.decl (fun d -> match d.d_node with
     | Dprop (k, pr, t) when id_equal iw pr.pr_name ->
         begin match k, t.t_node with
-        | Pgoal as k, Tbinop (Tor, f1, f2)
         | k, Tbinop (Tand, f1, f2) when k <> Pgoal ->
             let pr1 = create_prsymbol (id_clone iw) in
             let pr2 = create_prsymbol (id_clone iw) in
