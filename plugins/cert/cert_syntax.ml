@@ -18,24 +18,23 @@ type ctask = (cterm * bool) Mid.t
 
 type dir = Left | Right
 type path = dir list
+(* The last ident indicates where to apply the rule *)
 type certif = Skip
             | Axiom of ident * ident
-            (* first ident indicates an hypothesis, the second indicates a goal *)
+            (* first ident indicates an hypothesis *)
             | Split of certif * certif * ident
-            | Destruct of certif * ident
-            (* last ident is the declaration to destruct *)
+            | Decode of certif * ident
+            | Destruct of certif * ident * ident * ident
+            (* first 2 ident are the names of the new declarations *)
             | Dir of dir * certif * ident
             | Intro of ident * certif * ident
-            (* the first ident is the name of the new declaration, the second is
-             where is the hypothesis to introduce *)
+            (* the first ident is the name of the new declaration *)
             | Weakening of certif * ident
             | Rewrite of bool * ident * path * certif list * ident
             (* bool : left to right or right to left rewriting
              * first ident : what will be used to rewrite
-             * second ident : what will be rewritten
              * path : where to rewrite
              * certif list : the equality to rewrite may have some premisses *)
-
 
 type ctrans = task -> task list * certif
 
@@ -73,7 +72,9 @@ and prc (fmt : formatter) = function
   | Skip -> fprintf fmt "Skip"
   | Axiom (h, where) -> fprintf fmt "Axiom @[(%a,@ %a)@]" pri h pri where
   | Split (c1, c2, where) -> fprintf fmt "Split @[(%a,@ %a,@ %a)@]" prc c1 prc c2 pri where
-  | Destruct (c, where) -> fprintf fmt "Destruct @[(%a,@ %a)@]" prc c pri where
+  | Decode (c, where) -> fprintf fmt "Decode @[(%a,@ %a)@]" prc c pri where
+  | Destruct (c, i1, i2, where) -> fprintf fmt "Destruct @[(%a,@ %a,@ %a,@ %a)@]"
+                                     prc c pri i1 pri i2 pri where
   | Dir (d, c, where) -> fprintf fmt "Dir @[(%a,@ %a,@ %a)@]" prd d prc c pri where
   | Intro (name, c, where) -> fprintf fmt "Intro @[(%a,@ %a,@ %a)@]" pri name prc c pri where
   | Weakening (c, where) -> fprintf fmt "Weakning @[(%a,@ %a)@]" prc c pri where
@@ -135,11 +136,9 @@ let translate_tdecl (td : tdecl) : ctask =
   | Decl d -> translate_decl d
   | _ -> Mid.empty
 
-let union_ctask = Mid.set_union
-
 let rec translate_task_acc acc = function
   | Some {task_decl = d; task_prev = p} ->
-      let new_acc = union_ctask acc (translate_tdecl d) in
+      let new_acc = Mid.set_union acc (translate_tdecl d) in
       translate_task_acc new_acc p
   | None -> acc
 
@@ -172,6 +171,7 @@ let set_goal (cta : ctask) =
   fun ct -> Mid.add idg (ct, true) mh
 
 let rec check_rewrite_term tl tr t p =
+  (* returns t where the instance at p of tl is replaced by tr *)
   match p, t with
   | [], t when cterm_equal t tl -> tr
   | Left::prest, CTbinop (op, t1, t2) ->
@@ -217,7 +217,7 @@ let rec check_certif cta (cert : certif) : ctask list =
             let cta2 = Mid.add where (t2, pos) cta in
             check_certif cta1 c1 @ check_certif cta2 c2
         | _ -> verif_failed "Not splittable" end
-    | Destruct (c, where) ->
+    | Decode (c, where) ->
         let t, pos = find_ident where cta in
         begin match t with
         | CTbinop (CTiff, t1, t2) ->
@@ -226,7 +226,16 @@ let rec check_certif cta (cert : certif) : ctask list =
             let destruct_iff = CTbinop (CTand, imp_pos, imp_neg), pos in
             let cta = Mid.add where destruct_iff cta in
             check_certif cta c
-        | _ -> verif_failed "Not destructable" end
+        | _ -> verif_failed "Not decodable" end
+    | Destruct (c, i1, i2, where) ->
+        let t, pos = find_ident where cta in
+        begin match t, pos with
+        | CTbinop (CTand, t1, t2), false | CTbinop (CTor, t1, t2), true ->
+            let cta = Mid.remove where cta
+                      |> Mid.add i1 (t1, pos)
+                      |> Mid.add i2 (t2, pos) in
+            check_certif cta c
+        | _ -> verif_failed "Not destructible"  end
     | Dir (d, c, where) ->
         let t, pos = find_ident where cta in
         begin match t, d, pos with
@@ -239,7 +248,8 @@ let rec check_certif cta (cert : certif) : ctask list =
         let t, pos = find_ident where cta in
         begin match t, pos with
         | CTbinop (CTimplies, f1, f2), true ->
-            let cta = Mid.add where (f2, true) cta |> Mid.add name (f1, false) in
+            let cta = Mid.add name (f1, false) cta
+                      |> Mid.add where (f2, true) in
             check_certif cta c
         | _ -> verif_failed "Nothing to introduce" end
     | Weakening (c, where) ->
@@ -265,7 +275,8 @@ let checker_ctrans ctr task =
           verif_failed "Replaying certif gives different result" end
   with e -> raise (Trans.TransFailure ("Cert_syntax.checker_ctrans", e))
 
-(* Generalize ctrans on (task list * certif) *)
+(* Generalize ctrans on (task list * certif), the invariant is that the number of
+  Skip in the certif is equal to the list length. *)
 let ctrans_gen (ctr : ctrans) (ts, c) =
   let rec fill acc c ts = match c with
     | Skip -> begin match ts with
@@ -276,8 +287,10 @@ let ctrans_gen (ctr : ctrans) (ts, c) =
     | Split (c1, c2, where) -> let acc, c1, ts = fill acc c1 ts in
                                let acc, c2, ts = fill acc c2 ts in
                                acc, Split (c1, c2, where), ts
-    | Destruct (c, where) -> let acc, c, ts = fill acc c ts in
-                             acc, Destruct (c, where), ts
+    | Decode (c, where) -> let acc, c, ts = fill acc c ts in
+                             acc, Decode (c, where), ts
+    | Destruct (c, i1, i2, where) -> let acc, c, ts = fill acc c ts in
+                                     acc, Destruct (c, i1, i2, where), ts
     | Dir (d, c, where) -> let acc, c, ts = fill acc c ts in
                            acc, Dir (d, c, where), ts
     | Intro (name, c, where) -> let acc, c, ts = fill acc c ts in
@@ -299,7 +312,8 @@ let rec nocuts = function
   | Skip -> false
   | Axiom _ -> true
   | Split (c1, c2, _) -> nocuts c1 && nocuts c2
-  | Destruct (c, _)
+  | Decode (c, _)
+  | Destruct (c, _, _, _)
   | Dir (_, c, _)
   | Weakening (c, _)
   | Intro (_, c, _) -> nocuts c
@@ -344,56 +358,76 @@ let assumption t  =
 
 
 (* Split with certificate *)
-let destruct where task =
-  let pr = pr_arg_opt task where in
-  let found_destr = ref false in
+let destruct where task = (* destructs /\ in the premisses or \/ in the goal *)
+  let iw = (pr_arg_opt task where).pr_name in
+  let clues = ref None in
   let trans_t = Trans.decl (fun d -> match d.d_node with
-    | Dprop (k, pr', t) when id_equal pr.pr_name pr'.pr_name ->
+    | Dprop (k, pr, t) when id_equal iw pr.pr_name ->
+        begin match k, t.t_node with
+        | Pgoal as k, Tbinop (Tor, f1, f2)
+        | k, Tbinop (Tand, f1, f2) when k <> Pgoal ->
+            let pr1 = create_prsymbol (id_clone iw) in
+            let pr2 = create_prsymbol (id_clone iw) in
+            clues := Some (pr1, pr2);
+            [create_prop_decl k pr1 f1; create_prop_decl k pr2 f2]
+        | _ -> [d] end
+    | _ -> [d]) None in
+  let nt = Trans.apply trans_t task in
+  match !clues with
+  | Some (pr1, pr2) -> [nt], Destruct (Skip, pr1.pr_name, pr2.pr_name, iw)
+  | None -> [task], Skip
+
+
+let decode where task = (* replaces A <-> B with A -> B /\ B -> A *)
+  let iw = (pr_arg_opt task where).pr_name in
+  let clues = ref false in
+  let trans_t = Trans.decl (fun d -> match d.d_node with
+    | Dprop (k, pr, t) when id_equal iw pr.pr_name ->
         begin match t.t_node with
         | Tbinop (Tiff, f1, f2) ->
-            found_destr := true;
+            clues := true;
             let destr_iff = t_and (t_implies f1 f2) (t_implies f2 f1) in
             [create_prop_decl k pr destr_iff]
         | _ -> [d] end
     | _ -> [d]) None in
   let nt = Trans.apply trans_t task in
-  if !found_destr then [nt], Destruct (Skip, pr.pr_name)
+  if !clues then [nt], Decode (Skip, iw)
   else [task], Skip
 
-let split_or_and where task =
-  let pr = pr_arg_opt task where in
-  let found_split = ref false in
+let split_or_and where task = (* destructs /\ in the goal or \/ in the premisses *)
+  let iw = (pr_arg_opt task where).pr_name in
+  let clues = ref false in
   let trans_t = Trans.decl_l (fun d -> match d.d_node with
-    | Dprop (k, pr', t) when id_equal pr.pr_name pr'.pr_name ->
+    | Dprop (k, pr, t) when id_equal iw pr.pr_name ->
         begin match k, t.t_node with
         | Pgoal as k, Tbinop (Tand, f1, f2) ->
-            found_split := true;
+            clues := true;
             [[create_prop_decl k pr f1]; [create_prop_decl k pr f2]]
         | k, Tbinop (Tor, f1, f2) when k <> Pgoal ->
-            found_split := true;
+            clues := true;
             [[create_prop_decl k pr f1]; [create_prop_decl k pr f2]]
         | _ -> [[d]] end
     | _ -> [[d]]) None in
   let nt = Trans.apply trans_t task in
-  if !found_split then nt, Split (Skip, Skip, pr.pr_name)
+  if !clues then nt, Split (Skip, Skip, iw)
   else [task], Skip
 
 (* Intro with certificate *)
-let intro task =
-  let i = Decl.create_prsymbol (Ident.id_fresh "i") in
+let intro task = (* introduce hypothesis A when the goal is of the form A -> B *)
+  let npr = create_prsymbol (id_fresh "H") in
   let pr, g = try task_goal task, task_goal_fmla task
               with GoalNotFound -> invalid_arg "Cert_syntax.intro" in
   let _, c = task_separate_goal task in
   match g.t_node with
   | Tbinop (Timplies, f1, f2) ->
-      let decl1 = create_prop_decl Paxiom i f1 in
+      let decl1 = create_prop_decl Paxiom npr f1 in
       let tf1 = add_decl c decl1 in
       let tf2 = add_decl tf1 (create_prop_decl Pgoal pr f2) in
-      [tf2], Intro (i.pr_name, Skip, pr.pr_name)
+      [tf2], Intro (npr.pr_name, Skip, pr.pr_name)
   | _ -> [task], Skip
 
 (* Direction with certificate *)
-let dir d task =
+let dir d task = (* choose Left (A) or Right (B) when the goal is of the form A \/ B *)
   let pr, g = try task_goal task, task_goal_fmla task
               with GoalNotFound -> invalid_arg "Cert_syntax.dir" in
   let _, c = task_separate_goal task in
@@ -405,6 +439,7 @@ let dir d task =
 
 (* Rewrite with certificate *)
 let rec rewrite_in_term tl tr t : (term * path) option =
+  (* tries all paths in [t] to replace [tl] with [tr] *)
   if t_equal tl t
   then Some (tr, [])
   else match t.t_node with
@@ -500,6 +535,7 @@ let compose (tr1 : ctrans) (tr2 : ctrans) : ctrans = fun task ->
 
 (* If Then Else on transformations with certificate *)
 let ite (tri : ctrans) (trt : ctrans) (tre : ctrans) : ctrans = fun task ->
+  (* applies [tri], if the task changed then apply [trt] else apply [tre] *)
   let ((lt, cert) as tri_task) = tri task in
   if not (Lists.equal task_equal lt [task] && cert = Skip)
   then ctrans_gen trt tri_task
@@ -507,6 +543,7 @@ let ite (tri : ctrans) (trt : ctrans) (tre : ctrans) : ctrans = fun task ->
 
 (* Try on transformations with certificate *)
 let rec try_close (lctr : ctrans list) : ctrans = fun task ->
+  (* try each transformation in [lctr] and keep the one that closes the task *)
   match lctr with
   | [] -> id task
   | h::t -> let lctask_h, cert_h = h task in
@@ -516,6 +553,7 @@ let rec try_close (lctr : ctrans list) : ctrans = fun task ->
 
 (* Repeat on transformations with certificate *)
 let repeat (ctr : ctrans) : ctrans = fun task ->
+  (* keep applying [ctr] while the task changes *)
   let gen_task = id task in
   let gen_tr = ctrans_gen ctr in
   let rec loop gt =
@@ -530,7 +568,9 @@ let repeat (ctr : ctrans) : ctrans = fun task ->
 
 let intros = repeat intro
 
-let split_logic where = compose (destruct where) (split_or_and where)
+let split_logic where = compose (decode where)
+                          (compose (split_or_and where)
+                             (destruct where))
 
 let rec intuition task =
   repeat (compose assumption
