@@ -126,6 +126,18 @@
   </goal>
  </transf>
  </goal>
+ <goal name="G16">
+ <transf name="intro_cert" >
+  <goal name="G16.0">
+  <transf name="split_cert" arg1="in" arg2="i">
+   <goal name="G16.0.0">
+   </goal>
+   <goal name="G16.0.1">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
 </theory>
 </file>
 </why3session>
