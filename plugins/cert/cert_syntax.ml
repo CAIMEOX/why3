@@ -18,23 +18,42 @@ type ctask = (cterm * bool) Mid.t
 
 type dir = Left | Right
 type path = dir list
-(* The last ident indicates where to apply the rule *)
-type certif = Skip
-            | Axiom of ident * ident
-            (* first ident indicates an hypothesis *)
-            | Split of certif * certif * ident
-            | Decode of certif * ident
-            | Destruct of certif * ident * ident * ident
-            (* first 2 ident are the names of the new declarations *)
-            | Dir of dir * certif * ident
-            | Intro of ident * certif * ident
-            (* the first ident is the name of the new declaration *)
-            | Weakening of certif * ident
-            | Rewrite of bool * ident * path * certif list * ident
-            (* bool : left to right or right to left rewriting
-             * first ident : what will be used to rewrite
-             * path : where to rewrite
-             * certif list : the equality to rewrite may have some premisses *)
+
+type certif = rule * ident
+(* The ident indicates where to apply the rule.
+   In the following rules, we will call it <H> *)
+(* Replaying a certif <c> against a list of ctask <l> will be denoted <c ⇓ l>,
+   it (somewhat) corresponds to the function check_certif defined later *)
+
+and rule =
+  | Skip
+  (* Skip ⇓ [Γ ⊢ Δ] ≜  [Γ ⊢ Δ] *)
+  | Axiom of ident
+  (* Axiom G ⇓ [Γ, G : P ⊢ Δ, H : P]  ≜  [] *)
+  | Split of certif * certif
+  (* Split (c₁, c₂) ⇓ [Γ, H : A ∨ B ⊢ Δ]  ≜  (c₁ ⇓ [Γ, H : A ⊢ Δ])  @  (c₂ ⇓ [Γ, H : B ⊢ Δ]) *)
+  (* Split (c₁, c₂) ⇓ [Γ ⊢ Δ, H : A ∧ B]  ≜  (c₁ ⇓ [Γ ⊢ Δ, H : A])  @  (c₂ ⇓ [Γ ⊢ Δ, H : B]) *)
+  | Unfold of certif
+  (* Unfold c ⇓ [Γ, H : A ↔ B ⊢ Δ]  ≜  c ⇓ [Γ, H : (A → B) ∧ (B → A) ⊢ Δ] *)
+  (* Unfold c ⇓ [Γ ⊢ Δ, H : A ↔ B]  ≜  c ⇓ [Γ ⊢ Δ, H : (A → B) ∧ (B → A)] *)
+  | Destruct of certif * ident * ident
+  (* Destruct (c, H₁, H₂) ⇓ [Γ, H : A ∧ B ⊢ Δ]  ≜  c ⇓ [Γ, H₁ : A, H₂ : B ⊢ Δ *)
+  (* Destruct (c, H₁, H₂) ⇓ [Γ ⊢ Δ, H : A ∨ B]  ≜  c ⇓ [Γ ⊢ Δ, H₁ : A, H₂ : B *)
+  | Dir of dir * certif
+  (* Dir (Left, c) ⇓ [Γ ⊢ Δ, H : A ∧ B]  ≜  c ⇓ [Γ ⊢ Δ, H : A] *)
+  (* Dir (Left, c) ⇓ [Γ, H : A ∨ B ⊢ Δ]  ≜  c ⇓ [Γ, H : A ⊢ Δ] *)
+  (* and similar definition for Right instead of Left *)
+  | Intro of certif * ident
+  (* Intro (c, G) ⇓ [Γ ⊢ Δ, H : A → B]  ≜  c ⇓ [Γ, G : A ⊢ Δ, H : B  *)
+  | Weakening of certif
+  (* Weakening c ⇓ [Γ ⊢ Δ, H : A]  ≜  c ⇓ [Γ ⊢ Δ] *)
+  (* Weakening c ⇓ [Γ, H : A ⊢ Δ]  ≜  c ⇓ [Γ ⊢ Δ] *)
+  | Rewrite of bool * ident * path * certif list
+  (* Rewrite (rev, G, p, lc) ⇓ Seq is defined as follows :
+     it tries to rewrite in <H> an equality that is in <G>, following the path <p>,
+     <rev> indicates if it rewrites from left to right or from right to left.
+     Since <G> can have premisses, those are then matched against the certificates <lc> *)
+
 
 type ctrans = task -> task list * certif
 
@@ -72,7 +91,7 @@ and prc (fmt : formatter) = function
   | Skip -> fprintf fmt "Skip"
   | Axiom (h, where) -> fprintf fmt "Axiom @[(%a,@ %a)@]" pri h pri where
   | Split (c1, c2, where) -> fprintf fmt "Split @[(%a,@ %a,@ %a)@]" prc c1 prc c2 pri where
-  | Decode (c, where) -> fprintf fmt "Decode @[(%a,@ %a)@]" prc c pri where
+  | Unfold (c, where) -> fprintf fmt "Unfold @[(%a,@ %a)@]" prc c pri where
   | Destruct (c, i1, i2, where) -> fprintf fmt "Destruct @[(%a,@ %a,@ %a,@ %a)@]"
                                      prc c pri i1 pri i2 pri where
   | Dir (d, c, where) -> fprintf fmt "Dir @[(%a,@ %a,@ %a)@]" prd d prc c pri where
@@ -217,7 +236,7 @@ let rec check_certif cta (cert : certif) : ctask list =
             let cta2 = Mid.add where (t2, pos) cta in
             check_certif cta1 c1 @ check_certif cta2 c2
         | _ -> verif_failed "Not splittable" end
-    | Decode (c, where) ->
+    | Unfold (c, where) ->
         let t, pos = find_ident where cta in
         begin match t with
         | CTbinop (CTiff, t1, t2) ->
@@ -287,8 +306,8 @@ let ctrans_gen (ctr : ctrans) (ts, c) =
     | Split (c1, c2, where) -> let acc, c1, ts = fill acc c1 ts in
                                let acc, c2, ts = fill acc c2 ts in
                                acc, Split (c1, c2, where), ts
-    | Decode (c, where) -> let acc, c, ts = fill acc c ts in
-                             acc, Decode (c, where), ts
+    | Unfold (c, where) -> let acc, c, ts = fill acc c ts in
+                             acc, Unfold (c, where), ts
     | Destruct (c, i1, i2, where) -> let acc, c, ts = fill acc c ts in
                                      acc, Destruct (c, i1, i2, where), ts
     | Dir (d, c, where) -> let acc, c, ts = fill acc c ts in
@@ -312,7 +331,7 @@ let rec nocuts = function
   | Skip -> false
   | Axiom _ -> true
   | Split (c1, c2, _) -> nocuts c1 && nocuts c2
-  | Decode (c, _)
+  | Unfold (c, _)
   | Destruct (c, _, _, _)
   | Dir (_, c, _)
   | Weakening (c, _)
@@ -358,7 +377,7 @@ let assumption t  =
 
 
 (* Split with certificate *)
-let destruct where task = (* destructs /\ in the premisses or \/ in the goal *)
+let destruct where task =
   let iw = (pr_arg_opt task where).pr_name in
   let clues = ref None in
   let trans_t = Trans.decl (fun d -> match d.d_node with
@@ -377,7 +396,7 @@ let destruct where task = (* destructs /\ in the premisses or \/ in the goal *)
   | None -> [task], Skip
 
 
-let decode where task = (* replaces A <-> B with A -> B /\ B -> A *)
+let unfold where task =
   let iw = (pr_arg_opt task where).pr_name in
   let clues = ref false in
   let trans_t = Trans.decl (fun d -> match d.d_node with
@@ -390,19 +409,17 @@ let decode where task = (* replaces A <-> B with A -> B /\ B -> A *)
         | _ -> [d] end
     | _ -> [d]) None in
   let nt = Trans.apply trans_t task in
-  if !clues then [nt], Decode (Skip, iw)
+  if !clues then [nt], Unfold (Skip, iw)
   else [task], Skip
 
-let split_or_and where task = (* destructs /\ in the goal or \/ in the premisses *)
+let split_or_and where task =
   let iw = (pr_arg_opt task where).pr_name in
-  let clues = ref false in
+  let clues = ref false in (* TODO Andrei *)
   let trans_t = Trans.decl_l (fun d -> match d.d_node with
     | Dprop (k, pr, t) when id_equal iw pr.pr_name ->
         begin match k, t.t_node with
-        | Pgoal as k, Tbinop (Tand, f1, f2) ->
-            clues := true;
-            [[create_prop_decl k pr f1]; [create_prop_decl k pr f2]]
-        | k, Tbinop (Tor, f1, f2) when k <> Pgoal ->
+        | Pgoal as k, Tbinop (Tand, f1, f2)
+        | (Paxiom | Plemma as k), Tbinop (Tor, f1, f2) ->
             clues := true;
             [[create_prop_decl k pr f1]; [create_prop_decl k pr f2]]
         | _ -> [[d]] end
@@ -574,7 +591,7 @@ let repeat (ctr : ctrans) : ctrans = fun task ->
 
 let intros = repeat intro
 
-let split_logic where = compose (decode where)
+let split_logic where = compose (unfold where)
                           (compose (split_or_and where)
                              (destruct where))
 
