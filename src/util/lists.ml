@@ -79,6 +79,9 @@ let fold_product_l f acc ll =
 let flatten_rev fl =
   List.fold_left (fun acc l -> List.rev_append l acc) [] fl
 
+let rev_flatten fl =
+  List.fold_left (fun acc l -> l @ acc) [] fl
+
 let part cmp l =
   let l = List.stable_sort cmp l in
   match l with
