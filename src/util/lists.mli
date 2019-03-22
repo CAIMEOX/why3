@@ -45,6 +45,8 @@ val fold_product_l : ('a -> 'b list -> 'a) -> 'a -> 'b list list -> 'a
 
 val flatten_rev : 'a list list -> 'a list
 
+val rev_flatten : 'a list list -> 'a list
+
 val part : ('a -> 'a -> int) -> 'a list -> 'a list list
 (** [part cmp l] returns the list of the congruence classes with
     respect to [cmp]. They are returned in reverse order *)
