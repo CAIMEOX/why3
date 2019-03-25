@@ -18,8 +18,8 @@ let checker_ctrans ctr task =
       else begin
           print_ctasks "/tmp/from_trans.log" (List.map translate_task ltask);
           print_ctasks "/tmp/from_cert.log" lcta;
-          verif_failed "Replaying certif gives different result" end
-  with e -> raise (Trans.TransFailure ("Cert_syntax.checker_ctrans", e))
+          verif_failed "Replaying certif gives different result, log available" end
+  with e -> raise (Trans.TransFailure ("Cert_register.checker_ctrans", e))
 
 
 (** Certified transformations *)
@@ -39,26 +39,35 @@ let clear_trans l             = checker_ctrans (clear l)
 
 let () =
   let open Args_wrapper in let open Trans in
+
   register_transform_l "assumption_cert" (store assumption_trans)
     ~desc:"A certified version of coq tactic [assumption]";
+
   register_transform_l "intro_cert" (store intro_trans)
     ~desc:"A certified version of (simplified) coq tactic [intro]";
+
   register_transform_l "intros_cert" (store intros_trans)
     ~desc:"A certified version of coq tactic [intros]";
+
   register_transform_l "intuition_cert" (store intuition_trans)
     ~desc:"A certified version of (simplified) coq tactic [intuition]";
+
   wrap_and_register ~desc:"A certified version of coq tactic [left]"
      "left_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
      (fun where -> store (left_trans where));
+
   wrap_and_register ~desc:"A certified version of coq tactic [right]"
      "right_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
      (fun where -> store (right_trans where));
+
   wrap_and_register ~desc:"A certified version of (simplified) coq tactic [split]"
     "split_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
     (fun where -> store (split_trans where));
+
   wrap_and_register ~desc:"A certified version of transformation rewrite"
     "rewrite_cert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l))))))
     (fun rev g where -> store (rewrite_trans g rev where));
+
   wrap_and_register ~desc:"A certified version of (simplified) coq tactic [clear]"
     "clear_cert" (Tprlist Ttrans_l)
     (fun l -> store (clear_trans l))

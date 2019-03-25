@@ -113,7 +113,7 @@ let rec assumption_ctxt tg = function
 
 let assumption : ctrans = fun task ->
   let g, tg = try (task_goal task).pr_name, task_goal_fmla task
-          with GoalNotFound -> invalid_arg "Cert_syntax.assumption" in
+          with GoalNotFound -> invalid_arg "Cert_transformations.assumption" in
   let _, hyp = task_separate_goal task in
   try let h = assumption_ctxt tg hyp in
       [], (Axiom h, g)
@@ -176,7 +176,7 @@ let split_or_and where task = (* destructs /\ in the goal or \/ in the hypothses
 let intro task = (* introduces hypothesis A when the goal is of the form A -> B *)
   let hpr = create_prsymbol (id_fresh "H") in
   let gpr, tg = try task_goal task, task_goal_fmla task
-              with GoalNotFound -> invalid_arg "Cert_syntax.intro" in
+                with GoalNotFound -> invalid_arg "Cert_transformations.intro" in
   let _, hyp = task_separate_goal task in
   match tg.t_node with
   | Tbinop (Timplies, f1, f2) ->

@@ -31,7 +31,7 @@ type certif = rule * ident
    In the following rules, we will call it <G> *)
 
 (* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>,
-   it is defined later (see function check_certif) *)
+   it is defined as the function <Cert_verif.check_certif> *)
 and rule =
   | Skip
   (* Skip ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
