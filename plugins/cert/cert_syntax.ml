@@ -1,4 +1,5 @@
 open Why3
+
 open Term
 open Ident
 open Decl
@@ -8,17 +9,19 @@ open Format
 
 
 (** To certify transformations, we will represent Why3 tasks by the type <ctask>
-    and we equip existing transformations with a certificate <certif> *)
+    and we equip transformations with a certificate <certif> *)
 
 type ident = Ident.ident
 
 type binop = CTand | CTor | CTiff | CTimplies
 type cterm =
-  | CTapp of ident (* atomic formulas *)
+  | CTbvar of int (* bound variables use De Bruijn indices *)
+  | CTfvar of ident (* free variables use a name *)
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
+  | CTforall of cterm (* forall binding *)
 
 type ctask = (cterm * bool) Mid.t
-(* We will represent a ctask <M> by <Γ ⊢ Δ> where :
+(* We will denote a ctask <M> by <Γ ⊢ Δ> where :
    • <Γ> contains all the declarations <H : P> where <H> is mapped to <(P, false)> in <M>
    • <Δ> contains all the declarations <H : P> where <H> is mapped to <(P, true)> in <M>
 *)
@@ -47,11 +50,11 @@ and rule =
   (* Destruct (H₁, H₂, c) ⇓ (Γ, G : A ∧ B ⊢ Δ)  ≜  c ⇓ (Γ, H₁ : A, H₂ : B ⊢ Δ) *)
   (* Destruct (H₁, H₂, c) ⇓ (Γ ⊢ Δ, G : A ∨ B)  ≜  c ⇓ (Γ ⊢ Δ, H₁ : A, H₂ : B) *)
   | Dir of dir * certif
-  (* Dir (Left, c) ⇓ (Γ ⊢ Δ, G : A ∧ B)  ≜  c ⇓ (Γ ⊢ Δ, G : A) *)
-  (* Dir (Left, c) ⇓ (Γ, G : A ∨ B ⊢ Δ)  ≜  c ⇓ (Γ, G : A ⊢ Δ) *)
+  (* Dir (Left, c) ⇓ (Γ ⊢ Δ, G : A ∨ B)  ≜  c ⇓ (Γ ⊢ Δ, G : A) *)
+  (* Dir (Left, c) ⇓ (Γ, G : A ∧ B ⊢ Δ)  ≜  c ⇓ (Γ, G : A ⊢ Δ) *)
   (* and similar definition for Right instead of Left *)
   | Intro of ident * certif
-  (* Intro (H, c) ⇓ (Γ ⊢ Δ, H : A → B)  ≜  c ⇓ (Γ, H : A ⊢ Δ, G : B)  *)
+  (* Intro (H, c) ⇓ (Γ ⊢ Δ, G : A → B)  ≜  c ⇓ (Γ, H : A ⊢ Δ, G : B)  *)
   | Weakening of certif
   (* Weakening c ⇓ (Γ ⊢ Δ, G : A)  ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening c ⇓ (Γ, G : A ⊢ Δ)  ≜  c ⇓ (Γ ⊢ Δ) *)
@@ -59,11 +62,11 @@ and rule =
   (* Rewrite (H, path, rev, lc) ⇓ Seq is defined as follows :
      it tries to rewrite in <G> an equality that is in <H>, following the path <path>,
      <rev> indicates if it rewrites from left to right or from right to left.
-     Since <H> can have premisses, those are then matched against the certificates <lc> *)
+     Since <H> can have premises, those are then matched against the certificates <lc> *)
 
 let skip = Skip, id_register (id_fresh "dummy_skip_ident")
 
-(** Translating a Why3 <task> to a <ctask> *)
+(** Translating a Why3 <task> into a <ctask> *)
 
 let translate_op = function
   | Tand -> CTand
@@ -71,11 +74,32 @@ let translate_op = function
   | Timplies -> CTimplies
   | Tiff -> CTiff
 
-let rec translate_term t =
+let rec translate_term_rec bv_lvl lvl t =
+  (* level <lvl> is the number of forall above in the whole term *)
+  (* <bv_lvl> is mapping bound variables to their respective level *)
   match t.t_node with
-  | Tapp (ls, []) -> CTapp ls.ls_name
-  | Tbinop (op, t1, t2) -> CTbinop (translate_op op, translate_term t1, translate_term t2)
+  | Tapp (ls, []) ->
+      let ids = ls.ls_name in
+      begin match Mid.find_opt ids bv_lvl with
+      | None -> CTfvar ids
+      | Some lvl_s ->
+          assert (lvl_s <= lvl); (* a variable should not be above its definition *)
+          CTbvar (lvl - lvl_s) end
+  | Tbinop (op, t1, t2) ->
+      let ct1 = translate_term_rec bv_lvl lvl t1 in
+      let ct2 = translate_term_rec bv_lvl lvl t2 in
+      let cop = translate_op op in
+      CTbinop (cop, ct1, ct2)
+  | Tquant (Tforall, tq) ->
+      let vs, _, t = t_open_quant tq in
+      assert (List.length vs = 1);
+      let ids = (List.hd vs).vs_name in
+      let lvl = lvl + 1 in
+      let ctq = translate_term_rec (Mid.add ids lvl bv_lvl) lvl t in
+      CTforall ctq
   | _ -> invalid_arg "Cert_syntax.translate_term"
+
+let translate_term t = translate_term_rec Mid.empty 0 t
 
 let translate_decl decl =
   match decl.d_node with
@@ -98,6 +122,7 @@ let rec translate_task_acc acc = function
 
 let translate_task task =
   translate_task_acc Mid.empty task
+
 
 
 (** Printing of <cterm> and <ctask> : for debugging purposes *)
@@ -135,9 +160,11 @@ and prc fmt (r, g) =
   fprintf fmt "(%a, %a)" prr r pri g
 
 let rec pcte fmt = function
-  | CTapp i -> pri fmt i
+  | CTbvar lvl -> pp_print_int fmt lvl
+  | CTfvar i -> pri fmt i
   | CTbinop (op, t1, t2) ->
       fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
+  | CTforall ct -> fprintf fmt "∀. %a" pcte ct
 and pro fmt = function
   | CTor -> fprintf fmt "\\/"
   | CTand -> fprintf fmt "/\\"
@@ -159,3 +186,28 @@ let print_ctasks filename lcta =
   let fmt = formatter_of_out_channel oc in
   fprintf fmt "%a@." (prle "==========\n" pcta) lcta;
   close_out oc
+
+
+(** We equip existing transformations with a certificate <certif> *)
+
+type ctrans = task -> task list * certif
+
+exception Certif_verification_failed of string
+let verif_failed s = raise (Certif_verification_failed s)
+
+(** Create a certified transformation from a transformation with a certificate *)
+
+let checker_ctrans check_certif ctask_equal (ctr : ctrans) task =
+  try let (ltask, c) : task list * certif = ctr task in
+      let cta = translate_task task in
+      print_certif "/tmp/certif.log" c;
+      print_ctasks "/tmp/init_ctask.log" [cta];
+      let lcta : ctask list = check_certif cta c in
+      if Lists.equal ctask_equal lcta (List.map translate_task ltask)
+      then ltask
+      else begin
+          print_ctasks "/tmp/from_trans.log" (List.map translate_task ltask);
+          print_ctasks "/tmp/from_cert.log" lcta;
+          verif_failed "Replaying certif gives different result, log available" end
+  with e -> raise (Trans.TransFailure ("Cert_register.checker_ctrans", e))
+

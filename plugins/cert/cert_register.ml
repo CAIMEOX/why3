@@ -1,28 +1,12 @@
 open Why3
-open Task
 open Cert_syntax
 open Cert_transformations
 open Cert_verif
 
 
-(** Create a certified transformation from a transformation with a certificate *)
-
-let checker_ctrans ctr task =
-  try let (ltask, c) : task list * certif = ctr task in
-      let cta = translate_task task in
-      print_certif "/tmp/certif.log" c;
-      print_ctasks "/tmp/init_ctask.log" [cta];
-      let lcta : ctask list = check_certif cta c in
-      if Lists.equal ctask_equal lcta (List.map translate_task ltask)
-      then ltask
-      else begin
-          print_ctasks "/tmp/from_trans.log" (List.map translate_task ltask);
-          print_ctasks "/tmp/from_cert.log" lcta;
-          verif_failed "Replaying certif gives different result, log available" end
-  with e -> raise (Trans.TransFailure ("Cert_register.checker_ctrans", e))
-
-
 (** Certified transformations *)
+
+let checker_ctrans = checker_ctrans check_certif ctask_equal
 
 let assumption_trans          = checker_ctrans assumption
 let intro_trans               = checker_ctrans intro
