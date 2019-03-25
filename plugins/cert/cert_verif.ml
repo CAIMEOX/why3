@@ -3,9 +3,47 @@ open Ident
 open Cert_syntax
 
 
-(** Using ctasks and certificates *)
+(** Utility functions on <cterm> and <ctask> *)
 
-(* check_certif replays the certificate on a ctask *)
+let rec cterm_equal t1 t2 = match t1, t2 with
+  | CTapp i1, CTapp i2 -> Ident.id_equal i1 i2
+  | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
+      op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
+  | _ -> false
+
+let cterm_pos_equal (t1, p1) (t2, p2) =
+  cterm_equal t1 t2 && p1 = p2
+
+let ctask_equal cta1 cta2 = Mid.equal cterm_pos_equal cta1 cta2
+
+let rec noskip (r, _) = (* checks if the transformation closes the task *)
+  match r with
+  | Skip -> false
+  | Axiom _ -> true
+  | Split (c1, c2) -> noskip c1 && noskip c2
+  | Unfold c
+  | Destruct (_, _, c)
+  | Dir (_, c)
+  | Weakening c
+  | Intro (_, c) -> noskip c
+  | Rewrite (_, _, _, lc) -> List.for_all noskip lc
+
+let split_cta cta = (* separates hypotheses and goals *)
+  let open Mid in
+  fold (fun h (ct, pos) (mh, mg) ->
+      if pos then mh, add h (ct, pos) mg
+      else add h (ct, pos) mh, mg)
+    cta (empty, empty)
+
+let set_goal : ctask -> cterm -> ctask = fun cta ->
+  (* creates a new ctask with the same hypotheses but sets the goal with the second argument *)
+  let mh, mg = split_cta cta in
+  let hg, _ = Mid.choose mg in
+  fun ct -> Mid.add hg (ct, true) mh
+
+
+(** Utility verification functions *)
+
 exception Certif_verification_failed of string
 let verif_failed s = raise (Certif_verification_failed s)
 
@@ -14,20 +52,8 @@ let find_ident h cta =
   | Some x -> x
   | None -> verif_failed "Can't find ident in the task"
 
-let split_cta cta =
-  let open Mid in
-  fold (fun h (ct, pos) (mh, mg) ->
-      if pos then mh, add h (ct, pos) mg
-      else add h (ct, pos) mh, mg)
-    cta (empty, empty)
-
-let set_goal (cta : ctask) =
-  let mh, mg = split_cta cta in
-  let hg, _ = Mid.choose mg in
-  fun ct -> Mid.add hg (ct, true) mh
-
 let rec check_rewrite_term tl tr t path =
-  (* returns t where the instance at p of tl is replaced by tr *)
+  (* returns <t> where the instance at <path> of <tl> is replaced by <tr> *)
   match path, t with
   | [], t when cterm_equal t tl -> tr
   | Left::prest, CTbinop (op, t1, t2) ->
@@ -53,6 +79,13 @@ let check_rewrite cta rev h g path : ctask list =
     then check_rewrite_term tl tr te path, pos
     else te, pos in
   Mid.mapi rewrite_decl cta :: List.map (set_goal cta) lp
+  (* To check a rewriting rule, you need to :
+       • check the rewritten task
+       • check every premisses of rewritten equality in the current context
+   *)
+
+
+(** This is the main verification function : <check_certif> replays the certificate on a ctask *)
 
 let rec check_certif cta (r, g : certif) : ctask list =
   match r with

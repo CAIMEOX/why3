@@ -4,7 +4,9 @@ open Cert_syntax
 open Cert_transformations
 open Cert_verif
 
-(* Creates a certified transformation from a transformation with certificate *)
+
+(** Create a certified transformation from a transformation with a certificate *)
+
 let checker_ctrans ctr task =
   try let (ltask, c) : task list * certif = ctr task in
       let cta = translate_task task in
@@ -31,6 +33,9 @@ let right_trans where         = checker_ctrans (dir Right where)
 let split_trans where         = checker_ctrans (split_logic where)
 let rewrite_trans g rev where = checker_ctrans (rewrite g rev where)
 let clear_trans l             = checker_ctrans (clear l)
+
+
+(** Register certified transformations *)
 
 let () =
   let open Args_wrapper in let open Trans in

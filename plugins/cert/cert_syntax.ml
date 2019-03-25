@@ -8,7 +8,7 @@ open Format
 
 
 (** To certify transformations, we will represent Why3 tasks by the type <ctask>
-    and we equip existing transformations with certificates <certif> *)
+    and we equip existing transformations with a certificate <certif> *)
 
 type ident = Ident.ident
 
@@ -17,23 +17,11 @@ type cterm =
   | CTapp of ident (* atomic formulas *)
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
 
-let rec cterm_equal t1 t2 =
-  match t1, t2 with
-  | CTapp i1, CTapp i2 -> Ident.id_equal i1 i2
-  | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
-      op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
-  | _ -> false
-
 type ctask = (cterm * bool) Mid.t
 (* We will represent a ctask <M> by <Γ ⊢ Δ> where :
    • <Γ> contains all the declarations <H : P> where <H> is mapped to <(P, false)> in <M>
    • <Δ> contains all the declarations <H : P> where <H> is mapped to <(P, true)> in <M>
 *)
-
-let cterm_pos_equal (t1, p1) (t2, p2) =
-  cterm_equal t1 t2 && p1 = p2
-
-let ctask_equal cta1 cta2 = Mid.equal cterm_pos_equal cta1 cta2
 
 type dir = Left | Right
 type path = dir list
@@ -41,9 +29,9 @@ type path = dir list
 type certif = rule * ident
 (* The ident indicates where to apply the rule.
    In the following rules, we will call it <G> *)
+
 (* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>,
    it is defined later (see function check_certif) *)
-
 and rule =
   | Skip
   (* Skip ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
@@ -74,18 +62,6 @@ and rule =
      Since <H> can have premisses, those are then matched against the certificates <lc> *)
 
 let skip = Skip, id_register (id_fresh "dummy_skip_ident")
-
-
-let rec noskip (r, _) = match r with
-  | Skip -> false
-  | Axiom _ -> true
-  | Split (c1, c2) -> noskip c1 && noskip c2
-  | Unfold c
-  | Destruct (_, _, c)
-  | Dir (_, c)
-  | Weakening c
-  | Intro (_, c) -> noskip c
-  | Rewrite (_, _, _, lc) -> List.for_all noskip lc
 
 (** Translating a Why3 <task> to a <ctask> *)
 
@@ -124,7 +100,7 @@ let translate_task task =
   translate_task_acc Mid.empty task
 
 
-(** Printing : for debugging purposes *)
+(** Printing of <cterm> and <ctask> : for debugging purposes *)
 
 let ip = create_ident_printer []
 
@@ -157,7 +133,6 @@ and prr fmt = function
         pri h (prle "; " prd) p rev (prle "; " prc) lc
 and prc fmt (r, g) =
   fprintf fmt "(%a, %a)" prr r pri g
-
 
 let rec pcte fmt = function
   | CTapp i -> pri fmt i
