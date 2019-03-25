@@ -8,14 +8,16 @@ open Format
 
 
 (** To certify transformations, we will represent Why3 tasks by the type <ctask>
-    and we equip existing transformations with a certificate <certif> *)
+    and we equip transformations with a certificate <certif> *)
 
 type ident = Ident.ident
 
 type binop = CTand | CTor | CTiff | CTimplies
 type cterm =
-  | CTapp of ident (* atomic formulas *)
+  | CTbvar of int (* bound variables use De Bruijn indices *)
+  | CTfvar of ident (* free variables use a name *)
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
+  | CTforall of cterm (* forall binding *)
 
 type ctask = (cterm * bool) Mid.t
 (* We will represent a ctask <M> by <Γ ⊢ Δ> where :
@@ -63,7 +65,7 @@ and rule =
 
 let skip = Skip, id_register (id_fresh "dummy_skip_ident")
 
-(** Translating a Why3 <task> to a <ctask> *)
+(** Translating a Why3 <task> into a <ctask> *)
 
 let translate_op = function
   | Tand -> CTand
@@ -71,11 +73,31 @@ let translate_op = function
   | Timplies -> CTimplies
   | Tiff -> CTiff
 
-let rec translate_term t =
+let rec translate_term_rec bv_lvl lvl t =
+  (* level <lvl> is the number of forall above in the whole term *)
+  (* <bv_lvl> is mapping bound variables to their respective level *)
   match t.t_node with
-  | Tapp (ls, []) -> CTapp ls.ls_name
-  | Tbinop (op, t1, t2) -> CTbinop (translate_op op, translate_term t1, translate_term t2)
+  | Tapp (ls, []) ->
+      let ids = ls.ls_name in
+      begin match Mid.find_opt ids bv_lvl with
+      | None -> CTfvar ids
+      | Some lvl_s ->
+          assert (lvl_s <= lvl); (* a variable should not be above its definition *)
+          CTbvar (lvl - lvl_s) end
+  | Tbinop (op, t1, t2) ->
+      let ct1 = translate_term_rec bv_lvl lvl t1 in
+      let ct2 = translate_term_rec bv_lvl lvl t2 in
+      let cop = translate_op op in
+      CTbinop (cop, ct1, ct2)
+  | Tquant (Tforall, tq) ->
+      let vs, _, t = t_open_quant tq in
+      assert (List.length vs = 1);
+      let ids = (List.hd vs).vs_name in
+      let lvl = lvl + 1 in
+      CTforall (translate_term_rec (Mid.add ids lvl bv_lvl) lvl t)
   | _ -> invalid_arg "Cert_syntax.translate_term"
+
+let translate_term t = translate_term_rec Mid.empty 0 t
 
 let translate_decl decl =
   match decl.d_node with
@@ -135,9 +157,11 @@ and prc fmt (r, g) =
   fprintf fmt "(%a, %a)" prr r pri g
 
 let rec pcte fmt = function
-  | CTapp i -> pri fmt i
+  | CTbvar lvl -> pp_print_int fmt lvl
+  | CTfvar i -> pri fmt i
   | CTbinop (op, t1, t2) ->
       fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
+  | CTforall ct -> fprintf fmt "∀. %a" pcte ct
 and pro fmt = function
   | CTor -> fprintf fmt "\\/"
   | CTand -> fprintf fmt "/\\"

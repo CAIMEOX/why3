@@ -6,9 +6,11 @@ open Cert_syntax
 (** Utility functions on <cterm> and <ctask> *)
 
 let rec cterm_equal t1 t2 = match t1, t2 with
-  | CTapp i1, CTapp i2 -> Ident.id_equal i1 i2
+  | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
+  | CTfvar i1, CTfvar i2 -> Ident.id_equal i1 i2
   | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
       op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
+  | CTforall t1, CTforall t2 -> cterm_equal t1 t2
   | _ -> false
 
 let cterm_pos_equal (t1, p1) (t2, p2) =
