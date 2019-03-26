@@ -280,7 +280,6 @@ let rewrite_in rev h h1 task = (* rewrites <h> in <h1> with direction <rev> *)
             Trans.decl (fun decl -> match decl.d_node with
             | Dprop (Pgoal, pr, _) ->
                 [create_goal ~expl:"rewrite premises" pr t]
-             (* [create_goal ~expl:"rewrite premises" (create_prsymbol (gen_ident "G")) e] *)
             | _ -> [decl])
           None) lp in
       Trans.par (trans_rewriting :: list_par) in

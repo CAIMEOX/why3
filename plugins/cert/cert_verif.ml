@@ -7,7 +7,7 @@ open Cert_syntax
 
 let rec cterm_equal t1 t2 = match t1, t2 with
   | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
-  | CTfvar i1, CTfvar i2 -> Ident.id_equal i1 i2
+  | CTfvar i1, CTfvar i2 -> id_equal i1 i2
   | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
       op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
   | CTforall t1, CTforall t2 -> cterm_equal t1 t2
@@ -18,7 +18,44 @@ let cterm_pos_equal (t1, p1) (t2, p2) =
 
 let ctask_equal cta1 cta2 = Mid.equal cterm_pos_equal cta1 cta2
 
-let rec noskip (r, _) = (* checks if the transformation closes the task *)
+(* bound variable substitution *)
+let rec ct_bv_subst k u t = match t with
+  | CTbvar i -> if i = k then u else t
+  | CTfvar _ -> t
+  | CTbinop (op, t1, t2) ->
+      let nt1 = ct_bv_subst k u t1 in
+      let nt2 = ct_bv_subst k u t2 in
+      CTbinop (op, nt1, nt2)
+  | CTforall t ->
+      let nt = ct_bv_subst (k+1) u t in
+      CTforall nt
+
+let ct_open t u = ct_bv_subst 0 u t
+
+(* checks if the term is locally closed *)
+let locally_closed t =
+  let di = id_register (id_fresh "dummy_locally_closed_ident") in
+  let rec term = function
+    | CTbvar _ -> false
+    | CTfvar _ -> true
+    | CTbinop (_, t1, t2) -> term t1 && term t2
+    | CTforall t -> term (ct_open t (CTfvar di)) in
+  term t
+
+(* free variable substitution *)
+let rec ct_fv_subst z u t = match t with
+  | CTbvar _ -> t
+  | CTfvar x -> if id_equal z x then u else t
+  | CTbinop (op, t1, t2) ->
+      let nt1 = ct_fv_subst z u t1 in
+      let nt2 = ct_fv_subst z u t2 in
+      CTbinop (op, nt1, nt2)
+  | CTforall t ->
+      let nt = ct_fv_subst z u t in
+      CTforall nt
+
+(* checks if the transformation closes the task *)
+let rec noskip (r, _) =
   match r with
   | Skip -> false
   | Axiom _ -> true
@@ -30,15 +67,16 @@ let rec noskip (r, _) = (* checks if the transformation closes the task *)
   | Intro (_, c) -> noskip c
   | Rewrite (_, _, _, lc) -> List.for_all noskip lc
 
-let split_cta cta = (* separates hypotheses and goals *)
+(* separates hypotheses and goals *)
+let split_cta cta =
   let open Mid in
   fold (fun h (ct, pos) (mh, mg) ->
       if pos then mh, add h (ct, pos) mg
       else add h (ct, pos) mh, mg)
     cta (empty, empty)
 
+(* creates a new ctask with the same hypotheses but sets the goal with the second argument *)
 let set_goal : ctask -> cterm -> ctask = fun cta ->
-  (* creates a new ctask with the same hypotheses but sets the goal with the second argument *)
   let mh, mg = split_cta cta in
   let hg, _ = Mid.choose mg in
   fun ct -> Mid.add hg (ct, true) mh
@@ -83,7 +121,7 @@ let check_rewrite cta rev h g path : ctask list =
   Mid.mapi rewrite_decl cta :: List.map (set_goal cta) lp
   (* To check a rewriting rule, you need to :
        • check the rewritten task
-       • check every premisses of rewritten equality in the current context
+       • check every premises of rewritten equality in the current context
    *)
 
 

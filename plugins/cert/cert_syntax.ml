@@ -61,7 +61,7 @@ and rule =
   (* Rewrite (H, path, rev, lc) ⇓ Seq is defined as follows :
      it tries to rewrite in <G> an equality that is in <H>, following the path <path>,
      <rev> indicates if it rewrites from left to right or from right to left.
-     Since <H> can have premisses, those are then matched against the certificates <lc> *)
+     Since <H> can have premises, those are then matched against the certificates <lc> *)
 
 let skip = Skip, id_register (id_fresh "dummy_skip_ident")
 
@@ -94,7 +94,8 @@ let rec translate_term_rec bv_lvl lvl t =
       assert (List.length vs = 1);
       let ids = (List.hd vs).vs_name in
       let lvl = lvl + 1 in
-      CTforall (translate_term_rec (Mid.add ids lvl bv_lvl) lvl t)
+      let ctq = translate_term_rec (Mid.add ids lvl bv_lvl) lvl t in
+      CTforall ctq
   | _ -> invalid_arg "Cert_syntax.translate_term"
 
 let translate_term t = translate_term_rec Mid.empty 0 t
