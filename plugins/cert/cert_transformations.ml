@@ -1,4 +1,5 @@
 open Why3
+
 open Theory
 open Task
 open Decl
@@ -8,9 +9,6 @@ open Generic_arg_trans_utils
 open Cert_syntax
 
 
-(** We equip existing transformations with a certificate <certif> *)
-
-type ctrans = task -> task list * certif
 
 (* Identity transformation with a certificate *)
 let id task = [task], skip

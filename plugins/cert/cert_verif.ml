@@ -1,4 +1,5 @@
 open Why3
+
 open Ident
 open Cert_syntax
 
@@ -84,8 +85,6 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
 
 (** Utility verification functions *)
 
-exception Certif_verification_failed of string
-let verif_failed s = raise (Certif_verification_failed s)
 
 let find_ident h cta =
   match Mid.find_opt h cta with

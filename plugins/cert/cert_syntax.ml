@@ -1,4 +1,5 @@
 open Why3
+
 open Term
 open Ident
 open Decl
@@ -20,7 +21,7 @@ type cterm =
   | CTforall of cterm (* forall binding *)
 
 type ctask = (cterm * bool) Mid.t
-(* We will represent a ctask <M> by <Γ ⊢ Δ> where :
+(* We will denote a ctask <M> by <Γ ⊢ Δ> where :
    • <Γ> contains all the declarations <H : P> where <H> is mapped to <(P, false)> in <M>
    • <Δ> contains all the declarations <H : P> where <H> is mapped to <(P, true)> in <M>
 *)
@@ -49,11 +50,11 @@ and rule =
   (* Destruct (H₁, H₂, c) ⇓ (Γ, G : A ∧ B ⊢ Δ)  ≜  c ⇓ (Γ, H₁ : A, H₂ : B ⊢ Δ) *)
   (* Destruct (H₁, H₂, c) ⇓ (Γ ⊢ Δ, G : A ∨ B)  ≜  c ⇓ (Γ ⊢ Δ, H₁ : A, H₂ : B) *)
   | Dir of dir * certif
-  (* Dir (Left, c) ⇓ (Γ ⊢ Δ, G : A ∧ B)  ≜  c ⇓ (Γ ⊢ Δ, G : A) *)
-  (* Dir (Left, c) ⇓ (Γ, G : A ∨ B ⊢ Δ)  ≜  c ⇓ (Γ, G : A ⊢ Δ) *)
+  (* Dir (Left, c) ⇓ (Γ ⊢ Δ, G : A ∨ B)  ≜  c ⇓ (Γ ⊢ Δ, G : A) *)
+  (* Dir (Left, c) ⇓ (Γ, G : A ∧ B ⊢ Δ)  ≜  c ⇓ (Γ, G : A ⊢ Δ) *)
   (* and similar definition for Right instead of Left *)
   | Intro of ident * certif
-  (* Intro (H, c) ⇓ (Γ ⊢ Δ, H : A → B)  ≜  c ⇓ (Γ, H : A ⊢ Δ, G : B)  *)
+  (* Intro (H, c) ⇓ (Γ ⊢ Δ, G : A → B)  ≜  c ⇓ (Γ, H : A ⊢ Δ, G : B)  *)
   | Weakening of certif
   (* Weakening c ⇓ (Γ ⊢ Δ, G : A)  ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening c ⇓ (Γ, G : A ⊢ Δ)  ≜  c ⇓ (Γ ⊢ Δ) *)
@@ -123,6 +124,7 @@ let translate_task task =
   translate_task_acc Mid.empty task
 
 
+
 (** Printing of <cterm> and <ctask> : for debugging purposes *)
 
 let ip = create_ident_printer []
@@ -184,3 +186,28 @@ let print_ctasks filename lcta =
   let fmt = formatter_of_out_channel oc in
   fprintf fmt "%a@." (prle "==========\n" pcta) lcta;
   close_out oc
+
+
+(** We equip existing transformations with a certificate <certif> *)
+
+type ctrans = task -> task list * certif
+
+exception Certif_verification_failed of string
+let verif_failed s = raise (Certif_verification_failed s)
+
+(** Create a certified transformation from a transformation with a certificate *)
+
+let checker_ctrans check_certif ctask_equal (ctr : ctrans) task =
+  try let (ltask, c) : task list * certif = ctr task in
+      let cta = translate_task task in
+      print_certif "/tmp/certif.log" c;
+      print_ctasks "/tmp/init_ctask.log" [cta];
+      let lcta : ctask list = check_certif cta c in
+      if Lists.equal ctask_equal lcta (List.map translate_task ltask)
+      then ltask
+      else begin
+          print_ctasks "/tmp/from_trans.log" (List.map translate_task ltask);
+          print_ctasks "/tmp/from_cert.log" lcta;
+          verif_failed "Replaying certif gives different result, log available" end
+  with e -> raise (Trans.TransFailure ("Cert_register.checker_ctrans", e))
+
