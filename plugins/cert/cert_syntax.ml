@@ -11,9 +11,6 @@ open Format
 (** To certify transformations, we will represent Why3 tasks by the type <ctask>
     and we equip transformations with a certificate <certif> *)
 
-type ident = Ident.ident
-
-type binop = CTand | CTor | CTiff | CTimplies
 type cterm =
   | CTbvar of int (* bound variables use De Bruijn indices *)
   | CTfvar of ident (* free variables use a name *)
@@ -68,12 +65,6 @@ let skip = Skip, id_register (id_fresh "dummy_skip_ident")
 
 (** Translating a Why3 <task> into a <ctask> *)
 
-let translate_op = function
-  | Tand -> CTand
-  | Tor -> CTor
-  | Timplies -> CTimplies
-  | Tiff -> CTiff
-
 let rec translate_term_rec bv_lvl lvl t =
   (* level <lvl> is the number of forall above in the whole term *)
   (* <bv_lvl> is mapping bound variables to their respective level *)
@@ -88,8 +79,7 @@ let rec translate_term_rec bv_lvl lvl t =
   | Tbinop (op, t1, t2) ->
       let ct1 = translate_term_rec bv_lvl lvl t1 in
       let ct2 = translate_term_rec bv_lvl lvl t2 in
-      let cop = translate_op op in
-      CTbinop (cop, ct1, ct2)
+      CTbinop (op, ct1, ct2)
   | Tquant (Tforall, tq) ->
       let vs, _, t = t_open_quant tq in
       assert (List.length vs = 1);
@@ -166,10 +156,10 @@ let rec pcte fmt = function
       fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
   | CTforall ct -> fprintf fmt "∀. %a" pcte ct
 and pro fmt = function
-  | CTor -> fprintf fmt "\\/"
-  | CTand -> fprintf fmt "/\\"
-  | CTimplies -> fprintf fmt "->"
-  | CTiff -> fprintf fmt "<->"
+  | Tor -> fprintf fmt "\\/"
+  | Tand -> fprintf fmt "/\\"
+  | Timplies -> fprintf fmt "->"
+  | Tiff -> fprintf fmt "<->"
 
 let prpos fmt = function
   | true  -> fprintf fmt "GOAL| "
@@ -209,5 +199,5 @@ let checker_ctrans check_certif ctask_equal (ctr : ctrans) task =
           print_ctasks "/tmp/from_trans.log" (List.map translate_task ltask);
           print_ctasks "/tmp/from_cert.log" lcta;
           verif_failed "Replaying certif gives different result, log available" end
-  with e -> raise (Trans.TransFailure ("Cert_register.checker_ctrans", e))
+  with e -> raise (Trans.TransFailure ("Cert_syntax.checker_ctrans", e))
 
