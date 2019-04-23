@@ -38,6 +38,8 @@ let ctrans_gen (ctr : ctrans) ((ts, (r, g)) : task list * certif) =
                       acc, (Intro (h, c), g), ts
     | Weakening c -> let acc, c, ts = fill acc c ts in
                      acc, (Weakening c, g), ts
+    | Inst (i, h, c) -> let acc, c, ts = fill acc c ts in
+                        acc, (Inst (i, h, c), g), ts
     | Rewrite (h, path, rev, lc) ->
         let acc, lc, ts = List.fold_left (fun (acc, lc, ts) nc ->
                               let acc, c, ts = fill acc nc ts in
@@ -171,7 +173,8 @@ let split_or_and where task = (* destructs /\ in the goal or \/ in the hypothses
   else [task], skip
 
 (* Intro with a certificate *)
-let intro task = (* introduces hypothesis A when the goal is of the form A -> B *)
+let intro task = (* introduces hypothesis A when the goal is of the form A -> B
+                 or introduces variable x when the goal is of the form \forall x. P x *)
   let hpr = create_prsymbol (id_fresh "H") in
   let gpr, tg = try task_goal task, task_goal_fmla task
                 with GoalNotFound -> invalid_arg "Cert_transformations.intro" in
@@ -181,6 +184,14 @@ let intro task = (* introduces hypothesis A when the goal is of the form A -> B 
       let task1 = add_decl hyp (create_prop_decl Paxiom hpr f1) in
       let task2 = add_decl task1 (create_prop_decl Pgoal gpr f2) in
       [task2], (Intro (hpr.pr_name, skip), gpr.pr_name)
+  | Tquant (Tforall, f) ->
+      let vsl, tr, _, close_f = t_open_quant_cb f in
+      assert (List.length vsl = 1);
+      let v = List.hd vsl in
+      (* let x = create_prsymbol (gen_ident "x") in *)
+      let _, _, f_subst = t_open_quant (close_f vsl tr (t_var v)) in
+      let task = add_decl task (create_prop_decl Pgoal gpr f_subst) in
+      [task], (Intro (v.vs_name, skip), gpr.pr_name)
   | _ -> [task], skip
 
 (* Direction with a certificate *)
@@ -204,6 +215,25 @@ let dir d where task = (* choose Left (A) or Right (B) when the goal is of the f
 
 let left = dir Left None
 let right = dir Right None
+
+(* Instantiate with certificate *)
+let inst t_inst what task =
+  let g = what.pr_name in
+  let clues = ref None in
+  let trans_t = Trans.decl (fun decl -> match decl.d_node with
+    | Dprop (k, pr, t) when id_equal g pr.pr_name && k <> Pgoal ->
+        begin match t.t_node with
+        | Tquant (Tforall, _) ->
+            let t_subst = subst_forall_list t [t_inst] in
+            let new_pr = create_prsymbol (gen_ident "Hinst") in
+            clues := Some (new_pr, t_subst);
+            [decl; create_prop_decl k new_pr t_subst]
+        | _ -> [decl] end
+    | _ -> [decl]) None in
+  let nt = Trans.apply trans_t task in
+  match !clues with
+  | Some (h, t_subst) -> [nt], (Inst (h.pr_name, translate_term t_subst, skip), g)
+  | None -> [task], skip
 
 (* Rewrite with a certificate *)
 let rec rewrite_in_term tl tr t : (term * path) option =
