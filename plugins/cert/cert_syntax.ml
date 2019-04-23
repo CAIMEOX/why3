@@ -36,25 +36,27 @@ and rule =
   | Skip
   (* Skip ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
   | Axiom of ident
-  (* Axiom H ⇓ (Γ, H : P ⊢ Δ, G : P)  ≜  [] *)
+  (* Axiom H ⇓ (Γ, H : P ⊢ Δ, G : P) ≜  [] *)
   | Split of certif * certif
-  (* Split (c₁, c₂) ⇓ (Γ, G : A ∨ B ⊢ Δ)  ≜  (c₁ ⇓ (Γ, G : A ⊢ Δ))  @  (c₂ ⇓ (Γ, G : B ⊢ Δ)) *)
-  (* Split (c₁, c₂) ⇓ (Γ ⊢ Δ, G : A ∧ B)  ≜  (c₁ ⇓ (Γ ⊢ Δ, G : A))  @  (c₂ ⇓ (Γ ⊢ Δ, G : B)) *)
+  (* Split (c₁, c₂) ⇓ (Γ, G : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, G : A ⊢ Δ))  @  (c₂ ⇓ (Γ, G : B ⊢ Δ)) *)
+  (* Split (c₁, c₂) ⇓ (Γ ⊢ Δ, G : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, G : A))  @  (c₂ ⇓ (Γ ⊢ Δ, G : B)) *)
   | Unfold of certif
-  (* Unfold c ⇓ (Γ, G : A ↔ B ⊢ Δ)  ≜  c ⇓ (Γ, G : (A → B) ∧ (B → A) ⊢ Δ) *)
-  (* Unfold c ⇓ (Γ ⊢ Δ, G : A ↔ B)  ≜  c ⇓ (Γ ⊢ Δ, G : (A → B) ∧ (B → A)) *)
+  (* Unfold c ⇓ (Γ, G : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, G : (A → B) ∧ (B → A) ⊢ Δ) *)
+  (* Unfold c ⇓ (Γ ⊢ Δ, G : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, G : (A → B) ∧ (B → A)) *)
   | Destruct of ident * ident * certif
-  (* Destruct (H₁, H₂, c) ⇓ (Γ, G : A ∧ B ⊢ Δ)  ≜  c ⇓ (Γ, H₁ : A, H₂ : B ⊢ Δ) *)
-  (* Destruct (H₁, H₂, c) ⇓ (Γ ⊢ Δ, G : A ∨ B)  ≜  c ⇓ (Γ ⊢ Δ, H₁ : A, H₂ : B) *)
+  (* Destruct (H₁, H₂, c) ⇓ (Γ, G : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, H₁ : A, H₂ : B ⊢ Δ) *)
+  (* Destruct (H₁, H₂, c) ⇓ (Γ ⊢ Δ, G : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, H₁ : A, H₂ : B) *)
   | Dir of dir * certif
-  (* Dir (Left, c) ⇓ (Γ ⊢ Δ, G : A ∨ B)  ≜  c ⇓ (Γ ⊢ Δ, G : A) *)
-  (* Dir (Left, c) ⇓ (Γ, G : A ∧ B ⊢ Δ)  ≜  c ⇓ (Γ, G : A ⊢ Δ) *)
+  (* Dir (Left, c) ⇓ (Γ ⊢ Δ, G : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, G : A) *)
+  (* Dir (Left, c) ⇓ (Γ, G : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, G : A ⊢ Δ) *)
   (* and similar definition for Right instead of Left *)
   | Intro of ident * certif
-  (* Intro (H, c) ⇓ (Γ ⊢ Δ, G : A → B)  ≜  c ⇓ (Γ, H : A ⊢ Δ, G : B)  *)
+  (* Intro (H, c) ⇓ (Γ ⊢ Δ, G : A → B) ≜ c ⇓ (Γ, H : A ⊢ Δ, G : B)  *)
   | Weakening of certif
-  (* Weakening c ⇓ (Γ ⊢ Δ, G : A)  ≜  c ⇓ (Γ ⊢ Δ) *)
-  (* Weakening c ⇓ (Γ, G : A ⊢ Δ)  ≜  c ⇓ (Γ ⊢ Δ) *)
+  (* Weakening c ⇓ (Γ ⊢ Δ, G : A) ≜  c ⇓ (Γ ⊢ Δ) *)
+  (* Weakening c ⇓ (Γ, G : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
+  | Inst of ident * cterm * certif
+  (* Inst (H, t, c) ⇓ (Γ, G : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : ∀ x. P x, H : P t ⊢ Δ) *)
   | Rewrite of ident * path * bool * certif list
   (* Rewrite (H, path, rev, lc) ⇓ Seq is defined as follows :
      it tries to rewrite in <G> an equality that is in <H>, following the path <path>,
@@ -128,6 +130,18 @@ and prle sep pre fmt le =
   let prl = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt sep) pre in
   fprintf fmt "[%a]" prl le
 
+let rec pcte fmt = function
+  | CTbvar lvl -> pp_print_int fmt lvl
+  | CTfvar i -> pri fmt i
+  | CTbinop (op, t1, t2) ->
+      fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
+  | CTforall ct -> fprintf fmt "∀. %a" pcte ct
+and pro fmt = function
+  | Tor -> fprintf fmt "\\/"
+  | Tand -> fprintf fmt "/\\"
+  | Timplies -> fprintf fmt "->"
+  | Tiff -> fprintf fmt "<->"
+
 let rec print_certif filename cert =
   let oc = open_out filename in
   let fmt = formatter_of_out_channel oc in
@@ -143,23 +157,13 @@ and prr fmt = function
   | Dir (d, c) -> fprintf fmt "Dir @[(%a,@ %a)@]" prd d prc c
   | Intro (name, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri name prc c
   | Weakening c -> fprintf fmt "Weakening@ %a" prc c
+  | Inst (i, t, c) -> fprintf fmt "Inst @[(%a,@ %a,@ %a)@]" pri i pcte t prc c
   | Rewrite (h, p, rev, lc) ->
       fprintf fmt "Rewrite @[(%a,@ %a,@ %b,@ %a)@]"
         pri h (prle "; " prd) p rev (prle "; " prc) lc
 and prc fmt (r, g) =
   fprintf fmt "(%a, %a)" prr r pri g
 
-let rec pcte fmt = function
-  | CTbvar lvl -> pp_print_int fmt lvl
-  | CTfvar i -> pri fmt i
-  | CTbinop (op, t1, t2) ->
-      fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
-  | CTforall ct -> fprintf fmt "∀. %a" pcte ct
-and pro fmt = function
-  | Tor -> fprintf fmt "\\/"
-  | Tand -> fprintf fmt "/\\"
-  | Timplies -> fprintf fmt "->"
-  | Tiff -> fprintf fmt "<->"
 
 let prpos fmt = function
   | true  -> fprintf fmt "GOAL| "
