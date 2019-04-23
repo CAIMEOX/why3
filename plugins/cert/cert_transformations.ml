@@ -38,6 +38,8 @@ let ctrans_gen (ctr : ctrans) ((ts, (r, g)) : task list * certif) =
                       acc, (Intro (h, c), g), ts
     | Weakening c -> let acc, c, ts = fill acc c ts in
                      acc, (Weakening c, g), ts
+    | Inst (i, h, c) -> let acc, c, ts = fill acc c ts in
+                        acc, (Inst (i, h, c), g), ts
     | Rewrite (h, path, rev, lc) ->
         let acc, lc, ts = List.fold_left (fun (acc, lc, ts) nc ->
                               let acc, c, ts = fill acc nc ts in
@@ -204,6 +206,25 @@ let dir d where task = (* choose Left (A) or Right (B) when the goal is of the f
 
 let left = dir Left None
 let right = dir Right None
+
+(* instantiate with certificate *)
+let instantiate y where task =
+  let g = (default_goal task where).pr_name in
+  let clues = ref None in
+  let trans_t = Trans.decl (fun decl -> match decl.d_node with
+    | Dprop (k, pr, t) when id_equal g pr.pr_name && k <> Pgoal ->
+        begin match t.t_node with
+        | Tquant (Tforall, f) ->
+            let t_subst = subst_forall_list t [y] in
+            let new_pr = create_prsymbol (gen_ident "Hinst") in
+            clues := Some (new_pr, t_subst);
+            [decl; create_prop_decl k new_pr t_subst]
+        | _ -> [decl] end
+    | _ -> [decl]) None in
+  let nt = Trans.apply trans_t task in
+  match !clues with
+  | Some (h, t_subst) -> [nt], (Inst (h.pr_name, translate_term t_subst, skip), g)
+  | None -> [task], skip
 
 (* Rewrite with a certificate *)
 let rec rewrite_in_term tl tr t : (term * path) option =

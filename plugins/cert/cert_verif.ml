@@ -67,6 +67,7 @@ let rec noskip (r, _) =
   | Destruct (_, _, c)
   | Dir (_, c)
   | Weakening c
+  | Inst (_, _, c)
   | Intro (_, c) -> noskip c
   | Rewrite (_, _, _, lc) -> List.for_all noskip lc
 
@@ -105,14 +106,16 @@ let rec check_rewrite_term tl tr t path =
       CTbinop (op, t1, t2')
   | _ -> verif_failed "Can't follow the rewrite path"
 
-let check_rewrite cta rev h g path : ctask list =
-  let rec introduce acc = function
-    | CTbinop (Timplies, t1, t2) -> introduce (t1::acc) t2
-    | t -> acc, t in
+let check_rewrite cta rev h g terms path : ctask list =
+  let rec introduce acc inst_terms t = match t, inst_terms with
+    | CTbinop (Timplies, t1, t2), _ -> introduce (t1::acc) inst_terms t2
+    | CTforall t, inst::inst_terms -> introduce acc inst_terms (ct_open t inst)
+    | t, [] -> acc, t
+    | _ -> verif_failed "Can't instantiate the hypothesis" in
   let lp, tl, tr =
     let ct, pos = find_ident h cta in
     if pos then verif_failed "Can't use goal as an hypothesis to rewrite" else
-      match introduce [] ct with
+      match introduce [] terms ct with
       | lp, CTbinop (Tiff, t1, t2) -> if rev then lp, t1, t2 else lp, t2, t1
       | _ -> verif_failed "Can't find the hypothesis used to rewrite" in
   let rewrite_decl h (te, pos) =
@@ -185,6 +188,14 @@ let rec check_certif cta (r, g : certif) : ctask list =
     | Weakening c ->
         let cta = Mid.remove g cta in
         check_certif cta c
+    | Inst (h, t_subst, c) ->
+        let t, pos = find_ident h cta in
+        begin match t, pos with
+        | CTforall t, false ->
+            let cta = Mid.add h (ct_open t t_subst, false) cta in
+            check_certif cta c
+        | _ -> verif_failed "trying to instantiate a non-forall"
+        end
     | Rewrite (h, path, rev, lc) ->
-        let lcta = check_rewrite cta rev h g path in
+        let lcta = check_rewrite cta rev h g [] path in
         List.map2 check_certif lcta lc |> List.concat
