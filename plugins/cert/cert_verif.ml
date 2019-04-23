@@ -179,20 +179,23 @@ let rec check_certif cta (r, g : certif) : ctask list =
         | _ -> verif_failed "Can't follow a direction" end
     | Intro (h, c) ->
         let t, pos = find_ident g cta in
-        begin match t, pos with
-        | CTbinop (Timplies, f1, f2), true ->
+        begin match t with
+        | CTbinop (Timplies, f1, f2) when pos ->
             let cta = Mid.add h (f1, false) cta
                       |> Mid.add g (f2, true) in
+            check_certif cta c
+        | CTforall t when pos ->
+            let cta = Mid.add g (ct_open t (CTfvar h), true) cta in
             check_certif cta c
         | _ -> verif_failed "Nothing to introduce" end
     | Weakening c ->
         let cta = Mid.remove g cta in
         check_certif cta c
-    | Inst (h, t_subst, c) ->
+    | Inst (h, t_inst, c) ->
         let t, pos = find_ident h cta in
         begin match t, pos with
         | CTforall t, false ->
-            let cta = Mid.add h (ct_open t t_subst, false) cta in
+            let cta = Mid.add h (ct_open t t_inst, false) cta in
             check_certif cta c
         | _ -> verif_failed "trying to instantiate a non-forall"
         end

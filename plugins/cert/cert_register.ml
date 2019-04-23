@@ -15,6 +15,7 @@ let intuition_trans           = checker_ctrans intuition
 let left_trans where          = checker_ctrans (dir Left where)
 let right_trans where         = checker_ctrans (dir Right where)
 let split_trans where         = checker_ctrans (split_logic where)
+let instantiate_trans t what  = checker_ctrans (inst t what)
 let rewrite_trans g rev where = checker_ctrans (rewrite g rev where)
 let clear_trans l             = checker_ctrans (clear l)
 
@@ -47,6 +48,10 @@ let () =
   wrap_and_register ~desc:"A certified version of (simplified) coq tactic [split]"
     "split_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
     (fun where -> store (split_trans where));
+
+  wrap_and_register ~desc:"A certified version of transformation instantiate"
+    "instantiate_cert" (Tterm (Tprsymbol Ttrans_l))
+    (fun t_inst what -> store (instantiate_trans t_inst what));
 
   wrap_and_register ~desc:"A certified version of transformation rewrite"
     "rewrite_cert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l))))))
