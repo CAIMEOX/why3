@@ -24,7 +24,10 @@ let ctrans_gen (ctr : ctrans) ((ts, (r, g)) : task list * certif) =
               | [] -> assert false
               | t::ts -> let lt, ct = ctr t in
                          lt :: acc, ct, ts end
-    | Axiom _ -> acc, (r, g), ts
+    | Axiom _ | Trivial -> acc, (r, g), ts
+    | Cut (h, a, c1, c2) -> let acc, c1, ts = fill acc c1 ts in
+                            let acc, c2, ts = fill acc c2 ts in
+                            acc, (Cut (h, a, c1, c2), g), ts
     | Split (c1, c2) -> let acc, c1, ts = fill acc c1 ts in
                         let acc, c2, ts = fill acc c2 ts in
                         acc, (Split (c1, c2), g), ts

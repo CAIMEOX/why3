@@ -13,6 +13,8 @@ let rec cterm_equal t1 t2 = match t1, t2 with
   | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
       op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
   | CTquant (q1, t1), CTquant (q2, t2) when q1 = q2 -> cterm_equal t1 t2
+  | CTtrue, CTtrue | CTfalse, CTfalse -> true
+  | CTnot t1, CTnot t2 -> cterm_equal t1 t2
   | _ -> false
 
 let cterm_pos_equal (t1, p1) (t2, p2) =
@@ -31,6 +33,7 @@ let rec ct_bv_subst k u t = match t with
   | CTquant (q, t) ->
       let nt = ct_bv_subst (k+1) u t in
       CTquant (q, nt)
+  | CTnot t -> CTnot (ct_bv_subst k u t)
   | CTtrue -> CTtrue
   | CTfalse -> CTfalse
 
@@ -43,6 +46,7 @@ let locally_closed =
     | CTbvar _ -> false
     | CTbinop (_, t1, t2) -> term t1 && term t2
     | CTquant (_, t) -> term (ct_open t (CTfvar di))
+    | CTnot t -> term t
     | CTfvar _ | CTtrue | CTfalse -> true
   in
   term
@@ -57,13 +61,24 @@ let rec ct_fv_subst z u t = match t with
   | CTquant (q, t) ->
       let nt = ct_fv_subst z u t in
       CTquant (q, nt)
+  | CTnot t -> CTnot (ct_fv_subst z u t)
   | CTbvar _ | CTtrue | CTfalse -> t
+
+(* collect the free variables *)
+let rec fvars = function
+  | CTfvar x -> Mid.singleton x ()
+  | CTbinop (_, t1, t2) -> Mid.set_union (fvars t1) (fvars t2)
+  | CTquant (_, t) -> fvars t
+  | CTnot t -> fvars t
+  | CTbvar _ | CTtrue | CTfalse -> Mid.empty
+
 
 (* checks if the transformation closes the task *)
 let rec noskip (r, _) =
   match r with
   | Skip -> false
-  | Axiom _ -> true
+  | Axiom _ | Trivial -> true
+  | Cut (_, _, c1, c2) 
   | Split (c1, c2) -> noskip c1 && noskip c2
   | Unfold c
   | Destruct (_, _, c)
@@ -144,6 +159,16 @@ let rec check_certif cta (r, g : certif) : ctask list =
              then []
              else verif_failed "The hypothesis and goal given do not match"
         else verif_failed "Terms have wrong positivities in the task"
+    | Trivial ->
+        let t, pos = find_ident g cta in
+        begin match t, pos with
+        | CTfalse, false | CTtrue, true -> []
+        | _ -> verif_failed "Non trivial hypothesis"
+        end
+    | Cut (h, a, c1, c2) ->
+        let cta1 = Mid.add h (a, true) cta in
+        let cta2 = Mid.add h (a, false) cta in
+        check_certif cta1 c1 @ check_certif cta2 c2
     | Split (c1, c2) ->
         let t, pos = find_ident g cta in
         begin match t, pos with
@@ -192,7 +217,7 @@ let rec check_certif cta (r, g : certif) : ctask list =
         let t, pos = find_ident g cta in
         begin match t, pos with
         | CTquant (Tforall, t), true | CTquant (Texists, t), false ->
-            (* TODO : h needs to be fresh *)
+            assert (not (Mid.mem h (fvars t)));
             let cta = Mid.add g (ct_open t (CTfvar h), pos) cta in
             check_certif cta c
         | _ -> verif_failed "Nothing to introduce" end

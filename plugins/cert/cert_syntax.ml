@@ -16,6 +16,7 @@ type cterm =
   | CTfvar of ident (* free variables use a name *)
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
   | CTquant of quant * cterm (* forall binding *)
+  | CTnot of cterm
   | CTtrue
   | CTfalse
 
@@ -39,7 +40,11 @@ and rule =
   (* Skip ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
   | Axiom of ident
   (* Axiom H ⇓ (Γ, H : P ⊢ Δ, G : P) ≜  [] *)
-  (* TODO : trivial (true à droite et false à gauche) *)
+  | Trivial
+  (* Trivial ⇓ (Γ, G : false ⊢ Δ) ≜  [] *)
+  (* Trivial ⇓ (Γ ⊢ Δ, G : true ) ≜  [] *)
+  | Cut of ident * cterm * certif * certif
+  (* Cut (H, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, H : A))  @  (c₂ ⇓ (Γ, H : A ⊢ Δ)) *)
   | Split of certif * certif
   (* Split (c₁, c₂) ⇓ (Γ, G : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, G : A ⊢ Δ))  @  (c₂ ⇓ (Γ, G : B ⊢ Δ)) *)
   (* Split (c₁, c₂) ⇓ (Γ ⊢ Δ, G : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, G : A))  @  (c₂ ⇓ (Γ ⊢ Δ, G : B)) *)
@@ -96,6 +101,9 @@ let rec translate_term_rec bv_lvl lvl t =
       let lvl = lvl + 1 in
       let ctq = translate_term_rec (Mid.add ids lvl bv_lvl) lvl t in
       CTquant (q, ctq)
+  | Tnot t -> CTnot (translate_term_rec bv_lvl lvl t)
+  | Ttrue -> CTtrue
+  | Tfalse -> CTfalse
   | _ -> invalid_arg "Cert_syntax.translate_term"
 
 let translate_term t = translate_term_rec Mid.empty 0 t
@@ -146,6 +154,7 @@ let rec pcte fmt = function
                        | Tforall -> fprintf fmt "∀. %a" pcte ct
                        | Texists -> fprintf fmt "∃. %a" pcte ct
                        end
+  | CTnot t -> fprintf fmt "(not %a)" pcte t
   | CTtrue -> fprintf fmt "true"
   | CTfalse -> fprintf fmt "false"
 and pro fmt = function
@@ -162,6 +171,8 @@ let rec print_certif filename cert =
 and prr fmt = function
   | Skip -> fprintf fmt "Skip"
   | Axiom h -> fprintf fmt "Axiom@ %a" pri h
+  | Trivial -> fprintf fmt "Trivial"
+  | Cut (h, a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a,@ %a)@]" pri h pcte a prc c1 prc c2
   | Split (c1, c2) -> fprintf fmt "Split @[(%a,@ %a)@]" prc c1 prc c2
   | Unfold c -> fprintf fmt "Unfold@ %a" prc c
   | Destruct (h1, h2, c) -> fprintf fmt "Destruct @[(%a,@ %a,@ %a)@]"
