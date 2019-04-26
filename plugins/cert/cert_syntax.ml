@@ -15,7 +15,9 @@ type cterm =
   | CTbvar of int (* bound variables use De Bruijn indices *)
   | CTfvar of ident (* free variables use a name *)
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
-  | CTforall of cterm (* forall binding *)
+  | CTquant of quant * cterm (* forall binding *)
+  | CTtrue
+  | CTfalse
 
 type ctask = (cterm * bool) Mid.t
 (* We will denote a ctask <M> by <Γ ⊢ Δ> where :
@@ -37,26 +39,31 @@ and rule =
   (* Skip ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
   | Axiom of ident
   (* Axiom H ⇓ (Γ, H : P ⊢ Δ, G : P) ≜  [] *)
+  (* TODO : trivial (true à droite et false à gauche) *)
   | Split of certif * certif
   (* Split (c₁, c₂) ⇓ (Γ, G : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, G : A ⊢ Δ))  @  (c₂ ⇓ (Γ, G : B ⊢ Δ)) *)
   (* Split (c₁, c₂) ⇓ (Γ ⊢ Δ, G : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, G : A))  @  (c₂ ⇓ (Γ ⊢ Δ, G : B)) *)
+  (* Split (c₁, c₂) ⇓ (Γ, G : A → B ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, G : A))  @  (c₂ ⇓ (Γ, G : B ⊢ Δ)) *)
   | Unfold of certif
   (* Unfold c ⇓ (Γ, G : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, G : (A → B) ∧ (B → A) ⊢ Δ) *)
   (* Unfold c ⇓ (Γ ⊢ Δ, G : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, G : (A → B) ∧ (B → A)) *)
   | Destruct of ident * ident * certif
   (* Destruct (H₁, H₂, c) ⇓ (Γ, G : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, H₁ : A, H₂ : B ⊢ Δ) *)
   (* Destruct (H₁, H₂, c) ⇓ (Γ ⊢ Δ, G : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, H₁ : A, H₂ : B) *)
+  (* Destruct (H₁, H₂, c) ⇓ (Γ ⊢ Δ, G : A → B) ≜  c ⇓ (Γ, H₁ : A ⊢ Δ, H₂ : B) *)
   | Dir of dir * certif
   (* Dir (Left, c) ⇓ (Γ ⊢ Δ, G : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, G : A) *)
   (* Dir (Left, c) ⇓ (Γ, G : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, G : A ⊢ Δ) *)
   (* and similar definition for Right instead of Left *)
   | Intro of ident * certif
-  (* Intro (H, c) ⇓ (Γ ⊢ Δ, G : A → B) ≜ c ⇓ (Γ, H : A ⊢ Δ, G : B)  *)
+  (* Intro (y, c) ⇓ (Γ, G : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : P y ⊢ Δ) (y fresh) *)
+  (* Intro (y, c) ⇓ (Γ ⊢ Δ, G : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : P y) (y fresh) *)
   | Weakening of certif
   (* Weakening c ⇓ (Γ ⊢ Δ, G : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening c ⇓ (Γ, G : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
   | Inst of ident * cterm * certif
   (* Inst (H, t, c) ⇓ (Γ, G : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : ∀ x. P x, H : P t ⊢ Δ) *)
+  (* Inst (H, t, c) ⇓ (Γ ⊢ Δ, G : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : ∃ x. P x, H : P t) *)
   | Rewrite of ident * path * bool * certif list
   (* Rewrite (H, path, rev, lc) ⇓ Seq is defined as follows :
      it tries to rewrite in <G> an equality that is in <H>, following the path <path>,
@@ -82,13 +89,13 @@ let rec translate_term_rec bv_lvl lvl t =
       let ct1 = translate_term_rec bv_lvl lvl t1 in
       let ct2 = translate_term_rec bv_lvl lvl t2 in
       CTbinop (op, ct1, ct2)
-  | Tquant (Tforall, tq) ->
+  | Tquant (q, tq) ->
       let vs, _, t = t_open_quant tq in
       assert (List.length vs = 1);
       let ids = (List.hd vs).vs_name in
       let lvl = lvl + 1 in
       let ctq = translate_term_rec (Mid.add ids lvl bv_lvl) lvl t in
-      CTforall ctq
+      CTquant (q, ctq)
   | _ -> invalid_arg "Cert_syntax.translate_term"
 
 let translate_term t = translate_term_rec Mid.empty 0 t
@@ -135,7 +142,12 @@ let rec pcte fmt = function
   | CTfvar i -> pri fmt i
   | CTbinop (op, t1, t2) ->
       fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
-  | CTforall ct -> fprintf fmt "∀. %a" pcte ct
+  | CTquant (q, ct) -> begin match q with
+                       | Tforall -> fprintf fmt "∀. %a" pcte ct
+                       | Texists -> fprintf fmt "∃. %a" pcte ct
+                       end
+  | CTtrue -> fprintf fmt "true"
+  | CTfalse -> fprintf fmt "false"
 and pro fmt = function
   | Tor -> fprintf fmt "\\/"
   | Tand -> fprintf fmt "/\\"
