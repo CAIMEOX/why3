@@ -185,12 +185,10 @@ let intro task = (* introduces hypothesis A when the goal is of the form A -> B
       let task2 = add_decl task1 (create_prop_decl Pgoal gpr f2) in
       [task2], (Intro (hpr.pr_name, skip), gpr.pr_name)
   | Tquant (Tforall, f) ->
-      let vsl, tr, _, close_f = t_open_quant_cb f in
+      let vsl, _, f_open = t_open_quant f in
       assert (List.length vsl = 1);
       let v = List.hd vsl in
-      (* let x = create_prsymbol (gen_ident "x") in *)
-      let _, _, f_subst = t_open_quant (close_f vsl tr (t_var v)) in
-      let task = add_decl task (create_prop_decl Pgoal gpr f_subst) in
+      let task = add_decl task (create_prop_decl Pgoal gpr f_open) in
       [task], (Intro (v.vs_name, skip), gpr.pr_name)
   | _ -> [task], skip
 
