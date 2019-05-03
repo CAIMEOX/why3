@@ -64,6 +64,16 @@ let rec ct_fv_subst z u t = match t with
   | CTnot t -> CTnot (ct_fv_subst z u t)
   | CTbvar _ | CTtrue | CTfalse -> t
 
+(* variable closing *)
+let rec ct_fv_close x k t = match t with
+  | CTbvar _ | CTtrue | CTfalse-> t
+  | CTfvar y -> if id_equal x y then CTbvar k else t
+  | CTnot t -> CTnot (ct_fv_close x k t)
+  | CTbinop (op, t1, t2) -> CTbinop (op, ct_fv_close x k t1, ct_fv_close x k t2)
+  | CTquant (q, t) -> CTquant (q, ct_fv_close x (k+1) t)
+
+let ct_close x t = ct_fv_close x 0 t
+
 (* collect the free variables *)
 let rec fvars = function
   | CTfvar x -> Mid.singleton x ()
@@ -78,14 +88,16 @@ let rec noskip (r, _) =
   match r with
   | Skip -> false
   | Axiom _ | Trivial -> true
-  | Cut (_, _, c1, c2) 
+  | Cut (_, c1, c2)
   | Split (c1, c2) -> noskip c1 && noskip c2
   | Unfold c
+  | Swap_neg c
   | Destruct (_, _, c)
   | Dir (_, c)
   | Weakening c
+  | Intro (_, c)
   | Inst (_, _, c)
-  | Intro (_, c) -> noskip c
+  | Revert (_, c) -> noskip c
   | Rewrite (_, _, _, lc) -> List.for_all noskip lc
 
 (* separates hypotheses and goals *)
@@ -165,9 +177,9 @@ let rec check_certif cta (r, g : certif) : ctask list =
         | CTfalse, false | CTtrue, true -> []
         | _ -> verif_failed "Non trivial hypothesis"
         end
-    | Cut (h, a, c1, c2) ->
-        let cta1 = Mid.add h (a, true) cta in
-        let cta2 = Mid.add h (a, false) cta in
+    | Cut (a, c1, c2) ->
+        let cta1 = Mid.add g (a, true) cta in
+        let cta2 = Mid.add g (a, false) cta in
         check_certif cta1 c1 @ check_certif cta2 c2
     | Split (c1, c2) ->
         let t, pos = find_ident g cta in
@@ -176,10 +188,10 @@ let rec check_certif cta (r, g : certif) : ctask list =
             let cta1 = Mid.add g (t1, pos) cta in
             let cta2 = Mid.add g (t2, pos) cta in
             check_certif cta1 c1 @ check_certif cta2 c2
-        | CTbinop (Timplies, t1, t2), false ->
-            let cta1 = Mid.add g (t1, true) cta in
-            let cta2 = Mid.add g (t2, false) cta in
-            check_certif cta1 c1 @ check_certif cta2 c2
+        (* | CTbinop (Timplies, t1, t2), false ->
+         *     let cta1 = Mid.add g (t1, true) cta in
+         *     let cta2 = Mid.add g (t2, false) cta in
+         *     check_certif cta1 c1 @ check_certif cta2 c2 *)
         | _ -> verif_failed "Not splittable" end
     | Unfold c ->
         let t, pos = find_ident g cta in
@@ -190,7 +202,16 @@ let rec check_certif cta (r, g : certif) : ctask list =
             let unfolded_iff = CTbinop (Tand, imp_pos, imp_neg), pos in
             let cta = Mid.add g unfolded_iff cta in
             check_certif cta c
+        | CTbinop (Timplies, t1, t2) ->
+            let unfolded_imp = CTbinop (Tor, CTnot t1, t2), pos in
+            let cta = Mid.add g unfolded_imp cta in
+            check_certif cta c
         | _ -> verif_failed "Nothing to unfold" end
+    | Swap_neg c ->
+        let t, pos = find_ident g cta in
+        let neg_t = match t with CTnot t -> t | t -> CTnot t in
+        let cta = Mid.add g (neg_t, not pos) cta in
+        check_certif cta c
     | Destruct (h1, h2, c) ->
         let t, pos = find_ident g cta in
         begin match t, pos with
@@ -199,11 +220,11 @@ let rec check_certif cta (r, g : certif) : ctask list =
                       |> Mid.add h1 (t1, pos)
                       |> Mid.add h2 (t2, pos) in
             check_certif cta c
-        | CTbinop (Timplies, t1, t2), true ->
-            let cta = Mid.remove g cta
-                      |> Mid.add h1 (t1, false)
-                      |> Mid.add h2 (t2, true) in
-            check_certif cta c
+        (* | CTbinop (Timplies, t1, t2), true ->
+         *     let cta = Mid.remove g cta
+         *               |> Mid.add h1 (t1, false)
+         *               |> Mid.add h2 (t2, true) in
+         *     check_certif cta c *)
         | _ -> verif_failed "Nothing to destruct"  end
     | Dir (d, c) ->
         let t, pos = find_ident g cta in
@@ -213,6 +234,9 @@ let rec check_certif cta (r, g : certif) : ctask list =
           let cta = Mid.add g (t, pos) cta in
           check_certif cta c
         | _ -> verif_failed "Can't follow a direction" end
+    | Weakening c ->
+        let cta = Mid.remove g cta in
+        check_certif cta c
     | Intro (h, c) ->
         let t, pos = find_ident g cta in
         begin match t, pos with
@@ -221,9 +245,6 @@ let rec check_certif cta (r, g : certif) : ctask list =
             let cta = Mid.add g (ct_open t (CTfvar h), pos) cta in
             check_certif cta c
         | _ -> verif_failed "Nothing to introduce" end
-    | Weakening c ->
-        let cta = Mid.remove g cta in
-        check_certif cta c
     | Inst (h, t_inst, c) ->
         let t, pos = find_ident h cta in
         begin match t, pos with
@@ -232,6 +253,12 @@ let rec check_certif cta (r, g : certif) : ctask list =
             check_certif cta c
         | _ -> verif_failed "trying to instantiate a non-forall"
         end
+    | Revert (h, c) ->
+        let t, pos = find_ident g cta in
+        let closed_t = if pos then CTquant (Tforall, ct_close h t)
+                       else CTquant (Texists, ct_close h t) in
+        let cta = Mid.add g (closed_t, pos) cta in
+        check_certif cta c
     | Rewrite (h, path, rev, lc) ->
         let lcta = check_rewrite cta rev h g [] path in
         List.map2 check_certif lcta lc |> List.concat
