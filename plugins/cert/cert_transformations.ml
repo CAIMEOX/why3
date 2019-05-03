@@ -25,24 +25,28 @@ let ctrans_gen (ctr : ctrans) ((ts, (r, g)) : task list * certif) =
               | t::ts -> let lt, ct = ctr t in
                          lt :: acc, ct, ts end
     | Axiom _ | Trivial -> acc, (r, g), ts
-    | Cut (h, a, c1, c2) -> let acc, c1, ts = fill acc c1 ts in
-                            let acc, c2, ts = fill acc c2 ts in
-                            acc, (Cut (h, a, c1, c2), g), ts
+    | Cut (a, c1, c2) -> let acc, c1, ts = fill acc c1 ts in
+                         let acc, c2, ts = fill acc c2 ts in
+                         acc, (Cut (a, c1, c2), g), ts
     | Split (c1, c2) -> let acc, c1, ts = fill acc c1 ts in
                         let acc, c2, ts = fill acc c2 ts in
                         acc, (Split (c1, c2), g), ts
     | Unfold c -> let acc, c, ts = fill acc c ts in
                   acc, (Unfold c, g), ts
+    | Swap_neg c -> let acc, c, ts = fill acc c ts in
+                    acc, (Swap_neg c, g), ts
     | Destruct (h1, h2, c) -> let acc, c, ts = fill acc c ts in
                               acc, (Destruct (h1, h2, c), g), ts
     | Dir (d, c) -> let acc, c, ts = fill acc c ts in
                     acc, (Dir (d, c), g), ts
-    | Intro (h, c) -> let acc, c, ts = fill acc c ts in
-                      acc, (Intro (h, c), g), ts
     | Weakening c -> let acc, c, ts = fill acc c ts in
                      acc, (Weakening c, g), ts
+    | Intro (h, c) -> let acc, c, ts = fill acc c ts in
+                      acc, (Intro (h, c), g), ts
     | Inst (i, h, c) -> let acc, c, ts = fill acc c ts in
                         acc, (Inst (i, h, c), g), ts
+    | Revert (h, c) -> let acc, c, ts = fill acc c ts in
+                       acc, (Revert (h, c), g), ts
     | Rewrite (h, path, rev, lc) ->
         let acc, lc, ts = List.fold_left (fun (acc, lc, ts) nc ->
                               let acc, c, ts = fill acc nc ts in
@@ -124,7 +128,7 @@ let assumption : ctrans = fun task ->
 
 
 (* Split with a certificate : *)
-(*   destructs a logical constructor at the top of the formula *)
+(* destructs a logical constructor at the top of the formula *)
 let destruct where task = (* destructs /\ in the hypotheses *)
   let g = (default_goal task where).pr_name in
   let clues = ref None in
@@ -153,6 +157,10 @@ let unfold where task = (* replaces A <-> B with (A -> B) /\ (B -> A) *)
             clues := true;
             let destr_iff = t_and (t_implies f1 f2) (t_implies f2 f1) in
             [create_prop_decl k pr destr_iff]
+        | Tbinop (Timplies, f1, f2) ->
+            clues := true;
+            let destr_imp = t_or (t_not f1) f2 in
+            [create_prop_decl k pr destr_imp]
         | _ -> [d] end
     | _ -> [d]) None in
   let nt = Trans.apply trans_t task in
@@ -176,8 +184,8 @@ let split_or_and where task = (* destructs /\ in the goal or \/ in the hypothses
   else [task], skip
 
 (* Intro with a certificate *)
-let intro task = (* introduces hypothesis A when the goal is of the form A -> B
-                 or introduces variable x when the goal is of the form \forall x. P x *)
+let intro task = (* introduces hypothesis H : A when then goal is of the form A → B or
+                    introduces variable x when the goal is of the form \forall x. P x *)
   let hpr = create_prsymbol (id_fresh "H") in
   let gpr, tg = try task_goal task, task_goal_fmla task
                 with GoalNotFound -> invalid_arg "Cert_transformations.intro" in
@@ -186,17 +194,22 @@ let intro task = (* introduces hypothesis A when the goal is of the form A -> B
   | Tbinop (Timplies, f1, f2) ->
       let task1 = add_decl hyp (create_prop_decl Paxiom hpr f1) in
       let task2 = add_decl task1 (create_prop_decl Pgoal gpr f2) in
-      [task2], (Intro (hpr.pr_name, skip), gpr.pr_name)
+      let h = hpr.pr_name and g = gpr.pr_name in
+      (* [task2], (Intro (hpr.pr_name, skip), gpr.pr_name) *)
+      [task2], (Unfold (Destruct (h, g, (Swap_neg skip, h)), g), g)
   | Tquant (Tforall, f) ->
       let vsl, _, f_open = t_open_quant f in
       assert (List.length vsl = 1);
       let v = List.hd vsl in
-      let task = add_decl task (create_prop_decl Pgoal gpr f_open) in
+      let task = add_decl hyp (create_prop_decl Pgoal gpr f_open) in
       [task], (Intro (v.vs_name, skip), gpr.pr_name)
   | _ -> [task], skip
 
 (* Direction with a certificate *)
-let dir d where task = (* choose Left (A) or Right (B) when the goal is of the form A \/ B *)
+(* choose Left (A) or Right (B) when
+    • the goal is of the form A ∧ B
+    • the hypothesis is of the form A ∨ B *)
+let dir d where task =
   let g = (default_goal task where).pr_name in
   let clues = ref false in
   let trans_t = Trans.decl (fun decl -> match decl.d_node with
@@ -216,6 +229,16 @@ let dir d where task = (* choose Left (A) or Right (B) when the goal is of the f
 
 let left = dir Left None
 let right = dir Right None
+
+(* Assert with certificate *)
+let cut t h task =
+  let trans_t = Trans.decl_l (fun decl -> match decl.d_node with
+    | Dprop (Pgoal, _, _) ->
+        [ [create_prop_decl Pgoal h t]; [create_prop_decl Plemma h t; decl] ]
+    | _ -> [[decl]]) None in
+  let idg = (task_goal task).pr_name in
+  let ct = translate_term t in
+  Trans.apply trans_t task, (Cut (ct, (Weakening skip, idg), skip), h.pr_name)
 
 (* Instantiate with certificate *)
 let inst t_inst what task =

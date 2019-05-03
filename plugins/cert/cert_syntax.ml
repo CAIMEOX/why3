@@ -43,32 +43,40 @@ and rule =
   | Trivial
   (* Trivial ⇓ (Γ, G : false ⊢ Δ) ≜  [] *)
   (* Trivial ⇓ (Γ ⊢ Δ, G : true ) ≜  [] *)
-  | Cut of ident * cterm * certif * certif
-  (* Cut (H, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, H : A))  @  (c₂ ⇓ (Γ, H : A ⊢ Δ)) *)
+  | Cut of cterm * certif * certif
+  (* Cut (A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, G : A))  @  (c₂ ⇓ (Γ, G : A ⊢ Δ)) *)
   | Split of certif * certif
   (* Split (c₁, c₂) ⇓ (Γ, G : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, G : A ⊢ Δ))  @  (c₂ ⇓ (Γ, G : B ⊢ Δ)) *)
   (* Split (c₁, c₂) ⇓ (Γ ⊢ Δ, G : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, G : A))  @  (c₂ ⇓ (Γ ⊢ Δ, G : B)) *)
-  (* Split (c₁, c₂) ⇓ (Γ, G : A → B ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, G : A))  @  (c₂ ⇓ (Γ, G : B ⊢ Δ)) *)
   | Unfold of certif
   (* Unfold c ⇓ (Γ, G : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, G : (A → B) ∧ (B → A) ⊢ Δ) *)
   (* Unfold c ⇓ (Γ ⊢ Δ, G : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, G : (A → B) ∧ (B → A)) *)
+  (* Unfold c ⇓ (Γ, G : A → B ⊢ Δ) ≜  c ⇓ (Γ, G : ¬A ∨ B ⊢ Δ)*)
+  (* Unfold c ⇓ (Γ ⊢ Δ, G : A → B) ≜  c ⇓ (Γ ⊢ Δ, G : ¬A ∨ B)*)
+  | Swap_neg of certif
+  (* Swap_neg c ⇓ (Γ, G : ¬A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, G : A)  *)
+  (* Swap_neg c ⇓ (Γ, G : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, G : ¬A) *)
+  (* Swap_neg c ⇓ (Γ ⊢ Δ, G : A ) ≜  c ⇓ (Γ, G : ¬A ⊢ Δ) *)
+  (* Swap_neg c ⇓ (Γ ⊢ Δ, G : ¬A) ≜  c ⇓ (Γ, G : A ⊢ Δ)  *)
   | Destruct of ident * ident * certif
   (* Destruct (H₁, H₂, c) ⇓ (Γ, G : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, H₁ : A, H₂ : B ⊢ Δ) *)
   (* Destruct (H₁, H₂, c) ⇓ (Γ ⊢ Δ, G : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, H₁ : A, H₂ : B) *)
-  (* Destruct (H₁, H₂, c) ⇓ (Γ ⊢ Δ, G : A → B) ≜  c ⇓ (Γ, H₁ : A ⊢ Δ, H₂ : B) *)
   | Dir of dir * certif
   (* Dir (Left, c) ⇓ (Γ ⊢ Δ, G : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, G : A) *)
   (* Dir (Left, c) ⇓ (Γ, G : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, G : A ⊢ Δ) *)
   (* and similar definition for Right instead of Left *)
-  | Intro of ident * certif
-  (* Intro (y, c) ⇓ (Γ, G : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : P y ⊢ Δ) (y fresh) *)
-  (* Intro (y, c) ⇓ (Γ ⊢ Δ, G : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : P y) (y fresh) *)
   | Weakening of certif
   (* Weakening c ⇓ (Γ ⊢ Δ, G : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening c ⇓ (Γ, G : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
+  | Intro of ident * certif
+  (* Intro (y, c) ⇓ (Γ, G : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : P y ⊢ Δ) (y fresh) *)
+  (* Intro (y, c) ⇓ (Γ ⊢ Δ, G : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : P y) (y fresh) *)
   | Inst of ident * cterm * certif
   (* Inst (H, t, c) ⇓ (Γ, G : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : ∀ x. P x, H : P t ⊢ Δ) *)
   (* Inst (H, t, c) ⇓ (Γ ⊢ Δ, G : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : ∃ x. P x, H : P t) *)
+  | Revert of ident * certif
+  (* Revert (x, c) ⇓ (Γ ⊢ Δ, G : P x) ≜  c ⇓ (Γ ⊢ Δ, G : ∀ y. P y) *)
+  (* Revert (x, c) ⇓ (Γ, G : P x ⊢ Δ) ≜  c ⇓ (Γ, G : ∃ y. P y ⊢ Δ) *)
   | Rewrite of ident * path * bool * certif list
   (* Rewrite (H, path, rev, lc) ⇓ Seq is defined as follows :
      it tries to rewrite in <G> an equality that is in <H>, following the path <path>,
@@ -172,15 +180,17 @@ and prr fmt = function
   | Skip -> fprintf fmt "Skip"
   | Axiom h -> fprintf fmt "Axiom@ %a" pri h
   | Trivial -> fprintf fmt "Trivial"
-  | Cut (h, a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a,@ %a)@]" pri h pcte a prc c1 prc c2
+  | Cut (a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a)@]" pcte a prc c1 prc c2
   | Split (c1, c2) -> fprintf fmt "Split @[(%a,@ %a)@]" prc c1 prc c2
   | Unfold c -> fprintf fmt "Unfold@ %a" prc c
+  | Swap_neg c -> fprintf fmt "Swap_neg@ %a" prc c
   | Destruct (h1, h2, c) -> fprintf fmt "Destruct @[(%a,@ %a,@ %a)@]"
                               pri h1 pri h2 prc c
   | Dir (d, c) -> fprintf fmt "Dir @[(%a,@ %a)@]" prd d prc c
-  | Intro (name, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri name prc c
   | Weakening c -> fprintf fmt "Weakening@ %a" prc c
+  | Intro (name, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri name prc c
   | Inst (i, t, c) -> fprintf fmt "Inst @[(%a,@ %a,@ %a)@]" pri i pcte t prc c
+  | Revert (name, c) -> fprintf fmt "Revert @[(%a,@ %a)@]" pri name prc c
   | Rewrite (h, p, rev, lc) ->
       fprintf fmt "Rewrite @[(%a,@ %a,@ %b,@ %a)@]"
         pri h (prle "; " prd) p rev (prle "; " prc) lc
