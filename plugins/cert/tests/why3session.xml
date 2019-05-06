@@ -8,6 +8,14 @@
 <path name="tests.mlw"/>
 <theory name="Top">
  <goal name="G1" proved="true">
+ <transf name="case_cert" proved="true" arg1="true">
+  <goal name="G1.0" proved="true">
+  <proof prover="0"><result status="valid" time="0.01"/></proof>
+  </goal>
+  <goal name="G1.1" proved="true">
+  <proof prover="0"><result status="valid" time="0.00"/></proof>
+  </goal>
+ </transf>
  <transf name="intuition_cert" proved="true" >
  </transf>
  </goal>
@@ -24,12 +32,22 @@
    </transf>
    </goal>
    <goal name="G3.0.1">
+   <transf name="exfalso_cert" >
+    <goal name="G3.0.1.0">
+    </goal>
+   </transf>
    </goal>
   </transf>
   </goal>
  </transf>
  </goal>
  <goal name="G4" proved="true">
+ <transf name="case_cert" arg1="true">
+  <goal name="G4.0">
+  </goal>
+  <goal name="G4.1">
+  </goal>
+ </transf>
  <transf name="intuition_cert" proved="true" >
  </transf>
  </goal>
@@ -177,6 +195,62 @@
   <transf name="rewrite" proved="true" arg1="H">
    <goal name="G19.0.0" proved="true">
    <proof prover="0"><result status="valid" time="0.01"/></proof>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G20">
+ <transf name="case" arg1="(exists x. not p x)">
+  <goal name="G20.0" expl="true case">
+  <transf name="destruct" arg1="h">
+   <goal name="G20.0.0" expl="true case">
+   <transf name="exists" arg1="x">
+    <goal name="G20.0.0.0">
+    <transf name="introduce_premises" >
+     <goal name="G20.0.0.0.0">
+     <transf name="assert" arg1="false">
+      <goal name="G20.0.0.0.0.0" expl="asserted formula">
+      </goal>
+      <goal name="G20.0.0.0.0.1">
+      </goal>
+     </transf>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="G20.1" expl="false case">
+  <transf name="exists" arg1="True">
+   <goal name="G20.1.0">
+   <transf name="introduce_premises" >
+    <goal name="G20.1.0.0">
+    <transf name="case" arg1="(p y)">
+     <goal name="G20.1.0.0.0" expl="true case">
+     </goal>
+     <goal name="G20.1.0.0.1" expl="false case">
+     <transf name="assert" arg1="(exists x. not p x)">
+      <goal name="G20.1.0.0.1.0" expl="asserted formula">
+      <transf name="exists" arg1="y">
+       <goal name="G20.1.0.0.1.0.0">
+       </goal>
+      </transf>
+      </goal>
+      <goal name="G20.1.0.0.1.1" expl="false case">
+      <transf name="assert" arg1="false">
+       <goal name="G20.1.0.0.1.1.0" expl="asserted formula">
+       </goal>
+       <goal name="G20.1.0.0.1.1.1" expl="false case">
+       </goal>
+      </transf>
+      </goal>
+     </transf>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
    </goal>
   </transf>
   </goal>

@@ -10,6 +10,7 @@ let checker_ctrans = checker_ctrans check_certif ctask_equal
 
 let assumption_trans          = checker_ctrans assumption
 let trivial_trans             = checker_ctrans trivial
+let exfalso_trans             = checker_ctrans exfalso
 let intro_trans               = checker_ctrans intro
 let intros_trans              = checker_ctrans intros
 let intuition_trans           = checker_ctrans intuition
@@ -18,6 +19,7 @@ let right_trans where         = checker_ctrans (dir Right where)
 let split_trans where         = checker_ctrans (split_logic where)
 let instantiate_trans t what  = checker_ctrans (inst t what)
 let assert_trans t            = checker_ctrans (cut t)
+let case_trans t              = checker_ctrans (case t)
 let rewrite_trans g rev where = checker_ctrans (rewrite g rev where)
 let clear_trans l             = checker_ctrans (clear l)
 
@@ -29,6 +31,12 @@ let () =
   register_transform_l "assumption_cert" (store assumption_trans)
     ~desc:"A certified version of coq tactic [assumption]";
 
+  register_transform_l "trivial_cert" (store trivial_trans)
+    ~desc:"A certified version of (simplified) coq tactic [trivial]";
+
+  register_transform_l "exfalso_cert" (store exfalso_trans)
+    ~desc:"A certified version of coq tactic [exfalso]";
+
   register_transform_l "intro_cert" (store intro_trans)
     ~desc:"A certified version of (simplified) coq tactic [intro]";
 
@@ -37,9 +45,6 @@ let () =
 
   register_transform_l "intuition_cert" (store intuition_trans)
     ~desc:"A certified version of (simplified) coq tactic [intuition]";
-
-  register_transform_l "trivial_cert" (store trivial_trans)
-    ~desc:"A certified version of (simplified) coq tactic [trivial]";
 
   wrap_and_register ~desc:"A certified version of coq tactic [left]"
      "left_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
@@ -63,6 +68,10 @@ let () =
 
   wrap_and_register ~desc:"A certified version of transformation assert"
     "assert_cert" (Tformula Ttrans_l)
+    (fun t -> store (assert_trans t));
+
+  wrap_and_register ~desc:"A certified version of transformation case"
+    "case_cert" (Tformula Ttrans_l)
     (fun t -> store (assert_trans t));
 
   wrap_and_register ~desc:"A certified version of (simplified) coq tactic [clear]"
