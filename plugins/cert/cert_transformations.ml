@@ -349,6 +349,7 @@ let rewrite_in rev h h1 task = (* rewrites <h> in <h1> with direction <rev> *)
           None) lp in
       Trans.par (trans_rewriting :: list_par) in
 
+
   (* Composing previous functions *)
   let gen_task = Trans.apply (Trans.bind (Trans.bind found_eq lp_new) recreate_tasks) task in
   match !clues with
@@ -359,6 +360,36 @@ let rewrite_in rev h h1 task = (* rewrites <h> in <h1> with direction <rev> *)
 let rewrite g rev where task =
   let h1 = default_goal task where in
   rewrite_in (not rev) g h1 task
+
+
+let exfalso : ctrans = fun task ->
+  let h = create_prsymbol (gen_ident "H") in
+  let trans = Trans.decl (fun decl -> match decl.d_node with
+     | Dprop (Pgoal, _, _) ->
+         [create_prop_decl Pgoal h t_false]
+     | _ -> [decl]) None in
+  let g = task_goal task in
+  [Trans.apply trans task],
+  (Cut (CTfalse, (Weakening skip, g.pr_name), (Trivial, h.pr_name)), h.pr_name)
+
+let case t = fun task ->
+  let h = create_prsymbol (gen_ident "H") in
+  let h1 = (create_prsymbol (gen_ident "H")).pr_name in
+  let h2 = (create_prsymbol (gen_ident "H")).pr_name in
+  let trans = Trans.decl_l (fun decl -> match decl.d_node with
+     | Dprop (Pgoal, _, _) ->
+            [ [create_prop_decl Paxiom h t; decl];
+              [create_prop_decl Paxiom h (t_not t); decl] ]
+     | _ -> [[decl]]) None in
+  let ct = translate_term t in
+  let t_not_t = CTbinop (Tor, ct, CTnot ct) in
+  Trans.apply trans task,
+  (Cut (
+       t_not_t,
+       (Destruct (h1, h2, (Swap_neg (Axiom h2, h1), h2)), h.pr_name),
+       (Split (skip, skip), h.pr_name)
+     ),
+   h.pr_name)
 
 (* Clear transformation with a certificate : *)
 (*   removes hypothesis <g> from the task *)
@@ -387,4 +418,3 @@ let rec intuition task =
                               ite right intuition id])))) task
 
 let clear l = compose_list (List.map (fun pr -> clear_one pr.pr_name) l)
-
