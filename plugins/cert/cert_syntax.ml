@@ -139,7 +139,6 @@ let translate_task task =
   translate_task_acc Mid.empty task
 
 
-
 (** Printing of <cterm> and <ctask> : for debugging purposes *)
 
 let ip = create_ident_printer []
