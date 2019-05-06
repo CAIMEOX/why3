@@ -16,8 +16,8 @@ let id task = [task], skip
 
 (** Combinators on transformations with a certificate *)
 
-(* Generalize ctrans on <task list * certif>, the invariant is that the number of
-  <Skip> in the certif is equal to the list length *)
+(* Generalize ctrans on <task list * certif>, with the invariant that each <Skip> in the
+   certif corresponds to one task in the list *)
 let ctrans_gen (ctr : ctrans) ((ts, (r, g)) : task list * certif) =
   let rec fill acc (r, g) ts = match r with
     | Skip -> begin match ts with
@@ -126,6 +126,19 @@ let assumption : ctrans = fun task ->
       [], (Axiom h, g)
   with Not_found -> [task], skip
 
+(* Closes task when if hypotheses contain false or if the goal is true *)
+let close : ctrans = fun task ->
+  let trans = Trans.fold_decl (fun d acc -> match d.d_node, acc with
+      | _, Some _ -> acc
+      | Dprop (k, pr, t), _ ->
+          begin match k, t.t_node with
+          | Pgoal, Ttrue | (Plemma | Paxiom), Tfalse -> Some pr
+          | _ -> acc
+          end
+      | _ -> acc) None in
+  match Trans.apply trans task with
+  | Some pr -> [], (Trivial, pr.pr_name)
+  | None -> [task], skip
 
 (* Split with a certificate : *)
 (* destructs a logical constructor at the top of the formula *)
@@ -195,7 +208,6 @@ let intro task = (* introduces hypothesis H : A when then goal is of the form A 
       let task1 = add_decl hyp (create_prop_decl Paxiom hpr f1) in
       let task2 = add_decl task1 (create_prop_decl Pgoal gpr f2) in
       let h = hpr.pr_name and g = gpr.pr_name in
-      (* [task2], (Intro (hpr.pr_name, skip), gpr.pr_name) *)
       [task2], (Unfold (Destruct (h, g, (Swap_neg skip, h)), g), g)
   | Tquant (Tforall, f) ->
       let vsl, _, f_open = t_open_quant f in
@@ -231,10 +243,11 @@ let left = dir Left None
 let right = dir Right None
 
 (* Assert with certificate *)
-let cut t h task =
+let cut t task =
+  let h = create_prsymbol (gen_ident "H") in
   let trans_t = Trans.decl_l (fun decl -> match decl.d_node with
     | Dprop (Pgoal, _, _) ->
-        [ [create_prop_decl Pgoal h t]; [create_prop_decl Plemma h t; decl] ]
+        [ [create_prop_decl Pgoal h t]; [create_prop_decl Paxiom h t; decl] ]
     | _ -> [[decl]]) None in
   let idg = (task_goal task).pr_name in
   let ct = translate_term t in
@@ -358,6 +371,8 @@ let clear_one g task =
 
 (** Derived transformations with a certificate *)
 
+let trivial = try_close [assumption; close]
+
 let intros = repeat intro
 
 let split_logic where = compose (unfold where)
@@ -372,3 +387,4 @@ let rec intuition task =
                               ite right intuition id])))) task
 
 let clear l = compose_list (List.map (fun pr -> clear_one pr.pr_name) l)
+
