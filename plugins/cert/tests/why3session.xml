@@ -18,6 +18,14 @@
  <goal name="G3">
  <transf name="intuition_cert" >
   <goal name="G3.0">
+  <transf name="assert_cert" arg1="true">
+   <goal name="G3.0.0" proved="true">
+   <transf name="trivial_cert" proved="true" >
+   </transf>
+   </goal>
+   <goal name="G3.0.1">
+   </goal>
+  </transf>
   </goal>
  </transf>
  </goal>
@@ -93,6 +101,8 @@
   <transf name="rewrite_cert" proved="true" arg1="&lt;-" arg2="H1" arg3="in" arg4="H">
    <goal name="G14.0.0" proved="true">
    <transf name="assumption_cert" proved="true" >
+   </transf>
+   <transf name="trivial_cert" proved="true" >
    </transf>
    </goal>
   </transf>
