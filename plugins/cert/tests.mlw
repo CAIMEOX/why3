@@ -7,6 +7,8 @@ predicate f
 axiom A : a
 axiom B : b
 
+predicate p (x : bool)
+
 
 goal G1 : a /\ b
 goal G2 : (a /\ b) /\ (a /\ a /\ a /\ b)
@@ -29,5 +31,4 @@ goal G18 : a -> d -> b -> c -> a -> d
 goal G19 : forall x. (forall u. u <-> a) -> (x <-> x)
 
 
-predicate p (x : bool)
 goal G20 : exists x : bool. p x -> (forall y. p y)

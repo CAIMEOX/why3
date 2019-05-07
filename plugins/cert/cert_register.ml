@@ -72,7 +72,7 @@ let () =
 
   wrap_and_register ~desc:"A certified version of transformation case"
     "case_cert" (Tformula Ttrans_l)
-    (fun t -> store (assert_trans t));
+    (fun t -> store (case_trans t));
 
   wrap_and_register ~desc:"A certified version of (simplified) coq tactic [clear]"
     "clear_cert" (Tprlist Ttrans_l)
