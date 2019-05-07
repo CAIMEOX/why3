@@ -14,6 +14,7 @@ open Format
 type cterm =
   | CTbvar of int (* bound variables use De Bruijn indices *)
   | CTfvar of ident (* free variables use a name *)
+  | CTapp of cterm * cterm
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
   | CTquant of quant * cterm (* forall binding *)
   | CTnot of cterm
@@ -74,7 +75,7 @@ and rule =
   | Inst of ident * cterm * certif
   (* Inst (H, t, c) ⇓ (Γ, G : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : ∀ x. P x, H : P t ⊢ Δ) *)
   (* Inst (H, t, c) ⇓ (Γ ⊢ Δ, G : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : ∃ x. P x, H : P t) *)
-  | Revert of ident * certif
+  | Revert of ident * certif (* derived inst *)
   (* Revert (x, c) ⇓ (Γ ⊢ Δ, G : P x) ≜  c ⇓ (Γ ⊢ Δ, G : ∀ y. P y) *)
   (* Revert (x, c) ⇓ (Γ, G : P x ⊢ Δ) ≜  c ⇓ (Γ, G : ∃ y. P y ⊢ Δ) *)
   | Rewrite of ident * path * bool * certif list
@@ -91,13 +92,23 @@ let rec translate_term_rec bv_lvl lvl t =
   (* level <lvl> is the number of forall above in the whole term *)
   (* <bv_lvl> is mapping bound variables to their respective level *)
   match t.t_node with
-  | Tapp (ls, []) ->
-      let ids = ls.ls_name in
+  | Tvar v ->
+      let ids = v.vs_name in
       begin match Mid.find_opt ids bv_lvl with
-      | None -> CTfvar ids
-      | Some lvl_s ->
-          assert (lvl_s <= lvl); (* a variable should not be above its definition *)
-          CTbvar (lvl - lvl_s) end
+        | None -> CTfvar ids
+        | Some lvl_s ->
+            assert (lvl_s <= lvl); (* a variable should not be above its definition *)
+            CTbvar (lvl - lvl_s)
+      end
+  | Tapp (ls, lt) ->
+      let ids = ls.ls_name in
+      let vs = match Mid.find_opt ids bv_lvl with
+        | None -> CTfvar ids
+        | Some lvl_s ->
+            assert (lvl_s <= lvl); (* a variable should not be above its definition *)
+            CTbvar (lvl - lvl_s) in
+      List.fold_left (fun acc t -> CTapp (acc, translate_term_rec bv_lvl lvl t))
+        vs lt
   | Tbinop (op, t1, t2) ->
       let ct1 = translate_term_rec bv_lvl lvl t1 in
       let ct2 = translate_term_rec bv_lvl lvl t2 in
@@ -155,6 +166,7 @@ and prle sep pre fmt le =
 let rec pcte fmt = function
   | CTbvar lvl -> pp_print_int fmt lvl
   | CTfvar i -> pri fmt i
+  | CTapp (f, arg) -> fprintf fmt "%a@ %a" pcte f pcte arg
   | CTbinop (op, t1, t2) ->
       fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
   | CTquant (q, ct) -> begin match q with

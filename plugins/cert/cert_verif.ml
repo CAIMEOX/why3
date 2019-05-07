@@ -10,6 +10,8 @@ open Cert_syntax
 let rec cterm_equal t1 t2 = match t1, t2 with
   | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
   | CTfvar i1, CTfvar i2 -> id_equal i1 i2
+  | CTapp (tl1, tr1), CTapp (tl2, tr2) ->
+      cterm_equal tl1 tl2 && cterm_equal tr1 tr2
   | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
       op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
   | CTquant (q1, t1), CTquant (q2, t2) when q1 = q2 -> cterm_equal t1 t2
@@ -26,6 +28,10 @@ let ctask_equal cta1 cta2 = Mid.equal cterm_pos_equal cta1 cta2
 let rec ct_bv_subst k u t = match t with
   | CTbvar i -> if i = k then u else t
   | CTfvar _ -> t
+  | CTapp (t1, t2) ->
+      let nt1 = ct_bv_subst k u t1 in
+      let nt2 = ct_bv_subst k u t2 in
+      CTapp (nt1, nt2)
   | CTbinop (op, t1, t2) ->
       let nt1 = ct_bv_subst k u t1 in
       let nt2 = ct_bv_subst k u t2 in
@@ -44,6 +50,7 @@ let locally_closed =
   let di = id_register (id_fresh "dummy_locally_closed_ident") in
   let rec term = function
     | CTbvar _ -> false
+    | CTapp (t1, t2)
     | CTbinop (_, t1, t2) -> term t1 && term t2
     | CTquant (_, t) -> term (ct_open t (CTfvar di))
     | CTnot t -> term t
@@ -54,6 +61,10 @@ let locally_closed =
 (* free variable substitution *)
 let rec ct_fv_subst z u t = match t with
   | CTfvar x -> if id_equal z x then u else t
+  | CTapp (t1, t2) ->
+      let nt1 = ct_fv_subst z u t1 in
+      let nt2 = ct_fv_subst z u t2 in
+      CTapp (nt1, nt2)
   | CTbinop (op, t1, t2) ->
       let nt1 = ct_fv_subst z u t1 in
       let nt2 = ct_fv_subst z u t2 in
@@ -69,7 +80,14 @@ let rec ct_fv_close x k t = match t with
   | CTbvar _ | CTtrue | CTfalse-> t
   | CTfvar y -> if id_equal x y then CTbvar k else t
   | CTnot t -> CTnot (ct_fv_close x k t)
-  | CTbinop (op, t1, t2) -> CTbinop (op, ct_fv_close x k t1, ct_fv_close x k t2)
+  | CTapp (t1, t2) ->
+      let nt1 = ct_fv_close x k t1 in
+      let nt2 = ct_fv_close x k t2 in
+      CTapp (nt1, nt2)
+  | CTbinop (op, t1, t2) ->
+      let nt1 = ct_fv_close x k t1 in
+      let nt2 = ct_fv_close x k t2 in
+      CTbinop (op, nt1, nt2)
   | CTquant (q, t) -> CTquant (q, ct_fv_close x (k+1) t)
 
 let ct_close x t = ct_fv_close x 0 t
@@ -77,6 +95,7 @@ let ct_close x t = ct_fv_close x 0 t
 (* collect the free variables *)
 let rec fvars = function
   | CTfvar x -> Mid.singleton x ()
+  | CTapp (t1, t2)
   | CTbinop (_, t1, t2) -> Mid.set_union (fvars t1) (fvars t2)
   | CTquant (_, t) -> fvars t
   | CTnot t -> fvars t
