@@ -114,8 +114,8 @@ let rec noskip (r, _) =
   | Destruct (_, _, c)
   | Dir (_, c)
   | Weakening c
-  | Intro (_, c)
-  | Inst (_, _, c)
+  | Intro_quant (_, c)
+  | Inst_quant (_, _, c)
   | Revert (_, c) -> noskip c
   | Rewrite (_, _, _, lc) -> List.for_all noskip lc
 
@@ -207,10 +207,6 @@ let rec check_certif cta (r, g : certif) : ctask list =
             let cta1 = Mid.add g (t1, pos) cta in
             let cta2 = Mid.add g (t2, pos) cta in
             check_certif cta1 c1 @ check_certif cta2 c2
-        (* | CTbinop (Timplies, t1, t2), false ->
-         *     let cta1 = Mid.add g (t1, true) cta in
-         *     let cta2 = Mid.add g (t2, false) cta in
-         *     check_certif cta1 c1 @ check_certif cta2 c2 *)
         | _ -> verif_failed "Not splittable" end
     | Unfold c ->
         let t, pos = find_ident g cta in
@@ -239,11 +235,6 @@ let rec check_certif cta (r, g : certif) : ctask list =
                       |> Mid.add h1 (t1, pos)
                       |> Mid.add h2 (t2, pos) in
             check_certif cta c
-        (* | CTbinop (Timplies, t1, t2), true ->
-         *     let cta = Mid.remove g cta
-         *               |> Mid.add h1 (t1, false)
-         *               |> Mid.add h2 (t2, true) in
-         *     check_certif cta c *)
         | _ -> verif_failed "Nothing to destruct"  end
     | Dir (d, c) ->
         let t, pos = find_ident g cta in
@@ -256,7 +247,7 @@ let rec check_certif cta (r, g : certif) : ctask list =
     | Weakening c ->
         let cta = Mid.remove g cta in
         check_certif cta c
-    | Intro (h, c) ->
+    | Intro_quant (h, c) ->
         let t, pos = find_ident g cta in
         begin match t, pos with
         | CTquant (Tforall, t), true | CTquant (Texists, t), false ->
@@ -264,13 +255,13 @@ let rec check_certif cta (r, g : certif) : ctask list =
             let cta = Mid.add g (ct_open t (CTfvar h), pos) cta in
             check_certif cta c
         | _ -> verif_failed "Nothing to introduce" end
-    | Inst (h, t_inst, c) ->
-        let t, pos = find_ident h cta in
+    | Inst_quant (h, t_inst, c) ->
+        let t, pos = find_ident g cta in
         begin match t, pos with
         | CTquant (Tforall, t), false | CTquant (Texists, t), true ->
             let cta = Mid.add h (ct_open t t_inst, pos) cta in
             check_certif cta c
-        | _ -> verif_failed "trying to instantiate a non-forall"
+        | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
         end
     | Revert (h, c) ->
         let t, pos = find_ident g cta in
