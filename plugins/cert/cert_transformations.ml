@@ -140,6 +140,23 @@ let close : ctrans = fun task ->
   | Some pr -> [], (Trivial, pr.pr_name)
   | None -> [task], skip
 
+
+let swap where task = (* if formula <f> designed by <where> is in the context, dismiss the old goal and put <not f> in its place *)
+  let g = where.pr_name in
+  let clues = ref false in
+  let id_goal = (task_goal task).pr_name in
+  let _, hyp = task_separate_goal task in
+  let trans_t = Trans.decl (fun d -> match d.d_node with
+    | Dprop ((Paxiom | Plemma), pr, t) when id_equal g pr.pr_name ->
+        clues := true;
+        let not_t = match t.t_node with Tnot t' -> t' | _ -> t_not t in
+        [create_prop_decl Pgoal pr not_t]
+    | _ -> [d]) None in
+  let nt = Trans.apply trans_t hyp in
+  if !clues then [nt], (Swap_neg (Weakening skip, id_goal), g)
+  else [task], skip
+
+
 (* Split with a certificate : *)
 (* destructs a logical constructor at the top of the formula *)
 let destruct where task = (* destructs /\ in the hypotheses *)
@@ -161,6 +178,7 @@ let destruct where task = (* destructs /\ in the hypotheses *)
   | None -> [task], skip
 
 let unfold where task = (* replaces A <-> B with (A -> B) /\ (B -> A) *)
+                        (* and A -> B with ¬A ∨ B *)
   let g = (default_goal task where).pr_name in
   let clues = ref false in
   let trans_t = Trans.decl (fun d -> match d.d_node with
@@ -196,6 +214,22 @@ let split_or_and where task = (* destructs /\ in the goal or \/ in the hypothses
   if !clues then nt, (Split (skip, skip), g)
   else [task], skip
 
+
+(* the next 3 function are copy-pasted from core/transform.ml *)
+let intro_attrs = Sattr.singleton Inlining.intro_attr
+
+let compat ls vs =
+  ls.ls_args = [] &&
+  Opt.equal Ty.ty_equal ls.ls_value (Some vs.vs_ty) &&
+  Opt.equal Loc.equal ls.ls_name.id_loc vs.vs_name.id_loc &&
+  Sattr.equal ls.ls_name.id_attrs (Sattr.add Inlining.intro_attr vs.vs_name.id_attrs)
+
+
+let ls_of_vs mal vs = match mal with
+  | Theory.MAls ls :: mal when compat ls vs -> ls, mal
+  | _ ->  let id = id_clone ~attrs:intro_attrs vs.vs_name in
+          create_fsymbol id [] vs.vs_ty, mal
+
 let intro where task =
   (* introduces hypothesis H : A when then goal is of the form A → B or
      introduces variable x when the goal is of the form \forall x. P x *)
@@ -210,12 +244,17 @@ let intro where task =
             clues := Some (Unfold (Destruct (h, g, (Swap_neg skip, h)), g), g);
             [create_prop_decl Paxiom hpr f1;
              create_prop_decl Pgoal gpr f2]
-        | Tquant (Tforall, f), Pgoal ->
-            let vsl, _, f_open = t_open_quant f in
-            assert (List.length vsl = 1);
-            let v = List.hd vsl in
-            clues := Some (Intro_quant (v.vs_name, skip), gpr.pr_name);
-            [ create_prop_decl Pgoal gpr f_open ]
+        | Tquant (Tforall, f), (Pgoal as k) | Tquant (Texists, f), (Paxiom | Plemma as k) ->
+            let vsl, _, f_t = t_open_quant f in
+            begin match vsl with
+            | [vs] ->
+                let ls, _ = ls_of_vs [] vs in
+                let subst = Mvs.singleton vs (fs_app ls [] vs.vs_ty) in
+                let f = t_subst subst f_t in
+                clues := Some (Intro_quant (ls.ls_name, skip), gpr.pr_name);
+                [create_param_decl ls; create_prop_decl k gpr f]
+            | _ -> assert false
+            end
         | _ -> [d] end
     | _ -> [d]) None in
   let nt = Trans.apply trans_t task in
@@ -261,8 +300,8 @@ let cut t task =
   Trans.apply trans_t task, (Cut (ct, (Weakening skip, idg), skip), h.pr_name)
 
 (* Instantiate with certificate *)
-let inst t_inst what task =
-  let g = what.pr_name in
+let inst t_inst where task =
+  let g = (default_goal task where).pr_name in
   let ct_inst = translate_term t_inst in
   let hpr = create_prsymbol (gen_ident "H") in
   let clues = ref None in
