@@ -69,13 +69,13 @@ and rule =
   | Weakening of certif
   (* Weakening c ⇓ (Γ ⊢ Δ, G : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening c ⇓ (Γ, G : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | Intro of ident * certif
-  (* Intro (y, c) ⇓ (Γ, G : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : P y ⊢ Δ) (y fresh) *)
-  (* Intro (y, c) ⇓ (Γ ⊢ Δ, G : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : P y) (y fresh) *)
-  | Inst of ident * cterm * certif
-  (* Inst (H, t, c) ⇓ (Γ, G : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : ∀ x. P x, H : P t ⊢ Δ) *)
-  (* Inst (H, t, c) ⇓ (Γ ⊢ Δ, G : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : ∃ x. P x, H : P t) *)
-  | Revert of ident * certif (* derived inst *)
+  | Intro_quant of ident * certif
+  (* Intro_quant (y, c) ⇓ (Γ, G : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : P y ⊢ Δ) (y fresh) *)
+  (* Intro_quant (y, c) ⇓ (Γ ⊢ Δ, G : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : P y) (y fresh) *)
+  | Inst_quant of ident * cterm * certif
+  (* Inst_quant (H, t, c) ⇓ (Γ, G : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : ∀ x. P x, H : P t ⊢ Δ) *)
+  (* Inst_quant (H, t, c) ⇓ (Γ ⊢ Δ, G : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : ∃ x. P x, H : P t) *)
+  | Revert of ident * certif (* derived from Inst_quant *)
   (* Revert (x, c) ⇓ (Γ ⊢ Δ, G : P x) ≜  c ⇓ (Γ ⊢ Δ, G : ∀ y. P y) *)
   (* Revert (x, c) ⇓ (Γ, G : P x ⊢ Δ) ≜  c ⇓ (Γ, G : ∃ y. P y ⊢ Δ) *)
   | Rewrite of ident * path * bool * certif list
@@ -199,8 +199,8 @@ and prr fmt = function
                               pri h1 pri h2 prc c
   | Dir (d, c) -> fprintf fmt "Dir @[(%a,@ %a)@]" prd d prc c
   | Weakening c -> fprintf fmt "Weakening@ %a" prc c
-  | Intro (name, c) -> fprintf fmt "Intro @[(%a,@ %a)@]" pri name prc c
-  | Inst (i, t, c) -> fprintf fmt "Inst @[(%a,@ %a,@ %a)@]" pri i pcte t prc c
+  | Intro_quant (name, c) -> fprintf fmt "Intro_quant @[(%a,@ %a)@]" pri name prc c
+  | Inst_quant (i, t, c) -> fprintf fmt "Inst_quant @[(%a,@ %a,@ %a)@]" pri i pcte t prc c
   | Revert (name, c) -> fprintf fmt "Revert @[(%a,@ %a)@]" pri name prc c
   | Rewrite (h, p, rev, lc) ->
       fprintf fmt "Rewrite @[(%a,@ %a,@ %b,@ %a)@]"

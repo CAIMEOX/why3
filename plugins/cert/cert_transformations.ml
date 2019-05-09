@@ -41,10 +41,10 @@ let ctrans_gen (ctr : ctrans) ((ts, (r, g)) : task list * certif) =
                     acc, (Dir (d, c), g), ts
     | Weakening c -> let acc, c, ts = fill acc c ts in
                      acc, (Weakening c, g), ts
-    | Intro (h, c) -> let acc, c, ts = fill acc c ts in
-                      acc, (Intro (h, c), g), ts
-    | Inst (i, h, c) -> let acc, c, ts = fill acc c ts in
-                        acc, (Inst (i, h, c), g), ts
+    | Intro_quant (h, c) -> let acc, c, ts = fill acc c ts in
+                            acc, (Intro_quant (h, c), g), ts
+    | Inst_quant (i, h, c) -> let acc, c, ts = fill acc c ts in
+                              acc, (Inst_quant (i, h, c), g), ts
     | Revert (h, c) -> let acc, c, ts = fill acc c ts in
                        acc, (Revert (h, c), g), ts
     | Rewrite (h, path, rev, lc) ->
@@ -196,26 +196,33 @@ let split_or_and where task = (* destructs /\ in the goal or \/ in the hypothses
   if !clues then nt, (Split (skip, skip), g)
   else [task], skip
 
-(* Intro with a certificate *)
-let intro task = (* introduces hypothesis H : A when then goal is of the form A → B or
-                    introduces variable x when the goal is of the form \forall x. P x *)
+let intro where task =
+  (* introduces hypothesis H : A when then goal is of the form A → B or
+     introduces variable x when the goal is of the form \forall x. P x *)
+  let gpr = default_goal task where in
   let hpr = create_prsymbol (id_fresh "H") in
-  let gpr, tg = try task_goal task, task_goal_fmla task
-                with GoalNotFound -> invalid_arg "Cert_transformations.intro" in
-  let _, hyp = task_separate_goal task in
-  match tg.t_node with
-  | Tbinop (Timplies, f1, f2) ->
-      let task1 = add_decl hyp (create_prop_decl Paxiom hpr f1) in
-      let task2 = add_decl task1 (create_prop_decl Pgoal gpr f2) in
-      let h = hpr.pr_name and g = gpr.pr_name in
-      [task2], (Unfold (Destruct (h, g, (Swap_neg skip, h)), g), g)
-  | Tquant (Tforall, f) ->
-      let vsl, _, f_open = t_open_quant f in
-      assert (List.length vsl = 1);
-      let v = List.hd vsl in
-      let task = add_decl hyp (create_prop_decl Pgoal gpr f_open) in
-      [task], (Intro (v.vs_name, skip), gpr.pr_name)
-  | _ -> [task], skip
+  let h = hpr.pr_name and g = gpr.pr_name in
+  let clues = ref None in
+  let trans_t = Trans.decl (fun d -> match d.d_node with
+    | Dprop (k, pr, t) when id_equal g pr.pr_name ->
+        begin match t.t_node, k with
+        | Tbinop (Timplies, f1, f2), Pgoal ->
+            clues := Some (Unfold (Destruct (h, g, (Swap_neg skip, h)), g), g);
+            [create_prop_decl Paxiom hpr f1;
+             create_prop_decl Pgoal gpr f2]
+        | Tquant (Tforall, f), Pgoal ->
+            let vsl, _, f_open = t_open_quant f in
+            assert (List.length vsl = 1);
+            let v = List.hd vsl in
+            clues := Some (Intro_quant (v.vs_name, skip), gpr.pr_name);
+            [ create_prop_decl Pgoal gpr f_open ]
+        | _ -> [d] end
+    | _ -> [d]) None in
+  let nt = Trans.apply trans_t task in
+  match !clues with
+  | None -> [task], skip
+  | Some c -> [nt], c
+
 
 (* Direction with a certificate *)
 (* choose Left (A) or Right (B) when
@@ -256,20 +263,25 @@ let cut t task =
 (* Instantiate with certificate *)
 let inst t_inst what task =
   let g = what.pr_name in
+  let ct_inst = translate_term t_inst in
+  let hpr = create_prsymbol (gen_ident "H") in
   let clues = ref None in
   let trans_t = Trans.decl (fun decl -> match decl.d_node with
-    | Dprop (k, pr, t) when id_equal g pr.pr_name && k <> Pgoal ->
-        begin match t.t_node with
-        | Tquant (Tforall, _) ->
-            let t_subst = subst_forall_list t [t_inst] in
-            let new_pr = create_prsymbol (gen_ident "Hinst") in
-            clues := Some (new_pr, t_subst);
-            [decl; create_prop_decl k new_pr t_subst]
+    | Dprop (k, pr, t) when id_equal g pr.pr_name ->
+        begin match t.t_node, k with
+        | Tquant (Tforall, _), (Plemma | Paxiom) ->
+            let t_subst = subst_forall t t_inst in
+            clues := Some (Inst_quant (hpr.pr_name, ct_inst, skip), g);
+            [decl; create_prop_decl k hpr t_subst]
+        | Tquant (Texists, _), Pgoal ->
+            let t_subst = subst_exist t t_inst in
+            clues := Some (Inst_quant (hpr.pr_name, ct_inst, (Weakening skip, g)), g);
+            [create_prop_decl k hpr t_subst]
         | _ -> [decl] end
     | _ -> [decl]) None in
   let nt = Trans.apply trans_t task in
   match !clues with
-  | Some (h, t_subst) -> [nt], (Inst (h.pr_name, translate_term t_subst, skip), g)
+  | Some c -> [nt], c
   | None -> [task], skip
 
 (* Rewrite with a certificate *)
@@ -404,7 +416,7 @@ let clear_one g task =
 
 let trivial = try_close [assumption; close]
 
-let intros = repeat intro
+let intros = repeat (intro None)
 
 let split_logic where = compose (unfold where)
                           (compose (split_or_and where)
@@ -412,7 +424,7 @@ let split_logic where = compose (unfold where)
 
 let rec intuition task =
   repeat (compose assumption
-            (compose intro
+            (compose (intro None)
                (compose (split_logic None)
                   (try_close [ite left intuition id;
                               ite right intuition id])))) task

@@ -8,6 +8,12 @@
 <path name="tests.mlw"/>
 <theory name="Top">
  <goal name="G1" proved="true">
+ <transf name="assert" arg1="(forall x. p x)">
+  <goal name="G1.0" expl="asserted formula">
+  </goal>
+  <goal name="G1.1">
+  </goal>
+ </transf>
  <transf name="case_cert" arg1="true">
   <goal name="G1.0">
   <proof prover="0" obsolete="true"><result status="valid" time="0.01"/></proof>
@@ -257,6 +263,10 @@
  </transf>
  <transf name="case_cert" arg1="(exists x. not p x)">
   <goal name="G20.0">
+  <transf name="instantiate_cert" arg1="True" arg2="G20">
+   <goal name="G20.0.0">
+   </goal>
+  </transf>
   </goal>
   <goal name="G20.1">
   </goal>
