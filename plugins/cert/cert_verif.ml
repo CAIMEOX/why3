@@ -92,15 +92,19 @@ let rec ct_fv_close x k t = match t with
 
 let ct_close x t = ct_fv_close x 0 t
 
-(* collect the free variables *)
-let rec fvars = function
-  | CTfvar x -> Mid.singleton x ()
+(* free variable with respect to a term *)
+let rec mem_cont x t cont = match t with
+  | CTfvar y -> cont (id_equal x y)
   | CTapp (t1, t2)
-  | CTbinop (_, t1, t2) -> Mid.set_union (fvars t1) (fvars t2)
-  | CTquant (_, t) -> fvars t
-  | CTnot t -> fvars t
-  | CTbvar _ | CTtrue | CTfalse -> Mid.empty
+  | CTbinop (_, t1, t2) ->
+      mem_cont x t1 (fun m1 ->
+      mem_cont x t2 (fun m2 ->
+      cont (m1 || m2)))
+  | CTquant (_, t)
+  | CTnot t -> mem_cont x t cont
+  | CTbvar _ | CTtrue | CTfalse -> cont false
 
+let mem x t = mem_cont x t (fun x -> x)
 
 (* checks if the transformation closes the task *)
 let rec noskip (r, _) =
@@ -251,7 +255,7 @@ let rec check_certif cta (r, g : certif) : ctask list =
         let t, pos = find_ident g cta in
         begin match t, pos with
         | CTquant (Tforall, t), true | CTquant (Texists, t), false ->
-            assert (not (Mid.mem h (fvars t)));
+            if mem h t then verif_failed "non-free variable" else
             let cta = Mid.add g (ct_open t (CTfvar h), pos) cta in
             check_certif cta c
         | _ -> verif_failed "Nothing to introduce" end
