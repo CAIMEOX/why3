@@ -140,23 +140,6 @@ let close : ctrans = fun task ->
   | Some pr -> [], (Trivial, pr.pr_name)
   | None -> [task], skip
 
-
-let swap where task = (* if formula <f> designed by <where> is in the context, dismiss the old goal and put <not f> in its place *)
-  let g = where.pr_name in
-  let clues = ref false in
-  let id_goal = (task_goal task).pr_name in
-  let _, hyp = task_separate_goal task in
-  let trans_t = Trans.decl (fun d -> match d.d_node with
-    | Dprop ((Paxiom | Plemma), pr, t) when id_equal g pr.pr_name ->
-        clues := true;
-        let not_t = match t.t_node with Tnot t' -> t' | _ -> t_not t in
-        [create_prop_decl Pgoal pr not_t]
-    | _ -> [d]) None in
-  let nt = Trans.apply trans_t hyp in
-  if !clues then [nt], (Swap_neg (Weakening skip, id_goal), g)
-  else [task], skip
-
-
 (* Split with a certificate : *)
 (* destructs a logical constructor at the top of the formula *)
 let destruct where task = (* destructs /\ in the hypotheses *)
@@ -425,22 +408,38 @@ let exfalso : ctrans = fun task ->
 
 let case t = fun task ->
   let h = create_prsymbol (gen_ident "H") in
-  let h1 = (create_prsymbol (gen_ident "H")).pr_name in
-  let h2 = (create_prsymbol (gen_ident "H")).pr_name in
   let trans = Trans.decl_l (fun decl -> match decl.d_node with
      | Dprop (Pgoal, _, _) ->
             [ [create_prop_decl Paxiom h t; decl];
               [create_prop_decl Paxiom h (t_not t); decl] ]
      | _ -> [[decl]]) None in
-  let ct = translate_term t in
-  let t_not_t = CTbinop (Tor, ct, CTnot ct) in
+  let not_ct = CTnot (translate_term t) in
   Trans.apply trans task,
-  (Cut (
-       t_not_t,
-       (Destruct (h1, h2, (Swap_neg (Axiom h2, h1), h2)), h.pr_name),
-       (Split (skip, skip), h.pr_name)
-     ),
+  (Cut (not_ct, (Swap_neg skip, h.pr_name), skip),
    h.pr_name)
+
+
+let swap where task = (* if formula <f> designed by <where> is in the context, dismiss the old goal and put <not f> in its place *)
+  let gpr = default_goal task where in
+  let term_goal, id_goal = task_goal_fmla task, (task_goal task).pr_name in
+  if id_equal gpr.pr_name id_goal
+  then compose (case term_goal) (compose assumption exfalso) task
+  else
+  let clues = ref None in
+  let _, hyp = task_separate_goal task in
+  let trans_t = Trans.decl (fun d -> match d.d_node with
+    | Dprop ((Paxiom | Plemma), pr, t) when id_equal gpr.pr_name pr.pr_name ->
+        clues := Some t; []
+    | _ -> [d]) None in
+  let nt = Trans.apply trans_t hyp in
+  match !clues with
+  | Some t ->
+      let not_t = match t.t_node with Tnot t' -> t' | _ -> t_not t in
+      let decl = create_prop_decl Pgoal gpr not_t in
+      [add_decl nt decl], (Swap_neg (Weakening skip, id_goal), gpr.pr_name)
+  | None -> [task], skip
+
+
 
 (* Clear transformation with a certificate : *)
 (*   removes hypothesis <g> from the task *)

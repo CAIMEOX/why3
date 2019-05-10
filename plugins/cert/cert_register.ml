@@ -45,7 +45,7 @@ let () =
     ~desc:"A certified version of (simplified) coq tactic [intuition]";
 
   wrap_and_register ~desc:"A certified transformation that negates and swaps an hypothesis from the context to the goal]"
-    "swap_cert" (Tprsymbol (Ttrans_l))
+    "swap_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
      (fun where -> store (swap_trans where));
 
   wrap_and_register ~desc:"A certified version of (simplified) coq tactic [intro]"
