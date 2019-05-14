@@ -198,6 +198,10 @@
  <goal name="G19">
  <transf name="introduce_premises" >
   <goal name="G19.0">
+  <transf name="revert_cert" arg1="x">
+   <goal name="G19.0.0">
+   </goal>
+  </transf>
   <transf name="rewrite" arg1="H">
    <goal name="G19.0.0">
    <proof prover="0" obsolete="true"><result status="valid" time="0.01"/></proof>

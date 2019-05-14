@@ -14,6 +14,7 @@ let exfalso_trans             = checker_ctrans exfalso
 let intros_trans              = checker_ctrans intros
 let intuition_trans           = checker_ctrans intuition
 let swap_trans where          = checker_ctrans (swap where)
+let revert_trans ls           = checker_ctrans (revert ls)
 let intro_trans where         = checker_ctrans (intro where)
 let left_trans where          = checker_ctrans (dir Left where)
 let right_trans where         = checker_ctrans (dir Right where)
@@ -44,9 +45,14 @@ let () =
   register_transform_l "intuition_cert" (store intuition_trans)
     ~desc:"A certified version of (simplified) coq tactic [intuition]";
 
-  wrap_and_register ~desc:"A certified transformation that negates and swaps an hypothesis from the context to the goal]"
+  wrap_and_register ~desc:"A certified transformation that negates \
+                           and swaps an hypothesis from the context to the goal]"
     "swap_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
      (fun where -> store (swap_trans where));
+
+  wrap_and_register ~desc:"A certified transformation that generalizes a variable in the goal"
+    "revert_cert" (Tlsymbol (Ttrans_l))
+     (fun ls -> store (revert_trans ls));
 
   wrap_and_register ~desc:"A certified version of (simplified) coq tactic [intro]"
     "intro_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
