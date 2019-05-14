@@ -154,6 +154,7 @@ let collect_lsymbol s (d: decl) =
    used in the declaration d.  *)
 let depends dep d =
   let new_set = collect_lsymbol Sls.empty d in
+  (* not (Sls.disjoint dep new_set) *)
   if Sls.equal (Sls.inter dep new_set) Sls.empty then
     false
   else

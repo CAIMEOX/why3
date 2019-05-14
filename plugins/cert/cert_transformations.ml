@@ -198,24 +198,17 @@ let split_or_and where task = (* destructs /\ in the goal or \/ in the hypothses
   else [task], skip
 
 
-(* the next 3 function are copy-pasted from core/transform.ml *)
+(* the next 2 functions are copied from introduction.ml *)
 let intro_attrs = Sattr.singleton Inlining.intro_attr
 
-let compat ls vs =
-  ls.ls_args = [] &&
-  Opt.equal Ty.ty_equal ls.ls_value (Some vs.vs_ty) &&
-  Opt.equal Loc.equal ls.ls_name.id_loc vs.vs_name.id_loc &&
-  Sattr.equal ls.ls_name.id_attrs (Sattr.add Inlining.intro_attr vs.vs_name.id_attrs)
-
-
-let ls_of_vs mal vs = match mal with
-  | Theory.MAls ls :: mal when compat ls vs -> ls, mal
-  | _ ->  let id = id_clone ~attrs:intro_attrs vs.vs_name in
-          create_fsymbol id [] vs.vs_ty, mal
+let ls_of_vs vs =
+  let id = id_clone ~attrs:intro_attrs vs.vs_name in
+  create_fsymbol id [] vs.vs_ty
 
 let intro where task =
-  (* introduces hypothesis H : A when then goal is of the form A → B or
-     introduces variable x when the goal is of the form \forall x. P x *)
+  (* introduces hypothesis H : A when the goal is of the form A → B or
+     introduces variable x when the goal is of the form ∀ x. P x
+     introduces variable x when a hypothesis is of the form ∃ x. P x *)
   let gpr = default_goal task where in
   let hpr = create_prsymbol (id_fresh "H") in
   let h = hpr.pr_name and g = gpr.pr_name in
@@ -231,7 +224,7 @@ let intro where task =
             let vsl, _, f_t = t_open_quant f in
             begin match vsl with
             | [vs] ->
-                let ls, _ = ls_of_vs [] vs in
+                let ls = ls_of_vs vs in
                 let subst = Mvs.singleton vs (fs_app ls [] vs.vs_ty) in
                 let f = t_subst subst f_t in
                 clues := Some (Intro_quant (ls.ls_name, skip), gpr.pr_name);
@@ -395,7 +388,6 @@ let rewrite g rev where task =
   let h1 = default_goal task where in
   rewrite_in (not rev) g h1 task
 
-
 let exfalso : ctrans = fun task ->
   let h = create_prsymbol (gen_ident "H") in
   let trans = Trans.decl (fun decl -> match decl.d_node with
@@ -418,27 +410,41 @@ let case t = fun task ->
   (Cut (not_ct, (Swap_neg skip, h.pr_name), skip),
    h.pr_name)
 
-
-let swap where task = (* if formula <f> designed by <where> is in the context, dismiss the old goal and put <not f> in its place *)
+let swap where task = (* if formula <f> designed by <where> is in the context, dismiss the old
+ goal and put <not f> in its place *)
   let gpr = default_goal task where in
   let term_goal, id_goal = task_goal_fmla task, (task_goal task).pr_name in
   if id_equal gpr.pr_name id_goal
   then compose (case term_goal) (compose assumption exfalso) task
   else
-  let clues = ref None in
   let _, hyp = task_separate_goal task in
-  let trans_t = Trans.decl (fun d -> match d.d_node with
+  let trans_t = Trans.fold_decl (fun d (opt_t, acc_task) -> match d.d_node with
     | Dprop ((Paxiom | Plemma), pr, t) when id_equal gpr.pr_name pr.pr_name ->
-        clues := Some t; []
-    | _ -> [d]) None in
-  let nt = Trans.apply trans_t hyp in
-  match !clues with
+        Some t, acc_task
+    | _ -> opt_t, add_decl acc_task d) (None, None) in
+  let clues, nt = Trans.apply trans_t hyp in
+  match clues with
   | Some t ->
       let not_t = match t.t_node with Tnot t' -> t' | _ -> t_not t in
       let decl = create_prop_decl Pgoal gpr not_t in
       [add_decl nt decl], (Swap_neg (Weakening skip, id_goal), gpr.pr_name)
   | None -> [task], skip
 
+let revert ls task =
+  let gpr = create_prsymbol (gen_ident "G") in
+  let t, idg = task_goal_fmla task, task_goal task in
+  let _, hyp = task_separate_goal task in
+  let new_ident = id_fresh ls.ls_name.id_string in
+  let new_var = create_vsymbol new_ident (Opt.get ls.ls_value) in
+  let t = t_replace (t_app_infer ls []) (t_var new_var) t in
+  let close_t = t_forall_close [new_var] [] t in
+  let task = add_decl hyp (create_prop_decl Pgoal gpr close_t) in
+  let hinst = id_register (gen_ident "Hinst") in
+  [task],
+  (Cut (translate_term close_t,
+        (Weakening skip, idg.pr_name),
+        (Inst_quant (hinst, CTfvar ls.ls_name, (Axiom hinst, idg.pr_name)), gpr.pr_name)),
+   gpr.pr_name)
 
 
 (* Clear transformation with a certificate : *)
