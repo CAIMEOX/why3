@@ -258,6 +258,12 @@
   </goal>
  </transf>
  </goal>
+ <goal name="G21">
+ <transf name="pose_cert" arg1="hh" arg2="true">
+  <goal name="G21.0">
+  </goal>
+ </transf>
+ </goal>
 </theory>
 </file>
 </why3session>
