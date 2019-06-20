@@ -123,7 +123,12 @@ let rec translate_term_rec bv_lvl lvl t =
   | Tnot t -> CTnot (translate_term_rec bv_lvl lvl t)
   | Ttrue -> CTtrue
   | Tfalse -> CTfalse
-  | _ -> invalid_arg "Cert_syntax.translate_term"
+  | Tconst _ -> invalid_arg "Cert_syntax.translate_term Tconst"
+  | Tif _ -> invalid_arg "Cert_syntax.translate_term Tif"
+  | Tlet _ -> invalid_arg "Cert_syntax.translate_term Tlet"
+  | Tcase _ -> invalid_arg "Cert_syntax.translate_term Tcase"
+  | Teps _ -> invalid_arg "Cert_syntax.translate_term Teps"
+
 
 let translate_term t = translate_term_rec Mid.empty 0 t
 

@@ -32,3 +32,5 @@ goal G19 : forall x. (forall u. u <-> a) -> (x <-> x)
 
 
 goal G20 : exists x : bool. p x -> (forall y. p y)
+goal G21 : true
+
