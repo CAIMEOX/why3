@@ -456,6 +456,36 @@ let clear_one g task =
   [Trans.apply trans task], (Weakening skip, g)
 
 
+
+let pose (name: string) (t: term) : ctrans = fun task ->
+  let ls_ident = gen_ident name in
+  let ls = Term.create_lsymbol ls_ident [] None in
+  let ls_term = Term.t_app ls [] None in
+  let new_constant = Decl.create_param_decl ls in
+  let pr = create_prsymbol (gen_ident "H") in
+  let eq = t_iff ls_term t in
+  (* hyp = [pr : ls = t] *)
+  let hyp =
+    Decl.create_prop_decl Paxiom pr eq
+  in
+  let trans_new_task =
+      Trans.add_decls [new_constant; hyp]
+  in
+  let hpose = id_register (gen_ident "Hpose") in
+  let hposet = id_register (gen_ident "Hpose") in
+  let id_cert = Unfold (Destruct (hpose, hposet, (Swap_neg (Axiom hpose, hposet), hpose)),
+                hpose), hpose in
+  let eq_cert = Unfold (Split (id_cert, id_cert), hpose), hpose in
+  let ct = translate_term t in
+  [Trans.apply trans_new_task task],
+  (Cut (CTquant (Texists, CTbinop (Tiff, CTbvar 0, ct)),
+        (Inst_quant (hpose, ct, eq_cert),
+         pr.pr_name),
+        (Intro_quant (ls.ls_name, skip), pr.pr_name)
+     ),
+   pr.pr_name)
+
+
 (** Derived transformations with a certificate *)
 
 let trivial = try_close [assumption; close]
