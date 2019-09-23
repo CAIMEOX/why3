@@ -183,7 +183,7 @@ let check_rewrite cta rev h g terms path : ctask list =
 
 (** This is the main verification function : <check_certif> replays the certificate on a ctask *)
 
-let rec check_certif cta (r, g : certif) : ctask list =
+let rec ccheck (r, g : certif) cta : ctask list =
   match r with
     | Skip -> [cta]
     | Axiom h ->
@@ -203,14 +203,14 @@ let rec check_certif cta (r, g : certif) : ctask list =
     | Cut (a, c1, c2) ->
         let cta1 = Mid.add g (a, true) cta in
         let cta2 = Mid.add g (a, false) cta in
-        check_certif cta1 c1 @ check_certif cta2 c2
+        ccheck c1 cta1 @ ccheck c2 cta2
     | Split (c1, c2) ->
         let t, pos = find_ident g cta in
         begin match t, pos with
         | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false ->
             let cta1 = Mid.add g (t1, pos) cta in
             let cta2 = Mid.add g (t2, pos) cta in
-            check_certif cta1 c1 @ check_certif cta2 c2
+            ccheck c1 cta1 @ ccheck c2 cta2
         | _ -> verif_failed "Not splittable" end
     | Unfold c ->
         let t, pos = find_ident g cta in
@@ -220,17 +220,17 @@ let rec check_certif cta (r, g : certif) : ctask list =
             let imp_neg = CTbinop (Timplies, t2, t1) in
             let unfolded_iff = CTbinop (Tand, imp_pos, imp_neg), pos in
             let cta = Mid.add g unfolded_iff cta in
-            check_certif cta c
+            ccheck c cta
         | CTbinop (Timplies, t1, t2) ->
             let unfolded_imp = CTbinop (Tor, CTnot t1, t2), pos in
             let cta = Mid.add g unfolded_imp cta in
-            check_certif cta c
+            ccheck c cta
         | _ -> verif_failed "Nothing to unfold" end
     | Swap_neg c ->
         let t, pos = find_ident g cta in
         let neg_t = match t with CTnot t -> t | t -> CTnot t in
         let cta = Mid.add g (neg_t, not pos) cta in
-        check_certif cta c
+        ccheck c cta
     | Destruct (h1, h2, c) ->
         let t, pos = find_ident g cta in
         begin match t, pos with
@@ -238,7 +238,7 @@ let rec check_certif cta (r, g : certif) : ctask list =
             let cta = Mid.remove g cta
                       |> Mid.add h1 (t1, pos)
                       |> Mid.add h2 (t2, pos) in
-            check_certif cta c
+            ccheck c cta
         | _ -> verif_failed "Nothing to destruct"  end
     | Dir (d, c) ->
         let t, pos = find_ident g cta in
@@ -246,25 +246,25 @@ let rec check_certif cta (r, g : certif) : ctask list =
         | CTbinop (Tor, t, _), Left, true | CTbinop (Tor, _, t), Right, true
         | CTbinop (Tand, t, _), Left, false | CTbinop (Tand, _, t), Right, false ->
           let cta = Mid.add g (t, pos) cta in
-          check_certif cta c
+          ccheck c cta
         | _ -> verif_failed "Can't follow a direction" end
     | Weakening c ->
         let cta = Mid.remove g cta in
-        check_certif cta c
+        ccheck c cta
     | Intro_quant (h, c) ->
         let t, pos = find_ident g cta in
         begin match t, pos with
         | CTquant (Tforall, t), true | CTquant (Texists, t), false ->
             if mem h t then verif_failed "non-free variable" else
             let cta = Mid.add g (ct_open t (CTfvar h), pos) cta in
-            check_certif cta c
+            ccheck c cta
         | _ -> verif_failed "Nothing to introduce" end
     | Inst_quant (h, t_inst, c) ->
         let t, pos = find_ident g cta in
         begin match t, pos with
         | CTquant (Tforall, t), false | CTquant (Texists, t), true ->
             let cta = Mid.add h (ct_open t t_inst, pos) cta in
-            check_certif cta c
+            ccheck c cta
         | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
         end
     | Revert (h, c) ->
@@ -272,7 +272,20 @@ let rec check_certif cta (r, g : certif) : ctask list =
         let closed_t = if pos then CTquant (Tforall, ct_close h t)
                        else CTquant (Texists, ct_close h t) in
         let cta = Mid.add g (closed_t, pos) cta in
-        check_certif cta c
+        ccheck c cta
     | Rewrite (h, path, rev, lc) ->
         let lcta = check_rewrite cta rev h g [] path in
-        List.map2 check_certif lcta lc |> List.concat
+        List.map2 ccheck lc lcta |> List.concat
+
+
+let checker certif init_t res_t =
+  try let init_ct = translate_task init_t in
+      let res_ct  = List.map translate_task res_t in
+      let res_ct' = ccheck certif init_ct in
+      if Lists.equal ctask_equal res_ct res_ct'
+      then res_t
+      else begin
+          print_ctasks "/tmp/from_trans.log" res_ct;
+          print_ctasks "/tmp/from_cert.log"  res_ct';
+          verif_failed "Replaying certif gives different result, log available" end
+  with e -> raise (Trans.TransFailure ("Cert_syntax.checker_ctrans", e))
