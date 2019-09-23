@@ -6,7 +6,7 @@ open Cert_verif
 
 (** Certified transformations *)
 
-let checker_ctrans = checker_ctrans check_certif ctask_equal
+let checker_ctrans = checker_ctrans checker
 
 let assumption_trans          = checker_ctrans assumption
 let trivial_trans             = checker_ctrans trivial

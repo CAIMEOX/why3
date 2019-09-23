@@ -240,17 +240,7 @@ let verif_failed s = raise (Certif_verification_failed s)
 
 (** Create a certified transformation from a transformation with a certificate *)
 
-let checker_ctrans check_certif ctask_equal (ctr : ctrans) task =
-  try let (ltask, c) : task list * certif = ctr task in
-      let cta = translate_task task in
-      print_certif "/tmp/certif.log" c;
-      print_ctasks "/tmp/init_ctask.log" [cta];
-      let lcta : ctask list = check_certif cta c in
-      if Lists.equal ctask_equal lcta (List.map translate_task ltask)
-      then ltask
-      else begin
-          print_ctasks "/tmp/from_trans.log" (List.map translate_task ltask);
-          print_ctasks "/tmp/from_cert.log" lcta;
-          verif_failed "Replaying certif gives different result, log available" end
-  with e -> raise (Trans.TransFailure ("Cert_syntax.checker_ctrans", e))
+let checker_ctrans checker (ctr : ctrans) init_t =
+  let res_t, certif = ctr init_t in
+  checker certif init_t res_t
 
