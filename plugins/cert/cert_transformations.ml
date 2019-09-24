@@ -103,7 +103,7 @@ let default_goal task = function
 (* Assumption with a certificate : *)
 (*   closes the current task if the goal is an hypothesis *)
 let assumption_decl tg decl = match decl.d_node with
-  | Dprop (_, pr, t) when t_equal_nt_na t tg ->
+  | Dprop (_, pr, t) when t_equal t tg ->
       Some pr.pr_name
   | _ -> None
 
