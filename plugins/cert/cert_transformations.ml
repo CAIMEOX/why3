@@ -11,7 +11,7 @@ open Cert_syntax
 
 
 (* Identity transformation with a certificate *)
-let id task = [task], skip
+let id task = [task], hole
 
 
 (** Combinators on transformations with a certificate *)
@@ -20,7 +20,7 @@ let id task = [task], skip
    certif corresponds to one task in the list *)
 let ctrans_gen (ctr : ctrans) ((ts, (r, g)) : task list * certif) =
   let rec fill acc (r, g) ts = match r with
-    | Skip -> begin match ts with
+    | Hole -> begin match ts with
               | [] -> assert false
               | t::ts -> let lt, ct = ctr t in
                          lt :: acc, ct, ts end
@@ -67,7 +67,7 @@ let compose_list l = List.fold_left compose id l
 (*   applies [tri], if the task changed then apply [trt] else apply [tre] *)
 let ite (tri : ctrans) (trt : ctrans) (tre : ctrans) : ctrans = fun task ->
   let ((lt, (r, _)) as tri_task) = tri task in
-  if not (Lists.equal task_equal lt [task] && r = Skip)
+  if not (Lists.equal task_equal lt [task] && r = Hole)
   then ctrans_gen trt tri_task
   else ctrans_gen tre tri_task
 
@@ -124,7 +124,7 @@ let assumption : ctrans = fun task ->
   let _, hyp = task_separate_goal task in
   try let h = assumption_ctxt tg hyp in
       [], (Axiom h, g)
-  with Not_found -> [task], skip
+  with Not_found -> [task], hole
 
 (* Closes task when if hypotheses contain false or if the goal is true *)
 let close : ctrans = fun task ->
@@ -138,7 +138,7 @@ let close : ctrans = fun task ->
       | _ -> acc) None in
   match Trans.apply trans task with
   | Some pr -> [], (Trivial, pr.pr_name)
-  | None -> [task], skip
+  | None -> [task], hole
 
 (* Split with a certificate : *)
 (* destructs a logical constructor at the top of the formula *)
@@ -157,8 +157,8 @@ let destruct where task = (* destructs /\ in the hypotheses *)
     | _ -> [d]) None in
   let nt = Trans.apply trans_t task in
   match !clues with
-  | Some (h1, h2) -> [nt], (Destruct (h1, h2, skip), g)
-  | None -> [task], skip
+  | Some (h1, h2) -> [nt], (Destruct (h1, h2, hole), g)
+  | None -> [task], hole
 
 let unfold where task = (* replaces A <-> B with (A -> B) /\ (B -> A) *)
                         (* and A -> B with ¬A ∨ B *)
@@ -178,8 +178,8 @@ let unfold where task = (* replaces A <-> B with (A -> B) /\ (B -> A) *)
         | _ -> [d] end
     | _ -> [d]) None in
   let nt = Trans.apply trans_t task in
-  if !clues then [nt], (Unfold skip, g)
-  else [task], skip
+  if !clues then [nt], (Unfold hole, g)
+  else [task], hole
 
 let split_or_and where task = (* destructs /\ in the goal or \/ in the hypothses *)
   let g = (default_goal task where).pr_name in
@@ -194,8 +194,8 @@ let split_or_and where task = (* destructs /\ in the goal or \/ in the hypothses
         | _ -> [[d]] end
     | _ -> [[d]]) None in
   let nt = Trans.apply trans_t task in
-  if !clues then nt, (Split (skip, skip), g)
-  else [task], skip
+  if !clues then nt, (Split (hole, hole), g)
+  else [task], hole
 
 
 (* the next 2 functions are copied from introduction.ml *)
@@ -217,7 +217,7 @@ let intro where task =
     | Dprop (k, pr, t) when id_equal g pr.pr_name ->
         begin match t.t_node, k with
         | Tbinop (Timplies, f1, f2), Pgoal ->
-            clues := Some (Unfold (Destruct (h, g, (Swap_neg skip, h)), g), g);
+            clues := Some (Unfold (Destruct (h, g, (Swap_neg hole, h)), g), g);
             [create_prop_decl Paxiom hpr f1;
              create_prop_decl Pgoal gpr f2]
         | Tquant (Tforall, f), (Pgoal as k) | Tquant (Texists, f), (Paxiom | Plemma as k) ->
@@ -227,7 +227,7 @@ let intro where task =
                 let ls = ls_of_vs vs in
                 let subst = Mvs.singleton vs (fs_app ls [] vs.vs_ty) in
                 let f = t_subst subst f_t in
-                clues := Some (Intro_quant (ls.ls_name, skip), gpr.pr_name);
+                clues := Some (Intro_quant (ls.ls_name, hole), gpr.pr_name);
                 [create_param_decl ls; create_prop_decl k gpr f]
             | _ -> assert false
             end
@@ -235,7 +235,7 @@ let intro where task =
     | _ -> [d]) None in
   let nt = Trans.apply trans_t task in
   match !clues with
-  | None -> [task], skip
+  | None -> [task], hole
   | Some c -> [nt], c
 
 
@@ -258,8 +258,8 @@ let dir d where task =
         | _ -> [decl] end
     | _ -> [decl]) None in
   let nt = Trans.apply trans_t task in
-  if !clues then [nt], (Dir (d, skip), g)
-  else [task], skip
+  if !clues then [nt], (Dir (d, hole), g)
+  else [task], hole
 
 let left = dir Left None
 let right = dir Right None
@@ -273,7 +273,7 @@ let cut t task =
     | _ -> [[decl]]) None in
   let idg = (task_goal task).pr_name in
   let ct = translate_term t in
-  Trans.apply trans_t task, (Cut (ct, (Weakening skip, idg), skip), h.pr_name)
+  Trans.apply trans_t task, (Cut (ct, (Weakening hole, idg), hole), h.pr_name)
 
 (* Instantiate with certificate *)
 let inst t_inst where task =
@@ -286,18 +286,18 @@ let inst t_inst where task =
         begin match t.t_node, k with
         | Tquant (Tforall, _), (Plemma | Paxiom) ->
             let t_subst = subst_forall t t_inst in
-            clues := Some (Inst_quant (hpr.pr_name, ct_inst, skip), g);
+            clues := Some (Inst_quant (hpr.pr_name, ct_inst, hole), g);
             [decl; create_prop_decl k hpr t_subst]
         | Tquant (Texists, _), Pgoal ->
             let t_subst = subst_exist t t_inst in
-            clues := Some (Inst_quant (hpr.pr_name, ct_inst, (Weakening skip, g)), g);
+            clues := Some (Inst_quant (hpr.pr_name, ct_inst, (Weakening hole, g)), g);
             [create_prop_decl k hpr t_subst]
         | _ -> [decl] end
     | _ -> [decl]) None in
   let nt = Trans.apply trans_t task in
   match !clues with
   | Some c -> [nt], c
-  | None -> [task], skip
+  | None -> [task], hole
 
 (* Rewrite with a certificate *)
 let rec rewrite_in_term tl tr t : (term * path) option =
@@ -351,7 +351,7 @@ let rewrite_in rev h h1 task = (* rewrites <h> in <h1> with direction <rev> *)
               when id_equal pr.pr_name h1 && (p = Pgoal || p = Paxiom) ->
             begin match rewrite_in_term t1 t2 t with
               | Some (new_term, path) ->
-                  clues := Some (path, skip :: List.map (fun _ -> skip) lp);
+                  clues := Some (path, hole :: List.map (fun _ -> hole) lp);
                   Some (lp, create_prop_decl p pr new_term)
               | None -> None end
         | _ -> acc) None in
@@ -380,7 +380,7 @@ let rewrite_in rev h h1 task = (* rewrites <h> in <h1> with direction <rev> *)
   (* Composing previous functions *)
   let gen_task = Trans.apply (Trans.bind (Trans.bind found_eq lp_new) recreate_tasks) task in
   match !clues with
-  | None -> [task], skip
+  | None -> [task], hole
   | Some (path, lc) ->
       gen_task, (Rewrite (h, path, rev, lc), h1)
 
@@ -396,7 +396,7 @@ let exfalso : ctrans = fun task ->
      | _ -> [decl]) None in
   let g = task_goal task in
   [Trans.apply trans task],
-  (Cut (CTfalse, (Weakening skip, g.pr_name), (Trivial, h.pr_name)), h.pr_name)
+  (Cut (CTfalse, (Weakening hole, g.pr_name), (Trivial, h.pr_name)), h.pr_name)
 
 let case t = fun task ->
   let h = create_prsymbol (gen_ident "H") in
@@ -407,7 +407,7 @@ let case t = fun task ->
      | _ -> [[decl]]) None in
   let not_ct = CTnot (translate_term t) in
   Trans.apply trans task,
-  (Cut (not_ct, (Swap_neg skip, h.pr_name), skip),
+  (Cut (not_ct, (Swap_neg hole, h.pr_name), hole),
    h.pr_name)
 
 let swap where task = (* if formula <f> designed by <where> is in the context, dismiss the old
@@ -427,8 +427,8 @@ let swap where task = (* if formula <f> designed by <where> is in the context, d
   | Some t ->
       let not_t = match t.t_node with Tnot t' -> t' | _ -> t_not t in
       let decl = create_prop_decl Pgoal gpr not_t in
-      [add_decl nt decl], (Swap_neg (Weakening skip, id_goal), gpr.pr_name)
-  | None -> [task], skip
+      [add_decl nt decl], (Swap_neg (Weakening hole, id_goal), gpr.pr_name)
+  | None -> [task], hole
 
 let revert ls task =
   let gpr = create_prsymbol (gen_ident "G") in
@@ -442,7 +442,7 @@ let revert ls task =
   let hinst = id_register (gen_ident "Hinst") in
   [task],
   (Cut (translate_term close_t,
-        (Weakening skip, idg.pr_name),
+        (Weakening hole, idg.pr_name),
         (Inst_quant (hinst, CTfvar ls.ls_name, (Axiom hinst, idg.pr_name)), gpr.pr_name)),
    gpr.pr_name)
 
@@ -453,7 +453,7 @@ let clear_one g task =
   let trans = Trans.decl (fun decl -> match decl.d_node with
     | Dprop (_, pr, _) when id_equal g pr.pr_name -> []
     | _ -> [decl]) None in
-  [Trans.apply trans task], (Weakening skip, g)
+  [Trans.apply trans task], (Weakening hole, g)
 
 
 
@@ -481,7 +481,7 @@ let pose (name: string) (t: term) : ctrans = fun task ->
   (Cut (CTquant (Texists, CTbinop (Tiff, CTbvar 0, ct)),
         (Inst_quant (hpose, ct, eq_cert),
          pr.pr_name),
-        (Intro_quant (ls.ls_name, skip), pr.pr_name)
+        (Intro_quant (ls.ls_name, hole), pr.pr_name)
      ),
    pr.pr_name)
 
