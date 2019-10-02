@@ -4,9 +4,17 @@
 <why3session shape_version="8">
 <prover id="0" name="CVC4" version="1.6" timelimit="5" steplimit="0" memlimit="1000"/>
 <file>
-<path name=".."/><path name="tests.mlw"/>
+<path name=".."/><path name="test.mlw"/>
 <theory name="Top">
  <goal name="G1" proved="true">
+ <transf name="assert_dcert" arg1="a">
+  <goal name="G1.0" proved="true">
+  <transf name="assumption_dcert" proved="true" >
+  </transf>
+  </goal>
+  <goal name="G1.1">
+  </goal>
+ </transf>
  <transf name="case_ccert" proved="true" arg1="true">
   <goal name="G1.0" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="47"/></proof>
@@ -16,6 +24,16 @@
   </goal>
  </transf>
  <transf name="intuition_ccert" proved="true" >
+ </transf>
+ <transf name="split_ccert" proved="true" >
+  <goal name="G1.0" proved="true">
+  <transf name="assumption_ccert" proved="true" >
+  </transf>
+  </goal>
+  <goal name="G1.1" proved="true">
+  <transf name="assumption_ccert" proved="true" >
+  </transf>
+  </goal>
  </transf>
  </goal>
  <goal name="G2" proved="true">
