@@ -45,8 +45,6 @@ let ctrans_gen (ctr : ctrans) ((ts, (r, g)) : task list * certif) =
                             acc, (Intro_quant (h, c), g), ts
     | Inst_quant (i, h, c) -> let acc, c, ts = fill acc c ts in
                               acc, (Inst_quant (i, h, c), g), ts
-    | Revert (h, c) -> let acc, c, ts = fill acc c ts in
-                       acc, (Revert (h, c), g), ts
     | Rewrite (h, path, rev, lc) ->
         let acc, lc, ts = List.fold_left (fun (acc, lc, ts) nc ->
                               let acc, c, ts = fill acc nc ts in
