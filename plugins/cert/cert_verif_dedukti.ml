@@ -9,7 +9,7 @@ open Cert_syntax
    all the terms we need when printing to a Dedukti file *)
 
 type 'a ec = (* elaborated certificate *)
-  | Hole_e of 'a (* So we can fill the holes with the remaining tasks. Corresponds to Skip *)
+  | Hole_e of 'a (* So we can fill the holes with the remaining tasks. Corresponds to Hole *)
   | Axiom_e of cterm * ident * ident
   | Trivial_hyp of ident
   | Trivial_goal of ident

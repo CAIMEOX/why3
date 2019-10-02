@@ -122,7 +122,7 @@ def eq_trans: prf ( forall (x: Term => forall (y: Term => (forall (z: Term => im
 
 (; certificate lines ;)
 
-def skip : prf false -> prf false
+def hole : prf false -> prf false
 := f => f.
 
 def axiom (P : Prop) :
