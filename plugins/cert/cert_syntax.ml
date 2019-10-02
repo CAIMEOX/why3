@@ -75,9 +75,6 @@ and rule =
   | Inst_quant of ident * cterm * certif
   (* Inst_quant (H, t, c) ⇓ (Γ, G : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : ∀ x. P x, H : P t ⊢ Δ) *)
   (* Inst_quant (H, t, c) ⇓ (Γ ⊢ Δ, G : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : ∃ x. P x, H : P t) *)
-  | Revert of ident * certif (* derived from Inst_quant *)
-  (* Revert (x, c) ⇓ (Γ ⊢ Δ, G : P x) ≜  c ⇓ (Γ ⊢ Δ, G : ∀ y. P y) *)
-  (* Revert (x, c) ⇓ (Γ, G : P x ⊢ Δ) ≜  c ⇓ (Γ, G : ∃ y. P y ⊢ Δ) *)
   | Rewrite of ident * path * bool * certif list
   (* Rewrite (H, path, rev, lc) ⇓ Seq is defined as follows :
      it tries to rewrite in <G> an equality that is in <H>, following the path <path>,
@@ -206,7 +203,6 @@ and prr fmt = function
   | Weakening c -> fprintf fmt "Weakening@ %a" prc c
   | Intro_quant (name, c) -> fprintf fmt "Intro_quant @[(%a,@ %a)@]" pri name prc c
   | Inst_quant (i, t, c) -> fprintf fmt "Inst_quant @[(%a,@ %a,@ %a)@]" pri i pcte t prc c
-  | Revert (name, c) -> fprintf fmt "Revert @[(%a,@ %a)@]" pri name prc c
   | Rewrite (h, p, rev, lc) ->
       fprintf fmt "Rewrite @[(%a,@ %a,@ %b,@ %a)@]"
         pri h (prle "; " prd) p rev (prle "; " prc) lc
