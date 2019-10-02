@@ -1,7 +1,7 @@
 open Why3
 open Cert_syntax
 open Cert_transformations
-open Cert_verif
+open Cert_verif_caml
 
 
 (** Certified transformations *)
