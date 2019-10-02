@@ -107,12 +107,12 @@ let rec mem_cont x t cont = match t with
 let mem x t = mem_cont x t (fun x -> x)
 
 (* checks if the transformation closes the task *)
-let rec noskip (r, _) =
+let rec nohole (r, _) =
   match r with
   | Hole -> false
   | Axiom _ | Trivial -> true
   | Cut (_, c1, c2)
-  | Split (c1, c2) -> noskip c1 && noskip c2
+  | Split (c1, c2) -> nohole c1 && nohole c2
   | Unfold c
   | Swap_neg c
   | Destruct (_, _, c)
@@ -120,8 +120,8 @@ let rec noskip (r, _) =
   | Weakening c
   | Intro_quant (_, c)
   | Inst_quant (_, _, c)
-  | Revert (_, c) -> noskip c
-  | Rewrite (_, _, _, lc) -> List.for_all noskip lc
+  | Revert (_, c) -> nohole c
+  | Rewrite (_, _, _, lc) -> List.for_all nohole lc
 
 (* separates hypotheses and goals *)
 let split_cta cta =
