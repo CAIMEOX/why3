@@ -2,96 +2,185 @@ open Why3
 open Cert_syntax
 open Cert_transformations
 open Cert_verif_caml
+open Cert_verif_dedukti
 
 
 (** Certified transformations *)
 
-let checker_ctrans = checker_ctrans checker
+let cchecker = checker_ctrans checker_caml
+let dchecker = checker_ctrans checker_dedukti
 
-let assumption_trans          = checker_ctrans assumption
-let trivial_trans             = checker_ctrans trivial
-let exfalso_trans             = checker_ctrans exfalso
-let intros_trans              = checker_ctrans intros
-let intuition_trans           = checker_ctrans intuition
-let swap_trans where          = checker_ctrans (swap where)
-let revert_trans ls           = checker_ctrans (revert ls)
-let intro_trans where         = checker_ctrans (intro where)
-let left_trans where          = checker_ctrans (dir Left where)
-let right_trans where         = checker_ctrans (dir Right where)
-let split_trans where         = checker_ctrans (split_logic where)
-let instantiate_trans t what  = checker_ctrans (inst t what)
-let assert_trans t            = checker_ctrans (cut t)
-let case_trans t              = checker_ctrans (case t)
-let rewrite_trans g rev where = checker_ctrans (rewrite g rev where)
-let clear_trans l             = checker_ctrans (clear l)
-let pose_trans name t         = checker_ctrans (pose name t)
+let assumption_c          = cchecker assumption
+let trivial_c             = cchecker trivial
+let exfalso_c             = cchecker exfalso
+let intros_c              = cchecker intros
+let intuition_c           = cchecker intuition
+let swap_c where          = cchecker (swap where)
+let revert_c ls           = cchecker (revert ls)
+let intro_c where         = cchecker (intro where)
+let left_c where          = cchecker (dir Left where)
+let right_c where         = cchecker (dir Right where)
+let split_c where         = cchecker (split_logic where)
+let instantiate_c t what  = cchecker (inst t what)
+let assert_c t            = cchecker (cut t)
+let case_c t              = cchecker (case t)
+let rewrite_c g rev where = cchecker (rewrite g rev where)
+let clear_c l             = cchecker (clear l)
+let pose_c name t         = cchecker (pose name t)
+
+
+let assumption_d          = dchecker assumption
+let trivial_d             = dchecker trivial
+let exfalso_d             = dchecker exfalso
+let intros_d              = dchecker intros
+let intuition_d           = dchecker intuition
+let swap_d where          = dchecker (swap where)
+let revert_d ls           = dchecker (revert ls)
+let intro_d where         = dchecker (intro where)
+let left_d where          = dchecker (dir Left where)
+let right_d where         = dchecker (dir Right where)
+let split_d where         = dchecker (split_logic where)
+let instantiate_d t what  = dchecker (inst t what)
+let assert_d t            = dchecker (cut t)
+let case_d t              = dchecker (case t)
+let rewrite_d g rev where = dchecker (rewrite g rev where)
+let clear_d l             = dchecker (clear l)
+let pose_d name t         = dchecker (pose name t)
 
 (** Register certified transformations *)
 
-let () =
+let register_caml : unit =
   let open Args_wrapper in let open Trans in
 
-  register_transform_l "assumption_cert" (store assumption_trans)
-    ~desc:"A certified version of coq tactic [assumption]";
+  register_transform_l "assumption_ccert" (store assumption_c)
+    ~desc:"A OCaml certified version of coq tactic [assumption]";
 
-  register_transform_l "trivial_cert" (store trivial_trans)
-    ~desc:"A certified version of (simplified) coq tactic [trivial]";
+  register_transform_l "trivial_ccert" (store trivial_c)
+    ~desc:"A OCaml certified version of (simplified) coq tactic [trivial]";
 
-  register_transform_l "exfalso_cert" (store exfalso_trans)
-    ~desc:"A certified version of coq tactic [exfalso]";
+  register_transform_l "exfalso_ccert" (store exfalso_c)
+    ~desc:"A OCaml certified version of coq tactic [exfalso]";
 
-  register_transform_l "intros_cert" (store intros_trans)
-    ~desc:"A certified version of coq tactic [intros]";
+  register_transform_l "intros_ccert" (store intros_c)
+    ~desc:"A OCaml certified version of coq tactic [intros]";
 
-  register_transform_l "intuition_cert" (store intuition_trans)
-    ~desc:"A certified version of (simplified) coq tactic [intuition]";
+  register_transform_l "intuition_ccert" (store intuition_c)
+    ~desc:"A OCaml certified version of (simplified) coq tactic [intuition]";
 
-  wrap_and_register ~desc:"A certified transformation that negates \
+  wrap_and_register ~desc:"A OCaml certified transformation that negates \
                            and swaps an hypothesis from the context to the goal]"
-    "swap_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
-     (fun where -> store (swap_trans where));
+    "swap_ccert" (Topt ("in", Tprsymbol (Ttrans_l)))
+     (fun where -> store (swap_c where));
 
-  wrap_and_register ~desc:"A certified transformation that generalizes a variable in the goal"
-    "revert_cert" (Tlsymbol (Ttrans_l))
-     (fun ls -> store (revert_trans ls));
+  wrap_and_register ~desc:"A OCaml certified transformation that generalizes a variable in the goal"
+    "revert_ccert" (Tlsymbol (Ttrans_l))
+     (fun ls -> store (revert_c ls));
 
-  wrap_and_register ~desc:"A certified version of (simplified) coq tactic [intro]"
-    "intro_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
-     (fun where -> store (intro_trans where));
+  wrap_and_register ~desc:"A OCaml certified version of (simplified) coq tactic [intro]"
+    "intro_ccert" (Topt ("in", Tprsymbol (Ttrans_l)))
+     (fun where -> store (intro_c where));
 
-  wrap_and_register ~desc:"A certified version of coq tactic [left]"
-     "left_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
-     (fun where -> store (left_trans where));
+  wrap_and_register ~desc:"A OCaml certified version of coq tactic [left]"
+     "left_ccert" (Topt ("in", Tprsymbol (Ttrans_l)))
+     (fun where -> store (left_c where));
 
-  wrap_and_register ~desc:"A certified version of coq tactic [right]"
-     "right_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
-     (fun where -> store (right_trans where));
+  wrap_and_register ~desc:"A OCaml certified version of coq tactic [right]"
+     "right_ccert" (Topt ("in", Tprsymbol (Ttrans_l)))
+     (fun where -> store (right_c where));
 
-  wrap_and_register ~desc:"A certified version of (simplified) coq tactic [split]"
-    "split_cert" (Topt ("in", Tprsymbol (Ttrans_l)))
-    (fun where -> store (split_trans where));
+  wrap_and_register ~desc:"A OCaml certified version of (simplified) coq tactic [split]"
+    "split_ccert" (Topt ("in", Tprsymbol (Ttrans_l)))
+    (fun where -> store (split_c where));
 
-  wrap_and_register ~desc:"A certified version of transformation instantiate"
-    "instantiate_cert" (Tterm (Topt ("in", Tprsymbol Ttrans_l)))
-    (fun t_inst where -> store (instantiate_trans t_inst where));
+  wrap_and_register ~desc:"A OCaml certified version of transformation instantiate"
+    "instantiate_ccert" (Tterm (Topt ("in", Tprsymbol Ttrans_l)))
+    (fun t_inst where -> store (instantiate_c t_inst where));
 
-  wrap_and_register ~desc:"A certified version of transformation rewrite"
-    "rewrite_cert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l))))))
-    (fun rev g where -> store (rewrite_trans g rev where));
+  wrap_and_register ~desc:"A OCaml certified version of transformation rewrite"
+    "rewrite_ccert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l))))))
+    (fun rev g where -> store (rewrite_c g rev where));
 
-  wrap_and_register ~desc:"A certified version of transformation assert"
-    "assert_cert" (Tformula Ttrans_l)
-    (fun t -> store (assert_trans t));
+  wrap_and_register ~desc:"A OCaml certified version of transformation assert"
+    "assert_ccert" (Tformula Ttrans_l)
+    (fun t -> store (assert_c t));
 
-  wrap_and_register ~desc:"A certified version of transformation case"
-    "case_cert" (Tformula Ttrans_l)
-    (fun t -> store (case_trans t));
+  wrap_and_register ~desc:"A OCaml certified version of transformation case"
+    "case_ccert" (Tformula Ttrans_l)
+    (fun t -> store (case_c t));
 
-  wrap_and_register ~desc:"A certified version of (simplified) coq tactic [clear]"
-    "clear_cert" (Tprlist Ttrans_l)
-    (fun l -> store (clear_trans l));
+  wrap_and_register ~desc:"A OCaml certified version of (simplified) coq tactic [clear]"
+    "clear_ccert" (Tprlist Ttrans_l)
+    (fun l -> store (clear_c l));
 
-  wrap_and_register ~desc:"A certified version of (simplified) coq tactic [pose]"
-    "pose_cert" (Tstring (Tformula Ttrans_l))
-    (fun name t -> store (pose_trans name t))
+  wrap_and_register ~desc:"A OCaml certified version of (simplified) coq tactic [pose]"
+    "pose_ccert" (Tstring (Tformula Ttrans_l))
+    (fun name t -> store (pose_c name t))
+
+
+let register_dedukti : unit =
+  let open Args_wrapper in let open Trans in
+
+  register_transform_l "assumption_dcert" (store assumption_d)
+    ~desc:"A Dedukti certified version of coq tactic [assumption]";
+
+  register_transform_l "trivial_dcert" (store trivial_d)
+    ~desc:"A Dedukti certified version of (simplified) coq tactic [trivial]";
+
+  register_transform_l "exfalso_dcert" (store exfalso_d)
+    ~desc:"A Dedukti certified version of coq tactic [exfalso]";
+
+  register_transform_l "intros_dcert" (store intros_d)
+    ~desc:"A Dedukti certified version of coq tactic [intros]";
+
+  register_transform_l "intuition_dcert" (store intuition_d)
+    ~desc:"A Dedukti certified version of (simplified) coq tactic [intuition]";
+
+  wrap_and_register ~desc:"A Dedukti certified transformation that negates \
+                           and swaps an hypothesis from the context to the goal]"
+    "swap_dcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+     (fun where -> store (swap_d where));
+
+  wrap_and_register ~desc:"A Dedukti certified transformation that generalizes a variable in the goal"
+    "revert_dcert" (Tlsymbol (Ttrans_l))
+     (fun ls -> store (revert_d ls));
+
+  wrap_and_register ~desc:"A Dedukti certified version of (simplified) coq tactic [intro]"
+    "intro_dcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+     (fun where -> store (intro_d where));
+
+  wrap_and_register ~desc:"A Dedukti certified version of coq tactic [left]"
+     "left_dcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+     (fun where -> store (left_d where));
+
+  wrap_and_register ~desc:"A Dedukti certified version of coq tactic [right]"
+     "right_dcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+     (fun where -> store (right_d where));
+
+  wrap_and_register ~desc:"A Dedukti certified version of (simplified) coq tactic [split]"
+    "split_dcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+    (fun where -> store (split_d where));
+
+  wrap_and_register ~desc:"A Dedukti certified version of transformation instantiate"
+    "instantiate_dcert" (Tterm (Topt ("in", Tprsymbol Ttrans_l)))
+    (fun t_inst where -> store (instantiate_d t_inst where));
+
+  wrap_and_register ~desc:"A Dedukti certified version of transformation rewrite"
+    "rewrite_dcert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l))))))
+    (fun rev g where -> store (rewrite_d g rev where));
+
+  wrap_and_register ~desc:"A Dedukti certified version of transformation assert"
+    "assert_dcert" (Tformula Ttrans_l)
+    (fun t -> store (assert_d t));
+
+  wrap_and_register ~desc:"A Dedukti certified version of transformation case"
+    "case_dcert" (Tformula Ttrans_l)
+    (fun t -> store (case_d t));
+
+  wrap_and_register ~desc:"A Dedukti certified version of (simplified) coq tactic [clear]"
+    "clear_dcert" (Tprlist Ttrans_l)
+    (fun l -> store (clear_d l));
+
+  wrap_and_register ~desc:"A Dedukti certified version of (simplified) coq tactic [pose]"
+    "pose_dcert" (Tstring (Tformula Ttrans_l))
+    (fun name t -> store (pose_d name t))
 
