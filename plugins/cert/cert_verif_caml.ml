@@ -119,8 +119,7 @@ let rec nohole (r, _) =
   | Dir (_, c)
   | Weakening c
   | Intro_quant (_, c)
-  | Inst_quant (_, _, c)
-  | Revert (_, c) -> nohole c
+  | Inst_quant (_, _, c) -> nohole c
   | Rewrite (_, _, _, lc) -> List.for_all nohole lc
 
 (* separates hypotheses and goals *)
@@ -267,12 +266,6 @@ let rec ccheck (r, g : certif) cta : ctask list =
             ccheck c cta
         | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
         end
-    | Revert (h, c) ->
-        let t, pos = find_ident g cta in
-        let closed_t = if pos then CTquant (Tforall, ct_close h t)
-                       else CTquant (Texists, ct_close h t) in
-        let cta = Mid.add g (closed_t, pos) cta in
-        ccheck c cta
     | Rewrite (h, path, rev, lc) ->
         let lcta = check_rewrite cta rev h g [] path in
         List.map2 ccheck lc lcta |> List.concat
