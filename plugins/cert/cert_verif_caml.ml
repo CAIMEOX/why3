@@ -109,7 +109,7 @@ let mem x t = mem_cont x t (fun x -> x)
 (* checks if the transformation closes the task *)
 let rec noskip (r, _) =
   match r with
-  | Skip -> false
+  | Hole -> false
   | Axiom _ | Trivial -> true
   | Cut (_, c1, c2)
   | Split (c1, c2) -> noskip c1 && noskip c2
@@ -185,7 +185,7 @@ let check_rewrite cta rev h g terms path : ctask list =
 
 let rec ccheck (r, g : certif) cta : ctask list =
   match r with
-    | Skip -> [cta]
+    | Hole -> [cta]
     | Axiom h ->
         let th, posh = find_ident h cta in
         let tg, posg = find_ident g cta in
@@ -278,7 +278,7 @@ let rec ccheck (r, g : certif) cta : ctask list =
         List.map2 ccheck lc lcta |> List.concat
 
 
-let checker certif init_t res_t =
+let checker_caml certif init_t res_t =
   try let init_ct = translate_task init_t in
       let res_ct  = List.map translate_task res_t in
       let res_ct' = ccheck certif init_ct in

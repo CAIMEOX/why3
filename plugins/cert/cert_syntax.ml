@@ -37,7 +37,7 @@ type certif = rule * ident
 (* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>,
    it is defined as the function <Cert_verif.check_certif> *)
 and rule =
-  | Skip
+  | Hole
   (* Skip ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
   | Axiom of ident
   (* Axiom H ⇓ (Γ, H : P ⊢ Δ, G : P) ≜  [] *)
@@ -84,7 +84,7 @@ and rule =
      <rev> indicates if it rewrites from left to right or from right to left.
      Since <H> can have premises, those are then matched against the certificates <lc> *)
 
-let skip = Skip, id_register (id_fresh "dummy_skip_ident")
+let hole = Hole, id_register (id_fresh "dummy_skip_ident")
 
 (** Translating a Why3 <task> into a <ctask> *)
 
@@ -193,7 +193,7 @@ let rec print_certif filename cert =
   fprintf fmt "%a@." prc cert;
   close_out oc
 and prr fmt = function
-  | Skip -> fprintf fmt "Skip"
+  | Hole -> fprintf fmt "Skip"
   | Axiom h -> fprintf fmt "Axiom@ %a" pri h
   | Trivial -> fprintf fmt "Trivial"
   | Cut (a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a)@]" pcte a prc c1 prc c2
