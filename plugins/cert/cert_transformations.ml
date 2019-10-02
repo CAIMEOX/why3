@@ -16,7 +16,7 @@ let id task = [task], hole
 
 (** Combinators on transformations with a certificate *)
 
-(* Generalize ctrans on <task list * certif>, with the invariant that each <Skip> in the
+(* Generalize ctrans on <task list * certif>, with the invariant that each <Hole> in the
    certif corresponds to one task in the list *)
 let ctrans_gen (ctr : ctrans) ((ts, (r, g)) : task list * certif) =
   let rec fill acc (r, g) ts = match r with
