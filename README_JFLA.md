@@ -46,9 +46,10 @@ Les transformations sont accessibles dans Why3 avec les conventions de noms suiv
 Pour savoir quelles transformations sont ainsi accessibles, regarder le fichier
 `cert_register.ml` ou plus simplement taper `_ccert` ou `_dcert` dans l'invite de commande Why3.
 
-Pour lancer le jeu de tests du plugin, faire :
+Pour lancer le jeu de tests du greffon, faire :
 ```shell
-bin/why3 ide test
+cd plugins/cert
+../../bin/why3 ide test
 ```
 
 
