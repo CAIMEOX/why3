@@ -9,7 +9,7 @@ axiom B : b
 
 predicate p (x : bool)
 
-
+goal G0 : a
 goal G1 : a /\ b
 goal G2 : (a /\ b) /\ (a /\ a /\ a /\ b)
 goal G3 : (b /\ a) /\ ( (a /\ a) /\ c)
