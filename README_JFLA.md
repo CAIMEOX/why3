@@ -43,6 +43,7 @@ Utilisation
 Les transformations sont accessibles dans Why3 avec les conventions de noms suivantes :
   - Les noms des transformations qui sont vérifiées par OCaml se terminent par `_ccert`.
   - Les noms des transformations qui sont vérifiées par Dedukti se terminent par `_dcert`.
+
 Pour savoir quelles transformations sont ainsi accessibles, regarder le fichier
 `cert_register.ml` ou plus simplement taper `_ccert` ou `_dcert` dans l'invite de commande Why3.
 
@@ -66,3 +67,6 @@ de 5 fichiers :
      les transformations de `cert_transformations.ml`
    - le fichier `cert_verif_caml.ml` définit le vérificateur OCaml
    - le fichier `cert_verif_dedukti.ml` définit le vérificateur Dedukti
+
+Par ailleurs, le fichier `FO.dk` qui sert de préambule pour la vérification à l'aide de
+Dedukti est dans le répertoire `share/dedukti`.
