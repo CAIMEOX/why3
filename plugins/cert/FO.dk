@@ -169,14 +169,14 @@ def unfold_arr_hyp (A : Prop) (B : Prop) :
     prf (hyp (imp A B) empty)
 := h => impab =>
    h (tnd A (or (not A) B) (a =>  or_intro_2 (not A) B (impab a))
-			   (na => or_intro_1 (not A) B na)).
+                           (na => or_intro_1 (not A) B na)).
 
 def unfold_arr_goal (A : Prop) (B : Prop) :
     prf (goal (or (not A) B) empty) ->
     prf (goal (imp A B) empty)
 := h => nni (imp A B) (a =>
    nne (or (not A) B) h B (na => na a B)
-			  (b => b)).
+                          (b => b)).
 
 def swap_neg_neg_hyp (A : Prop) :
     prf (goal A empty) ->
@@ -208,7 +208,7 @@ def destruct_goal (A : Prop) (B : Prop) :
     prf (goal A (goal B empty)) ->
     prf (goal (or A B) empty)
 := h => nab => h (a => nab (or_intro_1 A B a))
-		 (b => nab (or_intro_2 A B b)).
+                 (b => nab (or_intro_2 A B b)).
 
 def dir_left_hyp (A : Prop) (B : Prop) :
     prf (hyp A empty) ->
@@ -241,3 +241,7 @@ def weakening_goal (A : Prop) :
 := f => a => f.
 
 
+def intro_quant_hyp (P : Term -> Prop) :
+    (y : Term -> prf (hyp (P y) empty)) ->
+    prf (hyp (exists P) empty)
+:= t => ep => exists_elim P false ep (x => px => t x px).
