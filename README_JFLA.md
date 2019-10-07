@@ -1,10 +1,12 @@
-Ce dépôt a pour objectif de servir de support à l'article 'Des transformations
-logiques passent leur certificat' soumis aux JFLA 2020.
+Ce dépôt sert de support à l'article 'Des transformations
+logiques passent leur certificat' soumis aux [JFLA 2020](http://jfla.inria.fr/jfla2020.html).
 
-Installation
-------------
+Compilation
+-----------
 
-On donne ici un guide pour installer Why3 et tester le plugin du papier.
+On donne ici un guide pour compiler Why3 et tester le greffon décrit dans l'article.
+
+La compilation nécessite une version récente d'OCaml et de menhir.
 
 À la racine du dépôt, faire :
 ```shell
@@ -56,9 +58,9 @@ Accéder au développement du plugin
 
 Le code source est dans le répertoire `plugin/cert` et est constitué essentiellement
 de 5 fichiers :
-   - le fichier `cert_syntax.ml` donne le type des `ctask`, des certificats et qui
+   - le fichier `cert_syntax.ml` donne le type des `ctask` et des certificats, et
      définit la traduction des tâches Why3 vers les `ctask`
-   - le fichier `cert_transformations.ml` définit des transformations certifiantes
+   - le fichier `cert_transformations.ml` définit les transformations certifiantes
    - le fichier `cert_register.ml`, étant donné un vérificateur, fait connaitre à Why3
      les transformations de `cert_transformations.ml`
    - le fichier `cert_verif_caml.ml` définit le vérificateur OCaml
