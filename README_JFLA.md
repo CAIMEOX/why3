@@ -1,5 +1,5 @@
 Ce dépôt a pour objectif de servir de support à l'article 'Des transformations
-logiques passent leur certificat' soumis au JFLA 2020.
+logiques passent leur certificat' soumis aux JFLA 2020.
 
 Installation
 ------------
@@ -44,6 +44,8 @@ de 5 fichiers :
    - cert_verif_caml.ml, le fichier qui définit le checker OCaml
    - cert_verif_dedukti.ml, le fichier qui définit le checker Dedukti
 
+Ce dossier contient aussi le jeu de test 'test', que l'on peut lancer avec :
+  why3 ide test
 
 Les transformations sont accessibles dans Why3 avec les conventions de nom suivantes :
     Les noms des transformations qui sont vérifiées par OCaml se terminent par '_ccert'.
@@ -51,5 +53,5 @@ Les transformations sont accessibles dans Why3 avec les conventions de nom suiva
 Pour savoir quelles transformations sont ainsi accessibles, regarder le fichier
 cert_register.ml ou plus simplement taper '_ccert' ou '_dcert' dans Why3.
 
-Pour lancer le jeu de tests du plugin, faire :
-  why3 ide test
+
+

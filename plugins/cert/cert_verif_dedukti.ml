@@ -351,14 +351,12 @@ let print fmt init_t res_t certif =
 let checker_dedukti certif init_t res_t =
   let oc = open_out "/tmp/check_line.dk" in
   let fmt = formatter_of_out_channel oc in
+  let fo = Filename.(concat Config.datadir (concat "dedukti" "FO.dk")) in
   print fmt (translate_task init_t) (List.map translate_task res_t) certif;
   close_out oc;
-  Sys.command "cat FO.dk > /tmp/check_all.dk" |> ignore;
+  Sys.command ("cat " ^ fo ^ " > /tmp/check_all.dk") |> ignore;
   Sys.command "cat /tmp/check_line.dk >> /tmp/check_all.dk" |> ignore;
   Sys.command "dkcheck /tmp/check_all.dk 2> /dev/null | head -n 1 > /tmp/result.log" |> ignore;
   let ic = Scanf.Scanning.open_in "/tmp/result.log" in
   Scanf.bscanf ic "%s" (fun s -> if s <> "YES" then verif_failed ("Dedukti returns : " ^ s));
   res_t
-
-
-
