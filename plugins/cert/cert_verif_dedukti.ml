@@ -26,6 +26,10 @@ type 'a ec = (* elaborated certificate *)
   | Swap_neg_neg_goal of (cterm * ident * 'a ec * ident)
   | Destruct_goal of (cterm * cterm * ident * ident * 'a ec * ident)
   | Destruct_hyp  of (cterm * cterm * ident * ident * 'a ec * ident)
+  | Dir_left_hyp of (cterm * cterm * ident * 'a ec * ident)
+  | Dir_right_hyp of (cterm * cterm * ident * 'a ec * ident)
+  | Dir_left_goal of (cterm * cterm * ident * 'a ec * ident)
+  | Dir_right_goal of (cterm * cterm * ident * 'a ec * ident)
   | Weakening_hyp of cterm * 'a ec * ident
   | Weakening_goal of cterm * 'a ec * ident
 
@@ -76,8 +80,8 @@ let rec elab (cta : ctask) (r, g : certif) (fill : 'a list) : 'a ec * 'a list =
           let cta2 = Mid.add g (b, pos) cta in
           let ce2, fill = elab cta2 c2 fill in
           let pack = (a, b, g, ce1, g, ce2, g) in
-          if pos then Split_hyp pack, fill
-          else Split_goal pack, fill
+          if pos then Split_goal pack, fill
+          else Split_hyp pack, fill
       | _ -> assert false
       end
   | Unfold c ->
@@ -105,7 +109,7 @@ let rec elab (cta : ctask) (r, g : certif) (fill : 'a list) : 'a ec * 'a list =
       let neg_a = match a with CTnot t -> t | t -> CTnot t in
       let cta = Mid.add g (neg_a, not pos) cta in
       let ce, fill = elab cta c fill in
-      let pack = (a, g, ce, g) in
+      let pack = (neg_a, g, ce, g) in
       let is_neg_a = match a with CTnot _ -> true | _ -> false in
       if is_neg_a
       then if pos
@@ -134,7 +138,25 @@ let rec elab (cta : ctask) (r, g : certif) (fill : 'a list) : 'a ec * 'a list =
       if pos
       then Weakening_goal (a, c, g), fill
       else Weakening_hyp  (a, c, g), fill
-  | _ -> assert false
+  | Dir (d, c) ->
+      let t, pos = find_ident g cta in
+      begin match t, pos with
+      | CTbinop (Tor, a, b), true | CTbinop (Tand, a, b), false ->
+          let t = match d with Left -> a | Right -> b in
+          let cta = Mid.add g (t, pos) cta in
+          let ce, fill = elab cta c fill in
+          let pack = (a, b, g, ce, g) in
+          if d = Left
+          then if pos
+               then Dir_left_goal pack, fill
+               else Dir_left_hyp  pack, fill
+          else if pos
+               then Dir_right_goal pack, fill
+               else Dir_right_hyp  pack, fill
+      | _ -> verif_failed "Can't follow a direction" end
+  | Inst_quant _ -> failwith "TODO Inst_quant"
+  | Intro_quant _ -> failwith "TODO Intro_quant"
+  | Rewrite _ -> failwith "rewriting is not supported in Dedukti verification"
 
 
 (* We represent a ctask <H₁ : A₁, ..., Hₘ : Aₘ ⊢ G₁ : B₁, ..., Gₘ : Bₘ >
@@ -157,7 +179,7 @@ let print_op fmt = function
   | Tand -> fprintf fmt "and"
   | Tor -> fprintf fmt "or"
   | Timplies -> fprintf fmt "imp"
-  | Tiff -> failwith "iff not supported"
+  | Tiff -> fprintf fmt "iff"
 
 
 let rec print_term fmt = function
@@ -302,6 +324,30 @@ let rec print_certif fmt = function
         print_term a
         print_term b
         (str h1) (str h2) print_certif c
+        (str g)
+  | Dir_left_hyp (a, b, h, c, g) ->
+      fprintf fmt "dir_left_hyp (%a) (%a) (%s => %a) %s"
+        print_term a
+        print_term b
+        (str h) print_certif c
+        (str g)
+  | Dir_right_hyp (a, b, h, c, g) ->
+      fprintf fmt "dir_right_hyp (%a) (%a) (%s => %a) %s"
+        print_term a
+        print_term b
+        (str h) print_certif c
+        (str g)
+  | Dir_left_goal (a, b, h, c, g) ->
+      fprintf fmt "dir_left_goal (%a) (%a) (%s => %a) %s"
+        print_term a
+        print_term b
+        (str h) print_certif c
+        (str g)
+  | Dir_right_goal (a, b, h, c, g) ->
+      fprintf fmt "dir_right_goal (%a) (%a) (%s => %a) %s"
+        print_term a
+        print_term b
+        (str h) print_certif c
         (str g)
   | Weakening_hyp (a, c, g) ->
       fprintf fmt "weakening_hyp (%a) (%a) %s"

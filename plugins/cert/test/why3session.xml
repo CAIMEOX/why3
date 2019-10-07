@@ -6,25 +6,25 @@
 <file>
 <path name=".."/><path name="test.mlw"/>
 <theory name="Top">
- <goal name="G1" proved="true">
- <transf name="assert_dcert" arg1="a">
-  <goal name="G1.0" proved="true">
-  <transf name="assumption_dcert" proved="true" >
-  </transf>
-  </goal>
-  <goal name="G1.1">
-  </goal>
- </transf>
+ <goal name="G0" proved="true">
  <transf name="case_ccert" proved="true" arg1="true">
-  <goal name="G1.0" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="47"/></proof>
+  <goal name="G0.0" proved="true">
+  <proof prover="0"><result status="valid" time="0.01" steps="40"/></proof>
   </goal>
-  <goal name="G1.1" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="50"/></proof>
+  <goal name="G0.1" proved="true">
+  <proof prover="0"><result status="valid" time="0.01" steps="43"/></proof>
   </goal>
  </transf>
- <transf name="intuition_ccert" proved="true" >
+ <transf name="case_dcert" proved="true" arg1="true">
+  <goal name="G0.0" proved="true">
+  <proof prover="0"><result status="valid" time="0.00" steps="40"/></proof>
+  </goal>
+  <goal name="G0.1" proved="true">
+  <proof prover="0"><result status="valid" time="0.01" steps="43"/></proof>
+  </goal>
  </transf>
+ </goal>
+ <goal name="G1" proved="true">
  <transf name="split_ccert" proved="true" >
   <goal name="G1.0" proved="true">
   <transf name="assumption_ccert" proved="true" >
@@ -35,9 +35,21 @@
   </transf>
   </goal>
  </transf>
+ <transf name="split_dcert" proved="true" >
+  <goal name="G1.0" proved="true">
+  <transf name="assumption_dcert" proved="true" >
+  </transf>
+  </goal>
+  <goal name="G1.1" proved="true">
+  <transf name="assumption_dcert" proved="true" >
+  </transf>
+  </goal>
+ </transf>
  </goal>
  <goal name="G2" proved="true">
  <transf name="intuition_ccert" proved="true" >
+ </transf>
+ <transf name="intuition_dcert" proved="true" >
  </transf>
  </goal>
  <goal name="G3">
@@ -56,6 +68,21 @@
   </transf>
   </goal>
  </transf>
+ <transf name="intuition_dcert" >
+  <goal name="G3.0">
+  <transf name="assert_dcert" arg1="true">
+   <goal name="G3.0.0" proved="true">
+   <proof prover="0"><result status="valid" time="0.03" steps="36"/></proof>
+   </goal>
+   <goal name="G3.0.1">
+   <transf name="exfalso_dcert" >
+    <goal name="G3.0.1.0">
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
  </goal>
  <goal name="G4" proved="true">
  <transf name="case_ccert" proved="true" arg1="true">
@@ -66,11 +93,23 @@
   <proof prover="0"><result status="valid" time="0.01" steps="57"/></proof>
   </goal>
  </transf>
+ <transf name="case_dcert" proved="true" arg1="true">
+  <goal name="G4.0" proved="true">
+  <proof prover="0"><result status="valid" time="0.00" steps="54"/></proof>
+  </goal>
+  <goal name="G4.1" proved="true">
+  <proof prover="0"><result status="valid" time="0.01" steps="57"/></proof>
+  </goal>
+ </transf>
  <transf name="intuition_ccert" proved="true" >
+ </transf>
+ <transf name="intuition_dcert" proved="true" >
  </transf>
  </goal>
  <goal name="G5" proved="true">
  <transf name="intuition_ccert" proved="true" >
+ </transf>
+ <transf name="intuition_dcert" proved="true" >
  </transf>
  </goal>
  <goal name="G6">
@@ -78,17 +117,33 @@
   <goal name="G6.0">
   </goal>
  </transf>
+ <transf name="intuition_dcert" >
+  <goal name="G6.0">
+  </goal>
+ </transf>
  </goal>
  <goal name="G7" proved="true">
  <transf name="intuition_ccert" proved="true" >
+ </transf>
+ <transf name="intuition_dcert" proved="true" >
  </transf>
  </goal>
  <goal name="G8" proved="true">
  <transf name="intuition_ccert" proved="true" >
  </transf>
+ <transf name="intuition_dcert" proved="true" >
+ </transf>
  </goal>
  <goal name="G9">
  <transf name="intuition_ccert" >
+  <goal name="G9.0">
+  </goal>
+  <goal name="G9.1">
+  </goal>
+  <goal name="G9.2">
+  </goal>
+ </transf>
+ <transf name="intuition_dcert" >
   <goal name="G9.0">
   </goal>
   <goal name="G9.1">
@@ -102,9 +157,15 @@
   <goal name="G10.0">
   </goal>
  </transf>
+ <transf name="intro_dcert" >
+  <goal name="G10.0">
+  </goal>
+ </transf>
  </goal>
  <goal name="G11" proved="true">
  <transf name="intuition_ccert" proved="true" >
+ </transf>
+ <transf name="intuition_dcert" proved="true" >
  </transf>
  </goal>
  <goal name="G12">
@@ -168,6 +229,16 @@
   </transf>
   </goal>
  </transf>
+ <transf name="intro_dcert" >
+  <goal name="G16.0">
+  <transf name="split_dcert" arg1="in" arg2="H">
+   <goal name="G16.0.0">
+   </goal>
+   <goal name="G16.0.1">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
  </goal>
  <goal name="G17">
  <transf name="intro_ccert" >
@@ -178,11 +249,27 @@
   </transf>
   </goal>
  </transf>
+ <transf name="intro_dcert" >
+  <goal name="G17.0">
+  <transf name="split_dcert" arg1="in" arg2="H">
+   <goal name="G17.0.0">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
  </goal>
  <goal name="G18">
  <transf name="intros_ccert" >
   <goal name="G18.0">
   <transf name="clear_ccert" arg1="H4,H2,H1,A,B">
+   <goal name="G18.0.0">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ <transf name="intros_dcert" >
+  <goal name="G18.0">
+  <transf name="clear_dcert" arg1="H4,H2,H1,A,B">
    <goal name="G18.0.0">
    </goal>
   </transf>
