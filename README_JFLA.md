@@ -28,7 +28,7 @@ make -j
 Pour pouvoir utiliser Why3 pleinement il est recommandé d'installer au moins Z3, CVC4 et Alt-Ergo.
 Dans tous les cas il faut faire :
 ```shell
-why3 config --detect
+bin/why3 config --detect
 ```
 
 Pour pouvoir utiliser le vérificateur Dedukti, il faut aussi avoir `dkcheck` dans le path de
