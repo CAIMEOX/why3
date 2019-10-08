@@ -32,6 +32,7 @@ type 'a ec = (* elaborated certificate *)
   | Dir_right_goal of (cterm * cterm * ident * 'a ec * ident)
   | Weakening_hyp of cterm * 'a ec * ident
   | Weakening_goal of cterm * 'a ec * ident
+  | Inst_quant_hyp of (cterm * cterm * ident * 'a ec * ident)
 
 type certif_elab = unit ec
 
@@ -154,7 +155,16 @@ let rec elab (cta : ctask) (r, g : certif) (fill : 'a list) : 'a ec * 'a list =
                then Dir_right_goal pack, fill
                else Dir_right_hyp  pack, fill
       | _ -> verif_failed "Can't follow a direction" end
-  | Inst_quant _ -> failwith "TODO Inst_quant"
+  | Inst_quant (h, t_inst, c) ->
+      let p, pos = find_ident g cta in
+        begin match p, pos with
+        | CTquant (Tforall, p'), false | CTquant (Texists, p'), true ->
+            let cta = Mid.add h (ct_open p' t_inst, pos) cta in
+            let ce, fill = elab cta c fill in
+            Inst_quant_hyp (p, t_inst, h, ce, g), fill
+        | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
+        end
+
   | Intro_quant _ -> failwith "TODO Intro_quant"
   | Rewrite _ -> failwith "rewriting is not supported in Dedukti verification"
 
@@ -181,19 +191,41 @@ let print_op fmt = function
   | Timplies -> fprintf fmt "imp"
   | Tiff -> fprintf fmt "iff"
 
+module Mi = Extmap.Make (struct type t = int let compare = Pervasives.compare end)
 
-let rec print_term fmt = function
-  | CTfvar i -> fprintf fmt "%s" (str i)
+let print_term fmt t =
+  let gen_sym =
+    let c = ref 0 in
+    fun () -> incr c; "x_" ^ string_of_int !c in
+  let rec pt alt lvl env fmt = function
+  | CTbvar n -> if alt then fprintf fmt "%s" (string_of_int n)
+                else fprintf fmt "%s" (Mi.find n env)
+  | CTfvar id -> fprintf fmt "%s" (str id)
   | CTbinop (op, ct1, ct2) ->
-      fprintf fmt "(%a %a %a)"
+      fprintf fmt "(%a (%a) (%a))"
         print_op op
-        print_term ct1
-        print_term ct2
-  | CTnot ct -> fprintf fmt "(not %a)"
-                  print_term ct
+        (pt alt lvl env) ct1
+        (pt alt lvl env) ct2
+  | CTnot ct ->
+      fprintf fmt "(not (%a))"
+        (pt alt lvl env) ct
   | CTfalse -> fprintf fmt "false"
   | CTtrue -> fprintf fmt "true"
-  | _ -> assert false
+  | CTapp (ct1, ct2) ->
+      fprintf fmt "(%a) (%a)"
+        (pt alt lvl env) ct1
+        (pt alt lvl env) ct2
+  | CTquant (q, t) ->
+      let x = gen_sym () in
+      let new_env = Mi.add lvl x env in
+      let q_str = match q with Tforall -> "forall" | Texists -> "exists" in
+      fprintf fmt "(%s (%s => %a))"
+        q_str
+        x
+        (pt alt (lvl+1) new_env) t in
+  try pt false 0 Mi.empty fmt t
+  with _ -> pt true 0 Mi.empty str_formatter t;
+            failwith (flush_str_formatter ())
 
 (* on [e1; ...; en], print_list gives :
    e1 sep ... en sep
@@ -217,11 +249,14 @@ let print_task fmt cts =
   print_list_pre "imp" print_term fmt tp
 
 let rec fvars_term = function
+  | CTbvar _ -> Sid.empty
   | CTfvar i -> Sid.singleton i
   | CTbinop (_, ct1, ct2) -> Sid.union (fvars_term ct1) (fvars_term ct2)
   | CTfalse | CTtrue -> Sid.empty
   | CTnot ct -> fvars_term ct
-  | _ -> assert false
+  | CTapp (ct1, ct2) -> Sid.union (fvars_term ct1) (fvars_term ct2)
+  | CTquant (_, ct) -> fvars_term ct
+
 
 let fvars_task cts =
   List.fold_left (fun acc (_, t) -> Sid.union acc (fvars_term t))
@@ -358,6 +393,12 @@ let rec print_certif fmt = function
       fprintf fmt "weakening_goal (%a) (%a) %s"
         print_term a
         print_certif c
+        (str g)
+  | Inst_quant_hyp (p, t, h, c, g) ->
+      fprintf fmt "inst_quant_hyp (%a) (%a) (%s => %s => %a) %s"
+        print_term p
+        print_term t
+        (str g) (str h) print_certif c
         (str g)
 
 
