@@ -30,7 +30,7 @@ let rec check_rewrite_term tl tr t path =
 let check_rewrite cta rev h g terms path : ctask list =
   let rec introduce acc inst_terms t = match t, inst_terms with
     | CTbinop (Timplies, t1, t2), _ -> introduce (t1::acc) inst_terms t2
-    | CTquant (Tforall, t), inst::inst_terms -> introduce acc inst_terms (ct_open t inst)
+    | CTquant (CTforall, t), inst::inst_terms -> introduce acc inst_terms (ct_open t inst)
     | t, [] -> acc, t
     | _ -> verif_failed "Can't instantiate the hypothesis" in
   let lp, tl, tr =
@@ -123,7 +123,7 @@ let rec ccheck (r, g : certif) cta : ctask list =
     | Intro_quant (h, c) ->
         let t, pos = find_ident g cta in
         begin match t, pos with
-        | CTquant (Tforall, t), true | CTquant (Texists, t), false ->
+        | CTquant (CTforall, t), true | CTquant (CTexists, t), false ->
             if mem h t then verif_failed "non-free variable" else
             let cta = Mid.add g (ct_open t (CTfvar h), pos) cta in
             ccheck c cta
@@ -131,7 +131,7 @@ let rec ccheck (r, g : certif) cta : ctask list =
     | Inst_quant (h, t_inst, c) ->
         let t, pos = find_ident g cta in
         begin match t, pos with
-        | CTquant (Tforall, t), false | CTquant (Texists, t), true ->
+        | CTquant (CTforall, t), false | CTquant (CTexists, t), true ->
             let cta = Mid.add h (ct_open t t_inst, pos) cta in
             ccheck c cta
         | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
