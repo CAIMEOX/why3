@@ -158,10 +158,11 @@ let rec elab (cta : ctask) (r, g : certif) (fill : 'a list) : 'a ec * 'a list =
   | Inst_quant (h, t_inst, c) ->
       let p, pos = find_ident g cta in
         begin match p, pos with
-        | CTquant (Tforall, p'), false | CTquant (Texists, p'), true ->
-            let cta = Mid.add h (ct_open p' t_inst, pos) cta in
+        | CTquant (CTforall, p), false | CTquant (CTexists, p), true ->
+            let cta = Mid.add h (ct_open p t_inst, pos) cta in
             let ce, fill = elab cta c fill in
-            Inst_quant_hyp (p, t_inst, h, ce, g), fill
+            let p' = CTquant (CTlambda, p) in
+            Inst_quant_hyp (p', t_inst, h, ce, g), fill
         | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
         end
 
@@ -183,7 +184,8 @@ let gen_sym s =
                    s ^ string_of_int !r
 
 let ip = create_ident_printer []
-let str i = id_unique ip i
+let san = sanitizer char_to_lalnum char_to_lalnum
+let str i = id_unique ip ~sanitizer:san i
 
 let print_op fmt = function
   | Tand -> fprintf fmt "and"
@@ -215,14 +217,24 @@ let print_term fmt t =
       fprintf fmt "(%a) (%a)"
         (pt alt lvl env) ct1
         (pt alt lvl env) ct2
-  | CTquant (q, t) ->
+  | CTquant ((CTforall | CTexists) as q, t) ->
       let x = gen_sym () in
       let new_env = Mi.add lvl x env in
-      let q_str = match q with Tforall -> "forall" | Texists -> "exists" in
+      let q_str = match q with CTforall -> "forall"
+                             | CTexists -> "exists"
+                             | CTlambda -> assert false in
       fprintf fmt "(%s (%s => %a))"
         q_str
         x
-        (pt alt (lvl+1) new_env) t in
+        (pt alt (lvl+1) new_env) t
+  | CTquant (CTlambda, t) ->
+      let x = gen_sym () in
+      let new_env = Mi.add lvl x env in
+      fprintf fmt "%s => %a"
+        x
+        (pt alt (lvl+1) new_env) t
+
+  in
   try pt false 0 Mi.empty fmt t
   with _ -> pt true 0 Mi.empty str_formatter t;
             failwith (flush_str_formatter ())

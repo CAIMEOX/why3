@@ -11,12 +11,14 @@ open Format
 (** To certify transformations, we will represent Why3 tasks by the type <ctask>
     and we equip transformations with a certificate <certif> *)
 
+type cquant = CTforall | CTexists | CTlambda
+
 type cterm =
   | CTbvar of int (* bound variables use De Bruijn indices *)
   | CTfvar of ident (* free variables use a name *)
   | CTapp of cterm * cterm
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
-  | CTquant of quant * cterm (* forall binding *)
+  | CTquant of cquant * cterm (* forall binding *)
   | CTnot of cterm
   | CTtrue
   | CTfalse
@@ -85,6 +87,10 @@ let hole = Hole, id_register (id_fresh "dummy_hole_ident")
 
 (** Translating a Why3 <task> into a <ctask> *)
 
+let translate_quant = function
+  | Tforall -> CTforall
+  | Texists -> CTexists
+
 let rec translate_term_rec bv_lvl lvl t =
   (* level <lvl> is the number of forall above in the whole term *)
   (* <bv_lvl> is mapping bound variables to their respective level *)
@@ -116,7 +122,7 @@ let rec translate_term_rec bv_lvl lvl t =
       let ids = (List.hd vs).vs_name in
       let lvl = lvl + 1 in
       let ctq = translate_term_rec (Mid.add ids lvl bv_lvl) lvl t in
-      CTquant (q, ctq)
+      CTquant (translate_quant q, ctq)
   | Tnot t -> CTnot (translate_term_rec bv_lvl lvl t)
   | Ttrue -> CTtrue
   | Tfalse -> CTfalse
@@ -127,7 +133,8 @@ let rec translate_term_rec bv_lvl lvl t =
   | Teps _ -> invalid_arg "Cert_syntax.translate_term Teps"
 
 
-let translate_term t = translate_term_rec Mid.empty 0 t
+let translate_term t =
+  translate_term_rec Mid.empty 0 t
 
 let translate_decl decl =
   match decl.d_node with
@@ -172,8 +179,9 @@ let rec pcte fmt = function
   | CTbinop (op, t1, t2) ->
       fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
   | CTquant (q, ct) -> begin match q with
-                       | Tforall -> fprintf fmt "∀. %a" pcte ct
-                       | Texists -> fprintf fmt "∃. %a" pcte ct
+                       | CTforall -> fprintf fmt "∀. %a" pcte ct
+                       | CTexists -> fprintf fmt "∃. %a" pcte ct
+                       | CTlambda -> fprintf fmt "λ. %a" pcte ct
                        end
   | CTnot t -> fprintf fmt "(not %a)" pcte t
   | CTtrue -> fprintf fmt "true"

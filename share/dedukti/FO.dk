@@ -252,16 +252,4 @@ def inst_quant_hyp (P : Term -> Prop) (t : Term) :
     prf (hyp (forall (x => P x)) empty)
 := f => h => f h (h t).
 
-(; #CHECK (P => h => t => h t) ;)
-(; : ;)
-(; (P : Term -> Prop) -> (h : (x : Term -> prf (P x))) -> ;)
-(; (t : Term) -> prf (P t). ;)
-
-(; #CHECK (P => h => t => h t) ;)
-(; : ;)
-(; (P : Term -> Prop) -> (h : prf (forall (x => P x))) ;)
-(; (t : Term) -> prf (P t). ;)
-
-
-
 
