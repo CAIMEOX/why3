@@ -476,7 +476,7 @@ let pose (name: string) (t: term) : ctrans = fun task ->
   let eq_cert = Unfold (Split (id_cert, id_cert), hpose), hpose in
   let ct = translate_term t in
   [Trans.apply trans_new_task task],
-  (Cut (CTquant (Texists, CTbinop (Tiff, CTbvar 0, ct)),
+  (Cut (CTquant (CTexists, CTbinop (Tiff, CTbvar 0, ct)),
         (Inst_quant (hpose, ct, eq_cert),
          pr.pr_name),
         (Intro_quant (ls.ls_name, hole), pr.pr_name)
