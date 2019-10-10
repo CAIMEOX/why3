@@ -33,7 +33,10 @@ bin/why3 config --detect
 
 Pour pouvoir utiliser le vérificateur Dedukti, il faut aussi avoir `dkcheck` dans le path de
 votre système. Une version de Dedukti compatible avec notre greffon est disponible
-[ici](https://github.com/Deducteam/Dedukti).
+[ici](https://github.com/Deducteam/Dedukti). La façon la plus simple de l'installer est via opam :
+```shell
+opam install dedukti
+```
 
 
 
