@@ -241,6 +241,10 @@ let print_term fmt t =
 let print_list sep pe fmt l =
   List.iter (fun h -> fprintf fmt "%a%s" pe h sep) l
 
+let print_list_inter sep pe fmt l =
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "%s" sep)
+    pe fmt l  
+
 (* on [e1; ...; en], print_list_pre gives :
    sep (e1) (sep (e2) ...)
  *)
@@ -270,7 +274,7 @@ let rec collect typ = function
   | CTbvar _  -> Mid.empty
   | CTfvar id -> Mid.singleton id typ
   | CTapp (ct1, ct2) -> Mid.set_union (collect (Arrow (Term, typ)) ct1) (collect Term ct2)
-  | CTbinop (_, ct1, ct2) -> Mid.set_union (collect Term ct1) (collect Term ct2)
+  | CTbinop (_, ct1, ct2) -> Mid.set_union (collect typ ct1) (collect typ ct2)
   | CTquant (_, ct)
   | CTnot ct -> collect typ ct
   | CTtrue | CTfalse -> Mid.empty
@@ -280,13 +284,15 @@ let collect_stask (ta : ctask_simple) =
     Mid.empty ta
 
 let print_task fmt (fv, ts) =
-  List.iter (fun (id, typ) -> (* to correct, think about printing lists in general *)
-      fprintf fmt "%s : (%a) -> "
+  fprintf fmt "(";
+  print_list " -> " (fun fmt (id, typ) ->
+      fprintf fmt "%s : (%a)"
         (str id)
-        print_type typ) fv;
+        print_type typ) fmt fv;
   let tp = snd (List.split ts) @ [CTfalse] in
   fprintf fmt "prf (%a)"
-    (print_list_pre "imp" print_term) tp
+    (print_list_pre "imp" print_term) tp;
+  fprintf fmt ")"
 
 let nopt = function
   | Some x -> x
@@ -433,7 +439,7 @@ let print fmt init_t res_t certif =
   let res  = List.map fv_ts res_t in
   (* The type we need to check is inhabited *)
   let p_type fmt () =
-    print_list " -> "
+    print_list_inter " -> "
       print_task
       fmt
       (res @ [init]) in
