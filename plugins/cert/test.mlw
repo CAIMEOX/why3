@@ -9,6 +9,7 @@ axiom B : b
 
 predicate p (x : bool)
 
+
 goal G0 : a
 goal G1 : a /\ b
 goal G2 : (a /\ b) /\ (a /\ a /\ a /\ b)
@@ -35,3 +36,5 @@ goal G20 : exists x : bool. p x -> (forall y. p y)
 goal G21 : true
 
 goal G22 : a -> b
+
+goal G23 : (exists x : bool. p x) -> a
