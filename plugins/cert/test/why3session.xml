@@ -344,6 +344,16 @@
   </transf>
   </goal>
  </transf>
+ <transf name="case_dcert" arg1="(exists x. not p x)">
+  <goal name="G20.0">
+  <transf name="intro_dcert" arg1="in" arg2="H">
+   <goal name="G20.0.0">
+   </goal>
+  </transf>
+  </goal>
+  <goal name="G20.1">
+  </goal>
+ </transf>
  </goal>
  <goal name="G21">
  <transf name="pose_ccert" arg1="hh" arg2="true">
@@ -352,6 +362,12 @@
  </transf>
  </goal>
  <goal name="G22">
+ </goal>
+ <goal name="G23">
+ <transf name="intro_dcert" >
+  <goal name="G23.0">
+  </goal>
+ </transf>
  </goal>
 </theory>
 </file>
