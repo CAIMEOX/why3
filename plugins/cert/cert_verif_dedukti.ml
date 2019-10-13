@@ -32,8 +32,10 @@ type 'a ec = (* elaborated certificate *)
   | Dir_right_goal of (cterm * cterm * ident * 'a ec * ident)
   | Weakening_hyp of cterm * 'a ec * ident
   | Weakening_goal of cterm * 'a ec * ident
-  | Inst_quant_hyp of (cterm * cterm * ident * 'a ec * ident)
   | Intro_quant_hyp of (cterm * ident * ident * 'a ec * ident)
+  | Intro_quant_goal of (cterm * ident * ident * 'a ec * ident)
+  | Inst_quant_goal of (cterm * cterm * ident * 'a ec * ident)
+  | Inst_quant_hyp of (cterm * cterm * ident * 'a ec * ident)
 
 type certif_elab = unit ec
 
@@ -159,21 +161,23 @@ let rec elab (cta : ctask) (r, g : certif) (fill : 'a list) : 'a ec * 'a list =
   | Intro_quant (y, c) ->
       let t, pos = find_ident g cta in
       begin match t, pos with
-      | CTquant (CTexists, p), false ->
+      | CTquant (CTexists, p), false | CTquant (CTforall, p), true ->
           if mem y t then verif_failed "non-free variable" else
             let cta = Mid.add g (ct_open p (CTfvar y), pos) cta in
             let ce, fill = elab cta c fill in
             let p' = CTquant (CTlambda, p) in
-            Intro_quant_hyp (p', y, g, ce, g), fill
+            if pos then Intro_quant_goal (p', y, g, ce, g), fill
+            else Intro_quant_hyp (p', y, g, ce, g), fill
       | _ -> verif_failed "Nothing to introduce" end
   | Inst_quant (h, t_inst, c) ->
       let p, pos = find_ident g cta in
       begin match p, pos with
-      | CTquant (CTforall, p), false ->
+      | CTquant (CTforall, p), false | CTquant (CTexists, p), true ->
           let cta = Mid.add h (ct_open p t_inst, pos) cta in
-            let ce, fill = elab cta c fill in
-            let p' = CTquant (CTlambda, p) in
-            Inst_quant_hyp (p', t_inst, h, ce, g), fill
+          let ce, fill = elab cta c fill in
+          let p' = CTquant (CTlambda, p) in
+          if pos then Inst_quant_goal (p', t_inst, h, ce, g), fill
+          else Inst_quant_hyp (p', t_inst, h, ce, g), fill
         | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
         end
   | Rewrite _ -> failwith "rewriting is not supported in Dedukti verification"
@@ -202,47 +206,37 @@ let print_op fmt = function
   | Timplies -> fprintf fmt "imp"
   | Tiff -> fprintf fmt "iff"
 
-module Mi = Extmap.Make (struct type t = int let compare = Pervasives.compare end)
-
-let print_term fmt t =
-  let rec pt alt lvl env fmt = function
-  | CTbvar n -> if alt then fprintf fmt "%s" (string_of_int n)
-                else fprintf fmt "%s" (Mi.find n env)
+let rec print_term fmt = function
+  | CTbvar _ -> assert false
   | CTfvar id -> fprintf fmt "%s" (str id)
   | CTbinop (op, ct1, ct2) ->
       fprintf fmt "(%a (%a) (%a))"
         print_op op
-        (pt alt lvl env) ct1
-        (pt alt lvl env) ct2
+        print_term ct1
+        print_term ct2
   | CTnot ct ->
       fprintf fmt "(not (%a))"
-        (pt alt lvl env) ct
+        print_term ct
   | CTfalse -> fprintf fmt "false"
   | CTtrue -> fprintf fmt "true"
   | CTapp (ct1, ct2) ->
       fprintf fmt "(%a) (%a)"
-        (pt alt lvl env) ct1
-        (pt alt lvl env) ct2
+        print_term ct1
+        print_term ct2
   | CTquant ((CTforall | CTexists) as q, t) ->
-      let x = str (id_register (id_fresh "x")) in
-      let new_env = Mi.add lvl x env in
+      let x = id_register (id_fresh "x") in
       let q_str = match q with CTforall -> "forall"
                              | CTexists -> "exists"
                              | CTlambda -> assert false in
       fprintf fmt "(%s (%s => %a))"
         q_str
-        x
-        (pt alt (lvl+1) new_env) t
+        (str x)
+        print_term (ct_open t (CTfvar x))
   | CTquant (CTlambda, t) ->
-      let x = str (id_register (id_fresh "x")) in
-      let new_env = Mi.add lvl x env in
+      let x = id_register (id_fresh "x") in
       fprintf fmt "%s => %a"
-        x
-        (pt alt (lvl+1) new_env) t
-  in
-  try pt false 0 Mi.empty fmt t
-  with _ -> pt true 0 Mi.empty str_formatter t;
-            failwith (flush_str_formatter ())
+        (str x)
+        print_term (ct_open t (CTfvar x))
 
 (* on [e1; ...; en], print_list gives :
    e1 sep ... en sep
@@ -252,7 +246,7 @@ let print_list sep pe fmt l =
 
 let print_list_inter sep pe fmt l =
   pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "%s" sep)
-    pe fmt l  
+    pe fmt l
 
 (* on [e1; ...; en], print_list_pre gives :
    sep (e1) (sep (e2) ...)
@@ -428,16 +422,27 @@ let rec print_certif fmt = function
         print_term a
         print_certif c
         (str g)
+  | Intro_quant_hyp (p, y, h, c, g) ->
+      fprintf fmt "intro_quant_hyp (%a) (%s => %s => %a) %s"
+        print_term p
+        (str y) (str h) print_certif c
+        (str g)
+  | Intro_quant_goal (p, y, h, c, g) ->
+      fprintf fmt "intro_quant_goal (%a) (%s => %s => %a) %s"
+        print_term p
+        (str y) (str h) print_certif c
+        (str g)
+  | Inst_quant_goal (p, t, h, c, g) ->
+      fprintf fmt "inst_quant_goal (%a) (%a) (%s => %s => %a) %s"
+        print_term p
+        print_term t
+        (str g) (str h) print_certif c
+        (str g)
   | Inst_quant_hyp (p, t, h, c, g) ->
       fprintf fmt "inst_quant_hyp (%a) (%a) (%s => %s => %a) %s"
         print_term p
         print_term t
         (str g) (str h) print_certif c
-        (str g)
-  | Intro_quant_hyp (p, y, h, c, g) ->
-      fprintf fmt "intro_quant_hyp (%a) (%s => %s => %a) %s"
-        print_term p
-        (str y) (str h) print_certif c
         (str g)
 
 
@@ -445,12 +450,15 @@ let fv_ts (ct : ctask) =
   let encode_neg (k, (ct, pos)) = k, if pos then CTnot ct else ct in
   let ts = Mid.bindings ct
            |> List.map encode_neg in
-  let fv = collect_stask ts |> Mid.bindings in
+  let fv = collect_stask ts in
   fv, ts
 
 let print fmt init_t res_t certif =
-  let init = fv_ts init_t in
-  let res  = List.map fv_ts res_t in
+  let resm  = List.map fv_ts res_t in
+  let res = List.map (fun (fv, ts) -> Mid.bindings fv, ts) resm in
+  let fvi, tsi = fv_ts init_t in
+  let fv = List.fold_left (fun acc (fv, _) -> Mid.set_union acc fv) fvi resm in
+  let init = Mid.bindings fv, tsi in
   (* The type we need to check is inhabited *)
   let p_type fmt () =
     print_list_inter " -> "
