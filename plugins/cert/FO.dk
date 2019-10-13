@@ -240,12 +240,21 @@ def weakening_goal (A : Prop) :
     prf (goal A empty)
 := f => a => f.
 
-
 def intro_quant_hyp (P : Term -> Prop) :
     (y : Term -> prf (hyp (P y) empty)) ->
     prf (hyp (exists P) empty)
 := t => ep => exists_elim P false ep (x => px => t x px).
 
+def intro_quant_goal (P : Term -> Prop) :
+    (y : Term -> prf (goal (P y) empty)) ->
+    prf (goal (forall P) empty)
+:= ta => nfp => nfp (t => nne (P t) (npt => ta t npt)).
+
+def inst_quant_goal (P : Term -> Prop) (t : Term) :
+    prf (goal (exists P) (goal (P t) empty)) ->
+    prf (goal (exists P) empty)
+:=
+  ta => nep => ta nep (pt => nep (exists_intro P t pt)).
 
 def inst_quant_hyp (P : Term -> Prop) (t : Term) :
     prf (hyp (forall (x => P x)) (hyp (P t) empty)) ->

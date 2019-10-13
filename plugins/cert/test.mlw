@@ -38,3 +38,4 @@ goal G21 : true
 goal G22 : a -> b
 
 goal G23 : (exists x : bool. p x) -> a
+goal G24 : exists x : bool. p x
