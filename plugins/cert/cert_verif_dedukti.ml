@@ -196,9 +196,6 @@ let print_op fmt = function
 module Mi = Extmap.Make (struct type t = int let compare = Pervasives.compare end)
 
 let print_term fmt t =
-  let gen_sym =
-    let c = ref 0 in
-    fun () -> incr c; "x_" ^ string_of_int !c in
   let rec pt alt lvl env fmt = function
   | CTbvar n -> if alt then fprintf fmt "%s" (string_of_int n)
                 else fprintf fmt "%s" (Mi.find n env)
@@ -218,7 +215,7 @@ let print_term fmt t =
         (pt alt lvl env) ct1
         (pt alt lvl env) ct2
   | CTquant ((CTforall | CTexists) as q, t) ->
-      let x = gen_sym () in
+      let x = str (id_register (id_fresh "x")) in
       let new_env = Mi.add lvl x env in
       let q_str = match q with CTforall -> "forall"
                              | CTexists -> "exists"
@@ -228,12 +225,11 @@ let print_term fmt t =
         x
         (pt alt (lvl+1) new_env) t
   | CTquant (CTlambda, t) ->
-      let x = gen_sym () in
+      let x = str (id_register (id_fresh "x")) in
       let new_env = Mi.add lvl x env in
       fprintf fmt "%s => %a"
         x
         (pt alt (lvl+1) new_env) t
-
   in
   try pt false 0 Mi.empty fmt t
   with _ -> pt true 0 Mi.empty str_formatter t;
@@ -244,6 +240,10 @@ let print_term fmt t =
  *)
 let print_list sep pe fmt l =
   List.iter (fun h -> fprintf fmt "%a%s" pe h sep) l
+
+let print_list_inter sep pe fmt l =
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "%s" sep)
+    pe fmt l  
 
 (* on [e1; ...; en], print_list_pre gives :
    sep (e1) (sep (e2) ...)
@@ -256,30 +256,43 @@ let rec print_list_pre sep pe fmt = function
               pe h
               (print_list_pre sep pe) t
 
-let print_task fmt cts =
-  let tp = snd (List.split cts) @ [CTfalse] in
-  print_list_pre "imp" print_term fmt tp
-
-let rec fvars_term = function
-  | CTbvar _ -> Sid.empty
-  | CTfvar i -> Sid.singleton i
-  | CTbinop (_, ct1, ct2) -> Sid.union (fvars_term ct1) (fvars_term ct2)
-  | CTfalse | CTtrue -> Sid.empty
-  | CTnot ct -> fvars_term ct
-  | CTapp (ct1, ct2) -> Sid.union (fvars_term ct1) (fvars_term ct2)
-  | CTquant (_, ct) -> fvars_term ct
 
 
-let fvars_task cts =
-  List.fold_left (fun acc (_, t) -> Sid.union acc (fvars_term t))
-    Sid.empty cts
+type typ =
+  | Term
+  | Prop
+  | Arrow of typ * typ
 
-let fvars_str init_t res_t =
-  List.fold_left (fun acc t -> Sid.union acc (fvars_task t))
-    (fvars_task init_t) res_t
-  |> Sid.elements
-  |> List.map str
+let rec print_type fmt = function
+  | Term -> fprintf fmt "Term"
+  | Prop -> fprintf fmt "Prop"
+  | Arrow (t1, t2) -> fprintf fmt "%a -> %a"
+                        print_type t1
+                        print_type t2
 
+let rec collect typ = function
+  | CTbvar _  -> Mid.empty
+  | CTfvar id -> Mid.singleton id typ
+  | CTapp (ct1, ct2) -> Mid.set_union (collect (Arrow (Term, typ)) ct1) (collect Term ct2)
+  | CTbinop (_, ct1, ct2) -> Mid.set_union (collect typ ct1) (collect typ ct2)
+  | CTquant (_, ct)
+  | CTnot ct -> collect typ ct
+  | CTtrue | CTfalse -> Mid.empty
+
+let collect_stask (ta : ctask_simple) =
+  List.fold_left (fun acc (_, ct) -> Mid.set_union acc (collect Prop ct))
+    Mid.empty ta
+
+let print_task fmt (fv, ts) =
+  fprintf fmt "(";
+  print_list " -> " (fun fmt (id, typ) ->
+      fprintf fmt "%s : (%a)"
+        (str id)
+        print_type typ) fmt fv;
+  let tp = snd (List.split ts) @ [CTfalse] in
+  fprintf fmt "prf (%a)"
+    (print_list_pre "imp" print_term) tp;
+  fprintf fmt ")"
 
 let nopt = function
   | Some x -> x
@@ -414,33 +427,41 @@ let rec print_certif fmt = function
         (str g)
 
 
-let ts (ct : ctask) =
-  Mid.bindings ct
-  |> List.map (fun (k, (cte, pos)) -> (k, if pos then CTnot cte else cte))
+let fv_ts (ct : ctask) =
+  let encode_neg (k, (ct, pos)) = k, if pos then CTnot ct else ct in
+  let ts = Mid.bindings ct
+           |> List.map encode_neg in
+  let fv = collect_stask ts |> Mid.bindings in
+  fv, ts
 
 let print fmt init_t res_t certif =
-  let init_ts = ts init_t in
-  let res_ts = List.map ts res_t in
-  let fv = fvars_str init_ts res_ts in
+  let init = fv_ts init_t in
+  let res  = List.map fv_ts res_t in
   (* The type we need to check is inhabited *)
   let p_type fmt () =
-    print_list " -> " (fun _ -> fprintf fmt "(%s : Prop)") fmt fv;
-    fprintf fmt "prf (%a)"
-      (print_list_pre "imp" print_task) (res_ts @ [init_ts]) in
+    print_list_inter " -> "
+      print_task
+      fmt
+      (res @ [init]) in
   let task_syms = let gs = gen_sym "task" in
-                  List.map (fun _ -> gs ()) res_ts in
+                  List.map (fun _ -> gs ()) res in
   (* applied_tasks are used to fill the holes *)
   let applied_tasks =
-    List.map2 (fun s t ->
-        let res_str = s::List.map (fun (i, _) -> str i) t in
+    List.map2 (fun s (fv_t, t) ->
+        let fv, _ = List.split fv_t in
+        let hyp, _ = List.split t in
+        let res_str = s :: List.map str (fv @ hyp) in
         print_list " " (fun fmt -> fprintf fmt "%s") str_formatter res_str;
         flush_str_formatter ())
       task_syms
-      res_ts in
+      res in
   let cert, _ = elab init_t certif applied_tasks in
   (* The term that has the correct type *)
   let p_term fmt () =
-    let vars = fv @ task_syms @ List.map (fun (i, _) -> str i) init_ts in
+    let fv, ts = init in
+    let fv_ids, _ = List.split fv in
+    let hyp_ids, _ = List.split ts in
+    let vars = task_syms @ List.map str (fv_ids @ hyp_ids) in
     print_list " => " (fun fmt -> fprintf fmt "%s") fmt vars;
     print_certif fmt cert in
   fprintf fmt "#CHECK (%a) :\n       (%a).@."
