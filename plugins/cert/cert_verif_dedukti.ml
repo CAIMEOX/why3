@@ -33,6 +33,7 @@ type 'a ec = (* elaborated certificate *)
   | Weakening_hyp of cterm * 'a ec * ident
   | Weakening_goal of cterm * 'a ec * ident
   | Inst_quant_hyp of (cterm * cterm * ident * 'a ec * ident)
+  | Intro_quant_hyp of (cterm * ident * ident * 'a ec * ident)
 
 type certif_elab = unit ec
 
@@ -155,18 +156,26 @@ let rec elab (cta : ctask) (r, g : certif) (fill : 'a list) : 'a ec * 'a list =
                then Dir_right_goal pack, fill
                else Dir_right_hyp  pack, fill
       | _ -> verif_failed "Can't follow a direction" end
+  | Intro_quant (y, c) ->
+      let t, pos = find_ident g cta in
+      begin match t, pos with
+      | CTquant (CTexists, p), false ->
+          if mem y t then verif_failed "non-free variable" else
+            let cta = Mid.add g (ct_open p (CTfvar y), pos) cta in
+            let ce, fill = elab cta c fill in
+            let p' = CTquant (CTlambda, p) in
+            Intro_quant_hyp (p', y, g, ce, g), fill
+      | _ -> verif_failed "Nothing to introduce" end
   | Inst_quant (h, t_inst, c) ->
       let p, pos = find_ident g cta in
-        begin match p, pos with
-        | CTquant (CTforall, p), false | CTquant (CTexists, p), true ->
-            let cta = Mid.add h (ct_open p t_inst, pos) cta in
+      begin match p, pos with
+      | CTquant (CTforall, p), false ->
+          let cta = Mid.add h (ct_open p t_inst, pos) cta in
             let ce, fill = elab cta c fill in
             let p' = CTquant (CTlambda, p) in
             Inst_quant_hyp (p', t_inst, h, ce, g), fill
         | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
         end
-
-  | Intro_quant _ -> failwith "TODO Intro_quant"
   | Rewrite _ -> failwith "rewriting is not supported in Dedukti verification"
 
 
@@ -424,6 +433,11 @@ let rec print_certif fmt = function
         print_term p
         print_term t
         (str g) (str h) print_certif c
+        (str g)
+  | Intro_quant_hyp (p, y, h, c, g) ->
+      fprintf fmt "intro_quant_hyp (%a) (%s => %s => %a) %s"
+        print_term p
+        (str y) (str h) print_certif c
         (str g)
 
 

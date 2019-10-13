@@ -252,9 +252,3 @@ def inst_quant_hyp (P : Term -> Prop) (t : Term) :
     prf (hyp (forall (x => P x)) empty)
 := f => h => f h (h t).
 
-(; #CHECK (P => t => f => h => f h (h t)) ;)
-(; : ;)
-(;  ((P : Term -> Prop) -> (t : Term) -> ;)
-(;     prf (hyp (forall (x => P x)) (hyp (P t) empty)) -> ;)
-(;     prf (hyp (forall (x => P x)) empty)). ;)
-(; et essayer en mettant une parenthèse autour du type de P ;)
