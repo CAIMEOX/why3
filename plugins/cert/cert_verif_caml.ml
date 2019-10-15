@@ -109,14 +109,6 @@ let rec ccheck (r, g : certif) cta : ctask list =
                       |> Mid.add h2 (t2, pos) in
             ccheck c cta
         | _ -> verif_failed "Nothing to destruct"  end
-    | Dir (d, c) ->
-        let t, pos = find_ident g cta in
-        begin match t, d, pos with
-        | CTbinop (Tor, t, _), Left, true | CTbinop (Tor, _, t), Right, true
-        | CTbinop (Tand, t, _), Left, false | CTbinop (Tand, _, t), Right, false ->
-          let cta = Mid.add g (t, pos) cta in
-          ccheck c cta
-        | _ -> verif_failed "Can't follow a direction" end
     | Weakening c ->
         let cta = Mid.remove g cta in
         ccheck c cta
