@@ -18,7 +18,7 @@ type cterm =
   | CTfvar of ident (* free variables use a name *)
   | CTapp of cterm * cterm
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
-  | CTquant of cquant * cterm (* forall binding *)
+  | CTquant of cquant * cterm (* quantifier binding *)
   | CTnot of cterm
   | CTtrue
   | CTfalse
