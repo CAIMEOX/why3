@@ -64,10 +64,6 @@ and rule =
   | Destruct of ident * ident * certif
   (* Destruct (H₁, H₂, c) ⇓ (Γ, G : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, H₁ : A, H₂ : B ⊢ Δ) *)
   (* Destruct (H₁, H₂, c) ⇓ (Γ ⊢ Δ, G : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, H₁ : A, H₂ : B) *)
-  | Dir of dir * certif
-  (* Dir (Left, c) ⇓ (Γ ⊢ Δ, G : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, G : A) *)
-  (* Dir (Left, c) ⇓ (Γ, G : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, G : A ⊢ Δ) *)
-  (* and similar definition for Right instead of Left *)
   | Weakening of certif
   (* Weakening c ⇓ (Γ ⊢ Δ, G : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening c ⇓ (Γ, G : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
@@ -207,7 +203,6 @@ and prr fmt = function
   | Swap_neg c -> fprintf fmt "Swap_neg@ %a" prc c
   | Destruct (h1, h2, c) -> fprintf fmt "Destruct @[(%a,@ %a,@ %a)@]"
                               pri h1 pri h2 prc c
-  | Dir (d, c) -> fprintf fmt "Dir @[(%a,@ %a)@]" prd d prc c
   | Weakening c -> fprintf fmt "Weakening@ %a" prc c
   | Intro_quant (name, c) -> fprintf fmt "Intro_quant @[(%a,@ %a)@]" pri name prc c
   | Inst_quant (i, t, c) -> fprintf fmt "Inst_quant @[(%a,@ %a,@ %a)@]" pri i pcte t prc c
@@ -352,7 +347,6 @@ let rec nohole (r, _) =
   | Unfold c
   | Swap_neg c
   | Destruct (_, _, c)
-  | Dir (_, c)
   | Weakening c
   | Intro_quant (_, c)
   | Inst_quant (_, _, c) -> nohole c

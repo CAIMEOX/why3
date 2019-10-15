@@ -37,8 +37,6 @@ let ctrans_gen (ctr : ctrans) ((ts, (r, g)) : task list * certif) =
                     acc, (Swap_neg c, g), ts
     | Destruct (h1, h2, c) -> let acc, c, ts = fill acc c ts in
                               acc, (Destruct (h1, h2, c), g), ts
-    | Dir (d, c) -> let acc, c, ts = fill acc c ts in
-                    acc, (Dir (d, c), g), ts
     | Weakening c -> let acc, c, ts = fill acc c ts in
                      acc, (Weakening c, g), ts
     | Intro_quant (h, c) -> let acc, c, ts = fill acc c ts in
@@ -237,10 +235,15 @@ let intro where task =
   | Some c -> [nt], c
 
 
+let dir_smart d c g =
+  let h = id_register (id_fresh "Weaken") in
+  let left, right = match d with Left -> g, h | Right -> h, g in
+  Destruct (left, right, (Weakening c, h)), g
+
 (* Direction with a certificate *)
 (* choose Left (A) or Right (B) when
-    • the goal is of the form A ∧ B
-    • the hypothesis is of the form A ∨ B *)
+    • the goal is of the form A ∨ B
+    • the hypothesis is of the form A ∧ B *)
 let dir d where task =
   let g = (default_goal task where).pr_name in
   let clues = ref false in
@@ -256,7 +259,7 @@ let dir d where task =
         | _ -> [decl] end
     | _ -> [decl]) None in
   let nt = Trans.apply trans_t task in
-  if !clues then [nt], (Dir (d, hole), g)
+  if !clues then [nt], dir_smart d hole g
   else [task], hole
 
 let left = dir Left None
