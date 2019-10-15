@@ -11,16 +11,16 @@ let cchecker = checker_ctrans checker_caml
 let dchecker = checker_ctrans checker_dedukti
 
 let assumption_c          = cchecker assumption
+let intro_c where         = cchecker (intro where)
+let left_c where          = cchecker (dir Left where)
+let right_c where         = cchecker (dir Right where)
+let split_c where         = cchecker (split_logic where)
 let trivial_c             = cchecker trivial
 let exfalso_c             = cchecker exfalso
 let intros_c              = cchecker intros
 let intuition_c           = cchecker intuition
 let swap_c where          = cchecker (swap where)
 let revert_c ls           = cchecker (revert ls)
-let intro_c where         = cchecker (intro where)
-let left_c where          = cchecker (dir Left where)
-let right_c where         = cchecker (dir Right where)
-let split_c where         = cchecker (split_logic where)
 let instantiate_c t what  = cchecker (inst t what)
 let assert_c t            = cchecker (cut t)
 let case_c t              = cchecker (case t)
@@ -30,20 +30,19 @@ let pose_c name t         = cchecker (pose name t)
 
 
 let assumption_d          = dchecker assumption
+let intro_d where         = dchecker (intro where)
+let left_d where          = dchecker (dir Left where)
+let right_d where         = dchecker (dir Right where)
+let split_d where         = dchecker (split_logic where)
 let trivial_d             = dchecker trivial
 let exfalso_d             = dchecker exfalso
 let intros_d              = dchecker intros
 let intuition_d           = dchecker intuition
 let swap_d where          = dchecker (swap where)
 let revert_d ls           = dchecker (revert ls)
-let intro_d where         = dchecker (intro where)
-let left_d where          = dchecker (dir Left where)
-let right_d where         = dchecker (dir Right where)
-let split_d where         = dchecker (split_logic where)
 let instantiate_d t what  = dchecker (inst t what)
 let assert_d t            = dchecker (cut t)
 let case_d t              = dchecker (case t)
-let rewrite_d g rev where = dchecker (rewrite g rev where)
 let clear_d l             = dchecker (clear l)
 let pose_d name t         = dchecker (pose name t)
 
@@ -163,10 +162,6 @@ let register_dedukti : unit =
   wrap_and_register ~desc:"A Dedukti certified version of transformation instantiate"
     "instantiate_dcert" (Tterm (Topt ("in", Tprsymbol Ttrans_l)))
     (fun t_inst where -> store (instantiate_d t_inst where));
-
-  wrap_and_register ~desc:"A Dedukti certified version of transformation rewrite"
-    "rewrite_dcert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l))))))
-    (fun rev g where -> store (rewrite_d g rev where));
 
   wrap_and_register ~desc:"A Dedukti certified version of transformation assert"
     "assert_dcert" (Tformula Ttrans_l)

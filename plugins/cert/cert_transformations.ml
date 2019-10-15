@@ -480,8 +480,7 @@ let pose (name: string) (t: term) : ctrans = fun task ->
   let ct = translate_term t in
   [Trans.apply trans_new_task task],
   (Cut (CTquant (CTexists, CTbinop (Tiff, CTbvar 0, ct)),
-        (Inst_quant (hpose, ct, eq_cert),
-         pr.pr_name),
+        (Inst_quant (hpose, ct, eq_cert), pr.pr_name),
         (Intro_quant (ls.ls_name, hole), pr.pr_name)
      ),
    pr.pr_name)

@@ -10,7 +10,30 @@ axiom B : b
 predicate p (x : bool)
 
 
-goal G0 : a
+goal assumption : a
+goal intro_imp : c -> c
+goal intro_exists : (exists x. p x) -> a
+goal intro_forall : forall x : bool. a
+goal left_goal : a \/ c
+goal right_goal : c \/ a
+goal split_goal_and : a /\ b
+goal split_hyp_or : c \/ d -> d \/ c
+goal case : (a /\ c) \/ (a /\ not c)
+goal split_goal_imp : d -> d
+goal split_goal_iff : d <-> d
+goal swap_neg_neg_hyp : not a -> false
+goal exfalso : not a -> d
+goal swap_neg_goal : false -> not a
+goal split_hyp_imp : (a -> d) -> d
+goal split_hyp_iff : (d <-> a) -> d
+
+goal trivial_hyp : false -> d
+goal trivial_goal : true
+
+goal intros : forall x. p x -> p x
+goal clear : a -> d -> a -> a -> d
+
+
 goal G1 : a /\ b
 goal G2 : (a /\ b) /\ (a /\ a /\ a /\ b)
 goal G3 : (b /\ a) /\ ( (a /\ a) /\ c)
@@ -32,7 +55,7 @@ goal G18 : a -> d -> b -> c -> a -> d
 goal G19 : forall x. (forall u. u <-> a) -> (x <-> x)
 
 
-goal G20 : exists x : bool. p x -> (forall y. p y)
+goal buveur : exists x : bool. p x -> (forall y. p y)
 goal G21 : true
 
 goal G22 : a -> b
