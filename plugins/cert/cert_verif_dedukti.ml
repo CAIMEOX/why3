@@ -178,7 +178,7 @@ let gen_sym s =
                    s ^ string_of_int !r
 
 let ip = create_ident_printer []
-let san = sanitizer char_to_lalnum char_to_lalnum
+let san = sanitizer char_to_alnum char_to_alnum
 let str i = id_unique ip ~sanitizer:san i
 
 let print_op fmt = function

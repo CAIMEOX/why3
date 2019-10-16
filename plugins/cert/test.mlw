@@ -10,10 +10,13 @@ axiom B : b
 predicate p (x : bool)
 
 
+(** Elementary rules **)
+
+
 goal assumption : a
 goal intro_imp : c -> c
 goal intro_exists : (exists x. p x) -> a
-goal intro_forall : forall x : bool. a
+goal intro_forall : forall x : bool. p x -> a
 goal left_goal : a \/ c
 goal right_goal : c \/ a
 goal split_goal_and : a /\ b
@@ -28,44 +31,39 @@ goal swap_neg_goal : false -> d
 goal split_hyp_imp : (a -> d) -> d
 goal split_hyp_iff : (d <-> a) -> d
 goal swap_neg_hyp : not d -> d -> false
-
 goal trivial_hyp : false -> d
 goal trivial_goal : true
+goal assert1 : (a -> b -> c) -> (c -> d) -> d
+goal revert : (forall x. p x) -> forall x. p x
+goal inst_hyp : (forall x. p x) -> p true
+goal inst_goal : p true -> exists x : bool. p x
+
+(* 'pose' transformation : in progress *)
+goal pose : a
+
+
+(** Transformations obtained by composition **)
+
 
 goal intros : forall x. p x -> d -> p x
 goal clear : a -> d -> a -> a -> d
 
-goal assert1 : (a -> b -> c) -> (c -> d) -> d
-goal revert : (forall x. p x) -> forall x. p x
-
-goal pose : a
-
-
-goal intuition1 : (a /\ b) /\ (a /\ a /\ a /\ b)
-goal G3 : (b /\ a) /\ ( (a /\ a) /\ c)
-goal G4 : a /\ (b \/ d)
-goal G5 : (a \/ c) /\ (d \/ b)
-goal G6 : a /\ (c \/ d)
-goal G7 : (a /\ (d \/ c) ) \/ ( ((a /\ b) /\ ((b /\ (d \/ e \/ a)) \/d)) \/ (a /\ c) )
-goal G8 : ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\ (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a)))) /\ ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\ (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))))
-goal G9 : c /\ (d \/ f) <-> (c /\ d) \/ (c /\ f)
-goal G10 : c -> d
-goal G11 : a /\ (d -> d)
-goal G12 : (c <-> a) -> (d \/ c)
-goal G13 : (c <-> d) -> c -> d
-goal G14 : (d <-> c) -> c -> d
-goal G15 : (a -> b -> d <-> c) -> c -> d
-goal G16 : d \/ c -> c
-goal G17 : (d <-> a) -> d
-goal G18 : a -> d -> b -> c -> a -> d
-goal G19 : forall x. (forall u. u <-> a) -> (x <-> x)
+(* Testing complex transformations *)
+goal intuition_and : (a /\ b) /\ (a /\ a /\ a /\ b)
+goal intuition_and_hole : (b /\ a) /\ ( (a /\ a) /\ c)
+goal intuition_or : (a \/ c) /\ (d \/ b)
+goal intuition_or_hole : a /\ (c \/ d)
+goal intuition_big : (a /\ (d \/ c) ) \/ ( ((a /\ b) /\ ((b /\ (d \/ e \/ a)) \/d)) \/ (a /\ c) )
+goal intuition_big_big : ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
+     		       	        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a)))) /\
+			 ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
+			        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))))
+goal rew_goal  : (c <-> a) -> (d \/ c)
+goal rew_hyp : (c <-> d) -> c -> d
+goal rew_inv_hyp : (d <-> c) -> c -> d
+goal rew_inv_prem_hyp : (a -> b -> d <-> c) -> c -> d
+goal rew_forall_hyp : forall x. (forall u. u <-> a) -> (x <-> x)
 
 
-goal buveur : exists x : bool. p x -> (forall y. p y)
-goal G21 : true
-
-goal G22 : a -> b
-
-goal G23 : (exists x : bool. p x) -> a
-goal G24 : exists x : bool. p x
-goal G25 : a \/ b
+(* Drinker's paradox example *)
+goal drinker : exists x : bool. p x -> (forall y. p y)
