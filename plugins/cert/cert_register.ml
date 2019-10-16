@@ -15,18 +15,18 @@ let intro_c where         = cchecker (intro where)
 let left_c where          = cchecker (dir Left where)
 let right_c where         = cchecker (dir Right where)
 let split_c where         = cchecker (split_logic where)
-let trivial_c             = cchecker trivial
-let exfalso_c             = cchecker exfalso
-let intros_c              = cchecker intros
-let intuition_c           = cchecker intuition
-let swap_c where          = cchecker (swap where)
-let revert_c ls           = cchecker (revert ls)
-let instantiate_c t what  = cchecker (inst t what)
-let assert_c t            = cchecker (cut t)
 let case_c t              = cchecker (case t)
-let rewrite_c g rev where = cchecker (rewrite g rev where)
+let swap_c where          = cchecker (swap where)
+let exfalso_c             = cchecker exfalso
+let trivial_c             = cchecker trivial
+let intros_c              = cchecker intros
 let clear_c l             = cchecker (clear l)
+let assert_c t            = cchecker (cut t)
+let revert_c ls           = cchecker (revert ls)
 let pose_c name t         = cchecker (pose name t)
+let instantiate_c t what  = cchecker (inst t what)
+let intuition_c           = cchecker intuition
+let rewrite_c g rev where = cchecker (rewrite g rev where)
 
 
 let assumption_d          = dchecker assumption

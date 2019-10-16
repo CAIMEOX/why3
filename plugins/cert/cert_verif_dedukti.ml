@@ -106,11 +106,12 @@ let rec elab (cta : ctask) (r, g : certif) (fill : 'a list) : 'a ec * 'a list =
       | _ -> verif_failed "Nothing to unfold" end
   | Swap_neg c ->
       let a, pos = find_ident g cta in
-      let neg_a = match a with CTnot t -> t | t -> CTnot t in
+      let underlying_a, neg_a, is_neg_a = match a with
+        | CTnot t -> t, t, true
+        | t -> t, CTnot t, false in
       let cta = Mid.add g (neg_a, not pos) cta in
       let ce, fill = elab cta c fill in
-      let pack = (neg_a, g, ce, g) in
-      let is_neg_a = match a with CTnot _ -> true | _ -> false in
+      let pack = (underlying_a, g, ce, g) in
       if is_neg_a
       then if pos
            then Swap_neg_neg_goal pack, fill
