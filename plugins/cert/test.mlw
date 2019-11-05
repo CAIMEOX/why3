@@ -67,3 +67,7 @@ goal rew_forall_hyp : forall x. (forall u. u <-> a) -> (x <-> x)
 
 (* Drinker's paradox example *)
 goal drinker : exists x : bool. p x -> (forall y. p y)
+
+
+goal multiple_intros :  (exists x : bool. p x) -> (forall y. p y)
+
