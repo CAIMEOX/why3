@@ -8,6 +8,11 @@ open Ident
 open Generic_arg_trans_utils
 open Cert_syntax
 
+type target =
+  | Pr of prsymbol
+  | Everywhere
+  | Nowhere
+
 
 
 (* Identity transformation with a certificate *)
@@ -96,6 +101,15 @@ let default_goal task = function
   | Some pr -> pr
   | None -> task_goal task
 
+let tg omni where task =
+  let v = if omni then Everywhere else Pr (default_goal task where) in
+  ref v
+
+let is_target pr tg = match !tg with
+  | Nowhere -> false
+  | Everywhere -> tg := Nowhere; true
+  | Pr tg_pr -> id_equal pr.pr_name tg_pr.pr_name
+
 (* Assumption with a certificate : *)
 (*   closes the current task if the goal is an hypothesis *)
 let assumption_decl tg decl = match decl.d_node with
@@ -156,26 +170,31 @@ let destruct where task = (* destructs /\ in the hypotheses *)
   | Some (h1, h2) -> [nt], (Destruct (h1, h2, hole), g)
   | None -> [task], hole
 
-let unfold where task = (* replaces A <-> B with (A -> B) /\ (B -> A) *)
+let unfold omni where task = (* replaces A <-> B with (A -> B) /\ (B -> A) *)
                         (* and A -> B with ¬A ∨ B *)
-  let g = (default_goal task where).pr_name in
-  let clues = ref false in
+  let target = tg omni where task in
+  let clues = ref None in
   let trans_t = Trans.decl (fun d -> match d.d_node with
-    | Dprop (k, pr, t) when id_equal g pr.pr_name ->
+    | Dprop (k, pr, t) ->
         begin match t.t_node with
         | Tbinop (Tiff, f1, f2) ->
-            clues := true;
-            let destr_iff = t_and (t_implies f1 f2) (t_implies f2 f1) in
-            [create_prop_decl k pr destr_iff]
+            if is_target pr target then begin
+                clues := Some pr;
+                let destr_iff = t_and (t_implies f1 f2) (t_implies f2 f1) in
+                [create_prop_decl k pr destr_iff] end
+            else [d]
         | Tbinop (Timplies, f1, f2) ->
-            clues := true;
-            let destr_imp = t_or (t_not f1) f2 in
-            [create_prop_decl k pr destr_imp]
+            if is_target pr target then begin
+                clues := Some pr;
+                let destr_imp = t_or (t_not f1) f2 in
+                [create_prop_decl k pr destr_imp] end
+            else [d]
         | _ -> [d] end
     | _ -> [d]) None in
   let nt = Trans.apply trans_t task in
-  if !clues then [nt], (Unfold hole, g)
-  else [task], hole
+  match !clues with
+  | Some gpr -> [nt], (Unfold hole, gpr.pr_name)
+  | None -> [task], hole
 
 let split_or_and where task = (* destructs /\ in the goal or \/ in the hypothses *)
   let g = (default_goal task where).pr_name in
@@ -185,6 +204,11 @@ let split_or_and where task = (* destructs /\ in the goal or \/ in the hypothses
         begin match k, t.t_node with
         | Pgoal as k, Tbinop (Tand, f1, f2)
         | (Paxiom | Plemma as k), Tbinop (Tor, f1, f2) ->
+            (* if is_target ...
+             * then (
+             * clues := true;
+             * [[create_prop_decl k pr f1]; [create_prop_decl k pr f2]])
+             * else [[d]] *)
             clues := true;
             [[create_prop_decl k pr f1]; [create_prop_decl k pr f2]]
         | _ -> [[d]] end
@@ -201,32 +225,39 @@ let ls_of_vs vs =
   let id = id_clone ~attrs:intro_attrs vs.vs_name in
   create_fsymbol id [] vs.vs_ty
 
-let intro where task =
+let intro omni where task =
   (* introduces hypothesis H : A when the goal is of the form A → B or
      introduces variable x when the goal is of the form ∀ x. P x
      introduces variable x when a hypothesis is of the form ∃ x. P x *)
-  let gpr = default_goal task where in
+  let target = tg omni where task in
   let hpr = create_prsymbol (id_fresh "H") in
-  let h = hpr.pr_name and g = gpr.pr_name in
+  let h = hpr.pr_name in
   let clues = ref None in
   let trans_t = Trans.decl (fun d -> match d.d_node with
-    | Dprop (k, pr, t) when id_equal g pr.pr_name ->
+    | Dprop (k, pr, t) ->
         begin match t.t_node, k with
         | Tbinop (Timplies, f1, f2), Pgoal ->
-            clues := Some (Unfold (Destruct (h, g, (Swap_neg hole, h)), g), g);
-            [create_prop_decl Paxiom hpr f1;
-             create_prop_decl Pgoal gpr f2]
+            if is_target pr target
+            then begin
+                let g = pr.pr_name in
+                clues := Some (Unfold (Destruct (h, g, (Swap_neg hole, h)), g), g);
+                [create_prop_decl Paxiom hpr f1;
+                 create_prop_decl Pgoal pr f2] end
+            else [d]
         | Tquant (Tforall, f), (Pgoal as k) | Tquant (Texists, f), (Paxiom | Plemma as k) ->
-            let vsl, _, f_t = t_open_quant f in
-            begin match vsl with
-            | [vs] ->
-                let ls = ls_of_vs vs in
-                let subst = Mvs.singleton vs (fs_app ls [] vs.vs_ty) in
-                let f = t_subst subst f_t in
-                clues := Some (Intro_quant (ls.ls_name, hole), gpr.pr_name);
-                [create_param_decl ls; create_prop_decl k gpr f]
-            | _ -> assert false
-            end
+            if is_target pr target
+            then
+              let vsl, _, f_t = t_open_quant f in
+              begin match vsl with
+              | [vs] ->
+                  let ls = ls_of_vs vs in
+                  let subst = Mvs.singleton vs (fs_app ls [] vs.vs_ty) in
+                  let f = t_subst subst f_t in
+                  clues := Some (Intro_quant (ls.ls_name, hole), pr.pr_name);
+                  [create_param_decl ls; create_prop_decl k pr f]
+              | _ -> assert false
+              end
+            else [d]
         | _ -> [d] end
     | _ -> [d]) None in
   let nt = Trans.apply trans_t task in
@@ -490,16 +521,16 @@ let pose (name: string) (t: term) : ctrans = fun task ->
 
 let trivial = try_close [assumption; close]
 
-let intros = repeat (intro None)
+let intros = repeat (intro false None)
 
-let split_logic where = compose (unfold where)
-                          (compose (split_or_and where)
-                             (destruct where))
+let split_logic omni where = compose (unfold omni where)
+                               (compose (split_or_and where)
+                                  (destruct where))
 
 let rec intuition task =
   repeat (compose assumption
-            (compose (intro None)
-               (compose (split_logic None)
+            (compose (intro true None)
+               (compose (split_logic true None)
                   (try_close [ite left intuition id;
                               ite right intuition id])))) task
 

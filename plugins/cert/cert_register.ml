@@ -11,10 +11,10 @@ let cchecker = checker_ctrans checker_caml
 let dchecker = checker_ctrans checker_dedukti
 
 let assumption_c          = cchecker assumption
-let intro_c where         = cchecker (intro where)
+let intro_c where         = cchecker (intro false where)
 let left_c where          = cchecker (dir Left where)
 let right_c where         = cchecker (dir Right where)
-let split_c where         = cchecker (split_logic where)
+let split_c where         = cchecker (split_logic false where)
 let case_c t              = cchecker (case t)
 let swap_c where          = cchecker (swap where)
 let exfalso_c             = cchecker exfalso
@@ -30,10 +30,10 @@ let rewrite_c g rev where = cchecker (rewrite g rev where)
 
 
 let assumption_d          = dchecker assumption
-let intro_d where         = dchecker (intro where)
+let intro_d where         = dchecker (intro false where)
 let left_d where          = dchecker (dir Left where)
 let right_d where         = dchecker (dir Right where)
-let split_d where         = dchecker (split_logic where)
+let split_d where         = dchecker (split_logic false where)
 let trivial_d             = dchecker trivial
 let exfalso_d             = dchecker exfalso
 let intros_d              = dchecker intros
