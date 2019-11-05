@@ -943,8 +943,28 @@
   </goal>
  </transf>
  </goal>
- <goal name="multiple_unfold" proved="true">
- <transf name="intuition_ccert" proved="true" >
+ <goal name="contra_hyps">
+ <transf name="intro_ccert" >
+  <goal name="contra_hyps.0">
+  <transf name="intuition_ccert" >
+   <goal name="contra_hyps.0.0">
+   </goal>
+   <goal name="contra_hyps.0.1">
+   </goal>
+   <goal name="contra_hyps.0.2">
+   </goal>
+   <goal name="contra_hyps.0.3">
+   </goal>
+   <goal name="contra_hyps.0.4">
+   </goal>
+   <goal name="contra_hyps.0.5">
+   </goal>
+   <goal name="contra_hyps.0.6">
+   </goal>
+   <goal name="contra_hyps.0.7">
+   </goal>
+  </transf>
+  </goal>
  </transf>
  </goal>
 </theory>

@@ -136,6 +136,25 @@ let assumption : ctrans = fun task ->
       [], (Axiom h, g)
   with Not_found -> [task], hole
 
+
+let contradict task =
+  let tbl = Hashtbl.create 17 in
+  let prem_trans = Trans.fold_decl (fun d () -> match d.d_node with
+    | Dprop (k, pr, t) when k <> Pgoal ->
+        Hashtbl.add tbl t pr.pr_name
+    | _ -> ()) () in
+  let _ = Trans.apply prem_trans task in
+  let trans = Trans.fold_decl (fun d acc -> match d.d_node, acc with
+    | Dprop (k, pr, t), None when k <> Pgoal ->
+        begin match Hashtbl.find_opt tbl (t_not t) with
+        | Some g -> Some (pr.pr_name, g)
+        | None -> acc end
+    | _ -> acc) None in
+  match Trans.apply trans task with
+  | Some (h, g) -> [], (Swap_neg (Axiom h, g), g)
+  | _ -> [task], hole
+
+
 (* Closes task when if hypotheses contain false or if the goal is true *)
 let close : ctrans = fun task ->
   let trans = Trans.fold_decl (fun d acc -> match d.d_node, acc with
@@ -152,22 +171,25 @@ let close : ctrans = fun task ->
 
 (* Split with a certificate : *)
 (* destructs a logical constructor at the top of the formula *)
-let destruct where task = (* destructs /\ in the hypotheses *)
-  let g = (default_goal task where).pr_name in
+let destruct omni where task = (* destructs /\ in the hypotheses *)
+  let target = tg omni where task in
   let clues = ref None in
   let trans_t = Trans.decl (fun d -> match d.d_node with
-    | Dprop (k, pr, t) when id_equal g pr.pr_name ->
+    | Dprop (k, pr, t) ->
         begin match k, t.t_node with
         | k, Tbinop (Tand, f1, f2) when k <> Pgoal ->
-            let pr1 = create_prsymbol (id_clone g) in
-            let pr2 = create_prsymbol (id_clone g) in
-            clues := Some (pr1.pr_name, pr2.pr_name);
-            [create_prop_decl k pr1 f1; create_prop_decl k pr2 f2]
+            if is_target pr target then begin
+                let g = pr.pr_name in
+                let pr1 = create_prsymbol (id_clone g) in
+                let pr2 = create_prsymbol (id_clone g) in
+                clues := Some (pr1.pr_name, pr2.pr_name, g);
+                [create_prop_decl k pr1 f1; create_prop_decl k pr2 f2] end
+            else [d]
         | _ -> [d] end
     | _ -> [d]) None in
   let nt = Trans.apply trans_t task in
   match !clues with
-  | Some (h1, h2) -> [nt], (Destruct (h1, h2, hole), g)
+  | Some (h1, h2, g) -> [nt], (Destruct (h1, h2, hole), g)
   | None -> [task], hole
 
 let unfold omni where task = (* replaces A <-> B with (A -> B) /\ (B -> A) *)
@@ -196,26 +218,24 @@ let unfold omni where task = (* replaces A <-> B with (A -> B) /\ (B -> A) *)
   | Some gpr -> [nt], (Unfold hole, gpr.pr_name)
   | None -> [task], hole
 
-let split_or_and where task = (* destructs /\ in the goal or \/ in the hypothses *)
-  let g = (default_goal task where).pr_name in
-  let clues = ref false in
+let split_or_and omni where task = (* destructs /\ in the goal or \/ in the hypothses *)
+  let target = tg omni where task in
+  let clues = ref None in
   let trans_t = Trans.decl_l (fun d -> match d.d_node with
-    | Dprop (k, pr, t) when id_equal g pr.pr_name ->
+    | Dprop (k, pr, t) ->
         begin match k, t.t_node with
         | Pgoal as k, Tbinop (Tand, f1, f2)
         | (Paxiom | Plemma as k), Tbinop (Tor, f1, f2) ->
-            (* if is_target ...
-             * then (
-             * clues := true;
-             * [[create_prop_decl k pr f1]; [create_prop_decl k pr f2]])
-             * else [[d]] *)
-            clues := true;
-            [[create_prop_decl k pr f1]; [create_prop_decl k pr f2]]
+            if is_target pr target then begin
+                clues := Some pr;
+                [[create_prop_decl k pr f1]; [create_prop_decl k pr f2]] end
+            else [[d]]
         | _ -> [[d]] end
     | _ -> [[d]]) None in
   let nt = Trans.apply trans_t task in
-  if !clues then nt, (Split (hole, hole), g)
-  else [task], hole
+  match !clues with
+  | Some gpr -> nt, (Split (hole, hole), gpr.pr_name)
+  | None -> [task], hole
 
 
 (* the next 2 functions are copied from introduction.ml *)
@@ -524,14 +544,16 @@ let trivial = try_close [assumption; close]
 let intros = repeat (intro false None)
 
 let split_logic omni where = compose (unfold omni where)
-                               (compose (split_or_and where)
-                                  (destruct where))
+                               (compose (split_or_and omni where)
+                                  (destruct omni where))
 
 let rec intuition task =
   repeat (compose assumption
-            (compose (intro true None)
-               (compose (split_logic true None)
-                  (try_close [ite left intuition id;
-                              ite right intuition id])))) task
+            (compose contradict
+               (compose (intro true None)
+                  (compose (split_logic true None)
+                     (try_close [ite left intuition id;
+                                 ite right intuition id])))))
+    task
 
 let clear l = compose_list (List.map (fun pr -> clear_one pr.pr_name) l)
