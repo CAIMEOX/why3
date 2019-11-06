@@ -136,23 +136,40 @@ let assumption : ctrans = fun task ->
       [], (Axiom h, g)
   with Not_found -> [task], hole
 
+let add k v tbl = tbl := (k, v) :: !tbl
+
+let rec assoc term = function
+  | [] -> raise Not_found
+  | (k, v)::tail -> if t_equal k term then v else assoc term tail
+
+let find_opt t tbl = try Some (assoc t !tbl)
+                     with Not_found -> None
 
 let contradict task =
-  let tbl = Hashtbl.create 17 in
+  let tbl = ref [] in
   let prem_trans = Trans.fold_decl (fun d () -> match d.d_node with
     | Dprop (k, pr, t) when k <> Pgoal ->
-        Hashtbl.add tbl t pr.pr_name
+        add t pr.pr_name tbl
     | _ -> ()) () in
   let _ = Trans.apply prem_trans task in
   let trans = Trans.fold_decl (fun d acc -> match d.d_node, acc with
     | Dprop (k, pr, t), None when k <> Pgoal ->
-        begin match Hashtbl.find_opt tbl (t_not t) with
+        begin match find_opt (t_not t) tbl with
         | Some g -> Some (pr.pr_name, g)
         | None -> acc end
     | _ -> acc) None in
   match Trans.apply trans task with
   | Some (h, g) -> [], (Swap_neg (Axiom h, g), g)
-  | _ -> [task], hole
+  | _ ->
+      (* let open Format in
+       * let out = open_out "/tmp/hyp_tbl.log" in
+       * let fmt = formatter_of_out_channel out in
+       * List.iter (fun (t, pr) ->
+       *     fprintf fmt "%a : %a\n@."
+       *       pri pr
+       *       pcte (translate_term t)) !tbl;
+       * close_out out; *)
+      [task], hole
 
 
 (* Closes task when if hypotheses contain false or if the goal is true *)

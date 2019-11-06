@@ -666,20 +666,6 @@
  </transf>
  </goal>
  <goal name="pose" proved="true">
- <transf name="assert_dcert" arg1="(exists x. x &lt;-&gt; true)">
-  <goal name="pose.0">
-  <transf name="instantiate_dcert" arg1="true">
-   <goal name="pose.0.0">
-   </goal>
-  </transf>
-  </goal>
-  <goal name="pose.1">
-  <transf name="intro_ccert" arg1="in" arg2="H">
-   <goal name="pose.1.0">
-   </goal>
-  </transf>
-  </goal>
- </transf>
  <transf name="pose_ccert" proved="true" arg1="tr" arg2="true">
   <goal name="pose.0" proved="true">
   <transf name="assumption_ccert" proved="true" >
@@ -943,26 +929,10 @@
   </goal>
  </transf>
  </goal>
- <goal name="contra_hyps">
- <transf name="intro_ccert" >
-  <goal name="contra_hyps.0">
-  <transf name="intuition_ccert" >
-   <goal name="contra_hyps.0.0">
-   </goal>
-   <goal name="contra_hyps.0.1">
-   </goal>
-   <goal name="contra_hyps.0.2">
-   </goal>
-   <goal name="contra_hyps.0.3">
-   </goal>
-   <goal name="contra_hyps.0.4">
-   </goal>
-   <goal name="contra_hyps.0.5">
-   </goal>
-   <goal name="contra_hyps.0.6">
-   </goal>
-   <goal name="contra_hyps.0.7">
-   </goal>
+ <goal name="contra_hyps" proved="true">
+ <transf name="intro_ccert" proved="true" >
+  <goal name="contra_hyps.0" proved="true">
+  <transf name="intuition_ccert" proved="true" >
   </transf>
   </goal>
  </transf>
