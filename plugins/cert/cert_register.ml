@@ -12,6 +12,10 @@ let dchecker = checker_ctrans checker_dedukti
 
 let contradict_c          = cchecker contradict
 
+let triv                  = cchecker trivial
+let unf                   = cchecker (unfold true None)
+let dest                  = cchecker (destruct_all true None)
+
 let assumption_c          = cchecker assumption
 let intro_c where         = cchecker (intro false where)
 let left_c where          = cchecker (dir Left where)
@@ -27,7 +31,7 @@ let assert_c t            = cchecker (cut t)
 let revert_c ls           = cchecker (revert ls)
 let pose_c name t         = cchecker (pose name t)
 let instantiate_c t what  = cchecker (inst t what)
-let intuition_c           = cchecker intuition
+let blast_c               = cchecker blast
 let rewrite_c g rev where = cchecker (rewrite g rev where)
 
 
@@ -39,7 +43,7 @@ let split_d where         = dchecker (split_logic false where)
 let trivial_d             = dchecker trivial
 let exfalso_d             = dchecker exfalso
 let intros_d              = dchecker intros
-let intuition_d           = dchecker intuition
+let blast_d               = dchecker blast
 let swap_d where          = dchecker (swap where)
 let revert_d ls           = dchecker (revert ls)
 let instantiate_d t what  = dchecker (inst t what)
@@ -52,6 +56,13 @@ let pose_d name t         = dchecker (pose name t)
 
 let register_caml : unit =
   let open Args_wrapper in let open Trans in
+
+  register_transform_l "triv" (store triv)
+    ~desc:"triv";
+  register_transform_l "unf" (store unf)
+    ~desc:"unf";
+  register_transform_l "dest" (store dest)
+    ~desc:"dest";
 
   register_transform_l "contradict_ccert" (store contradict_c)
     ~desc:"A OCaml certified transformation that closes some contradictory goals";
@@ -68,8 +79,8 @@ let register_caml : unit =
   register_transform_l "intros_ccert" (store intros_c)
     ~desc:"A OCaml certified version of coq tactic [intros]";
 
-  register_transform_l "intuition_ccert" (store intuition_c)
-    ~desc:"A OCaml certified version of (simplified) coq tactic [intuition]";
+  register_transform_l "blast_ccert" (store blast_c)
+    ~desc:"A OCaml certified transformation that decomposes structurally logical formulas";
 
   wrap_and_register ~desc:"A OCaml certified transformation that negates \
                            and swaps an hypothesis from the context to the goal]"
@@ -136,8 +147,8 @@ let register_dedukti : unit =
   register_transform_l "intros_dcert" (store intros_d)
     ~desc:"A Dedukti certified version of coq tactic [intros]";
 
-  register_transform_l "intuition_dcert" (store intuition_d)
-    ~desc:"A Dedukti certified version of (simplified) coq tactic [intuition]";
+  register_transform_l "blast_dcert" (store blast_d)
+    ~desc:"A Dedukti certified transformation that decomposes structurally logical formulas";
 
   wrap_and_register ~desc:"A Dedukti certified transformation that negates \
                            and swaps an hypothesis from the context to the goal]"
