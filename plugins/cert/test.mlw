@@ -49,12 +49,11 @@ goal intros : forall x. p x -> d -> p x
 goal clear : a -> d -> a -> a -> d
 
 (* Testing complex transformations *)
-goal intuition_and : (a /\ b) /\ (a /\ a /\ a /\ b)
-goal intuition_and_hole : (b /\ a) /\ ( (a /\ a) /\ c)
-goal intuition_or : (a \/ c) /\ (d \/ b)
-goal intuition_or_hole : a /\ (c \/ d)
-goal intuition_big : (a /\ (d \/ c) ) \/ ( ((a /\ b) /\ ((b /\ (d \/ e \/ a)) \/d)) \/ (a /\ c) )
-goal intuition_big_big : ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
+goal blast_and : (a /\ b) /\ (a /\ a /\ a /\ b)
+goal blast_and_hole : (b /\ a) /\ ( (a /\ a) /\ c)
+goal blast_or : (a \/ c) /\ (d \/ b)
+goal blast_or_hole : a /\ (c \/ d)
+goal blast_big : ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
      		       	        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a)))) /\
 			 ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
 			        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))))
@@ -68,7 +67,5 @@ goal rew_forall_hyp : forall x. (forall u. u <-> a) -> (x <-> x)
 (* Drinker's paradox example *)
 goal drinker : exists x : bool. p x -> (forall y. p y)
 
-
-goal multiple_intros :  (exists x : bool. p x) -> (forall y. p y)
 
 goal contra_hyps : (c /\ (not c \/ d) /\ (not d \/ e) /\ (not e \/ f) /\ not f) -> false
