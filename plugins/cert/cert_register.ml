@@ -11,11 +11,6 @@ let cchecker = checker_ctrans checker_caml
 let dchecker = checker_ctrans checker_dedukti
 
 let contradict_c          = cchecker contradict
-
-let triv                  = cchecker trivial
-let unf                   = cchecker (unfold true None)
-let dest                  = cchecker (destruct_all true None)
-
 let assumption_c          = cchecker assumption
 let intro_c where         = cchecker (intro false where)
 let left_c where          = cchecker (dir Left where)
@@ -35,6 +30,7 @@ let blast_c               = cchecker blast
 let rewrite_c g rev where = cchecker (rewrite g rev where)
 
 
+let contradict_d          = dchecker contradict
 let assumption_d          = dchecker assumption
 let intro_d where         = dchecker (intro false where)
 let left_d where          = dchecker (dir Left where)
@@ -56,13 +52,6 @@ let pose_d name t         = dchecker (pose name t)
 
 let register_caml : unit =
   let open Args_wrapper in let open Trans in
-
-  register_transform_l "triv" (store triv)
-    ~desc:"triv";
-  register_transform_l "unf" (store unf)
-    ~desc:"unf";
-  register_transform_l "dest" (store dest)
-    ~desc:"dest";
 
   register_transform_l "contradict_ccert" (store contradict_c)
     ~desc:"A OCaml certified transformation that closes some contradictory goals";
@@ -134,6 +123,9 @@ let register_caml : unit =
 
 let register_dedukti : unit =
   let open Args_wrapper in let open Trans in
+
+  register_transform_l "contradict_ccert" (store contradict_c)
+    ~desc:"A OCaml certified transformation that closes some contradictory goals";
 
   register_transform_l "assumption_dcert" (store assumption_d)
     ~desc:"A Dedukti certified version of coq tactic [assumption]";
