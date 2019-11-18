@@ -369,16 +369,12 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
 (** Create a certified transformation from a transformation with a certificate *)
 
 let checker_ctrans checker (ctr : ctrans) init_t =
-  let t1 = Unix.gettimeofday () in
+  (* let t1 = Unix.gettimeofday () in *)
   let res_t, certif = ctr init_t in
-  let t2 = Unix.gettimeofday () in
+  (* let t2 = Unix.gettimeofday () in *)
   let res = checker certif init_t res_t in
-  let t3 = Unix.gettimeofday () in
-  let open Format in
-  let out = open_out "/tmp/time_transfo.log" in
-  let fmt = formatter_of_out_channel out in
-  fprintf fmt "temps de la transformation : %f\ntemps de la vérification : %f@."
-    (t2 -. t1) (t3 -. t2);
-  close_out out;
+  (* let t3 = Unix.gettimeofday () in
+   * Format.eprintf "temps de la transformation : %f\ntemps de la vérification : %f@."
+   *   (t2 -. t1) (t3 -. t2); *)
   res
 
