@@ -124,8 +124,8 @@ let register_caml : unit =
 let register_dedukti : unit =
   let open Args_wrapper in let open Trans in
 
-  register_transform_l "contradict_ccert" (store contradict_c)
-    ~desc:"A OCaml certified transformation that closes some contradictory goals";
+  register_transform_l "contradict_dcert" (store contradict_d)
+    ~desc:"A Dedukti certified transformation that closes some contradictory goals";
 
   register_transform_l "assumption_dcert" (store assumption_d)
     ~desc:"A Dedukti certified version of coq tactic [assumption]";

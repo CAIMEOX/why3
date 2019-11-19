@@ -285,38 +285,38 @@ let neg_decompose omni where task =
             | k, Tnot nnt when is_target pr target -> (* double negation *)
                 clues := Some (Swap_neg (Swap_neg hole, g), g);
                 [[create_prop_decl k pr nnt]]
-            | Plemma, Tbinop (Tor, f1, f2) when is_target pr target -> (* destruct *)
+            | Paxiom, Tbinop (Tor, f1, f2) when is_target pr target -> (* destruct *)
                 let pr1 = create_prsymbol (id_clone g) in
                 let pr2 = create_prsymbol (id_clone g) in
                 clues := Some (Swap_neg (Destruct (pr1.pr_name, pr2.pr_name,
                                (Swap_neg (Swap_neg hole, pr2.pr_name), pr1.pr_name)), g), g);
-                [[create_prop_decl Plemma pr1 (t_not f1);
-                  create_prop_decl Plemma pr2 (t_not f2)]]
+                [[create_prop_decl Paxiom pr1 (t_not f1);
+                  create_prop_decl Paxiom pr2 (t_not f2)]]
             | Pgoal, Tbinop (Tand, f1, f2) when is_target pr target ->
                 let pr1 = create_prsymbol (id_clone g) in
                 let pr2 = create_prsymbol (id_clone g) in
                 clues := Some (Swap_neg (Destruct (pr1.pr_name, pr2.pr_name,
                                (Swap_neg hole, pr2.pr_name)), g), g);
-                [[create_prop_decl Plemma pr1 f1;
+                [[create_prop_decl Paxiom pr1 f1;
                   create_prop_decl Pgoal  pr2 (t_not f2)]]
-            | Plemma, Tbinop (Tand, f1, f2) when is_target pr target -> (* split *)
+            | Paxiom, Tbinop (Tand, f1, f2) when is_target pr target -> (* split *)
                 clues := Some (Swap_neg (Split ((Swap_neg hole, g), (Swap_neg hole, g)), g), g);
-                [[create_prop_decl Plemma pr (t_not f1)];
-                 [create_prop_decl Plemma pr (t_not f2)]]
+                [[create_prop_decl Paxiom pr (t_not f1)];
+                 [create_prop_decl Paxiom pr (t_not f2)]]
             | Pgoal, Tbinop (Tor, f1, f2) when is_target pr target ->
-                clues := Some (Swap_neg (Split (hole, hole), g), g);
-                [[create_prop_decl Plemma pr f1];
-                 [create_prop_decl Plemma pr f2]]
+                clues := Some (Swap_neg (Split ((Swap_neg hole, g), (Swap_neg hole, g)), g), g);
+                [[create_prop_decl Pgoal pr (t_not f1)];
+                 [create_prop_decl Pgoal pr (t_not f2)]]
             | Pgoal, Ttrue when is_target pr target -> (* ⊥ and ⊤ *)
                 clues := Some (Weakening (Cut (CTfalse, hole, (Trivial, g)), g), g);
                 [[create_prop_decl Pgoal pr t_false]]
             | Pgoal, Tfalse when is_target pr target ->
                 clues := Some (Swap_neg (Trivial, g), g);
                 []
-            | Plemma, Tfalse when is_target pr target ->
+            | Paxiom, Tfalse when is_target pr target ->
                 clues := Some (Weakening hole, g);
                 [[]]
-            | Plemma, Ttrue when is_target pr target ->
+            | Paxiom, Ttrue when is_target pr target ->
                 clues := Some (Swap_neg (Trivial, g), g);
                 []
             | k, Tbinop (Tiff, f1, f2) when is_target pr target -> (* unfold *)
