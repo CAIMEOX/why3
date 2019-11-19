@@ -675,9 +675,13 @@ let split_logic omni where = compose (unfold omni where)
                                   (destruct omni where))
 
 let rec blast task =
-  repeat (compose trivial (ite (compose (unfold true None) (destruct_all true None))
-                             blast
-                             id))
+  repeat (ite (compose (compose (compose
+                 trivial
+                 (neg_decompose true None))
+                 (unfold true None))
+                 (destruct_all true None))
+            blast
+            id)
     task
 
 
