@@ -52,7 +52,6 @@ let check_rewrite cta rev h g terms path : ctask list =
 (** This is the main verification function : <check_certif> replays the certificate on a ctask *)
 
 let rec ccheck (r, g : certif) cta : ctask list =
-  Format.eprintf "i@.";
   match r with
     | Hole -> [cta]
     | Axiom h ->

@@ -87,18 +87,12 @@ let rec try_close (lctr : ctrans list) : ctrans = fun task ->
 let repeat (ctr : ctrans) : ctrans = fun task ->
   let gen_task = id task in
   let gen_tr = ctrans_gen ctr in
-  let open Format in
-  let out = open_out "/tmp/loop.log" in
-  let fmt = formatter_of_out_channel out in
   let rec loop gt =
-    fprintf fmt "one loop@.";
     let new_gt = gen_tr gt in
     if Lists.equal task_equal (fst new_gt) (fst gt)
     then gt
     else loop new_gt in
-  let res = loop gen_task in
-  close_out out;
-  res
+  loop gen_task
 
 
 (** Primitive transformations with a certificate *)
