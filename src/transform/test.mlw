@@ -5,4 +5,8 @@ predicate d
 predicate e
 
 
-goal G : a /\ b \/ c /\ d
+goal G1 : a /\ b
+goal G2 : a /\ (b \/ c)
+goal G3 : (a /\ b) \/ c
+goal G4 : a \/ (b /\ c)
+goal G5 : a /\ b \/ c /\ d

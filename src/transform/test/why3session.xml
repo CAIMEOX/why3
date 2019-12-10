@@ -5,15 +5,47 @@
 <file format="whyml">
 <path name=".."/><path name="test.mlw"/>
 <theory name="Top">
- <goal name="G">
+ <goal name="G1">
  <transf name="split_all_full" >
-  <goal name="G.0">
+  <goal name="G1.0">
   </goal>
-  <goal name="G.1">
+  <goal name="G1.1">
   </goal>
-  <goal name="G.2">
+ </transf>
+ </goal>
+ <goal name="G2">
+ <transf name="split_all_full" >
+  <goal name="G2.0">
   </goal>
-  <goal name="G.3">
+  <goal name="G2.1">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G3">
+ <transf name="split_all_full" >
+  <goal name="G3.0">
+  </goal>
+  <goal name="G3.1">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G4">
+ <transf name="split_all_full" >
+  <goal name="G4.0">
+  </goal>
+  <goal name="G4.1">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G5">
+ <transf name="split_all_full" >
+  <goal name="G5.0">
+  </goal>
+  <goal name="G5.1">
+  </goal>
+  <goal name="G5.2">
+  </goal>
+  <goal name="G5.3">
   </goal>
  </transf>
  </goal>

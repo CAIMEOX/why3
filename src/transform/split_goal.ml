@@ -197,7 +197,7 @@ and print_tnode pri fmt t = match t.t_node with
   | Tbinop (b,f1,f2) ->
       let asym = Sattr.mem Term.asym_split f1.t_attrs in
       let p = prio_binop b in
-      fprintf fmt (protect_on (pri > p) "%a %a@ %a")
+      fprintf fmt (protect_on (pri > p) "%a %a %a") (* removed an '@' *)
         (print_lterm (p + 1)) f1 (print_binop ~asym) b (print_lterm p) f2
   | Tnot f ->
       fprintf fmt (protect_on (pri > 4) "not %a") (print_lterm 4) f
@@ -317,8 +317,8 @@ module M = struct
 
   let print_mon sep fmt c =
     Pp.print_list
-      (fun fmt () -> Format.fprintf fmt sep)
-      (fun fmt t -> Format.fprintf fmt "(%a)" Termprinter.print_term t)
+      (fun fmt () -> Format.fprintf fmt "%s" sep)
+      (fun fmt -> Format.fprintf fmt "[%a]" Termprinter.print_term)
       fmt
       (to_list c)
 
