@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="8">
+<file format="whyml">
+<path name=".."/><path name="test_elem.mlw"/>
+<theory name="Top">
+ <goal name="G1">
+ <transf name="split_all_full" >
+  <goal name="G1.0">
+  </goal>
+  <goal name="G1.1">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G2">
+ </goal>
+ <goal name="G3">
+ </goal>
+ <goal name="G4">
+ <transf name="split_all_full" >
+  <goal name="G4.0">
+  </goal>
+  <goal name="G4.1">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G5">
+ <transf name="split_all_full" >
+  <goal name="G5.0">
+  </goal>
+  <goal name="G5.1">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G6">
+ </goal>
+</theory>
+</file>
+</why3session>
