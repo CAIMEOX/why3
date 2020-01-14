@@ -39,6 +39,8 @@ type certif = rule * ident
 (* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>,
    it is defined as the function <Cert_verif.check_certif> *)
 and rule =
+  (* | No_certif
+   * (\* to use if we have yet to define the right certificate *\) *)
   | Hole
   (* Hole ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
   | Axiom of ident
@@ -194,6 +196,7 @@ let rec print_certif filename cert =
   fprintf fmt "%a@." prc cert;
   close_out oc
 and prr fmt = function
+  (* | No_certif -> fprintf fmt "No_certif" *)
   | Hole -> fprintf fmt "Hole"
   | Axiom h -> fprintf fmt "Axiom@ %a" pri h
   | Trivial -> fprintf fmt "Trivial"
@@ -337,21 +340,6 @@ let rec mem_cont x t cont = match t with
 
 let mem x t = mem_cont x t (fun x -> x)
 
-(* checks if the transformation closes the task *)
-let rec nohole (r, _) =
-  match r with
-  | Hole -> false
-  | Axiom _ | Trivial -> true
-  | Cut (_, c1, c2)
-  | Split (c1, c2) -> nohole c1 && nohole c2
-  | Unfold c
-  | Swap_neg c
-  | Destruct (_, _, c)
-  | Weakening c
-  | Intro_quant (_, c)
-  | Inst_quant (_, _, c) -> nohole c
-  | Rewrite (_, _, _, lc) -> List.for_all nohole lc
-
 (* separates hypotheses and goals *)
 let split_cta cta =
   let open Mid in
@@ -368,13 +356,15 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
 
 (** Create a certified transformation from a transformation with a certificate *)
 
+exception Not
+
 let checker_ctrans checker (ctr : ctrans) init_t =
   (* let t1 = Unix.gettimeofday () in *)
   let res_t, certif = ctr init_t in
   (* let t2 = Unix.gettimeofday () in *)
-  let res = checker certif init_t res_t in
+  checker certif init_t res_t;
   (* let t3 = Unix.gettimeofday () in
    * Format.eprintf "temps de la transformation : %f\ntemps de la vérification : %f@."
    *   (t2 -. t1) (t3 -. t2); *)
-  res
+  res_t
 

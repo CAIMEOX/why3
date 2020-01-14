@@ -1,0 +1,10 @@
+predicate a
+predicate b
+
+
+goal G1 : a /\ b
+goal G2 : a \/ b
+goal G3 : not (a /\ b)
+goal G4 : not (a \/ b)
+goal G5 : a && b
+goal G6 : a || b
