@@ -49,8 +49,8 @@ let find_goal cta =
    Also fills the holes with a predefined list.*)
 let rec elab (cta : ctask) (r, g : certif) (fill : 'a list) : 'a ec * 'a list =
   match r with
-  (* | No_certif ->
-   *     raise Not_certified *)
+  | No_certif ->
+      raise Not_certified
   | Hole ->
       begin match fill with
       | [] -> failwith "Not enough to fill"
