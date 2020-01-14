@@ -533,7 +533,7 @@ PLUG_TPTP = tptp_parser tptp_typing tptp_lexer tptp_printer
 PLUG_PYTHON = py_parser py_lexer py_main
 PLUG_MICROC = mc_parser mc_lexer mc_printer mc_main
 PLUG_CFG = cfg_parser cfg_lexer cfg_main
-PLUG_CERT = cert_syntax cert_verif_caml cert_verif_dedukti cert_transformations cert_register
+PLUG_CERT = cert_syntax cert_verif_caml cert_verif_dedukti cert_transformations cert_split cert_register
 PLUG_CMIONLY = tptp/tptp_ast python/py_ast microc/mc_ast cfg/cfg_ast
 
 PLUGINS = genequlin dimacs tptp python microc cfg cert

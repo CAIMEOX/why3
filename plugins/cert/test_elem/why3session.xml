@@ -6,7 +6,7 @@
 <path name=".."/><path name="test_elem.mlw"/>
 <theory name="Top">
  <goal name="G1">
- <transf name="split_all_full" >
+ <transf name="split_goal_full" >
   <goal name="G1.0">
   </goal>
   <goal name="G1.1">
@@ -18,7 +18,7 @@
  <goal name="G3">
  </goal>
  <goal name="G4">
- <transf name="split_all_full" >
+ <transf name="split_goal_full" >
   <goal name="G4.0">
   </goal>
   <goal name="G4.1">
@@ -26,7 +26,7 @@
  </transf>
  </goal>
  <goal name="G5">
- <transf name="split_all_full" >
+ <transf name="split_goal_full" >
   <goal name="G5.0">
   </goal>
   <goal name="G5.1">
