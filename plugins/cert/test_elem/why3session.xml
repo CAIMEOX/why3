@@ -12,6 +12,12 @@
   <goal name="G1.1">
   </goal>
  </transf>
+ <transf name="split_goal_full_ccert" >
+  <goal name="G1.0">
+  </goal>
+  <goal name="G1.1">
+  </goal>
+ </transf>
  </goal>
  <goal name="G2">
  </goal>
@@ -34,6 +40,8 @@
  </transf>
  </goal>
  <goal name="G6">
+ </goal>
+ <goal name="G7">
  </goal>
 </theory>
 </file>

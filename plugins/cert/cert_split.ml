@@ -263,13 +263,13 @@ let rec split_core sp f =
   let r = match f.t_node with
   | _ when sp.stop_split && stop f ->
       let df = drop_byso f in
-      ret !+(unstop f) no_cert !+(unstop df) no_cert f df Unit false false
+      ret !+(unstop f) hole !+(unstop df) hole f df Unit false false
   | Tbinop (Tiff,_,_) | Tif _ | Tcase _ | Tquant _ when sp.intro_mode ->
       let df = drop_byso f in
       ret !+f no_cert !+df no_cert f df Unit false false
   | Ttrue -> ret Unit no_cert (Zero f) no_cert f f Unit false false
   | Tfalse -> ret (Zero f) no_cert Unit no_cert f f Unit false false
-  | Tapp _ -> let uf = !+f in ret uf no_cert uf no_cert f f Unit false false
+  | Tapp _ -> let uf = !+f in ret uf hole uf hole f f Unit false false
     (* f1 so f2 *)
   | Tbinop (Tand,f1,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) }) ->
       if not (sp.byso_split && asym f2) then split_core sp f1 else
@@ -301,7 +301,9 @@ let rec split_core sp f =
       let pos = sf1.pos ++ pos2 in
       let side = sf1.side ++ if not asym then sf2.side else
         let nf1 = ncase (sf2.pos::dp) sf1 in iclose nf1 sf2.side in
-      ret pos no_cert neg no_cert bwd fwd side false (cn1 || cn2)
+      let c1 = sf1.cert_pos and c2 = sf2.cert_pos in
+      let cert_pos = Split (c1, c2), current_ident in
+      ret pos cert_pos neg no_cert bwd fwd side false (cn1 || cn2)
     (* f1 by f2 *)
   | Tbinop (Timplies,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) },f1) ->
       if not (sp.byso_split && asym f2) then split_core sp f1 else
@@ -557,7 +559,7 @@ let clue = ref hole
 
 let csplit_goal sp pr f =
   let l, cert = csplit_proof sp f in
-  clue := cert;
+  clue := fill_id pr.pr_name cert;
   let make_prop f = [create_prop_decl Pgoal pr f] in
   List.map make_prop l
 
