@@ -1,5 +1,6 @@
 open Why3
 
+open Format
 open Ident
 open Term (* only for binop *)
 open Cert_syntax
@@ -12,7 +13,10 @@ open Cert_syntax
 let find_ident h cta =
   match Mid.find_opt h cta with
   | Some x -> x
-  | None -> verif_failed "Can't find ident in the task"
+  | None ->
+      fprintf str_formatter "Can't find ident %a in the task" pri h;
+      verif_failed (flush_str_formatter ())
+
 
 let rec check_rewrite_term tl tr t path =
   (* returns <t> where the instance at <path> of <tl> is replaced by <tr> *)
