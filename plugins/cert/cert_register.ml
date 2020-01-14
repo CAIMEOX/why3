@@ -10,6 +10,9 @@ open Cert_verif_dedukti
 let cchecker = checker_ctrans checker_caml
 let dchecker = checker_ctrans checker_dedukti
 
+
+let split_goal_full_c     = cchecker Cert_split.csplit_goal_full
+
 let contradict_c          = cchecker contradict
 let assumption_c          = cchecker assumption
 let intro_c where         = cchecker (intro false where)
@@ -52,6 +55,9 @@ let pose_d name t         = dchecker (pose name t)
 
 let register_caml : unit =
   let open Args_wrapper in let open Trans in
+
+  register_transform_l "split_goal_full_ccert" (store split_goal_full_c)
+    ~desc:"The OCaml certified version of split_goal";
 
   register_transform_l "contradict_ccert" (store contradict_c)
     ~desc:"A OCaml certified transformation that closes some contradictory goals";

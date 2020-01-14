@@ -83,6 +83,24 @@ and rule =
 
 let hole = Hole, id_register (id_fresh "dummy_hole_ident")
 
+let rec map_cert fid fct (r, g) =
+  map_rule fid fct r, fid g
+
+and map_rule fid fct r =
+  let m = map_cert fid fct in
+  match r with
+  | Axiom i -> Axiom (fid i)
+  | Cut (ct, c1, c2) -> Cut (fct ct, m c1, m c2)
+  | Split (c1, c2) -> Split (m c1, m c2)
+  | Unfold c -> Unfold (m c)
+  | Swap_neg c -> Swap_neg (m c)
+  | Destruct (i1, i2, c) -> Destruct (fid i1, fid i2, m c)
+  | Weakening c -> Weakening (m c)
+  | Intro_quant (i, c) -> Intro_quant (fid i, m c)
+  | Inst_quant (i, ct, c) -> Inst_quant (fid i, fct ct, m c)
+  | Rewrite (i, p, b, cl) -> Rewrite (fid i, p, b, List.map m cl)
+  | _ -> r
+
 (** Translating a Why3 <task> into a <ctask> *)
 
 let translate_quant = function
@@ -155,6 +173,7 @@ let rec translate_task_acc acc = function
 
 let translate_task task =
   translate_task_acc Mid.empty task
+
 
 
 (** Printing of <cterm> and <ctask> : for debugging purposes *)
