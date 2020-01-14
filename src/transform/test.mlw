@@ -10,3 +10,5 @@ goal G2 : a /\ (b \/ c)
 goal G3 : (a /\ b) \/ c
 goal G4 : a \/ (b /\ c)
 goal G5 : a /\ b \/ c /\ d
+goal G6 : (a \/ b) /\ (c \/ d)
+goal G7 : not ((a \/ b) /\ (c \/ d))

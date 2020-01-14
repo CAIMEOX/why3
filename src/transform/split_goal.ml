@@ -10,208 +10,6 @@
 (********************************************************************)
 
 
-module Termprinter = struct
-open Format
-open Pp
-open Ident
-open Ty
-open Term
-open Printer
-
-let iprinter,aprinter,tprinter,pprinter =
-  let bl = ["theory"; "type"; "function"; "predicate"; "inductive";
-            "axiom"; "lemma"; "goal"; "use"; "clone"; "prop"; "meta";
-            "scope"; "import"; "export"; "end";
-            "forall"; "exists"; "not"; "true"; "false"; "if"; "then"; "else";
-            "let"; "in"; "match"; "with"; "as"; "epsilon" ] in
-  let isanitize = sanitizer char_to_alpha char_to_alnumus in
-  let lsanitize = sanitizer char_to_lalpha char_to_alnumus in
-  create_ident_printer bl ~sanitizer:isanitize,
-  create_ident_printer bl ~sanitizer:lsanitize,
-  create_ident_printer bl ~sanitizer:lsanitize,
-  create_ident_printer bl ~sanitizer:isanitize
-
-
-let _forget_all () =
-  forget_all iprinter;
-  forget_all aprinter;
-  forget_all tprinter;
-  forget_all pprinter
-
-(* type variables always start with a quote *)
-let print_tv fmt tv =
-  fprintf fmt "'%s" (id_unique aprinter tv.tv_name)
-
-(* logic variables always start with a lower case letter *)
-let print_vs fmt vs =
-  let sanitizer = Strings.uncapitalize in
-  fprintf fmt "%s" (id_unique iprinter ~sanitizer vs.vs_name)
-
-let forget_var vs = forget_id iprinter vs.vs_name
-
-let print_ts fmt ts =
-  fprintf fmt "%s" (id_unique tprinter ts.ts_name)
-
-let print_ls fmt ls =
-  fprintf fmt "%s" (id_unique iprinter ls.ls_name)
-
-let print_cs fmt ls =
-  let sanitizer = Strings.capitalize in
-  fprintf fmt "%s" (id_unique iprinter ~sanitizer ls.ls_name)
-
-(* info *)
-
-type info = { info_syn : syntax_map }
-
-let info = ref { info_syn = Mid.empty }
-
-let query_syntax id = query_syntax !info.info_syn id
-
-(** Types *)
-
-let protect_on x s = if x then "(" ^^ s ^^ ")" else s
-
-let rec print_ty_node inn fmt ty = match ty.ty_node with
-  | Tyvar v -> print_tv fmt v
-  | Tyapp (ts, tl) -> begin match query_syntax ts.ts_name with
-      | Some s -> syntax_arguments s (print_ty_node false) fmt tl
-      | None -> begin match tl with
-          | [] -> print_ts fmt ts
-          | tl -> fprintf fmt (protect_on inn "%a@ %a")
-              print_ts ts (print_list space (print_ty_node true)) tl
-          end
-      end
-
-let print_ty = print_ty_node false
-
-(* can the type of a value be derived from the type of the arguments? *)
-let unambig_fs fs =
-  let rec lookup v ty = match ty.ty_node with
-    | Tyvar u when tv_equal u v -> true
-    | _ -> ty_any (lookup v) ty
-  in
-  let lookup v = List.exists (lookup v) fs.ls_args in
-  let rec inspect ty = match ty.ty_node with
-    | Tyvar u when not (lookup u) -> false
-    | _ -> ty_all inspect ty
-  in
-  Opt.fold (fun _ -> inspect) true fs.ls_value
-
-(** Patterns, terms, and formulas *)
-
-let rec print_pat_node pri fmt p = match p.pat_node with
-  | Pwild ->
-      fprintf fmt "_"
-  | Pvar v ->
-      print_vs fmt v
-  | Pas (p, v) ->
-      fprintf fmt (protect_on (pri > 1) "%a as %a")
-        (print_pat_node 1) p print_vs v
-  | Por (p, q) ->
-      fprintf fmt (protect_on (pri > 0) "%a | %a")
-        (print_pat_node 0) p (print_pat_node 0) q
-  | Papp (cs, pl) -> begin match query_syntax cs.ls_name with
-      | Some s -> syntax_arguments s (print_pat_node 0) fmt pl
-      | None -> begin match pl with
-          | [] -> print_cs fmt cs
-          | pl -> fprintf fmt (protect_on (pri > 1) "%a@ %a")
-              print_cs cs (print_list space (print_pat_node 2)) pl
-          end
-      end
-
-let print_pat = print_pat_node 0
-
-let print_vsty fmt v =
-  fprintf fmt "%a:@,%a" print_vs v print_ty v.vs_ty
-
-let print_quant = Pretty.print_quant
-let print_binop = Pretty.print_binop
-
-let prio_binop = function
-  | Tand -> 3
-  | Tor -> 2
-  | Timplies -> 1
-  | Tiff -> 1
-
-let print_attr = Pretty.print_attr
-let print_attrs = print_iter1 Sattr.iter space print_attr
-
-let rec print_term fmt t = print_lterm 0 fmt t
-
-and print_lterm pri fmt t =
-  if Sattr.is_empty t.t_attrs then print_tnode pri fmt t
-  else fprintf fmt (protect_on (pri > 0) "%a %a")
-      print_attrs t.t_attrs (print_tnode 0) t
-
-and print_app pri fs fmt tl =
-  match query_syntax fs.ls_name with
-    | Some s -> syntax_arguments s print_term fmt tl
-    | None -> begin match tl with
-        | [] -> print_ls fmt fs
-        | tl -> fprintf fmt (protect_on (pri > 5) "%a@ %a")
-            print_ls fs (print_list space (print_lterm 6)) tl
-        end
-
-and print_tnode pri fmt t = match t.t_node with
-  | Tvar v ->
-      print_vs fmt v
-  | Tconst c ->
-      Constant.print_def fmt c
-  | Tapp (fs, tl) when unambig_fs fs ->
-      print_app pri fs fmt tl
-  | Tapp (fs, tl) ->
-      fprintf fmt (protect_on (pri > 0) "%a:%a")
-        (print_app 5 fs) tl print_ty (t_type t)
-  | Tif (f,t1,t2) ->
-      fprintf fmt (protect_on (pri > 0) "if @[%a@] then %a@ else %a")
-        print_term f print_term t1 print_term t2
-  | Tlet (t1,tb) ->
-      let v,t2 = t_open_bound tb in
-      fprintf fmt (protect_on (pri > 0) "let %a = @[%a@] in@ %a")
-        print_vs v (print_lterm 4) t1 print_term t2;
-      forget_var v
-  | Tcase (t1,bl) ->
-      fprintf fmt "match @[%a@] with@\n@[<hov>%a@]@\nend"
-        print_term t1 (print_list newline print_tbranch) bl
-  | Teps fb ->
-      let vl,tl,e = t_open_lambda t in
-      if vl = [] then begin
-        let v,f = t_open_bound fb in
-        fprintf fmt (protect_on (pri > 0) "epsilon %a.@ %a")
-          print_vsty v print_term f;
-        forget_var v
-      end else begin
-        fprintf fmt (protect_on (pri > 0) "fun %a%a ->@ %a")
-          (print_list comma print_vsty) vl print_tl tl print_term e;
-        List.iter forget_var vl
-      end
-  | Tquant (q,fq) ->
-      let vl,tl,f = t_open_quant fq in
-      fprintf fmt (protect_on (pri > 0) "%a %a%a.@ %a") print_quant q
-        (print_list comma print_vsty) vl print_tl tl print_term f;
-      List.iter forget_var vl
-  | Ttrue ->
-      fprintf fmt "true"
-  | Tfalse ->
-      fprintf fmt "false"
-  | Tbinop (b,f1,f2) ->
-      let asym = Sattr.mem Term.asym_split f1.t_attrs in
-      let p = prio_binop b in
-      fprintf fmt (protect_on (pri > p) "%a %a %a") (* removed an '@' *)
-        (print_lterm (p + 1)) f1 (print_binop ~asym) b (print_lterm p) f2
-  | Tnot f ->
-      fprintf fmt (protect_on (pri > 4) "not %a") (print_lterm 4) f
-
-and print_tbranch fmt br =
-  let p,t = t_open_branch br in
-  fprintf fmt "@[<hov 4>| %a ->@ %a@]" print_pat p print_term t;
-  Svs.iter forget_var p.pat_vars
-
-and print_tl fmt tl =
-  if tl = [] then () else fprintf fmt "@ [%a]"
-    (print_list alt (print_list comma print_term)) tl
-
-end
 
 
 open Ident
@@ -221,9 +19,14 @@ open Decl
 
 type split = {
   right_only : bool;
+  (* split only the right side every time. This makes split more efficient
+     while preserving most use cases : we mostly want to split on the goal which
+     is on the right of implications *)
   byso_split : bool;
+  (* do we eliminate by and so constructions during the split *)
   side_split : bool;
   stop_split : bool;
+  (* do we stop at a Term.stop_split *)
   cpos_split : bool;
   cneg_split : bool;
   asym_split : bool;
@@ -232,7 +35,12 @@ type split = {
 }
 
 let stop f = Sattr.mem Term.stop_split f.t_attrs
+(* remember that the Term.stop_split attribute is set on requires and ensures for example :
+   a first call to split with stop_split on makes it clear where proof obligations comme from
+   a second call to split will completely split the formulas *)
 let asym f = Sattr.mem Term.asym_split f.t_attrs
+(* remember that A /\ B and A && B are both represented by t_or (A, B), the distinction
+   between the 2 comes from the attribute Term.asym_split on A *)
 
 let case_split = Ident.create_attribute "case_split"
 let case f = Sattr.mem case_split f.t_attrs
@@ -318,14 +126,14 @@ module M = struct
   let print_mon sep fmt c =
     Pp.print_list
       (fun fmt () -> Format.fprintf fmt "%s" sep)
-      (fun fmt -> Format.fprintf fmt "[%a]" Termprinter.print_term)
+      (fun fmt -> Format.fprintf fmt "[%a]" Pretty.print_term)
       fmt
       (to_list c)
 
 end
 
 type split_ret = {
-  (* implications are equivalences when byso_split is off *)
+  (* The following implications are equivalences when byso_split is off *)
   (* Conjunctive decomposition of formula: /\ pos -> f *)
   pos : M.monoid;
   (* Disjunctive decomposition of formula: f -> \/ neg *)
@@ -344,17 +152,18 @@ type split_ret = {
 
 let print_ret_err { pos; neg; bwd; fwd; side; cpos; cneg } =
   Format.fprintf Format.err_formatter
-    "pos  : %a\n\
-     neg  : %a\n\
-     bwd  : %a\n\
-     fwd  : %a\n\
-     side : %a\n\
-     cpos : %b\n\
-     cneg : %b\n@."
+    "@[<h>\
+     pos  : @[%a@]@\n\
+     neg  : @[%a@]@\n\
+     bwd  : @[%a@]@\n\
+     fwd  : @[%a@]@\n\
+     side : @[%a@]@\n\
+     cpos : %b@\n\
+     cneg : %b@\n@]@."
     (M.print_mon " /\\ ") pos
     (M.print_mon " \\/ ") neg
-    Termprinter.print_term bwd
-    Termprinter.print_term fwd
+    Pretty.print_term bwd
+    Pretty.print_term fwd
     (M.print_mon " /\\ ") side
     cpos
     cneg
