@@ -39,8 +39,8 @@ type certif = rule * ident
 (* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>,
    it is defined as the function <Cert_verif.check_certif> *)
 and rule =
-  (* | No_certif
-   * (\* to use if we have yet to define the right certificate *\) *)
+  | No_certif
+  (* to use if we have yet to define the right certificate *)
   | Hole
   (* Hole ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
   | Axiom of ident
@@ -196,7 +196,7 @@ let rec print_certif filename cert =
   fprintf fmt "%a@." prc cert;
   close_out oc
 and prr fmt = function
-  (* | No_certif -> fprintf fmt "No_certif" *)
+  | No_certif -> fprintf fmt "No_certif"
   | Hole -> fprintf fmt "Hole"
   | Axiom h -> fprintf fmt "Axiom@ %a" pri h
   | Trivial -> fprintf fmt "Trivial"
@@ -356,13 +356,14 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
 
 (** Create a certified transformation from a transformation with a certificate *)
 
-exception Not
+exception Not_certified
 
 let checker_ctrans checker (ctr : ctrans) init_t =
   (* let t1 = Unix.gettimeofday () in *)
   let res_t, certif = ctr init_t in
   (* let t2 = Unix.gettimeofday () in *)
-  checker certif init_t res_t;
+  begin try checker certif init_t res_t
+        with Not_certified -> () end;
   (* let t3 = Unix.gettimeofday () in
    * Format.eprintf "temps de la transformation : %f\ntemps de la vérification : %f@."
    *   (t2 -. t1) (t3 -. t2); *)

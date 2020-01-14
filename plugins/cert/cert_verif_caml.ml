@@ -53,6 +53,8 @@ let check_rewrite cta rev h g terms path : ctask list =
 
 let rec ccheck (r, g : certif) cta : ctask list =
   match r with
+    | No_certif ->
+        raise Not_certified
     | Hole -> [cta]
     | Axiom h ->
         let th, posh = find_ident h cta in
