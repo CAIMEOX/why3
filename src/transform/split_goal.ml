@@ -9,9 +9,6 @@
 (*                                                                  *)
 (********************************************************************)
 
-
-
-
 open Ident
 open Ty
 open Term
@@ -19,14 +16,9 @@ open Decl
 
 type split = {
   right_only : bool;
-  (* split only the right side every time. This makes split more efficient
-     while preserving most use cases : we mostly want to split on the goal which
-     is on the right of implications *)
   byso_split : bool;
-  (* do we eliminate by and so constructions during the split *)
   side_split : bool;
   stop_split : bool;
-  (* do we stop at a Term.stop_split *)
   cpos_split : bool;
   cneg_split : bool;
   asym_split : bool;
@@ -35,12 +27,7 @@ type split = {
 }
 
 let stop f = Sattr.mem Term.stop_split f.t_attrs
-(* remember that the Term.stop_split attribute is set on requires and ensures for example :
-   a first call to split with stop_split on makes it clear where proof obligations comme from
-   a second call to split will completely split the formulas *)
 let asym f = Sattr.mem Term.asym_split f.t_attrs
-(* remember that A /\ B and A && B are both represented by t_or (A, B), the distinction
-   between the 2 comes from the attribute Term.asym_split on A *)
 
 let case_split = Ident.create_attribute "case_split"
 let case f = Sattr.mem case_split f.t_attrs
@@ -123,17 +110,10 @@ module M = struct
     | Unit -> []
     | Comb c -> to_list c []
 
-  let print_mon sep fmt c =
-    Pp.print_list
-      (fun fmt () -> Format.fprintf fmt "%s" sep)
-      (fun fmt -> Format.fprintf fmt "[%a]" Pretty.print_term)
-      fmt
-      (to_list c)
-
 end
 
 type split_ret = {
-  (* The following implications are equivalences when byso_split is off *)
+  (* implications are equivalences when byso_split is off *)
   (* Conjunctive decomposition of formula: /\ pos -> f *)
   pos : M.monoid;
   (* Disjunctive decomposition of formula: f -> \/ neg *)
@@ -149,24 +129,6 @@ type split_ret = {
   cpos : bool;
   cneg : bool;
 }
-
-let print_ret_err { pos; neg; bwd; fwd; side; cpos; cneg } =
-  Format.fprintf Format.err_formatter
-    "@[<h>\
-     pos  : @[%a@]@\n\
-     neg  : @[%a@]@\n\
-     bwd  : @[%a@]@\n\
-     fwd  : @[%a@]@\n\
-     side : @[%a@]@\n\
-     cpos : %b@\n\
-     cneg : %b@\n@]@."
-    (M.print_mon " /\\ ") pos
-    (M.print_mon " \\/ ") neg
-    Pretty.print_term bwd
-    Pretty.print_term fwd
-    (M.print_mon " /\\ ") side
-    cpos
-    cneg
 
 let rec drop_byso f = match f.t_node with
   | Tbinop (Timplies,{ t_node = Tbinop (Tor,_,{ t_node = Ttrue }) },f) ->
@@ -477,10 +439,6 @@ let rec split_core (sp:split) (f:term) : split_ret =
       { r with pos = Unit; neg = Unit; fwd = t_false; bwd = t_true }
   | _ -> r
 
-let split_core sp t =
-  let res = split_core sp t in
-  print_ret_err res;
-  res
 
 let full_split kn = {
   right_only = false;
