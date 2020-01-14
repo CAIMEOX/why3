@@ -49,6 +49,8 @@ let find_goal cta =
    Also fills the holes with a predefined list.*)
 let rec elab (cta : ctask) (r, g : certif) (fill : 'a list) : 'a ec * 'a list =
   match r with
+  (* | No_certif ->
+   *     raise Not_certified *)
   | Hole ->
       begin match fill with
       | [] -> failwith "Not enough to fill"
@@ -448,14 +450,15 @@ let print fmt init_t res_t certif =
     p_type ()
 
 let checker_dedukti certif init_t res_t =
-  let oc = open_out "/tmp/check_line.dk" in
-  let fmt = formatter_of_out_channel oc in
-  let fo = Filename.(concat Config.datadir (concat "dedukti" "FO.dk")) in
-  print fmt (translate_task init_t) (List.map translate_task res_t) certif;
-  close_out oc;
-  Sys.command ("cat " ^ fo ^ " > /tmp/check_all.dk") |> ignore;
-  Sys.command "cat /tmp/check_line.dk >> /tmp/check_all.dk" |> ignore;
-  Sys.command "dkcheck /tmp/check_all.dk 2> /dev/null | head -n 1 > /tmp/result.log" |> ignore;
-  let ic = Scanf.Scanning.open_in "/tmp/result.log" in
-  Scanf.bscanf ic "%s" (fun s -> if s <> "YES" then verif_failed ("Dedukti returns : " ^ s));
-  res_t
+  try
+    let oc = open_out "/tmp/check_line.dk" in
+    let fmt = formatter_of_out_channel oc in
+    let fo = Filename.(concat Config.datadir (concat "dedukti" "FO.dk")) in
+    print fmt (translate_task init_t) (List.map translate_task res_t) certif;
+    close_out oc;
+    Sys.command ("cat " ^ fo ^ " > /tmp/check_all.dk") |> ignore;
+    Sys.command "cat /tmp/check_line.dk >> /tmp/check_all.dk" |> ignore;
+    Sys.command "dkcheck /tmp/check_all.dk 2> /dev/null | head -n 1 > /tmp/result.log" |> ignore;
+    let ic = Scanf.Scanning.open_in "/tmp/result.log" in
+    Scanf.bscanf ic "%s" (fun s -> if s <> "YES" then verif_failed ("Dedukti returns : " ^ s))
+  with e -> raise (Trans.TransFailure ("Cert_verif_dedukti.checker_dedukti", e))

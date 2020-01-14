@@ -136,10 +136,9 @@ let checker_caml certif init_t res_t =
   try let init_ct = translate_task init_t in
       let res_ct  = List.map translate_task res_t in
       let res_ct' = ccheck certif init_ct in
-      if Lists.equal ctask_equal res_ct res_ct'
-      then res_t
-      else begin
+      if not (Lists.equal ctask_equal res_ct res_ct')
+      then begin
           print_ctasks "/tmp/from_trans.log" res_ct;
           print_ctasks "/tmp/from_cert.log"  res_ct';
           verif_failed "Replaying certif gives different result, log available" end
-  with e -> raise (Trans.TransFailure ("Cert_syntax.checker_ctrans", e))
+  with e -> raise (Trans.TransFailure ("Cert_verif_caml.checker_caml", e))
