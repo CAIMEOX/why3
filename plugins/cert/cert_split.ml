@@ -150,8 +150,9 @@ type split_ret = {
   (* The following implications are equivalences when byso_split is off *)
   (* Conjunctive decomposition of formula: /\ pos -> f *)
   pos : M.monoid;
+  (* cert_pos ⇓ pos ≜ f with pos and f in the same arbitrary context *)
   cert_pos : certif;
-  (* Disjunctive decomposition of formula: f -> \/ pos *)
+  (* Disjunctive decomposition of formula: f -> \/ neg *)
   neg : M.monoid;
   cert_neg : certif;
   (* Backward pull of formula: bwd -> f (typically from by) *)

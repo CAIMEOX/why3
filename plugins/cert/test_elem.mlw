@@ -9,3 +9,5 @@ goal G4 : not (a \/ b)
 goal G5 : a && b
 goal G6 : a || b
 goal G7 : a /\ (b \/ c)
+goal G8 : a /\ b /\ c
+goal G9 : a \/ (b /\ c)

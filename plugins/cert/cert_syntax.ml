@@ -40,7 +40,7 @@ type certif = rule * ident
    it is defined as the function <Cert_verif.check_certif> *)
 and rule =
   | No_certif
-  (* to use if we have yet to define the right certificate *)
+  (* makes verification fail : use it as a placeholder  *)
   | Hole
   (* Hole ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
   | Axiom of ident
@@ -382,7 +382,8 @@ let checker_ctrans checker (ctr : ctrans) init_t =
   let res_t, certif = ctr init_t in
   (* let t2 = Unix.gettimeofday () in *)
   begin try checker certif init_t res_t
-        with Not_certified -> () end;
+        with Not_certified ->
+          raise (Trans.TransFailure ("Cert_syntax.checker_ctrans", Not_certified)) end;
   (* let t3 = Unix.gettimeofday () in
    * Format.eprintf "temps de la transformation : %f\ntemps de la vérification : %f@."
    *   (t2 -. t1) (t3 -. t2); *)
