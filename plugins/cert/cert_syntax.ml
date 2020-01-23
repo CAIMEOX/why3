@@ -1,11 +1,9 @@
 open Why3
-
 open Term
 open Ident
-open Decl
 open Theory
+open Decl
 open Task
-open Format
 
 
 (** To certify transformations, we will represent Why3 tasks by the type <ctask>
@@ -32,74 +30,51 @@ type ctask = (cterm * bool) Mid.t
 type dir = Left | Right
 type path = dir list
 
-type certif = rule * ident
-(* The ident indicates where to apply the rule.
-   In the following rules, we will call it <G> *)
-
-(* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>,
-   it is defined as the function <Cert_verif.check_certif> *)
-and rule =
+type certif =
+(* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>.
+   To learn more about the implementation details of this function, take a loog at
+   its OCaml implementation <Cert_verif_caml.ccheck>. *)
   | No_certif
-  (* makes verification fail : use it as a placeholder  *)
+  (* Makes verification fail : use it as a placeholder  *)
   | Hole
   (* Hole ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
-  | Axiom of ident
-  (* Axiom H ⇓ (Γ, H : P ⊢ Δ, G : P) ≜  [] *)
-  | Trivial
-  (* Trivial ⇓ (Γ, G : false ⊢ Δ) ≜  [] *)
-  (* Trivial ⇓ (Γ ⊢ Δ, G : true ) ≜  [] *)
-  | Cut of cterm * certif * certif
-  (* Cut (A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, G : A))  @  (c₂ ⇓ (Γ, G : A ⊢ Δ)) *)
-  | Split of certif * certif
-  (* Split (c₁, c₂) ⇓ (Γ, G : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, G : A ⊢ Δ))  @  (c₂ ⇓ (Γ, G : B ⊢ Δ)) *)
-  (* Split (c₁, c₂) ⇓ (Γ ⊢ Δ, G : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, G : A))  @  (c₂ ⇓ (Γ ⊢ Δ, G : B)) *)
-  | Unfold of certif
-  (* Unfold c ⇓ (Γ, G : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, G : (A → B) ∧ (B → A) ⊢ Δ) *)
-  (* Unfold c ⇓ (Γ ⊢ Δ, G : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, G : (A → B) ∧ (B → A)) *)
-  (* Unfold c ⇓ (Γ, G : A → B ⊢ Δ) ≜  c ⇓ (Γ, G : ¬A ∨ B ⊢ Δ)*)
-  (* Unfold c ⇓ (Γ ⊢ Δ, G : A → B) ≜  c ⇓ (Γ ⊢ Δ, G : ¬A ∨ B)*)
-  | Swap_neg of certif
-  (* Swap_neg c ⇓ (Γ, G : ¬A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, G : A)  *)
-  (* Swap_neg c ⇓ (Γ, G : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, G : ¬A) *)
-  (* Swap_neg c ⇓ (Γ ⊢ Δ, G : A ) ≜  c ⇓ (Γ, G : ¬A ⊢ Δ) *)
-  (* Swap_neg c ⇓ (Γ ⊢ Δ, G : ¬A) ≜  c ⇓ (Γ, G : A ⊢ Δ)  *)
-  | Destruct of ident * ident * certif
-  (* Destruct (H₁, H₂, c) ⇓ (Γ, G : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, H₁ : A, H₂ : B ⊢ Δ) *)
-  (* Destruct (H₁, H₂, c) ⇓ (Γ ⊢ Δ, G : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, H₁ : A, H₂ : B) *)
-  | Weakening of certif
-  (* Weakening c ⇓ (Γ ⊢ Δ, G : A) ≜  c ⇓ (Γ ⊢ Δ) *)
-  (* Weakening c ⇓ (Γ, G : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | Intro_quant of ident * certif
-  (* Intro_quant (y, c) ⇓ (Γ, G : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : P y ⊢ Δ) (y fresh) *)
-  (* Intro_quant (y, c) ⇓ (Γ ⊢ Δ, G : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : P y) (y fresh) *)
-  | Inst_quant of ident * cterm * certif
-  (* Inst_quant (H, t, c) ⇓ (Γ, G : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, G : ∀ x. P x, H : P t ⊢ Δ) *)
-  (* Inst_quant (H, t, c) ⇓ (Γ ⊢ Δ, G : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, G : ∃ x. P x, H : P t) *)
-  | Rewrite of ident * path * bool * certif list
-  (* Rewrite (H, path, rev, lc) ⇓ Seq is defined as follows :
-     it tries to rewrite in <G> an equality that is in <H>, following the path <path>,
+  | Axiom of ident * ident
+  (* Axiom (H, G) ⇓ (Γ, H : A ⊢ Δ, G : A) ≜  [] *)
+  | Trivial of ident
+  (* Trivial I ⇓ (Γ, I : false ⊢ Δ) ≜  [] *)
+  (* Trivial I ⇓ (Γ ⊢ Δ, I : true ) ≜  [] *)
+  | Cut of ident * cterm * certif * certif
+  (* Cut (I, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ, I : A ⊢ Δ)) *)
+  | Split of ident * certif * certif
+  (* Split (I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
+  (* Split (I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
+  | Unfold of ident * certif
+  (* Unfold (I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
+  (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
+  (* Unfold (I, c) ⇓ (Γ, I : A → B ⊢ Δ) ≜  c ⇓ (Γ, I : ¬A ∨ B ⊢ Δ)*)
+  (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A → B) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A ∨ B)*)
+  | Swap_neg of ident * certif
+  (* Swap_neg (I, c) ⇓ (Γ, I : ¬A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, I : A)  *)
+  (* Swap_neg (I, c) ⇓ (Γ, I : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A) *)
+  (* Swap_neg (I, c) ⇓ (Γ ⊢ Δ, I : A ) ≜  c ⇓ (Γ, I : ¬A ⊢ Δ) *)
+  (* Swap_neg (I, c) ⇓ (Γ ⊢ Δ, I : ¬A) ≜  c ⇓ (Γ, I : A ⊢ Δ)  *)
+  | Destruct of ident * ident * ident * certif
+  (* Destruct (I, J₁, J₂, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, J₁ : A, J₂ : B ⊢ Δ) *)
+  (* Destruct (I, J₁, J₂, c) ⇓ (Γ ⊢ Δ, I : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, J₁ : A, J₂ : B) *)
+  | Weakening of ident * certif
+  (* Weakening (I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
+  (* Weakening (I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
+  | Intro_quant of ident * ident * certif
+  (* Intro_quant (I, y, c) ⇓ (Γ, I : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : P y ⊢ Δ) (y fresh) *)
+  (* Intro_quant (I, y, c) ⇓ (Γ ⊢ Δ, I : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : P y) (y fresh) *)
+  | Inst_quant of ident * ident * cterm * certif
+  (* Inst_quant (I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
+  (* Inst_quant (I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
+  | Rewrite of ident * ident * path * bool * certif list
+  (* Rewrite (I, J, path, rev, lc) ⇓ Seq is defined as follows :
+     it tries to rewrite in <I> an equality that is in <J>, following the path <path>,
      <rev> indicates if it rewrites from left to right or from right to left.
      Since <H> can have premises, those are then matched against the certificates <lc> *)
-
-let hole = Hole, id_register (id_fresh "dummy_hole_ident")
-
-let rec map_cert fid fct (r, g) =
-  map_rule fid fct r, fid g
-
-and map_rule fid fct r =
-  let m = map_cert fid fct in
-  match r with
-  | Axiom i -> Axiom (fid i)
-  | Cut (ct, c1, c2) -> Cut (fct ct, m c1, m c2)
-  | Split (c1, c2) -> Split (m c1, m c2)
-  | Unfold c -> Unfold (m c)
-  | Swap_neg c -> Swap_neg (m c)
-  | Destruct (i1, i2, c) -> Destruct (fid i1, fid i2, m c)
-  | Weakening c -> Weakening (m c)
-  | Intro_quant (i, c) -> Intro_quant (fid i, m c)
-  | Inst_quant (i, ct, c) -> Inst_quant (fid i, fct ct, m c)
-  | Rewrite (i, p, b, cl) -> Rewrite (fid i, p, b, List.map m cl)
-  | _ -> r
 
 (** Translating a Why3 <task> into a <ctask> *)
 
@@ -148,7 +123,6 @@ let rec translate_term_rec bv_lvl lvl t =
   | Tcase _ -> invalid_arg "Cert_syntax.translate_term Tcase"
   | Teps _ -> invalid_arg "Cert_syntax.translate_term Teps"
 
-
 let translate_term t =
   translate_term_rec Mid.empty 0 t
 
@@ -174,204 +148,13 @@ let rec translate_task_acc acc = function
 let translate_task task =
   translate_task_acc Mid.empty task
 
-
-
-(** Printing of <cterm> and <ctask> : for debugging purposes *)
-
-let ip = create_ident_printer []
-
-let pri fmt i =
-  fprintf fmt "%s" (id_unique ip i)
-and prd fmt = function
-  | Left -> fprintf fmt "Left"
-  | Right -> fprintf fmt "Right"
-and prle sep pre fmt le =
-  let prl = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt sep) pre in
-  fprintf fmt "[%a]" prl le
-
-let rec pcte fmt = function
-  | CTbvar lvl -> pp_print_int fmt lvl
-  | CTfvar i -> pri fmt i
-  | CTapp (f, arg) -> fprintf fmt "%a@ %a" pcte f pcte arg
-  | CTbinop (op, t1, t2) ->
-      fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
-  | CTquant (q, ct) -> begin match q with
-                       | CTforall -> fprintf fmt "∀. %a" pcte ct
-                       | CTexists -> fprintf fmt "∃. %a" pcte ct
-                       | CTlambda -> fprintf fmt "λ. %a" pcte ct
-                       end
-  | CTnot t -> fprintf fmt "(not %a)" pcte t
-  | CTtrue -> fprintf fmt "true"
-  | CTfalse -> fprintf fmt "false"
-and pro fmt = function
-  | Tor -> fprintf fmt "\\/"
-  | Tand -> fprintf fmt "/\\"
-  | Timplies -> fprintf fmt "->"
-  | Tiff -> fprintf fmt "<->"
-
-let rec print_certif filename cert =
-  let oc = open_out filename in
-  let fmt = formatter_of_out_channel oc in
-  fprintf fmt "%a@." prc cert;
-  close_out oc
-and prr fmt = function
-  | No_certif -> fprintf fmt "No_certif"
-  | Hole -> fprintf fmt "Hole"
-  | Axiom h -> fprintf fmt "Axiom@ %a" pri h
-  | Trivial -> fprintf fmt "Trivial"
-  | Cut (a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a)@]" pcte a prc c1 prc c2
-  | Split (c1, c2) -> fprintf fmt "Split @[(%a,@ %a)@]" prc c1 prc c2
-  | Unfold c -> fprintf fmt "Unfold@ %a" prc c
-  | Swap_neg c -> fprintf fmt "Swap_neg@ %a" prc c
-  | Destruct (h1, h2, c) -> fprintf fmt "Destruct @[(%a,@ %a,@ %a)@]"
-                              pri h1 pri h2 prc c
-  | Weakening c -> fprintf fmt "Weakening@ %a" prc c
-  | Intro_quant (name, c) -> fprintf fmt "Intro_quant @[(%a,@ %a)@]" pri name prc c
-  | Inst_quant (i, t, c) -> fprintf fmt "Inst_quant @[(%a,@ %a,@ %a)@]" pri i pcte t prc c
-  | Rewrite (h, p, rev, lc) ->
-      fprintf fmt "Rewrite @[(%a,@ %a,@ %b,@ %a)@]"
-        pri h (prle "; " prd) p rev (prle "; " prc) lc
-and prc fmt (r, g) =
-  fprintf fmt "(%a, %a)" prr r pri g
-
-
-let prpos fmt = function
-  | true  -> fprintf fmt "GOAL| "
-  | false -> fprintf fmt "HYP | "
-
-let prmid fmt mid =
-  Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a\n" prpos pos pri h pcte cte) mid
-
-let pcta fmt cta =
-  fprintf fmt "%a\n" prmid cta
-
-let print_ctasks filename lcta =
-  let oc = open_out filename in
-  let fmt = formatter_of_out_channel oc in
-  fprintf fmt "%a@." (prle "==========\n" pcta) lcta;
-  close_out oc
-
-
 (** We equip existing transformations with a certificate <certif> *)
 
 type ctrans = task -> task list * certif
 
 exception Certif_verification_failed of string
 let verif_failed s = raise (Certif_verification_failed s)
-(** Utility functions on <cterm> and <ctask> *)
 
-let rec cterm_equal t1 t2 = match t1, t2 with
-  | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
-  | CTfvar i1, CTfvar i2 -> id_equal i1 i2
-  | CTapp (tl1, tr1), CTapp (tl2, tr2) ->
-      cterm_equal tl1 tl2 && cterm_equal tr1 tr2
-  | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
-      op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
-  | CTquant (q1, t1), CTquant (q2, t2) when q1 = q2 -> cterm_equal t1 t2
-  | CTtrue, CTtrue | CTfalse, CTfalse -> true
-  | CTnot t1, CTnot t2 -> cterm_equal t1 t2
-  | _ -> false
-
-let cterm_pos_equal (t1, p1) (t2, p2) =
-  cterm_equal t1 t2 && p1 = p2
-
-let ctask_equal cta1 cta2 = Mid.equal cterm_pos_equal cta1 cta2
-
-(* bound variable substitution *)
-let rec ct_bv_subst k u t = match t with
-  | CTbvar i -> if i = k then u else t
-  | CTfvar _ -> t
-  | CTapp (t1, t2) ->
-      let nt1 = ct_bv_subst k u t1 in
-      let nt2 = ct_bv_subst k u t2 in
-      CTapp (nt1, nt2)
-  | CTbinop (op, t1, t2) ->
-      let nt1 = ct_bv_subst k u t1 in
-      let nt2 = ct_bv_subst k u t2 in
-      CTbinop (op, nt1, nt2)
-  | CTquant (q, t) ->
-      let nt = ct_bv_subst (k+1) u t in
-      CTquant (q, nt)
-  | CTnot t -> CTnot (ct_bv_subst k u t)
-  | CTtrue -> CTtrue
-  | CTfalse -> CTfalse
-
-let ct_open t u = ct_bv_subst 0 u t
-
-(* checks if the term is locally closed *)
-let locally_closed =
-  let di = id_register (id_fresh "dummy_locally_closed_ident") in
-  let rec term = function
-    | CTbvar _ -> false
-    | CTapp (t1, t2)
-    | CTbinop (_, t1, t2) -> term t1 && term t2
-    | CTquant (_, t) -> term (ct_open t (CTfvar di))
-    | CTnot t -> term t
-    | CTfvar _ | CTtrue | CTfalse -> true
-  in
-  term
-
-(* free variable substitution *)
-let rec ct_fv_subst z u t = match t with
-  | CTfvar x -> if id_equal z x then u else t
-  | CTapp (t1, t2) ->
-      let nt1 = ct_fv_subst z u t1 in
-      let nt2 = ct_fv_subst z u t2 in
-      CTapp (nt1, nt2)
-  | CTbinop (op, t1, t2) ->
-      let nt1 = ct_fv_subst z u t1 in
-      let nt2 = ct_fv_subst z u t2 in
-      CTbinop (op, nt1, nt2)
-  | CTquant (q, t) ->
-      let nt = ct_fv_subst z u t in
-      CTquant (q, nt)
-  | CTnot t -> CTnot (ct_fv_subst z u t)
-  | CTbvar _ | CTtrue | CTfalse -> t
-
-(* variable closing *)
-let rec ct_fv_close x k t = match t with
-  | CTbvar _ | CTtrue | CTfalse-> t
-  | CTfvar y -> if id_equal x y then CTbvar k else t
-  | CTnot t -> CTnot (ct_fv_close x k t)
-  | CTapp (t1, t2) ->
-      let nt1 = ct_fv_close x k t1 in
-      let nt2 = ct_fv_close x k t2 in
-      CTapp (nt1, nt2)
-  | CTbinop (op, t1, t2) ->
-      let nt1 = ct_fv_close x k t1 in
-      let nt2 = ct_fv_close x k t2 in
-      CTbinop (op, nt1, nt2)
-  | CTquant (q, t) -> CTquant (q, ct_fv_close x (k+1) t)
-
-let ct_close x t = ct_fv_close x 0 t
-
-(* free variable with respect to a term *)
-let rec mem_cont x t cont = match t with
-  | CTfvar y -> cont (id_equal x y)
-  | CTapp (t1, t2)
-  | CTbinop (_, t1, t2) ->
-      mem_cont x t1 (fun m1 ->
-      mem_cont x t2 (fun m2 ->
-      cont (m1 || m2)))
-  | CTquant (_, t)
-  | CTnot t -> mem_cont x t cont
-  | CTbvar _ | CTtrue | CTfalse -> cont false
-
-let mem x t = mem_cont x t (fun x -> x)
-
-(* separates hypotheses and goals *)
-let split_cta cta =
-  let open Mid in
-  fold (fun h (ct, pos) (mh, mg) ->
-      if pos then mh, add h (ct, pos) mg
-      else add h (ct, pos) mh, mg)
-    cta (empty, empty)
-
-(* creates a new ctask with the same hypotheses but sets the goal with the second argument *)
-let set_goal : ctask -> cterm -> ctask = fun cta ->
-  let mh, mg = split_cta cta in
-  let hg, _ = Mid.choose mg in
-  fun ct -> Mid.add hg (ct, true) mh
 
 (** Create a certified transformation from a transformation with a certificate *)
 
@@ -382,10 +165,10 @@ let checker_ctrans checker (ctr : ctrans) init_t =
   let res_t, certif = ctr init_t in
   (* let t2 = Unix.gettimeofday () in *)
   begin try checker certif init_t res_t
-        with Not_certified ->
-          raise (Trans.TransFailure ("Cert_syntax.checker_ctrans", Not_certified)) end;
+        with Not_certified -> verif_failed "Incomplete certificate returned" end;
   (* let t3 = Unix.gettimeofday () in
    * Format.eprintf "temps de la transformation : %f\ntemps de la vérification : %f@."
    *   (t2 -. t1) (t3 -. t2); *)
   res_t
+
 

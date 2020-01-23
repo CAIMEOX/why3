@@ -18,18 +18,13 @@ open Term
 open Decl
 
 open Cert_syntax
+open Cert_utility
 
+(* id used by split core, to replace by the real id of the formula currently being splitted *)
 let current_ident = id_register (id_fresh "current_ident")
-let no_cert = No_certif, current_ident
 
-
-let replace_ci id g =
-  if id_equal g current_ident
-  then id
-  else g
-
-let fill_id id c =
-  map_cert (replace_ci id) (fun ct -> ct) c
+let rename id1 id2 (c : certif) : certif =
+  map_cert (fun id -> if id_equal id id1 then id2 else id) (fun ct -> ct) c
 
 type split = {
   right_only : bool;
@@ -229,6 +224,17 @@ let fold_cond = function
   | Comb c -> !+ (fold_cond c)
   | x -> x
 
+
+let or_combine_cert g1 c1 c2 =
+  let g2 = id_register (id_fresh "combine_cert_temp") in
+  let c2 = rename g1 g2 c2 in
+  let or_destruct = assert false (* TODO *) in
+  Destruct (g1, g1, g2, Hole)
+  |>> c1
+  |>> c2
+  |>> or_destruct (* on g1 and g2 *)
+
+
 let rec split_core sp f =
   let (~-) = t_attr_copy f in
   let ro = sp.right_only in
@@ -264,13 +270,13 @@ let rec split_core sp f =
   let r = match f.t_node with
   | _ when sp.stop_split && stop f ->
       let df = drop_byso f in
-      ret !+(unstop f) hole !+(unstop df) hole f df Unit false false
+      ret !+(unstop f) Hole !+(unstop df) Hole f df Unit false false
   | Tbinop (Tiff,_,_) | Tif _ | Tcase _ | Tquant _ when sp.intro_mode ->
       let df = drop_byso f in
-      ret !+f no_cert !+df no_cert f df Unit false false
-  | Ttrue -> ret Unit no_cert (Zero f) no_cert f f Unit false false
-  | Tfalse -> ret (Zero f) no_cert Unit no_cert f f Unit false false
-  | Tapp _ -> let uf = !+f in ret uf hole uf hole f f Unit false false
+      ret !+f No_certif !+df No_certif f df Unit false false
+  | Ttrue -> ret Unit No_certif (Zero f) No_certif f f Unit false false
+  | Tfalse -> ret (Zero f) No_certif Unit No_certif f f Unit false false
+  | Tapp _ -> let uf = !+f in ret uf Hole uf Hole f f Unit false false
     (* f1 so f2 *)
   | Tbinop (Tand,f1,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) }) ->
       if not (sp.byso_split && asym f2) then split_core sp f1 else
@@ -285,7 +291,7 @@ let rec split_core sp f =
       let lside = if sp.side_split then close sf2.pos else
         !+(t_implies sf1.fwd sf2.bwd) in
       let side = sf1.side ++ lside ++ close sf2.side in
-      ret sf1.pos no_cert neg no_cert sf1.bwd fwd side sf1.cpos (cn1 || cn2)
+      ret sf1.pos No_certif neg No_certif sf1.bwd fwd side sf1.cpos (cn1 || cn2)
   | Tbinop (Tand,f1,f2) ->
       let (&&&) = alias2 f1 f2 t_and in
       let rc = split_core (ps_csp sp) in
@@ -303,8 +309,8 @@ let rec split_core sp f =
       let side = sf1.side ++ if not asym then sf2.side else
         let nf1 = ncase (sf2.pos::dp) sf1 in iclose nf1 sf2.side in
       let c1 = sf1.cert_pos and c2 = sf2.cert_pos in
-      let cert_pos = Split (c1, c2), current_ident in
-      ret pos cert_pos neg no_cert bwd fwd side false (cn1 || cn2)
+      let cert_pos = Split (current_ident, c1, c2) in
+      ret pos cert_pos neg No_certif bwd fwd side false (cn1 || cn2)
     (* f1 by f2 *)
   | Tbinop (Timplies,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) },f1) ->
       if not (sp.byso_split && asym f2) then split_core sp f1 else
@@ -314,7 +320,7 @@ let rec split_core sp f =
       let lside = if sp.side_split then close sf1.pos else
         !+(t_implies sf2.fwd sf1.bwd) in
       let side = sf2.side ++ lside ++ sf1.side in
-      ret sf2.pos no_cert sf1.neg no_cert sf2.bwd sf1.fwd side sf2.cpos sf1.cneg
+      ret sf2.pos No_certif sf1.neg No_certif sf2.bwd sf1.fwd side sf2.cpos sf1.cneg
   | Tbinop (Timplies,f1,f2) ->
       let (>->) = alias2 f1 f2 t_implies in
       let sp2 = ng_csp sp in let sp1 = in_csp sp2 in
@@ -332,7 +338,7 @@ let rec split_core sp f =
       let pos = bimap (fun _ a -> - t_not a) (>->) nf1 sf2.pos in
       let nf1 = ncase (if asym then sf2.neg::dp else dp) sf1 in
       let side = sf1.side ++ iclose nf1 sf2.side in
-      ret pos no_cert neg no_cert bwd fwd side (cn1 || sf2.cpos) false
+      ret pos No_certif neg No_certif bwd fwd side (cn1 || sf2.cpos) false
   | Tbinop (Tor,f1,f2) ->
       let (|||) = alias2 f1 f2 t_or in
       let rc = split_core (ng_csp sp) in
@@ -349,7 +355,7 @@ let rec split_core sp f =
       let side2 = if not asym then sf2.side else
         let pf1 = pcase (sf2.neg::dp) sf1 in
         bimap cpy (|||) pf1 sf2.side in
-      ret pos no_cert (sf1.neg ++ neg2) no_cert bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
+      ret pos No_certif (sf1.neg ++ neg2) No_certif bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
   | Tbinop (Tiff,f1,f2) ->
       let rc = split_core (no_csp sp) in
       let sf1 = rc f1 and sf2 = rc f2 in
@@ -361,7 +367,7 @@ let rec split_core sp f =
       let nf1 = ncase [nf2] sf1 and pf1 = pcase [pf2] sf1 in
       let neg_top = aclose nf1 nf2 in
       let neg_bot = aclose (nclose pf1) (nclose pf2) in
-      ret pos no_cert (neg_top ++ neg_bot) no_cert df df (sf1.side ++ sf2.side) false false
+      ret pos No_certif (neg_top ++ neg_bot) No_certif df df (sf1.side ++ sf2.side) false false
   | Tif (fif,fthen,felse) ->
       let rc = split_core (no_csp sp) in
       let sfi = rc fif and sft = rc fthen and sfe = rc felse in
@@ -381,19 +387,19 @@ let rec split_core sp f =
       let nfi = ncase (sft.neg::spt) sfi and pfi = pcase (sfe.neg::spe) sfi in
       let eside = iclose (nclose pfi) sfe.side in
       let side = sfi.side ++ iclose nfi sft.side ++ eside in
-      ret pos no_cert neg no_cert bwd fwd side false false
+      ret pos No_certif neg No_certif bwd fwd side false false
   | Tnot f1 ->
       let sf = split_core (in_csp sp) f1 in
       let (!) = alias f1 t_not in
       let (|>) zero = map (fun t -> !+(t_attr_copy t zero)) (!) in
       let pos = t_false |> sf.neg and neg = t_true |> sf.pos in
-      ret pos no_cert neg no_cert !(sf.fwd) !(sf.bwd) sf.side sf.cneg sf.cpos
+      ret pos No_certif neg No_certif !(sf.fwd) !(sf.bwd) sf.side sf.cneg sf.cpos
   | Tlet (t,fb) ->
       let vs, f1 = t_open_bound fb in
       let (!) = alias f1 (t_let_close vs t) in
       let sf = split_core sp f1 in
       let (!!) = map (fun t -> Zero t) (!) in
-      ret !!(sf.pos) no_cert !!(sf.neg) no_cert !(sf.bwd) !(sf.fwd) !!(sf.side) sf.cpos sf.cneg
+      ret !!(sf.pos) No_certif !!(sf.neg) No_certif !(sf.bwd) !(sf.fwd) !!(sf.side) sf.cpos sf.cneg
   | Tcase (t,bl) ->
       let rc = match bl with
         | [_] -> split_core sp
@@ -409,7 +415,7 @@ let rec split_core sp f =
         let blbwd = List.map (fun (p, close, sf) -> close p sf.bwd) sbl in
         let bwd = case_close blbwd in
         let pos, neg, side = join sbl in
-        ret pos no_cert neg no_cert bwd fwd side false false
+        ret pos No_certif neg No_certif bwd fwd side false false
       in
       begin match sp.comp_match with
       | None ->
@@ -486,7 +492,7 @@ let rec split_core sp f =
             false, sf.cneg
       in
       let side = map (fun t -> Zero t) (t_forall_close vsl trl) sf.side in
-      ret pos no_cert neg no_cert bwd fwd side cpos cneg
+      ret pos No_certif neg No_certif bwd fwd side cpos cneg
   | Tvar _ | Tconst _ | Teps _ -> raise (FmlaExpected f)
   in
   let r = if case f then
@@ -556,11 +562,11 @@ let split_goal sp pr f =
   let make_prop f = [create_prop_decl Pgoal pr f] in
   List.map make_prop (split_proof sp f)
 
-let clue = ref hole
+let clue = ref Hole
 
 let csplit_goal sp pr f =
   let l, cert = csplit_proof sp f in
-  clue := fill_id pr.pr_name cert;
+  clue := rename current_ident pr.pr_name cert;
   let make_prop f = [create_prop_decl Pgoal pr f] in
   List.map make_prop l
 
