@@ -1,6 +1,7 @@
 predicate a
 predicate b
 predicate c
+predicate d
 
 goal G1 : a /\ b
 goal G2 : a \/ b
@@ -11,3 +12,4 @@ goal G6 : a || b
 goal G7 : a /\ (b \/ c)
 goal G8 : a /\ b /\ c
 goal G9 : a \/ (b /\ c)
+goal G10 : (a /\ b) \/ (c /\ d)

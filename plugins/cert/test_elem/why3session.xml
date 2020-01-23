@@ -61,6 +61,8 @@
  </goal>
  <goal name="G9">
  </goal>
+ <goal name="G10">
+ </goal>
 </theory>
 </file>
 </why3session>
