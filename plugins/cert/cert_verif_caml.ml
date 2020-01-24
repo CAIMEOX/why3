@@ -1,6 +1,5 @@
 open Why3
 
-open Format
 open Ident
 open Term (* only for binop *)
 open Cert_syntax
@@ -10,12 +9,6 @@ open Cert_utility
 (** Utility verification functions *)
 
 
-let find_ident h cta =
-  match Mid.find_opt h cta with
-  | Some x -> x
-  | None ->
-      fprintf str_formatter "Can't find ident %a in the task" pri h;
-      verif_failed (flush_str_formatter ())
 
 
 let rec check_rewrite_term tl tr t path =
@@ -37,7 +30,7 @@ let check_rewrite cta rev h g terms path : ctask list =
     | t, [] -> acc, t
     | _ -> verif_failed "Can't instantiate the hypothesis" in
   let lp, tl, tr =
-    let ct, pos = find_ident h cta in
+    let ct, pos = find_ident "check_rewrite" h cta in
     if pos then verif_failed "Can't use goal as an hypothesis to rewrite" else
       match introduce [] terms ct with
       | lp, CTbinop (Tiff, t1, t2) -> if rev then lp, t1, t2 else lp, t2, t1
@@ -61,15 +54,15 @@ let rec ccheck (c : certif) cta : ctask list =
         raise Not_certified
     | Hole -> [cta]
     | Axiom (h, g) ->
-        let th, posh = find_ident h cta in
-        let tg, posg = find_ident g cta in
+        let th, posh = find_ident "axiom1" h cta in
+        let tg, posg = find_ident "axiom2" g cta in
         if not posh && posg
         then if cterm_equal th tg
              then []
              else verif_failed "The hypothesis and goal given do not match"
         else verif_failed "Terms have wrong positivities in the task"
     | Trivial i ->
-        let t, pos = find_ident i cta in
+        let t, pos = find_ident "trivial" i cta in
         begin match t, pos with
         | CTfalse, false | CTtrue, true -> []
         | _ -> verif_failed "Non trivial hypothesis"
@@ -79,7 +72,7 @@ let rec ccheck (c : certif) cta : ctask list =
         let cta2 = Mid.add i (a, false) cta in
         ccheck c1 cta1 @ ccheck c2 cta2
     | Split (i, c1, c2) ->
-        let t, pos = find_ident i cta in
+        let t, pos = find_ident "split" i cta in
         begin match t, pos with
         | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false ->
             let cta1 = Mid.add i (t1, pos) cta in
@@ -87,7 +80,7 @@ let rec ccheck (c : certif) cta : ctask list =
             ccheck c1 cta1 @ ccheck c2 cta2
         | _ -> verif_failed "Not splittable" end
     | Unfold (i, c) ->
-        let t, pos = find_ident i cta in
+        let t, pos = find_ident "unfold" i cta in
         begin match t with
         | CTbinop (Tiff, t1, t2) ->
             let imp_pos = CTbinop (Timplies, t1, t2) in
@@ -101,24 +94,35 @@ let rec ccheck (c : certif) cta : ctask list =
             ccheck c cta
         | _ -> verif_failed "Nothing to unfold" end
     | Swap_neg (i, c) ->
-        let t, pos = find_ident i cta in
+        let t, pos = find_ident "swap_neg" i cta in
         let neg_t = match t with CTnot t -> t | t -> CTnot t in
         let cta = Mid.add i (neg_t, not pos) cta in
         ccheck c cta
     | Destruct (i, j1, j2, c) ->
-        let t, pos = find_ident i cta in
+        let t, pos = find_ident "destruct" i cta in
         begin match t, pos with
         | CTbinop (Tand, t1, t2), false | CTbinop (Tor, t1, t2), true ->
             let cta = Mid.remove i cta
                       |> Mid.add j1 (t1, pos)
                       |> Mid.add j2 (t2, pos) in
             ccheck c cta
-        | _ -> verif_failed "Nothing to destruct"  end
+        | _ -> verif_failed "Nothing to destruct" end
+    | Construct (i1, i2, j, c) ->
+        let a, pos1 = find_ident "construct1" i1 cta in
+        let b, pos2 = find_ident "construct2" i2 cta in
+        if pos1 = pos2
+        then
+          let t = if pos1 then CTbinop (Tor, a, b) else CTbinop (Tand, a, b) in
+          let cta = Mid.remove i1 cta
+                    |> Mid.remove i2
+                    |> Mid.add j (t, pos1) in
+          ccheck c cta
+        else verif_failed "Can't construct"
     | Weakening (i, c) ->
         let cta = Mid.remove i cta in
         ccheck c cta
     | Intro_quant (i, y, c) ->
-        let t, pos = find_ident i cta in
+        let t, pos = find_ident "intro_quant" i cta in
         begin match t, pos with
         | CTquant (CTforall, t), true | CTquant (CTexists, t), false ->
             if mem y t then verif_failed "non-free variable" else
@@ -126,7 +130,7 @@ let rec ccheck (c : certif) cta : ctask list =
             ccheck c cta
         | _ -> verif_failed "Nothing to introduce" end
     | Inst_quant (i, j, t_inst, c) ->
-        let t, pos = find_ident i cta in
+        let t, pos = find_ident "inst_quant" i cta in
         begin match t, pos with
         | CTquant (CTforall, t), false | CTquant (CTexists, t), true ->
             let cta = Mid.add j (ct_open t t_inst, pos) cta in

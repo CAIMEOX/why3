@@ -12,6 +12,7 @@ let dchecker = checker_ctrans checker_dedukti
 
 
 let split_goal_full_c     = cchecker Cert_split.csplit_goal_full
+let split_goal_full_d     = dchecker Cert_split.csplit_goal_full
 
 let contradict_c          = cchecker contradict
 let assumption_c          = cchecker assumption
@@ -58,6 +59,14 @@ let register_caml : unit =
 
   register_transform_l "split_goal_full_ccert" (store split_goal_full_c)
     ~desc:"The OCaml certified version of split_goal";
+
+  register_transform_l "split_goal_full_dcert" (store split_goal_full_d)
+    ~desc:"The Dedukti certified version of split_goal";
+
+
+
+
+
 
   register_transform_l "contradict_ccert" (store contradict_c)
     ~desc:"A OCaml certified transformation that closes some contradictory goals";
