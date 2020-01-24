@@ -47,19 +47,21 @@ let rec print_certif filename cert =
 and prc fmt = function
   | No_certif -> fprintf fmt "No_certif"
   | Hole -> fprintf fmt "Hole"
-  | Axiom (h, g) -> fprintf fmt "Axiom@ @[(%a,@ %a)@]" pri h pri g
-  | Trivial i -> fprintf fmt "Trivial@ %a" pri i
-  | Cut (i, a, c1, c2) -> fprintf fmt "Cut@ @[(%a,@ %a,@ %a,@ %a)@]" pri i pcte a prc c1 prc c2
-  | Split (i, c1, c2) -> fprintf fmt "Split@ @[(%a,@ %a,@ %a)@]" pri i prc c1 prc c2
-  | Unfold (i, c) -> fprintf fmt "Unfold@ @[(%a,@ %a)@]" pri i prc c
-  | Swap_neg (i, c) -> fprintf fmt "Swap_neg@ @[(%a,@ %a)@]" pri i prc c
+  | Axiom (h, g) -> fprintf fmt "Axiom @[(%a,@ %a)@]" pri h pri g
+  | Trivial i -> fprintf fmt "Trivial %a" pri i
+  | Cut (i, a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a,@ %a)@]" pri i pcte a prc c1 prc c2
+  | Split (i, c1, c2) -> fprintf fmt "Split @[(%a,@ %a,@ %a)@]" pri i prc c1 prc c2
+  | Unfold (i, c) -> fprintf fmt "Unfold @[(%a,@ %a)@]" pri i prc c
+  | Swap_neg (i, c) -> fprintf fmt "Swap_neg @[(%a,@ %a)@]" pri i prc c
   | Destruct (i, j1, j2, c) ->
       fprintf fmt "Destruct @[(%a,@ %a,@ %a,@ %a)@]" pri i pri j1 pri j2 prc c
+  | Construct (i1, i2, j, c) ->
+      fprintf fmt "Construct @[(%a,@ %a,@ %a,@ %a)@]" pri i1 pri i2 pri j prc c
   | Weakening (i, c) -> fprintf fmt "Weakening@ @[(%a,@ %a)@]" pri i prc c
-  | Intro_quant (i, y, c) -> fprintf fmt "Intro_quant@ @[(%a,@ %a,@ %a)@]" pri i pri y prc c
-  | Inst_quant (i, j, t, c) -> fprintf fmt "Inst_quant@ @[(%a,@ %a,@ %a,@ %a)@]" pri i pri j pcte t prc c
+  | Intro_quant (i, y, c) -> fprintf fmt "Intro_quant @[(%a,@ %a,@ %a)@]" pri i pri y prc c
+  | Inst_quant (i, j, t, c) -> fprintf fmt "Inst_quant @[(%a,@ %a,@ %a,@ %a)@]" pri i pri j pcte t prc c
   | Rewrite (i, j, path, rev, lc) ->
-      fprintf fmt "Rewrite@ @[(%a,@ %a,@ %a,@ %b,@ %a)@]"
+      fprintf fmt "Rewrite @[(%a,@ %a,@ %a,@ %b,@ %a)@]"
         pri i pri j (prle "; " prd) path rev (prle "; " prc) lc
 
 
@@ -79,6 +81,12 @@ let print_ctasks filename lcta =
   fprintf fmt "%a@." (prle "==========\n" pcta) lcta;
   close_out oc
 
+let find_ident s h cta =
+  match Mid.find_opt h cta with
+  | Some x -> x
+  | None ->
+      fprintf str_formatter "%s : Can't find ident %a in the task" s pri h;
+      verif_failed (flush_str_formatter ())
 
 (** Utility functions of Cert_syntax types *)
 
@@ -94,6 +102,7 @@ let rec map_cert fid fct c =
   | Unfold (i, c) -> Unfold (fid i, m c)
   | Swap_neg (i, c) -> Swap_neg (fid i, m c)
   | Destruct (i, j1, j2, c) -> Destruct (fid i, fid j1, fid j2, m c)
+  | Construct (i1, i2, j, c) -> Construct (fid i1, fid i2, fid j, m c)
   | Weakening (i, c) -> Weakening (fid i, m c)
   | Intro_quant (i, y, c) -> Intro_quant (fid i, fid y, m c)
   | Inst_quant (i, j, ct, c) -> Inst_quant (fid i, fid j, fct ct, m c)
@@ -106,14 +115,15 @@ let propagate f = function
   | Unfold (i, c) -> Unfold (i, f c)
   | Swap_neg (i, c) -> Swap_neg (i, f c)
   | Destruct (i, j1, j2, c) -> Destruct (i, j1, j2, f c)
+  | Construct (i1, i2, j, c) -> Construct (i1, i2, j, f c)
   | Weakening (i, c) -> Weakening (i, f c)
   | Intro_quant (i, y, c) -> Intro_quant (i, y, f c)
   | Inst_quant (i, j, t, c) -> Inst_quant (i, j, t, f c)
   | Rewrite (i, j, path, rev, lc) -> Rewrite (i, j, path, rev, List.map f lc)
 
-let rec (|>>) c = function
-  | Hole -> c
-  | c' -> propagate ((|>>) c) c'
+let rec (|>>) c1 c2 = match c1 with
+  | Hole -> c2
+  | _ -> propagate (fun c -> c |>> c2) c1
 
 
 (* Equality *)

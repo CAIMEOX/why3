@@ -27,6 +27,7 @@ type 'a ec = (* elaborated certificate *)
   | Swap_neg_neg_goal of (cterm * ident * 'a ec * ident)
   | Destruct_goal of (cterm * cterm * ident * ident * 'a ec * ident)
   | Destruct_hyp  of (cterm * cterm * ident * ident * 'a ec * ident)
+  | Construct_goal of cterm * cterm * ident * 'a ec * ident * ident
   | Weakening_hyp of cterm * 'a ec * ident
   | Weakening_goal of cterm * 'a ec * ident
   | Intro_quant_hyp of (cterm * ident * ident * 'a ec * ident)
@@ -36,15 +37,9 @@ type 'a ec = (* elaborated certificate *)
 
 type certif_elab = unit ec
 
-let find_ident h cta =
-  match Mid.find_opt h cta with
-  | Some x -> x
-  | None -> verif_failed "Can't find ident in the task"
-
 let find_goal cta =
   let _, (t, _) = Mid.(filter (fun _ (_, b) -> b) cta |> choose) in
   t
-
 
 (* Run the certificate from the initial task to find intermediate terms.
    Also fills the holes with a predefined list.*)
@@ -57,10 +52,10 @@ let rec elab (cta : ctask) (c : certif) (fill : 'a list) : 'a ec * 'a list =
       | [] -> failwith "Not enough to fill"
       | first::rest -> Hole_e first, rest end
   | Axiom (h, g) ->
-      let t, _ = find_ident h cta in
-      Axiom_e (t, h, g), fill (* TO VERIFY *)
+      let t, _ = find_ident "axiom" h cta in
+      Axiom_e (t, h, g), fill
   | Trivial i ->
-      let t, pos = find_ident i cta in
+      let t, pos = find_ident "trivial" i cta in
       begin match t, pos with
       | CTfalse, false ->
           Trivial_hyp i, fill
@@ -75,7 +70,7 @@ let rec elab (cta : ctask) (c : certif) (fill : 'a list) : 'a ec * 'a list =
       let ce2, fill = elab cta2 ce2 fill in
       Cut_e (a, i, ce1, i, ce2), fill
   | Split (i, c1, c2) ->
-      let t, pos = find_ident i cta in
+      let t, pos = find_ident "split" i cta in
       begin match t, pos with
       | CTbinop (Tor, a, b), false | CTbinop (Tand, a, b), true ->
           let cta1 = Mid.add i (a, pos) cta in
@@ -88,7 +83,7 @@ let rec elab (cta : ctask) (c : certif) (fill : 'a list) : 'a ec * 'a list =
       | _ -> assert false
       end
   | Unfold (i, c) ->
-      let t, pos = find_ident i cta in
+      let t, pos = find_ident "unfold" i cta in
       begin match t with
       | CTbinop (Tiff, a, b) ->
           let imp_pos = CTbinop (Timplies, a, b) in
@@ -108,7 +103,7 @@ let rec elab (cta : ctask) (c : certif) (fill : 'a list) : 'a ec * 'a list =
           else Unfold_arr_hyp pack, fill
       | _ -> verif_failed "Nothing to unfold" end
   | Swap_neg (i, c) ->
-      let a, pos = find_ident i cta in
+      let a, pos = find_ident "swap_neg" i cta in
       let underlying_a, neg_a, is_neg_a = match a with
         | CTnot t -> t, t, true
         | t -> t, CTnot t, false in
@@ -123,7 +118,7 @@ let rec elab (cta : ctask) (c : certif) (fill : 'a list) : 'a ec * 'a list =
            then Swap_neg_goal pack, fill
            else Swap_neg_hyp  pack, fill
   | Destruct (i, j1, j2, c) ->
-      let t, pos = find_ident i cta in
+      let t, pos = find_ident "destruct" i cta in
       begin match t, pos with
       | CTbinop (Tand, a, b), false | CTbinop (Tor, a, b), true ->
           let cta = Mid.remove i cta
@@ -135,15 +130,27 @@ let rec elab (cta : ctask) (c : certif) (fill : 'a list) : 'a ec * 'a list =
           else Destruct_hyp pack, fill
       | _ -> assert false
       end
+  | Construct (i1, i2, j, c) ->
+      let a, pos1 = find_ident "construct1" i1 cta in
+      let b, pos2 = find_ident "construct2" i2 cta in
+      if pos1 = pos2
+      then
+        let t = if pos1 then CTbinop (Tor, a, b) else CTbinop (Tand, a, b) in
+        let cta = Mid.remove i1 cta
+                  |> Mid.remove i2
+                  |> Mid.add j (t, pos1) in
+        let ce, fill = elab cta c fill in
+        Construct_goal (a, b, j, ce, i1, i2), fill
+      else verif_failed "Can't construct"
   | Weakening (i, c) ->
-      let a, pos = find_ident i cta in
+      let a, pos = find_ident "weakening" i cta in
       let cta = Mid.remove i cta in
       let c, fill = elab cta c fill in
       if pos
       then Weakening_goal (a, c, i), fill
       else Weakening_hyp  (a, c, i), fill
   | Intro_quant (i, y, c) ->
-      let t, pos = find_ident i cta in
+      let t, pos = find_ident "intro_quant" i cta in
       begin match t, pos with
       | CTquant (CTexists, p), false | CTquant (CTforall, p), true ->
           if mem y t then verif_failed "non-free variable" else
@@ -154,7 +161,7 @@ let rec elab (cta : ctask) (c : certif) (fill : 'a list) : 'a ec * 'a list =
             else Intro_quant_hyp (p', y, i, ce, i), fill
       | _ -> verif_failed "Nothing to introduce" end
   | Inst_quant (i, j, t_inst, c) ->
-      let p, pos = find_ident i cta in
+      let p, pos = find_ident "inst_quant" i cta in
       begin match p, pos with
       | CTquant (CTforall, p), false | CTquant (CTexists, p), true ->
           let cta = Mid.add j (ct_open p t_inst, pos) cta in
@@ -162,8 +169,8 @@ let rec elab (cta : ctask) (c : certif) (fill : 'a list) : 'a ec * 'a list =
           let p' = CTquant (CTlambda, p) in
           if pos then Inst_quant_goal (p', t_inst, j, ce, i), fill
           else Inst_quant_hyp (p', t_inst, j, ce, i), fill
-        | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
-        end
+      | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
+      end
   | Rewrite _ -> failwith "rewriting is not supported in Dedukti verification"
 
 
@@ -372,6 +379,13 @@ let rec print_certif fmt = function
         print_term b
         (str h1) (str h2) print_certif c
         (str g)
+  | Construct_goal (a, b, j, c, i1, i2) ->
+      fprintf fmt "construct_goal (%a) (%a) (%s => %a) %s %s"
+        print_term a
+        print_term b
+        (str j) print_certif c
+        (str i1)
+        (str i2)
   | Weakening_hyp (a, c, g) ->
       fprintf fmt "weakening_hyp (%a) (%a) %s"
         print_term a
