@@ -37,6 +37,8 @@ let ctrans_gen (ctr : ctrans) (ts, c : task list * certif) =
                          acc, Swap_neg (i, c), ts
     | Destruct (i, j1, j2, c) -> let acc, c, ts = fill acc c ts in
                                  acc, Destruct (i, j1, j2, c), ts
+    | Construct (i1, i2, j, c) -> let acc, c, ts = fill acc c ts in
+                                  acc, Construct (i1, i2, j, c), ts
     | Weakening (i, c) -> let acc, c, ts = fill acc c ts in
                           acc, Weakening (i, c), ts
     | Intro_quant (i, y, c) -> let acc, c, ts = fill acc c ts in

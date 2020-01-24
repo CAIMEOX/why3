@@ -211,6 +211,11 @@ def destruct_goal (A : Prop) (B : Prop) :
 := h => nab => h (a => nab (or_intro_1 A B a))
                  (b => nab (or_intro_2 A B b)).
 
+def construct_goal (A : Prop) (B : Prop) :
+    prf (goal (or A B) empty) ->
+    prf (goal A (goal B empty))
+:= h => na => nb => or_elim A B (nne (or A B) h) false na nb.
+
 def dir_left_hyp (A : Prop) (B : Prop) :
     prf (hyp A empty) ->
     prf (hyp (and A B) empty)

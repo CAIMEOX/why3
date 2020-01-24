@@ -224,16 +224,13 @@ let fold_cond = function
   | Comb c -> !+ (fold_cond c)
   | x -> x
 
-
-let or_combine_cert g1 c1 c2 =
-  let g2 = id_register (id_fresh "combine_cert_temp") in
-  let c2 = rename g1 g2 c2 in
-  let or_destruct = assert false (* TODO *) in
-  Destruct (g1, g1, g2, Hole)
-  |>> c1
-  |>> c2
-  |>> or_destruct (* on g1 and g2 *)
-
+let or_combine_cert g c1 c2 =
+  let g1 = id_register (id_fresh "combine_cert_temp_1") in
+  let g2 = id_register (id_fresh "combine_cert_temp_2") in
+  Destruct (g, g1, g2, Hole)
+  |>> rename g g1 c1
+  |>> rename g g2 c2
+  |>> Construct (g1, g2, g, Hole)
 
 let rec split_core sp f =
   let (~-) = t_attr_copy f in
@@ -355,7 +352,8 @@ let rec split_core sp f =
       let side2 = if not asym then sf2.side else
         let pf1 = pcase (sf2.neg::dp) sf1 in
         bimap cpy (|||) pf1 sf2.side in
-      ret pos No_certif (sf1.neg ++ neg2) No_certif bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
+      let cert_pos = or_combine_cert current_ident sf1.cert_pos sf2.cert_pos in
+      ret pos cert_pos (sf1.neg ++ neg2) No_certif bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
   | Tbinop (Tiff,f1,f2) ->
       let rc = split_core (no_csp sp) in
       let sf1 = rc f1 and sf2 = rc f2 in
@@ -629,7 +627,6 @@ let split_premise_right = prep_premise right_proof
  *   ~desc:"Same@ as@ split_goal_full,@ but@ also@ split@ premises."
  * let () = Trans.register_transform "split_premise_full" split_premise_full
  *   ~desc:"Same@ as@ split_all_full,@ but@ split@ only@ premises."
- * 
  * let () = Trans.register_transform_l "split_goal_right" split_goal_right
  *   ~desc:"@[<hov 2>Same@ as@ split_goal_full,@ but@ don't@ split:@,\
  *       - @[conjunctions under disjunctions@]@\n\
