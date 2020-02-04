@@ -13,3 +13,10 @@ goal G7 : a /\ (b \/ c)
 goal G8 : a /\ b /\ c
 goal G9 : a \/ (b /\ c)
 goal G10 : (a /\ b) \/ (c /\ d)
+goal G11 : true -> c
+goal G12 : false -> c
+goal G13 : a /\ b -> c
+goal G14 : a by b
+goal G15 : a \/ b /\ c -> d
+
+
