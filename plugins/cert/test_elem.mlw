@@ -17,6 +17,7 @@ goal G11 : true -> c
 goal G12 : false -> c
 goal G13 : a /\ b -> c
 goal G14 : a by b
-goal G15 : a \/ b /\ c -> d
-
-
+goal G15 : a \/ b /\ c
+goal G16 : a \/ b /\ c -> d
+goal G17 : (a by b) -> c
+goal G18 : (a /\ b) -> c
