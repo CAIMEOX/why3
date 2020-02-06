@@ -50,7 +50,7 @@ let check_rewrite cta rev h g terms path : ctask list =
 
 let rec ccheck (c : certif) cta : ctask list =
   match c with
-    | No_certif ->
+    | Nc ->
         raise Not_certified
     | Hole -> [cta]
     | Axiom (h, g) ->
