@@ -34,7 +34,7 @@ type certif =
 (* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>.
    To learn more about the implementation details of this function, take a loog at
    its OCaml implementation <Cert_verif_caml.ccheck>. *)
-  | No_certif
+  | Nc
   (* Makes verification fail : use it as a placeholder  *)
   | Hole
   (* Hole ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)

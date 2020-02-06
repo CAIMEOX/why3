@@ -19,7 +19,7 @@ let id_ctrans task = [task], Hole
    certif corresponds to one task in the list *)
 let ctrans_gen (ctr : ctrans) (ts, c : task list * certif) =
   let rec fill acc c' ts = match c' with
-    | No_certif -> raise Not_certified
+    | Nc -> raise Not_certified
     | Hole -> begin match ts with
               | [] -> assert false
               | t::ts -> let lt, ct = ctr t in

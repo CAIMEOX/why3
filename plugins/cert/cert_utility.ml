@@ -45,7 +45,7 @@ let rec print_certif filename cert =
   fprintf fmt "%a@." prc cert;
   close_out oc
 and prc fmt = function
-  | No_certif -> fprintf fmt "No_certif"
+  | Nc -> fprintf fmt "No_certif"
   | Hole -> fprintf fmt "Hole"
   | Axiom (h, g) -> fprintf fmt "Axiom @[(%a,@ %a)@]" pri h pri g
   | Trivial i -> fprintf fmt "Trivial %a" pri i
@@ -94,7 +94,7 @@ let find_ident s h cta =
 let rec map_cert fid fct c =
   let m = map_cert fid fct in
   match c with
-  | No_certif | Hole -> c
+  | Nc | Hole -> c
   | Trivial i -> Trivial (fid i)
   | Axiom (h, g) -> Axiom (fid h, fid g)
   | Cut (i, a, c1, c2) -> Cut (fid i, fct a, m c1, m c2)
@@ -109,7 +109,7 @@ let rec map_cert fid fct c =
   | Rewrite (i, j, p, b, cl) -> Rewrite (fid i, fid j, p, b, List.map m cl)
 
 let propagate f = function
-  | (Hole | No_certif | Axiom _ | Trivial _) as c -> c
+  | (Hole | Nc | Axiom _ | Trivial _) as c -> c
   | Cut (i, a, c1, c2) -> Cut (i, a, f c1, f c2)
   | Split (i, c1, c2) -> Split (i, f c1, f c2)
   | Unfold (i, c) -> Unfold (i, f c)

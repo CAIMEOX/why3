@@ -23,8 +23,8 @@ open Cert_utility
 (* temporary *)
 open Format
 
-(* id used by split core, to replace by the real id of the formula currently being splitted *)
-let ci = id_register (id_fresh "current_ident")
+(* current ident : used by split_core, to replace by the real id of the formula currently being splitted *)
+let ci = id_register (id_fresh "ci")
 
 let rename id1 id2 (c : certif) : certif =
   map_cert (fun id -> if id_equal id id1 then id2 else id) (fun ct -> ct) c
@@ -145,42 +145,51 @@ module M = struct
 end
 
 type split_ret = {
-  (* The following implications are equivalences when byso_split is off *)
-  (* Conjunctive decomposition of formula: /\ pos -> f *)
+  (* Conjunctive decomposition of formula f, to apply if f is in positive position *)
   pos : M.monoid;
-  (* cert_pos ⇓ pos ≜ f with pos and f in the same arbitrary context *)
-  cert_pos : certif;
-  (* Disjunctive decomposition of formula: f -> \/ neg *)
+  (* Certificate of Pos implies Formula : ∧ pos ⇒ f *)
+  cpf : certif;
+  (* Certificate of Formula implies Pos : f ⇒ ∧ pos *)
+  (* WARNING : this certificate and the implication are only valid when byso_split is off *)
+  cfp : certif;
+  (* Disjunctive decomposition of formula f, to apply if f is in negative position *)
   neg : M.monoid;
-  cert_neg : certif;
-  (* Backward pull of formula: bwd -> f (typically from by) *)
+  (* Certificate of Formula implies Neg : f ⇒ ∨ neg *)
+  cfn : certif;
+  (* Certificate of Neg implies Formula : ∨ neg ⇒ f *)
+  (* WARNING : this certificate and the implication are only valid when byso_split is off *)
+  cnf : certif;
+  (* Backward pull of formula: bwd ⇒ f (typically from by) *)
   bwd : term;
-  (* Forward pull of formula: f -> fwd (typically from so) *)
+  (* Forward pull of formula : f ⇒ fwd (typically from so) *)
   fwd : term;
   (* Side-condition (generated from by/so occurrences when byso_split is on) *)
   side : M.monoid;
-  (* Indicate whether positive/negative occurrences of formula
-     force decomposition. *)
+  (* Indicate whether positive/negative occurrences of formula force decomposition. *)
   cpos : bool;
   cneg : bool;
 }
 
-let print_ret_err { pos; cert_pos; neg; cert_neg; bwd; fwd; side; cpos; cneg } =
+let print_ret_err { pos; cpf; cfp; neg; cfn; cnf; bwd; fwd; side; cpos; cneg } =
   Format.fprintf Format.err_formatter
     "@[<h>\
-     pos      : @[%a@]@\n\
-     cert_pos : @[%a@]@\n\
-     neg      : @[%a@]@\n\
-     cert_neg : @[%a@]@\n\
-     bwd      : @[%a@]@\n\
-     fwd      : @[%a@]@\n\
-     side     : @[%a@]@\n\
-     cpos     : %b@\n\
-     cneg     : %b@\n@]@."
+     pos        : @[%a@]@\n\
+     cert_pos_f : @[%a@]@\n\
+     cert_f_pos : @[%a@]@\n\
+     neg        : @[%a@]@\n\
+     cert_f_neg : @[%a@]@\n\
+     cert_neg_f : @[%a@]@\n\
+     bwd        : @[%a@]@\n\
+     fwd        : @[%a@]@\n\
+     side       : @[%a@]@\n\
+     cpos       : %b@\n\
+     cneg       : %b@\n@]@."
     (M.print_mon " /\\ ") pos
-    prc cert_pos
+    prc cpf
+    prc cfp
     (M.print_mon " \\/ ") neg
-    prc cert_neg
+    prc cfn
+    prc cnf
     Pretty.print_term bwd
     Pretty.print_term fwd
     (M.print_mon " /\\ ") side
@@ -228,12 +237,12 @@ let rec fold_cond = function
   | Op (a,b) -> t_or (fold_cond a) (fold_cond b)
 
 let fold_cond = function
-  | Comb c -> !+ (fold_cond c)
+  | Comb c -> !+(fold_cond c)
   | x -> x
 
-let or_combine_cert g c1 c2 =
-  let g1 = id_register (id_fresh "combine_cert_temp_1") in
-  let g2 = id_register (id_fresh "combine_cert_temp_2") in
+let combine_cert g c1 c2 =
+  let g1 = id_register (id_fresh "g1") in
+  let g2 = id_register (id_fresh "g2") in
   Destruct (g, g1, g2, Hole)
   |>> rename g g1 c1
   |>> rename g g2 c2
@@ -269,18 +278,18 @@ let rec split_core sp f =
   let iclose = bimap ngt t_implies in
   let aclose = bimap cpy t_and in
   let nclose ps = map (fun t -> Zero (t_attr_copy t t_true)) t_not ps in
-  let ret pos cert_pos neg cert_neg bwd fwd side cpos cneg =
-      { pos; cert_pos; neg; cert_neg; bwd; fwd; side; cpos; cneg } in
+  let ret pos cpf cfp  neg cfn cnf bwd fwd side cpos cneg =
+      { pos; cpf; cfp; neg; cfn; cnf; bwd; fwd; side; cpos; cneg } in
   let r = match f.t_node with
   | _ when sp.stop_split && stop f ->
       let df = drop_byso f in
-      ret !+(unstop f) Hole !+(unstop df) Hole f df Unit false false
+      ret !+(unstop f) Hole Nc !+(unstop df) Hole Nc f df Unit false false
   | Tbinop (Tiff,_,_) | Tif _ | Tcase _ | Tquant _ when sp.intro_mode ->
       let df = drop_byso f in
-      ret !+f No_certif !+df No_certif f df Unit false false
-  | Ttrue -> ret Unit (Trivial ci) (Zero f) (Weakening (ci, Hole)) f f Unit false false
-  | Tfalse -> ret (Zero f) (Weakening (ci, Hole)) Unit (Trivial ci) f f Unit false false
-  | Tapp _ -> let uf = !+f in ret uf Hole uf Hole f f Unit false false
+      ret !+f Hole Nc !+df Hole Nc f df Unit false false
+  | Ttrue -> ret Unit (Trivial ci) Nc (Zero f) (Weakening (ci, Hole)) Nc f f Unit false false
+  | Tfalse -> ret (Zero f) (Weakening (ci, Hole)) Nc Unit (Trivial ci) Nc f f Unit false false
+  | Tapp _ -> let uf = !+f in ret uf Hole Nc uf Hole Nc f f Unit false false
     (* f1 so f2 *)
   | Tbinop (Tand,f1,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) }) ->
       if not (sp.byso_split && asym f2) then split_core sp f1 else
@@ -295,7 +304,7 @@ let rec split_core sp f =
       let lside = if sp.side_split then close sf2.pos else
         !+(t_implies sf1.fwd sf2.bwd) in
       let side = sf1.side ++ lside ++ close sf2.side in
-      ret sf1.pos No_certif neg No_certif sf1.bwd fwd side sf1.cpos (cn1 || cn2)
+      ret sf1.pos Nc Nc neg Nc Nc sf1.bwd fwd side sf1.cpos (cn1 || cn2)
   | Tbinop (Tand,f1,f2) ->
       let (&&&) = alias2 f1 f2 t_and in
       let rc = split_core (ps_csp sp) in
@@ -312,9 +321,10 @@ let rec split_core sp f =
       let pos = sf1.pos ++ pos2 in
       let side = sf1.side ++ if not asym then sf2.side else
         let nf1 = ncase (sf2.pos::dp) sf1 in iclose nf1 sf2.side in
-      let cert_pos = Split (ci, sf1.cert_pos, sf2.cert_pos) in
-      let cert_neg = or_combine_cert ci sf1.cert_neg sf2.cert_neg in
-      ret pos cert_pos neg cert_neg bwd fwd side false (cn1 || cn2)
+      let cpf = Split (ci, sf1.cpf, sf2.cpf) in
+      let cfp = Split (ci, sf1.cfp, sf2.cfp) in (* should be destruct_hyp *)
+      let cfn = combine_cert ci sf1.cfn sf2.cfn in
+      ret pos cpf cfp neg cfn Nc bwd fwd side false (cn1 || cn2)
     (* f1 by f2 *)
   | Tbinop (Timplies,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) },f1) ->
       if not (sp.byso_split && asym f2) then split_core sp f1 else
@@ -324,7 +334,7 @@ let rec split_core sp f =
       let lside = if sp.side_split then close sf1.pos else
         !+(t_implies sf2.fwd sf1.bwd) in
       let side = sf2.side ++ lside ++ sf1.side in
-      ret sf2.pos No_certif sf1.neg No_certif sf2.bwd sf1.fwd side sf2.cpos sf1.cneg
+      ret sf2.pos Nc Nc sf1.neg Nc Nc sf2.bwd sf1.fwd side sf2.cpos sf1.cneg
   | Tbinop (Timplies,f1,f2) ->
       let (>->) = alias2 f1 f2 t_implies in
       let sp2 = ng_csp sp in let sp1 = in_csp sp2 in
@@ -342,7 +352,7 @@ let rec split_core sp f =
       let pos = bimap (fun _ a -> - t_not a) (>->) nf1 sf2.pos in
       let nf1 = ncase (if asym then sf2.neg::dp else dp) sf1 in
       let side = sf1.side ++ iclose nf1 sf2.side in
-      ret pos No_certif neg No_certif bwd fwd side (cn1 || sf2.cpos) false
+      ret pos Nc Nc neg Nc Nc bwd fwd side (cn1 || sf2.cpos) false
   | Tbinop (Tor,f1,f2) ->
       let (|||) = alias2 f1 f2 t_or in
       let rc = split_core (ng_csp sp) in
@@ -359,9 +369,9 @@ let rec split_core sp f =
       let side2 = if not asym then sf2.side else
         let pf1 = pcase (sf2.neg::dp) sf1 in
         bimap cpy (|||) pf1 sf2.side in
-      let cert_pos = or_combine_cert ci sf1.cert_pos sf2.cert_pos in
-      let cert_neg = Split (ci, sf1.cert_neg, sf2.cert_neg) in
-      ret pos cert_pos (sf1.neg ++ neg2) cert_neg bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
+      let cpf = combine_cert ci sf1.cpf sf2.cpf in
+      let cfn = Split (ci, sf1.cfn, sf2.cfn) in
+      ret pos cpf Nc (sf1.neg ++ neg2) cfn Nc bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
   | Tbinop (Tiff,f1,f2) ->
       let rc = split_core (no_csp sp) in
       let sf1 = rc f1 and sf2 = rc f2 in
@@ -373,7 +383,7 @@ let rec split_core sp f =
       let nf1 = ncase [nf2] sf1 and pf1 = pcase [pf2] sf1 in
       let neg_top = aclose nf1 nf2 in
       let neg_bot = aclose (nclose pf1) (nclose pf2) in
-      ret pos No_certif (neg_top ++ neg_bot) No_certif df df (sf1.side ++ sf2.side) false false
+      ret pos Nc Nc (neg_top ++ neg_bot) Nc Nc df df (sf1.side ++ sf2.side) false false
   | Tif (fif,fthen,felse) ->
       let rc = split_core (no_csp sp) in
       let sfi = rc fif and sft = rc fthen and sfe = rc felse in
@@ -393,19 +403,19 @@ let rec split_core sp f =
       let nfi = ncase (sft.neg::spt) sfi and pfi = pcase (sfe.neg::spe) sfi in
       let eside = iclose (nclose pfi) sfe.side in
       let side = sfi.side ++ iclose nfi sft.side ++ eside in
-      ret pos No_certif neg No_certif bwd fwd side false false
+      ret pos Nc Nc neg Nc Nc bwd fwd side false false
   | Tnot f1 ->
       let sf = split_core (in_csp sp) f1 in
       let (!) = alias f1 t_not in
       let (|>) zero = map (fun t -> !+(t_attr_copy t zero)) (!) in
       let pos = t_false |> sf.neg and neg = t_true |> sf.pos in
-      ret pos No_certif neg No_certif !(sf.fwd) !(sf.bwd) sf.side sf.cneg sf.cpos
+      ret pos Nc Nc neg Nc Nc !(sf.fwd) !(sf.bwd) sf.side sf.cneg sf.cpos
   | Tlet (t,fb) ->
       let vs, f1 = t_open_bound fb in
       let (!) = alias f1 (t_let_close vs t) in
       let sf = split_core sp f1 in
       let (!!) = map (fun t -> Zero t) (!) in
-      ret !!(sf.pos) No_certif !!(sf.neg) No_certif !(sf.bwd) !(sf.fwd) !!(sf.side) sf.cpos sf.cneg
+      ret !!(sf.pos) Nc Nc !!(sf.neg) Nc Nc !(sf.bwd) !(sf.fwd) !!(sf.side) sf.cpos sf.cneg
   | Tcase (t,bl) ->
       let rc = match bl with
         | [_] -> split_core sp
@@ -421,7 +431,7 @@ let rec split_core sp f =
         let blbwd = List.map (fun (p, close, sf) -> close p sf.bwd) sbl in
         let bwd = case_close blbwd in
         let pos, neg, side = join sbl in
-        ret pos No_certif neg No_certif bwd fwd side false false
+        ret pos Nc Nc neg Nc Nc bwd fwd side false false
       in
       begin match sp.comp_match with
       | None ->
@@ -498,7 +508,7 @@ let rec split_core sp f =
             false, sf.cneg
       in
       let side = map (fun t -> Zero t) (t_forall_close vsl trl) sf.side in
-      ret pos No_certif neg No_certif bwd fwd side cpos cneg
+      ret pos Nc Nc neg Nc Nc bwd fwd side cpos cneg
   | Tvar _ | Tconst _ | Teps _ -> raise (FmlaExpected f)
   in
   let r = if case f then
@@ -543,129 +553,111 @@ let pop () = match !clues with
   | h::t -> clues := t; h
   | _ -> assert false
 
-let split_pos sp f =
+(* let split_pos sp f =
+ *   let core = split_core sp f in
+ *   assert (core.side = Unit);
+ *   to_list core.pos *)
+
+let split_pos sp pr f = (* only used by split_axiom *)
   let core = split_core sp f in
   assert (core.side = Unit);
+  add (rename ci pr.pr_name core.cfp);
   to_list core.pos
 
-let csplit_pos sp pr f =
-  let core = split_core sp f in
-  assert (core.side = Unit);
-  add (rename ci pr.pr_name core.cert_pos);
-  to_list core.pos
+(* let split_proof sp f =
+ *   let core = split_core sp f in
+ *   to_list (core.pos ++ core.side) *)
 
-let split_neg sp f =
+let split_proof sp pr f =
   let core = split_core sp f in
-  assert (core.side = Unit);
-  to_list core.neg
-
-let split_proof sp f =
-  let core = split_core sp f in
+  add (rename ci pr.pr_name core.cpf);
   to_list (core.pos ++ core.side)
-
-let csplit_proof sp pr f =
-  let core = split_core sp f in
-  add (rename ci pr.pr_name core.cert_pos);
-  to_list (core.pos ++ core.side)
-
-let split_pos_full  ?known_map f = split_pos (full_split known_map)  f
-let split_pos_right ?known_map f = split_pos (right_split known_map) f
-
-let split_neg_full  ?known_map f = split_neg (full_split known_map)  f
-let split_neg_right ?known_map f = split_neg (right_split known_map) f
-
-let split_proof_full  ?known_map f = split_proof (full_proof known_map)  f
-let split_proof_right ?known_map f = split_proof (right_proof known_map) f
-
-let split_intro_full  ?known_map f = split_pos (full_intro known_map)  f
-let split_intro_right ?known_map f = split_pos (right_intro known_map) f
 
 let split_goal sp pr f =
   let make_prop f = [create_prop_decl Pgoal pr f] in
-  List.map make_prop (split_proof sp f)
+  List.map make_prop (split_proof sp pr f)
 
-let csplit_goal sp pr f =
-  let make_prop f = [create_prop_decl Pgoal pr f] in
-  List.map make_prop (csplit_proof sp pr f)
-
-let make_prop pr f =
+let make_new_prop pr f =
   let pr = create_prsymbol (id_clone pr.pr_name) in
   create_prop_decl Paxiom pr f
 
 let split_axiom sp pr f =
   let sp = { sp with asym_split = false; byso_split = false } in
-  match split_pos sp f with
+  match split_pos sp pr f with
     | [f] -> [create_prop_decl Paxiom pr f]
-    | fl  -> List.map (make_prop pr) fl
-
-let csplit_axiom sp pr f = (* not ready *)
-  let sp = { sp with asym_split = false; byso_split = false } in
-  match csplit_pos sp pr f with (* because here it is supposed to be csplit_neg ... *)
-    | [f] -> [create_prop_decl Paxiom pr f]
-    | fl  -> List.map (make_prop pr) fl
+    | fl  -> List.map (make_new_prop pr) fl
 
 let split_all sp d = match d.d_node with
   | Dprop (Pgoal, pr,f) -> split_goal  sp pr f
   | Dprop (Paxiom,pr,f) -> [split_axiom sp pr f]
   | _ -> [[d]]
 
-let csplit_all sp d = match d.d_node with
-  | Dprop (Pgoal, pr,f) -> csplit_goal  sp pr f
-  | Dprop (Paxiom,pr,f) -> [csplit_axiom sp pr f]
-  | _ -> [[d]]
-
 
 let split_premise sp d = match d.d_node with
-  | Dprop (Paxiom,pr,f) ->  split_axiom sp pr f
+  | Dprop (Paxiom,pr,f) -> split_axiom sp pr f
   | _ -> [d]
 
-let prep_goal split = Trans.store (fun t ->
-  let split = split (Some (Task.task_known t)) in
-  let trans = Trans.goal_l (split_goal split) in
-  Trans.apply trans t)
+(* let prep_goal split = Trans.store (fun t ->
+ *   let split = split (Some (Task.task_known t)) in
+ *   let trans = Trans.goal_l (split_goal split) in
+ *   Trans.apply trans t) *)
 
 let rev_append_cert lc =
   let (<<|) a b = b |>> a in
   List.fold_right (<<|) lc Hole
 
-let cprep_goal split = Trans.store (fun t ->
+let prep_goal split = Trans.store (fun t ->
   let split = split (Some (Task.task_known t)) in
   reset ();
-  let trans = Trans.goal_l (csplit_goal split) in
+  let trans = Trans.goal_l (split_goal split) in
   let nt = Trans.apply trans t in
   let cert = rev_append_cert !clues in
   nt, cert)
 
-let prep_all split = Trans.store (fun t ->
-  let split = split (Some (Task.task_known t)) in
-  let trans = Trans.decl_l (split_all split) None in
-  Trans.apply trans t)
+(* let prep_all split = Trans.store (fun t ->
+ *   let split = split (Some (Task.task_known t)) in
+ *   let trans = Trans.decl_l (split_all split) None in
+ *   Trans.apply trans t) *)
 
-let cprep_all split = Trans.store (fun t ->
+let prep_all split = Trans.store (fun t -> (* not ready for reasons mentioned above *)
   let split = split (Some (Task.task_known t)) in
   reset ();
-  let trans = Trans.decl_l (csplit_all split) None in
+  let trans = Trans.decl_l (split_all split) None in
   let nt = Trans.apply trans t in
   (* List.iter (printf "%a@." (fun _ -> prc err_formatter)) (List.rev !clues); *)
   (* prc err_formatter cert; *)
   printf "NUMBER OF CLUES : %d@." (List.length !clues);
   nt, rev_append_cert !clues)
 
+(* let prep_premise split = Trans.store (fun t ->
+ *   let split = split (Some (Task.task_known t)) in
+ *   let trans = Trans.decl (split_premise split) None in
+ *   Trans.apply trans t) *)
+
 let prep_premise split = Trans.store (fun t ->
   let split = split (Some (Task.task_known t)) in
+  reset ();
   let trans = Trans.decl (split_premise split) None in
-  Trans.apply trans t)
-
-let split_goal_full  = prep_goal full_proof
-let split_goal_right = prep_goal right_proof
-
-let csplit_goal_full t = Trans.apply (cprep_goal full_proof) t
-let csplit_all_full t = Trans.apply (cprep_all full_proof) t
+  let nt = Trans.apply trans t in
+  nt, rev_append_cert !clues)
 
 
-let split_all_full  = prep_all full_proof
-let split_all_right = prep_all right_proof
+(* let split_goal_full  = prep_goal full_proof
+ * let split_goal_right = prep_goal right_proof
+ *
+ * let split_all_full  = prep_all full_proof
+ * let split_all_right = prep_all right_proof
+ *
+ * let split_premise_full  = prep_premise full_proof
+ * let split_premise_right = prep_premise right_proof *)
 
-let split_premise_full  = prep_premise full_proof
-let split_premise_right = prep_premise right_proof
+let split_all_full t = Trans.apply (prep_all full_proof) t
+let split_all_right t = Trans.apply (prep_all right_proof) t
+
+let split_goal_full t  = Trans.apply (prep_goal full_proof) t
+let split_goal_right t = Trans.apply (prep_goal right_proof) t
+
+let split_premise_full t = Trans.apply (prep_premise full_proof) t
+let split_premise_right t = Trans.apply (prep_premise right_proof) t
+
 
