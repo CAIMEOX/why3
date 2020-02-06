@@ -92,18 +92,20 @@
  </transf>
  </goal>
  <goal name="G15">
+ </goal>
+ <goal name="G16">
  <transf name="intro_ccert" >
-  <goal name="G15.0">
+  <goal name="G16.0">
   <transf name="split_all_full" >
-   <goal name="G15.0.0">
+   <goal name="G16.0.0">
    </goal>
   </transf>
   </goal>
  </transf>
  <transf name="split_all_full" >
-  <goal name="G15.0">
+  <goal name="G16.0">
   </goal>
-  <goal name="G15.1">
+  <goal name="G16.1">
   </goal>
  </transf>
  </goal>
