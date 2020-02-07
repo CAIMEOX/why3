@@ -173,5 +173,3 @@ let checker_ctrans checker (ctr : ctrans) init_t =
    * Format.eprintf "temps de la transformation : %f\ntemps de la vérification : %f@."
    *   (t2 -. t1) (t3 -. t2); *)
   res_t
-
-
