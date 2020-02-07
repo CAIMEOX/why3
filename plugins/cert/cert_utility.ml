@@ -110,8 +110,12 @@ let rec map_cert fid fct c =
 
 let propagate f = function
   | (Hole | Nc | Axiom _ | Trivial _) as c -> c
-  | Cut (i, a, c1, c2) -> Cut (i, a, f c1, f c2)
-  | Split (i, c1, c2) -> Split (i, f c1, f c2)
+  | Cut (i, a, c1, c2) ->
+      let f1 = f c1 in let f2 = f c2 in
+      Cut (i, a, f1, f2)
+  | Split (i, c1, c2) ->
+      let f1 = f c1 in let f2 = f c2 in
+      Split (i, f1, f2)
   | Unfold (i, c) -> Unfold (i, f c)
   | Swap_neg (i, c) -> Swap_neg (i, f c)
   | Destruct (i, j1, j2, c) -> Destruct (i, j1, j2, f c)
@@ -121,9 +125,19 @@ let propagate f = function
   | Inst_quant (i, j, t, c) -> Inst_quant (i, j, t, f c)
   | Rewrite (i, j, path, rev, lc) -> Rewrite (i, j, path, rev, List.map f lc)
 
-let rec (|>>) c1 c2 = match c1 with
-  | Hole -> c2
-  | _ -> propagate (fun c -> c |>> c2) c1
+let fill c stream =
+  let rec fill = function
+  | Hole -> Stream.next stream
+  | c -> propagate fill c in
+  fill c
+
+let (|>>) c1 c2 =
+  let c2_stream = Stream.from (fun _ -> Some c2) in
+  fill c1 c2_stream
+
+let (|>>>) c1 lc2 =
+  let lc2_stream = Stream.of_list lc2 in
+  fill c1 lc2_stream
 
 
 (* Equality *)
@@ -239,4 +253,3 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
   let mh, mg = split_cta cta in
   let hg, _ = Mid.choose mg in
   fun ct -> Mid.add hg (ct, true) mh
-
