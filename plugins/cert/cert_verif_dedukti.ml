@@ -43,13 +43,13 @@ let find_goal cta =
 
 (* Run the certificate from the initial task to find intermediate terms.
    Also fills the holes with a predefined list.*)
-let rec elab (cta : ctask) (c : certif) (fill : 'a list) : 'a ec * 'a list =
+let rec elab (cta : ctask) (c : core_certif) (fill : 'a list) : 'a ec * 'a list =
   match c with
   | Nc ->
-      raise Not_certified
+      verif_failed "No certificates for this case"
   | Hole ->
       begin match fill with
-      | [] -> failwith "Not enough to fill"
+      | [] -> verif_failed "Not enough to fill"
       | first::rest -> Hole_e first, rest end
   | Axiom (h, g) ->
       let t, _ = find_ident "axiom" h cta in
@@ -171,7 +171,7 @@ let rec elab (cta : ctask) (c : certif) (fill : 'a list) : 'a ec * 'a list =
           else Inst_quant_hyp (p', t_inst, j, ce, i), fill
       | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
       end
-  | Rewrite _ -> failwith "rewriting is not supported in Dedukti verification"
+  | Rewrite _ -> verif_failed "rewriting is not supported in Dedukti verification"
 
 
 (* We represent a ctask <H₁ : A₁, ..., Hₘ : Aₘ ⊢ G₁ : B₁, ..., Gₘ : Bₘ >

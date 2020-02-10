@@ -258,9 +258,8 @@ let destruct_all omni where task =
             let prh = create_prsymbol (id_clone pr.pr_name) in
             let g = pr.pr_name and h1 = prh.pr_name in
             let htemp = id_register (gen_ident "htemp") in
-            let cf1 = translate_term f1 in
             clues := Some (Destruct (g, htemp, g,
-                           Cut (h1, cf1,
+                           Cut (h1, f1,
                                 Swap_neg (h1, Weakening (htemp, Hole)),
                                 Axiom (h1, htemp))));
             [[create_prop_decl Paxiom prh (t_not f1); create_prop_decl Pgoal pr f2]]
@@ -274,7 +273,7 @@ let destruct_all omni where task =
 
 let neg_decompose omni where task =
   let target = tg omni where task in
-  let clues = ref None in
+  let clues : certif option ref = ref None in
   let trans_t = Trans.decl_l (fun d -> match d.d_node with
     | Dprop (k, pr, t) ->
         let g = pr.pr_name in
@@ -317,7 +316,7 @@ let neg_decompose omni where task =
                  [create_prop_decl Pgoal pr (t_not f2)]]
             | Pgoal, Ttrue when is_target pr target -> (* ⊥ and ⊤ *)
                 clues := Some (Weakening (g,
-                               Cut (g, CTfalse,
+                               Cut (g, t_false,
                                     Hole,
                                     Trivial g)));
                 [[create_prop_decl Pgoal pr t_false]]
@@ -455,13 +454,11 @@ let cut t task =
         [ [create_prop_decl Pgoal h t]; [create_prop_decl Paxiom h t; decl] ]
     | _ -> [[decl]]) None in
   let idg = (task_goal task).pr_name in
-  let ct = translate_term t in
-  Trans.apply trans_t task, Cut (h.pr_name, ct, Weakening (idg, Hole), Hole)
+  Trans.apply trans_t task, Cut (h.pr_name, t, Weakening (idg, Hole), Hole)
 
 (* Instantiate with certificate *)
 let inst t_inst where task =
   let g = (default_goal task where).pr_name in
-  let ct_inst = translate_term t_inst in
   let hpr = create_prsymbol (gen_ident "H") in
   let clues = ref None in
   let trans_t = Trans.decl (fun decl -> match decl.d_node with
@@ -469,11 +466,11 @@ let inst t_inst where task =
         begin match t.t_node, k with
         | Tquant (Tforall, _), Paxiom ->
             let t_subst = subst_forall t t_inst in
-            clues := Some (Inst_quant (g, hpr.pr_name, ct_inst, Hole));
+            clues := Some (Inst_quant (g, hpr.pr_name, t_inst, Hole));
             [decl; create_prop_decl k hpr t_subst]
         | Tquant (Texists, _), Pgoal ->
             let t_subst = subst_exist t t_inst in
-            clues := Some (Inst_quant (g, hpr.pr_name, ct_inst, Weakening (g, Hole)));
+            clues := Some (Inst_quant (g, hpr.pr_name, t_inst, Weakening (g, Hole)));
             [create_prop_decl k hpr t_subst]
         | _ -> [decl] end
     | _ -> [decl]) None in
@@ -579,7 +576,7 @@ let exfalso task =
      | _ -> [decl]) None in
   let g = task_goal task in
   [Trans.apply trans task],
-  Cut (h.pr_name, CTfalse, Weakening (g.pr_name, Hole), Trivial h.pr_name)
+  Cut (h.pr_name, t_false, Weakening (g.pr_name, Hole), Trivial h.pr_name)
 
 let case t task =
   let h = create_prsymbol (gen_ident "H") in
@@ -588,9 +585,8 @@ let case t task =
             [ [create_prop_decl Paxiom h t; decl];
               [create_prop_decl Paxiom h (t_not t); decl] ]
      | _ -> [[decl]]) None in
-  let not_ct = CTnot (translate_term t) in
   Trans.apply trans task,
-  Cut (h.pr_name, not_ct, Swap_neg (h.pr_name, Hole), Hole)
+  Cut (h.pr_name, t_not t, Swap_neg (h.pr_name, Hole), Hole)
 
 
 let swap where task = (* if formula <f> designed by <where> is a premise, dismiss the old
@@ -615,6 +611,7 @@ let swap where task = (* if formula <f> designed by <where> is a premise, dismis
   | None -> [task], Hole
 
 let revert ls task =
+  let x = t_app_infer ls [] in
   let gpr = create_prsymbol (gen_ident "G") in
   let t, idg = task_goal_fmla task, task_goal task in
   let _, hyp = task_separate_goal task in
@@ -625,9 +622,9 @@ let revert ls task =
   let task = add_decl hyp (create_prop_decl Pgoal gpr close_t) in
   let hinst = id_register (gen_ident "Hinst") in
   [task],
-  Cut (gpr.pr_name, translate_term close_t,
+  Cut (gpr.pr_name, close_t,
        Weakening (idg.pr_name, Hole),
-       Inst_quant (gpr.pr_name, hinst, CTfvar ls.ls_name, Axiom (hinst, idg.pr_name)))
+       Inst_quant (gpr.pr_name, hinst, x, Axiom (hinst, idg.pr_name)))
 
 
 (* Clear transformation with a certificate : *)
@@ -638,14 +635,14 @@ let clear_one g task =
     | _ -> [decl]) None in
   [Trans.apply trans task], Weakening (g, Hole)
 
+
 let pose (name: string) (t: term) task =
-  let ls_ident = gen_ident name in
-  let ls = Term.create_lsymbol ls_ident [] None in
-  let ls_term = Term.t_app ls [] None in
+  let vs = create_vsymbol (gen_ident name) (t_type t) in
+  let ls = ls_of_vs vs in
   let new_constant = Decl.create_param_decl ls in
   let pr = create_prsymbol (gen_ident "H") in
-  let eq = t_iff ls_term t in
-  (* hyp = [pr : ls = t] *)
+  let eq = t_iff (t_var vs) t in
+  (* hyp = [pr : vs = t] *)
   let hyp =
     Decl.create_prop_decl Paxiom pr eq
   in
@@ -658,11 +655,11 @@ let pose (name: string) (t: term) task =
                 Destruct (h1, h1, h2,
                 Swap_neg (h1, Axiom (h1, h2)))) in
   let eq_cert = Unfold (h1, Split (h1, id_cert, id_cert)) in
-  let ct = translate_term t in
   [Trans.apply trans_new_task task],
-  Cut (pr.pr_name, CTquant (CTexists, CTbinop (Tiff, CTbvar 0, ct)),
-       Inst_quant (pr.pr_name, h1, ct, eq_cert),
-       Intro_quant (pr.pr_name, ls.ls_name, Hole))
+  Cut (pr.pr_name,
+       t_exists (t_close_quant [vs] [] eq),
+       Inst_quant (pr.pr_name, h1, t, eq_cert),
+       Intro_quant (pr.pr_name, vs.vs_name, Hole))
 
 
 (** Derived transformations with a certificate *)

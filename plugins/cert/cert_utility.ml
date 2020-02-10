@@ -39,6 +39,8 @@ and pro fmt = function
   | Timplies -> fprintf fmt "->"
   | Tiff -> fprintf fmt "<->"
 
+let pte = Pretty.print_term
+
 let rec print_certif filename cert =
   let oc = open_out filename in
   let fmt = formatter_of_out_channel oc in
@@ -49,7 +51,7 @@ and prc fmt = function
   | Hole -> fprintf fmt "Hole"
   | Axiom (h, g) -> fprintf fmt "Axiom @[(%a,@ %a)@]" pri h pri g
   | Trivial i -> fprintf fmt "Trivial %a" pri i
-  | Cut (i, a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a,@ %a)@]" pri i pcte a prc c1 prc c2
+  | Cut (i, a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a,@ %a)@]" pri i pte a prc c1 prc c2
   | Split (i, c1, c2) -> fprintf fmt "Split @[(%a,@ %a,@ %a)@]" pri i prc c1 prc c2
   | Unfold (i, c) -> fprintf fmt "Unfold @[(%a,@ %a)@]" pri i prc c
   | Swap_neg (i, c) -> fprintf fmt "Swap_neg @[(%a,@ %a)@]" pri i prc c
@@ -59,7 +61,7 @@ and prc fmt = function
       fprintf fmt "Construct @[(%a,@ %a,@ %a,@ %a)@]" pri i1 pri i2 pri j prc c
   | Weakening (i, c) -> fprintf fmt "Weakening@ @[(%a,@ %a)@]" pri i prc c
   | Intro_quant (i, y, c) -> fprintf fmt "Intro_quant @[(%a,@ %a,@ %a)@]" pri i pri y prc c
-  | Inst_quant (i, j, t, c) -> fprintf fmt "Inst_quant @[(%a,@ %a,@ %a,@ %a)@]" pri i pri j pcte t prc c
+  | Inst_quant (i, j, t, c) -> fprintf fmt "Inst_quant @[(%a,@ %a,@ %a,@ %a)@]" pri i pri j pte t prc c
   | Rewrite (i, j, path, rev, lc) ->
       fprintf fmt "Rewrite @[(%a,@ %a,@ %a,@ %b,@ %a)@]"
         pri i pri j (prle "; " prd) path rev (prle "; " prc) lc
@@ -108,36 +110,34 @@ let rec map_cert fid fct c =
   | Inst_quant (i, j, ct, c) -> Inst_quant (fid i, fid j, fct ct, m c)
   | Rewrite (i, j, p, b, cl) -> Rewrite (fid i, fid j, p, b, List.map m cl)
 
-let propagate f = function
+let propagate f g (c : 'a cert) = match c with
   | (Hole | Nc | Axiom _ | Trivial _) as c -> c
+  | Unfold (i, c) -> Unfold (i, f c)
   | Cut (i, a, c1, c2) ->
       let f1 = f c1 in let f2 = f c2 in
-      Cut (i, a, f1, f2)
+      Cut (i, g a, f1, f2)
   | Split (i, c1, c2) ->
       let f1 = f c1 in let f2 = f c2 in
       Split (i, f1, f2)
-  | Unfold (i, c) -> Unfold (i, f c)
   | Swap_neg (i, c) -> Swap_neg (i, f c)
   | Destruct (i, j1, j2, c) -> Destruct (i, j1, j2, f c)
   | Construct (i1, i2, j, c) -> Construct (i1, i2, j, f c)
   | Weakening (i, c) -> Weakening (i, f c)
   | Intro_quant (i, y, c) -> Intro_quant (i, y, f c)
-  | Inst_quant (i, j, t, c) -> Inst_quant (i, j, t, f c)
+  | Inst_quant (i, j, t, c) -> Inst_quant (i, j, g t, f c)
   | Rewrite (i, j, path, rev, lc) -> Rewrite (i, j, path, rev, List.map f lc)
 
-let fill c stream =
-  let rec fill = function
+let rec fill stream = function
   | Hole -> Stream.next stream
-  | c -> propagate fill c in
-  fill c
+  | c -> propagate (fill stream) (fun t -> t) c
 
 let (|>>) c1 c2 =
   let c2_stream = Stream.from (fun _ -> Some c2) in
-  fill c1 c2_stream
+  fill c2_stream c1
 
 let (|>>>) c1 lc2 =
   let lc2_stream = Stream.of_list lc2 in
-  fill c1 lc2_stream
+  fill lc2_stream c1
 
 
 (* Equality *)
@@ -253,3 +253,6 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
   let mh, mg = split_cta cta in
   let hg, _ = Mid.choose mg in
   fun ct -> Mid.add hg (ct, true) mh
+
+let rec make_core init_t res_t c =
+  propagate (make_core init_t res_t) translate_term c
