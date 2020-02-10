@@ -665,9 +665,9 @@
   </goal>
  </transf>
  </goal>
- <goal name="pose" proved="true">
- <transf name="pose_ccert" proved="true" arg1="tr" arg2="true">
-  <goal name="pose.0" proved="true">
+ <goal name="pose">
+ <transf name="pose_ccert" arg1="tr" arg2="true">
+  <goal name="pose.0">
   <transf name="assumption_ccert" proved="true" >
   </transf>
   </goal>

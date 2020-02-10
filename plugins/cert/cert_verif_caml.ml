@@ -48,10 +48,10 @@ let check_rewrite cta rev h g terms path : ctask list =
 
 (** This is the main verification function : <check_certif> replays the certificate on a ctask *)
 
-let rec ccheck (c : certif) cta : ctask list =
+let rec ccheck (c : core_certif) cta : ctask list =
   match c with
     | Nc ->
-        raise Not_certified
+        verif_failed "No certificates for this case"
     | Hole -> [cta]
     | Axiom (h, g) ->
         let th, posh = find_ident "axiom1" h cta in
