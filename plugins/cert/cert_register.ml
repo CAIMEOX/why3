@@ -1,5 +1,6 @@
 open Why3
 open Cert_syntax
+open Cert_utility
 open Cert_transformations
 open Cert_verif_caml
 open Cert_verif_dedukti
@@ -7,8 +8,8 @@ open Cert_verif_dedukti
 
 (** Certified transformations *)
 
-let cchecker trans = Trans.store (checker_ctrans checker_caml trans)
-let dchecker trans = Trans.store (checker_ctrans checker_dedukti trans)
+let cchecker trans = Trans.store (checker_ctrans make_core checker_caml trans)
+let dchecker trans = Trans.store (checker_ctrans make_core checker_dedukti trans)
 
 
 let split_goal_full_c     = cchecker Cert_split.split_goal_full
