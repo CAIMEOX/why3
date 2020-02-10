@@ -30,12 +30,11 @@ type ctask = (cterm * bool) Mid.t
 type dir = Left | Right
 type path = dir list
 
-type certif =
+type 'a cert =
 (* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>.
-   To learn more about the implementation details of this function, take a loog at
-   its OCaml implementation <Cert_verif_caml.ccheck>. *)
+   For more details, take a look at the OCaml implementation <Cert_verif_caml.ccheck>. *)
   | Nc
-  (* Makes verification fail : use it as a placeholder  *)
+  (* Makes verification fail : use it as a placeholder *)
   | Hole
   (* Hole ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
   | Axiom of ident * ident
@@ -43,41 +42,46 @@ type certif =
   | Trivial of ident
   (* Trivial I ⇓ (Γ, I : false ⊢ Δ) ≜  [] *)
   (* Trivial I ⇓ (Γ ⊢ Δ, I : true ) ≜  [] *)
-  | Cut of ident * cterm * certif * certif
+  | Cut of ident * 'a * 'a cert * 'a cert
   (* Cut (I, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ, I : A ⊢ Δ)) *)
-  | Split of ident * certif * certif
+  | Split of ident * 'a cert * 'a cert
   (* Split (I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
   (* Split (I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
-  | Unfold of ident * certif
+  | Unfold of ident * 'a cert
   (* Unfold (I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
   (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
   (* Unfold (I, c) ⇓ (Γ, I : A → B ⊢ Δ) ≜  c ⇓ (Γ, I : ¬A ∨ B ⊢ Δ)*)
   (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A → B) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A ∨ B)*)
-  | Swap_neg of ident * certif
+  | Swap_neg of ident * 'a cert
   (* Swap_neg (I, c) ⇓ (Γ, I : ¬A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, I : A)  *)
   (* Swap_neg (I, c) ⇓ (Γ, I : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A) *)
   (* Swap_neg (I, c) ⇓ (Γ ⊢ Δ, I : A ) ≜  c ⇓ (Γ, I : ¬A ⊢ Δ) *)
   (* Swap_neg (I, c) ⇓ (Γ ⊢ Δ, I : ¬A) ≜  c ⇓ (Γ, I : A ⊢ Δ)  *)
-  | Destruct of ident * ident * ident * certif
+  | Destruct of ident * ident * ident * 'a cert
   (* Destruct (I, J₁, J₂, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, J₁ : A, J₂ : B ⊢ Δ) *)
   (* Destruct (I, J₁, J₂, c) ⇓ (Γ ⊢ Δ, I : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, J₁ : A, J₂ : B) *)
-  | Construct of ident * ident * ident * certif (* should be derivable from Cut and Split *)
+  | Construct of ident * ident * ident * 'a cert (* should be derivable from Cut and Split *)
   (* Construct (I₁, I₂, J, c) ⇓ (Γ ⊢ Δ, I₁ : A, I₂ : B) ≜ c ⇓ (Γ ⊢ Δ, J : A ∧ B) *)
   (* Construct (I₁, I₂, J, c) ⇓ (Γ, I₁ : A, I₂ : B ⊢ Δ) ≜ c ⇓ (Γ, J : A ∧ B ⊢ Δ) *)
-  | Weakening of ident * certif
+  | Weakening of ident * 'a cert
   (* Weakening (I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening (I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | Intro_quant of ident * ident * certif
+  | Intro_quant of ident * ident * 'a cert
   (* Intro_quant (I, y, c) ⇓ (Γ, I : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : P y ⊢ Δ) (y fresh) *)
   (* Intro_quant (I, y, c) ⇓ (Γ ⊢ Δ, I : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : P y) (y fresh) *)
-  | Inst_quant of ident * ident * cterm * certif
+  | Inst_quant of ident * ident * 'a * 'a cert
   (* Inst_quant (I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
   (* Inst_quant (I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
-  | Rewrite of ident * ident * path * bool * certif list
+  | Rewrite of ident * ident * path * bool * 'a cert list
   (* Rewrite (I, J, path, rev, lc) ⇓ Seq is defined as follows :
      it tries to rewrite in <I> an equality that is in <J>, following the path <path>,
      <rev> indicates if it rewrites from left to right or from right to left.
      Since <H> can have premises, those are then matched against the certificates <lc> *)
+
+type certif = term cert
+type core_certif = cterm cert
+
+
 
 (** Translating a Why3 <task> into a <ctask> *)
 
@@ -161,14 +165,16 @@ let verif_failed s = raise (Certif_verification_failed s)
 
 (** Create a certified transformation from a transformation with a certificate *)
 
-exception Not_certified
-
-let checker_ctrans checker (ctr : ctrans) init_t =
+let checker_ctrans
+      (make_core : task -> task list -> certif -> core_certif)
+      (checker : core_certif -> task -> task list -> unit)
+      (ctr : ctrans)
+      (init_t : task) =
   (* let t1 = Unix.gettimeofday () in *)
   let res_t, certif = ctr init_t in
+  let core_certif = make_core init_t res_t certif in
   (* let t2 = Unix.gettimeofday () in *)
-  begin try checker certif init_t res_t
-        with Not_certified -> verif_failed "Incomplete certificate returned" end;
+   checker core_certif init_t res_t;
   (* let t3 = Unix.gettimeofday () in
    * Format.eprintf "temps de la transformation : %f\ntemps de la vérification : %f@."
    *   (t2 -. t1) (t3 -. t2); *)
