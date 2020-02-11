@@ -102,8 +102,8 @@ let abstract_task task =
 
 (** We equip existing transformations with a certificate <certif> *)
 
-type 'certif ctransformation = task -> task list * 'certif
-(* = (task list * certif) trans *)
+type 'certif ctransformation = (task list * 'certif) Trans.trans
+
 exception Certif_verification_failed of string
 let verif_failed s = raise (Certif_verification_failed s)
 
@@ -115,14 +115,9 @@ let checker_ctrans
       (checker : 'core_certif -> ctask -> ctask list -> unit)
       (ctr : 'certif ctransformation)
       (init_t : task) =
-  (* let t1 = Unix.gettimeofday () in *)
-  let res_t, certif = ctr init_t in
+  let res_t, certif = Trans.apply ctr init_t in
   let init_ct = abstract_task init_t in
   let res_ct = List.map abstract_task res_t in
   let core_certif = make_core init_ct res_ct certif in
-  (* let t2 = Unix.gettimeofday () in *)
   checker core_certif init_ct res_ct;
-  (* let t3 = Unix.gettimeofday () in
-   * Format.eprintf "temps de la transformation : %f\ntemps de la vérification : %f@."
-   *   (t2 -. t1) (t3 -. t2); *)
   res_t

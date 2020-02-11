@@ -640,22 +640,12 @@ let prep_premise split = Trans.store (fun t ->
   [nt], rev_append_cert !clues)
 
 
-(* let split_goal_full  = prep_goal full_proof
- * let split_goal_right = prep_goal right_proof
- *
- * let split_all_full  = prep_all full_proof
- * let split_all_right = prep_all right_proof
- *
- * let split_premise_full  = prep_premise full_proof
- * let split_premise_right = prep_premise right_proof *)
+let split_goal_full  = prep_goal full_proof
+let split_goal_right = prep_goal right_proof
 
-let split_all_full t = Trans.apply (prep_all full_proof) t
-let split_all_right t = Trans.apply (prep_all right_proof) t
+let split_all_full  = prep_all full_proof
+let split_all_right = prep_all right_proof
 
-let split_goal_full t  = Trans.apply (prep_goal full_proof) t
-let split_goal_right t = Trans.apply (prep_goal right_proof) t
-
-let split_premise_full t = Trans.apply (prep_premise full_proof) t
-let split_premise_right t = Trans.apply (prep_premise right_proof) t
-
+let split_premise_full  = prep_premise full_proof
+let split_premise_right = prep_premise right_proof
 
