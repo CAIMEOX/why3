@@ -1,6 +1,7 @@
 open Why3
-open Cert_syntax
-open Cert_utility
+
+open Cert_abstract
+open Cert_certificates
 open Cert_split
 open Cert_transformations
 open Cert_verif_caml
