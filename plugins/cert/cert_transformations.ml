@@ -635,31 +635,31 @@ let clear_one g task =
     | _ -> [decl]) None in
   [Trans.apply trans task], Weakening (g, Hole)
 
-
-let pose (name: string) (t: term) task =
-  let vs = create_vsymbol (gen_ident name) (t_type t) in
-  let ls = ls_of_vs vs in
-  let new_constant = Decl.create_param_decl ls in
-  let pr = create_prsymbol (gen_ident "H") in
-  let eq = t_iff (t_var vs) t in
-  (* hyp = [pr : vs = t] *)
-  let hyp =
-    Decl.create_prop_decl Paxiom pr eq
-  in
-  let trans_new_task =
-      Trans.add_decls [new_constant; hyp]
-  in
-  let h1 = id_register (gen_ident "Hpose") in
-  let h2 = id_register (gen_ident "Hpose") in
-  let id_cert = Unfold (h1,
-                Destruct (h1, h1, h2,
-                Swap_neg (h1, Axiom (h1, h2)))) in
-  let eq_cert = Unfold (h1, Split (h1, id_cert, id_cert)) in
-  [Trans.apply trans_new_task task],
-  Cut (pr.pr_name,
-       t_exists (t_close_quant [vs] [] eq),
-       Inst_quant (pr.pr_name, h1, t, eq_cert),
-       Intro_quant (pr.pr_name, vs.vs_name, Hole))
+(* UNSOUND : uses ∃ x. x = P, where P is a formula. Not first order logic. *)
+(* let pose (name: string) (t: term) task =
+ *   let ls = Term.create_lsymbol (gen_ident name) [] None in
+ *   let ls_term = Term.t_app ls [] None in
+ *   let new_constant = Decl.create_param_decl ls in
+ *   let pr = create_prsymbol (gen_ident "H") in
+ *   let eq = t_iff ls_term t in
+ *   (\* hyp = [pr : vs = t] *\)
+ *   let hyp =
+ *     Decl.create_prop_decl Paxiom pr eq
+ *   in
+ *   let trans_new_task =
+ *       Trans.add_decls [new_constant; hyp]
+ *   in
+ *   let h1 = id_register (gen_ident "Hpose") in
+ *   let h2 = id_register (gen_ident "Hpose") in
+ *   let id_cert = Unfold (h1,
+ *                 Destruct (h1, h1, h2,
+ *                 Swap_neg (h1, Axiom (h1, h2)))) in
+ *   let eq_cert = Unfold (h1, Split (h1, id_cert, id_cert)) in
+ *   [Trans.apply trans_new_task task],
+ *   Cut (pr.pr_name,
+ *        t_exists (t_close_quant [vs] [] eq),
+ *        Inst_quant (pr.pr_name, h1, t, eq_cert),
+ *        Intro_quant (pr.pr_name, vs.vs_name, Hole)) *)
 
 
 (** Derived transformations with a certificate *)

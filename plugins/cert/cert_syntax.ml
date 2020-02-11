@@ -158,7 +158,7 @@ let translate_task task =
 (** We equip existing transformations with a certificate <certif> *)
 
 type ctrans = task -> task list * certif
-
+(* = (task list * certif) trans *)
 exception Certif_verification_failed of string
 let verif_failed s = raise (Certif_verification_failed s)
 
@@ -174,7 +174,7 @@ let checker_ctrans
   let res_t, certif = ctr init_t in
   let core_certif = make_core init_t res_t certif in
   (* let t2 = Unix.gettimeofday () in *)
-   checker core_certif init_t res_t;
+  checker core_certif init_t res_t;
   (* let t3 = Unix.gettimeofday () in
    * Format.eprintf "temps de la transformation : %f\ntemps de la vérification : %f@."
    *   (t2 -. t1) (t3 -. t2); *)

@@ -39,7 +39,7 @@ goal inst_hyp : (forall x. p x) -> p true
 goal inst_goal : p true -> exists x : bool. p x
 
 (* 'pose' transformation : in progress *)
-goal pose : a
+(* goal pose : a *)
 
 
 (** Transformations obtained by composition **)
