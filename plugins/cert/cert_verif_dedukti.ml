@@ -3,8 +3,8 @@ open Term
 open Ident
 open Format
 
-open Cert_syntax
-open Cert_utility
+open Cert_abstract
+open Cert_certificates
 
 (* Define an elaborated type of certificate. This is usefull to have access to
    all the terms we need when printing to a Dedukti file *)
@@ -427,10 +427,10 @@ let fv_ts (ct : ctask) =
   let fv = collect_stask ts in
   fv, ts
 
-let print fmt init_t res_t certif =
-  let resm  = List.map fv_ts res_t in
+let print fmt init_ct res_ct certif =
+  let resm  = List.map fv_ts res_ct in
   let res = List.map (fun (fv, ts) -> Mid.bindings fv, ts) resm in
-  let fvi, tsi = fv_ts init_t in
+  let fvi, tsi = fv_ts init_ct in
   let fv = List.fold_left (fun acc (fv, _) -> Mid.set_union acc fv) fvi resm in
   let init = Mid.bindings fv, tsi in
   (* The type we need to check is inhabited *)
@@ -451,7 +451,7 @@ let print fmt init_t res_t certif =
         flush_str_formatter ())
       task_syms
       res in
-  let cert, _ = elab init_t certif applied_tasks in
+  let cert, _ = elab init_ct certif applied_tasks in
   (* The term that has the correct type *)
   let p_term fmt () =
     let fv, ts = init in
@@ -464,12 +464,12 @@ let print fmt init_t res_t certif =
     p_term ()
     p_type ()
 
-let checker_dedukti certif init_t res_t =
+let checker_dedukti certif init_ct res_ct =
   try
     let oc = open_out "/tmp/check_line.dk" in
     let fmt = formatter_of_out_channel oc in
     let fo = Filename.(concat Config.datadir (concat "dedukti" "FO.dk")) in
-    print fmt (translate_task init_t) (List.map translate_task res_t) certif;
+    print fmt init_ct res_ct certif;
     close_out oc;
     Sys.command ("cat " ^ fo ^ " > /tmp/check_all.dk") |> ignore;
     Sys.command "cat /tmp/check_line.dk >> /tmp/check_all.dk" |> ignore;
