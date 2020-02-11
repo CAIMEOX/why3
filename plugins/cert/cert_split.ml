@@ -17,8 +17,7 @@ open Ty
 open Term
 open Decl
 
-open Cert_syntax
-open Cert_utility
+open Cert_certificates
 
 (* temporary *)
 open Format

@@ -6,8 +6,8 @@ open Decl
 open Term
 open Ident
 open Generic_arg_trans_utils
-open Cert_syntax
-open Cert_utility
+
+open Cert_certificates
 
 (* Identity transformation with a certificate *)
 let id_ctrans task = [task], Hole

@@ -2,8 +2,9 @@ open Why3
 
 open Ident
 open Term (* only for binop *)
-open Cert_syntax
-open Cert_utility
+
+open Cert_abstract
+open Cert_certificates
 
 
 (** Utility verification functions *)
@@ -142,10 +143,8 @@ let rec ccheck (c : core_certif) cta : ctask list =
         List.map2 ccheck lc lcta |> List.concat
 
 
-let checker_caml certif init_t res_t =
-  try let init_ct = translate_task init_t in
-      let res_ct  = List.map translate_task res_t in
-      let res_ct' = ccheck certif init_ct in
+let checker_caml certif init_ct res_ct =
+  try let res_ct' = ccheck certif init_ct in
       if not (Lists.equal ctask_equal res_ct res_ct')
       then begin
           print_ctasks "/tmp/from_trans.log" res_ct;

@@ -3,8 +3,66 @@ open Format
 open Why3
 open Term
 open Ident
-open Cert_syntax
 
+open Cert_abstract
+
+type dir = Left | Right
+type path = dir list
+
+(** We equip existing transformations with a certificate <certif> *)
+
+type 'a cert =
+(* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>.
+   For more details, take a look at the OCaml implementation <Cert_verif_caml.ccheck>. *)
+  | Nc
+  (* Makes verification fail : use it as a placeholder *)
+  | Hole
+  (* Hole ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
+  | Axiom of ident * ident
+  (* Axiom (H, G) ⇓ (Γ, H : A ⊢ Δ, G : A) ≜  [] *)
+  | Trivial of ident
+  (* Trivial I ⇓ (Γ, I : false ⊢ Δ) ≜  [] *)
+  (* Trivial I ⇓ (Γ ⊢ Δ, I : true ) ≜  [] *)
+  | Cut of ident * 'a * 'a cert * 'a cert
+  (* Cut (I, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ, I : A ⊢ Δ)) *)
+  | Split of ident * 'a cert * 'a cert
+  (* Split (I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
+  (* Split (I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
+  | Unfold of ident * 'a cert
+  (* Unfold (I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
+  (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
+  (* Unfold (I, c) ⇓ (Γ, I : A → B ⊢ Δ) ≜  c ⇓ (Γ, I : ¬A ∨ B ⊢ Δ)*)
+  (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A → B) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A ∨ B)*)
+  | Swap_neg of ident * 'a cert
+  (* Swap_neg (I, c) ⇓ (Γ, I : ¬A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, I : A)  *)
+  (* Swap_neg (I, c) ⇓ (Γ, I : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A) *)
+  (* Swap_neg (I, c) ⇓ (Γ ⊢ Δ, I : A ) ≜  c ⇓ (Γ, I : ¬A ⊢ Δ) *)
+  (* Swap_neg (I, c) ⇓ (Γ ⊢ Δ, I : ¬A) ≜  c ⇓ (Γ, I : A ⊢ Δ)  *)
+  | Destruct of ident * ident * ident * 'a cert
+  (* Destruct (I, J₁, J₂, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, J₁ : A, J₂ : B ⊢ Δ) *)
+  (* Destruct (I, J₁, J₂, c) ⇓ (Γ ⊢ Δ, I : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, J₁ : A, J₂ : B) *)
+  | Construct of ident * ident * ident * 'a cert (* should be derivable from Cut and Split *)
+  (* Construct (I₁, I₂, J, c) ⇓ (Γ ⊢ Δ, I₁ : A, I₂ : B) ≜ c ⇓ (Γ ⊢ Δ, J : A ∧ B) *)
+  (* Construct (I₁, I₂, J, c) ⇓ (Γ, I₁ : A, I₂ : B ⊢ Δ) ≜ c ⇓ (Γ, J : A ∧ B ⊢ Δ) *)
+  | Weakening of ident * 'a cert
+  (* Weakening (I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
+  (* Weakening (I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
+  | Intro_quant of ident * ident * 'a cert
+  (* Intro_quant (I, y, c) ⇓ (Γ, I : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : P y ⊢ Δ) (y fresh) *)
+  (* Intro_quant (I, y, c) ⇓ (Γ ⊢ Δ, I : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : P y) (y fresh) *)
+  | Inst_quant of ident * ident * 'a * 'a cert
+  (* Inst_quant (I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
+  (* Inst_quant (I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
+  | Rewrite of ident * ident * path * bool * 'a cert list
+  (* Rewrite (I, J, path, rev, lc) ⇓ Seq is defined as follows :
+     it tries to rewrite in <I> an equality that is in <J>, following the path <path>,
+     <rev> indicates if it rewrites from left to right or from right to left.
+     Since <H> can have premises, those are then matched against the certificates <lc> *)
+
+type certif = term cert
+type core_certif = cterm cert
+
+type ctrans = certif ctransformation
 
 (** Printing of <cterm> and <ctask> : for debugging purposes *)
 
@@ -255,4 +313,4 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
   fun ct -> Mid.add hg (ct, true) mh
 
 let rec make_core init_t res_t c =
-  propagate (make_core init_t res_t) translate_term c
+  propagate (make_core init_t res_t) abstract_term c
