@@ -603,8 +603,7 @@ let split_premise sp d = match d.d_node with
  *   Trans.apply trans t) *)
 
 let rev_append_cert lc =
-  let (<<|) a b = b |>> a in
-  List.fold_right (<<|) lc Hole
+  List.fold_left (|>>) Hole (List.rev lc)
 
 let prep_goal split = Trans.store (fun t ->
   let split = split (Some (Task.task_known t)) in
@@ -619,7 +618,7 @@ let prep_goal split = Trans.store (fun t ->
  *   let trans = Trans.decl_l (split_all split) None in
  *   Trans.apply trans t) *)
 
-let prep_all split = Trans.store (fun t -> (* not ready for reasons mentioned above *)
+let prep_all split = Trans.store (fun t ->
   let split = split (Some (Task.task_known t)) in
   reset ();
   let trans = Trans.decl_l (split_all split) None in
@@ -639,7 +638,7 @@ let prep_premise split = Trans.store (fun t ->
   reset ();
   let trans = Trans.decl (split_premise split) None in
   let nt = Trans.apply trans t in
-  nt, rev_append_cert !clues)
+  [nt], rev_append_cert !clues)
 
 
 (* let split_goal_full  = prep_goal full_proof
