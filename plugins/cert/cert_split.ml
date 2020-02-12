@@ -23,10 +23,10 @@ open Cert_certificates
 open Format
 
 (* current ident : used by split_core, to replace by the real id of the formula currently being splitted *)
-let ci = id_register (id_fresh "ci")
+let cpr = create_prsymbol (id_fresh "cpr")
 
-let rename id1 id2 (c : certif) : certif =
-  map_cert (fun id -> if id_equal id id1 then id2 else id) (fun ct -> ct) c
+let rec rename pr1 pr2 (c : certif) : certif =
+  propagate (rename pr1 pr2) (fun pr -> if pr_equal pr pr1 then pr2 else pr) (fun ct -> ct) c
 
 type split = {
   right_only : bool;
@@ -240,12 +240,12 @@ let fold_cond = function
   | x -> x
 
 let combine_cert g c1 c2 =
-  let g1 = id_register (id_fresh "g1") in
-  let g2 = id_register (id_fresh "g2") in
+  let g1 = create_prsymbol (id_fresh "g1") in
+  let g2 = create_prsymbol (id_fresh "g2") in
   Destruct (g, g1, g2, Hole)
   |>> rename g g1 c1
   |>> rename g g2 c2
-  |>> Construct (g1, g2, g, Hole)
+  |>> construct g1 g2 g Hole
 
 let rec split_core sp f =
   let (~-) = t_attr_copy f in
@@ -286,8 +286,8 @@ let rec split_core sp f =
   | Tbinop (Tiff,_,_) | Tif _ | Tcase _ | Tquant _ when sp.intro_mode ->
       let df = drop_byso f in
       ret !+f Hole Nc !+df Hole Nc f df Unit false false
-  | Ttrue -> ret Unit (Trivial ci) Nc (Zero f) (Weakening (ci, Hole)) Nc f f Unit false false
-  | Tfalse -> ret (Zero f) (Weakening (ci, Hole)) Nc Unit (Trivial ci) Nc f f Unit false false
+  | Ttrue -> ret Unit (Trivial cpr) Nc (Zero f) (Weakening (cpr, Hole)) Nc f f Unit false false
+  | Tfalse -> ret (Zero f) (Weakening (cpr, Hole)) Nc Unit (Trivial cpr) Nc f f Unit false false
   | Tapp _ -> let uf = !+f in ret uf Hole Nc uf Hole Nc f f Unit false false
     (* f1 so f2 *)
   | Tbinop (Tand,f1,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) }) ->
@@ -320,9 +320,9 @@ let rec split_core sp f =
       let pos = sf1.pos ++ pos2 in
       let side = sf1.side ++ if not asym then sf2.side else
         let nf1 = ncase (sf2.pos::dp) sf1 in iclose nf1 sf2.side in
-      let cpf = Split (ci, sf1.cpf, sf2.cpf) in
-      let cfp = Split (ci, sf1.cfp, sf2.cfp) in (* should be destruct_hyp *)
-      let cfn = combine_cert ci sf1.cfn sf2.cfn in
+      let cpf = Split (cpr, sf1.cpf, sf2.cpf) in
+      let cfp = Split (cpr, sf1.cfp, sf2.cfp) in (* should be destruct_hyp *)
+      let cfn = combine_cert cpr sf1.cfn sf2.cfn in
       ret pos cpf cfp neg cfn Nc bwd fwd side false (cn1 || cn2)
     (* f1 by f2 *)
   | Tbinop (Timplies,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) },f1) ->
@@ -368,8 +368,8 @@ let rec split_core sp f =
       let side2 = if not asym then sf2.side else
         let pf1 = pcase (sf2.neg::dp) sf1 in
         bimap cpy (|||) pf1 sf2.side in
-      let cpf = combine_cert ci sf1.cpf sf2.cpf in
-      let cfn = Split (ci, sf1.cfn, sf2.cfn) in
+      let cpf = combine_cert cpr sf1.cpf sf2.cpf in
+      let cfn = Split (cpr, sf1.cfn, sf2.cfn) in
       ret pos cpf Nc (sf1.neg ++ neg2) cfn Nc bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
   | Tbinop (Tiff,f1,f2) ->
       let rc = split_core (no_csp sp) in
@@ -560,7 +560,7 @@ let pop () = match !clues with
 let split_pos sp pr f = (* only used by split_axiom *)
   let core = split_core sp f in
   assert (core.side = Unit);
-  add (rename ci pr.pr_name core.cfp);
+  add (rename cpr pr core.cfp);
   to_list core.pos
 
 (* let split_proof sp f =
@@ -569,7 +569,7 @@ let split_pos sp pr f = (* only used by split_axiom *)
 
 let split_proof sp pr f =
   let core = split_core sp f in
-  add (rename ci pr.pr_name core.cpf);
+  add (rename cpr pr core.cpf);
   to_list (core.pos ++ core.side)
 
 let split_goal sp pr f =

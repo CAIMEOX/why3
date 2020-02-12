@@ -300,6 +300,8 @@ let pr_hash pr = id_hash pr.pr_name
 
 let create_prsymbol n = { pr_name = id_register n }
 
+let pr_clone pr = create_prsymbol (id_clone pr.pr_name)
+
 type ind_decl = lsymbol * (prsymbol * term) list
 
 type ind_sign = Ind | Coind

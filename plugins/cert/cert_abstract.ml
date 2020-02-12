@@ -37,22 +37,17 @@ let abstract_quant = function
 let rec abstract_term_rec bv_lvl lvl t =
   (* level <lvl> is the number of forall above in the whole term *)
   (* <bv_lvl> is mapping bound variables to their respective level *)
+  let term_from_id id = match Mid.find_opt id bv_lvl with
+        | None -> CTfvar id
+        | Some lvl_id ->
+            (* a variable should not be above its definition *)
+            assert (lvl_id <= lvl);
+            CTbvar (lvl - lvl_id) in
   match t.t_node with
   | Tvar v ->
-      let ids = v.vs_name in
-      begin match Mid.find_opt ids bv_lvl with
-        | None -> CTfvar ids
-        | Some lvl_s ->
-            assert (lvl_s <= lvl); (* a variable should not be above its definition *)
-            CTbvar (lvl - lvl_s)
-      end
+      term_from_id (v.vs_name)
   | Tapp (ls, lt) ->
-      let ids = ls.ls_name in
-      let vs = match Mid.find_opt ids bv_lvl with
-        | None -> CTfvar ids
-        | Some lvl_s ->
-            assert (lvl_s <= lvl); (* a variable should not be above its definition *)
-            CTbvar (lvl - lvl_s) in
+      let vs = term_from_id (ls.ls_name) in
       List.fold_left (fun acc t -> CTapp (acc, abstract_term_rec bv_lvl lvl t))
         vs lt
   | Tbinop (op, t1, t2) ->
