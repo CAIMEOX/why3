@@ -120,7 +120,7 @@ let is_target pr tg = match !tg with
 (*   closes the current task if the goal is an hypothesis *)
 let assumption_decl tg decl = match decl.d_node with
   | Dprop (_, pr, t) when t_equal t tg ->
-      Some pr.pr_name
+      Some pr
   | _ -> None
 
 let assumption_tdecl tg td = match td.td_node with
@@ -135,7 +135,7 @@ let rec assumption_ctxt tg = function
   | None -> raise Not_found
 
 let assumption = Trans.store (fun task ->
-  let g, tg = try (task_goal task).pr_name, task_goal_fmla task
+  let g, tg = try task_goal task, task_goal_fmla task
           with GoalNotFound -> invalid_arg "Cert_transformations.assumption" in
   let _, hyp = task_separate_goal task in
   try let h = assumption_ctxt tg hyp in
@@ -155,13 +155,13 @@ let contradict = Trans.store (fun task ->
   let tbl = ref [] in
   let prem_trans = Trans.fold_decl (fun d () -> match d.d_node with
     | Dprop (k, pr, t) when k <> Pgoal ->
-        add t pr.pr_name tbl
+        add t pr tbl
     | _ -> ()) () in
   let _ = Trans.apply prem_trans task in
   let trans = Trans.fold_decl (fun d acc -> match d.d_node, acc with
     | Dprop (k, pr, t), None when k <> Pgoal ->
         begin match find_opt (t_not t) tbl with
-        | Some g -> Some (pr.pr_name, g)
+        | Some g -> Some (pr, g)
         | None -> acc end
     | _ -> acc) None in
   match Trans.apply trans task with
@@ -189,7 +189,7 @@ let close = Trans.store (fun task ->
           end
       | _ -> acc) None in
   match Trans.apply trans task with
-  | Some pr -> [], Trivial pr.pr_name
+  | Some pr -> [], Trivial pr
   | None -> [task], Hole)
 
 (* Split with a certificate : *)
@@ -203,10 +203,9 @@ let destruct omni where = Trans.store (fun task ->
         begin match k, t.t_node with
         | k, Tbinop (Tand, f1, f2) when k <> Pgoal ->
             if is_target pr target then begin
-                let g = pr.pr_name in
-                let pr1 = create_prsymbol (id_clone g) in
-                let pr2 = create_prsymbol (id_clone g) in
-                clues := Some (Destruct (g, pr1.pr_name, pr2.pr_name, Hole));
+                let pr1 = pr_clone pr in
+                let pr2 = pr_clone pr in
+                clues := Some (Destruct (pr, pr1, pr2, Hole));
                 [create_prop_decl k pr1 f1; create_prop_decl k pr2 f2] end
             else [d]
         | _ -> [d] end
@@ -233,7 +232,7 @@ let split_or_and omni where = Trans.store (fun task ->
     | _ -> [[d]]) None in
   let nt = Trans.apply trans_t task in
   match !clues with
-  | Some gpr -> nt, Split (gpr.pr_name, Hole, Hole)
+  | Some gpr -> nt, Split (gpr, Hole, Hole)
   | None -> [task], Hole)
 
 let destruct_all omni where = Trans.store (fun task ->
@@ -244,26 +243,25 @@ let destruct_all omni where = Trans.store (fun task ->
         begin match k, t.t_node with
         | (Paxiom as k), Tbinop (Tand, f1, f2) ->
             if is_target pr target then
-            let pr1 = create_prsymbol (id_clone pr.pr_name) in
-            let pr2 = create_prsymbol (id_clone pr.pr_name) in
-            clues := Some (Destruct (pr.pr_name, pr1.pr_name, pr2.pr_name, Hole));
+            let pr1 = pr_clone pr in
+            let pr2 = pr_clone pr in
+            clues := Some (Destruct (pr, pr1, pr2, Hole));
             [[create_prop_decl k pr1 f1; create_prop_decl k pr2 f2]]
             else [[d]]
         | (Pgoal as k), Tbinop (Tand, f1, f2)
         | (Paxiom as k), Tbinop (Tor, f1, f2) ->
             if is_target pr target then begin
-            clues := Some (Split (pr.pr_name, Hole, Hole));
+            clues := Some (Split (pr, Hole, Hole));
             [[create_prop_decl k pr f1]; [create_prop_decl k pr f2]] end
             else [[d]]
         | Pgoal, Tbinop (Tor, f1, f2) ->
             if is_target pr target then
-            let prh = create_prsymbol (id_clone pr.pr_name) in
-            let g = pr.pr_name and h1 = prh.pr_name in
-            let htemp = id_register (gen_ident "htemp") in
-            clues := Some (Destruct (g, htemp, g,
-                           Cut (h1, f1,
-                                Swap_neg (h1, Weakening (htemp, Hole)),
-                                Axiom (h1, htemp))));
+            let prh = pr_clone pr in
+            let prtemp = pr_clone pr in
+            clues := Some (Destruct (pr, prtemp, pr,
+                           Cut (prh, f1,
+                                Swap_neg (prh, Weakening (prtemp, Hole)),
+                                Axiom (prh, prtemp))));
             [[create_prop_decl Paxiom prh (t_not f1); create_prop_decl Pgoal pr f2]]
             else [[d]]
         | _ -> [[d]] end
@@ -278,65 +276,64 @@ let neg_decompose omni where = Trans.store (fun task ->
   let clues : certif option ref = ref None in
   let trans_t = Trans.decl_l (fun d -> match d.d_node with
     | Dprop (k, pr, t) ->
-        let g = pr.pr_name in
         begin match t.t_node with
         | Tnot nt ->
             begin match k, nt.t_node with
             | k, Tnot nnt when is_target pr target -> (* double negation *)
-                clues := Some (Swap_neg (g, Swap_neg (g, Hole)));
+                clues := Some (Swap_neg (pr, Swap_neg (pr, Hole)));
                 [[create_prop_decl k pr nnt]]
             | Paxiom, Tbinop (Tor, f1, f2) when is_target pr target -> (* destruct *)
-                let pr1 = create_prsymbol (id_clone g) in
-                let pr2 = create_prsymbol (id_clone g) in
-                clues := Some (Swap_neg (g,
-                               Destruct (g, pr1.pr_name, pr2.pr_name,
-                               Swap_neg (pr1.pr_name,
-                               Swap_neg (pr2.pr_name, Hole)))));
+                let pr1 = create_prsymbol (id_clone pr.pr_name) in
+                let pr2 = create_prsymbol (id_clone pr.pr_name) in
+                clues := Some (Swap_neg (pr,
+                               Destruct (pr, pr1, pr2,
+                               Swap_neg (pr1,
+                               Swap_neg (pr2, Hole)))));
                 [[create_prop_decl Paxiom pr1 (t_not f1);
                   create_prop_decl Paxiom pr2 (t_not f2)]]
             | Pgoal, Tbinop (Tand, f1, f2) when is_target pr target ->
-                let pr1 = create_prsymbol (id_clone g) in
-                let pr2 = create_prsymbol (id_clone g) in
-                clues := Some (Swap_neg (g,
-                               Destruct (g, pr1.pr_name, pr2.pr_name,
-                               Swap_neg (pr2.pr_name, Hole))));
+                let pr1 = create_prsymbol (id_clone pr.pr_name) in
+                let pr2 = create_prsymbol (id_clone pr.pr_name) in
+                clues := Some (Swap_neg (pr,
+                               Destruct (pr, pr1, pr2,
+                               Swap_neg (pr2, Hole))));
                 [[create_prop_decl Paxiom pr1 f1;
                   create_prop_decl Pgoal  pr2 (t_not f2)]]
             | Paxiom, Tbinop (Tand, f1, f2) when is_target pr target -> (* split *)
-                clues := Some (Swap_neg (g,
-                               Split (g,
-                                      Swap_neg (g, Hole),
-                                      Swap_neg (g, Hole))));
+                clues := Some (Swap_neg (pr,
+                               Split (pr,
+                                      Swap_neg (pr, Hole),
+                                      Swap_neg (pr, Hole))));
                 [[create_prop_decl Paxiom pr (t_not f1)];
                  [create_prop_decl Paxiom pr (t_not f2)]]
             | Pgoal, Tbinop (Tor, f1, f2) when is_target pr target ->
-                clues := Some (Swap_neg (g,
-                               Split (g,
-                                      Swap_neg (g, Hole),
-                                      Swap_neg (g, Hole))));
+                clues := Some (Swap_neg (pr,
+                               Split (pr,
+                                      Swap_neg (pr, Hole),
+                                      Swap_neg (pr, Hole))));
                 [[create_prop_decl Pgoal pr (t_not f1)];
                  [create_prop_decl Pgoal pr (t_not f2)]]
             | Pgoal, Ttrue when is_target pr target -> (* ⊥ and ⊤ *)
-                clues := Some (Weakening (g,
-                               Cut (g, t_false,
+                clues := Some (Weakening (pr,
+                               Cut (pr, t_false,
                                     Hole,
-                                    Trivial g)));
+                                    Trivial pr)));
                 [[create_prop_decl Pgoal pr t_false]]
             | Pgoal, Tfalse when is_target pr target ->
-                clues := Some (Swap_neg (g, Trivial g));
+                clues := Some (Swap_neg (pr, Trivial pr));
                 []
             | Paxiom, Tfalse when is_target pr target ->
-                clues := Some (Weakening (g, Hole));
+                clues := Some (Weakening (pr, Hole));
                 [[]]
             | Paxiom, Ttrue when is_target pr target ->
-                clues := Some (Swap_neg (g, Trivial g));
+                clues := Some (Swap_neg (pr, Trivial pr));
                 []
             | k, Tbinop (Tiff, f1, f2) when is_target pr target -> (* unfold *)
-                clues := Some (Swap_neg (g, Unfold (g, Swap_neg (g, Hole))));
+                clues := Some (Swap_neg (pr, Unfold (pr, Swap_neg (pr, Hole))));
                 let destr_iff = t_and (t_implies f1 f2) (t_implies f2 f1) in
                 [[create_prop_decl k pr destr_iff]]
             | k, Tbinop (Timplies, f1, f2) when is_target pr target ->
-                clues := Some (Swap_neg (g, Unfold (g, Swap_neg (g, Hole))));
+                clues := Some (Swap_neg (pr, Unfold (pr, Swap_neg (pr, Hole))));
                 let destr_imp = t_or (t_not f1) f2 in
                 [[create_prop_decl k pr destr_imp]]
             | _ -> [[d]]
@@ -357,11 +354,11 @@ let unfold omni where = Trans.store (fun task ->
     | Dprop (k, pr, t) ->
         begin match t.t_node with
         | Tbinop (Tiff, f1, f2) when is_target pr target ->
-            clues := Some (Unfold (pr.pr_name, Hole));
+            clues := Some (Unfold (pr, Hole));
             let destr_iff = t_and (t_implies f1 f2) (t_implies f2 f1) in
             [create_prop_decl k pr destr_iff]
         | Tbinop (Timplies, f1, f2) when is_target pr target ->
-            clues := Some (Unfold (pr.pr_name, Hole));
+            clues := Some (Unfold (pr, Hole));
             let destr_imp = t_or (t_not f1) f2 in
             [create_prop_decl k pr destr_imp]
         | _ -> [d] end
@@ -385,7 +382,6 @@ let intro omni where = Trans.store (fun task ->
      introduces variable x when a hypothesis is of the form ∃ x. P x *)
   let target = tg omni where task in
   let hpr = create_prsymbol (id_fresh "H") in
-  let h = hpr.pr_name in
   let clues = ref None in
   let trans_t = Trans.decl (fun d -> match d.d_node with
     | Dprop (k, pr, t) ->
@@ -393,8 +389,7 @@ let intro omni where = Trans.store (fun task ->
         | Tbinop (Timplies, f1, f2), Pgoal ->
             if is_target pr target
             then begin
-                let g = pr.pr_name in
-                clues := Some (Unfold (g, Destruct (g, h, g, (Swap_neg (h, Hole)))));
+                clues := Some (Unfold (pr, Destruct (pr, hpr, pr, (Swap_neg (hpr, Hole)))));
                 [create_prop_decl Paxiom hpr f1;
                  create_prop_decl Pgoal pr f2] end
             else [d]
@@ -407,7 +402,7 @@ let intro omni where = Trans.store (fun task ->
                   let ls = ls_of_vs vs in
                   let subst = Mvs.singleton vs (fs_app ls [] vs.vs_ty) in
                   let f = t_subst subst f_t in
-                  clues := Some (Intro_quant (pr.pr_name, ls.ls_name, Hole));
+                  clues := Some (Intro_quant (pr, ls.ls_name, Hole));
                   [create_param_decl ls; create_prop_decl k pr f]
               | _ -> assert false
               end
@@ -419,20 +414,20 @@ let intro omni where = Trans.store (fun task ->
   | None -> [task], Hole
   | Some c -> [nt], c)
 
-let dir_smart d c g =
-  let h = id_register (id_fresh "Weaken") in
-  let left, right = match d with Left -> g, h | Right -> h, g in
-  Destruct (g, left, right, Weakening (h, c))
+let dir_smart d c prg =
+  let prh = create_prsymbol (id_fresh "Weaken") in
+  let left, right = match d with Left -> prg, prh | Right -> prh, prg in
+  Destruct (prg, left, right, Weakening (prh, c))
 
 (* Direction with a certificate *)
 (* choose Left (A) or Right (B) when
     • the goal is of the form A ∨ B
     • the hypothesis is of the form A ∧ B *)
 let dir d where = Trans.store (fun task ->
-  let g = (default_goal task where).pr_name in
+  let prg = default_goal task where in
   let clues = ref false in
   let trans_t = Trans.decl (fun decl -> match decl.d_node with
-    | Dprop (k, pr, t) when id_equal g pr.pr_name ->
+    | Dprop (k, pr, t) when pr_equal pr prg ->
         begin match k, t.t_node, d with
         | (Pgoal as k),           Tbinop (Tor, f, _),  Left
         | (Pgoal as k),           Tbinop (Tor, _, f),  Right
@@ -443,7 +438,7 @@ let dir d where = Trans.store (fun task ->
         | _ -> [decl] end
     | _ -> [decl]) None in
   let nt = Trans.apply trans_t task in
-  if !clues then [nt], dir_smart d Hole g
+  if !clues then [nt], dir_smart d Hole prg
   else [task], Hole)
 
 (* Assert with certificate *)
@@ -453,24 +448,24 @@ let cut t = Trans.store (fun task ->
     | Dprop (Pgoal, _, _) ->
         [ [create_prop_decl Pgoal h t]; [create_prop_decl Paxiom h t; decl] ]
     | _ -> [[decl]]) None in
-  let idg = (task_goal task).pr_name in
-  Trans.apply trans_t task, Cut (h.pr_name, t, Weakening (idg, Hole), Hole))
+  let prg = task_goal task in
+  Trans.apply trans_t task, Cut (h, t, Weakening (prg, Hole), Hole))
 
 (* Instantiate with certificate *)
 let inst t_inst where = Trans.store (fun task ->
-  let g = (default_goal task where).pr_name in
+  let prg = default_goal task where in
   let hpr = create_prsymbol (gen_ident "H") in
   let clues = ref None in
   let trans_t = Trans.decl (fun decl -> match decl.d_node with
-    | Dprop (k, pr, t) when id_equal g pr.pr_name ->
+    | Dprop (k, pr, t) when pr_equal pr prg ->
         begin match t.t_node, k with
         | Tquant (Tforall, _), Paxiom ->
             let t_subst = subst_forall t t_inst in
-            clues := Some (Inst_quant (g, hpr.pr_name, t_inst, Hole));
+            clues := Some (Inst_quant (prg, hpr, t_inst, Hole));
             [decl; create_prop_decl k hpr t_subst]
         | Tquant (Texists, _), Pgoal ->
             let t_subst = subst_exist t t_inst in
-            clues := Some (Inst_quant (g, hpr.pr_name, t_inst, Weakening (g, Hole)));
+            clues := Some (Inst_quant (prg, hpr, t_inst, Weakening (prg, Hole)));
             [create_prop_decl k hpr t_subst]
         | _ -> [decl] end
     | _ -> [decl]) None in
@@ -497,8 +492,7 @@ let rec intro_premises acc t = match t.t_node with
   | Tbinop (Timplies, f1, f2) -> intro_premises (f1::acc) f2
   | _ -> acc, t
 
-let rewrite_in rev h h1 task = (* rewrites <h> in <h1> with direction <rev> *)
-  let h = h.pr_name and h1 = h1.pr_name in
+let rewrite_in rev prh prh1 task = (* rewrites <h> in <h1> with direction <rev> *)
   let clues = ref None in
   let found_eq =
     (* Used to find the equality we are rewriting on *)
@@ -506,7 +500,7 @@ let rewrite_in rev h h1 task = (* rewrites <h> in <h1> with direction <rev> *)
        not go through all possible hypotheses *)
     Trans.fold_decl (fun d acc ->
       match d.d_node with
-      | Dprop (Paxiom, pr, t) when Ident.id_equal pr.pr_name h ->
+      | Dprop (Paxiom, pr, t) when pr_equal pr prh ->
           let lp, f = intro_premises [] t in
           let t1, t2 = (match f.t_node with
           | Tapp (ls, [t1; t2]) when ls_equal ls ps_equ ->
@@ -528,7 +522,7 @@ let rewrite_in rev h h1 task = (* rewrites <h> in <h1> with direction <rev> *)
       Trans.fold_decl (fun d acc ->
         match d.d_node with
         | Dprop (p, pr, t)
-              when id_equal pr.pr_name h1 && (p = Pgoal || p = Paxiom) ->
+              when pr_equal pr prh1 && (p = Pgoal || p = Paxiom) ->
             begin match rewrite_in_term t1 t2 t with
               | Some (new_term, path) ->
                   clues := Some (path, Hole :: List.map (fun _ -> Hole) lp);
@@ -544,7 +538,7 @@ let rewrite_in rev h h1 task = (* rewrites <h> in <h1> with direction <rev> *)
     | Some (lp, new_decl) ->
       let trans_rewriting =
         Trans.decl (fun decl -> match decl.d_node with
-        | Dprop (p, pr, _) when id_equal pr.pr_name h1 && (p = Paxiom || p = Pgoal) ->
+        | Dprop (p, pr, _) when pr_equal pr prh1 && (p = Paxiom || p = Pgoal) ->
             [new_decl]
         | _ -> [decl]) None in
       let list_par =
@@ -562,7 +556,7 @@ let rewrite_in rev h h1 task = (* rewrites <h> in <h1> with direction <rev> *)
   match !clues with
   | None -> [task], Hole
   | Some (path, lc) ->
-      gen_task, Rewrite (h1, h, path, rev, lc)
+      gen_task, Rewrite (prh1, prh, path, rev, lc)
 
 let rewrite g rev where = Trans.store (fun task ->
   let h1 = default_goal task where in
@@ -576,7 +570,7 @@ let exfalso = Trans.store (fun task ->
      | _ -> [decl]) None in
   let g = task_goal task in
   [Trans.apply trans task],
-  Cut (h.pr_name, t_false, Weakening (g.pr_name, Hole), Trivial h.pr_name))
+  Cut (h, t_false, Weakening (g, Hole), Trivial h))
 
 let case t = Trans.store (fun task ->
   let h = create_prsymbol (gen_ident "H") in
@@ -586,7 +580,7 @@ let case t = Trans.store (fun task ->
               [create_prop_decl Paxiom h (t_not t); decl] ]
      | _ -> [[decl]]) None in
   Trans.apply trans task,
-  Cut (h.pr_name, t_not t, Swap_neg (h.pr_name, Hole), Hole))
+  Cut (h, t_not t, Swap_neg (h, Hole), Hole))
 
 (* if formula <f> designed by <where> is a premise, dismiss the old
  goal and put <not f> in its place *)
@@ -607,7 +601,7 @@ let swap where = Trans.store (fun task ->
   | Some t ->
       let not_t = match t.t_node with Tnot t' -> t' | _ -> t_not t in
       let decl = create_prop_decl Pgoal gpr not_t in
-      [add_decl nt decl], Swap_neg (gpr.pr_name, Weakening (pr_goal.pr_name, Hole))
+      [add_decl nt decl], Swap_neg (gpr, Weakening (pr_goal, Hole))
   | None -> [task], Hole)
 
 let revert ls = Trans.store (fun task ->
@@ -620,18 +614,18 @@ let revert ls = Trans.store (fun task ->
   let t = t_replace (t_app_infer ls []) (t_var new_var) t in
   let close_t = t_forall_close [new_var] [] t in
   let task = add_decl hyp (create_prop_decl Pgoal gpr close_t) in
-  let hinst = id_register (gen_ident "Hinst") in
+  let prinst = create_prsymbol (gen_ident "Hinst") in
   [task],
-  Cut (gpr.pr_name, close_t,
-       Weakening (idg.pr_name, Hole),
-       Inst_quant (gpr.pr_name, hinst, x, Axiom (hinst, idg.pr_name))))
+  Cut (gpr, close_t,
+       Weakening (idg, Hole),
+       Inst_quant (gpr, prinst, x, Axiom (prinst, idg))))
 
 
 (* Clear transformation with a certificate : *)
 (*   removes hypothesis <g> from the task *)
 let clear_one g = Trans.store (fun task ->
   let trans = Trans.decl (fun decl -> match decl.d_node with
-    | Dprop (_, pr, _) when id_equal g pr.pr_name -> []
+    | Dprop (_, pr, _) when pr_equal g pr -> []
     | _ -> [decl]) None in
   [Trans.apply trans task], Weakening (g, Hole))
 
@@ -685,4 +679,4 @@ let rec blast task =
 
 let blast = Trans.store blast
 
-let clear l = compose_list (List.map (fun pr -> clear_one pr.pr_name) l)
+let clear l = compose_list (List.map (fun pr -> clear_one pr) l)

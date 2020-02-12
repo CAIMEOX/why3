@@ -78,6 +78,8 @@ module Wpr : Weakhtbl.S with type key = prsymbol
 
 val create_prsymbol : preid -> prsymbol
 
+val pr_clone : prsymbol -> prsymbol
+
 val pr_equal : prsymbol -> prsymbol -> bool
 
 val pr_hash : prsymbol -> int
