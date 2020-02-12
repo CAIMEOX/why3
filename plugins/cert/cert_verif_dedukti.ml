@@ -69,6 +69,7 @@ let rec elab (cta : ctask) (c : core_certif) (fill : 'a list) : 'a ec * 'a list 
       let cta2 = Mid.add i (a, false) cta in
       let ce2, fill = elab cta2 ce2 fill in
       Cut_e (a, i, ce1, i, ce2), fill
+  | Let _ -> verif_failed "Some Let left"
   | Split (i, c1, c2) ->
       let t, pos = find_ident "split" i cta in
       begin match t, pos with
@@ -130,18 +131,18 @@ let rec elab (cta : ctask) (c : core_certif) (fill : 'a list) : 'a ec * 'a list 
           else Destruct_hyp pack, fill
       | _ -> assert false
       end
-  | Construct (i1, i2, j, c) ->
-      let a, pos1 = find_ident "construct1" i1 cta in
-      let b, pos2 = find_ident "construct2" i2 cta in
-      if pos1 = pos2
-      then
-        let t = if pos1 then CTbinop (Tor, a, b) else CTbinop (Tand, a, b) in
-        let cta = Mid.remove i1 cta
-                  |> Mid.remove i2
-                  |> Mid.add j (t, pos1) in
-        let ce, fill = elab cta c fill in
-        Construct_goal (a, b, j, ce, i1, i2), fill
-      else verif_failed "Can't construct"
+  (* | Construct (i1, i2, j, c) ->
+   *     let a, pos1 = find_ident "construct1" i1 cta in
+   *     let b, pos2 = find_ident "construct2" i2 cta in
+   *     if pos1 = pos2
+   *     then
+   *       let t = if pos1 then CTbinop (Tor, a, b) else CTbinop (Tand, a, b) in
+   *       let cta = Mid.remove i1 cta
+   *                 |> Mid.remove i2
+   *                 |> Mid.add j (t, pos1) in
+   *       let ce, fill = elab cta c fill in
+   *       Construct_goal (a, b, j, ce, i1, i2), fill
+   *     else verif_failed "Can't construct" *)
   | Weakening (i, c) ->
       let a, pos = find_ident "weakening" i cta in
       let cta = Mid.remove i cta in

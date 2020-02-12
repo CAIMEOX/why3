@@ -53,6 +53,7 @@ let rec ccheck (c : core_certif) cta : ctask list =
   match c with
     | Nc ->
         verif_failed "No certificates for this case"
+    | Let _ -> verif_failed "Some Let left"
     | Hole -> [cta]
     | Axiom (h, g) ->
         let th, posh = find_ident "axiom1" h cta in
@@ -108,17 +109,17 @@ let rec ccheck (c : core_certif) cta : ctask list =
                       |> Mid.add j2 (t2, pos) in
             ccheck c cta
         | _ -> verif_failed "Nothing to destruct" end
-    | Construct (i1, i2, j, c) ->
-        let a, pos1 = find_ident "construct1" i1 cta in
-        let b, pos2 = find_ident "construct2" i2 cta in
-        if pos1 = pos2
-        then
-          let t = if pos1 then CTbinop (Tor, a, b) else CTbinop (Tand, a, b) in
-          let cta = Mid.remove i1 cta
-                    |> Mid.remove i2
-                    |> Mid.add j (t, pos1) in
-          ccheck c cta
-        else verif_failed "Can't construct"
+    (* | Construct (i1, i2, j, c) ->
+     *     let a, pos1 = find_ident "construct1" i1 cta in
+     *     let b, pos2 = find_ident "construct2" i2 cta in
+     *     if pos1 = pos2
+     *     then
+     *       let t = if pos1 then CTbinop (Tor, a, b) else CTbinop (Tand, a, b) in
+     *       let cta = Mid.remove i1 cta
+     *                 |> Mid.remove i2
+     *                 |> Mid.add j (t, pos1) in
+     *       ccheck c cta
+     *     else verif_failed "Can't construct" *)
     | Weakening (i, c) ->
         let cta = Mid.remove i cta in
         ccheck c cta
