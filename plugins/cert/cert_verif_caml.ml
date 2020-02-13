@@ -55,11 +55,11 @@ let rec ccheck (c : core_certif) cta : ctask list =
         verif_failed "No certificates for this case"
     | Let _ -> verif_failed "Some Let left"
     | Hole -> [cta]
-    | Axiom (h, g) ->
-        let th, posh = find_ident "axiom1" h cta in
-        let tg, posg = find_ident "axiom2" g cta in
-        if not posh && posg
-        then if cterm_equal th tg
+    | Axiom (i1, i2) ->
+        let t1, pos1 = find_ident "axiom1" i1 cta in
+        let t2, pos2 = find_ident "axiom2" i2 cta in
+        if pos1 <> pos2
+        then if cterm_equal t1 t2
              then []
              else verif_failed "The hypothesis and goal given do not match"
         else verif_failed "Terms have wrong positivities in the task"
