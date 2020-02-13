@@ -25,8 +25,9 @@ open Format
 (* current ident : used by split_core, to replace by the real id of the formula currently being splitted *)
 let cpr = create_prsymbol (id_fresh "cpr")
 
-let rec rename pr1 pr2 (c : certif) : certif =
-  propagate (rename pr1 pr2) (fun pr -> if pr_equal pr pr1 then pr2 else pr) (fun ct -> ct) c
+let rec rename_cert pr1 pr2 (c : certif) : certif =
+  propagate (rename_cert pr1 pr2)
+    (fun pr -> if pr_equal pr pr1 then pr2 else pr) (fun ct -> ct) c
 
 type split = {
   right_only : bool;
@@ -184,11 +185,11 @@ let print_ret_err { pos; cpf; cfp; neg; cfn; cnf; bwd; fwd; side; cpos; cneg } =
      cpos       : %b@\n\
      cneg       : %b@\n@]@."
     (M.print_mon " /\\ ") pos
-    prc cpf
-    prc cfp
+    prcertif cpf
+    prcertif cfp
     (M.print_mon " \\/ ") neg
-    prc cfn
-    prc cnf
+    prcertif cfn
+    prcertif cnf
     Pretty.print_term bwd
     Pretty.print_term fwd
     (M.print_mon " /\\ ") side
@@ -243,9 +244,9 @@ let combine_cert g c1 c2 =
   let g1 = create_prsymbol (id_fresh "g1") in
   let g2 = create_prsymbol (id_fresh "g2") in
   Destruct (g, g1, g2, Hole)
-  |>> rename g g1 c1
-  |>> rename g g2 c2
-  |>> construct g1 g2 g Hole
+  |>> rename_cert g g1 c1
+  |>> rename_cert g g2 c2
+  |>> construct true g1 g2 g Hole
 
 let rec split_core sp f =
   let (~-) = t_attr_copy f in
@@ -519,7 +520,7 @@ let rec split_core sp f =
 
 let split_core sp t =
   let res = split_core sp t in
-  print_ret_err res;
+  (* print_ret_err res; *)
   res
 
 let full_split kn = {
@@ -560,7 +561,7 @@ let pop () = match !clues with
 let split_pos sp pr f = (* only used by split_axiom *)
   let core = split_core sp f in
   assert (core.side = Unit);
-  add (rename cpr pr core.cfp);
+  add (rename_cert cpr pr core.cfp);
   to_list core.pos
 
 (* let split_proof sp f =
@@ -569,7 +570,7 @@ let split_pos sp pr f = (* only used by split_axiom *)
 
 let split_proof sp pr f =
   let core = split_core sp f in
-  add (rename cpr pr core.cpf);
+  add (rename_cert cpr pr core.cpf);
   to_list (core.pos ++ core.side)
 
 let split_goal sp pr f =
