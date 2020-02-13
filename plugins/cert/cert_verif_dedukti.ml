@@ -11,7 +11,7 @@ open Cert_certificates
 
 type 'a ec = (* elaborated certificate *)
   | Hole_e of 'a (* So we can fill the holes with the remaining tasks. Corresponds to Hole *)
-  | Axiom_e of cterm * ident * ident
+  | Axiom_directed of cterm * ident * ident
   | Trivial_hyp of ident
   | Trivial_goal of ident
   | Cut_e of cterm * ident * 'a ec * ident * 'a ec
@@ -27,7 +27,6 @@ type 'a ec = (* elaborated certificate *)
   | Swap_neg_neg_goal of (cterm * ident * 'a ec * ident)
   | Destruct_goal of (cterm * cterm * ident * ident * 'a ec * ident)
   | Destruct_hyp  of (cterm * cterm * ident * ident * 'a ec * ident)
-  | Construct_goal of cterm * cterm * ident * 'a ec * ident * ident
   | Weakening_hyp of cterm * 'a ec * ident
   | Weakening_goal of cterm * 'a ec * ident
   | Intro_quant_hyp of (cterm * ident * ident * 'a ec * ident)
@@ -51,9 +50,10 @@ let rec elab (cta : ctask) (c : core_certif) (fill : 'a list) : 'a ec * 'a list 
       begin match fill with
       | [] -> verif_failed "Not enough to fill"
       | first::rest -> Hole_e first, rest end
-  | Axiom (h, g) ->
-      let t, _ = find_ident "axiom" h cta in
-      Axiom_e (t, h, g), fill
+  | Axiom (i1, i2) ->
+      let t, pos1 = find_ident "axiom1" i1 cta in
+      let h, g = if pos1 then i2, i1 else i1, i2 in
+      Axiom_directed (t, h, g), fill
   | Trivial i ->
       let t, pos = find_ident "trivial" i cta in
       begin match t, pos with
@@ -131,18 +131,6 @@ let rec elab (cta : ctask) (c : core_certif) (fill : 'a list) : 'a ec * 'a list 
           else Destruct_hyp pack, fill
       | _ -> assert false
       end
-  (* | Construct (i1, i2, j, c) ->
-   *     let a, pos1 = find_ident "construct1" i1 cta in
-   *     let b, pos2 = find_ident "construct2" i2 cta in
-   *     if pos1 = pos2
-   *     then
-   *       let t = if pos1 then CTbinop (Tor, a, b) else CTbinop (Tand, a, b) in
-   *       let cta = Mid.remove i1 cta
-   *                 |> Mid.remove i2
-   *                 |> Mid.add j (t, pos1) in
-   *       let ce, fill = elab cta c fill in
-   *       Construct_goal (a, b, j, ce, i1, i2), fill
-   *     else verif_failed "Can't construct" *)
   | Weakening (i, c) ->
       let a, pos = find_ident "weakening" i cta in
       let cta = Mid.remove i cta in
@@ -296,7 +284,7 @@ let nopt = function
 let rec print_certif fmt = function
   | Hole_e s ->
       fprintf fmt "%s" s
-  | Axiom_e (t, h, g) ->
+  | Axiom_directed (t, h, g) ->
       fprintf fmt "axiom (%a) %s %s"
         print_term t
         (str h)
@@ -380,13 +368,6 @@ let rec print_certif fmt = function
         print_term b
         (str h1) (str h2) print_certif c
         (str g)
-  | Construct_goal (a, b, j, c, i1, i2) ->
-      fprintf fmt "construct_goal (%a) (%a) (%s => %a) %s %s"
-        print_term a
-        print_term b
-        (str j) print_certif c
-        (str i1)
-        (str i2)
   | Weakening_hyp (a, c, g) ->
       fprintf fmt "weakening_hyp (%a) (%a) %s"
         print_term a
