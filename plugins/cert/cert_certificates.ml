@@ -23,7 +23,8 @@ type ('a, 'b) cert = (* 'a is used to designate an hypothesis, 'b is used for te
   (* Cut (I, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ, I : A ⊢ Δ)) *)
   | Let of 'b * 'a * ('a, 'b) cert
   | Axiom of 'a * 'a
-  (* Axiom (H, G) ⇓ (Γ, H : A ⊢ Δ, G : A) ≜  [] *)
+  (* Axiom (i1, i2) ⇓ (Γ, i1 : A ⊢ Δ, i2 : A) ≜  [] *)
+  (* Axiom (i1, i2) ⇓ (Γ, i2 : A ⊢ Δ, i1 : A) ≜  [] *)
   | Trivial of 'a
   (* Trivial I ⇓ (Γ, I : false ⊢ Δ) ≜  [] *)
   (* Trivial I ⇓ (Γ ⊢ Δ, I : true ) ≜  [] *)
@@ -43,9 +44,6 @@ type ('a, 'b) cert = (* 'a is used to designate an hypothesis, 'b is used for te
   | Destruct of 'a * 'a * 'a * ('a, 'b) cert
   (* Destruct (I, J₁, J₂, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, J₁ : A, J₂ : B ⊢ Δ) *)
   (* Destruct (I, J₁, J₂, c) ⇓ (Γ ⊢ Δ, I : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, J₁ : A, J₂ : B) *)
-  (* | Construct of ident * ident * ident * 'a cert (\* should be derivable from Cut and Split *\)
-   * (\* Construct (I₁, I₂, J, c) ⇓ (Γ ⊢ Δ, I₁ : A, I₂ : B) ≜ c ⇓ (Γ ⊢ Δ, J : A ∧ B) *\)
-   * (\* Construct (I₁, I₂, J, c) ⇓ (Γ, I₁ : A, I₂ : B ⊢ Δ) ≜ c ⇓ (Γ, J : A ∧ B ⊢ Δ) *\) *)
   | Weakening of 'a * ('a, 'b) cert
   (* Weakening (I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening (I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
@@ -111,29 +109,33 @@ let pte = Pretty.print_term
 let rec print_certif filename cert =
   let oc = open_out filename in
   let fmt = formatter_of_out_channel oc in
-  fprintf fmt "%a@." prc cert;
+  fprintf fmt "%a@." prcertif cert;
   close_out oc
-and prc fmt = function
+and prcab : type a b. (formatter -> a -> unit) ->
+                 (formatter -> b -> unit) ->
+                 formatter -> (a, b) cert -> unit
+  = fun pra prb fmt c ->
+  let prc = prcab pra prb in
+  match c with
   | Nc -> fprintf fmt "No_certif"
   | Hole -> fprintf fmt "Hole"
-  | Cut (i, a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a,@ %a)@]" prpr i pte a prc c1 prc c2
-  | Let (x, i, c) -> fprintf fmt "Let @[(%a,@ %a,@ %a)@]" pte x prpr i prc c
-  | Axiom (h, g) -> fprintf fmt "Axiom @[(%a,@ %a)@]" prpr h prpr g
-  | Trivial i -> fprintf fmt "Trivial %a" prpr i
-  | Split (i, c1, c2) -> fprintf fmt "Split @[(%a,@ %a,@ %a)@]" prpr i prc c1 prc c2
-  | Unfold (i, c) -> fprintf fmt "Unfold @[(%a,@ %a)@]" prpr i prc c
-  | Swap_neg (i, c) -> fprintf fmt "Swap_neg @[(%a,@ %a)@]" prpr i prc c
+  | Cut (i, a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a,@ %a)@]" pra i prb a prc c1 prc c2
+  | Let (x, i, c) -> fprintf fmt "Let @[(%a,@ %a,@ %a)@]" prb x pra i prc c
+  | Axiom (i1, i2) -> fprintf fmt "Axiom @[(%a,@ %a)@]" pra i1 pra i2
+  | Trivial i -> fprintf fmt "Trivial %a" pra i
+  | Split (i, c1, c2) -> fprintf fmt "Split @[(%a,@ %a,@ %a)@]" pra i prc c1 prc c2
+  | Unfold (i, c) -> fprintf fmt "Unfold @[(%a,@ %a)@]" pra i prc c
+  | Swap_neg (i, c) -> fprintf fmt "Swap_neg @[(%a,@ %a)@]" pra i prc c
   | Destruct (i, j1, j2, c) ->
-      fprintf fmt "Destruct @[(%a,@ %a,@ %a,@ %a)@]" prpr i prpr j1 prpr j2 prc c
-  (* | Construct (i1, i2, j, c) ->
-   *     fprintf fmt "Construct @[(%a,@ %a,@ %a,@ %a)@]" pri i1 pri i2 pri j prc c *)
-  | Weakening (i, c) -> fprintf fmt "Weakening@ @[(%a,@ %a)@]" prpr i prc c
-  | Intro_quant (i, y, c) -> fprintf fmt "Intro_quant @[(%a,@ %a,@ %a)@]" prpr i pri y prc c
-  | Inst_quant (i, j, t, c) -> fprintf fmt "Inst_quant @[(%a,@ %a,@ %a,@ %a)@]" prpr i prpr j pte t prc c
+      fprintf fmt "Destruct @[(%a,@ %a,@ %a,@ %a)@]" pra i pra j1 pra j2 prc c
+  | Weakening (i, c) -> fprintf fmt "Weakening@ @[(%a,@ %a)@]" pra i prc c
+  | Intro_quant (i, y, c) -> fprintf fmt "Intro_quant @[(%a,@ %a,@ %a)@]" pra i pri y prc c
+  | Inst_quant (i, j, t, c) -> fprintf fmt "Inst_quant @[(%a,@ %a,@ %a,@ %a)@]" pra i pra j prb t prc c
   | Rewrite (i, j, path, rev, lc) ->
       fprintf fmt "Rewrite @[(%a,@ %a,@ %a,@ %b,@ %a)@]"
-        prpr i prpr j (prle "; " prd) path rev (prle "; " prc) lc
-
+        pra i pra j (prle "; " prd) path rev (prle "; " prc) lc
+and prcertif fmt = prcab prpr pte fmt
+and prcore_certif fmt = prcab pri pcte fmt
 
 let prpos fmt = function
   | true  -> fprintf fmt "GOAL| "
@@ -196,14 +198,31 @@ let new_let_var str =
   let ls = create_lsymbol (id_fresh str) [] None in
   t_app ls [] None
 
-let construct i1 i2 j c =
-  let ti1 = new_let_var "i1" in
-  let ti2 = new_let_var "i2" in
-  Let (ti1, i1, Hole)
-  |>> Let (ti2, i2, Hole)
-  |>> Cut (j, t_and ti1 ti2, c, Hole)
+let let_pr i f =
+  let fi = new_let_var "i" in
+  Let (fi, i, f fi)
 
+let rename goal pr f =
+  let pr' = pr_clone pr in
+  let c_open = Weakening (pr, f pr') in
+  let c_closed = Axiom (pr, pr') in
+  let c1, c2 = if goal
+               then c_open, c_closed
+               else c_closed, c_open in
+  let fpr = new_let_var "pr" in
+  Let (fpr, pr, Cut (pr', fpr, c1, c2))
 
+let construct goal i1 i2 j c =
+  rename goal i1 (fun i1' ->
+  rename goal i2 (fun i2' ->
+  let_pr i1' (fun fi1' ->
+  let_pr i2' (fun fi2' ->
+  let c_open = Weakening (i1', Weakening (i2', c)) in
+  let c_closed = Split (j, Axiom (i1', j), Axiom (i2', j)) in
+  let c1, c2, cut = if goal
+                    then c_open, c_closed, t_or fi1' fi2'
+                    else c_closed, c_open, t_and fi1' fi2' in
+  Cut (j, cut, c1, c2)))))
 
 (* Equality *)
 let rec cterm_equal t1 t2 = match t1, t2 with
@@ -326,8 +345,9 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
 let rec abstract_types c =
     propagate abstract_types (fun pr -> pr.pr_name) abstract_term c
 
-let rec eliminate_let (cta : ctask) (m : cterm Mid.t) = function
-    | (Nc | Hole | Axiom _ | Trivial _) as c -> c
+let rec eliminate_let (cta : ctask) (m : cterm Mid.t) (c : core_certif) =
+  match c with
+    | (Nc | Hole | Axiom _ | Trivial _) -> c
     | Cut (i, a, c1, c2) ->
         let cta1 = Mid.add i (a, true) cta in
         let cta2 = Mid.add i (a, false) cta in
@@ -404,7 +424,7 @@ let rec eliminate_let (cta : ctask) (m : cterm Mid.t) = function
           | _ -> verif_failed "trying to instantiate a non-quantified hypothesis" in
         let c = eliminate_let cta m c in
         Inst_quant (i, j, t_inst, c)
-    | Rewrite (i, j, path, rev, lc) as c -> c
+    | Rewrite _ as c -> c
                                          (* TODO *)
         (* let lcta = check_rewrite cta rev j i [] path in
          * List.map2 ccheck lc lcta |> List.concat *)

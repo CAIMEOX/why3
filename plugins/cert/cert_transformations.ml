@@ -1,6 +1,5 @@
 open Why3
 
-open Theory
 open Task
 open Decl
 open Term
@@ -118,29 +117,14 @@ let is_target pr tg = match !tg with
 
 (* Assumption with a certificate : *)
 (*   closes the current task if the goal is an hypothesis *)
-let assumption_decl tg decl = match decl.d_node with
-  | Dprop (_, pr, t) when t_equal t tg ->
-      Some pr
-  | _ -> None
-
-let assumption_tdecl tg td = match td.td_node with
-  | Decl decl -> assumption_decl tg decl
-  | _ -> None
-
-let rec assumption_ctxt tg = function
-  | Some {task_decl = td; task_prev = task} ->
-      begin match assumption_tdecl tg td with
-      | Some h -> h
-      | None -> assumption_ctxt tg task end
-  | None -> raise Not_found
-
 let assumption = Trans.store (fun task ->
-  let g, tg = try task_goal task, task_goal_fmla task
-          with GoalNotFound -> invalid_arg "Cert_transformations.assumption" in
-  let _, hyp = task_separate_goal task in
-  try let h = assumption_ctxt tg hyp in
-      [], Axiom (h, g)
-  with Not_found -> [task], Hole)
+  let prg, tg = task_goal task, task_goal_fmla task in
+  let clues = ref Hole in
+  let trans = Trans.decl_l (fun d -> match d.d_node with
+    | Dprop (Paxiom, pr, t) when t_equal t tg -> clues := Axiom (pr, prg); []
+    | _ -> [[d]]) None in
+  let nt = Trans.apply trans task in
+  nt, !clues)
 
 let add k v tbl = tbl := (k, v) :: !tbl
 
@@ -166,16 +150,7 @@ let contradict = Trans.store (fun task ->
     | _ -> acc) None in
   match Trans.apply trans task with
   | Some (h, g) -> [], Swap_neg (g, Axiom (h, g))
-  | _ ->
-      (* let open Format in
-       * let out = open_out "/tmp/hyp_tbl.log" in
-       * let fmt = formatter_of_out_channel out in
-       * List.iter (fun (t, pr) ->
-       *     fprintf fmt "%a : %a\n@."
-       *       pri pr
-       *       pcte (translate_term t)) !tbl;
-       * close_out out; *)
-      [task], Hole)
+  | _ -> [task], Hole)
 
 
 (* Closes task when if hypotheses contain false or if the goal is true *)
