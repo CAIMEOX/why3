@@ -99,7 +99,15 @@ let fold fn v =
   in
   accum []
 
-let fold_l fn v = fold (fun task -> Lists.apply (fn task)) [v]
+let fold_l fn v =
+  let fn task = Lists.apply (fn task) in
+  fold fn [v]
+
+let fold_l_acc fn =
+  let fn task (la, b) =
+    let lla, b = Lists.map_fold_right (fn task) la b in
+    List.flatten lla, b in
+  fold fn
 
 let fold_decl fn v =
   fold (fun task v ->
@@ -124,6 +132,15 @@ let gen_decl add fn =
   in
   fold fn
 
+let gen_decl_acc add facc fn =
+  let fn = store_decl fn in
+  let fn task (tacc, acc) = match task.task_decl.td_node with
+    | Decl d -> let dl, na = fn d in
+                List.fold_left add tacc dl, facc acc na
+    | _ -> add_tdecl tacc task.task_decl, acc
+  in
+  fold fn
+
 let gen_decl_l add fn =
   let fn = store_decl fn in
   let fn task acc = match task.task_decl.td_node with
@@ -132,10 +149,22 @@ let gen_decl_l add fn =
   in
   fold_l fn
 
+let gen_decl_l_acc add facc fn =
+  let fn = store_decl fn in
+  let fn task tacc acc = match task.task_decl.td_node with
+    | Decl d -> let dll, na = fn d in
+                List.map (List.fold_left add tacc) dll, facc acc na
+    | _ -> [add_tdecl tacc task.task_decl], acc
+  in
+  fold_l_acc fn
+
 let decl    = gen_decl   Task.add_decl
 let decl_l  = gen_decl_l Task.add_decl
 let tdecl   = gen_decl   add_tdecl
 let tdecl_l = gen_decl_l add_tdecl
+
+let decl_acc idacc facc f = gen_decl_acc Task.add_decl facc f (None, idacc)
+let decl_l_acc idacc facc f = gen_decl_l_acc Task.add_decl facc f ([None], idacc)
 
 type diff_decl =
   | Goal_decl of Decl.decl
