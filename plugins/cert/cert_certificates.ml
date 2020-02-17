@@ -343,7 +343,7 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
   fun ct -> Mid.add hg (ct, true) mh
 
 let rec abstract_types c =
-    propagate abstract_types (fun pr -> pr.pr_name) abstract_term c
+  propagate abstract_types (fun pr -> pr.pr_name) abstract_term c
 
 let rec eliminate_let (cta : ctask) (m : cterm Mid.t) (c : core_certif) =
   match c with

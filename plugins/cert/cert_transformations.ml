@@ -6,6 +6,7 @@ open Term
 open Ident
 open Generic_arg_trans_utils
 
+
 open Cert_certificates
 
 let decl_cert f = Trans.decl_acc Hole (|>>) f
@@ -77,23 +78,27 @@ let tg omni where task =
   let v = if omni then Everywhere else Pr (default_goal task where) in
   ref v
 
+let find_target omni where task =
+  if omni then Everywhere else Pr (default_goal task where)
+
 let is_target pr tg = match !tg with
   | Nowhere -> false
   | Everywhere -> tg := Nowhere; true
   | Pr tg_pr -> pr_equal pr tg_pr
 
+
 (* Assumption with a certificate : *)
 (*   closes the current task if the goal is an hypothesis *)
-let assumption = Trans.store (fun task ->
-  let prg, tg = task_goal task, task_goal_fmla task in
-  let clues = ref Hole in
-  let trans = Trans.decl_l (fun d -> match d.d_node with
-    | Dprop (Paxiom, pr, t) when t_equal t tg -> clues := Axiom (pr, prg); []
-    | _ -> [[d]]) None in
-  let nt = Trans.apply trans task in
-  nt, !clues)
+(* let assumption : ctrans = Trans.store (fun task ->
+ *   let prg, tg = task_goal task, task_goal_fmla task in
+ *   let clues = ref Hole in
+ *   let trans = Trans.decl_l (fun d -> match d.d_node with
+ *     | Dprop (Paxiom, pr, t) when t_equal t tg -> clues := Axiom (pr, prg); []
+ *     | _ -> [[d]]) None in
+ *   let nt = Trans.apply trans task in
+ *   nt, !clues) *)
 
-let assumption = Trans.store (fun task ->
+let assumption : ctrans = Trans.store (fun task ->
   let prg, tg = task_goal task, task_goal_fmla task in
   let trans = decl_l_cert (fun d -> match d.d_node with
     | Dprop (Paxiom, pr, t) when t_equal t tg -> [], Axiom (pr, prg)
@@ -109,7 +114,7 @@ let rec assoc term = function
 let find_opt t tbl = try Some (assoc t !tbl)
                      with Not_found -> None
 
-let contradict = Trans.store (fun task ->
+let contradict : ctrans = Trans.store (fun task ->
   let tbl = ref [] in
   let prem_trans = Trans.fold_decl (fun d () -> match d.d_node with
     | Dprop (k, pr, t) when k <> Pgoal ->
@@ -128,7 +133,7 @@ let contradict = Trans.store (fun task ->
 
 
 (* Closes task when if hypotheses contain false or if the goal is true *)
-let close = Trans.store (fun task ->
+let close : ctrans = Trans.store (fun task ->
   let trans = Trans.fold_decl (fun d acc -> match d.d_node, acc with
       | _, Some _ -> acc
       | Dprop (k, pr, t), _ ->
@@ -145,33 +150,33 @@ let close = Trans.store (fun task ->
 (* Split with a certificate : *)
 (* destructs a logical constructor at the top of the formula *)
 (* destructs /\ in the hypotheses *)
-let destruct omni where = Trans.store (fun task ->
-  let target = tg omni where task in
-  let clues = ref None in
-  let trans_t = Trans.decl (fun d -> match d.d_node with
-    | Dprop (k, pr, t) ->
-        begin match k, t.t_node with
-        | k, Tbinop (Tand, f1, f2) when k <> Pgoal ->
-            if is_target pr target then begin
-                let pr1 = pr_clone pr in
-                let pr2 = pr_clone pr in
-                clues := Some (Destruct (pr, pr1, pr2, Hole));
-                [create_prop_decl k pr1 f1; create_prop_decl k pr2 f2] end
-            else [d]
-        | _ -> [d] end
-    | _ -> [d]) None in
-  let nt = Trans.apply trans_t task in
-  match !clues with
-  | Some c -> [nt], c
-  | None -> [task], Hole)
+(* let destruct omni where : ctrans = Trans.store (fun task ->
+ *   let target = tg omni where task in
+ *   let clues = ref None in
+ *   let trans_t = Trans.decl (fun d -> match d.d_node with
+ *     | Dprop (k, pr, t) ->
+ *         begin match k, t.t_node with
+ *         | k, Tbinop (Tand, f1, f2) when k <> Pgoal ->
+ *             if is_target pr target then begin
+ *                 let pr1 = pr_clone pr in
+ *                 let pr2 = pr_clone pr in
+ *                 clues := Some (Destruct (pr, pr1, pr2, Hole));
+ *                 [create_prop_decl k pr1 f1; create_prop_decl k pr2 f2] end
+ *             else [d]
+ *         | _ -> [d] end
+ *     | _ -> [d]) None in
+ *   let nt = Trans.apply trans_t task in
+ *   match !clues with
+ *   | Some c -> [nt], c
+ *   | None -> [task], Hole) *)
 
 let update_opt o1 o2 = match o1 with
   | Some _ -> o1
   | None -> o2
 
-let destruct omni where = Trans.store (fun task ->
+let destruct2 omni where : ctrans = Trans.store (fun task ->
   let target = tg omni where task in
-  let trans_t = Trans.decl_acc None update_opt (fun d -> match d.d_node with
+  let trans_t = Trans.decl_acc None update_opt (fun d _ -> match d.d_node with
     | Dprop (Paxiom, pr, {t_node = Tbinop (Tand, f1, f2)}) ->
         if is_target pr target then begin
             let pr1 = pr_clone pr in
@@ -186,9 +191,27 @@ let destruct omni where = Trans.store (fun task ->
   | Some c -> [nt], c
   | None -> [task], Hole)
 
+let matg tg pr = match tg with
+  | Pr pr' when pr_equal pr' pr -> true
+  | Everywhere -> true
+  | _ -> false
+
+let destruct_tg target =
+  Trans.decl_acc (target, Hole) (fun _ acc -> acc) (fun d (tg, c) -> match d.d_node with
+      | Dprop (Paxiom, pr, {t_node = Tbinop (Tand, f1, f2)}) when matg tg pr ->
+          let pr1 = pr_clone pr in
+          let pr2 = pr_clone pr in
+          [create_prop_decl Paxiom pr1 f1; create_prop_decl Paxiom pr2 f2],
+          (Nowhere, Destruct (pr, pr1, pr2, Hole))
+      | _ -> [d], (tg, c))
+
+let destruct omni where : ctrans = Trans.store (fun task ->
+   let tg = find_target omni where task in
+   let ta, (_, c) = destruct_tg tg task in
+   [ta], c)
 
 (* destructs /\ in the goal or \/ in the hypothses *)
-let split_or_and omni where = Trans.store (fun task ->
+let split_or_and omni where : ctrans = Trans.store (fun task ->
   let target = tg omni where task in
   let clues = ref None in
   let trans_t = Trans.decl_l (fun d -> match d.d_node with
@@ -207,7 +230,9 @@ let split_or_and omni where = Trans.store (fun task ->
   | Some gpr -> nt, Split (gpr, Hole, Hole)
   | None -> [task], Hole)
 
-let destruct_all omni where = Trans.store (fun task ->
+
+
+let destruct_all omni where : ctrans = Trans.store (fun task ->
   let target = tg omni where task in
   let clues = ref None in
   let trans_t = Trans.decl_l (fun d -> match d.d_node with
@@ -243,7 +268,7 @@ let destruct_all omni where = Trans.store (fun task ->
   | Some c -> nt, c
   | None -> [task], Hole)
 
-let neg_decompose omni where = Trans.store (fun task ->
+let neg_decompose omni where : ctrans = Trans.store (fun task ->
   let target = tg omni where task in
   let clues : certif option ref = ref None in
   let trans_t = Trans.decl_l (fun d -> match d.d_node with
@@ -319,7 +344,7 @@ let neg_decompose omni where = Trans.store (fun task ->
 
 (* replaces A <-> B with (A -> B) /\ (B -> A) *)
 (* and A -> B with ¬A ∨ B *)
-let unfold omni where = Trans.store (fun task ->
+let unfold omni where : ctrans = Trans.store (fun task ->
   let target = tg omni where task in
   let clues = ref None in
   let trans_t = Trans.decl (fun d -> match d.d_node with
@@ -348,7 +373,7 @@ let ls_of_vs vs =
   let id = id_clone ~attrs:intro_attrs vs.vs_name in
   create_fsymbol id [] vs.vs_ty
 
-let intro omni where = Trans.store (fun task ->
+let intro omni where : ctrans = Trans.store (fun task ->
   (* introduces hypothesis H : A when the goal is of the form A → B or
      introduces variable x when the goal is of the form ∀ x. P x
      introduces variable x when a hypothesis is of the form ∃ x. P x *)
@@ -395,7 +420,7 @@ let dir_smart d c prg =
 (* choose Left (A) or Right (B) when
     • the goal is of the form A ∨ B
     • the hypothesis is of the form A ∧ B *)
-let dir d where = Trans.store (fun task ->
+let dir d where : ctrans = Trans.store (fun task ->
   let prg = default_goal task where in
   let clues = ref false in
   let trans_t = Trans.decl (fun decl -> match decl.d_node with
@@ -414,7 +439,7 @@ let dir d where = Trans.store (fun task ->
   else [task], Hole)
 
 (* Assert with certificate *)
-let cut t = Trans.store (fun task ->
+let cut t : ctrans = Trans.store (fun task ->
   let h = create_prsymbol (gen_ident "H") in
   let trans_t = Trans.decl_l (fun decl -> match decl.d_node with
     | Dprop (Pgoal, _, _) ->
@@ -424,7 +449,7 @@ let cut t = Trans.store (fun task ->
   Trans.apply trans_t task, Cut (h, t, Weakening (prg, Hole), Hole))
 
 (* Instantiate with certificate *)
-let inst t_inst where = Trans.store (fun task ->
+let inst t_inst where : ctrans = Trans.store (fun task ->
   let prg = default_goal task where in
   let hpr = create_prsymbol (gen_ident "H") in
   let clues = ref None in
@@ -530,11 +555,11 @@ let rewrite_in rev prh prh1 task = (* rewrites <h> in <h1> with direction <rev> 
   | Some (path, lc) ->
       gen_task, Rewrite (prh1, prh, path, rev, lc)
 
-let rewrite g rev where = Trans.store (fun task ->
+let rewrite g rev where : ctrans = Trans.store (fun task ->
   let h1 = default_goal task where in
   rewrite_in (not rev) g h1 task)
 
-let exfalso = Trans.store (fun task ->
+let exfalso : ctrans = Trans.store (fun task ->
   let h = create_prsymbol (gen_ident "H") in
   let trans = Trans.decl (fun decl -> match decl.d_node with
      | Dprop (Pgoal, _, _) ->
@@ -544,7 +569,7 @@ let exfalso = Trans.store (fun task ->
   [Trans.apply trans task],
   Cut (h, t_false, Weakening (g, Hole), Trivial h))
 
-let case t = Trans.store (fun task ->
+let case t : ctrans = Trans.store (fun task ->
   let h = create_prsymbol (gen_ident "H") in
   let trans = Trans.decl_l (fun decl -> match decl.d_node with
      | Dprop (Pgoal, _, _) ->
@@ -556,7 +581,7 @@ let case t = Trans.store (fun task ->
 
 (* if formula <f> designed by <where> is a premise, dismiss the old
  goal and put <not f> in its place *)
-let swap where = Trans.store (fun task ->
+let swap where : ctrans = Trans.store (fun task ->
   let gpr = default_goal task where in
   let t, pr_goal = task_goal_fmla task, task_goal task in
   let _, hyp = task_separate_goal task in
@@ -576,7 +601,7 @@ let swap where = Trans.store (fun task ->
       [add_decl nt decl], Swap_neg (gpr, Weakening (pr_goal, Hole))
   | None -> [task], Hole)
 
-let revert ls = Trans.store (fun task ->
+let revert ls : ctrans = Trans.store (fun task ->
   let x = t_app_infer ls [] in
   let gpr = create_prsymbol (gen_ident "G") in
   let t, idg = task_goal_fmla task, task_goal task in
@@ -595,7 +620,7 @@ let revert ls = Trans.store (fun task ->
 
 (* Clear transformation with a certificate : *)
 (*   removes hypothesis <g> from the task *)
-let clear_one g = Trans.store (fun task ->
+let clear_one g : ctrans = Trans.store (fun task ->
   let trans = Trans.decl (fun decl -> match decl.d_node with
     | Dprop (_, pr, _) when pr_equal g pr -> []
     | _ -> [decl]) None in
@@ -649,6 +674,6 @@ let rec blast task =
                   id_ctrans))
       task
 
-let blast = Trans.store blast
+let blast : ctrans = Trans.store blast
 
 let clear l = compose_list (List.map (fun pr -> clear_one pr) l)
