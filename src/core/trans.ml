@@ -135,7 +135,7 @@ let gen_decl add fn =
 let gen_decl_acc add facc fn =
   let fn = store_decl fn in
   let fn task (tacc, acc) = match task.task_decl.td_node with
-    | Decl d -> let dl, na = fn d in
+    | Decl d -> let dl, na = fn d acc in
                 List.fold_left add tacc dl, facc acc na
     | _ -> add_tdecl tacc task.task_decl, acc
   in

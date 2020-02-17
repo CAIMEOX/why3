@@ -322,10 +322,10 @@ let rec split_core sp f =
       let side = sf1.side ++ if not asym then sf2.side else
         let nf1 = ncase (sf2.pos::dp) sf1 in iclose nf1 sf2.side in
       let cpf = Split (cpr, sf1.cpf, sf2.cpf) in
-      let cfp = let und () = assert false in
-                Destruct (cpr, und (), und (), sf1.cfp |>> sf2.cfp) in
+      (* let cfp = let und () = assert false in
+       *           Destruct (cpr, und (), und (), sf1.cfp |>> sf2.cfp) in *)
       let cfn = combine_cert cpr sf1.cfn sf2.cfn in
-      ret pos cpf cfp neg cfn Nc bwd fwd side false (cn1 || cn2)
+      ret pos cpf Nc neg cfn Nc bwd fwd side false (cn1 || cn2)
     (* f1 by f2 *)
   | Tbinop (Timplies,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) },f1) ->
       if not (sp.byso_split && asym f2) then split_core sp f1 else
