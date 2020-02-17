@@ -80,6 +80,17 @@ val decl_l : (decl -> decl list list) -> task -> task tlist
     [t1;d111;d112;d21], [t1;d111;d112;d221;d222], [t1;d12;d21] and
     [t1;d12;d221;d222] *)
 
+val decl_acc   : 'a -> ('a -> 'b -> 'a) ->
+                 (decl -> decl list * 'b) -> task -> task * 'a
+(** Same as decl but with an accumulator (first argument) and a function
+ to compose accumulators (second argument) *)
+
+
+val decl_l_acc : 'a -> ('a -> 'b -> 'a) ->
+                 (decl -> decl list list * 'b) -> task -> task list * 'a
+(** Same as decl_l but with an accumulator (first argument) and a function
+ to compose accumulators (second argument) *)
+
 
 type diff_decl =
   | Goal_decl of Decl.decl
