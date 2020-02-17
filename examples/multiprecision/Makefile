@@ -1,6 +1,8 @@
 BENCH ?= no
+OVERLAY ?= no
+LOCAL ?= $(BENCH)
 
-ifeq ($(BENCH),yes)
+ifeq ($(LOCAL),yes)
   WHY3=../../bin/why3.opt
 else
   ifeq ($(BINDIR),)
@@ -11,28 +13,37 @@ else
 endif
 
 ifdef GMP_DIR
-  GMPFLAGS = $(shell sed -n -e 's/^CFLAGS = \(.*\)/\1/p' $(GMP_DIR)/Makefile)
+  CFLAGS = $(shell sed -n -e 's/^CFLAGS = \(.*\)/\1/p' $(GMP_DIR)/Makefile)
 else
-  GMPFLAGS = -march=native -O2 -fomit-frame-pointer
+  CFLAGS = -march=native -O2 -fomit-frame-pointer
 endif
 
-CFLAGS = $(GMPFLAGS) -Wall -Wno-unused -g -std=c11
+ifdef GMP_LIB
+  GMPFLAGS = -I$(GMP_LIB)/include -L$(GMP_LIB)/lib
+endif
 
-all: why3 extract
+CFLAGS += -Wall -Wno-unused -g -std=c11 -Wno-pedantic
+
+.PHONY: all clean extract plots benchs why3benchs gmpbenchs minigmpbenchs
+
+all: extract
 
 clean:
-	rm -rf build
+	rm -rf build bench
 
 why3:
 	make -C ../..
 
-MLWFILES= $(addsuffix .mlw, powm sqrtrem sqrt toom logical div mul sub add compare util)
+MLWFILES = \
+  mpz_div2exp mpz_mul2exp mpz_mul mpz_sub mpz_add mpz_getset mpz_cmp mpz_cmpabs mpz \
+  set_str get_str base_info powm sqrtrem sqrt toom logical div mul sub add compare util
 
-cfiles: why3
+build/extracted: $(addsuffix .mlw, $(MLWFILES))
 	mkdir -p build
+	rm -f $@
 	$(WHY3) extract -D wmpn.drv -D c -L . --recursive --modular --interface -o build/ \
-	--debug c_no_error_msgs wmpn.mlw
-	#$(MLWFILES)
+	  --debug c_no_error_msgs wmpn.mlw
+	touch $@
 
 build/sqrtinit.h: sqrtinit.ml
 	mkdir -p build
@@ -42,58 +53,62 @@ build/binverttab.h: binverttab.ml
 	mkdir -p build
 	ocaml binverttab.ml > build/binverttab.h
 
-extract: cfiles build/sqrtinit.h build/binverttab.h
+EXTRACTED = build/extracted build/sqrtinit.h build/binverttab.h
 
-CFILES = build/uint64gmp.c build/powm.c build/fxp.c build/sqrt.c build/sqrt1.c build/toom.c build/div.c build/logical.c build/mul.c build/sub.c build/add.c build/compare.c build/util.c build/int32.c
+extract: $(EXTRACTED)
 
-tests: extract
-	gcc $(CFLAGS) tests.c $(CFILES) -Irandom -lgmp -o build/tests
-	gcc $(CFLAGS) -DCOMPARE_MINI tests.c $(CFILES) -Irandom -Imini-gmp -o build/minitests
-	./build/tests
-	./build/minitests
+CFILES = \
+  zutil.c z.c zcmp.c zcmpabs.c zadd.c zsub.c zmul.c zmul2exp.c zdiv2exp.c \
+  set.c get_str.c set_str.c baseinfo.c powm.c fxp.c sqrt.c sqrt1.c toom.c div.c \
+  logical.c logicalold.c logicalutil.c mul_basecase.c sub.c sub_1.c add.c add_1.c \
+  compare.c util.c utilold.c int32.c
 
-bench-tests: extract
-	gcc $(CFLAGS) tests.c $(CFILES) -Irandom -lgmp -o build/bench-tests
+ifneq ($(OVERLAY),gmp)
+CFILES += mul.c addold.c subold.c
+endif
 
-build/why3%bench: extract
-	gcc $(CFLAGS) -DTEST_WHY3 -DTEST_`echo $* | tr [:lower:] [:upper:]` tests.c $(CFILES) -Iinclude -Irandom -lgmp -o $@
+gmp_INCLUDES = mul.h add.h sub.h
+mini_INCLUDES = uint64gmp.h
+no_INCLUDES =
+INCLUDES = $($(OVERLAY)_INCLUDES)
 
-build/gmp%bench: extract
-	gcc $(CFLAGS) -DTEST_GMP -DTEST_`echo $* | tr [:lower:] [:upper:]` tests.c $(CFILES) -Iinclude -Irandom -lgmp -o $@
+build/libwmp.a: $(EXTRACTED)
+	cd build; gcc $(CFLAGS) $(INCLUDES:%=-include ../overlays/%) -c $(CFILES)
+	ar rcs $@ $(addprefix build/,$(CFILES:.c=.o))
 
-build/minigmp%bench: extract
-	gcc $(CFLAGS) -DTEST_MINIGMP -DTEST_`echo $* | tr [:lower:] [:upper:]` tests.c $(CFILES) -Iinclude -Imini-gmp -Irandom -o $@
+build/tests: tests.c build/libwmp.a
+	gcc $(CFLAGS) tests.c -Irandom -Lbuild -lm -lwmp -lgmp -o $@
 
-alltests: tests build/why3addbench build/why3mulbench build/why3toombench build/why3divbench build/gmpaddbench build/gmpmulbench build/gmptoombench build/gmpdivbench build/minigmpaddbench build/minigmpmulbench build/minigmpdivbench build/minigmptoombench build/gmppowmbench build/why3powmbench
+build/minitests: tests.c build/libwmp.a
+	gcc $(CFLAGS) -DCOMPARE_MINI tests.c -Irandom -Imini-gmp -Lbuild -lm -lwmp -o $@
 
-data: alltests
+UPPER = $(shell echo $* | tr [:lower:] [:upper:])
+
+build/why3%bench: tests.c build/libwmp.a
+	gcc $(CFLAGS) -DTEST_WHY3 -DTEST_$(UPPER) tests.c -Iinclude -Irandom -Lbuild -lm -lwmp -lgmp -o $@
+
+build/gmp%bench: tests.c build/libwmp.a
+	gcc $(CFLAGS) $(GMPFLAGS) -DTEST_GMP -DTEST_$(UPPER) tests.c -Iinclude -Irandom -lm -lgmp -o $@
+
+build/minigmp%bench: tests.c build/libwmp.a
+	gcc $(CFLAGS) -DTEST_MINIGMP -DTEST_$(UPPER) tests.c -Iinclude -Imini-gmp -Irandom -lm -o $@
+
+BENCHS = toomb sqrtrem millerrabin toomu add mul div powm toomm
+
+
+WHY3BENCHFILES = $(addprefix bench/why3, $(BENCHS))
+GMPBENCHFILES = $(addprefix bench/gmp, $(BENCHS))
+MINIGMPBENCHFILES = $(addprefix bench/minigmp, $(BENCHS))
+BENCHFILES = $(WHY3BENCHFILES) $(GMPBENCHFILES) $(MINIGMPBENCHFILES)
+
+$(BENCHFILES): bench/%: build/%bench
 	mkdir -p bench
-	./build/why3addbench > bench/why3add
-	./build/why3mulbench > bench/why3mul
-	./build/why3toombench > bench/why3toom
-	./build/why3divbench > bench/why3div
-	./build/why3powmbench > bench/why3powm
-	./build/gmpaddbench > bench/gmpadd
-	./build/gmpmulbench > bench/gmpmul
-	./build/gmptoombench > bench/gmptoom
-	./build/gmpdivbench > bench/gmpdiv
-	./build/gmppowmbench > bench/gmppowm
-	./build/minigmpaddbench > bench/minigmpadd
-	./build/minigmpmulbench > bench/minigmpmul
-	./build/minigmptoombench > bench/minigmptoom
-	./build/minigmpdivbench > bench/minigmpdiv
+	$< > $@
 
-plots: data
+why3benchs: $(WHY3BENCHFILES)
+gmpbenchs: $(GMPBENCHFILES)
+minigmpbenchs: $(MINIGMPBENCHFILES)
+benchs: why3benchs gmpbenchs minigmpbenchs
+
+plots: $(BENCHFILES)
 	make all -C plots
-
-dist: extract
-	mkdir -p distrib/lib
-	touch distrib/ChangeLog
-	cp build/*.c build/*.h distrib/lib/
-	cd distrib; ./autogen.sh
-	cd distrib; make distcheck
-
-tests-dist:
-	make -C distrib
-	gcc $(CFLAGS) tests.c -DTEST_LIB -Irandom -Idistrib -lgmp -Ldistrib -lwmp -o build/disttests
-	./build/disttests

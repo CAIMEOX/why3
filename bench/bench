@@ -254,14 +254,14 @@ extract_and_test_wmp () {
         printf "extract... "
         if BENCH=yes make -C $dir extract > /dev/null; then
             printf "compile... "
-            if BENCH=yes make -C $dir bench-tests > /dev/null; then
+            if BENCH=yes make -C $dir build/tests > /dev/null; then
                 printf "execute... "
-                if $dir/build/bench-tests > /dev/null; then
+                if $dir/build/tests > /dev/null; then
                     echo "ok"
                 else
                     echo "execution failed!"
-                    echo $dir/build/bench-tests
-                    $dir/build/bench-tests
+                    echo $dir/build/tests
+                    $dir/build/tests
                     exit 1
                 fi
             else
@@ -436,6 +436,7 @@ echo ""
 
 echo "=== Checking replay (no prover) ==="
 replay bench/replay
+replay tests/ada_terms # TODO ada plugin only
 replay examples/stdlib --merging-only
 replay examples/bts --merging-only
 replay examples/tests --merging-only
@@ -450,7 +451,7 @@ replay examples/bitvectors "-L examples/bitvectors --merging-only"
 replay examples/avl "-L examples/avl --merging-only"
 replay examples/verifythis_2016_matrix_multiplication "-L examples/verifythis_2016_matrix_multiplication --merging-only"
 replay examples/double_wp "-L examples/double_wp --merging-only"
-replay examples/in_progress/ring_decision "-L examples/in_progress/ring_decision --merging-only"
+#replay examples/in_progress/ring_decision "-L examples/in_progress/ring_decision --merging-only"
 replay examples/multiprecision "-L examples/multiprecision --merging-only"
 replay examples/prover "-L examples/prover --merging-only --debug ignore_unused_vars"
 #replay examples/in_progress --merging-only

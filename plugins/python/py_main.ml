@@ -368,8 +368,6 @@ open Term
 open Format
 open Pretty
 
-let protect_on x s = if x then "(" ^^ s ^^ ")" else s
-
 (* python print_binop *)
 let print_binop ~asym fmt = function
   | Tand when asym -> fprintf fmt "&&"
@@ -406,7 +404,7 @@ let rec python_ext_printer print_any fmt a =
       end
   | _ -> print_any fmt a
 
-let () = Itp_server.add_registered_lang "python" python_ext_printer
+let () = Itp_server.add_registered_lang "python" (fun _ -> python_ext_printer)
 
 let () = Args_wrapper.set_argument_parsing_functions "python"
     ~parse_term:(fun _ lb -> Py_lexer.parse_term lb)
