@@ -538,8 +538,6 @@ PLUGCMX = $(addsuffix .cmx, $(PLUGMODULES))
 
 PLUGDIRS = parser printer transform tptp python microc cert ada_terms
 
-PLUGDIRS = parser printer transform tptp python microc ada_terms
-
 PLUGINCLUDES = $(addprefix -I plugins/, $(PLUGDIRS))
 
 $(PLUGDEP) $(PLUGCMO) $(PLUGCMX): INCLUDES += $(PLUGINCLUDES)
