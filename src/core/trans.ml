@@ -152,7 +152,7 @@ let gen_decl_l add fn =
 let gen_decl_l_acc add facc fn =
   let fn = store_decl fn in
   let fn task tacc acc = match task.task_decl.td_node with
-    | Decl d -> let dll, na = fn d in
+    | Decl d -> let dll, na = fn d acc in
                 List.map (List.fold_left add tacc) dll, facc acc na
     | _ -> [add_tdecl tacc task.task_decl], acc
   in

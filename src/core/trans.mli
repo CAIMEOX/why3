@@ -87,7 +87,7 @@ val decl_acc   : 'a -> ('a -> 'b -> 'a) ->
 
 
 val decl_l_acc : 'a -> ('a -> 'b -> 'a) ->
-                 (decl -> decl list list * 'b) -> task -> task list * 'a
+                 (decl -> 'a -> decl list list * 'b) -> task -> task list * 'a
 (** Same as decl_l but with an accumulator (first argument) and a function
  to compose accumulators (second argument) *)
 
