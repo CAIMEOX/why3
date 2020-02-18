@@ -22,14 +22,14 @@ let clear_c l               = cchecker (clear l)
 let contradict_c            = cchecker contradict
 let exfalso_c               = cchecker exfalso
 let instantiate_c t what    = cchecker (inst t what)
-let intro_c where           = cchecker (intro false where)
+let intro_c any every where = cchecker (intro any every where)
 let intros_c                = cchecker intros
 let left_c where            = cchecker (dir Left where)
 (* let pose_c name t           = cchecker (pose name t) *)
 let revert_c ls             = cchecker (revert ls)
 let rewrite_c rev g where   = cchecker (rewrite g rev where)
 let right_c where           = cchecker (dir Right where)
-let split_c where           = cchecker (split_logic false where)
+let split_c any every where = cchecker (split_logic any every where)
 let split_all_full_c        = cchecker split_all_full
 let split_all_right_c       = cchecker split_all_right
 let split_goal_full_c       = cchecker split_goal_full
@@ -48,13 +48,13 @@ let clear_d l               = dchecker (clear l)
 let contradict_d            = dchecker contradict
 let exfalso_d               = dchecker exfalso
 let instantiate_d t what    = dchecker (inst t what)
-let intro_d where           = dchecker (intro false where)
+let intro_d any every where = dchecker (intro any every where)
 let intros_d                = dchecker intros
 let left_d where            = dchecker (dir Left where)
 (* let pose_d name t           = dchecker (pose name t) *)
 let revert_d ls             = dchecker (revert ls)
 let right_d where           = dchecker (dir Right where)
-let split_d where           = dchecker (split_logic false where)
+let split_d any every where = dchecker (split_logic any every where)
 let split_all_full_d        = dchecker split_all_full
 let split_all_right_d       = dchecker split_all_right
 let split_goal_full_d       = dchecker split_goal_full
@@ -96,7 +96,8 @@ let register_caml : unit =
     instantiate_c;
 
   wrap_and_register ~desc:"A OCaml certified version of (simplified) coq tactic [intro]"
-    "intro_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) intro_c;
+    "intro_ccert" (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
+    intro_c;
 
   register_transform_l "intros_ccert" intros_c
     ~desc:"A OCaml certified version of coq tactic [intros]";
@@ -117,7 +118,8 @@ let register_caml : unit =
     "right_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) right_c;
 
   wrap_and_register ~desc:"A OCaml certified version of (simplified) coq tactic [split]"
-    "split_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) split_c;
+    "split_ccert" (Toptbool ("any", (Toptbool ("all", ((Topt ("in", Tprsymbol (Ttrans_l))))))))
+    split_c;
 
   register_transform_l "split_all_full_ccert" split_all_full_c
     ~desc:"The OCaml certified version of split_all_full";
@@ -178,7 +180,7 @@ let register_dedukti : unit =
     instantiate_d;
 
   wrap_and_register ~desc:"A Dedukti certified version of (simplified) coq tactic [intro]"
-    "intro_dcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+    "intro_dcert" (Toptbool ("any", (Toptbool ("all", ((Topt ("in", Tprsymbol (Ttrans_l))))))))
     intro_d;
 
   register_transform_l "intros_dcert" intros_d
@@ -201,7 +203,7 @@ let register_dedukti : unit =
     right_d;
 
   wrap_and_register ~desc:"A Dedukti certified version of (simplified) coq tactic [split]"
-    "split_dcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+    "split_dcert" (Toptbool ("any", (Toptbool ("all", ((Topt ("in", Tprsymbol (Ttrans_l))))))))
     split_d;
 
   register_transform_l "split_all_full_dcert" split_all_full_d
