@@ -20,6 +20,7 @@ let blast_c                 = cchecker blast
 let case_c t                = cchecker (case t)
 let clear_c l               = cchecker (clear l)
 let contradict_c            = cchecker contradict
+let destruct_all_c any every where = cchecker (destruct_all any every where)
 let exfalso_c               = cchecker exfalso
 let instantiate_c t what    = cchecker (inst t what)
 let intro_c any every where = cchecker (intro any every where)
@@ -46,6 +47,7 @@ let blast_d                 = dchecker blast
 let case_d t                = dchecker (case t)
 let clear_d l               = dchecker (clear l)
 let contradict_d            = dchecker contradict
+let destruct_all_d any every where = dchecker (destruct_all any every where)
 let exfalso_d               = dchecker exfalso
 let instantiate_d t what    = dchecker (inst t what)
 let intro_d any every where = dchecker (intro any every where)
@@ -87,6 +89,10 @@ let register_caml : unit =
 
   register_transform_l "contradict_ccert" contradict_c
     ~desc:"A OCaml certified transformation that closes some contradictory goals";
+
+  wrap_and_register ~desc:"A OCaml certified transformation to destruct a logical constructor"
+    "destruct_all_ccert" (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
+    destruct_all_c;
 
   register_transform_l "exfalso_ccert" exfalso_c
     ~desc:"A OCaml certified version of coq tactic [exfalso]";
@@ -171,6 +177,10 @@ let register_dedukti : unit =
 
   register_transform_l "contradict_dcert" contradict_d
     ~desc:"A Dedukti certified transformation that closes some contradictory goals";
+
+  wrap_and_register ~desc:"A Dedukti certified transformation to destruct a logical constructor"
+    "destruct_all_dcert" (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
+    destruct_all_d;
 
   register_transform_l "exfalso_dcert" exfalso_d
     ~desc:"A Dedukti certified version of coq tactic [exfalso]";
