@@ -9,159 +9,9 @@ open Cert_certificates
 (* Define an elaborated type of certificate. This is usefull to have access to
    all the terms we need when printing to a Dedukti file *)
 
-type 'a ec = (* elaborated certificate *)
-  | Hole_e of 'a (* So we can fill the holes with the remaining tasks. Corresponds to Hole *)
-  | Axiom_directed of cterm * ident * ident
-  | Trivial_hyp of ident
-  | Trivial_goal of ident
-  | Cut_e of cterm * ident * 'a ec * ident * 'a ec
-  | Split_hyp  of (cterm * cterm * ident * 'a ec * ident * 'a ec * ident)
-  | Split_goal of (cterm * cterm * ident * 'a ec * ident * 'a ec * ident)
-  | Unfold_iff_hyp of (cterm * cterm * ident * 'a ec * ident)
-  | Unfold_iff_goal of (cterm * cterm * ident * 'a ec * ident)
-  | Unfold_arr_hyp of (cterm * cterm * ident * 'a ec * ident)
-  | Unfold_arr_goal of (cterm * cterm * ident * 'a ec * ident)
-  | Swap_neg_neg_hyp of (cterm * ident * 'a ec * ident)
-  | Swap_neg_hyp of (cterm * ident * 'a ec * ident)
-  | Swap_neg_goal of (cterm * ident * 'a ec * ident)
-  | Swap_neg_neg_goal of (cterm * ident * 'a ec * ident)
-  | Destruct_goal of (cterm * cterm * ident * ident * 'a ec * ident)
-  | Destruct_hyp  of (cterm * cterm * ident * ident * 'a ec * ident)
-  | Weakening_hyp of cterm * 'a ec * ident
-  | Weakening_goal of cterm * 'a ec * ident
-  | Intro_quant_hyp of (cterm * ident * ident * 'a ec * ident)
-  | Intro_quant_goal of (cterm * ident * ident * 'a ec * ident)
-  | Inst_quant_goal of (cterm * cterm * ident * 'a ec * ident)
-  | Inst_quant_hyp of (cterm * cterm * ident * 'a ec * ident)
-
-type certif_elab = unit ec
-
 let find_goal cta =
   let _, (t, _) = Mid.(filter (fun _ (_, b) -> b) cta |> choose) in
   t
-
-(* Run the certificate from the initial task to find intermediate terms.
-   Also fills the holes with a predefined list.*)
-let rec elab (cta : ctask) (c : core_certif) (fill : 'a list) : 'a ec * 'a list =
-  match c with
-  | Nc ->
-      verif_failed "No certificates for this case"
-  | Hole ->
-      begin match fill with
-      | [] -> verif_failed "Not enough to fill"
-      | first::rest -> Hole_e first, rest end
-  | Axiom (i1, i2) ->
-      let t, pos1 = find_ident "axiom1" i1 cta in
-      let h, g = if pos1 then i2, i1 else i1, i2 in
-      Axiom_directed (t, h, g), fill
-  | Trivial i ->
-      let t, pos = find_ident "trivial" i cta in
-      begin match t, pos with
-      | CTfalse, false ->
-          Trivial_hyp i, fill
-      | CTtrue, true ->
-          Trivial_goal i, fill
-      | _ -> assert false
-      end
-  | Cut (i, a, ce1, ce2) ->
-      let cta1 = Mid.add i (a, true) cta in
-      let ce1, fill = elab cta1 ce1 fill in
-      let cta2 = Mid.add i (a, false) cta in
-      let ce2, fill = elab cta2 ce2 fill in
-      Cut_e (a, i, ce1, i, ce2), fill
-  | Let _ -> verif_failed "Some Let left"
-  | Split (i, c1, c2) ->
-      let t, pos = find_ident "split" i cta in
-      begin match t, pos with
-      | CTbinop (Tor, a, b), false | CTbinop (Tand, a, b), true ->
-          let cta1 = Mid.add i (a, pos) cta in
-          let ce1, fill = elab cta1 c1 fill in
-          let cta2 = Mid.add i (b, pos) cta in
-          let ce2, fill = elab cta2 c2 fill in
-          let pack = (a, b, i, ce1, i, ce2, i) in
-          if pos then Split_goal pack, fill
-          else Split_hyp pack, fill
-      | _ -> assert false
-      end
-  | Unfold (i, c) ->
-      let t, pos = find_ident "unfold" i cta in
-      begin match t with
-      | CTbinop (Tiff, a, b) ->
-          let imp_pos = CTbinop (Timplies, a, b) in
-          let imp_neg = CTbinop (Timplies, b, a) in
-          let unfolded_iff = CTbinop (Tand, imp_pos, imp_neg), pos in
-          let cta = Mid.add i unfolded_iff cta in
-          let ce, fill = elab cta c fill in
-          let pack = (a, b, i, ce, i) in
-          if pos then Unfold_iff_goal pack, fill
-          else Unfold_iff_hyp pack, fill
-      | CTbinop (Timplies, a, b) ->
-          let unfolded_imp = CTbinop (Tor, CTnot a, b), pos in
-          let cta = Mid.add i unfolded_imp cta in
-          let ce, fill = elab cta c fill in
-          let pack = (a, b, i, ce, i) in
-          if pos then Unfold_arr_goal pack, fill
-          else Unfold_arr_hyp pack, fill
-      | _ -> verif_failed "Nothing to unfold" end
-  | Swap_neg (i, c) ->
-      let a, pos = find_ident "swap_neg" i cta in
-      let underlying_a, neg_a, is_neg_a = match a with
-        | CTnot t -> t, t, true
-        | t -> t, CTnot t, false in
-      let cta = Mid.add i (neg_a, not pos) cta in
-      let ce, fill = elab cta c fill in
-      let pack = (underlying_a, i, ce, i) in
-      if is_neg_a
-      then if pos
-           then Swap_neg_neg_goal pack, fill
-           else Swap_neg_neg_hyp  pack, fill
-      else if pos
-           then Swap_neg_goal pack, fill
-           else Swap_neg_hyp  pack, fill
-  | Destruct (i, j1, j2, c) ->
-      let t, pos = find_ident "destruct" i cta in
-      begin match t, pos with
-      | CTbinop (Tand, a, b), false | CTbinop (Tor, a, b), true ->
-          let cta = Mid.remove i cta
-                    |> Mid.add j1 (a, pos)
-                    |> Mid.add j2 (b, pos) in
-          let ce, fill = elab cta c fill in
-          let pack = (a, b, j1, j2, ce, i) in
-          if pos then Destruct_goal pack, fill
-          else Destruct_hyp pack, fill
-      | _ -> assert false
-      end
-  | Weakening (i, c) ->
-      let a, pos = find_ident "weakening" i cta in
-      let cta = Mid.remove i cta in
-      let c, fill = elab cta c fill in
-      if pos
-      then Weakening_goal (a, c, i), fill
-      else Weakening_hyp  (a, c, i), fill
-  | Intro_quant (i, y, c) ->
-      let t, pos = find_ident "intro_quant" i cta in
-      begin match t, pos with
-      | CTquant (CTexists, p), false | CTquant (CTforall, p), true ->
-          if mem y t then verif_failed "non-free variable" else
-            let cta = Mid.add i (ct_open p (CTfvar y), pos) cta in
-            let ce, fill = elab cta c fill in
-            let p' = CTquant (CTlambda, p) in
-            if pos then Intro_quant_goal (p', y, i, ce, i), fill
-            else Intro_quant_hyp (p', y, i, ce, i), fill
-      | _ -> verif_failed "Nothing to introduce" end
-  | Inst_quant (i, j, t_inst, c) ->
-      let p, pos = find_ident "inst_quant" i cta in
-      begin match p, pos with
-      | CTquant (CTforall, p), false | CTquant (CTexists, p), true ->
-          let cta = Mid.add j (ct_open p t_inst, pos) cta in
-          let ce, fill = elab cta c fill in
-          let p' = CTquant (CTlambda, p) in
-          if pos then Inst_quant_goal (p', t_inst, j, ce, i), fill
-          else Inst_quant_hyp (p', t_inst, j, ce, i), fill
-      | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
-      end
-  | Rewrite _ -> verif_failed "rewriting is not supported in Dedukti verification"
-
 
 (* We represent a ctask <H₁ : A₁, ..., Hₘ : Aₘ ⊢ G₁ : B₁, ..., Gₘ : Bₘ >
    by the formula <A₁ → ... → Aₘ → ¬B₁ → ... → ¬Bₙ → ⊥ >
@@ -218,8 +68,8 @@ let rec print_term fmt = function
         (str x)
         print_term (ct_open t (CTfvar x))
 
-(* on [e1; ...; en], print_list gives :
-   e1 sep ... en sep
+(* on [e1; ...; en], print_list sep gives :
+   e1 sep e2 sep ... en sep
  *)
 let print_list sep pe fmt l =
   List.iter (fun h -> fprintf fmt "%a%s" pe h sep) l
@@ -277,130 +127,77 @@ let print_task fmt (fv, ts) =
     (print_list_pre "imp" print_term) tp;
   fprintf fmt ")"
 
-let nopt = function
-  | Some x -> x
-  | None -> failwith "not an option"
+let rstr goal = if goal then "_goal" else "_hyp"
 
 let rec print_certif fmt = function
-  | Hole_e s ->
+  | ELet _ | EConstruct _ -> verif_failed "Construct/Let left"
+  | EHole s ->
       fprintf fmt "%s" s
-  | Axiom_directed (t, h, g) ->
+  | EAxiom (t, h, g) ->
       fprintf fmt "axiom (%a) %s %s"
         print_term t
         (str h)
         (str g)
-  | Trivial_hyp g ->
-      fprintf fmt "trivial_hyp %s" (str g)
-  | Trivial_goal g ->
-      fprintf fmt "trivial_goal %s" (str g)
-  | Cut_e (a, g1, ce1, g2, ce2) ->
+  | ETrivial (goal, g) ->
+      fprintf fmt "trivial%s %s" (rstr goal)
+        (str g)
+  | ECut (i, a, ce1, ce2) ->
       fprintf fmt "cut (%a) (%s => %a) (%s => %a)"
         print_term a
-        (str g1) print_certif ce1
-        (str g2) print_certif ce2
-  | Split_hyp (a, b, h1, c1, h2, c2, g) ->
-      fprintf fmt "split_hyp (%a) (%a) (%s => %a) (%s => %a) %s"
+        (str i) print_certif ce1
+        (str i) print_certif ce2
+  | ESplit (goal, a, b, i, c1, c2) ->
+      fprintf fmt "split%s (%a) (%a) (%s => %a) (%s => %a) %s" (rstr goal)
         print_term a
         print_term b
-        (str h1) print_certif c1
-        (str h2) print_certif c2
-        (str g)
-  | Split_goal (a, b, h1, c1, h2, c2, g) ->
-      fprintf fmt "split_goal (%a) (%a) (%s => %a) (%s => %a) %s"
+        (str i) print_certif c1
+        (str i) print_certif c2
+        (str i)
+  | EUnfoldIff (goal, a, b, i, c) ->
+      fprintf fmt "unfold_iff%s (%a) (%a) (%s => %a) %s" (rstr goal)
         print_term a
         print_term b
-        (str h1) print_certif c1
-        (str h2) print_certif c2
-        (str g)
-  | Unfold_iff_hyp (a, b, h, c, g) ->
-      fprintf fmt "unfold_iff_hyp (%a) (%a) (%s => %a) %s"
+        (str i) print_certif c
+        (str i)
+  | EUnfoldArr (goal, a, b, i, c) ->
+      fprintf fmt "unfold_arr%s (%a) (%a) (%s => %a) %s" (rstr goal)
         print_term a
         print_term b
-        (str h) print_certif c
-        (str g)
-  | Unfold_iff_goal (a, b, h, c, g) ->
-      fprintf fmt "unfold_iff_goal (%a) (%a) (%s => %a) %s"
+        (str i) print_certif c
+        (str i)
+  | ESwapNeg (goal, a, i, c) ->
+      fprintf fmt "swap_neg%s (%a) (%s => %a) %s" (rstr goal)
+        print_term a
+        (str i) print_certif c
+        (str i)
+  | ESwap (goal, a, i, c) ->
+      fprintf fmt "swap%s (%a) (%s => %a) %s" (rstr goal)
+        print_term a
+        (str i) print_certif c
+        (str i)
+  | EDestruct (goal, a, b, i1, i2, j, c) ->
+      fprintf fmt "destruct%s (%a) (%a) (%s => %s => %a) %s" (rstr goal)
         print_term a
         print_term b
-        (str h) print_certif c
-        (str g)
-  | Unfold_arr_hyp (a, b, h, c, g) ->
-      fprintf fmt "unfold_arr_hyp (%a) (%a) (%s => %a) %s"
-        print_term a
-        print_term b
-        (str h) print_certif c
-        (str g)
-  | Unfold_arr_goal (a, b, h, c, g) ->
-      fprintf fmt "unfold_arr_goal (%a) (%a) (%s => %a) %s"
-        print_term a
-        print_term b
-        (str h) print_certif c
-        (str g)
-  | Swap_neg_neg_hyp (a, h, c, g) ->
-      fprintf fmt "swap_neg_neg_hyp (%a) (%s => %a) %s"
-        print_term a
-        (str h) print_certif c
-        (str g)
-  | Swap_neg_hyp (a, h, c, g) ->
-      fprintf fmt "swap_neg_hyp (%a) (%s => %a) %s"
-        print_term a
-        (str h) print_certif c
-        (str g)
-  | Swap_neg_goal (a, h, c, g) ->
-      fprintf fmt "swap_neg_goal (%a) (%s => %a) %s"
-        print_term a
-        (str h) print_certif c
-        (str g)
-  | Swap_neg_neg_goal (a, h, c, g) ->
-      fprintf fmt "swap_neg_neg_goal (%a) (%s => %a) %s"
-        print_term a
-        (str h) print_certif c
-        (str g)
-  | Destruct_hyp (a, b, h1, h2, c, g) ->
-      fprintf fmt "destruct_hyp (%a) (%a) (%s => %s => %a) %s"
-        print_term a
-        print_term b
-        (str h1) (str h2) print_certif c
-        (str g)
-  | Destruct_goal (a, b, h1, h2, c, g) ->
-      fprintf fmt "destruct_goal (%a) (%a) (%s => %s => %a) %s"
-        print_term a
-        print_term b
-        (str h1) (str h2) print_certif c
-        (str g)
-  | Weakening_hyp (a, c, g) ->
-      fprintf fmt "weakening_hyp (%a) (%a) %s"
+        (str i1) (str i2) print_certif c
+        (str j)
+  | EWeakening (goal, a, i, c) ->
+      fprintf fmt "weakening%s (%a) (%a) %s" (rstr goal)
         print_term a
         print_certif c
-        (str g)
-  | Weakening_goal (a, c, g) ->
-      fprintf fmt "weakening_goal (%a) (%a) %s"
-        print_term a
-        print_certif c
-        (str g)
-  | Intro_quant_hyp (p, y, h, c, g) ->
-      fprintf fmt "intro_quant_hyp (%a) (%s => %s => %a) %s"
+        (str i)
+  | EIntroQuant (goal, p, i, y, c) ->
+      fprintf fmt "intro_quant%s (%a) (%s => %s => %a) %s" (rstr goal)
         print_term p
-        (str y) (str h) print_certif c
-        (str g)
-  | Intro_quant_goal (p, y, h, c, g) ->
-      fprintf fmt "intro_quant_goal (%a) (%s => %s => %a) %s"
-        print_term p
-        (str y) (str h) print_certif c
-        (str g)
-  | Inst_quant_goal (p, t, h, c, g) ->
-      fprintf fmt "inst_quant_goal (%a) (%a) (%s => %s => %a) %s"
+        (str y) (str i) print_certif c
+        (str i)
+  | EInstQuant (goal, p, i, j, t, c) ->
+      fprintf fmt "inst_quant%s (%a) (%a) (%s => %s => %a) %s" (rstr goal)
         print_term p
         print_term t
-        (str g) (str h) print_certif c
-        (str g)
-  | Inst_quant_hyp (p, t, h, c, g) ->
-      fprintf fmt "inst_quant_hyp (%a) (%a) (%s => %s => %a) %s"
-        print_term p
-        print_term t
-        (str g) (str h) print_certif c
-        (str g)
-
+        (str i) (str j) print_certif c
+        (str i)
+  | ERewrite _ -> verif_failed "Rewrite is not yet supported by the Dedukti checker"
 
 let fv_ts (ct : ctask) =
   let encode_neg (k, (ct, pos)) = k, if pos then CTnot ct else ct in
@@ -442,7 +239,8 @@ let print fmt init_ct res_ct certif =
     let vars = task_syms @ List.map str (fv_ids @ hyp_ids) in
     print_list " => " (fun fmt -> fprintf fmt "%s") fmt vars;
     print_certif fmt cert in
-  fprintf fmt "#CHECK (%a) :\n       (%a).@."
+  fprintf fmt "#CHECK (%a) :\n\
+                      (%a).@."
     p_term ()
     p_type ()
 

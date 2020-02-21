@@ -49,13 +49,11 @@ let check_rewrite cta rev h g terms path : ctask list =
 
 (** This is the main verification function : <check_certif> replays the certificate on a ctask *)
 
-let rec ccheck (c : core_certif) cta : ctask list =
+let rec ccheck (c : kernel_ecert) cta : ctask list =
   match c with
-    | Nc ->
-        verif_failed "No certificates for this case"
-    | Let _ -> verif_failed "Some Let left"
-    | Hole -> [cta]
-    | Axiom (i1, i2) ->
+    | ELet _ | EConstruct _ -> verif_failed "Construct/Let left"
+    | EHole _ -> [cta]
+    | EAxiom (_, i1, i2) ->
         let t1, pos1 = find_ident "axiom1" i1 cta in
         let t2, pos2 = find_ident "axiom2" i2 cta in
         if pos1 <> pos2
@@ -63,17 +61,17 @@ let rec ccheck (c : core_certif) cta : ctask list =
              then []
              else verif_failed "The hypothesis and goal given do not match"
         else verif_failed "Terms have wrong positivities in the task"
-    | Trivial i ->
+    | ETrivial (_, i) ->
         let t, pos = find_ident "trivial" i cta in
         begin match t, pos with
         | CTfalse, false | CTtrue, true -> []
         | _ -> verif_failed "Non trivial hypothesis"
         end
-    | Cut (i, a, c1, c2) ->
+    | ECut (i, a, c1, c2) ->
         let cta1 = Mid.add i (a, true) cta in
         let cta2 = Mid.add i (a, false) cta in
         ccheck c1 cta1 @ ccheck c2 cta2
-    | Split (i, c1, c2) ->
+    | ESplit (_, _, _, i, c1, c2) ->
         let t, pos = find_ident "split" i cta in
         begin match t, pos with
         | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false ->
@@ -81,7 +79,7 @@ let rec ccheck (c : core_certif) cta : ctask list =
             let cta2 = Mid.add i (t2, pos) cta in
             ccheck c1 cta1 @ ccheck c2 cta2
         | _ -> verif_failed "Not splittable" end
-    | Unfold (i, c) ->
+    | EUnfoldIff (_, _, _, i, c) ->
         let t, pos = find_ident "unfold" i cta in
         begin match t with
         | CTbinop (Tiff, t1, t2) ->
@@ -90,17 +88,21 @@ let rec ccheck (c : core_certif) cta : ctask list =
             let unfolded_iff = CTbinop (Tand, imp_pos, imp_neg), pos in
             let cta = Mid.add i unfolded_iff cta in
             ccheck c cta
+        | _ -> verif_failed "Nothing to unfold" end
+    | EUnfoldArr (_, _, _, i, c) ->
+        let t, pos = find_ident "unfold" i cta in
+        begin match t with
         | CTbinop (Timplies, t1, t2) ->
             let unfolded_imp = CTbinop (Tor, CTnot t1, t2), pos in
             let cta = Mid.add i unfolded_imp cta in
             ccheck c cta
         | _ -> verif_failed "Nothing to unfold" end
-    | Swap_neg (i, c) ->
-        let t, pos = find_ident "swap_neg" i cta in
+    | ESwap (_, _, i, c) | ESwapNeg (_, _, i, c) ->
+        let t, pos = find_ident "Swap" i cta in
         let neg_t = match t with CTnot t -> t | t -> CTnot t in
         let cta = Mid.add i (neg_t, not pos) cta in
         ccheck c cta
-    | Destruct (i, j1, j2, c) ->
+    | EDestruct (_, _, _, i, j1, j2, c) ->
         let t, pos = find_ident "destruct" i cta in
         begin match t, pos with
         | CTbinop (Tand, t1, t2), false | CTbinop (Tor, t1, t2), true ->
@@ -109,21 +111,10 @@ let rec ccheck (c : core_certif) cta : ctask list =
                       |> Mid.add j2 (t2, pos) in
             ccheck c cta
         | _ -> verif_failed "Nothing to destruct" end
-    (* | Construct (i1, i2, j, c) ->
-     *     let a, pos1 = find_ident "construct1" i1 cta in
-     *     let b, pos2 = find_ident "construct2" i2 cta in
-     *     if pos1 = pos2
-     *     then
-     *       let t = if pos1 then CTbinop (Tor, a, b) else CTbinop (Tand, a, b) in
-     *       let cta = Mid.remove i1 cta
-     *                 |> Mid.remove i2
-     *                 |> Mid.add j (t, pos1) in
-     *       ccheck c cta
-     *     else verif_failed "Can't construct" *)
-    | Weakening (i, c) ->
+    | EWeakening (_, _, i, c) ->
         let cta = Mid.remove i cta in
         ccheck c cta
-    | Intro_quant (i, y, c) ->
+    | EIntroQuant (_, _, i, y, c) ->
         let t, pos = find_ident "intro_quant" i cta in
         begin match t, pos with
         | CTquant (CTforall, t), true | CTquant (CTexists, t), false ->
@@ -131,7 +122,7 @@ let rec ccheck (c : core_certif) cta : ctask list =
             let cta = Mid.add i (ct_open t (CTfvar y), pos) cta in
             ccheck c cta
         | _ -> verif_failed "Nothing to introduce" end
-    | Inst_quant (i, j, t_inst, c) ->
+    | EInstQuant (_, _, i, j, t_inst, c) ->
         let t, pos = find_ident "inst_quant" i cta in
         begin match t, pos with
         | CTquant (CTforall, t), false | CTquant (CTexists, t), true ->
@@ -139,7 +130,7 @@ let rec ccheck (c : core_certif) cta : ctask list =
             ccheck c cta
         | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
         end
-    | Rewrite (i, j, path, rev, lc) ->
+    | ERewrite (i, j, path, rev, lc) ->
         let lcta = check_rewrite cta rev j i [] path in
         List.map2 ccheck lc lcta |> List.concat
 
