@@ -56,9 +56,8 @@ let rec ccheck (c : kernel_ecert) cta : ctask list =
     | EAxiom (_, i1, i2) ->
         let t1, pos1 = find_ident "axiom1" i1 cta in
         let t2, pos2 = find_ident "axiom2" i2 cta in
-        if pos1 <> pos2
-        then if cterm_equal t1 t2
-             then []
+        if not pos1 && pos2
+        then if cterm_equal t1 t2 then []
              else verif_failed "The hypothesis and goal given do not match"
         else verif_failed "Terms have wrong positivities in the task"
     | ETrivial (_, i) ->
