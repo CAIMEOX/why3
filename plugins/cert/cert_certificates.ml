@@ -201,6 +201,8 @@ and prcab : type a b. (formatter -> a -> unit) ->
 and prcertif fmt = prcab (po prpr) pte fmt
 and prcore_certif fmt = prcab (po pri) pcte fmt
 
+let eprcertif c = eprintf "%a@." prcertif c
+
 let prpos fmt = function
   | true  -> fprintf fmt "GOAL| "
   | false -> fprintf fmt "HYP | "
@@ -410,7 +412,9 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
 let rec abstract_types (c : visible_cert) : abstract_cert =
   propagate abstract_types (Opt.map (fun pr -> pr.pr_name)) abstract_term c
 
-exception Elaboration_failed
+exception Elaboration_failed of string
+
+let elab_failed s = raise (Elaboration_failed s)
 
 module Hashid = Hashtbl.Make(struct type t = ident let equal = id_equal let hash = id_hash end)
 
@@ -423,7 +427,7 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
     | None -> id_register (id_fresh "temp_ident") in
   let rec elab cta c =
   match c with
-  | Nc -> raise Elaboration_failed
+  | Nc -> elab_failed "No certificates"
   | Hole -> let nct = Stream.next res_ct in
             (* TODO : match cta against nct and update tbl accordingly *)
             EHole nct
@@ -449,7 +453,7 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
       let t, pos = find_ident "Split" i cta in
       let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false -> t1, t2
-        | _ -> verif_failed "Not splittable" in
+        | _ -> elab_failed "Not splittable" in
       let cta1 = Mid.add i (t1, pos) cta in
       let cta2 = Mid.add i (t2, pos) cta in
       let c1 = elab cta1 c1 in
@@ -467,7 +471,8 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
         | CTbinop (Timplies, t1, t2) ->
             let unfolded_imp = CTbinop (Tor, CTnot t1, t2), pos in
             false, Mid.add i unfolded_imp cta, t1, t2
-        | _ -> verif_failed "Nothing to unfold" in
+        | _ -> Format.eprintf "@[%a@]@." pcte t;
+               elab_failed "Nothing to unfold" in
       let pack = pos, t1, t2, i, elab cta c in
       if iff
       then EUnfoldIff pack
@@ -489,7 +494,7 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
       let t, pos = find_ident "Destruct" i cta in
       let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), false | CTbinop (Tor, t1, t2), true -> t1, t2
-        | _ -> verif_failed "Nothing to destruct" in
+        | _ -> elab_failed "Nothing to destruct" in
       let cta = Mid.remove i cta
                 |> Mid.add j1 (t1, pos)
                 |> Mid.add j2 (t2, pos) in
@@ -515,19 +520,19 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
       let t, pos = find_ident "IntroQuant" i cta in
       let t = match t, pos with
         | CTquant (CTforall, t), true | CTquant (CTexists, t), false -> t
-        | _ -> verif_failed "Nothing to introduce" in
+        | _ -> elab_failed "Nothing to introduce" in
       let cta = Mid.add i (ct_open t (CTfvar y), pos) cta in
-      EIntroQuant (pos, t, i, y, elab cta c)
+      EIntroQuant (pos, CTquant (CTlambda, t), i, y, elab cta c)
   | InstQuant (i, j, t_inst, c) ->
       let i = Opt.get i in
       let j = get_create_ident j in
       let t, pos = find_ident "InstQuant" i cta in
       let t = match t, pos with
         | CTquant (CTforall, t), false | CTquant (CTexists, t), true -> t
-        | _ -> verif_failed "trying to instantiate a non-quantified hypothesis" in
+        | _ -> elab_failed "trying to instantiate a non-quantified hypothesis" in
       let cta = Mid.add j (ct_open t t_inst, pos) cta in
-      EInstQuant (pos, t, i, j, t_inst, elab cta c)
-  | Rewrite _ -> assert false
+      EInstQuant (pos, CTquant (CTlambda, t), i, j, t_inst, elab cta c)
+  | Rewrite _ -> elab_failed "TODO : Rewrite"G
   (* TODO *)
   (* let lcta = check_rewrite cta rev j i [] path in
    * List.map2 ccheck lc lcta |> List.concat *)
@@ -536,6 +541,7 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
 
 
 let make_core init_ct res_ct c =
+  (* Format.eprintf "%a@." prcertif c; *)
   abstract_types c
   |> elaborate init_ct res_ct
 
