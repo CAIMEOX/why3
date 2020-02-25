@@ -13,6 +13,9 @@ open Cert_verif_dedukti
 let cchecker trans = Trans.store (checker_ctrans None make_core checker_caml trans)
 let dchecker trans = Trans.store (checker_ctrans None make_core checker_dedukti trans)
 
+(* let cchecker trans = Trans.store (checker_ctrans (Some eprcertif) make_core checker_caml trans)
+ * let dchecker trans = Trans.store (checker_ctrans (Some eprcertif) make_core checker_dedukti trans) *)
+
 
 let assert_c t              = cchecker (cut t)
 let assumption_c            = cchecker assumption
