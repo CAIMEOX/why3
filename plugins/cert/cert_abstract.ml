@@ -106,11 +106,13 @@ let verif_failed s = raise (Certif_verification_failed s)
 (** Create a certified transformation from a transformation with a certificate *)
 
 let checker_ctrans
+      (debug : ('certif -> unit) option)
       (make_core : ctask -> ctask list -> 'certif -> 'core_certif)
       (checker : 'core_certif -> ctask -> ctask list -> unit)
       (ctr : 'certif ctransformation)
       (init_t : task) =
   let res_t, certif = Trans.apply ctr init_t in
+  Opt.iter (fun print -> print certif) debug;
   let init_ct = abstract_task init_t in
   let res_ct = List.map abstract_task res_t in
   let core_certif = make_core init_ct res_ct certif in

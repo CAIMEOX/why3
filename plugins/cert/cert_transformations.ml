@@ -380,7 +380,6 @@ let intro_tg target =
 let intro any every where : ctrans = Trans.store (fun task ->
   let tg = find_target any every where task in
   let ta, (_, c) = intro_tg tg task in
-  (* Format.eprintf "%a@." prcertif c; *)
   [ta], c)
 
 let dir_smart d c prg =

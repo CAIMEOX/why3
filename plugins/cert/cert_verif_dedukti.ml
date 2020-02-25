@@ -6,9 +6,6 @@ open Format
 open Cert_abstract
 open Cert_certificates
 
-(* Define an elaborated type of certificate. This is usefull to have access to
-   all the terms we need when printing to a Dedukti file *)
-
 let find_goal cta =
   let _, (t, _) = Mid.(filter (fun _ (_, b) -> b) cta |> choose) in
   t
@@ -129,10 +126,12 @@ let print_task fmt (fv, ts) =
 
 let rstr goal = if goal then "_goal" else "_hyp"
 
-let rec print_certif fmt = function
+let print_certif at fmt c =
+  let s = Stream.of_list at in
+  let rec pc fmt = function
   | ELet _ | EConstruct _ -> verif_failed "Construct/Let left"
-  | EHole s ->
-      fprintf fmt "%s" s
+  | EHole _ ->
+      fprintf fmt "%s" (Stream.next s)
   | EAxiom (t, h, g) ->
       fprintf fmt "axiom (%a) %s %s"
         print_term t
@@ -144,60 +143,61 @@ let rec print_certif fmt = function
   | ECut (i, a, ce1, ce2) ->
       fprintf fmt "cut (%a) (%s => %a) (%s => %a)"
         print_term a
-        (str i) print_certif ce1
-        (str i) print_certif ce2
+        (str i) pc ce1
+        (str i) pc ce2
   | ESplit (goal, a, b, i, c1, c2) ->
       fprintf fmt "split%s (%a) (%a) (%s => %a) (%s => %a) %s" (rstr goal)
         print_term a
         print_term b
-        (str i) print_certif c1
-        (str i) print_certif c2
+        (str i) pc c1
+        (str i) pc c2
         (str i)
   | EUnfoldIff (goal, a, b, i, c) ->
       fprintf fmt "unfold_iff%s (%a) (%a) (%s => %a) %s" (rstr goal)
         print_term a
         print_term b
-        (str i) print_certif c
+        (str i) pc c
         (str i)
   | EUnfoldArr (goal, a, b, i, c) ->
       fprintf fmt "unfold_arr%s (%a) (%a) (%s => %a) %s" (rstr goal)
         print_term a
         print_term b
-        (str i) print_certif c
+        (str i) pc c
         (str i)
   | ESwapNeg (goal, a, i, c) ->
       fprintf fmt "swap_neg%s (%a) (%s => %a) %s" (rstr goal)
         print_term a
-        (str i) print_certif c
+        (str i) pc c
         (str i)
   | ESwap (goal, a, i, c) ->
       fprintf fmt "swap%s (%a) (%s => %a) %s" (rstr goal)
         print_term a
-        (str i) print_certif c
+        (str i) pc c
         (str i)
-  | EDestruct (goal, a, b, i1, i2, j, c) ->
+  | EDestruct (goal, a, b, i, j1, j2, c) ->
       fprintf fmt "destruct%s (%a) (%a) (%s => %s => %a) %s" (rstr goal)
         print_term a
         print_term b
-        (str i1) (str i2) print_certif c
-        (str j)
+        (str j1) (str j2) pc c
+        (str i)
   | EWeakening (goal, a, i, c) ->
       fprintf fmt "weakening%s (%a) (%a) %s" (rstr goal)
         print_term a
-        print_certif c
+        pc c
         (str i)
   | EIntroQuant (goal, p, i, y, c) ->
       fprintf fmt "intro_quant%s (%a) (%s => %s => %a) %s" (rstr goal)
         print_term p
-        (str y) (str i) print_certif c
+        (str y) (str i) pc c
         (str i)
   | EInstQuant (goal, p, i, j, t, c) ->
       fprintf fmt "inst_quant%s (%a) (%a) (%s => %s => %a) %s" (rstr goal)
         print_term p
         print_term t
-        (str i) (str j) print_certif c
+        (str i) (str j) pc c
         (str i)
-  | ERewrite _ -> verif_failed "Rewrite is not yet supported by the Dedukti checker"
+  | ERewrite _ -> verif_failed "Rewrite is not yet supported by the Dedukti checker" in
+  pc fmt c
 
 let fv_ts (ct : ctask) =
   let encode_neg (k, (ct, pos)) = k, if pos then CTnot ct else ct in
@@ -230,7 +230,6 @@ let print fmt init_ct res_ct certif =
         flush_str_formatter ())
       task_syms
       res in
-  let cert, _ = elab init_ct certif applied_tasks in
   (* The term that has the correct type *)
   let p_term fmt () =
     let fv, ts = init in
@@ -238,7 +237,7 @@ let print fmt init_ct res_ct certif =
     let hyp_ids, _ = List.split ts in
     let vars = task_syms @ List.map str (fv_ids @ hyp_ids) in
     print_list " => " (fun fmt -> fprintf fmt "%s") fmt vars;
-    print_certif fmt cert in
+    print_certif applied_tasks fmt certif in
   fprintf fmt "#CHECK (%a) :\n\
                       (%a).@."
     p_term ()

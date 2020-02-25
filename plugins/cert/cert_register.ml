@@ -10,8 +10,8 @@ open Cert_verif_dedukti
 
 (** Certified transformations *)
 
-let cchecker trans = Trans.store (checker_ctrans make_core checker_caml trans)
-let dchecker trans = Trans.store (checker_ctrans make_core checker_dedukti trans)
+let cchecker trans = Trans.store (checker_ctrans None make_core checker_caml trans)
+let dchecker trans = Trans.store (checker_ctrans None make_core checker_dedukti trans)
 
 
 let assert_c t              = cchecker (cut t)

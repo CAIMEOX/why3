@@ -179,22 +179,22 @@ def unfold_arr_goal (A : Prop) (B : Prop) :
    nne (or (not A) B) h B (na => na a B)
                           (b => b)).
 
-def swap_neg_neg_hyp (A : Prop) :
+def swap_neg_hyp (A : Prop) :
     prf (goal A empty) ->
     prf (hyp (not A) empty)
 := h => h.
 
-def swap_neg_hyp (A : Prop) :
+def swap_hyp (A : Prop) :
     prf (goal (not A) empty) ->
     prf (hyp A empty)
 := nnna => nne (not A) nnna.
 
-def swap_neg_goal (A : Prop) :
+def swap_goal (A : Prop) :
     prf (hyp (not A) empty) ->
     prf (goal A empty)
 := h => h.
 
-def swap_neg_neg_goal (A : Prop) :
+def swap_neg_goal (A : Prop) :
     prf (hyp A empty) ->
     prf (goal (not A) empty)
 := na => nni (not A) na.
