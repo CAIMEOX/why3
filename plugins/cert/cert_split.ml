@@ -26,7 +26,7 @@ open Format
 let cpr = create_prsymbol (id_fresh "cpr")
 
 let rec rename_cert pr1 pr2 (c : visible_cert) : visible_cert =
-  propagate (rename_cert pr1 pr2)
+  propagate_cert (rename_cert pr1 pr2)
     (Opt.map (fun pr -> if pr_equal pr pr1 then pr2 else pr))
     (fun ct -> ct) c
 
@@ -247,7 +247,7 @@ let combine_cert g c1 c2 =
   Destruct (Some g, Some g1, Some g2, Hole)
   |>> rename_cert g g1 c1
   |>> rename_cert g g2 c2
-  |>> construct true g1 g2 g Hole
+  |>> Construct (Some g1, Some g2, Some g, Hole)
 
 let rec split_core sp f =
   let (~-) = t_attr_copy f in

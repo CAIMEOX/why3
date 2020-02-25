@@ -75,8 +75,8 @@ type ('a, 'b, 'c) ecert = (* elaborated certificates, 'a is used to designate an
   (* EHole ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
   | ECut of 'a * 'b * ('a, 'b, 'c) ecert * ('a, 'b, 'c) ecert
   (* ECut (I, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ, I : A ⊢ Δ)) *)
-  | ELet of 'b * 'a * ('a, 'b, 'c) ecert
-  (* ELet (x, I, c) ⇓ t ≜  c ⇓ t[x ← I(t)] *)
+  | ELet of 'b * 'b * ('a, 'b, 'c) ecert
+  (* ELet (x, y, c) ⇓ t ≜  c ⇓ t[x ←  y] *)
   | EAxiom of 'b * 'a * 'a
   (* EAxiom (A, i1, i2) ⇓ (Γ, i1 : A ⊢ Δ, i2 : A) ≜  [] *)
   (* Notice that there is only one rule *)
@@ -87,11 +87,11 @@ type ('a, 'b, 'c) ecert = (* elaborated certificates, 'a is used to designate an
   (* ESplit (false, A, B, I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
   (* ESplit (true, A, B, I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
   | EUnfoldIff of (bool * 'b * 'b * 'a * ('a, 'b, 'c) ecert)
-  (* EUnfoldIff (false, true, A, B, I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
-  (* EUnfoldIff (true, true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
+  (* EUnfoldIff (false, A, B, I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
+  (* EUnfoldIff (true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
   | EUnfoldArr of (bool * 'b * 'b * 'a * ('a, 'b, 'c) ecert)
-  (* EUnfoldArr (false, false, A, B, I, c) ⇓ (Γ, I : A → B ⊢ Δ) ≜  c ⇓ (Γ, I : ¬A ∨ B ⊢ Δ)*)
-  (* EUnfoldArr (true, false, A, B, I, c) ⇓ (Γ ⊢ Δ, I : A → B) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A ∨ B)*)
+  (* EUnfoldArr (false, A, B, I, c) ⇓ (Γ, I : A → B ⊢ Δ) ≜  c ⇓ (Γ, I : ¬A ∨ B ⊢ Δ)*)
+  (* EUnfoldArr (true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : A → B) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A ∨ B)*)
   | ESwap of (bool * 'b * 'a * ('a, 'b, 'c) ecert)
   (* ESwap (false, A, I, c) ⇓ (Γ, I : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A) *)
   (* ESwap (true, A, I, c) ⇓ (Γ ⊢ Δ, I : A ) ≜  c ⇓ (Γ, I : ¬A ⊢ Δ) *)
@@ -229,7 +229,7 @@ let find_ident s h cta =
 (** Utility functions on certificate, cterm and ctask *)
 
 (* Structural functions on certificates *)
-let propagate f fid fte = function
+let propagate_cert f fid fte = function
   | (Hole | Nc)  as c -> c
   | Axiom (h, g) -> Axiom (fid h, fid g)
   | Trivial i -> Trivial (fid i)
@@ -251,7 +251,7 @@ let propagate f fid fte = function
 
 let rec fill stream = function
   | Hole -> Stream.next stream
-  | c -> propagate (fill stream) (fun t -> t) (fun t -> t) c
+  | c -> propagate_cert (fill stream) (fun t -> t) (fun t -> t) c
 
 let (|>>) c1 c2 =
   let c2_stream = Stream.from (fun _ -> Some c2) in
@@ -261,35 +261,28 @@ let (|>>>) c1 lc2 =
   let lc2_stream = Stream.of_list lc2 in
   fill lc2_stream c1
 
-let new_let_var str =
-  let ls = create_lsymbol (id_fresh str) [] None in
-  t_app ls [] None
+let propagate_ecert f fid ft = function
+  | EHole _ as c -> c
+  | ECut (i, a, c1, c2) ->
+      let f1 = f c1 in let f2 = f c2 in
+      ECut (fid i, ft a, f1, f2)
+  | ELet (x, y, c) -> ELet (ft x, ft y, f c)
+  | EAxiom (a, i1, i2) -> EAxiom (ft a, fid i1, fid i2)
+  | ETrivial (g, i) -> ETrivial (g, fid i)
+  | ESplit (g, a, b, i, c1, c2) ->
+      let f1 = f c1 in let f2 = f c2 in
+      ESplit (g, ft a, ft b, fid i, f1, f2)
+  | EUnfoldIff (g, a, b, i, c) -> EUnfoldIff (g, ft a, ft b, fid i, f c)
+  | EUnfoldArr (g, a, b, i, c) -> EUnfoldArr (g, ft a, ft b, fid i, f c)
+  | ESwap (g, a, i, c) -> ESwap (g, ft a, fid i, f c)
+  | ESwapNeg (g, a, i, c) -> ESwapNeg (g, ft a, fid i, f c)
+  | EDestruct (g, a, b, i, j1, j2, c) -> EDestruct (g, ft a, ft b, fid i, fid j1, fid j2, f c)
+  | EConstruct (g, a, b, i1, i2, j, c) -> EConstruct (g, ft a, ft b, fid i1, fid i2, fid j, f c)
+  | EWeakening (g, a, i, c) -> EWeakening (g, ft a, fid i, f c)
+  | EIntroQuant (g, p, i, y, c) -> EIntroQuant (g, ft p, fid i, y, f c)
+  | EInstQuant (g, p, i, j, t, c) -> EInstQuant (g, ft p, fid i, fid j, ft t, f c)
+  | ERewrite (i, j, path, rev, lc) -> ERewrite (fid i, fid j, path, rev, List.map f lc)
 
-let let_pr i f =
-  let fi = new_let_var "i" in
-  Let (fi, Some i, f fi)
-
-let rename goal pr f =
-  let pr' = pr_clone pr in
-  let c_open = Weakening (Some pr, f pr') in
-  let c_closed = Axiom (Some pr, Some pr') in
-  let c1, c2 = if goal
-               then c_open, c_closed
-               else c_closed, c_open in
-  let fpr = new_let_var "pr" in
-  Let (fpr, Some pr, Cut (Some pr', fpr, c1, c2))
-
-let construct goal i1 i2 j c =
-  rename goal i1 (fun i1' ->
-  rename goal i2 (fun i2' ->
-  let_pr i1' (fun fi1' ->
-  let_pr i2' (fun fi2' ->
-  let c_open = Weakening (Some i1', Weakening (Some i2', c)) in
-  let c_closed = Split (Some j, Axiom (Some i1', Some j), Axiom (Some i2', Some j)) in
-  let c1, c2, cut = if goal
-                    then c_open, c_closed, t_or fi1' fi2'
-                    else c_closed, c_open, t_and fi1' fi2' in
-  Cut (Some j, cut, c1, c2)))))
 
 (* Equality *)
 let rec cterm_equal t1 t2 = match t1, t2 with
@@ -410,7 +403,7 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
   fun ct -> Mid.add hg (ct, true) mh
 
 let rec abstract_types (c : visible_cert) : abstract_cert =
-  propagate abstract_types (Opt.map (fun pr -> pr.pr_name)) abstract_term c
+  propagate_cert abstract_types (Opt.map (fun pr -> pr.pr_name)) abstract_term c
 
 exception Elaboration_failed of string
 
@@ -447,7 +440,10 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
       let c1 = elab cta1 c1 in
       let c2 = elab cta2 c2 in
       ECut (i, a, c1, c2)
-  | Let (_, _, _) -> assert false
+  | Let (x, i, c) ->
+      let i = Opt.get i in
+      let y, _ = find_ident "Let" i cta in
+      ELet (x, y, elab cta c)
   | Split (i, c1, c2) ->
       let i = Opt.get i in
       let t, pos = find_ident "Split" i cta in
@@ -532,103 +528,66 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
         | _ -> elab_failed "trying to instantiate a non-quantified hypothesis" in
       let cta = Mid.add j (ct_open t t_inst, pos) cta in
       EInstQuant (pos, CTquant (CTlambda, t), i, j, t_inst, elab cta c)
-  | Rewrite _ -> elab_failed "TODO : Rewrite"G
+  | Rewrite _ -> elab_failed "TODO : Rewrite"
   (* TODO *)
   (* let lcta = check_rewrite cta rev j i [] path in
    * List.map2 ccheck lc lcta |> List.concat *)
   in
   elab init_ct c
 
+let erename goal id a (f : ident -> heavy_ecert) : heavy_ecert =
+  let id' = id_register (id_clone id) in
+  let c_open = EWeakening (goal, a, id, f id') in
+  let c_closed = EAxiom (a, id, id') in
+  let c1, c2 = if goal
+               then c_open, c_closed
+               else c_closed, c_open in
+  ECut (id', a, c1, c2)
+
+let eaxiom goal a i j =
+  if goal then EAxiom (a, i, j)
+  else EAxiom (a, j, i)
+
+
+let rec eliminate_construct (c : heavy_ecert) : trimmed_ecert =
+  match c with
+    | EConstruct (goal, a, b, i1, i2, j, c) ->
+        let c = eliminate_construct c in
+        erename goal i1 a (fun i1' ->
+        erename goal i2 b (fun i2' ->
+        let c_open = EWeakening (goal, a, i1', EWeakening (goal, b, i2', c)) in
+        let c_closed = ESplit (not goal, a, b, j,
+                               eaxiom (not goal) a i1' j,
+                               eaxiom (not goal) b i2' j)
+                               in
+        let c1, c2, cut = if goal
+                          then c_open, c_closed, CTbinop (Tor, a, b)
+                          else c_closed, c_open, CTbinop (Tand, a, b) in
+        ECut (j, cut, c1, c2)))
+    | _ -> propagate_ecert eliminate_construct (fun t -> t) (fun i -> i) c
+
+
+
+let rec eliminate_let (m : cterm Mid.t) (c : trimmed_ecert) : kernel_ecert =
+  match c with
+    | ELet (x, y, c) ->
+        let x = match x with
+                | CTfvar id -> id
+                | _ -> failwith "" in
+        let m = Mid.add x y m in
+        eliminate_let m c
+    | ECut (i, a, c1, c2) ->
+        let c1 = eliminate_let m c1 in
+        let c2 = eliminate_let m c2 in
+        let a = ct_subst m a in
+        ECut (i, a, c1, c2)
+    | _ -> propagate_ecert (eliminate_let m) (fun t -> t) (fun i -> i) c
+
+
 
 let make_core init_ct res_ct c =
   (* Format.eprintf "%a@." prcertif c; *)
   abstract_types c
   |> elaborate init_ct res_ct
-
-
-(* let rec eliminate_let (cta : ctask) (m : cterm Mid.t) (c : core_certif) =
- *   match c with
- *     | (Nc | Hole | Axiom _ | Trivial _) -> c
- *     | Cut (i, a, c1, c2) ->
- *         let cta1 = Mid.add i (a, true) cta in
- *         let cta2 = Mid.add i (a, false) cta in
- *         let c1 = eliminate_let cta1 m c1 in
- *         let c2 = eliminate_let cta2 m c2 in
- *         let a = ct_subst m a in
- *         Cut (i, a, c1, c2)
- *     | Let (x, i, c) ->
- *         let x = match x with
- *                 | CTfvar i -> i
- *                 | _ -> failwith "" in
- *         let a, _ = Mid.find i cta in
- *         let m = Mid.add x a m in
- *         eliminate_let cta m c
- *     | Split (i, c1, c2) ->
- *         let t, pos = find_ident "split" i cta in
- *         let cta1, cta2 = match t, pos with
- *           | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false ->
- *               let cta1 = Mid.add i (t1, pos) cta in
- *               let cta2 = Mid.add i (t2, pos) cta in
- *               cta1, cta2
- *           | _ -> verif_failed "Not splittable" in
- *         let c1 = eliminate_let cta1 m c1 in
- *         let c2 = eliminate_let cta2 m c2 in
- *         Split (i, c1, c2)
- *     | Unfold (i, c) ->
- *         let t, pos = find_ident "unfold" i cta in
- *         let cta =  match t with
- *           | CTbinop (Tiff, t1, t2) ->
- *               let imp_pos = CTbinop (Timplies, t1, t2) in
- *               let imp_neg = CTbinop (Timplies, t2, t1) in
- *               let unfolded_iff = CTbinop (Tand, imp_pos, imp_neg), pos in
- *               Mid.add i unfolded_iff cta
- *           | CTbinop (Timplies, t1, t2) ->
- *               let unfolded_imp = CTbinop (Tor, CTnot t1, t2), pos in
- *               Mid.add i unfolded_imp cta
- *           | _ -> verif_failed "Nothing to unfold" in
- *         let c = eliminate_let cta m c in
- *         Unfold (i, c)
- *     | Swap (i, c) ->
- *         let t, pos = find_ident "swap_neg" i cta in
- *         let neg_t = match t with CTnot t -> t | t -> CTnot t in
- *         let cta = Mid.add i (neg_t, not pos) cta in
- *         let c = eliminate_let cta m c in
- *         Swap (i, c)
- *     | Destruct (i, j1, j2, c) ->
- *         let t, pos = find_ident "destruct" i cta in
- *         let cta = match t, pos with
- *           | CTbinop (Tand, t1, t2), false | CTbinop (Tor, t1, t2), true ->
- *               Mid.remove i cta
- *               |> Mid.add j1 (t1, pos)
- *               |> Mid.add j2 (t2, pos)
- *           | _ -> verif_failed "Nothing to destruct" in
- *         let c = eliminate_let cta m c in
- *         Destruct (i, j1, j2, c)
- *     | Weakening (i, c) ->
- *         let cta = Mid.remove i cta in
- *         let c = eliminate_let cta m c in
- *         Weakening (i, c)
- *     | Intro_quant (i, y, c) ->
- *         let t, pos = find_ident "intro_quant" i cta in
- *         let cta = match t, pos with
- *           | CTquant (CTforall, t), true | CTquant (CTexists, t), false ->
- *               if mem y t then verif_failed "non-free variable" else
- *                 Mid.add i (ct_open t (CTfvar y), pos) cta
- *           | _ -> verif_failed "Nothing to introduce" in
- *         let c = eliminate_let cta m c in
- *         Intro_quant (i, y, c)
- *     | Inst_quant (i, j, t_inst, c) ->
- *         let t, pos = find_ident "inst_quant" i cta in
- *         let cta = match t, pos with
- *           | CTquant (CTforall, t), false | CTquant (CTexists, t), true ->
- *               Mid.add j (ct_open t t_inst, pos) cta
- *           | _ -> verif_failed "trying to instantiate a non-quantified hypothesis" in
- *         let c = eliminate_let cta m c in
- *         Inst_quant (i, j, t_inst, c)
- *     | Rewrite _ as c -> c
- *                                          (* TODO *)
- *         (* let lcta = check_rewrite cta rev j i [] path in
- *          * List.map2 ccheck lc lcta |> List.concat *)
- * 
- * let make_core init_ct _ c =
- *   eliminate_let init_ct Mid.empty (abstract_types c) *)
+  |> eliminate_construct
+  |> eliminate_let Mid.empty
