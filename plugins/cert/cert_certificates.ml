@@ -535,18 +535,18 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
   in
   elab init_ct c
 
-let erename goal id a (f : ident -> heavy_ecert) : heavy_ecert =
+let eaxiom goal a i j =
+  if goal then EAxiom (a, i, j)
+  else EAxiom (a, j, i)
+
+let erename goal id a (f : ident -> heavy_ecert) : trimmed_ecert =
   let id' = id_register (id_clone id) in
   let c_open = EWeakening (goal, a, id, f id') in
-  let c_closed = EAxiom (a, id, id') in
+  let c_closed = eaxiom goal a id' id in
   let c1, c2 = if goal
                then c_open, c_closed
                else c_closed, c_open in
   ECut (id', a, c1, c2)
-
-let eaxiom goal a i j =
-  if goal then EAxiom (a, i, j)
-  else EAxiom (a, j, i)
 
 
 let rec eliminate_construct (c : heavy_ecert) : trimmed_ecert =
@@ -558,8 +558,7 @@ let rec eliminate_construct (c : heavy_ecert) : trimmed_ecert =
         let c_open = EWeakening (goal, a, i1', EWeakening (goal, b, i2', c)) in
         let c_closed = ESplit (not goal, a, b, j,
                                eaxiom (not goal) a i1' j,
-                               eaxiom (not goal) b i2' j)
-                               in
+                               eaxiom (not goal) b i2' j) in
         let c1, c2, cut = if goal
                           then c_open, c_closed, CTbinop (Tor, a, b)
                           else c_closed, c_open, CTbinop (Tand, a, b) in

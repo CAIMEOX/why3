@@ -19,9 +19,6 @@ open Decl
 
 open Cert_certificates
 
-(* temporary *)
-open Format
-
 (* current ident : used by split_core, to replace by the real id of the formula currently being splitted *)
 let cpr = create_prsymbol (id_fresh "cpr")
 
@@ -627,7 +624,7 @@ let prep_all split = Trans.store (fun t ->
   let nt = Trans.apply trans t in
   (* List.iter (printf "%a@." (fun _ -> prc err_formatter)) (List.rev !clues); *)
   (* prc err_formatter cert; *)
-  printf "NUMBER OF CLUES : %d@." (List.length !clues);
+  (* Format.printf "NUMBER OF CLUES : %d@." (List.length !clues); *)
   nt, rev_append_cert !clues)
 
 (* let prep_premise split = Trans.store (fun t ->
