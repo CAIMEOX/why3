@@ -1,0 +1,132 @@
+module StructPrivateIntf
+       type t = private mutable {
+       }
+
+       val create unit : t
+       val modify1 (x:t) : unit
+         writes { x }
+       val modify2 (x:t) (y:t) : unit
+         writes { x, y }
+       val modify2but1 (x:t) (y:t) : unit
+         writes { x, y }
+       val modify1of2 (x:t) (y:t) : unit
+         writes { x }
+end
+
+module StructMutable
+
+       type t = {
+            mutable c: int
+       }
+
+       let create () : t
+        =
+         { c = 0 }
+       let modify1 (x:t) : unit
+        =
+         x.c <- 0
+       let modify2 (x:t) (y:t) : unit
+        =
+         x.c <- 0;
+         y.c <- 0
+       let modify2but1 (x:t) (y:t) : unit
+        =
+         x.c <- y.c
+       let modify1of2 (x:t) (y:t) : unit
+        =
+         x.c <- y.c
+
+      clone StructPrivateIntf with
+            type t = t,
+            val create = create,
+            val modify1 = modify1,
+            val modify2 = modify2,
+            val modify2but1 = modify2but1,
+            val modify1of2 = modify1of2
+end
+
+module StructMutableRef
+
+       use ref.Ref
+
+       type t = {
+            mutable c: ref int
+       }
+
+       let create () : t
+        =
+         { c = ref 0 }
+       let modify1 (x:t) : unit
+        =
+         x.c := 0
+       let modify2 (x:t) (y:t) : unit
+        =
+         x.c := 0;
+         y.c := 0
+       let modify2but1 (x:t) (y:t) : unit
+        =
+         x.c := !(y.c)
+       let modify1of2 (x:t) (y:t) : unit
+        =
+         x.c := !(y.c)
+
+       let modify2but1' (x:t) (y:t) : unit
+        =
+         x.c <- (y.c)
+       let modify1of2' (x:t) (y:t) : unit
+        =
+         x.c <- y.c
+
+      clone StructPrivateIntf with
+            type t = t,
+            val create = create,
+            val modify1 = modify1,
+            val modify2 = modify2,
+            val modify2but1 = modify2but1,
+            val modify1of2 = modify1of2
+
+       clone StructPrivateIntf with
+            type t = t,
+            val create = create,
+            val modify1 = modify1,
+            val modify2 = modify2,
+            val modify2but1 = modify2but1',
+            val modify1of2 = modify1of2'
+end
+
+module Test
+
+       scope A
+             use StructPrivateIntf
+
+             let f =
+                 let x = create () in
+                 let y = create () in
+                 modify2but1 x y;
+                 modify2 x y;
+       end
+
+       scope B
+             use StructMutableRef
+
+             let f =
+                 let x = create () in
+                 let y = create () in
+                 modify2but1 x y;
+                 modify2 x y;
+       end
+
+
+(*
+       scope C
+             use StructMutableRef
+
+             let f =
+                 let x = create () in
+                 let y = create () in
+                 modify2but1' x y;
+                 modify2 x y;
+       end
+*)
+
+end
