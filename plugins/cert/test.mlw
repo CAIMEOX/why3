@@ -38,6 +38,9 @@ goal revert : (forall x. p x) -> forall x. p x
 goal inst_hyp : (forall x. p x) -> p true
 goal inst_goal : p true -> exists x : bool. p x
 
+
+goal rename : c -> c
+
 (* 'pose' transformation : in progress *)
 (* goal pose : a *)
 

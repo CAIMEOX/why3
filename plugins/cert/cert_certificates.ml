@@ -24,6 +24,9 @@ type ('a, 'b) cert = (* 'a is used to designate an hypothesis, 'b is used for te
   | Let of 'b * 'a * ('a, 'b) cert
   (* Let (x, I, c) ⇓ t ≜  c ⇓ t[x ← I(t)] *)
   (* Or : x can be used in c as the formula identified by I in t *)
+  | Rename of 'a * 'a * ('a, 'b) cert
+  (* Rename (I₁, I₂, c) ⇓  (Γ, I₁ : A ⊢ Δ) ≜ c ⇓ (Γ, I₂ : A ⊢ Δ)*)
+  (* Rename (I₁, I₂, c) ⇓  (Γ ⊢ Δ, I₁ : A) ≜ c ⇓ (Γ ⊢ Δ, I₂ : A)*)
   | Axiom of 'a * 'a
   (* Axiom (i1, i2) ⇓ (Γ, i1 : A ⊢ Δ, i2 : A) ≜  [] *)
   (* Axiom (i1, i2) ⇓ (Γ, i2 : A ⊢ Δ, i1 : A) ≜  [] *)
@@ -83,6 +86,9 @@ type ('a, 'b, 'c) ecert = (* elaborated certificates, 'a is used to designate an
   | ETrivial of bool * 'a
   (* ETrivial (false, I) ⇓ (Γ, I : false ⊢ Δ) ≜  [] *)
   (* ETrivial (true, I) ⇓ (Γ ⊢ Δ, I : true ) ≜  [] *)
+  | ERename of bool * 'b * 'a * 'a * ('a, 'b, 'c) ecert
+  (* ERename (false, A, I₁, I₂, c) ⇓  (Γ, I₁ : A ⊢ Δ) ≜ c ⇓ (Γ, I₂ : A ⊢ Δ)*)
+  (* ERename (true, A, I₁, I₂, c) ⇓  (Γ ⊢ Δ, I₁ : A) ≜ c ⇓ (Γ ⊢ Δ, I₂ : A)*)
   | ESplit of bool * 'b * 'b * 'a * ('a, 'b, 'c) ecert * ('a, 'b, 'c) ecert
   (* ESplit (false, A, B, I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
   (* ESplit (true, A, B, I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
@@ -183,6 +189,7 @@ and prcab : type a b. (formatter -> a -> unit) ->
   | Hole -> fprintf fmt "Hole"
   | Cut (i, a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a,@ %a)@]" pra i prb a prc c1 prc c2
   | Let (x, i, c) -> fprintf fmt "Let @[(%a,@ %a,@ %a)@]" prb x pra i prc c
+  | Rename (i1, i2, c) -> fprintf fmt "Rename @[(%a,@ %a,@ %a)@]" pra i1 pra i2 prc c
   | Axiom (i1, i2) -> fprintf fmt "Axiom @[(%a,@ %a)@]" pra i1 pra i2
   | Trivial i -> fprintf fmt "Trivial %a" pra i
   | Split (i, c1, c2) -> fprintf fmt "Split @[(%a,@ %a,@ %a)@]" pra i prc c1 prc c2
@@ -237,6 +244,7 @@ let propagate_cert f fid fte = function
       let f1 = f c1 in let f2 = f c2 in
       Cut (fid i, fte a, f1, f2)
   | Let (x, i, c) -> Let (fte x, fid i, f c)
+  | Rename (i1, i2, c) -> Rename (fid i1, fid i2, f c)
   | Unfold (i, c) -> Unfold (fid i, f c)
   | Split (i, c1, c2) ->
       let f1 = f c1 in let f2 = f c2 in
@@ -267,6 +275,7 @@ let propagate_ecert f fid ft = function
       let f1 = f c1 in let f2 = f c2 in
       ECut (fid i, ft a, f1, f2)
   | ELet (x, y, c) -> ELet (ft x, ft y, f c)
+  | ERename (g, a, i1, i2, c) -> ERename (g, ft a, fid i1, fid i2, f c)
   | EAxiom (a, i1, i2) -> EAxiom (ft a, fid i1, fid i2)
   | ETrivial (g, i) -> ETrivial (g, fid i)
   | ESplit (g, a, b, i, c1, c2) ->
@@ -428,6 +437,12 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
   | Trivial i ->
       let _, pos = find_ident "Trivial" i cta in
       ETrivial (pos, i)
+  | Rename (i1, i2, c) ->
+      let a, pos = find_ident "Rename" i1 cta in
+      let cta = Mid.remove i1 cta
+                |> Mid.add i2 (a, pos) in
+      let c = elab cta c in
+      ERename (pos, a, i1, i2, c)
   | Cut (i, a, c1, c2) ->
       let cta1 = Mid.add i (a, true) cta in
       let cta2 = Mid.add i (a, false) cta in
@@ -517,34 +532,37 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
   in
   elab init_ct c
 
-let eaxiom goal a i j =
-  if goal then EAxiom (a, i, j)
+let eaxiom g a i j =
+  if g then EAxiom (a, i, j)
   else EAxiom (a, j, i)
 
-let erename goal id a (f : ident -> heavy_ecert) : trimmed_ecert =
-  let id' = id_register (id_clone id) in
-  let c_open = EWeakening (goal, a, id, f id') in
-  let c_closed = eaxiom goal a id' id in
-  let c1, c2 = if goal
+let erename g a i1 i2 c =
+  let c_open = EWeakening (g, a, i1, c) in
+  let c_closed = eaxiom (not g) a i1 i2 in
+  let c1, c2 = if g
                then c_open, c_closed
                else c_closed, c_open in
-  ECut (id', a, c1, c2)
+  ECut (i2, a, c1, c2)
 
-let rec eliminate_construct (c : heavy_ecert) : trimmed_ecert =
+let rec trim_certif (c : heavy_ecert) : trimmed_ecert =
   match c with
-    | EConstruct (goal, a, b, i1, i2, j, c) ->
-        let c = eliminate_construct c in
-        erename goal i1 a (fun i1' ->
-        erename goal i2 b (fun i2' ->
-        let c_open = EWeakening (goal, a, i1', EWeakening (goal, b, i2', c)) in
-        let c_closed = ESplit (not goal, a, b, j,
-                               eaxiom (not goal) a i1' j,
-                               eaxiom (not goal) b i2' j) in
-        let c1, c2, cut = if goal
-                          then c_open, c_closed, CTbinop (Tor, a, b)
-                          else c_closed, c_open, CTbinop (Tand, a, b) in
-        ECut (j, cut, c1, c2)))
-    | _ -> propagate_ecert eliminate_construct (fun t -> t) (fun i -> i) c
+  | ERename (g, a, i1, i2, c) ->
+      erename g a i1 i2 c
+  | EConstruct (g, a, b, i1, i2, j, c) ->
+      let c = trim_certif c in
+      let i1' = id_register (id_fresh "i1") in
+      let i2' = id_register (id_fresh "i2") in
+      erename g a i1 i1' (
+          erename g b i2 i2' (
+              let c_open = EWeakening (g, a, i1', EWeakening (g, b, i2', c)) in
+              let c_closed = ESplit (not g, a, b, j,
+                                     eaxiom (not g) a i1' j,
+                                     eaxiom (not g) b i2' j) in
+              let c1, c2, cut = if g
+                                then c_open, c_closed, CTbinop (Tor, a, b)
+                                else c_closed, c_open, CTbinop (Tand, a, b) in
+              ECut (j, cut, c1, c2)))
+  | _ -> propagate_ecert trim_certif (fun t -> t) (fun i -> i) c
 
 let rec eliminate_let (m : cterm Mid.t) (c : trimmed_ecert) : kernel_ecert =
   match c with
@@ -565,5 +583,5 @@ let make_core init_ct res_ct c =
   (* Format.eprintf "%a@." prcertif c; *)
   abstract_types c
   |> elaborate init_ct res_ct
-  |> eliminate_construct
+  |> trim_certif
   |> eliminate_let Mid.empty
