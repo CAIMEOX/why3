@@ -51,7 +51,7 @@ let check_rewrite cta rev h g terms path : ctask list =
 
 let rec ccheck (c : kernel_ecert) cta : ctask list =
   match c with
-    | ELet _ | EConstruct _ -> verif_failed "Construct/Let left"
+  | ELet _ | EConstruct _ | ERename _ -> verif_failed "Construct/Let/Rename left"
     | EHole _ -> [cta]
     | EAxiom (_, i1, i2) ->
         let t1, pos1 = find_ident "axiom1" i1 cta in
