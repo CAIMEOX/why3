@@ -133,6 +133,20 @@
  </goal>
  <goal name="G18">
  </goal>
+ <goal name="G19">
+ <transf name="split_all_full" >
+  <goal name="G19.0">
+  </goal>
+  <goal name="G19.1">
+  </goal>
+ </transf>
+ <transf name="split_all_full_ccert" >
+  <goal name="G19.0">
+  </goal>
+  <goal name="G19.1">
+  </goal>
+ </transf>
+ </goal>
 </theory>
 </file>
 </why3session>
