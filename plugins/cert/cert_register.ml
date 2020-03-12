@@ -30,6 +30,7 @@ let intro_c any every where = cchecker (intro any every where)
 let intros_c                = cchecker intros
 let left_c where            = cchecker (dir Left where)
 (* let pose_c name t           = cchecker (pose name t) *)
+let rename_c pr1            = cchecker (rename pr1)
 let revert_c ls             = cchecker (revert ls)
 let rewrite_c rev g where   = cchecker (rewrite g rev where)
 let right_c where           = cchecker (dir Right where)
@@ -57,6 +58,7 @@ let intro_d any every where = dchecker (intro any every where)
 let intros_d                = dchecker intros
 let left_d where            = dchecker (dir Left where)
 (* let pose_d name t           = dchecker (pose name t) *)
+let rename_d pr1            = dchecker (rename pr1)
 let revert_d ls             = dchecker (revert ls)
 let right_d where           = dchecker (dir Right where)
 let split_d any every where = dchecker (split_logic any every where)
@@ -116,6 +118,9 @@ let register_caml : unit =
 
   (* wrap_and_register ~desc:"A OCaml certified version of (simplified) coq tactic [pose]"
    *   "pose_ccert" (Tstring (Tformula Ttrans_l)) pose_c; *)
+
+  wrap_and_register ~desc:"A OCaml certified transformation to rename an hypothesis"
+    "rename_ccert" (Tprsymbol (Ttrans_l)) rename_c;
 
   wrap_and_register ~desc:"A OCaml certified transformation to generalize a variable"
     "revert_ccert" (Tlsymbol (Ttrans_l)) revert_c;
@@ -206,6 +211,9 @@ let register_dedukti : unit =
   (* wrap_and_register ~desc:"A Dedukti certified version of (simplified) coq tactic [pose]"
    *   "pose_dcert" (Tstring (Tformula Ttrans_l))
    *   pose_d; *)
+
+  wrap_and_register ~desc:"A Dedukti certified transformation to rename an hypothesis"
+    "rename_dcert" (Tprsymbol (Ttrans_l)) rename_d;
 
   wrap_and_register ~desc:"A Dedukti certified transformation to generalize a variable"
     "revert_dcert" (Tlsymbol (Ttrans_l))

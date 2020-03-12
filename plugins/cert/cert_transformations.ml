@@ -128,6 +128,18 @@ let contradict : ctrans = Trans.store (fun task ->
   | Hole -> [task], Hole
   | _ -> [], c)
 
+let ren pr1 =
+  decl_cert  (fun d -> match d.d_node with
+   | Dprop (k, pr, t) when pr_equal pr pr1 ->
+       let pr2 = pr_clone pr1 in
+       [create_prop_decl k pr2 t],
+       Rename (pr1, pr2, Hole)
+   | _ -> [d], Hole)
+
+let rename pr1 : ctrans = Trans.store (fun task ->
+  let ta, c = ren pr1 task in
+  [ta], c)
+
 
 (* Closes task when if hypotheses contain false or if the goal is true *)
 let close : ctrans = Trans.store (fun task ->
