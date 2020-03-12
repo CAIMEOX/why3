@@ -64,8 +64,8 @@ type ('a, 'b) cert = (* 'a is used to designate an hypothesis, 'b is used for te
      <rev> indicates if it rewrites from left to right or from right to left.
      Since <H> can have premises, those are then matched against the certificates <lc> *)
 
-type visible_cert = (prsymbol option, term) cert
-type abstract_cert = (ident option, cterm) cert
+type visible_cert = (prsymbol, term) cert
+type abstract_cert = (ident, cterm) cert
 
 type ctrans = visible_cert ctransformation
 
@@ -198,8 +198,8 @@ and prcab : type a b. (formatter -> a -> unit) ->
   | Rewrite (i, j, path, rev, lc) ->
       fprintf fmt "Rewrite @[(%a,@ %a,@ %a,@ %b,@ %a)@]"
         pra i pra j (prle "; " prd) path rev (prle "; " prc) lc
-and prcertif fmt = prcab (po prpr) pte fmt
-and prcore_certif fmt = prcab (po pri) pcte fmt
+and prcertif fmt = prcab prpr pte fmt
+and prcore_certif fmt = prcab pri pcte fmt
 
 let eprcertif c = eprintf "%a@." prcertif c
 
@@ -403,7 +403,7 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
   fun ct -> Mid.add hg (ct, true) mh
 
 let rec abstract_types (c : visible_cert) : abstract_cert =
-  propagate_cert abstract_types (Opt.map (fun pr -> pr.pr_name)) abstract_term c
+  propagate_cert abstract_types (fun pr -> pr.pr_name) abstract_term c
 
 exception Elaboration_failed of string
 
@@ -415,9 +415,6 @@ module Hashid = Hashtbl.Make(struct type t = ident let equal = id_equal let hash
 let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heavy_ecert =
   let res_ct = Stream.of_list res_ct in
   (* let tbl = Hashid.create 17 in *)
-  let get_create_ident = function
-    | Some i -> i
-    | None -> id_register (id_fresh "temp_ident") in
   let rec elab cta c =
   match c with
   | Nc -> elab_failed "No certificates"
@@ -425,27 +422,22 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
             (* TODO : match cta against nct and update tbl accordingly *)
             EHole nct
   | Axiom (i1, i2) ->
-      let i1 = Opt.get i1 and i2 = Opt.get i2 in
       let a, posi2 = find_ident "Axiom" i2 cta in
       let i1, i2 = if posi2 then i1, i2 else i2, i1 in
       EAxiom (a, i1, i2)
   | Trivial i ->
-      let i = Opt.get i in
       let _, pos = find_ident "Trivial" i cta in
       ETrivial (pos, i)
   | Cut (i, a, c1, c2) ->
-      let i = get_create_ident i in
       let cta1 = Mid.add i (a, true) cta in
       let cta2 = Mid.add i (a, false) cta in
       let c1 = elab cta1 c1 in
       let c2 = elab cta2 c2 in
       ECut (i, a, c1, c2)
   | Let (x, i, c) ->
-      let i = Opt.get i in
       let y, _ = find_ident "Let" i cta in
       ELet (x, y, elab cta c)
   | Split (i, c1, c2) ->
-      let i = Opt.get i in
       let t, pos = find_ident "Split" i cta in
       let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false -> t1, t2
@@ -456,7 +448,6 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
       let c2 = elab cta2 c2 in
       ESplit (pos, t1, t2, i, c1, c2)
   | Unfold (i, c) ->
-      let i = Opt.get i in
       let t, pos = find_ident "Unfold" i cta in
       let iff, cta, t1, t2 = match t with
         | CTbinop (Tiff, t1, t2) ->
@@ -474,7 +465,6 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
       then EUnfoldIff pack
       else EUnfoldArr pack
   | Swap (i, c) ->
-      let i = Opt.get i in
       let t, pos = find_ident "Swap" i cta in
       let neg, underlying_t, neg_t = match t with
         | CTnot t -> true, t, t
@@ -485,8 +475,6 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
       then ESwapNeg pack
       else ESwap pack
   | Destruct (i, j1, j2, c) ->
-      let i = Opt.get i in
-      let j1 = get_create_ident j1 and j2 = get_create_ident j2 in
       let t, pos = find_ident "Destruct" i cta in
       let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), false | CTbinop (Tor, t1, t2), true -> t1, t2
@@ -496,8 +484,6 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
                 |> Mid.add j2 (t2, pos) in
       EDestruct (pos, t1, t2, i, j1, j2, elab cta c)
   | Construct (i1, i2, j, c) ->
-      let i1 = Opt.get i1 and i2 = Opt.get i2 in
-      let j = get_create_ident j in
       let t1, pos1 = find_ident "Construct1" i1 cta in
       let t2, pos2 = find_ident "Construct2" i2 cta in
       assert (pos1 = pos2);
@@ -507,12 +493,10 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
                 |> Mid.add j (t, pos1) in
       EConstruct (pos1, t1, t2, i1, i2, j, elab cta c)
   | Weakening (i, c) ->
-      let i = Opt.get i in
       let t, pos = find_ident "Weakening" i cta in
       let cta = Mid.remove i cta in
       EWeakening (pos, t, i, elab cta c)
   | IntroQuant (i, y, c) ->
-      let i = Opt.get i in
       let t, pos = find_ident "IntroQuant" i cta in
       let t = match t, pos with
         | CTquant (CTforall, t), true | CTquant (CTexists, t), false -> t
@@ -520,8 +504,6 @@ let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heav
       let cta = Mid.add i (ct_open t (CTfvar y), pos) cta in
       EIntroQuant (pos, CTquant (CTlambda, t), i, y, elab cta c)
   | InstQuant (i, j, t_inst, c) ->
-      let i = Opt.get i in
-      let j = get_create_ident j in
       let t, pos = find_ident "InstQuant" i cta in
       let t = match t, pos with
         | CTquant (CTforall, t), false | CTquant (CTexists, t), true -> t
@@ -548,7 +530,6 @@ let erename goal id a (f : ident -> heavy_ecert) : trimmed_ecert =
                else c_closed, c_open in
   ECut (id', a, c1, c2)
 
-
 let rec eliminate_construct (c : heavy_ecert) : trimmed_ecert =
   match c with
     | EConstruct (goal, a, b, i1, i2, j, c) ->
@@ -565,14 +546,12 @@ let rec eliminate_construct (c : heavy_ecert) : trimmed_ecert =
         ECut (j, cut, c1, c2)))
     | _ -> propagate_ecert eliminate_construct (fun t -> t) (fun i -> i) c
 
-
-
 let rec eliminate_let (m : cterm Mid.t) (c : trimmed_ecert) : kernel_ecert =
   match c with
     | ELet (x, y, c) ->
         let x = match x with
                 | CTfvar id -> id
-                | _ -> failwith "" in
+                | _ -> assert false in
         let m = Mid.add x y m in
         eliminate_let m c
     | ECut (i, a, c1, c2) ->
@@ -581,8 +560,6 @@ let rec eliminate_let (m : cterm Mid.t) (c : trimmed_ecert) : kernel_ecert =
         let a = ct_subst m a in
         ECut (i, a, c1, c2)
     | _ -> propagate_ecert (eliminate_let m) (fun t -> t) (fun i -> i) c
-
-
 
 let make_core init_ct res_ct c =
   (* Format.eprintf "%a@." prcertif c; *)
