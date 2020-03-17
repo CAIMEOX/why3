@@ -10,15 +10,16 @@ open Cert_abstract
 type dir = Left | Right
 type path = dir list
 
-(** We equip existing transformations with a certificate <certif> *)
+(** We equip each transformation application with a certificate indicating
+    why the resulting list of tasks is implying the initial task *)
 
 type ('a, 'b) cert = (* 'a is used to designate an hypothesis, 'b is used for terms *)
-(* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>.
-   For more details, take a look at the OCaml implementation <Cert_verif_caml.ccheck>. *)
+  (* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>.
+     For more details, take a look at the OCaml implementation <Cert_verif_caml.ccheck>. *)
   | Nc
   (* Makes verification fail : use it as a placeholder *)
-  | Hole
-  (* Hole ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
+  | Hole of ident
+  (* Hole ct ⇓ (Γ ⊢ Δ) ≜  [ct : Γ ⊢ Δ] *)
   | Cut of 'a * 'b * ('a, 'b) cert * ('a, 'b) cert
   (* Cut (I, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ, I : A ⊢ Δ)) *)
   | Let of 'b * 'a * ('a, 'b) cert
@@ -72,13 +73,13 @@ type abstract_cert = (ident, cterm) cert
 
 type ctrans = visible_cert ctransformation
 
-type ('a, 'b, 'c) ecert = (* elaborated certificates, 'a is used to designate an hypothesis,
+type ('a, 'b) ecert = (* elaborated certificates, 'a is used to designate an hypothesis,
  'b is used for terms, 'c is used for tasks *)
-  | EHole of 'c
+  | EHole of ident
   (* EHole ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
-  | ECut of 'a * 'b * ('a, 'b, 'c) ecert * ('a, 'b, 'c) ecert
+  | ECut of 'a * 'b * ('a, 'b) ecert * ('a, 'b) ecert
   (* ECut (I, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ, I : A ⊢ Δ)) *)
-  | ELet of 'b * 'b * ('a, 'b, 'c) ecert
+  | ELet of 'b * 'b * ('a, 'b) ecert
   (* ELet (x, y, c) ⇓ t ≜  c ⇓ t[x ←  y] *)
   | EAxiom of 'b * 'a * 'a
   (* EAxiom (A, i1, i2) ⇓ (Γ, i1 : A ⊢ Δ, i2 : A) ≜  [] *)
@@ -86,48 +87,48 @@ type ('a, 'b, 'c) ecert = (* elaborated certificates, 'a is used to designate an
   | ETrivial of bool * 'a
   (* ETrivial (false, I) ⇓ (Γ, I : false ⊢ Δ) ≜  [] *)
   (* ETrivial (true, I) ⇓ (Γ ⊢ Δ, I : true ) ≜  [] *)
-  | ERename of bool * 'b * 'a * 'a * ('a, 'b, 'c) ecert
+  | ERename of bool * 'b * 'a * 'a * ('a, 'b) ecert
   (* ERename (false, A, I₁, I₂, c) ⇓  (Γ, I₁ : A ⊢ Δ) ≜ c ⇓ (Γ, I₂ : A ⊢ Δ)*)
   (* ERename (true, A, I₁, I₂, c) ⇓  (Γ ⊢ Δ, I₁ : A) ≜ c ⇓ (Γ ⊢ Δ, I₂ : A)*)
-  | ESplit of bool * 'b * 'b * 'a * ('a, 'b, 'c) ecert * ('a, 'b, 'c) ecert
+  | ESplit of bool * 'b * 'b * 'a * ('a, 'b) ecert * ('a, 'b) ecert
   (* ESplit (false, A, B, I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
   (* ESplit (true, A, B, I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
-  | EUnfoldIff of (bool * 'b * 'b * 'a * ('a, 'b, 'c) ecert)
+  | EUnfoldIff of (bool * 'b * 'b * 'a * ('a, 'b) ecert)
   (* EUnfoldIff (false, A, B, I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
   (* EUnfoldIff (true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
-  | EUnfoldArr of (bool * 'b * 'b * 'a * ('a, 'b, 'c) ecert)
+  | EUnfoldArr of (bool * 'b * 'b * 'a * ('a, 'b) ecert)
   (* EUnfoldArr (false, A, B, I, c) ⇓ (Γ, I : A → B ⊢ Δ) ≜  c ⇓ (Γ, I : ¬A ∨ B ⊢ Δ)*)
   (* EUnfoldArr (true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : A → B) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A ∨ B)*)
-  | ESwap of (bool * 'b * 'a * ('a, 'b, 'c) ecert)
+  | ESwap of (bool * 'b * 'a * ('a, 'b) ecert)
   (* ESwap (false, A, I, c) ⇓ (Γ, I : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A) *)
   (* ESwap (true, A, I, c) ⇓ (Γ ⊢ Δ, I : A ) ≜  c ⇓ (Γ, I : ¬A ⊢ Δ) *)
-  | ESwapNeg of (bool * 'b * 'a * ('a, 'b, 'c) ecert)
+  | ESwapNeg of (bool * 'b * 'a * ('a, 'b) ecert)
   (* ESwap_neg (false, A, I, c) ⇓ (Γ, I : ¬A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, I : A)  *)
   (* ESwap_neg (true, A, I, c) ⇓ (Γ ⊢ Δ, I : ¬A) ≜  c ⇓ (Γ, I : A ⊢ Δ)  *)
-  | EDestruct of bool * 'b * 'b * 'a * 'a * 'a * ('a, 'b, 'c) ecert
+  | EDestruct of bool * 'b * 'b * 'a * 'a * 'a * ('a, 'b) ecert
   (* EDestruct (false, A, B, I, J₁, J₂, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, J₁ : A, J₂ : B ⊢ Δ) *)
   (* EDestruct (true, A, B, I, J₁, J₂, c) ⇓ (Γ ⊢ Δ, I : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, J₁ : A, J₂ : B) *)
-  | EConstruct of bool * 'b * 'b * 'a * 'a * 'a * ('a, 'b, 'c) ecert
+  | EConstruct of bool * 'b * 'b * 'a * 'a * 'a * ('a, 'b) ecert
   (* EConstruct (false, A, B, I₁, I₂, J, c) ⇓ (Γ, I₁ : A, I₂ : B ⊢ Δ) ≜  c ⇓ (Γ, J : A ∧ B ⊢ Δ) *)
   (* EConstruct (true, A, B, I₁, I₂, J, c) ⇓ (Γ ⊢ Δ, I₁ : A, I₂ : B) ≜  c ⇓ (Γ ⊢ Δ, J : A ∧ B) *)
-  | EWeakening of bool * 'b * 'a * ('a, 'b, 'c) ecert
+  | EWeakening of bool * 'b * 'a * ('a, 'b) ecert
   (* EWeakening (true, A, I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* EWeakening (false, A, I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | EIntroQuant of bool * 'b * 'a * ident * ('a, 'b, 'c) ecert
+  | EIntroQuant of bool * 'b * 'a * ident * ('a, 'b) ecert
   (* EIntroQuant (false, P, I, y, c) ⇓ (Γ, I : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : P y ⊢ Δ) (y fresh) *)
   (* EIntroQuant (true, P, I, y, c) ⇓ (Γ ⊢ Δ, I : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : P y) (y fresh) *)
-  | EInstQuant of bool * 'b * 'a * 'a * 'b * ('a, 'b, 'c) ecert
+  | EInstQuant of bool * 'b * 'a * 'a * 'b * ('a, 'b) ecert
   (* InstQuant (false, P, I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
   (* InstQuant (true, P, I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
-  | ERewrite of 'a * 'a * path * bool * ('a, 'b, 'c) ecert list
+  | ERewrite of 'a * 'a * path * bool * ('a, 'b) ecert list
 (* Rewrite (I, J, path, rev, lc) ⇓ Seq is defined as follows :
    *    it tries to rewrite in <I> an equality that is in <J>, following the path <path>,
    *    <rev> indicates if it rewrites from left to right or from right to left.
    *    Since <H> can have premises, those are then matched against the certificates <lc> *)
 
-type heavy_ecert = (ident, cterm, ctask) ecert
-type trimmed_ecert = (ident, cterm, ctask) ecert (* without (Rename,Construct) *)
-type kernel_ecert = (ident, cterm, ctask) ecert (* without (Rename,Construct,Let) *)
+type heavy_ecert = (ident, cterm) ecert
+type trimmed_ecert = (ident, cterm) ecert (* without (Rename,Construct) *)
+type kernel_ecert = (ident, cterm) ecert (* without (Rename,Construct,Let) *)
 
 (** Printing of <cterm> and <ctask> : for debugging purposes *)
 
@@ -186,7 +187,7 @@ and prcab : type a b. (formatter -> a -> unit) ->
   let prc = prcab pra prb in
   match c with
   | Nc -> fprintf fmt "No_certif"
-  | Hole -> fprintf fmt "Hole"
+  | Hole ct -> fprintf fmt "Hole %a" pri ct
   | Cut (i, a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a,@ %a)@]" pra i prb a prc c1 prc c2
   | Let (x, i, c) -> fprintf fmt "Let @[(%a,@ %a,@ %a)@]" prb x pra i prc c
   | Rename (i1, i2, c) -> fprintf fmt "Rename @[(%a,@ %a,@ %a)@]" pra i1 pra i2 prc c
@@ -237,7 +238,7 @@ let find_ident s h cta =
 
 (* Structural functions on certificates *)
 let propagate_cert f fid fte = function
-  | (Hole | Nc)  as c -> c
+  | (Hole _ | Nc)  as c -> c
   | Axiom (h, g) -> Axiom (fid h, fid g)
   | Trivial i -> Trivial (fid i)
   | Cut (i, a, c1, c2) ->
@@ -257,17 +258,30 @@ let propagate_cert f fid fte = function
   | InstQuant (i, j, t, c) -> InstQuant (fid i, fid j, fte t, f c)
   | Rewrite (i, j, path, rev, lc) -> Rewrite (fid i, fid j, path, rev, List.map f lc)
 
-let rec fill stream = function
-  | Hole -> Stream.next stream
-  | c -> propagate_cert (fill stream) (fun t -> t) (fun t -> t) c
+let rec fill map = function
+  | Hole x -> Mid.find x map
+  | c -> propagate_cert (fill map) (fun t -> t) (fun t -> t) c
 
-let (|>>) c1 c2 =
-  let c2_stream = Stream.from (fun _ -> Some c2) in
-  fill c2_stream c1
+let flatten_uniq l =
+  let s = Sid.empty in
+  let add acc v = if Sid.mem v s then acc else v::acc in
+  let add_list acc nl = List.fold_left add acc nl in
+  let add_list_list acc nll = List.fold_left add_list acc nll in
+  List.rev (add_list_list [] l)
 
-let (|>>>) c1 lc2 =
-  let lc2_stream = Stream.of_list lc2 in
-  fill lc2_stream c1
+let (|>>>) (v1, c1) lcv2 =
+  let lv2, lc2 = List.split lcv2 in
+  assert (List.length v1 = List.length lv2);
+  let lvc1 = List.combine v1 lc2 in
+  let map = List.fold_left (fun map (v, c) -> Mid.add v c map) Mid.empty lvc1 in
+  flatten_uniq lv2, fill map c1
+
+let rec iterate n v = if n = 0 then [] else v :: iterate (n-1) v
+
+let (|>>) (v1, c1) (v2, c2) =
+  let n = List.length v1 in
+  let lcv2 = iterate n (v2, c2)in
+  (v1, c1) |>>> lcv2
 
 let propagate_ecert f fid ft = function
   | EHole _ as c -> c
@@ -422,14 +436,15 @@ module Hashid = Hashtbl.Make(struct type t = ident let equal = id_equal let hash
 
 
 let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heavy_ecert =
-  let res_ct = Stream.of_list res_ct in
+  (* let res_ct = Stream.of_list res_ct in *)
   (* let tbl = Hashid.create 17 in *)
   let rec elab cta c =
   match c with
   | Nc -> elab_failed "No certificates"
-  | Hole -> let nct = Stream.next res_ct in
-            (* TODO : match cta against nct and update tbl accordingly *)
-            EHole nct
+  | Hole _ -> c
+  (* TODO : match cta against nct and update tbl accordingly *)
+  (* let nct = Stream.next res_ct inc *)
+  (* EHole nct *)
   | Axiom (i1, i2) ->
       let a, posi2 = find_ident "Axiom" i2 cta in
       let i1, i2 = if posi2 then i1, i2 else i2, i1 in
