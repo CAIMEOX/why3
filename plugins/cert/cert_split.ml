@@ -19,7 +19,7 @@ open Decl
 
 open Cert_certificates
 
-let rec rename_cert pr1 pr2 (c : visible_cert) : visible_cert =
+let rec rename_cert pr1 pr2 c =
   propagate_cert (rename_cert pr1 pr2)
     (fun pr -> if pr_equal pr pr1 then pr2 else pr)
     (fun ct -> ct) c
@@ -240,10 +240,10 @@ let fold_cond = function
   | x -> x
 
 let destruct_reconstruct pr pr1 pr2 c1 c2 =
-  Destruct (pr, pr1, pr2, Hole)
+  lambda One (fun i -> Destruct (pr, pr1, pr2, Hole i))
   |>> c1
   |>> c2
-  |>> Construct (pr1, pr2, pr, Hole)
+  |>> lambda One (fun i -> Construct (pr1, pr2, pr, Hole i))
 
 let luop op (pr, t) = pr, op t
 
@@ -287,13 +287,24 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
   let r = match f.t_node with
   | _ when sp.stop_split && stop f ->
       let df = drop_byso f in
-      ret !+(pr, unstop f) Hole Nc !+(pr, unstop df) Hole Nc (pr, f) (pr, df) Unit false false
+      ret !+(pr, unstop f) (hole ()) nc
+        !+(pr, unstop df) (hole ()) nc
+        (pr, f) (pr, df) Unit false false
   | Tbinop (Tiff,_,_) | Tif _ | Tcase _ | Tquant _ when sp.intro_mode ->
       let df = drop_byso f in
-      ret !+(pr, f) Hole Nc !+(pr, df) Hole Nc (pr, f) (pr, df) Unit false false
-  | Ttrue -> ret Unit (Trivial pr) Nc (Zero (pr, f)) (Weakening (pr, Hole)) Nc (pr, f) (pr, f) Unit false false
-  | Tfalse -> ret (Zero (pr, f)) (Weakening (pr, Hole)) Nc Unit (Trivial pr) Nc (pr, f) (pr, f) Unit false false
-  | Tapp _ -> let uf = !+(pr, f) in ret uf Hole Nc uf Hole Nc (pr, f) (pr, f) Unit false false
+      ret !+(pr, f) (hole ()) nc
+        !+(pr, df) (hole ()) nc
+        (pr, f) (pr, df) Unit false false
+  | Ttrue -> ret Unit (lambda Z (Trivial pr)) nc
+               (Zero (pr, f)) (lambda One (fun i -> Weakening (pr, Hole i))) nc
+               (pr, f) (pr, f) Unit false false
+  | Tfalse -> ret (Zero (pr, f)) (lambda One (fun i -> Weakening (pr, Hole i))) nc
+                Unit (lambda Z (Trivial pr)) nc
+                (pr, f) (pr, f) Unit false false
+  | Tapp _ -> let uf = !+(pr, f) in
+              ret uf (hole ()) nc
+                uf (hole ()) nc
+                (pr, f) (pr, f) Unit false false
     (* f1 so f2 *)
   | Tbinop (Tand,f1,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) }) ->
       if not (sp.byso_split && asym f2) then split_core sp pr f1 else
@@ -310,7 +321,9 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let lside = if sp.side_split then close sf2.conj else
         !+(lbop t_implies sf1.fwd sf2.bwd) in
       let side = sf1.side ++ lside ++ close sf2.side in
-      ret sf1.conj Nc Nc disj Nc Nc sf1.bwd fwd side sf1.cpos (cn1 || cn2)
+      ret sf1.conj nc nc
+        disj nc nc
+        sf1.bwd fwd side sf1.cpos (cn1 || cn2)
   | Tbinop (Tand,f1,f2) ->
       let (&&&) = lbop (alias2 f1 f2 t_and) in
       let rc = split_core (ps_csp sp) in
@@ -329,10 +342,15 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let conj = sf1.conj ++ conj2 in
       let side = sf1.side ++ if not asym then sf2.side else
         let nf1 = ncase (sf2.conj::dp) sf1 in iclose nf1 sf2.side in
-      let cp = Split (pr, Rename (pr, pr1, sf1.cp), Rename (pr, pr2, sf2.cp)) in
-      let cn = Destruct (pr, pr1, pr2, sf1.cn |>> sf2.cn) in
+      let cp = lambda Two (fun i j ->
+               Split (pr, Rename (pr, pr1, Hole i), Rename (pr, pr2, Hole j)))
+               |>>> [sf1.cp; sf2.cp] in
+      let cn = lambda One (fun i -> Destruct (pr, pr1, pr2, Hole i))
+               |>> (sf1.cn |>> sf2.cn) in
       let dn = destruct_reconstruct pr pr1 pr2 sf1.dn sf2.dn in
-      ret conj cp cn disj dn Nc bwd fwd side false (cn1 || cn2)
+      ret conj cp cn
+        disj dn nc
+        bwd fwd side false (cn1 || cn2)
     (* f1 by f2 *)
   | Tbinop (Timplies,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) },f1) ->
       if not (sp.byso_split && asym f2) then split_core sp pr f1 else
@@ -342,7 +360,7 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let lside = if sp.side_split then close sf1.conj else
         !+(lbop t_implies sf2.fwd sf1.bwd) in
       let side = sf2.side ++ lside ++ sf1.side in
-      ret sf2.conj Nc Nc sf1.disj Nc Nc sf2.bwd sf1.fwd side sf2.cpos sf1.cneg
+      ret sf2.conj nc nc sf1.disj nc nc sf2.bwd sf1.fwd side sf2.cpos sf1.cneg
   | Tbinop (Timplies,f1,f2) ->
       let (>->) = lbop (alias2 f1 f2 t_implies) in
       let sp2 = ng_csp sp in let sp1 = in_csp sp2 in
@@ -360,7 +378,7 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let conj = bimap (fun _ (pr, a) -> pr, - t_not a) (>->) nf1 sf2.conj in
       let nf1 = ncase (if asym then sf2.disj::dp else dp) sf1 in
       let side = sf1.side ++ iclose nf1 sf2.side in
-      ret conj Nc Nc disj Nc Nc bwd fwd side (cn1 || sf2.cpos) false
+      ret conj nc nc disj nc nc bwd fwd side (cn1 || sf2.cpos) false
   | Tbinop (Tor,f1,f2) ->
       let (|||) = lbop (alias2 f1 f2 t_or) in
       let rc = split_core (ng_csp sp) in
@@ -380,8 +398,9 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
         let pf1 = pcase (sf2.disj::dp) sf1 in
         bimap cpy (|||) pf1 sf2.side in
       let cp = destruct_reconstruct pr pr1 pr2 sf1.cp sf2.cp in
-      let dn = Split (pr, sf1.dn, sf2.dn) in
-      ret conj cp Nc (sf1.disj ++ disj2) dn Nc bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
+      let dn = lambda Two (fun i j -> Split (pr, Hole i, Hole j))
+               |>>> [sf1.dn; sf2.dn] in
+      ret conj cp nc (sf1.disj ++ disj2) dn nc bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
   | Tbinop (Tiff,f1,f2) ->
       let rc = split_core (no_csp sp) in
       let pr1 = create_prsymbol (id_fresh "pr1") in
@@ -395,7 +414,7 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let nf1 = ncase [nf2] sf1 and pf1 = pcase [pf2] sf1 in
       let disj_top = aclose nf1 nf2 in
       let disj_bot = aclose (nclose pf1) (nclose pf2) in
-      ret conj Nc Nc (disj_top ++ disj_bot) Nc Nc df df (sf1.side ++ sf2.side) false false
+      ret conj nc nc (disj_top ++ disj_bot) nc nc df df (sf1.side ++ sf2.side) false false
   | Tif (fif,fthen,felse) ->
       let rc = split_core (no_csp sp) in
       let sfi = rc pr fif and sft = rc pr fthen and sfe = rc pr felse in
@@ -415,19 +434,19 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let nfi = ncase (sft.disj::spt) sfi and pfi = pcase (sfe.disj::spe) sfi in
       let eside = iclose (nclose pfi) sfe.side in
       let side = sfi.side ++ iclose nfi sft.side ++ eside in
-      ret conj Nc Nc disj Nc Nc bwd fwd side false false
+      ret conj nc nc disj nc nc bwd fwd side false false
   | Tnot f1 ->
       let sf = split_core (in_csp sp) pr f1 in
       let (!) = luop (alias f1 t_not) in
       let (|>) zero = map (fun (pr, t) -> !+(pr, t_attr_copy t zero)) (!) in
       let conj = t_false |> sf.disj and disj = t_true |> sf.conj in
-      ret conj Nc Nc disj Nc Nc !(sf.fwd) !(sf.bwd) sf.side sf.cneg sf.cpos
+      ret conj nc nc disj nc nc !(sf.fwd) !(sf.bwd) sf.side sf.cneg sf.cpos
   | Tlet (t,fb) ->
       let vs, f1 = t_open_bound fb in
       let (!) = luop (alias f1 (t_let_close vs t)) in
       let sf = split_core sp pr f1 in
       let (!!) = map (fun t -> Zero t) (!) in
-      ret !!(sf.conj) Nc Nc !!(sf.disj) Nc Nc !(sf.bwd) !(sf.fwd) !!(sf.side) sf.cpos sf.cneg
+      ret !!(sf.conj) nc nc !!(sf.disj) nc nc !(sf.bwd) !(sf.fwd) !!(sf.side) sf.cpos sf.cneg
   (* | Tcase (t,bl) ->
    *     let rc = match bl with
    *       | [_] -> split_core sp
@@ -443,7 +462,7 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
    *       let blbwd = List.map (fun (p, close, sf) -> close p (snd sf.bwd)) sbl in
    *       let bwd = case_close blbwd in
    *       let conj, disj, side = join sbl in
-   *       ret conj Nc Nc disj Nc Nc bwd fwd side false false
+   *       ret conj nc nc disj nc nc bwd fwd side false false
    *     in
    *     begin match sp.comp_match with
    *     | None ->
@@ -521,7 +540,7 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
             false, sf.cneg
       in
       let side = map (fun t -> Zero t) (luop (t_forall_close vsl trl)) sf.side in
-      ret conj Nc Nc disj Nc Nc bwd fwd side cpos cneg
+      ret conj nc nc disj nc nc bwd fwd side cpos cneg
   | Tvar _ | Tconst _ | Teps _ -> raise (FmlaExpected f)
   in
   let r = if case f then
@@ -609,7 +628,7 @@ let split_premise sp d = match d.d_node with
  *   Trans.apply trans t) *)
 
 let rev_append_cert lc =
-  List.fold_left (|>>) Hole (List.rev lc)
+  List.fold_left (|>>) (hole ()) (List.rev lc)
 
 let prep_goal split = Trans.store (fun t ->
   let split = split (Some (Task.task_known t)) in
