@@ -18,15 +18,6 @@ let find_goal cta =
  *)
 type ctask_simple = (ident * cterm) list
 
-let gen_sym s =
-  let r = ref 0 in fun () ->
-                   incr r;
-                   s ^ string_of_int !r
-
-let ip = create_ident_printer []
-let san = sanitizer char_to_alnum char_to_alnum
-let str i = id_unique ip ~sanitizer:san i
-
 let print_op fmt = function
   | Tand -> fprintf fmt "and"
   | Tor -> fprintf fmt "or"
@@ -35,7 +26,7 @@ let print_op fmt = function
 
 let rec print_term fmt = function
   | CTbvar _ -> assert false
-  | CTfvar id -> fprintf fmt "%s" (str id)
+  | CTfvar id -> pri fmt id
   | CTbinop (op, ct1, ct2) ->
       fprintf fmt "(%a (%a) (%a))"
         print_op op
@@ -55,14 +46,14 @@ let rec print_term fmt = function
       let q_str = match q with CTforall -> "forall"
                              | CTexists -> "exists"
                              | CTlambda -> assert false in
-      fprintf fmt "(%s (%s => %a))"
+      fprintf fmt "(%s (%a => %a))"
         q_str
-        (str x)
+        pri x
         print_term (ct_open t (CTfvar x))
   | CTquant (CTlambda, t) ->
       let x = id_register (id_fresh "x") in
-      fprintf fmt "%s => %a"
-        (str x)
+      fprintf fmt "%a => %a"
+        pri x
         print_term (ct_open t (CTfvar x))
 
 (* on [e1; ...; en], print_list sep gives :
@@ -116,8 +107,8 @@ let collect_stask (ta : ctask_simple) =
 let print_task fmt (fv, ts) =
   fprintf fmt "(";
   print_list " -> " (fun fmt (id, typ) ->
-      fprintf fmt "%s : (%a)"
-        (str id)
+      fprintf fmt "%a : (%a)"
+        pri id
         print_type typ) fmt fv;
   let tp = snd (List.split ts) @ [CTfalse] in
   fprintf fmt "prf (%a)"
@@ -133,69 +124,69 @@ let print_certif at fmt c =
   | EHole _ ->
       fprintf fmt "%s" (Stream.next s)
   | EAxiom (t, h, g) ->
-      fprintf fmt "axiom (%a) %s %s"
+      fprintf fmt "axiom (%a) %a %a"
         print_term t
-        (str h)
-        (str g)
+        pri h
+        pri g
   | ETrivial (goal, g) ->
-      fprintf fmt "trivial%s %s" (rstr goal)
-        (str g)
+      fprintf fmt "trivial%s %a" (rstr goal)
+        pri g
   | ECut (i, a, ce1, ce2) ->
-      fprintf fmt "cut (%a) (%s => %a) (%s => %a)"
+      fprintf fmt "cut (%a) (%a => %a) (%a => %a)"
         print_term a
-        (str i) pc ce1
-        (str i) pc ce2
+        pri i pc ce1
+        pri i pc ce2
   | ESplit (goal, a, b, i, c1, c2) ->
-      fprintf fmt "split%s (%a) (%a) (%s => %a) (%s => %a) %s" (rstr goal)
+      fprintf fmt "split%s (%a) (%a) (%a => %a) (%a => %a) %a" (rstr goal)
         print_term a
         print_term b
-        (str i) pc c1
-        (str i) pc c2
-        (str i)
+        pri i pc c1
+        pri i pc c2
+        pri i
   | EUnfoldIff (goal, a, b, i, c) ->
-      fprintf fmt "unfold_iff%s (%a) (%a) (%s => %a) %s" (rstr goal)
+      fprintf fmt "unfold_iff%s (%a) (%a) (%a => %a) %a" (rstr goal)
         print_term a
         print_term b
-        (str i) pc c
-        (str i)
+        pri i pc c
+        pri i
   | EUnfoldArr (goal, a, b, i, c) ->
-      fprintf fmt "unfold_arr%s (%a) (%a) (%s => %a) %s" (rstr goal)
+      fprintf fmt "unfold_arr%s (%a) (%a) (%a => %a) %a" (rstr goal)
         print_term a
         print_term b
-        (str i) pc c
-        (str i)
+        pri i pc c
+        pri i
   | ESwapNeg (goal, a, i, c) ->
-      fprintf fmt "swap_neg%s (%a) (%s => %a) %s" (rstr goal)
+      fprintf fmt "swap_neg%s (%a) (%a => %a) %a" (rstr goal)
         print_term a
-        (str i) pc c
-        (str i)
+        pri i pc c
+        pri i
   | ESwap (goal, a, i, c) ->
-      fprintf fmt "swap%s (%a) (%s => %a) %s" (rstr goal)
+      fprintf fmt "swap%s (%a) (%a => %a) %a" (rstr goal)
         print_term a
-        (str i) pc c
-        (str i)
+        pri i pc c
+        pri i
   | EDestruct (goal, a, b, i, j1, j2, c) ->
-      fprintf fmt "destruct%s (%a) (%a) (%s => %s => %a) %s" (rstr goal)
+      fprintf fmt "destruct%s (%a) (%a) (%a => %a => %a) %a" (rstr goal)
         print_term a
         print_term b
-        (str j1) (str j2) pc c
-        (str i)
+        pri j1 pri j2 pc c
+        pri i
   | EWeakening (goal, a, i, c) ->
-      fprintf fmt "weakening%s (%a) (%a) %s" (rstr goal)
+      fprintf fmt "weakening%s (%a) (%a) %a" (rstr goal)
         print_term a
         pc c
-        (str i)
+        pri i
   | EIntroQuant (goal, p, i, y, c) ->
-      fprintf fmt "intro_quant%s (%a) (%s => %s => %a) %s" (rstr goal)
+      fprintf fmt "intro_quant%s (%a) (%a => %a => %a) %a" (rstr goal)
         print_term p
-        (str y) (str i) pc c
-        (str i)
+        pri y pri i pc c
+        pri i
   | EInstQuant (goal, p, i, j, t, c) ->
-      fprintf fmt "inst_quant%s (%a) (%a) (%s => %s => %a) %s" (rstr goal)
+      fprintf fmt "inst_quant%s (%a) (%a) (%a => %a => %a) %a" (rstr goal)
         print_term p
         print_term t
-        (str i) (str j) pc c
-        (str i)
+        pri i pri j pc c
+        pri i
   | ERewrite _ -> verif_failed "Rewrite is not yet supported by the Dedukti checker" in
   pc fmt c
 
@@ -206,7 +197,7 @@ let fv_ts (ct : ctask) =
   let fv = collect_stask ts in
   fv, ts
 
-let print fmt init_ct res_ct certif =
+let print fmt init_ct res_ct (task_id, certif) =
   let resm  = List.map fv_ts res_ct in
   let res = List.map (fun (fv, ts) -> Mid.bindings fv, ts) resm in
   let fvi, tsi = fv_ts init_ct in
@@ -218,25 +209,22 @@ let print fmt init_ct res_ct certif =
       print_task
       fmt
       (res @ [init]) in
-  let task_syms = let gs = gen_sym "task" in
-                  List.map (fun _ -> gs ()) res in
   (* applied_tasks are used to fill the holes *)
   let applied_tasks =
-    List.map2 (fun s (fv_t, t) ->
+    List.map2 (fun id (fv_t, t) ->
         let fv, _ = List.split fv_t in
         let hyp, _ = List.split t in
-        let res_str = s :: List.map str (fv @ hyp) in
-        print_list " " (fun fmt -> fprintf fmt "%s") str_formatter res_str;
+        print_list_inter " " pri str_formatter (id :: fv @ hyp);
         flush_str_formatter ())
-      task_syms
+      task_id
       res in
   (* The term that has the correct type *)
   let p_term fmt () =
     let fv, ts = init in
     let fv_ids, _ = List.split fv in
     let hyp_ids, _ = List.split ts in
-    let vars = task_syms @ List.map str (fv_ids @ hyp_ids) in
-    print_list " => " (fun fmt -> fprintf fmt "%s") fmt vars;
+    let vars = task_id @ fv_ids @ hyp_ids in
+    print_list " => " pri fmt vars;
     print_certif applied_tasks fmt certif in
   fprintf fmt "#CHECK (%a) :\n\
                       (%a).@."

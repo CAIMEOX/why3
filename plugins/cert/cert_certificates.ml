@@ -68,8 +68,39 @@ type ('a, 'b) cert = (* 'a is used to designate an hypothesis, 'b is used for te
      <rev> indicates if it rewrites from left to right or from right to left.
      Since <H> can have premises, those are then matched against the certificates <lc> *)
 
-type visible_cert = (prsymbol, term) cert
-type abstract_cert = (ident, cterm) cert
+type vcert = (prsymbol, term) cert
+
+type visible_cert = ident list * (prsymbol, term) cert
+
+let nc = [], Nc
+
+type 'a args =
+  | Z : vcert args
+  | One : (ident -> vcert) args
+  | Two : (ident -> ident -> vcert) args
+  | List : int -> (ident list -> vcert) args
+
+let rec new_idents n =
+  if n = 0 then [] else
+    let i = id_register (id_fresh "cert_ident") in
+    i:: new_idents (n-1)
+
+let lambda : type a. a args -> a -> visible_cert  = fun args f ->
+  match args with
+  | Z -> [], f
+  | One -> let i = id_register (id_fresh "cert_ident") in
+           [i], f i
+  | Two -> let i1 = id_register (id_fresh "cert_ident") in
+           let i2 = id_register (id_fresh "cert_ident") in
+           [i1; i2], f i1 i2
+  | List n ->
+      let il = new_idents n in
+      il, f il
+
+let hole () : visible_cert =
+  lambda One (fun i -> Hole i)
+
+type abstract_cert = ident list * (ident, cterm) cert
 
 type ctrans = visible_cert ctransformation
 
@@ -126,16 +157,17 @@ type ('a, 'b) ecert = (* elaborated certificates, 'a is used to designate an hyp
    *    <rev> indicates if it rewrites from left to right or from right to left.
    *    Since <H> can have premises, those are then matched against the certificates <lc> *)
 
-type heavy_ecert = (ident, cterm) ecert
-type trimmed_ecert = (ident, cterm) ecert (* without (Rename,Construct) *)
-type kernel_ecert = (ident, cterm) ecert (* without (Rename,Construct,Let) *)
+type heavy_ecert = ident list * (ident, cterm) ecert
+type trimmed_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct) *)
+type kernel_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct,Let) *)
 
 (** Printing of <cterm> and <ctask> : for debugging purposes *)
 
 let ip = create_ident_printer []
+let san = sanitizer char_to_alnum char_to_alnum
 
 let pri fmt i =
-  fprintf fmt "%s" (id_unique ip i)
+  fprintf fmt "%s" (id_unique ip ~sanitizer:san i)
 
 let prpr fmt pr =
   pri fmt pr.pr_name
@@ -206,8 +238,10 @@ and prcab : type a b. (formatter -> a -> unit) ->
   | Rewrite (i, j, path, rev, lc) ->
       fprintf fmt "Rewrite @[(%a,@ %a,@ %a,@ %b,@ %a)@]"
         pra i pra j (prle "; " prd) path rev (prle "; " prc) lc
-and prcertif fmt = prcab prpr pte fmt
-and prcore_certif fmt = prcab pri pcte fmt
+
+and prli = prle "; " pri
+and prcertif fmt (v, c) = fprintf fmt  "%a, %a" prli v (prcab prpr pte) c
+and prcore_certif fmt (v, c) = fprintf fmt  "%a, %a" prli v (prcab pri pcte) c
 
 let eprcertif c = eprintf "%a@." prcertif c
 
@@ -263,11 +297,23 @@ let rec fill map = function
   | c -> propagate_cert (fill map) (fun t -> t) (fun t -> t) c
 
 let flatten_uniq l =
-  let s = Sid.empty in
-  let add acc v = if Sid.mem v s then acc else v::acc in
+  let add (s, l) v = if Sid.mem v s
+                     then s, l
+                     else Sid.add v s, v::l in
   let add_list acc nl = List.fold_left add acc nl in
   let add_list_list acc nll = List.fold_left add_list acc nll in
-  List.rev (add_list_list [] l)
+  let _, fl = add_list_list (Sid.empty, []) l in
+  List.rev fl
+
+let _ =
+  let id1 = id_register (id_fresh "H1") in
+  let id2 = id_register (id_fresh "H2") in
+  let id3 = id_register (id_fresh "H3") in
+  let id4 = id_register (id_fresh "H4") in
+  let id5 = id_register (id_fresh "H5") in
+  let ll = [[id1; id2]; [id1; id3; id3]; [id2; id1; id4]; [id4; id2; id5]] in
+  let l = flatten_uniq ll in
+  List.iter (Format.printf "%a\n" pri) l
 
 let (|>>>) (v1, c1) lcv2 =
   let lv2, lc2 = List.split lcv2 in
@@ -425,7 +471,7 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
   let hg, _ = Mid.choose mg in
   fun ct -> Mid.add hg (ct, true) mh
 
-let rec abstract_types (c : visible_cert) : abstract_cert =
+let rec abstract_types c =
   propagate_cert abstract_types (fun pr -> pr.pr_name) abstract_term c
 
 exception Elaboration_failed of string
@@ -435,13 +481,13 @@ let elab_failed s = raise (Elaboration_failed s)
 module Hashid = Hashtbl.Make(struct type t = ident let equal = id_equal let hash = id_hash end)
 
 
-let elaborate (init_ct : ctask) (res_ct : ctask list) (c : abstract_cert) : heavy_ecert =
+let elaborate (init_ct : ctask) c =
   (* let res_ct = Stream.of_list res_ct in *)
   (* let tbl = Hashid.create 17 in *)
   let rec elab cta c =
   match c with
   | Nc -> elab_failed "No certificates"
-  | Hole _ -> c
+  | Hole i -> EHole i
   (* TODO : match cta against nct and update tbl accordingly *)
   (* let nct = Stream.next res_ct inc *)
   (* EHole nct *)
@@ -559,7 +605,8 @@ let erename g a i1 i2 c =
                else c_closed, c_open in
   ECut (i2, a, c1, c2)
 
-let rec trim_certif (c : heavy_ecert) : trimmed_ecert =
+
+let rec trim_certif c =
   match c with
   | ERename (g, a, i1, i2, c) ->
       erename g a i1 i2 c
@@ -579,7 +626,7 @@ let rec trim_certif (c : heavy_ecert) : trimmed_ecert =
               ECut (j, cut, c1, c2)))
   | _ -> propagate_ecert trim_certif (fun t -> t) (fun i -> i) c
 
-let rec eliminate_let (m : cterm Mid.t) (c : trimmed_ecert) : kernel_ecert =
+let rec eliminate_let (m : cterm Mid.t) c =
   match c with
     | ELet (x, y, c) ->
         let x = match x with
@@ -594,9 +641,9 @@ let rec eliminate_let (m : cterm Mid.t) (c : trimmed_ecert) : kernel_ecert =
         ECut (i, a, c1, c2)
     | _ -> propagate_ecert (eliminate_let m) (fun t -> t) (fun i -> i) c
 
-let make_core init_ct res_ct c =
+let make_core (init_ct : ctask) (_ : ctask list) (v, c : visible_cert) : heavy_ecert =
   (* Format.eprintf "%a@." prcertif c; *)
-  abstract_types c
-  |> elaborate init_ct res_ct
-  |> trim_certif
-  |> eliminate_let Mid.empty
+  v, abstract_types c
+     |> elaborate init_ct
+     |> trim_certif
+     |> eliminate_let Mid.empty
