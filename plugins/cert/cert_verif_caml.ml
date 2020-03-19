@@ -49,34 +49,41 @@ let check_rewrite cta rev h g terms path : ctask list =
 
 (** This is the main verification function : <check_certif> replays the certificate on a ctask *)
 
-let rec ccheck (c : kernel_ecert) cta : ctask list =
+let union : ctask Mid.t -> ctask Mid.t -> ctask Mid.t =
+  let merge_no_conflicts _ cta1 cta2 =
+    if ctask_equal cta1 cta2
+    then Some cta1
+    else assert false in (* assert false and NOT None *)
+  Mid.union merge_no_conflicts
+
+let rec ccheck c cta =
   match c with
   | ELet _ | EConstruct _ | ERename _ -> verif_failed "Construct/Let/Rename left"
-    | EHole _ -> [cta]
+    | EHole i -> Mid.singleton i cta
     | EAxiom (_, i1, i2) ->
         let t1, pos1 = find_ident "axiom1" i1 cta in
         let t2, pos2 = find_ident "axiom2" i2 cta in
         if not pos1 && pos2
-        then if cterm_equal t1 t2 then []
+        then if cterm_equal t1 t2 then Mid.empty
              else verif_failed "The hypothesis and goal given do not match"
         else verif_failed "Terms have wrong positivities in the task"
     | ETrivial (_, i) ->
         let t, pos = find_ident "trivial" i cta in
         begin match t, pos with
-        | CTfalse, false | CTtrue, true -> []
+        | CTfalse, false | CTtrue, true -> Mid.empty
         | _ -> verif_failed "Non trivial hypothesis"
         end
     | ECut (i, a, c1, c2) ->
         let cta1 = Mid.add i (a, true) cta in
         let cta2 = Mid.add i (a, false) cta in
-        ccheck c1 cta1 @ ccheck c2 cta2
+        union (ccheck c1 cta1) (ccheck c2 cta2)
     | ESplit (_, _, _, i, c1, c2) ->
         let t, pos = find_ident "split" i cta in
         begin match t, pos with
         | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false ->
             let cta1 = Mid.add i (t1, pos) cta in
             let cta2 = Mid.add i (t2, pos) cta in
-            ccheck c1 cta1 @ ccheck c2 cta2
+            union (ccheck c1 cta1) (ccheck c2 cta2)
         | _ -> verif_failed "Not splittable" end
     | EUnfoldIff (_, _, _, i, c) ->
         let t, pos = find_ident "unfold" i cta in
@@ -131,11 +138,12 @@ let rec ccheck (c : kernel_ecert) cta : ctask list =
         end
     | ERewrite (i, j, path, rev, lc) ->
         let lcta = check_rewrite cta rev j i [] path in
-        List.map2 ccheck lc lcta |> List.concat
+        List.map2 ccheck lc lcta |> List.fold_left union Mid.empty
 
 
-let checker_caml certif init_ct res_ct =
-  try let res_ct' = ccheck certif init_ct in
+let checker_caml (vs, certif) init_ct res_ct =
+  try let map_res = ccheck certif init_ct in
+      let res_ct' = List.map (fun id -> Mid.find id map_res) vs in
       if not (Lists.equal ctask_equal res_ct res_ct')
       then begin
           print_ctasks "/tmp/from_trans.log" res_ct;
