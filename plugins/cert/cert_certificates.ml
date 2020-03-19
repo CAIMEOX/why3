@@ -305,15 +305,15 @@ let flatten_uniq l =
   let _, fl = add_list_list (Sid.empty, []) l in
   List.rev fl
 
-let _ =
-  let id1 = id_register (id_fresh "H1") in
-  let id2 = id_register (id_fresh "H2") in
-  let id3 = id_register (id_fresh "H3") in
-  let id4 = id_register (id_fresh "H4") in
-  let id5 = id_register (id_fresh "H5") in
-  let ll = [[id1; id2]; [id1; id3; id3]; [id2; id1; id4]; [id4; id2; id5]] in
-  let l = flatten_uniq ll in
-  List.iter (Format.printf "%a\n" pri) l
+(* let _ =
+ *   let id1 = id_register (id_fresh "H1") in
+ *   let id2 = id_register (id_fresh "H2") in
+ *   let id3 = id_register (id_fresh "H3") in
+ *   let id4 = id_register (id_fresh "H4") in
+ *   let id5 = id_register (id_fresh "H5") in
+ *   let ll = [[id1; id2]; [id1; id3; id3]; [id2; id1; id4]; [id4; id2; id5]] in
+ *   let l = flatten_uniq ll in
+ *   List.iter (Format.printf "%a\n" pri) l *)
 
 let (|>>>) (v1, c1) lcv2 =
   let lv2, lc2 = List.split lcv2 in
