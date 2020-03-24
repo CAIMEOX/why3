@@ -206,6 +206,16 @@ let po p fmt = function
   | None -> fprintf fmt "None"
   | Some x -> fprintf fmt "%a" p x
 
+(* let _ =
+ *   let rcd = {
+ *       mark_open_tag = (fun _ -> "start");
+ *       mark_close_tag = (fun _ -> "");
+ *       print_open_tag = (fun _ -> ());
+ *       print_close_tag = (fun _ -> ());
+ *     } in
+ *   pp_set_formatter_tag_functions err_formatter rcd;
+ *   pp_set_tags err_formatter true *)
+
 
 let rec print_certif filename cert =
   let oc = open_out filename in
@@ -220,28 +230,28 @@ and prcab : type a b. (formatter -> a -> unit) ->
   match c with
   | Nc -> fprintf fmt "No_certif"
   | Hole ct -> fprintf fmt "Hole %a" pri ct
-  | Cut (i, a, c1, c2) -> fprintf fmt "Cut @[(%a,@ %a,@ %a,@ %a)@]" pra i prb a prc c1 prc c2
-  | Let (x, i, c) -> fprintf fmt "Let @[(%a,@ %a,@ %a)@]" prb x pra i prc c
-  | Rename (i1, i2, c) -> fprintf fmt "Rename @[(%a,@ %a,@ %a)@]" pra i1 pra i2 prc c
-  | Axiom (i1, i2) -> fprintf fmt "Axiom @[(%a,@ %a)@]" pra i1 pra i2
+  | Cut (i, a, c1, c2) -> fprintf fmt "Cut (@[%a, %a,@ @[<4>%a@],@ @[<4>%a@])@]" pra i prb a prc c1 prc c2
+  | Let (x, i, c) -> fprintf fmt "Let (%a, %a,@ %a)" prb x pra i prc c
+  | Rename (i1, i2, c) -> fprintf fmt "Rename (%a, %a,@ %a)" pra i1 pra i2 prc c
+  | Axiom (i1, i2) -> fprintf fmt "Axiom (%a, %a)" pra i1 pra i2
   | Trivial i -> fprintf fmt "Trivial %a" pra i
-  | Split (i, c1, c2) -> fprintf fmt "Split @[(%a,@ %a,@ %a)@]" pra i prc c1 prc c2
-  | Unfold (i, c) -> fprintf fmt "Unfold @[(%a,@ %a)@]" pra i prc c
-  | Swap (i, c) -> fprintf fmt "Swap @[(%a,@ %a)@]" pra i prc c
+  | Split (i, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]" pra i prc c1 prc c2
+  | Unfold (i, c) -> fprintf fmt "Unfold (%a,@ %a)" pra i prc c
+  | Swap (i, c) -> fprintf fmt "Swap (%a,@ %a)" pra i prc c
   | Destruct (i, j1, j2, c) ->
-      fprintf fmt "Destruct @[(%a,@ %a,@ %a,@ %a)@]" pra i pra j1 pra j2 prc c
+      fprintf fmt "Destruct (%a, %a, %a,@ %a)" pra i pra j1 pra j2 prc c
   | Construct (i1, i2, j, c) ->
-      fprintf fmt "Construct @[(%a,@ %a,@ %a,@ %a)@]" pra i1 pra i2 pra j prc c
-  | Weakening (i, c) -> fprintf fmt "Weakening@ @[(%a,@ %a)@]" pra i prc c
-  | IntroQuant (i, y, c) -> fprintf fmt "IntroQuant @[(%a,@ %a,@ %a)@]" pra i pri y prc c
-  | InstQuant (i, j, t, c) -> fprintf fmt "InstQuant @[(%a,@ %a,@ %a,@ %a)@]" pra i pra j prb t prc c
+      fprintf fmt "Construct (%a, %a, %a,@ %a)" pra i1 pra i2 pra j prc c
+  | Weakening (i, c) -> fprintf fmt "Weakening@ (%a,@ %a)" pra i prc c
+  | IntroQuant (i, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)" pra i pri y prc c
+  | InstQuant (i, j, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)" pra i pra j prb t prc c
   | Rewrite (i, j, path, rev, lc) ->
-      fprintf fmt "Rewrite @[(%a,@ %a,@ %a,@ %b,@ %a)@]"
+      fprintf fmt "Rewrite (%a, %a, %a, %b,@ %a)"
         pra i pra j (prle "; " prd) path rev (prle "; " prc) lc
 
 and prli = prle "; " pri
-and prcertif fmt (v, c) = fprintf fmt  "%a, %a" prli v (prcab prpr pte) c
-and prcore_certif fmt (v, c) = fprintf fmt  "%a, %a" prli v (prcab pri pcte) c
+and prcertif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab prpr pte) c
+and prcore_certif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab pri pcte) c
 
 let eprcertif c = eprintf "%a@." prcertif c
 
@@ -609,6 +619,7 @@ let erename g a i1 i2 c =
 let rec trim_certif c =
   match c with
   | ERename (g, a, i1, i2, c) ->
+      let c = trim_certif c in
       erename g a i1 i2 c
   | EConstruct (g, a, b, i1, i2, j, c) ->
       let c = trim_certif c in
