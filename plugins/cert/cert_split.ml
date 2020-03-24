@@ -57,6 +57,12 @@ let compiled = Ident.create_attribute "split_goal: compiled match"
 let unstop f =
   t_attr_set ?loc:f.t_loc (Sattr.remove stop_split f.t_attrs) f
 
+let print_pr_t fmt (pr, t) =
+  Format.fprintf fmt "[%a : %a]"
+    Pretty.print_pr pr
+    Pretty.print_term t
+
+
 (* Represent monoid of formula interpretation for conjonction and disjunction *)
 module M = struct
 
@@ -133,7 +139,7 @@ module M = struct
   let print_mon sep fmt c =
     Pp.print_list
       (fun fmt () -> Format.fprintf fmt "%s" sep)
-      (fun fmt -> Format.fprintf fmt "[%a]" Pretty.print_term)
+      print_pr_t
       fmt
       (to_list c)
 
@@ -189,8 +195,8 @@ let print_ret_err { conj; cp; cn; disj; dn; dp; bwd; fwd; side; cpos; cneg } =
     (M.print_mon " \\/ ") disj
     prcertif dn
     prcertif dp
-    Pretty.print_term bwd
-    Pretty.print_term fwd
+    print_pr_t bwd
+    print_pr_t fwd
     (M.print_mon " /\\ ") side
     cpos
     cneg
@@ -550,9 +556,9 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       { r with conj = Unit; disj = Unit; fwd = pr, t_false; bwd = pr, t_true }
   | _ -> r
 
-let split_core sp t =
-  let res = split_core sp t in
-  (* print_ret_err res; *)
+let split_core sp pr t =
+  let res = split_core sp pr t in
+  print_ret_err res;
   res
 
 let full_split kn = {
