@@ -82,16 +82,16 @@ type 'a args =
 
 let rec new_idents n =
   if n = 0 then [] else
-    let i = id_register (id_fresh "cert_ident") in
+    let i = id_register (id_fresh "s") in
     i:: new_idents (n-1)
 
 let lambda : type a. a args -> a -> visible_cert  = fun args f ->
   match args with
   | Z -> [], f
-  | One -> let i = id_register (id_fresh "cert_ident") in
+  | One -> let i = id_register (id_fresh "s") in
            [i], f i
-  | Two -> let i1 = id_register (id_fresh "cert_ident") in
-           let i2 = id_register (id_fresh "cert_ident") in
+  | Two -> let i1 = id_register (id_fresh "s") in
+           let i2 = id_register (id_fresh "s") in
            [i1; i2], f i1 i2
   | List n ->
       let il = new_idents n in
@@ -324,6 +324,7 @@ let flatten_uniq l =
  *   let ll = [[id1; id2]; [id1; id3; id3]; [id2; id1; id4]; [id4; id2; id5]] in
  *   let l = flatten_uniq ll in
  *   List.iter (Format.printf "%a\n" pri) l *)
+
 
 let (|>>>) (v1, c1) lcv2 =
   let lv2, lc2 = List.split lcv2 in

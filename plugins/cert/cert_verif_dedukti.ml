@@ -19,21 +19,21 @@ let find_goal cta =
 type ctask_simple = (ident * cterm) list
 
 let print_op fmt = function
-  | Tand -> fprintf fmt "and"
-  | Tor -> fprintf fmt "or"
-  | Timplies -> fprintf fmt "imp"
-  | Tiff -> fprintf fmt "iff"
+  | Tand -> fprintf fmt "∧"
+  | Tor -> fprintf fmt "∨"
+  | Timplies -> fprintf fmt "⇨"
+  | Tiff -> fprintf fmt "⇔"
 
 let rec print_term fmt = function
   | CTbvar _ -> assert false
   | CTfvar id -> pri fmt id
   | CTbinop (op, ct1, ct2) ->
-      fprintf fmt "(%a (%a) (%a))"
-        print_op op
+      fprintf fmt "(%a %a %a)"
         print_term ct1
+        print_op op
         print_term ct2
   | CTnot ct ->
-      fprintf fmt "(not (%a))"
+      fprintf fmt "(¬ %a)"
         print_term ct
   | CTfalse -> fprintf fmt "false"
   | CTtrue -> fprintf fmt "true"
@@ -46,13 +46,13 @@ let rec print_term fmt = function
       let q_str = match q with CTforall -> "forall"
                              | CTexists -> "exists"
                              | CTlambda -> assert false in
-      fprintf fmt "(%s (%a => %a))"
+      fprintf fmt "(%s (λ %a, %a))"
         q_str
         pri x
         print_term (ct_open t (CTfvar x))
   | CTquant (CTlambda, t) ->
       let x = id_register (id_fresh "x") in
-      fprintf fmt "%a => %a"
+      fprintf fmt "(λ %a, %a)"
         pri x
         print_term (ct_open t (CTfvar x))
 
@@ -87,7 +87,7 @@ type typ =
 let rec print_type fmt = function
   | Term -> fprintf fmt "Term"
   | Prop -> fprintf fmt "Prop"
-  | Arrow (t1, t2) -> fprintf fmt "%a -> %a"
+  | Arrow (t1, t2) -> fprintf fmt "%a ⇒ %a"
                         print_type t1
                         print_type t2
 
@@ -105,14 +105,14 @@ let collect_stask (ta : ctask_simple) =
     Mid.empty ta
 
 let print_task fmt (fv, ts) =
-  fprintf fmt "(";
-  print_list " -> " (fun fmt (id, typ) ->
-      fprintf fmt "%a : (%a)"
+  fprintf fmt "(∀ ";
+  print_list_inter " " (fun fmt (id, typ) ->
+      fprintf fmt "(%a : %a)"
         pri id
         print_type typ) fmt fv;
   let tp = snd (List.split ts) @ [CTfalse] in
-  fprintf fmt "prf (%a)"
-    (print_list_pre "imp" print_term) tp;
+  fprintf fmt ", prf (%a)"
+    (print_list_inter " ⇨ " print_term) tp;
   fprintf fmt ")"
 
 let rstr goal = if goal then "_goal" else "_hyp"
@@ -132,41 +132,41 @@ let print_certif at fmt c =
       fprintf fmt "trivial%s %a" (rstr goal)
         pri g
   | ECut (i, a, ce1, ce2) ->
-      fprintf fmt "cut (%a) (%a => %a) (%a => %a)"
+      fprintf fmt "cut (%a) (λ %a, %a) (λ %a, %a)"
         print_term a
         pri i pc ce1
         pri i pc ce2
   | ESplit (goal, a, b, i, c1, c2) ->
-      fprintf fmt "split%s (%a) (%a) (%a => %a) (%a => %a) %a" (rstr goal)
+      fprintf fmt "split%s (%a) (%a) (λ %a, %a) (λ %a, %a) %a" (rstr goal)
         print_term a
         print_term b
         pri i pc c1
         pri i pc c2
         pri i
   | EUnfoldIff (goal, a, b, i, c) ->
-      fprintf fmt "unfold_iff%s (%a) (%a) (%a => %a) %a" (rstr goal)
+      fprintf fmt "unfold_iff%s (%a) (%a) (λ %a, %a) %a" (rstr goal)
         print_term a
         print_term b
         pri i pc c
         pri i
   | EUnfoldArr (goal, a, b, i, c) ->
-      fprintf fmt "unfold_arr%s (%a) (%a) (%a => %a) %a" (rstr goal)
+      fprintf fmt "unfold_arr%s (%a) (%a) (λ %a, %a) %a" (rstr goal)
         print_term a
         print_term b
         pri i pc c
         pri i
   | ESwapNeg (goal, a, i, c) ->
-      fprintf fmt "swap_neg%s (%a) (%a => %a) %a" (rstr goal)
+      fprintf fmt "swap_neg%s (%a) (λ %a, %a) %a" (rstr goal)
         print_term a
         pri i pc c
         pri i
   | ESwap (goal, a, i, c) ->
-      fprintf fmt "swap%s (%a) (%a => %a) %a" (rstr goal)
+      fprintf fmt "swap%s (%a) (λ %a, %a) %a" (rstr goal)
         print_term a
         pri i pc c
         pri i
   | EDestruct (goal, a, b, i, j1, j2, c) ->
-      fprintf fmt "destruct%s (%a) (%a) (%a => %a => %a) %a" (rstr goal)
+      fprintf fmt "destruct%s (%a) (%a) (λ %a %a, %a) %a" (rstr goal)
         print_term a
         print_term b
         pri j1 pri j2 pc c
@@ -177,12 +177,12 @@ let print_certif at fmt c =
         pc c
         pri i
   | EIntroQuant (goal, p, i, y, c) ->
-      fprintf fmt "intro_quant%s (%a) (%a => %a => %a) %a" (rstr goal)
+      fprintf fmt "intro_quant%s (%a) (λ %a %a, %a) %a" (rstr goal)
         print_term p
         pri y pri i pc c
         pri i
   | EInstQuant (goal, p, i, j, t, c) ->
-      fprintf fmt "inst_quant%s (%a) (%a) (%a => %a => %a) %a" (rstr goal)
+      fprintf fmt "inst_quant%s (%a) (%a) (λ %a %a, %a) %a" (rstr goal)
         print_term p
         print_term t
         pri i pri j pc c
@@ -205,7 +205,7 @@ let print fmt init_ct res_ct (task_id, certif) =
   let init = Mid.bindings fv, tsi in
   (* The type we need to check is inhabited *)
   let p_type fmt () =
-    print_list_inter " -> "
+    print_list_inter " ⇒ "
       print_task
       fmt
       (res @ [init]) in
@@ -224,23 +224,24 @@ let print fmt init_ct res_ct (task_id, certif) =
     let fv_ids, _ = List.split fv in
     let hyp_ids, _ = List.split ts in
     let vars = task_id @ fv_ids @ hyp_ids in
-    print_list " => " pri fmt vars;
+    fprintf fmt "λ %a, " (print_list_inter " " pri) vars;
     print_certif applied_tasks fmt certif in
-  fprintf fmt "#CHECK (%a) :\n\
-                      (%a).@."
-    p_term ()
+  fprintf fmt "definition to_verify : %a \n\
+               ≔  %a@."
     p_type ()
+    p_term ()
 
 let checker_dedukti certif init_ct res_ct =
   try
-    let oc = open_out "/tmp/check_line.dk" in
+    let oc = open_out "/tmp/check_line.lp" in
     let fmt = formatter_of_out_channel oc in
-    let fo = Filename.(concat Config.datadir (concat "dedukti" "FO.dk")) in
     print fmt init_ct res_ct certif;
     close_out oc;
-    Sys.command ("cat " ^ fo ^ " > /tmp/check_all.dk") |> ignore;
-    Sys.command "cat /tmp/check_line.dk >> /tmp/check_all.dk" |> ignore;
-    Sys.command "dkcheck /tmp/check_all.dk 2> /dev/null | head -n 1 > /tmp/result.log" |> ignore;
-    let ic = Scanf.Scanning.open_in "/tmp/result.log" in
-    Scanf.bscanf ic "%s" (fun s -> if s <> "YES" then verif_failed ("Dedukti returns : " ^ s))
+    let fo = Filename.(concat Config.datadir (concat "lambdapi" "FO.lp")) in
+    let pkg_conf = Filename.(concat Config.datadir (concat "lambdapi" "lambdapi.pkg")) in
+    Sys.command ("cat " ^ fo ^ " > /tmp/check_all.lp") |> ignore;
+    Sys.command "cat /tmp/check_line.lp >> /tmp/check_all.lp" |> ignore;
+    Sys.command ("cp " ^ pkg_conf ^ " /tmp/lambdapi.pkg") |> ignore;
+    let ret = Sys.command "lambdapi check /tmp/check_all.lp 2> /dev/null 1> /dev/null" in
+    if ret <> 0 then verif_failed "Not verified by Lambdapi"
   with e -> raise (Trans.TransFailure ("Cert_verif_dedukti.checker_dedukti", e))
