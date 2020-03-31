@@ -5,16 +5,16 @@ open Cert_certificates
 open Cert_split
 open Cert_transformations
 open Cert_verif_caml
-open Cert_verif_dedukti
+open Cert_verif_lambdapi
 
 
 (** Certified transformations *)
 
 let cchecker trans = Trans.store (checker_ctrans None make_core checker_caml trans)
-let dchecker trans = Trans.store (checker_ctrans None make_core checker_dedukti trans)
+let lchecker trans = Trans.store (checker_ctrans None make_core checker_lambdapi trans)
 
 (* let cchecker trans = Trans.store (checker_ctrans (Some eprcertif) make_core checker_caml trans)
- * let dchecker trans = Trans.store (checker_ctrans (Some eprcertif) make_core checker_dedukti trans) *)
+ * let lchecker trans = Trans.store (checker_ctrans (Some eprcertif) make_core checker_lambdapi trans) *)
 
 
 let assert_c t              = cchecker (cut t)
@@ -45,31 +45,31 @@ let swap_c where            = cchecker (swap where)
 let trivial_c               = cchecker trivial
 
 
-let assert_d t              = dchecker (cut t)
-let assumption_d            = dchecker assumption
-let blast_d                 = dchecker blast
-let case_d t                = dchecker (case t)
-let clear_d l               = dchecker (clear l)
-let contradict_d            = dchecker contradict
-let destruct_all_d any every where = dchecker (destruct_all any every where)
-let exfalso_d               = dchecker exfalso
-let instantiate_d t what    = dchecker (inst t what)
-let intro_d any every where = dchecker (intro any every where)
-let intros_d                = dchecker intros
-let left_d where            = dchecker (dir Left where)
-(* let pose_d name t           = dchecker (pose name t) *)
-let rename_d pr1            = dchecker (rename pr1)
-let revert_d ls             = dchecker (revert ls)
-let right_d where           = dchecker (dir Right where)
-let split_d any every where = dchecker (split_logic any every where)
-let split_all_full_d        = dchecker split_all_full
-let split_all_right_d       = dchecker split_all_right
-let split_goal_full_d       = dchecker split_goal_full
-let split_goal_right_d      = dchecker split_goal_right
-let split_premise_full_d    = dchecker split_premise_full
-let split_premise_right_d   = dchecker split_premise_right
-let swap_d where            = dchecker (swap where)
-let trivial_d               = dchecker trivial
+let assert_l t              = lchecker (cut t)
+let assumption_l            = lchecker assumption
+let blast_l                 = lchecker blast
+let case_l t                = lchecker (case t)
+let clear_l l               = lchecker (clear l)
+let contradict_l            = lchecker contradict
+let destruct_all_l any every where = lchecker (destruct_all any every where)
+let exfalso_l               = lchecker exfalso
+let instantiate_l t what    = lchecker (inst t what)
+let intro_l any every where = lchecker (intro any every where)
+let intros_l                = lchecker intros
+let left_l where            = lchecker (dir Left where)
+(* let pose_l name t           = lchecker (pose name t) *)
+let rename_l pr1            = lchecker (rename pr1)
+let revert_l ls             = lchecker (revert ls)
+let right_l where           = lchecker (dir Right where)
+let split_l any every where = lchecker (split_logic any every where)
+let split_all_full_l        = lchecker split_all_full
+let split_all_right_l       = lchecker split_all_right
+let split_goal_full_l       = lchecker split_goal_full
+let split_goal_right_l      = lchecker split_goal_right
+let split_premise_full_l    = lchecker split_premise_full
+let split_premise_right_l   = lchecker split_premise_right
+let swap_l where            = lchecker (swap where)
+let trivial_l               = lchecker trivial
 
 (** Register certified transformations *)
 
@@ -161,94 +161,94 @@ let register_caml : unit =
     ~desc:"A OCaml certified version of (simplified) coq tactic [trivial]"
 
 
-let register_dedukti : unit =
+let register_lambdapi : unit =
   let open Args_wrapper in
   let open Trans in
 
-  wrap_and_register ~desc:"A Dedukti certified version of transformation assert"
-    "assert_dcert" (Tformula Ttrans_l)
-    assert_d;
+  wrap_and_register ~desc:"A Lambdapi certified version of transformation assert"
+    "assert_lcert" (Tformula Ttrans_l)
+    assert_l;
 
-  register_transform_l "assumption_dcert" assumption_d
-    ~desc:"A Dedukti certified version of coq tactic [assumption]";
+  register_transform_l "assumption_lcert" assumption_l
+    ~desc:"A Lambdapi certified version of coq tactic [assumption]";
 
-  register_transform_l "blast_dcert" blast_d
-    ~desc:"A Dedukti certified transformation that decomposes structurally logical formulas";
+  register_transform_l "blast_lcert" blast_l
+    ~desc:"A Lambdapi certified transformation that decomposes structurally logical formulas";
 
-  wrap_and_register ~desc:"A Dedukti certified version of transformation case"
-    "case_dcert" (Tformula Ttrans_l)
-    case_d;
+  wrap_and_register ~desc:"A Lambdapi certified version of transformation case"
+    "case_lcert" (Tformula Ttrans_l)
+    case_l;
 
-  wrap_and_register ~desc:"A Dedukti certified version of (simplified) coq tactic [clear]"
-    "clear_dcert" (Tprlist Ttrans_l)
-    clear_d;
+  wrap_and_register ~desc:"A Lambdapi certified version of (simplified) coq tactic [clear]"
+    "clear_lcert" (Tprlist Ttrans_l)
+    clear_l;
 
-  register_transform_l "contradict_dcert" contradict_d
-    ~desc:"A Dedukti certified transformation that closes some contradictory goals";
+  register_transform_l "contradict_lcert" contradict_l
+    ~desc:"A Lambdapi certified transformation that closes some contradictory goals";
 
-  wrap_and_register ~desc:"A Dedukti certified transformation to destruct a logical constructor"
-    "destruct_all_dcert" (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
-    destruct_all_d;
+  wrap_and_register ~desc:"A Lambdapi certified transformation to destruct a logical constructor"
+    "destruct_all_lcert" (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
+    destruct_all_l;
 
-  register_transform_l "exfalso_dcert" exfalso_d
-    ~desc:"A Dedukti certified version of coq tactic [exfalso]";
+  register_transform_l "exfalso_lcert" exfalso_l
+    ~desc:"A Lambdapi certified version of coq tactic [exfalso]";
 
-  wrap_and_register ~desc:"A Dedukti certified version of transformation instantiate"
-    "instantiate_dcert" (Tterm (Topt ("in", Tprsymbol Ttrans_l)))
-    instantiate_d;
+  wrap_and_register ~desc:"A Lambdapi certified version of transformation instantiate"
+    "instantiate_lcert" (Tterm (Topt ("in", Tprsymbol Ttrans_l)))
+    instantiate_l;
 
-  wrap_and_register ~desc:"A Dedukti certified version of (simplified) coq tactic [intro]"
-    "intro_dcert" (Toptbool ("any", (Toptbool ("all", ((Topt ("in", Tprsymbol (Ttrans_l))))))))
-    intro_d;
+  wrap_and_register ~desc:"A Lambdapi certified version of (simplified) coq tactic [intro]"
+    "intro_lcert" (Toptbool ("any", (Toptbool ("all", ((Topt ("in", Tprsymbol (Ttrans_l))))))))
+    intro_l;
 
-  register_transform_l "intros_dcert" intros_d
-    ~desc:"A Dedukti certified version of coq tactic [intros]";
+  register_transform_l "intros_lcert" intros_l
+    ~desc:"A Lambdapi certified version of coq tactic [intros]";
 
-  wrap_and_register ~desc:"A Dedukti certified version of coq tactic [left]"
-    "left_dcert" (Topt ("in", Tprsymbol (Ttrans_l)))
-    left_d;
+  wrap_and_register ~desc:"A Lambdapi certified version of coq tactic [left]"
+    "left_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+    left_l;
 
-  (* wrap_and_register ~desc:"A Dedukti certified version of (simplified) coq tactic [pose]"
-   *   "pose_dcert" (Tstring (Tformula Ttrans_l))
-   *   pose_d; *)
+  (* wrap_and_register ~desc:"A Lambdapi certified version of (simplified) coq tactic [pose]"
+   *   "pose_lcert" (Tstring (Tformula Ttrans_l))
+   *   pose_l; *)
 
-  wrap_and_register ~desc:"A Dedukti certified transformation to rename an hypothesis"
-    "rename_dcert" (Tprsymbol (Ttrans_l)) rename_d;
+  wrap_and_register ~desc:"A Lambdapi certified transformation to rename an hypothesis"
+    "rename_lcert" (Tprsymbol (Ttrans_l)) rename_l;
 
-  wrap_and_register ~desc:"A Dedukti certified transformation to generalize a variable"
-    "revert_dcert" (Tlsymbol (Ttrans_l))
-    revert_d;
+  wrap_and_register ~desc:"A Lambdapi certified transformation to generalize a variable"
+    "revert_lcert" (Tlsymbol (Ttrans_l))
+    revert_l;
 
-  wrap_and_register ~desc:"A Dedukti certified version of coq tactic [right]"
-    "right_dcert" (Topt ("in", Tprsymbol (Ttrans_l)))
-    right_d;
+  wrap_and_register ~desc:"A Lambdapi certified version of coq tactic [right]"
+    "right_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+    right_l;
 
-  wrap_and_register ~desc:"A Dedukti certified version of (simplified) coq tactic [split]"
-    "split_dcert" (Toptbool ("any", (Toptbool ("all", ((Topt ("in", Tprsymbol (Ttrans_l))))))))
-    split_d;
+  wrap_and_register ~desc:"A Lambdapi certified version of (simplified) coq tactic [split]"
+    "split_lcert" (Toptbool ("any", (Toptbool ("all", ((Topt ("in", Tprsymbol (Ttrans_l))))))))
+    split_l;
 
-  register_transform_l "split_all_full_dcert" split_all_full_d
-    ~desc:"The Dedukti certified version of split_all_full";
+  register_transform_l "split_all_full_lcert" split_all_full_l
+    ~desc:"The Lambdapi certified version of split_all_full";
 
-  register_transform_l "split_all_right_dcert" split_all_right_d
-    ~desc:"The Dedukti certified version of split_all_right";
+  register_transform_l "split_all_right_lcert" split_all_right_l
+    ~desc:"The Lambdapi certified version of split_all_right";
 
-  register_transform_l "split_goal_full_dcert" split_goal_full_d
-    ~desc:"The Dedukti certified version of split_goal_full";
+  register_transform_l "split_goal_full_lcert" split_goal_full_l
+    ~desc:"The Lambdapi certified version of split_goal_full";
 
-  register_transform_l "split_goal_right_dcert" split_goal_right_d
-    ~desc:"The Dedukti certified version of split_goal_right";
+  register_transform_l "split_goal_right_lcert" split_goal_right_l
+    ~desc:"The Lambdapi certified version of split_goal_right";
 
-  register_transform_l "split_premise_full_dcert" split_premise_full_d
-    ~desc:"The Dedukti certified version of split_premise_full";
+  register_transform_l "split_premise_full_lcert" split_premise_full_l
+    ~desc:"The Lambdapi certified version of split_premise_full";
 
-  register_transform_l "split_premise_right_dcert" split_premise_right_d
-    ~desc:"The Dedukti certified version of split_premise_right";
+  register_transform_l "split_premise_right_lcert" split_premise_right_l
+    ~desc:"The Lambdapi certified version of split_premise_right";
 
   wrap_and_register ~desc:"A OCaml certified transformation that negates \
                            and swaps an hypothesis from the context to the goal"
-    "swap_dcert" (Topt ("in", Tprsymbol (Ttrans_l)))
-    swap_d;
+    "swap_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+    swap_l;
 
-  register_transform_l "trivial_dcert" trivial_d
-    ~desc:"A Dedukti certified version of (simplified) coq tactic [trivial]"
+  register_transform_l "trivial_lcert" trivial_l
+    ~desc:"A Lambdapi certified version of (simplified) coq tactic [trivial]"

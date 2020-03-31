@@ -187,7 +187,7 @@ let print_certif at fmt c =
         print_term t
         pri i pri j pc c
         pri i
-  | ERewrite _ -> verif_failed "Rewrite is not yet supported by the Dedukti checker" in
+  | ERewrite _ -> verif_failed "Rewrite is not yet supported by the Lambdapi checker" in
   pc fmt c
 
 let fv_ts (ct : ctask) =
@@ -231,7 +231,7 @@ let print fmt init_ct res_ct (task_id, certif) =
     p_type ()
     p_term ()
 
-let checker_dedukti certif init_ct res_ct =
+let checker_lambdapi certif init_ct res_ct =
   try
     let oc = open_out "/tmp/check_line.lp" in
     let fmt = formatter_of_out_channel oc in
@@ -244,4 +244,4 @@ let checker_dedukti certif init_ct res_ct =
     Sys.command ("cp " ^ pkg_conf ^ " /tmp/lambdapi.pkg") |> ignore;
     let ret = Sys.command "lambdapi check /tmp/check_all.lp 2> /dev/null 1> /dev/null" in
     if ret <> 0 then verif_failed "Not verified by Lambdapi"
-  with e -> raise (Trans.TransFailure ("Cert_verif_dedukti.checker_dedukti", e))
+  with e -> raise (Trans.TransFailure ("Cert_verif_lambdapi.checker_lambdapi", e))
