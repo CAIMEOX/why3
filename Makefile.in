@@ -486,7 +486,7 @@ PLUG_PRINTER =
 PLUG_TRANSFORM =
 PLUG_TPTP = tptp_ast tptp_parser tptp_typing tptp_lexer tptp_printer
 PLUG_PYTHON = py_ast py_parser py_lexer py_main
-PLUG_CERT = cert_abstract cert_certificates cert_verif_caml cert_verif_dedukti cert_transformations cert_split cert_register
+PLUG_CERT = cert_abstract cert_certificates cert_verif_caml cert_verif_lambdapi cert_transformations cert_split cert_register
 PLUG_MICROC = mc_ast mc_parser mc_lexer mc_printer mc_main
 PLUG_ADA = ada_nametable ada_parser ada_lexer ada_main
 
