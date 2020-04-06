@@ -1,0 +1,72 @@
+
+use int.Int
+
+
+(* premier exemple introductif *)
+
+let incr (ref x : int) : unit
+  requires Pre { x < 100 }
+  writes   { x }
+  ensures  Post { x <= 100 }
+  = x <- x+1
+
+(*
+
+goal incr'vc :
+  forall x:int. x < 100 -> (forall x1:int. x1 = (x + 1) -> x1 <= 100)
+
+traduction monadique :
+
+let incr_monad (x:int) (Pre: x < 100) : { x1:int | Post : x1 <= 100 } =
+  let x1 = x+1 in
+  { x1 | incr'vc x Pre x1 <preuve de x1 = x+1> }
+
+il faudra mieux une syntaxe Coq ou Dedukti bien sur.
+
+ici, sans meme avoir de terme-preuve pour incr'vc, mais en supposant
+son existence, on peut tenter de type-checker la definition de
+incr_monad pour certifier que le calcul de la formule de incr'vc etait
+correct.
+
+*)
+
+
+
+(* deuxieme exemple, avex risque d'alias *)
+
+let incr2 (ref x : int) (ref y : int) : unit
+  requires { x < 100 /\  y < 200 }
+  writes   { x, y }
+  ensures  { x <= 100 /\ y <= 200 }
+  = x <- x+1; y <- y+1
+
+(*
+
+le risque potentiel d'alias est illustré par
+
+*)
+(*
+let wrong (ref z : int) = incr2 z z
+*)
+(*
+qui est refusé par Why3 :
+
+File "../exemples.mlw", line 49, characters 26-31: This application creates an illegal alias
+
+
+goal incr2'vc :
+  forall x:int, y:int.
+   x < 100 /\ y < 200 ->
+   (forall x1:int.
+     x1 = (x + 1) -> (forall y1:int. y1 = (y + 1) -> x1 <= 100 /\ y1 <= 200))
+
+La traduction fonctionnelle monadique de incr2 doit etre grosso-modo :
+
+let incr2_monad (x:int) (y:int) (Pre:  x < 100 /\  y < 200 ) :
+   { x1:int, y1:int | Post : x <= 100 /\ y <= 200 }
+   =
+   let x1 = x + 1 in
+   let y1 = y + 1 in
+   { x1,y1 | incr2'vc .... }
+
+*)
