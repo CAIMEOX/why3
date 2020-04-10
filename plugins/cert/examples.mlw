@@ -70,3 +70,34 @@ let incr2_monad (x:int) (y:int) (Pre:  x < 100 /\  y < 200 ) :
    { x1,y1 | incr2'vc .... }
 
 *)
+
+
+
+(* if !i > 1 then s := 0 else () *)
+
+(* traduction monadique : *)
+(* \ x0 . if x0.i > 1 *)
+(*        then ({s = 0}, ()) *)
+(*        else ({}, ()) *)
+
+let rw_example i s =
+    let ref i = i + 1 in
+    let ref s = s + 1 in
+    if !i > 0
+    then s := 0;
+    !s
+
+(* traduction monadique : *)
+(* les variables, les constantes et le déreferencement ne renvoient pas la mise à jour vide des
+   variables écrites ? *)
+(* x0 après les variables de la fonction ? *)
+(* \ i s : int. \ x0. *)
+(*       let x1, v = *)
+(*       	  let x2, v = *)
+(* 	      let x3, _ = trad (rw_example) (x0 + { i = i + 1, s = s + 1 }) in *)
+(* 	      let v = (x2+x3).s in *)
+(* 	      (x3, v) *)
+(* 	  in *)
+(* 	  ({}, v) *)
+(*       in *)
+(*       ({}, v) *)
