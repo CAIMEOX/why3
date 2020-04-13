@@ -34,25 +34,30 @@ type ('a, 'b) cert = (* 'a is used to designate an hypothesis, 'b is used for te
   | Trivial of 'a
   (* Trivial I ⇓ (Γ, I : false ⊢ Δ) ≜  [] *)
   (* Trivial I ⇓ (Γ ⊢ Δ, I : true ) ≜  [] *)
-  | Split of 'a * ('a, 'b) cert * ('a, 'b) cert
-  (* Split (I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
-  (* Split (I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
   | Unfold of 'a * ('a, 'b) cert
   (* Unfold (I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
   (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
   (* Unfold (I, c) ⇓ (Γ, I : A → B ⊢ Δ) ≜  c ⇓ (Γ, I : ¬A ∨ B ⊢ Δ)*)
   (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A → B) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A ∨ B)*)
-  | Swap of 'a * ('a, 'b) cert
-  (* Swap (I, c) ⇓ (Γ, I : ¬A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, I : A)  *)
-  (* Swap (I, c) ⇓ (Γ, I : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A) *)
-  (* Swap (I, c) ⇓ (Γ ⊢ Δ, I : A ) ≜  c ⇓ (Γ, I : ¬A ⊢ Δ) *)
-  (* Swap (I, c) ⇓ (Γ ⊢ Δ, I : ¬A) ≜  c ⇓ (Γ, I : A ⊢ Δ)  *)
+  | Split of 'a * ('a, 'b) cert * ('a, 'b) cert
+  (* Split (I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
+  (* Split (I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
   | Destruct of 'a * 'a * 'a * ('a, 'b) cert
   (* Destruct (I, J₁, J₂, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, J₁ : A, J₂ : B ⊢ Δ) *)
   (* Destruct (I, J₁, J₂, c) ⇓ (Γ ⊢ Δ, I : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, J₁ : A, J₂ : B) *)
   | Construct of 'a * 'a * 'a * ('a, 'b) cert
   (* Construct (I₁, I₂, J, c) ⇓ (Γ, I₁ : A, I₂ : B ⊢ Δ) ≜  c ⇓ (Γ, J : A ∧ B ⊢ Δ) *)
   (* Construct (I₁, I₂, J, c) ⇓ (Γ ⊢ Δ, I₁ : A, I₂ : B) ≜  c ⇓ (Γ ⊢ Δ, J : A ∧ B) *)
+  | Swap of 'a * ('a, 'b) cert
+  (* Swap (I, c) ⇓ (Γ, I : ¬A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, I : A)  *)
+  (* Swap (I, c) ⇓ (Γ, I : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A) *)
+  (* Swap (I, c) ⇓ (Γ ⊢ Δ, I : A ) ≜  c ⇓ (Γ, I : ¬A ⊢ Δ) *)
+  (* Swap (I, c) ⇓ (Γ ⊢ Δ, I : ¬A) ≜  c ⇓ (Γ, I : A ⊢ Δ)  *)
+  | Dir of dir * 'a * ('a, 'b) cert
+  (* Dir (Left, I, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, I : A ⊢ Δ) *)
+  (* Dir (Right, I, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, I : B ⊢ Δ) *)
+  (* Dir (Left, I, c) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  c ⇓ (Γ ⊢ Δ, I : A) *)
+  (* Dir (Right, I, c) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  c ⇓ (Γ ⊢ Δ, I : B) *)
   | Weakening of 'a * ('a, 'b) cert
   (* Weakening (I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening (I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
@@ -121,27 +126,27 @@ type ('a, 'b) ecert = (* elaborated certificates, 'a is used to designate an hyp
   | ERename of bool * 'b * 'a * 'a * ('a, 'b) ecert
   (* ERename (false, A, I₁, I₂, c) ⇓  (Γ, I₁ : A ⊢ Δ) ≜ c ⇓ (Γ, I₂ : A ⊢ Δ)*)
   (* ERename (true, A, I₁, I₂, c) ⇓  (Γ ⊢ Δ, I₁ : A) ≜ c ⇓ (Γ ⊢ Δ, I₂ : A)*)
-  | ESplit of bool * 'b * 'b * 'a * ('a, 'b) ecert * ('a, 'b) ecert
-  (* ESplit (false, A, B, I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
-  (* ESplit (true, A, B, I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
   | EUnfoldIff of (bool * 'b * 'b * 'a * ('a, 'b) ecert)
   (* EUnfoldIff (false, A, B, I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
   (* EUnfoldIff (true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
   | EUnfoldArr of (bool * 'b * 'b * 'a * ('a, 'b) ecert)
   (* EUnfoldArr (false, A, B, I, c) ⇓ (Γ, I : A → B ⊢ Δ) ≜  c ⇓ (Γ, I : ¬A ∨ B ⊢ Δ)*)
   (* EUnfoldArr (true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : A → B) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A ∨ B)*)
-  | ESwap of (bool * 'b * 'a * ('a, 'b) ecert)
-  (* ESwap (false, A, I, c) ⇓ (Γ, I : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A) *)
-  (* ESwap (true, A, I, c) ⇓ (Γ ⊢ Δ, I : A ) ≜  c ⇓ (Γ, I : ¬A ⊢ Δ) *)
-  | ESwapNeg of (bool * 'b * 'a * ('a, 'b) ecert)
-  (* ESwap_neg (false, A, I, c) ⇓ (Γ, I : ¬A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, I : A)  *)
-  (* ESwap_neg (true, A, I, c) ⇓ (Γ ⊢ Δ, I : ¬A) ≜  c ⇓ (Γ, I : A ⊢ Δ)  *)
+  | ESplit of bool * 'b * 'b * 'a * ('a, 'b) ecert * ('a, 'b) ecert
+  (* ESplit (false, A, B, I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
+  (* ESplit (true, A, B, I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
   | EDestruct of bool * 'b * 'b * 'a * 'a * 'a * ('a, 'b) ecert
   (* EDestruct (false, A, B, I, J₁, J₂, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, J₁ : A, J₂ : B ⊢ Δ) *)
   (* EDestruct (true, A, B, I, J₁, J₂, c) ⇓ (Γ ⊢ Δ, I : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, J₁ : A, J₂ : B) *)
   | EConstruct of bool * 'b * 'b * 'a * 'a * 'a * ('a, 'b) ecert
   (* EConstruct (false, A, B, I₁, I₂, J, c) ⇓ (Γ, I₁ : A, I₂ : B ⊢ Δ) ≜  c ⇓ (Γ, J : A ∧ B ⊢ Δ) *)
   (* EConstruct (true, A, B, I₁, I₂, J, c) ⇓ (Γ ⊢ Δ, I₁ : A, I₂ : B) ≜  c ⇓ (Γ ⊢ Δ, J : A ∧ B) *)
+  | ESwap of (bool * 'b * 'a * ('a, 'b) ecert)
+  (* ESwap (false, A, I, c) ⇓ (Γ, I : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A) *)
+  (* ESwap (true, A, I, c) ⇓ (Γ ⊢ Δ, I : A ) ≜  c ⇓ (Γ, I : ¬A ⊢ Δ) *)
+  | ESwapNeg of (bool * 'b * 'a * ('a, 'b) ecert)
+  (* ESwap_neg (false, A, I, c) ⇓ (Γ, I : ¬A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, I : A)  *)
+  (* ESwap_neg (true, A, I, c) ⇓ (Γ ⊢ Δ, I : ¬A) ≜  c ⇓ (Γ, I : A ⊢ Δ)  *)
   | EWeakening of bool * 'b * 'a * ('a, 'b) ecert
   (* EWeakening (true, A, I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* EWeakening (false, A, I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
@@ -235,13 +240,15 @@ and prcab : type a b. (formatter -> a -> unit) ->
   | Rename (i1, i2, c) -> fprintf fmt "Rename (%a, %a,@ %a)" pra i1 pra i2 prc c
   | Axiom (i1, i2) -> fprintf fmt "Axiom (%a, %a)" pra i1 pra i2
   | Trivial i -> fprintf fmt "Trivial %a" pra i
-  | Split (i, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]" pra i prc c1 prc c2
   | Unfold (i, c) -> fprintf fmt "Unfold (%a,@ %a)" pra i prc c
-  | Swap (i, c) -> fprintf fmt "Swap (%a,@ %a)" pra i prc c
+  | Split (i, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]" pra i prc c1 prc c2
   | Destruct (i, j1, j2, c) ->
       fprintf fmt "Destruct (%a, %a, %a,@ %a)" pra i pra j1 pra j2 prc c
   | Construct (i1, i2, j, c) ->
       fprintf fmt "Construct (%a, %a, %a,@ %a)" pra i1 pra i2 pra j prc c
+  | Swap (i, c) -> fprintf fmt "Swap (%a,@ %a)" pra i prc c
+  | Dir (d, i, c) ->
+      fprintf fmt "Dir (%a, %a,@ %a)" prd d pra i prc c
   | Weakening (i, c) -> fprintf fmt "Weakening@ (%a,@ %a)" pra i prc c
   | IntroQuant (i, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)" pra i pri y prc c
   | InstQuant (i, j, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)" pra i pra j prb t prc c
@@ -294,9 +301,10 @@ let propagate_cert f fid fte = function
   | Split (i, c1, c2) ->
       let f1 = f c1 in let f2 = f c2 in
       Split (fid i, f1, f2)
-  | Swap (i, c) -> Swap (fid i, f c)
   | Destruct (i, j1, j2, c) -> Destruct (fid i, fid j1, fid j2, f c)
   | Construct (i1, i2, j, c) -> Construct (fid i1, fid i2, fid j, f c)
+  | Swap (i, c) -> Swap (fid i, f c)
+  | Dir (d, i, c) -> Dir (d, fid i, f c)
   | Weakening (i, c) -> Weakening (fid i, f c)
   | IntroQuant (i, y, c) -> IntroQuant (fid i, y, f c)
   | InstQuant (i, j, t, c) -> InstQuant (fid i, fid j, fte t, f c)
@@ -354,10 +362,10 @@ let propagate_ecert f fid ft = function
       ESplit (g, ft a, ft b, fid i, f1, f2)
   | EUnfoldIff (g, a, b, i, c) -> EUnfoldIff (g, ft a, ft b, fid i, f c)
   | EUnfoldArr (g, a, b, i, c) -> EUnfoldArr (g, ft a, ft b, fid i, f c)
-  | ESwap (g, a, i, c) -> ESwap (g, ft a, fid i, f c)
-  | ESwapNeg (g, a, i, c) -> ESwapNeg (g, ft a, fid i, f c)
   | EDestruct (g, a, b, i, j1, j2, c) -> EDestruct (g, ft a, ft b, fid i, fid j1, fid j2, f c)
   | EConstruct (g, a, b, i1, i2, j, c) -> EConstruct (g, ft a, ft b, fid i1, fid i2, fid j, f c)
+  | ESwap (g, a, i, c) -> ESwap (g, ft a, fid i, f c)
+  | ESwapNeg (g, a, i, c) -> ESwapNeg (g, ft a, fid i, f c)
   | EWeakening (g, a, i, c) -> EWeakening (g, ft a, fid i, f c)
   | EIntroQuant (g, p, i, y, c) -> EIntroQuant (g, ft p, fid i, y, f c)
   | EInstQuant (g, p, i, j, t, c) -> EInstQuant (g, ft p, fid i, fid j, ft t, f c)
@@ -482,8 +490,33 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
   let hg, _ = Mid.choose mg in
   fun ct -> Mid.add hg (ct, true) mh
 
-let rec abstract_types c =
-  propagate_cert abstract_types (fun pr -> pr.pr_name) abstract_term c
+
+(** Compile chain.
+    1. visible_cert
+       The certificates given by transformations. Many constructors and few
+       parameters to ease certification.
+    2. abstract_cert
+       With simpler types that can be used by our checkers. Also removes some
+       easily derivable rules from the core such as Dir.
+    3. heavy_ecert
+       The result of the elaboration and as such contains many additional
+       information such as the current formula.
+    4. trimmed_ecert
+       Removes rules that are derivable with core rules but with additional
+       information such as Rename and Construct.
+    5. kernel_ecert
+       Only the core rules with additional information.
+*)
+
+let dir_smart d prg c =
+  let prh = create_prsymbol (id_fresh "Weaken") in
+  let left, right = match d with Left -> prg, prh | Right -> prh, prg in
+  Destruct (prg, left, right, Weakening (prh, c))
+
+
+let rec abstract_cert = function
+  | Dir (d, pr, c) -> abstract_cert (dir_smart d pr c)
+  | c -> propagate_cert abstract_cert (fun pr -> pr.pr_name) abstract_term c
 
 exception Elaboration_failed of string
 
@@ -524,16 +557,6 @@ let elaborate (init_ct : ctask) c =
   | Let (x, i, c) ->
       let y, _ = find_ident "Let" i cta in
       ELet (x, y, elab cta c)
-  | Split (i, c1, c2) ->
-      let t, pos = find_ident "Split" i cta in
-      let t1, t2 = match t, pos with
-        | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false -> t1, t2
-        | _ -> elab_failed "Not splittable" in
-      let cta1 = Mid.add i (t1, pos) cta in
-      let cta2 = Mid.add i (t2, pos) cta in
-      let c1 = elab cta1 c1 in
-      let c2 = elab cta2 c2 in
-      ESplit (pos, t1, t2, i, c1, c2)
   | Unfold (i, c) ->
       let t, pos = find_ident "Unfold" i cta in
       let iff, cta, t1, t2 = match t with
@@ -551,16 +574,16 @@ let elaborate (init_ct : ctask) c =
       if iff
       then EUnfoldIff pack
       else EUnfoldArr pack
-  | Swap (i, c) ->
-      let t, pos = find_ident "Swap" i cta in
-      let neg, underlying_t, neg_t = match t with
-        | CTnot t -> true, t, t
-        | _ -> false, t, CTnot t in
-      let cta = Mid.add i (neg_t, not pos) cta in
-      let pack = pos, underlying_t, i, elab cta c in
-      if neg
-      then ESwapNeg pack
-      else ESwap pack
+  | Split (i, c1, c2) ->
+      let t, pos = find_ident "Split" i cta in
+      let t1, t2 = match t, pos with
+        | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false -> t1, t2
+        | _ -> elab_failed "Not splittable" in
+      let cta1 = Mid.add i (t1, pos) cta in
+      let cta2 = Mid.add i (t2, pos) cta in
+      let c1 = elab cta1 c1 in
+      let c2 = elab cta2 c2 in
+      ESplit (pos, t1, t2, i, c1, c2)
   | Destruct (i, j1, j2, c) ->
       let t, pos = find_ident "Destruct" i cta in
       let t1, t2 = match t, pos with
@@ -579,6 +602,17 @@ let elaborate (init_ct : ctask) c =
                 |> Mid.remove i2
                 |> Mid.add j (t, pos1) in
       EConstruct (pos1, t1, t2, i1, i2, j, elab cta c)
+  | Swap (i, c) ->
+      let t, pos = find_ident "Swap" i cta in
+      let neg, underlying_t, neg_t = match t with
+        | CTnot t -> true, t, t
+        | _ -> false, t, CTnot t in
+      let cta = Mid.add i (neg_t, not pos) cta in
+      let pack = pos, underlying_t, i, elab cta c in
+      if neg
+      then ESwapNeg pack
+      else ESwap pack
+  | Dir _ -> verif_failed "Some Dir left during elaboration"
   | Weakening (i, c) ->
       let t, pos = find_ident "Weakening" i cta in
       let cta = Mid.remove i cta in
@@ -655,7 +689,7 @@ let rec eliminate_let (m : cterm Mid.t) c =
 
 let make_core (init_ct : ctask) (_ : ctask list) (v, c : visible_cert) : heavy_ecert =
   (* Format.eprintf "%a@." prcertif c; *)
-  v, abstract_types c
+  v, abstract_cert c
      |> elaborate init_ct
      |> trim_certif
      |> eliminate_let Mid.empty
