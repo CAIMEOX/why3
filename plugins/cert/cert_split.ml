@@ -19,10 +19,13 @@ open Decl
 
 open Cert_certificates
 
-let rec rename_cert pr1 pr2 c =
-  propagate_cert (rename_cert pr1 pr2)
+let rec rename_vcert pr1 pr2 c =
+  propagate_cert (rename_vcert pr1 pr2)
     (fun pr -> if pr_equal pr pr1 then pr2 else pr)
     (fun ct -> ct) c
+
+let rename_cert pr1 pr2 (l, c) =
+  l, rename_vcert pr1 pr2 c
 
 type split = {
   right_only : bool;
@@ -149,20 +152,20 @@ type 'a split_ret = {
   (* Conjunctive decomposition of formula f *)
   conj : 'a M.monoid;
   (* Certificate to decompose f as a Conjunction in Positive position :
-     cp ⇓ (⊢ f) ≜  [⊢ posᵢ]ᵢ *)
+     cp ⇓ (⊢ f) ≜  [⊢ conjᵢ]ᵢ *)
   cp : visible_cert;
   (* Certificate to decompose f as a Conjunction in Negative position :
-     cn ⇓ (f ⊢) ≜ [pos₁, ..., posₙ ⊢] *)
-  (* WARNING : this certificate and the implication are only valid when byso_split is off *)
+     cn ⇓ (f ⊢) ≜ [conj₁, ..., conjₙ ⊢] *)
+  (* WARNING : the previous equality is only valid when byso_split is off *)
   cn : visible_cert;
-  (* Disjunctive decomposition of formula f, to apply if f is in negative position *)
+  (* Disjunctive decomposition of formula f *)
   disj : 'a M.monoid;
   (* Certificate to decompose f as a Disjunction in Negative position :
-     dn ⇓ (f ⊢) ≜  [negᵢ ⊢]ᵢ*)
+     dn ⇓ (f ⊢) ≜  [disjᵢ ⊢]ᵢ*)
   dn : visible_cert;
   (* Certificate to decompose f as a Disjunction in Positive position :
-     dp ⇓ (⊢ f) ≜  [⊢ neg₁, ..., negₙ] *)
-  (* WARNING : this certificate and the implication are only valid when byso_split is off *)
+     dp ⇓ (⊢ f) ≜  [⊢ disj₁, ..., disjₙ] *)
+  (* WARNING : the previous equality is only valid when byso_split is off *)
   dp : visible_cert;
   (* Backward pull of formula: bwd ⇒ f (typically from by) *)
   bwd : 'a;
@@ -348,14 +351,19 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let conj = sf1.conj ++ conj2 in
       let side = sf1.side ++ if not asym then sf2.side else
         let nf1 = ncase (sf2.conj::dp) sf1 in iclose nf1 sf2.side in
-      let cp = lambda Two (fun i j ->
-               Split (pr, Rename (pr, pr1, Hole i), Rename (pr, pr2, Hole j)))
-               |>>> [sf1.cp; sf2.cp] in
+      let cp = lambda Two (fun i j -> Split (pr, Hole i, Hole j))
+               |>>> [rename_cert pr1 pr sf1.cp; rename_cert pr2 pr sf2.cp] in
       let cn = lambda One (fun i -> Destruct (pr, pr1, pr2, Hole i))
-               |>> (sf1.cn |>> sf2.cn) in
+               |>> sf1.cn |>> sf2.cn in
       let dn = destruct_reconstruct pr pr1 pr2 sf1.dn sf2.dn in
+      let dp = lambda One (fun i ->
+               Split (pr,
+                      Hole i,
+                      Hole i
+                 )) in
+
       ret conj cp cn
-        disj dn nc
+        disj dn dp
         bwd fwd side false (cn1 || cn2)
     (* f1 by f2 *)
   | Tbinop (Timplies,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) },f1) ->
@@ -446,7 +454,15 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let (!) = luop (alias f1 t_not) in
       let (|>) zero = map (fun (pr, t) -> !+(pr, t_attr_copy t zero)) (!) in
       let conj = t_false |> sf.disj and disj = t_true |> sf.conj in
-      ret conj nc nc disj nc nc !(sf.fwd) !(sf.bwd) sf.side sf.cneg sf.cpos
+      let cp = lambda One (fun i -> Swap (pr, Hole i))
+               |>> sf.dn
+               |>> lambda One (fun i -> Swap (pr, Hole i)) in
+      let dn = lambda One (fun i -> Swap (pr, Hole i))
+               |>> sf.cp
+               |>> lambda One (fun i -> Swap (pr, Hole i)) in
+      ret conj cp nc
+        disj dn nc
+        !(sf.fwd) !(sf.bwd) sf.side sf.cneg sf.cpos
   | Tlet (t,fb) ->
       let vs, f1 = t_open_bound fb in
       let (!) = luop (alias f1 (t_let_close vs t)) in

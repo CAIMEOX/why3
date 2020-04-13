@@ -396,10 +396,6 @@ let intro any every where : ctrans = Trans.store (fun task ->
   let ta, (_, c) = intro_tg tg task in
   [ta], c)
 
-let dir_smart d prg =
-  let prh = create_prsymbol (id_fresh "Weaken") in
-  let left, right = match d with Left -> prg, prh | Right -> prh, prg in
-  lambda One (fun i -> Destruct (prg, left, right, Weakening (prh, Hole i)))
 
 (* Direction with a certificate *)
 (* choose Left (A) or Right (B) when
@@ -420,7 +416,7 @@ let dir_pr d prg =
 let dir d where : ctrans =  Trans.store (fun task ->
   let pr = default_goal task where in
   let nt, b = dir_pr d pr task in
-  if b then [nt], dir_smart d pr
+  if b then [nt], lambda One (fun i -> Dir (d, pr, Hole i))
   else [task], hole ())
 
 (* Assert with certificate *)
