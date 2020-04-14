@@ -46,7 +46,7 @@ type split = {
 
 let stop f = Sattr.mem Term.stop_split f.t_attrs
 (* remember that the Term.stop_split attribute is set on requires and ensures for example :
-   a first call to split with stop_split on makes it clear where proof obligations comme from
+   a first call to split with stop_split on makes it clear where proof obligations come from
    a second call to split will completely split the formulas *)
 let asym f = Sattr.mem Term.asym_split f.t_attrs
 (* remember that A /\ B and A && B are both represented by t_or (A, B), the distinction
@@ -356,10 +356,38 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let cn = lambda One (fun i -> Destruct (pr, pr1, pr2, Hole i))
                |>> sf1.cn |>> sf2.cn in
       let dn = destruct_reconstruct pr pr1 pr2 sf1.dn sf2.dn in
+
+
+      let find_pr mon =
+        let open Mterm in
+        let map = List.fold_left (fun map (pr, t) -> add t pr map) empty (to_list mon) in
+        fun pr -> find pr map in
+      let find_a = find_pr sf1.disj in
+      let find_b = find_pr sf2.disj in
+
+      let add is_left c (pr, t) =
+        let a, b = match t.t_node with
+          | Tbinop (Tand, a, b) -> a, b
+          | _ -> assert false in
+        let pra = create_prsymbol (id_fresh "pra") in
+        let prb = create_prsymbol (id_fresh "prb") in
+        let pri = if is_left then find_a a else find_b b in
+        let ax = if is_left then Axiom (pra, pri) else Axiom (prb, pri) in
+        Cut (pr, t, c,
+             Destruct (pr, pra, prb, ax)) in
+
+      let add_all is_left c =
+        List.fold_left (add is_left) c (to_list disj) in
+
+      let remove_all is_left c =
+        let rem = if is_left then sf1.disj else sf2.disj in
+        let rem_names = List.map fst (to_list rem) in
+        List.fold_left (fun c pr -> Weakening (pr, c)) c rem_names in
+
       let dp = lambda One (fun i ->
                Split (pr,
-                      Hole i,
-                      Hole i
+                      add_all true (remove_all true (Hole i)),
+                      add_all false (remove_all false (Hole i))
                  )) in
 
       ret conj cp cn
@@ -454,14 +482,16 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let (!) = luop (alias f1 t_not) in
       let (|>) zero = map (fun (pr, t) -> !+(pr, t_attr_copy t zero)) (!) in
       let conj = t_false |> sf.disj and disj = t_true |> sf.conj in
-      let cp = lambda One (fun i -> Swap (pr, Hole i))
-               |>> sf.dn
-               |>> lambda One (fun i -> Swap (pr, Hole i)) in
-      let dn = lambda One (fun i -> Swap (pr, Hole i))
-               |>> sf.cp
-               |>> lambda One (fun i -> Swap (pr, Hole i)) in
-      ret conj cp nc
-        disj dn nc
+      let swap pr = lambda One (fun i -> Swap (pr, Hole i)) in
+      let swap_all mon =
+        let swaps = List.map (fun (pr, _) -> swap pr) (to_list mon) in
+        List.fold_left (|>>) (hole ()) swaps in
+      let cp = swap pr |>> sf.dn |>> swap pr in
+      let cn = swap pr |>> sf.dp |>> swap_all sf.disj in
+      let dn = swap pr |>> sf.cp |>> swap pr in
+      let dp = swap pr |>> sf.cn |>> swap_all sf.conj in
+      ret conj cp cn
+        disj dn dp
         !(sf.fwd) !(sf.bwd) sf.side sf.cneg sf.cpos
   | Tlet (t,fb) ->
       let vs, f1 = t_open_bound fb in
