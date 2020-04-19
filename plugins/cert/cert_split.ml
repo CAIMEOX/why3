@@ -250,8 +250,8 @@ let fold_cond = function
 
 let destruct_reconstruct pr pr1 pr2 c1 c2 =
   lambda One (fun i -> Destruct (pr, pr1, pr2, Hole i))
-  |>> c1
-  |>> c2
+  |>> rename_cert pr pr1 c1
+  |>> rename_cert pr pr2 c2
   |>> lambda One (fun i -> Construct (pr1, pr2, pr, Hole i))
 
 let luop op (pr, t) = pr, op t
@@ -296,23 +296,29 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
   let r = match f.t_node with
   | _ when sp.stop_split && stop f ->
       let df = drop_byso f in
-      ret !+(pr, unstop f) (hole ()) nc
-        !+(pr, unstop df) (hole ()) nc
+      ret !+(pr, unstop f) (hole ()) (hole ())
+        !+(pr, unstop df) (hole ()) (hole ())
         (pr, f) (pr, df) Unit false false
   | Tbinop (Tiff,_,_) | Tif _ | Tcase _ | Tquant _ when sp.intro_mode ->
       let df = drop_byso f in
-      ret !+(pr, f) (hole ()) nc
-        !+(pr, df) (hole ()) nc
+      ret !+(pr, f) (hole ()) (hole ())
+        !+(pr, df) (hole ()) (hole ())
         (pr, f) (pr, df) Unit false false
-  | Ttrue -> ret Unit (lambda Z (Trivial pr)) nc
-               (Zero (pr, f)) (lambda One (fun i -> Weakening (pr, Hole i))) nc
-               (pr, f) (pr, f) Unit false false
-  | Tfalse -> ret (Zero (pr, f)) (lambda One (fun i -> Weakening (pr, Hole i))) nc
-                Unit (lambda Z (Trivial pr)) nc
-                (pr, f) (pr, f) Unit false false
+  | Ttrue ->
+      let weak () = lambda One (fun i -> Weakening (pr, Hole i)) in
+      let triv = lambda Z (Trivial pr) in
+      ret Unit triv (weak ())
+        (Zero (pr, f)) (weak ()) triv
+        (pr, f) (pr, f) Unit false false
+  | Tfalse ->
+      let weak () = lambda One (fun i -> Weakening (pr, Hole i)) in
+      let triv = lambda Z (Trivial pr) in
+      ret (Zero (pr, f)) (weak ()) triv
+        Unit triv (weak ())
+        (pr, f) (pr, f) Unit false false
   | Tapp _ -> let uf = !+(pr, f) in
-              ret uf (hole ()) nc
-                uf (hole ()) nc
+              ret uf (hole ()) (hole ())
+                uf (hole ()) (hole ())
                 (pr, f) (pr, f) Unit false false
     (* f1 so f2 *)
   | Tbinop (Tand,f1,{ t_node = Tbinop (Tor,f2,{ t_node = Ttrue }) }) ->
@@ -336,9 +342,7 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
   | Tbinop (Tand,f1,f2) ->
       let (&&&) = lbop (alias2 f1 f2 t_and) in
       let rc = split_core (ps_csp sp) in
-      let pr1 = create_prsymbol (id_fresh "pr1") in
-      let pr2 = create_prsymbol (id_fresh "pr2") in
-      let sf1 = rc pr1 f1 and sf2 = rc pr2 f2 in
+      let sf1 = rc pr f1 and sf2 = rc pr f2 in
       let fwd = sf1.fwd &&& sf2.fwd and bwd = sf1.bwd &&& sf2.bwd in
       let asym = sp.asym_split && asym f1 in
       let nf2, cn2 = ncaset [] sf2 in
@@ -351,10 +355,13 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let conj = sf1.conj ++ conj2 in
       let side = sf1.side ++ if not asym then sf2.side else
         let nf1 = ncase (sf2.conj::dp) sf1 in iclose nf1 sf2.side in
+      let pr1 = create_prsymbol (id_fresh "pr1") in
+      let pr2 = create_prsymbol (id_fresh "pr2") in
       let cp = lambda Two (fun i j -> Split (pr, Hole i, Hole j))
-               |>>> [rename_cert pr1 pr sf1.cp; rename_cert pr2 pr sf2.cp] in
+               |>>> [sf1.cp; sf2.cp] in
       let cn = lambda One (fun i -> Destruct (pr, pr1, pr2, Hole i))
-               |>> sf1.cn |>> sf2.cn in
+               |>> rename_cert pr pr1 sf1.cn
+               |>> rename_cert pr pr2 sf2.cn in
       let dn = destruct_reconstruct pr pr1 pr2 sf1.dn sf2.dn in
 
 
@@ -384,11 +391,12 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
         let rem_names = List.map fst (to_list rem) in
         List.fold_left (fun c pr -> Weakening (pr, c)) c rem_names in
 
-      let dp = lambda One (fun i ->
-               Split (pr,
-                      add_all true (remove_all true (Hole i)),
-                      add_all false (remove_all false (Hole i))
-                 )) in
+      let h = hole () in
+      let dp = lambda Two (fun i j -> Split (pr, Hole i, Hole j))
+               |>>> [sf1.dp ; sf2.dp]
+               |>>> [lambda One (fun i -> add_all true (remove_all true (Hole i)));
+                     lambda One (fun j -> add_all false (remove_all false (Hole j)))]
+               |>>> [h; h] in
 
       ret conj cp cn
         disj dn dp

@@ -78,7 +78,7 @@ let incr2_monad (x:int) (y:int) (Pre:  x < 100 /\  y < 200 ) :
 (* traduction monadique : *)
 (* \ x0 . if x0.i > 1 *)
 (*        then ({s = 0}, ()) *)
-(*        else ({}, ()) *)
+(*        else ({s = x0.s}, ()) *)
 
 let rw_example i s =
     let ref i = i + 1 in
