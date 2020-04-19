@@ -149,22 +149,24 @@ module M = struct
 end
 
 type 'a split_ret = {
-  (* Conjunctive decomposition of formula f *)
+  (* Conjunctive decomposition of formula f, to be seen as a list :
+     conj ≃ [ (pr₁, conj₁) ; ...; (prₙ, conjₙ) ] *)
   conj : 'a M.monoid;
   (* Certificate to decompose f as a Conjunction in Positive position :
-     cp ⇓ (⊢ f) ≜  [⊢ conjᵢ]ᵢ *)
+     cp ⇓ (⊢  pr : f) ≜  [⊢  prᵢ : conjᵢ]ᵢ *)
   cp : visible_cert;
   (* Certificate to decompose f as a Conjunction in Negative position :
-     cn ⇓ (f ⊢) ≜ [conj₁, ..., conjₙ ⊢] *)
+     cn ⇓ (pr : f ⊢) ≜ [pr₁ : conj₁, ..., prₙ : conjₙ ⊢] *)
   (* WARNING : the previous equality is only valid when byso_split is off *)
   cn : visible_cert;
-  (* Disjunctive decomposition of formula f *)
+  (* Disjunctive decomposition of formula f, to be seen as a list :
+     disj ≃ [ (pr₁, disj₁) ; ...; (prₙ, disjₙ) ] *)
   disj : 'a M.monoid;
   (* Certificate to decompose f as a Disjunction in Negative position :
-     dn ⇓ (f ⊢) ≜  [disjᵢ ⊢]ᵢ*)
+     dn ⇓ (pr : f ⊢) ≜  [prᵢ : disjᵢ ⊢]ᵢ*)
   dn : visible_cert;
   (* Certificate to decompose f as a Disjunction in Positive position :
-     dp ⇓ (⊢ f) ≜  [⊢ disj₁, ..., disjₙ] *)
+     dp ⇓ (⊢ pr : f) ≜  [⊢ pr₁ : disj₁, ..., prₙ : disjₙ] *)
   (* WARNING : the previous equality is only valid when byso_split is off *)
   dp : visible_cert;
   (* Backward pull of formula: bwd ⇒ f (typically from by) *)
@@ -490,14 +492,14 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let (!) = luop (alias f1 t_not) in
       let (|>) zero = map (fun (pr, t) -> !+(pr, t_attr_copy t zero)) (!) in
       let conj = t_false |> sf.disj and disj = t_true |> sf.conj in
-      let swap pr = lambda One (fun i -> Swap (pr, Hole i)) in
+      let swap pr () = lambda One (fun i -> Swap (pr, Hole i)) in
       let swap_all mon =
-        let swaps = List.map (fun (pr, _) -> swap pr) (to_list mon) in
+        let swaps = List.map (fun (pr, _) -> swap pr ()) (to_list mon) in
         List.fold_left (|>>) (hole ()) swaps in
-      let cp = swap pr |>> sf.dn |>> swap pr in
-      let cn = swap pr |>> sf.dp |>> swap_all sf.disj in
-      let dn = swap pr |>> sf.cp |>> swap pr in
-      let dp = swap pr |>> sf.cn |>> swap_all sf.conj in
+      let cp = swap pr () |>> sf.dn ||> swap pr in
+      let cn = swap pr () |>> sf.dp |>> swap_all sf.disj in
+      let dn = swap pr () |>> sf.cp ||> swap pr in
+      let dp = swap pr () |>> sf.cn |>> swap_all sf.conj in
       ret conj cp cn
         disj dn dp
         !(sf.fwd) !(sf.bwd) sf.side sf.cneg sf.cpos

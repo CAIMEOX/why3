@@ -345,7 +345,12 @@ let rec iterate n v = if n = 0 then [] else v :: iterate (n-1) v
 
 let (|>>) (v1, c1) (v2, c2) =
   let n = List.length v1 in
-  let lcv2 = iterate n (v2, c2)in
+  let lcv2 = iterate n (v2, c2) in
+  (v1, c1) |>>> lcv2
+
+let (||>) (v1, c1) f =
+  let n = List.length v1 in
+  let lcv2 = List.map f (iterate n ()) in
   (v1, c1) |>>> lcv2
 
 let propagate_ecert f fid ft = function
