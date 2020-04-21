@@ -20,6 +20,10 @@
  </transf>
  </goal>
  <goal name="G2">
+ <transf name="split_goal_full_ccert" >
+  <goal name="G2.0">
+  </goal>
+ </transf>
  </goal>
  <goal name="G3">
  </goal>
@@ -118,6 +122,18 @@
   <goal name="G19.0">
   </goal>
   <goal name="G19.1">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G20">
+ <transf name="split_all_full" >
+  <goal name="G20.0">
+  </goal>
+  <goal name="G20.1">
+  </goal>
+  <goal name="G20.2">
+  </goal>
+  <goal name="G20.3">
   </goal>
  </transf>
  </goal>
