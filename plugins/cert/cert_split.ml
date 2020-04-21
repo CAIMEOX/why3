@@ -250,11 +250,7 @@ let fold_cond = function
   | Comb c -> !+(fold_cond c)
   | x -> x
 
-let destruct_reconstruct pr pr1 pr2 c1 c2 =
-  lambda One (fun i -> Destruct (pr, pr1, pr2, Hole i))
-  |>> rename_cert pr pr1 c1
-  |>> rename_cert pr pr2 c2
-  |>> lambda One (fun i -> Construct (pr1, pr2, pr, Hole i))
+
 
 let luop op (pr, t) = pr, op t
 
@@ -262,6 +258,23 @@ let lbop op (_, t1) (_, t2) =
   let pr = create_prsymbol (id_fresh "binop") in
   pr, op t1 t2
 
+
+let recons mona monb mon =
+  let open List in
+  let la = map fst (to_list mona) in
+  let lb = map fst (to_list monb) in
+  let lres = map fst (to_list mon) in
+  let lab = fold_left (fun acc ai -> fold_left (fun acc bj -> (ai, bj) :: acc) acc lb)
+              [] la in
+  let s = Stream.of_list (combine (rev lab) lres) in
+  fun () -> let (pra, prb), pr = Stream.next s in
+            lambda One (fun i -> Construct (pra, prb, pr, Hole i))
+
+let decons pr pr1 pr2 c1 c2 recons =
+  lambda One (fun i -> Destruct (pr, pr1, pr2, Hole i))
+  |>> rename_cert pr pr1 c1
+  |>> rename_cert pr pr2 c2
+  ||> recons
 
 let rec split_core sp pr f : (prsymbol * term) split_ret =
   let (~-) = t_attr_copy f in
@@ -364,13 +377,15 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let cn = lambda One (fun i -> Destruct (pr, pr1, pr2, Hole i))
                |>> rename_cert pr pr1 sf1.cn
                |>> rename_cert pr pr2 sf2.cn in
-      let dn = destruct_reconstruct pr pr1 pr2 sf1.dn sf2.dn in
+
+      let dn = decons pr pr1 pr2 sf1.dn sf2.dn (recons sf1.disj sf2.disj disj) in
 
 
       let find_pr mon =
         let open Mterm in
         let map = List.fold_left (fun map (pr, t) -> add t pr map) empty (to_list mon) in
-        fun pr -> find pr map in
+        fun t -> find t map in
+
       let find_a = find_pr sf1.disj in
       let find_b = find_pr sf2.disj in
 
@@ -449,7 +464,7 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let side2 = if not asym then sf2.side else
         let pf1 = pcase (sf2.disj::dp) sf1 in
         bimap cpy (|||) pf1 sf2.side in
-      let cp = destruct_reconstruct pr pr1 pr2 sf1.cp sf2.cp in
+      let cp = decons pr pr1 pr2 sf1.cp sf2.cp (recons sf1.conj sf2.conj conj) in
       let dn = lambda Two (fun i j -> Split (pr, Hole i, Hole j))
                |>>> [sf1.dn; sf2.dn] in
       ret conj cp nc (sf1.disj ++ disj2) dn nc bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
@@ -614,7 +629,7 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
 
 let split_core sp pr t =
   let res = split_core sp pr t in
-  print_ret_err res;
+  (* print_ret_err res; *)
   res
 
 let full_split kn = {
