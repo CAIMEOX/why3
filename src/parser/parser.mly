@@ -249,9 +249,9 @@
 %token AMP BAR
 %token COLON COMMA
 %token DOT DOTDOT EQUAL LT GT LTGT MINUS
-%token LEFTPAR LEFTSQ
+%token LEFTPAR LEFTSQ LEFTSQBAR
 %token LARROW LRARROW OR
-%token RIGHTPAR RIGHTSQ
+%token RIGHTPAR RIGHTSQ BARRIGHTSQ
 %token UNDERSCORE
 
 %token EOF
@@ -849,6 +849,8 @@ term_block_:
 | LEFTPAR RIGHTPAR                                  { Ttuple [] }
 | LEFTBRC field_list1(term) RIGHTBRC                { Trecord $2 }
 | LEFTBRC term_arg WITH field_list1(term) RIGHTBRC  { Tupdate ($2,$4) }
+| LEFTSQBAR semicolon_list0(term) BARRIGHTSQ        { assert false }
+
 
 term_sub_:
 | term_block_                                       { $1 }
@@ -1232,6 +1234,7 @@ expr_block_:
 | LEFTPAR RIGHTPAR                                  { Etuple [] }
 | LEFTBRC field_list1(expr) RIGHTBRC                { Erecord $2 }
 | LEFTBRC expr_arg WITH field_list1(expr) RIGHTBRC  { Eupdate ($2, $4) }
+| LEFTSQBAR semicolon_list0(expr) BARRIGHTSQ        { assert false }
 
 expr_pure_:
 | LEFTBRC qualid RIGHTBRC                           { Eidpur $2 }
@@ -1635,6 +1638,9 @@ comma_list0(X):
 semicolon_list1(X):
 | x = X ; ioption(SEMICOLON)                  { [x] }
 | x = X ; SEMICOLON ; xl = semicolon_list1(X) { x :: xl }
+
+semicolon_list0(X):
+| xl = separated_list(SEMICOLON,X) { xl }
 
 located(X): X { $1, $startpos, $endpos }
 
