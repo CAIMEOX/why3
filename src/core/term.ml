@@ -1009,6 +1009,27 @@ let t_tuple tl =
   let ty = ty_tuple (List.map t_type tl) in
   fs_app (fs_tuple (List.length tl)) tl ty
 
+let fs_seq_empty =
+  let id = id_fresh "'empty" in
+  let v = ty_var (List.hd ts_seq.ts_args) in
+  let ty = ty_app ts_seq [v] in
+  create_fsymbol ~constr:2 id [] ty
+
+let fs_seq_cons  =
+  let id = id_fresh "'cons" in
+  let v = ty_var (List.hd ts_seq.ts_args) in
+  let ty = ty_app ts_seq [v] in
+  create_fsymbol ~constr:2 id [v;ty] ty
+
+let t_seq tl = match tl with
+  | [] ->
+     let ty = ty_seq (ty_var (List.hd ts_seq.ts_args)) in
+     fs_app fs_seq_empty [] ty
+  | t :: _ ->
+     let ty = ty_seq (t_type t) in
+     let consl t seq = fs_app fs_seq_cons [t; seq] ty in
+     List.fold_right consl tl (fs_app fs_seq_empty [] ty)
+
 let fs_func_app =
   let ty_a = ty_var (create_tvsymbol (id_fresh "a")) in
   let ty_b = ty_var (create_tvsymbol (id_fresh "b")) in

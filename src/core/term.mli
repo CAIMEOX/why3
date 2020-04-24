@@ -334,6 +334,11 @@ val t_tuple : term list -> term
 val is_fs_tuple : lsymbol -> bool
 val is_fs_tuple_id : ident -> int option
 
+(* sequence literals *)
+val fs_seq_empty : lsymbol
+val fs_seq_cons : lsymbol
+val t_seq  : term list -> term
+
 val fs_func_app : lsymbol  (* higher-order application symbol *)
 
 val t_func_app : term -> term -> term  (* value-typed application *)

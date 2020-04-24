@@ -401,6 +401,12 @@ let highord_module =
   let m = close_module uc in
   { m with mod_theory = highord_theory }
 
+let seq_module =
+  let uc = empty_module dummy_env (id_fresh "Seq") ["why3";"Seq"] in
+  let uc = add_pdecl_no_logic uc pd_seq in
+  let m = close_module uc in
+  {m with mod_theory = seq_theory }
+
 let tuple_module = Hint.memo 17 (fun n ->
   let nm = "Tuple" ^ string_of_int n in
   let uc = empty_module dummy_env (id_fresh nm) ["why3";nm] in
@@ -446,6 +452,7 @@ let create_module env ?(path=[]) n =
   let m = use_export m builtin_module in
   let m = use_export m bool_module in
   let m = use_export m unit_module in
+  let m = use_export m seq_module in
   m
 
 let add_use uc d = Sid.fold (fun id uc ->
@@ -1327,6 +1334,7 @@ let mlw_language_builtin =
     if s = builtin_theory.th_name.id_string then builtin_module else
     if s = highord_theory.th_name.id_string then highord_module else
     if s = bool_theory.th_name.id_string then bool_module else
+    if s = seq_theory.th_name.id_string then seq_module else
     match tuple_theory_name s with
     | Some n -> tuple_module n
     | None -> raise Not_found in

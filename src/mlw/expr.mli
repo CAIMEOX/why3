@@ -277,6 +277,9 @@ val c_ghost : cexp -> bool
 val rs_true  : rsymbol
 val rs_false : rsymbol
 
+val rs_seq_empty : rsymbol
+val rs_seq_cons : rsymbol
+
 val rs_tuple : int -> rsymbol
 val e_tuple : expr list -> expr
 

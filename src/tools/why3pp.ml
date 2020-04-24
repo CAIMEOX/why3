@@ -298,6 +298,8 @@ module LatexInd (Conf: sig val prefix: string val flatten_applies : bool val com
         fprintf fmt "%a \\texttt{:} %a" pp_term t pp_type ty
     | Ttuple ts ->
         fprintf fmt "(%a)" (pp_print_list ~pp_sep:(pp_str ", ") pp_term) ts
+    | Tseqlit ts ->
+        fprintf fmt "[|%a|]" (pp_print_list ~pp_sep:(pp_str "; ") pp_term) ts
     | Trecord fs ->
         let pp = pp_print_list ~pp_sep:(pp_str "\\texttt{;} ") (pp_field pp_term) in
         fprintf fmt "\\{%a\\}" pp fs

@@ -11,7 +11,7 @@ module Seq
   use int.Int
 
   (** the polymorphic type of sequences *)
-  type seq 'a
+  (* type seq 'a -- builtin *)
 
   (** `seq 'a` is an infinite type *)
   meta "infinite_type" type seq

@@ -790,6 +790,9 @@ let its_unit = its_tuple 0
 let ty_unit  = ty_tuple  []
 let ity_unit = ity_tuple []
 
+let its_seq = its_of_ts ts_seq true
+let ity_seq ity = ity_app its_seq [ity] []
+
 (* exception symbols *)
 
 type mask =

@@ -116,6 +116,7 @@ val pd_bool : pdecl
 val pd_str : pdecl
 val pd_tuple : int -> pdecl
 val pd_func : pdecl
+val pd_seq : pdecl
 val pd_func_app : pdecl
 
 (** {2 Known identifiers} *)

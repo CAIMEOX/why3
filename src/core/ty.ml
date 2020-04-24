@@ -276,6 +276,12 @@ let ty_func ty_a ty_b = ty_app ts_func [ty_a;ty_b]
 
 let ty_pred ty_a = ty_app ts_func [ty_a;ty_bool]
 
+let ts_seq  =
+  let tv = create_tvsymbol (id_fresh "a") in
+  create_tysymbol (id_fresh "seq") [tv] NoDef
+
+let ty_seq ty = ty_app ts_seq  [ty]
+
 let ts_tuple_ids = Hid.create 17
 
 let ts_tuple = Hint.memo 17 (fun n ->

@@ -849,6 +849,9 @@ let e_assign al =
 let e_true  = e_app rs_true  [] [] ity_bool
 let e_false = e_app rs_false [] [] ity_bool
 
+let rs_seq_empty = rs_of_ls fs_seq_empty
+let rs_seq_cons  = rs_of_ls fs_seq_cons
+
 let rs_tuple = Hint.memo 17 (fun n ->
   ignore (its_tuple n); rs_of_ls (fs_tuple n))
 

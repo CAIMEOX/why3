@@ -375,6 +375,12 @@ let rec dterm ns km crcmap gvars at denv {term_desc = desc; term_loc = loc} =
   | Ptree.Ttuple tl ->
       let tl = List.map (dterm ns km crcmap gvars at denv) tl in
       DTapp (fs_tuple (List.length tl), tl)
+  | Ptree.Tseqlit tl ->
+      let app_cons t seq = (* TODO: fix locations *)
+        let dt1 = dterm ns km crcmap gvars at denv t in
+        let dt2 = Dterm.dterm crcmap ~loc seq in
+        DTapp (fs_seq_cons, [dt1; dt2]) in
+      List.fold_right app_cons tl (DTapp (fs_seq_empty, []))
   | Ptree.Tinfix (e1, op1, e23)
   | Ptree.Tinnfix (e1, op1, e23) ->
       let apply loc de1 op de2 =
@@ -882,7 +888,7 @@ let rec eff_dterm muc denv {term_desc = desc; term_loc = loc} =
       DEcast (d1, dity_of_pty muc pty)
   | Ptree.Tat _ -> Loc.errorm ~loc "`at' and `old' cannot be used here"
   | Ptree.Tidapp _ | Ptree.Tconst _ | Ptree.Tinfix _ | Ptree.Tinnfix _
-  | Ptree.Ttuple _ | Ptree.Tlet _ | Ptree.Tcase _ | Ptree.Tif _
+  | Ptree.Ttuple _ | Ptree.Tseqlit _ | Ptree.Tlet _ | Ptree.Tcase _ | Ptree.Tif _
   | Ptree.Ttrue | Ptree.Tfalse | Ptree.Tnot _ | Ptree.Tbinop _ | Ptree.Tbinnop _
   | Ptree.Tquant _ | Ptree.Trecord _ | Ptree.Tupdate _ ->
       Loc.errorm ~loc "unsupported effect expression")
@@ -949,6 +955,13 @@ let rec dexpr muc denv {expr_desc = desc; expr_loc = loc} =
   | Ptree.Etuple el ->
       let e = DEsym (RS (rs_tuple (List.length el))) in
       expr_app loc e (List.map (dexpr muc denv) el)
+  | Ptree.Eseqlit el ->
+      let app_cons e seq = (* TODO: fix locations *)
+        let de1 = dexpr muc denv e in
+        let de2 = Dexpr.dexpr ~loc seq in
+        let cons = DEsym (RS rs_seq_cons) in
+        expr_app loc cons [de1; de2] in
+      List.fold_right app_cons el (DEsym (RS rs_seq_empty))
   | Ptree.Einfix (e1, op1, e23)
   | Ptree.Einnfix (e1, op1, e23) ->
       let apply loc de1 op de2 =

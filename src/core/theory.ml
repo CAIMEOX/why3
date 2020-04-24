@@ -981,6 +981,12 @@ let highord_theory =
   let uc = add_param_decl uc fs_func_app in
   close_theory uc
 
+let seq_theory =
+  let uc = empty_theory (id_fresh "Seq") ["why3";"Seq"] in
+  let constrl = [fs_seq_empty,[]; fs_seq_cons, [None;None]] in
+  let uc = add_data_decl uc [ts_seq, constrl] in
+  close_theory uc
+
 let tuple_theory = Hint.memo 17 (fun n ->
   let ts = ts_tuple n and fs = fs_tuple n in
   let pl = List.map (fun _ -> None) ts.ts_args in

@@ -849,7 +849,7 @@ term_block_:
 | LEFTPAR RIGHTPAR                                  { Ttuple [] }
 | LEFTBRC field_list1(term) RIGHTBRC                { Trecord $2 }
 | LEFTBRC term_arg WITH field_list1(term) RIGHTBRC  { Tupdate ($2,$4) }
-| LEFTSQBAR semicolon_list0(term) BARRIGHTSQ        { assert false }
+| LEFTSQBAR semicolon_list0(term) BARRIGHTSQ        { Tseqlit $2 }
 
 
 term_sub_:
@@ -1234,7 +1234,7 @@ expr_block_:
 | LEFTPAR RIGHTPAR                                  { Etuple [] }
 | LEFTBRC field_list1(expr) RIGHTBRC                { Erecord $2 }
 | LEFTBRC expr_arg WITH field_list1(expr) RIGHTBRC  { Eupdate ($2, $4) }
-| LEFTSQBAR semicolon_list0(expr) BARRIGHTSQ        { assert false }
+| LEFTSQBAR semicolon_list0(expr) BARRIGHTSQ        { Eseqlit $2 }
 
 expr_pure_:
 | LEFTBRC qualid RIGHTBRC                           { Eidpur $2 }

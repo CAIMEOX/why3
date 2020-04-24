@@ -258,6 +258,9 @@ val ity_pred : ity -> ity (* ity_pred 'a == ity_func 'a ity_bool *)
 val its_tuple : int -> itysymbol
 val ity_tuple : ity list -> ity
 
+val its_seq : itysymbol
+val ity_seq : ity -> ity
+
 (** {2 Type matching and instantiation} *)
 
 type ity_subst = private {

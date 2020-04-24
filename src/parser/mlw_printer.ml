@@ -205,6 +205,10 @@ let pp_tuple pp fmt xs =
   let pp_xs = pp_print_list ~pp_sep:(pp_sep ",@ ") pp in
   fprintf fmt "@[<hv 1>(%a)@]" pp_xs xs
 
+let pp_seqlit pp fmt xs =
+  let pp_xs = pp_print_list ~pp_sep:(pp_sep ";@ ") pp in
+  fprintf fmt "@[<hv 1>[|%a|]@]" pp_xs xs
+
 let pp_field pp closed fmt (qid, x) =
   let pp = pp_closed closed pp in
   fprintf fmt "@[<hv 2>%a =@ %a@]" pp_qualid qid pp x
@@ -464,6 +468,8 @@ and pp_expr'' fmt e =
       todo fmt "Eany _"
   | Etuple es ->
       pp_tuple pp_expr fmt es
+  | Eseqlit es ->
+      pp_seqlit pp_expr fmt es
   | Erecord fs ->
       pp_record pp_expr expr_closed fmt fs
   | Eupdate (e, fs) ->
@@ -644,6 +650,8 @@ and pp_term'' fmt t =
       pp_cast pp_term fmt t pty
   | Ttuple ts ->
       pp_tuple pp_term fmt ts
+  | Tseqlit ts ->
+      pp_seqlit pp_term fmt ts
   | Trecord fs ->
       pp_record pp_term term_closed fmt fs
   | Tupdate (t, fs) ->

@@ -104,6 +104,7 @@ and term_desc =
   | Tcase of term * (pattern * term) list
   | Tcast of term * pty
   | Ttuple of term list
+  | Tseqlit of term list
   | Trecord of (qualid * term) list
   | Tupdate of term * (qualid * term) list
   | Tscope of qualid * term
@@ -186,6 +187,8 @@ and expr_desc =
        generating of VC for existence *)
   | Etuple of expr list
   (** Tuple of expressions *)
+  | Eseqlit of expr list
+  (** Sequences' literals *)
   | Erecord of (qualid * expr) list
   (** Record expressions *)
   | Eupdate of expr * (qualid * expr) list
