@@ -86,6 +86,14 @@
  <goal name="G12">
  </goal>
  <goal name="G13">
+ <transf name="intro_ccert" >
+  <goal name="G13.0">
+  <transf name="split_all_full" >
+   <goal name="G13.0.0">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
  </goal>
  <goal name="G14">
  <transf name="split_all_full" >

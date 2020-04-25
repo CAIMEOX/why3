@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<file format="whyml">
+<path name=".."/><path name="test_split.mlw"/>
+<theory name="Top">
+ <goal name="G1">
+ <transf name="split_all_full_ccert" >
+  <goal name="G1.0">
+  </goal>
+  <goal name="G1.1">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G2">
+ </goal>
+ <goal name="G3">
+ <transf name="intro_ccert" >
+  <goal name="G3.0">
+  <transf name="split_all_full" >
+   <goal name="G3.0.0">
+   </goal>
+  </transf>
+  <transf name="split_all_full_ccert" >
+   <goal name="G3.0.0">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G4">
+ <transf name="intro_ccert" >
+  <goal name="G4.0">
+  <transf name="split_all_full_ccert" >
+   <goal name="G4.0.0">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>

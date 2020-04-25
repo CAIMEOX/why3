@@ -1,0 +1,7 @@
+predicate a
+predicate b
+
+goal G1 : a /\ b
+goal G2 : not (a /\ b)
+goal G3 : a /\ b -> false
+goal G4 : not (a /\ b) -> false

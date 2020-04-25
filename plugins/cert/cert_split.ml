@@ -19,10 +19,14 @@ open Decl
 
 open Cert_certificates
 
-let rec rename_vcert pr1 pr2 c =
-  propagate_cert (rename_vcert pr1 pr2)
+let rec ren_vcert pr1 pr2 c =
+  propagate_cert (ren_vcert pr1 pr2)
     (fun pr -> if pr_equal pr pr1 then pr2 else pr)
     (fun ct -> ct) c
+
+let rename_vcert pr1 pr2 = function
+  | Hole i -> Rename (pr2, pr1, Hole i)
+  | c -> ren_vcert pr1 pr2 c
 
 let rename_cert pr1 pr2 (l, c) =
   l, rename_vcert pr1 pr2 c
@@ -32,6 +36,9 @@ type split = {
   (* split only the right side every time. This makes split more efficient
      while preserving most use cases : we mostly want to split on the goal which
      is on the right of implications *)
+  rev_split : bool;
+  (* split is reversed : tries to split as a conjunction in hypothesis and
+   as a disjunction in goals *)
   byso_split : bool;
   (* do we eliminate by and so constructions during the split *)
   side_split : bool;
@@ -150,24 +157,28 @@ end
 
 type 'a split_ret = {
   (* Conjunctive decomposition of formula f, to be seen as a list :
-     conj ≃ [ (pr₁, conj₁) ; ...; (prₙ, conjₙ) ] *)
+     conj ≃ [ (pr₁, conj₁) ; ...; (prₙ, conjₙ) ]
+     Note that when rev_split is off, prᵢ are all equal to pr (in split_core) *)
   conj : 'a M.monoid;
   (* Certificate to decompose f as a Conjunction in Positive position :
      cp ⇓ (⊢  pr : f) ≜  [⊢  prᵢ : conjᵢ]ᵢ *)
   cp : visible_cert;
   (* Certificate to decompose f as a Conjunction in Negative position :
      cn ⇓ (pr : f ⊢) ≜ [pr₁ : conj₁, ..., prₙ : conjₙ ⊢] *)
-  (* WARNING : the previous equality is only valid when byso_split is off *)
+  (* WARNING : the previous equality is only valid when byso_split is off,
+     and only useful when rev_split is on *)
   cn : visible_cert;
   (* Disjunctive decomposition of formula f, to be seen as a list :
-     disj ≃ [ (pr₁, disj₁) ; ...; (prₙ, disjₙ) ] *)
+     disj ≃ [ (pr₁, disj₁) ; ...; (prₙ, disjₙ) ]
+     Note that when rev_split is off, prᵢ are all equal to pr *)
   disj : 'a M.monoid;
   (* Certificate to decompose f as a Disjunction in Negative position :
      dn ⇓ (pr : f ⊢) ≜  [prᵢ : disjᵢ ⊢]ᵢ*)
   dn : visible_cert;
   (* Certificate to decompose f as a Disjunction in Positive position :
      dp ⇓ (⊢ pr : f) ≜  [⊢ pr₁ : disj₁, ..., prₙ : disjₙ] *)
-  (* WARNING : the previous equality is only valid when byso_split is off *)
+  (* WARNING : the previous equality is only valid when byso_split is off,
+     and only useful when rev_split is on *)
   dp : visible_cert;
   (* Backward pull of formula: bwd ⇒ f (typically from by) *)
   bwd : 'a;
@@ -254,27 +265,31 @@ let fold_cond = function
 
 let luop op (pr, t) = pr, op t
 
-let lbop op (_, t1) (_, t2) =
-  let pr = create_prsymbol (id_fresh "binop") in
+let lbop op (pr1, t1) (pr2, t2) =
+  let pr = if pr_equal pr1 pr2 then pr1
+           else create_prsymbol (id_fresh "binop") in
   pr, op t1 t2
 
 
-let recons mona monb mon =
-  let open List in
-  let la = map fst (to_list mona) in
-  let lb = map fst (to_list monb) in
-  let lres = map fst (to_list mon) in
-  let lab = fold_left (fun acc ai -> fold_left (fun acc bj -> (ai, bj) :: acc) acc lb)
-              [] la in
-  let s = Stream.of_list (combine (rev lab) lres) in
-  fun () -> let (pra, prb), pr = Stream.next s in
-            lambda One (fun i -> Construct (pra, prb, pr, Hole i))
+(* let recons mona monb mon =
+ *   let open List in
+ *   let la = map fst (to_list mona) in
+ *   let lb = map fst (to_list monb) in
+ *   let lres = map fst (to_list mon) in
+ *   let lab = fold_left (fun acc ai -> fold_left (fun acc bj -> (ai, bj) :: acc) acc lb)
+ *               [] la in
+ *   let s = Stream.of_list (combine (rev lab) lres) in
+ *   fun () -> let (pra, prb), pr = Stream.next s in
+ *             lambda One (fun i -> Construct (pra, prb, pr, Hole i)) *)
 
-let decons pr pr1 pr2 c1 c2 recons =
-  lambda One (fun i -> Destruct (pr, pr1, pr2, Hole i))
-  |>> rename_cert pr pr1 c1
-  |>> rename_cert pr pr2 c2
-  ||> recons
+let destruct_reconstruct pr c1 c2 =
+  let pr1 = create_prsymbol (id_fresh "pr1") in
+  let pr2 = create_prsymbol (id_fresh "pr2") in
+  lambda One (fun i -> Destruct (pr, pr, pr2, Hole i))
+  |>> c1
+  ||> (fun () -> lambda One (fun i -> Rename (pr, pr1, (Rename (pr2, pr, Hole i)))))
+  |>> c2
+  ||> fun () -> lambda One (fun i -> Construct (pr1, pr, pr, Hole i))
 
 let rec split_core sp pr f : (prsymbol * term) split_ret =
   let (~-) = t_attr_copy f in
@@ -320,16 +335,16 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
         !+(pr, df) (hole ()) (hole ())
         (pr, f) (pr, df) Unit false false
   | Ttrue ->
-      let weak () = lambda One (fun i -> Weakening (pr, Hole i)) in
+      let weak = lambda One (fun i -> Weakening (pr, Hole i)) in
       let triv = lambda Z (Trivial pr) in
-      ret Unit triv (weak ())
-        (Zero (pr, f)) (weak ()) triv
+      ret Unit triv weak
+        (Zero (pr, f)) (hole ()) triv
         (pr, f) (pr, f) Unit false false
   | Tfalse ->
-      let weak () = lambda One (fun i -> Weakening (pr, Hole i)) in
+      let weak = lambda One (fun i -> Weakening (pr, Hole i)) in
       let triv = lambda Z (Trivial pr) in
-      ret (Zero (pr, f)) (weak ()) triv
-        Unit triv (weak ())
+      ret (Zero (pr, f)) (hole ()) triv
+        Unit triv weak
         (pr, f) (pr, f) Unit false false
   | Tapp _ -> let uf = !+(pr, f) in
               ret uf (hole ()) (hole ())
@@ -357,7 +372,12 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
   | Tbinop (Tand,f1,f2) ->
       let (&&&) = lbop (alias2 f1 f2 t_and) in
       let rc = split_core (ps_csp sp) in
-      let sf1 = rc pr f1 and sf2 = rc pr f2 in
+      let pr1, pr2 =
+        if sp.rev_split
+        then create_prsymbol (id_fresh "pr1"),
+             create_prsymbol (id_fresh "pr2")
+        else pr, pr in
+      let sf1 = rc pr1 f1 and sf2 = rc pr2 f2 in
       let fwd = sf1.fwd &&& sf2.fwd and bwd = sf1.bwd &&& sf2.bwd in
       let asym = sp.asym_split && asym f1 in
       let nf2, cn2 = ncaset [] sf2 in
@@ -370,16 +390,15 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let conj = sf1.conj ++ conj2 in
       let side = sf1.side ++ if not asym then sf2.side else
         let nf1 = ncase (sf2.conj::dp) sf1 in iclose nf1 sf2.side in
-      let pr1 = create_prsymbol (id_fresh "pr1") in
-      let pr2 = create_prsymbol (id_fresh "pr2") in
+
       let cp = lambda Two (fun i j -> Split (pr, Hole i, Hole j))
                |>>> [sf1.cp; sf2.cp] in
+
       let cn = lambda One (fun i -> Destruct (pr, pr1, pr2, Hole i))
-               |>> rename_cert pr pr1 sf1.cn
-               |>> rename_cert pr pr2 sf2.cn in
+               |>> sf1.cn
+               |>> sf2.cn in
 
-      let dn = decons pr pr1 pr2 sf1.dn sf2.dn (recons sf1.disj sf2.disj disj) in
-
+      let dn = destruct_reconstruct pr sf1.dn sf2.dn in
 
       let find_pr mon =
         let open Mterm in
@@ -409,7 +428,8 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
         List.fold_left (fun c pr -> Weakening (pr, c)) c rem_names in
 
       let h = hole () in
-      let dp = lambda Two (fun i j -> Split (pr, Hole i, Hole j))
+      let dp = lambda Two (fun i j -> Split (pr, Rename (pr, pr1, Hole i),
+                                             Rename (pr, pr2, Hole j)))
                |>>> [sf1.dp ; sf2.dp]
                |>>> [lambda One (fun i -> add_all true (remove_all true (Hole i)));
                      lambda One (fun j -> add_all false (remove_all false (Hole j)))]
@@ -464,7 +484,7 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let side2 = if not asym then sf2.side else
         let pf1 = pcase (sf2.disj::dp) sf1 in
         bimap cpy (|||) pf1 sf2.side in
-      let cp = decons pr pr1 pr2 sf1.cp sf2.cp (recons sf1.conj sf2.conj conj) in
+      let cp = destruct_reconstruct pr sf1.cp sf2.cp in
       let dn = lambda Two (fun i j -> Split (pr, Hole i, Hole j))
                |>>> [sf1.dn; sf2.dn] in
       ret conj cp nc (sf1.disj ++ disj2) dn nc bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
@@ -629,12 +649,13 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
 
 let split_core sp pr t =
   let res = split_core sp pr t in
-  (* print_ret_err res; *)
+  print_ret_err res;
   res
 
 let full_split kn = {
   right_only = false;
   byso_split = false;
+  rev_split  = false;
   side_split = true;
   stop_split = false;
   cpos_split = true;
@@ -687,7 +708,7 @@ let split_goal sp pr f =
   List.map make_prop (split_proof sp pr f)
 
 let split_axiom sp pr f =
-  let sp = { sp with asym_split = false; byso_split = false } in
+  let sp = { sp with asym_split = false; rev_split = true; byso_split = false } in
   List.map (fun (pr, f) -> create_prop_decl Paxiom pr f) (split_conj sp pr f)
 
 let split_all sp d = match d.d_node with
