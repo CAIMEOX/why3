@@ -291,6 +291,34 @@ let destruct_reconstruct pr c1 c2 =
   |>> c2
   ||> fun () -> lambda One (fun i -> Construct (pr1, pr, pr, Hole i))
 
+let find_pr mon =
+  let open Mterm in
+  let map = List.fold_left (fun map (pr, t) -> add t pr map) empty (to_list mon) in
+  fun t -> find t map
+
+let add find_a find_b is_and is_a c (pr, t) =
+  let a, b = match t.t_node with
+    | Tbinop (_, a, b) -> a, b (* underscore may be Tand or Tor depending on is_and *)
+    | _ -> assert false in
+  let pra = create_prsymbol (id_fresh "pra") in
+  let prb = create_prsymbol (id_fresh "prb") in
+  let pri = if is_a then find_a a else find_b b in
+  let ax = if is_a then Axiom (pra, pri) else Axiom (prb, pri) in
+  let dest = Destruct (pr, pra, prb, ax) in
+  let c1, c2 = if is_and then c, dest else dest, c in
+  Cut (pr, t, c1, c2)
+
+let add_all mon_a mon_b mon_res is_and is_a c =
+  let find_a = find_pr mon_a in
+  let find_b = find_pr mon_b in
+  let add = add find_a find_b is_and is_a in
+  List.fold_left add c (to_list mon_res)
+
+let remove_all mon_a mon_b is_a c =
+  let rem = if is_a then mon_a else mon_b in
+  let rem_names = List.map fst (to_list rem) in
+  List.fold_left (fun c pr -> Weakening (pr, c)) c rem_names
+
 let rec split_core sp pr f : (prsymbol * term) split_ret =
   let (~-) = t_attr_copy f in
   let ro = sp.right_only in
@@ -400,32 +428,9 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
 
       let dn = destruct_reconstruct pr sf1.dn sf2.dn in
 
-      let find_pr mon =
-        let open Mterm in
-        let map = List.fold_left (fun map (pr, t) -> add t pr map) empty (to_list mon) in
-        fun t -> find t map in
 
-      let find_a = find_pr sf1.disj in
-      let find_b = find_pr sf2.disj in
-
-      let add is_left c (pr, t) =
-        let a, b = match t.t_node with
-          | Tbinop (Tand, a, b) -> a, b
-          | _ -> assert false in
-        let pra = create_prsymbol (id_fresh "pra") in
-        let prb = create_prsymbol (id_fresh "prb") in
-        let pri = if is_left then find_a a else find_b b in
-        let ax = if is_left then Axiom (pra, pri) else Axiom (prb, pri) in
-        Cut (pr, t, c,
-             Destruct (pr, pra, prb, ax)) in
-
-      let add_all is_left c =
-        List.fold_left (add is_left) c (to_list disj) in
-
-      let remove_all is_left c =
-        let rem = if is_left then sf1.disj else sf2.disj in
-        let rem_names = List.map fst (to_list rem) in
-        List.fold_left (fun c pr -> Weakening (pr, c)) c rem_names in
+      let add_all = add_all sf1.disj sf2.disj disj true in
+      let remove_all = remove_all sf1.disj sf2.disj in
 
       let h = hole () in
       let dp = lambda Two (fun i j -> Split (pr, Rename (pr, pr1, Hole i),
@@ -469,8 +474,11 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
   | Tbinop (Tor,f1,f2) ->
       let (|||) = lbop (alias2 f1 f2 t_or) in
       let rc = split_core (ng_csp sp) in
-      let pr1 = create_prsymbol (id_fresh "pr1") in
-      let pr2 = create_prsymbol (id_fresh "pr2") in
+      let pr1, pr2 =
+        if sp.rev_split
+        then create_prsymbol (id_fresh "pr1"),
+             create_prsymbol (id_fresh "pr2")
+        else pr, pr in
       let sf1 = rc pr1 f1 and sf2 = rc pr2 f2 in
       let fwd = sf1.fwd ||| sf2.fwd and bwd = sf1.bwd ||| sf2.bwd in
       let asym = sp.asym_split && asym f1 in
@@ -484,10 +492,30 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let side2 = if not asym then sf2.side else
         let pf1 = pcase (sf2.disj::dp) sf1 in
         bimap cpy (|||) pf1 sf2.side in
+      let disj = sf1.disj ++ disj2 in
+
       let cp = destruct_reconstruct pr sf1.cp sf2.cp in
+
+      let add_all = add_all sf1.conj sf2.conj conj false in
+      let remove_all = remove_all sf1.conj sf2.conj in
+
+      let h = hole () in
+      let cn = lambda Two (fun i j -> Split (pr, Rename (pr, pr1, Hole i),
+                                             Rename (pr, pr2, Hole j)))
+               |>>> [sf1.cn ; sf2.cn]
+               |>>> [lambda One (fun i -> add_all true (remove_all true (Hole i)));
+                     lambda One (fun j -> add_all false (remove_all false (Hole j)))]
+               |>>> [h; h] in
       let dn = lambda Two (fun i j -> Split (pr, Hole i, Hole j))
                |>>> [sf1.dn; sf2.dn] in
-      ret conj cp nc (sf1.disj ++ disj2) dn nc bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
+
+      let dp = lambda One (fun i -> Destruct (pr, pr1, pr2, Hole i))
+               |>> sf1.dp
+               |>> sf2.dp in
+
+      ret conj cp cn
+        disj dn dp
+        bwd fwd (sf1.side ++ side2) (cp1 || cp2) false
   | Tbinop (Tiff,f1,f2) ->
       let rc = split_core (no_csp sp) in
       let pr1 = create_prsymbol (id_fresh "pr1") in
