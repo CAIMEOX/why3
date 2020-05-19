@@ -32,8 +32,40 @@
  <goal name="G4">
  <transf name="intro_ccert" >
   <goal name="G4.0">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G5">
+ </goal>
+ <goal name="G6">
+ <transf name="split_all_full" >
+  <goal name="G6.0">
+  </goal>
+  <goal name="G6.1">
+  </goal>
+ </transf>
+ <transf name="split_all_full_ccert" >
+  <goal name="G6.0">
+  </goal>
+  <goal name="G6.1">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G7">
+ <transf name="intro_ccert" >
+  <goal name="G7.0">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G8">
+ <transf name="intro_ccert" >
+  <goal name="G8.0">
+  <transf name="split_all_full" >
+   <goal name="G8.0.0">
+   </goal>
+  </transf>
   <transf name="split_all_full_ccert" >
-   <goal name="G4.0.0">
+   <goal name="G8.0.0">
    </goal>
   </transf>
   </goal>
