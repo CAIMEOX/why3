@@ -39,6 +39,9 @@ type ('a, 'b) cert = (* 'a is used to designate an hypothesis, 'b is used for te
   (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
   (* Unfold (I, c) ⇓ (Γ, I : A → B ⊢ Δ) ≜  c ⇓ (Γ, I : ¬A ∨ B ⊢ Δ)*)
   (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A → B) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A ∨ B)*)
+  | Fold of 'a * ('a, 'b) cert
+  (* Fold (I, c) ⇓ (Γ, I : ¬A ∨ B ⊢ Δ) ≜  c ⇓ (Γ, I : A → B ⊢ Δ)*)
+  (* Fold (I, c) ⇓ (Γ ⊢ Δ, I : ¬A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, I : A → B)*)
   | Split of 'a * ('a, 'b) cert * ('a, 'b) cert
   (* Split (I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
   (* Split (I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
@@ -132,6 +135,9 @@ type ('a, 'b) ecert = (* elaborated certificates, 'a is used to designate an hyp
   | EUnfoldArr of (bool * 'b * 'b * 'a * ('a, 'b) ecert)
   (* EUnfoldArr (false, A, B, I, c) ⇓ (Γ, I : A → B ⊢ Δ) ≜  c ⇓ (Γ, I : ¬A ∨ B ⊢ Δ)*)
   (* EUnfoldArr (true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : A → B) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A ∨ B)*)
+  | EFoldArr of (bool * 'b * 'b * 'a * ('a, 'b) ecert)
+  (* EFoldArr (false, A, B, I, c) ⇓ (Γ, I : ¬A ∨ B ⊢ Δ) ≜  c ⇓ (Γ, I : A → B ⊢ Δ)*)
+  (* EFoldArr (true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : ¬A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, I : A → B)*)
   | ESplit of bool * 'b * 'b * 'a * ('a, 'b) ecert * ('a, 'b) ecert
   (* ESplit (false, A, B, I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
   (* ESplit (true, A, B, I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
@@ -241,6 +247,7 @@ and prcab : type a b. (formatter -> a -> unit) ->
   | Axiom (i1, i2) -> fprintf fmt "Axiom (%a, %a)" pra i1 pra i2
   | Trivial i -> fprintf fmt "Trivial %a" pra i
   | Unfold (i, c) -> fprintf fmt "Unfold (%a,@ %a)" pra i prc c
+  | Fold (i, c) -> fprintf fmt "Fold (%a,@ %a)" pra i prc c
   | Split (i, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]" pra i prc c1 prc c2
   | Destruct (i, j1, j2, c) ->
       fprintf fmt "Destruct (%a, %a, %a,@ %a)" pra i pra j1 pra j2 prc c
@@ -298,6 +305,7 @@ let propagate_cert f fid fte = function
   | Let (x, i, c) -> Let (fte x, fid i, f c)
   | Rename (i1, i2, c) -> Rename (fid i1, fid i2, f c)
   | Unfold (i, c) -> Unfold (fid i, f c)
+  | Fold (i, c) -> Fold (fid i, f c)
   | Split (i, c1, c2) ->
       let f1 = f c1 in let f2 = f c2 in
       Split (fid i, f1, f2)
@@ -367,6 +375,7 @@ let propagate_ecert f fid ft = function
       ESplit (g, ft a, ft b, fid i, f1, f2)
   | EUnfoldIff (g, a, b, i, c) -> EUnfoldIff (g, ft a, ft b, fid i, f c)
   | EUnfoldArr (g, a, b, i, c) -> EUnfoldArr (g, ft a, ft b, fid i, f c)
+  | EFoldArr (g, a, b, i, c) -> EFoldArr (g, ft a, ft b, fid i, f c)
   | EDestruct (g, a, b, i, j1, j2, c) -> EDestruct (g, ft a, ft b, fid i, fid j1, fid j2, f c)
   | EConstruct (g, a, b, i1, i2, j, c) -> EConstruct (g, ft a, ft b, fid i1, fid i2, fid j, f c)
   | ESwap (g, a, i, c) -> ESwap (g, ft a, fid i, f c)
@@ -579,6 +588,15 @@ let elaborate (init_ct : ctask) c =
       if iff
       then EUnfoldIff pack
       else EUnfoldArr pack
+  | Fold (i, c) ->
+      let t, pos = find_ident "Fold" i cta in
+      let cta, t1, t2 = match t with
+        | CTbinop (Tor, CTnot t1, t2) ->
+            Mid.add i (CTbinop (Timplies, t1, t2), pos) cta, t1, t2
+        | _ -> Format.eprintf "@[%a@]@." pcte t;
+               elab_failed "Nothing to fold" in
+      let c = elab cta c in
+      EFoldArr (pos, t1, t2, i, c)
   | Split (i, c1, c2) ->
       let t, pos = find_ident "Split" i cta in
       let t1, t2 = match t, pos with
@@ -675,6 +693,15 @@ let rec trim_certif c =
                                 then c_open, c_closed, CTbinop (Tor, a, b)
                                 else c_closed, c_open, CTbinop (Tand, a, b) in
               ECut (j, cut, c1, c2)))
+  | EFoldArr (g, a, b, i, c) ->
+      let c = trim_certif c in
+      let j = id_register (id_fresh "fold_arr_temp") in
+      let pre = CTbinop (Tor, CTnot a, b) in
+      let post = CTbinop (Timplies, a, b) in
+      let c_open = EWeakening (g, pre, j, c) in
+      let c_closed = EUnfoldArr (not g, a, b, i, eaxiom g pre i j) in
+      let c1, c2 = if g then c_open, c_closed else c_closed, c_open in
+      erename g pre i j (ECut (i, post, c1, c2))
   | _ -> propagate_ecert trim_certif (fun t -> t) (fun i -> i) c
 
 let rec eliminate_let (m : cterm Mid.t) c =

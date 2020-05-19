@@ -120,7 +120,8 @@ let rstr goal = if goal then "_goal" else "_hyp"
 let print_certif at fmt c =
   let s = Stream.of_list at in
   let rec pc fmt = function
-  | ELet _ | EConstruct _ | ERename _-> verif_failed "Construct/Let/Rename left"
+  | ELet _ | EConstruct _ | ERename _ | EFoldArr _ ->
+      verif_failed "Construct/Let/Rename/Fold left"
   | EHole _ ->
       fprintf fmt "%s" (Stream.next s)
   | EAxiom (t, h, g) ->

@@ -66,7 +66,8 @@ let union : ctask Mid.t -> ctask Mid.t -> ctask Mid.t =
 
 let rec ccheck c cta =
   match c with
-  | ELet _ | EConstruct _ | ERename _ -> verif_failed "Construct/Let/Rename left"
+  | ELet _ | EConstruct _ | ERename _ | EFoldArr _ ->
+      verif_failed "Construct/Let/Rename/Fold left"
     | EHole i -> Mid.singleton i cta
     | EAxiom (_, i1, i2) ->
         let t1, pos1 = find_ident "axiom1" i1 cta in
