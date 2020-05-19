@@ -9,3 +9,7 @@ goal G5 : a \/ b
 goal G6 : not (a \/ b)
 goal G7 : a \/ b -> false
 goal G8 : not (a \/ b) -> false
+goal G9 : a -> b
+goal G10 : not (a -> b)
+goal G11 : (a -> b) -> false
+goal G12 : (not (a -> b)) -> false
