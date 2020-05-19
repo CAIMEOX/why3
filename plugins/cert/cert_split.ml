@@ -319,6 +319,12 @@ let remove_all mon_a mon_b is_a c =
   let rem_names = List.map fst (to_list rem) in
   List.fold_left (fun c pr -> Weakening (pr, c)) c rem_names
 
+let swap pr () = lambda One (fun i -> Swap (pr, Hole i))
+
+let swap_all mon =
+  let swaps = List.map (fun (pr, _) -> swap pr ()) (to_list mon) in
+  List.fold_left (|>>) (hole ()) swaps
+
 let rec split_core sp pr f : (prsymbol * term) split_ret =
   let (~-) = t_attr_copy f in
   let ro = sp.right_only in
@@ -400,11 +406,9 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
   | Tbinop (Tand,f1,f2) ->
       let (&&&) = lbop (alias2 f1 f2 t_and) in
       let rc = split_core (ps_csp sp) in
-      let pr1, pr2 =
-        if sp.rev_split
-        then create_prsymbol (id_fresh "pr1"),
-             create_prsymbol (id_fresh "pr2")
-        else pr, pr in
+      let pr1, pr2 = if sp.rev_split
+                     then pr_clone pr, pr_clone pr
+                     else pr, pr in
       let sf1 = rc pr1 f1 and sf2 = rc pr2 f2 in
       let fwd = sf1.fwd &&& sf2.fwd and bwd = sf1.bwd &&& sf2.bwd in
       let asym = sp.asym_split && asym f1 in
@@ -456,29 +460,38 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
   | Tbinop (Timplies,f1,f2) ->
       let (>->) = lbop (alias2 f1 f2 t_implies) in
       let sp2 = ng_csp sp in let sp1 = in_csp sp2 in
-      let sf1 = split_core sp1 pr f1 and sf2 = split_core sp2 pr f2 in
+      let pr1, pr2 = if sp.rev_split
+                     then pr_clone pr, pr_clone pr
+                     else pr, pr in
+      let sf1 = split_core sp1 pr1 f1 and sf2 = split_core sp2 pr2 f2 in
       let fwd = sf1.bwd >-> sf2.fwd and bwd = sf1.fwd >-> sf2.bwd in
       let asym = sp.asym_split && asym f1 in
       let sd = [sf2.side] in
-      let disj1 = nclose sf1.conj in
+      let disj1 = nclose sf1.conj in 
       let disj2 = if not asym then sf2.disj else
         let nf1 = ncase (sf2.disj::sd) sf1 in
         aclose nf1 sf2.disj in
       let disj = disj1 ++ disj2 in
-      let dp = sf2.conj::sd in
-      let nf1, cn1 = ncaset dp sf1 in
+      let dp' = sf2.conj::sd in
+      let nf1, cn1 = ncaset dp' sf1 in
       let conj = bimap (fun _ (pr, a) -> pr, - t_not a) (>->) nf1 sf2.conj in
-      let nf1 = ncase (if asym then sf2.disj::dp else dp) sf1 in
+      let nf1 = ncase (if asym then sf2.disj::dp' else dp') sf1 in
       let side = sf1.side ++ iclose nf1 sf2.side in
-      ret conj nc nc disj nc nc bwd fwd side (cn1 || sf2.cpos) false
+      let dn = lambda Two (fun i j -> Unfold (pr, Split (pr, Hole i, Hole j)))
+               |>>> [ swap pr () |>> sf1.cp ||> swap pr;
+                      sf2.dn ] in
+      let dp = lambda One (fun i -> Unfold (pr, Destruct (pr, pr1, pr2, Hole i)))
+               |>> swap pr1 () |>> sf1.cn |>> swap_all sf1.conj
+               |>> sf2.dp in
+      ret conj nc nc
+        disj dn dp
+        bwd fwd side (cn1 || sf2.cpos) false
   | Tbinop (Tor,f1,f2) ->
       let (|||) = lbop (alias2 f1 f2 t_or) in
       let rc = split_core (ng_csp sp) in
-      let pr1, pr2 =
-        if sp.rev_split
-        then create_prsymbol (id_fresh "pr1"),
-             create_prsymbol (id_fresh "pr2")
-        else pr, pr in
+      let pr1, pr2 = if sp.rev_split
+                     then pr_clone pr, pr_clone pr
+                     else pr, pr in
       let sf1 = rc pr1 f1 and sf2 = rc pr2 f2 in
       let fwd = sf1.fwd ||| sf2.fwd and bwd = sf1.bwd ||| sf2.bwd in
       let asym = sp.asym_split && asym f1 in
@@ -555,10 +568,6 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let (!) = luop (alias f1 t_not) in
       let (|>) zero = map (fun (pr, t) -> !+(pr, t_attr_copy t zero)) (!) in
       let conj = t_false |> sf.disj and disj = t_true |> sf.conj in
-      let swap pr () = lambda One (fun i -> Swap (pr, Hole i)) in
-      let swap_all mon =
-        let swaps = List.map (fun (pr, _) -> swap pr ()) (to_list mon) in
-        List.fold_left (|>>) (hole ()) swaps in
       let cp = swap pr () |>> sf.dn ||> swap pr in
       let cn = swap pr () |>> sf.dp |>> swap_all sf.disj in
       let dn = swap pr () |>> sf.cp ||> swap pr in
@@ -737,7 +746,9 @@ let split_goal sp pr f =
 
 let split_axiom sp pr f =
   let sp = { sp with asym_split = false; rev_split = true; byso_split = false } in
-  List.map (fun (pr, f) -> create_prop_decl Paxiom pr f) (split_conj sp pr f)
+  match split_conj sp pr f with
+  | [_, f] -> ignore (pop ()); add (hole()); [create_prop_decl Paxiom pr f]
+  | fl -> List.map (fun (pr, f) -> create_prop_decl Paxiom pr f) fl
 
 let split_all sp d = match d.d_node with
   | Dprop (Pgoal, pr,f) -> split_goal sp pr f
