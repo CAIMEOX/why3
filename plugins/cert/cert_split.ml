@@ -478,7 +478,7 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let fwd = sf1.bwd >-> sf2.fwd and bwd = sf1.fwd >-> sf2.bwd in
       let asym = sp.asym_split && asym f1 in
       let sd = [sf2.side] in
-      let disj1 = nclose sf1.conj in 
+      let disj1 = nclose sf1.conj in
       let disj2 = if not asym then sf2.disj else
         let nf1 = ncase (sf2.disj::sd) sf1 in
         aclose nf1 sf2.disj in
@@ -587,7 +587,7 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       ret conj nc nc disj nc nc bwd fwd side false false
   | Tnot f1 ->
       let sf = split_core (in_csp sp) pr f1 in
-      let (!) = luop (alias f1 t_not) in
+      let (!) = luop (alias f1 t_not_simp) in
       let (|>) zero = map (fun (pr, t) -> !+(pr, t_attr_copy t zero)) (!) in
       let conj = t_false |> sf.disj and disj = t_true |> sf.conj in
       let cp = swap pr () |>> sf.dn ||> swap pr in
@@ -833,4 +833,3 @@ let split_all_right = prep_all right_proof
 
 let split_premise_full  = prep_premise full_proof
 let split_premise_right = prep_premise right_proof
-
