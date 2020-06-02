@@ -90,14 +90,13 @@ let () = Exn_printer.register (fun fmt exn -> match exn with
   | CFGError msg -> Format.fprintf fmt "CFG translation error: %s" msg
   | _ -> raise exn)
 
-let translate_cfg preconds block blocks =
+let translate_cfg thestartlabel preconds block blocks =
   let blocks =
     List.fold_left
       (fun acc (l,b) -> Wstdlib.Mstr.add l.id_str b acc)
       Wstdlib.Mstr.empty
       blocks
   in
-  let thestartlabel = "start" in
   let visited_entry_points = ref [thestartlabel] in
   let funs = ref [] in
   let rec traverse_block startlabel visited_instrs bl : Ptree.expr =
@@ -132,27 +131,33 @@ let translate_cfg preconds block blocks =
             | [] -> assert false
             | (id,_)::_ -> id
           in
-          let l = List.map
-                (fun (id,t) ->
-                  let attr = ATstr (Ident.create_attribute ("hyp_name:" ^ id.id_str)) in
-                  (* TODO : add also an "expl:" *)
-                  { t with term_desc = Tattr(attr,t) })
-                l
+          let l =
+            List.map
+              (fun (id,t) ->
+                let attr = ATstr (Ident.create_attribute ("hyp_name:" ^ id.id_str)) in
+                let t = { t with term_desc = Tattr(attr,t) } in
+                let attr = ATstr (Ident.create_attribute ("expl:invariant at " ^ id.id_str)) in
+                { t with term_desc = Tattr(attr,t) }
+              )
+              l
           in
-          if not (List.mem id.id_str !visited_entry_points) then
+          let from_label = "invariant'" ^ id.id_str in
+          if not (List.mem from_label !visited_entry_points) then
             begin
-              visited_entry_points := id.id_str :: !visited_entry_points;
-              traverse_from_entry_point id.id_str l rem
+              visited_entry_points := from_label :: !visited_entry_points;
+              traverse_from_entry_point from_label l rem
             end;
           let k =
-            mk_expr ~loc (Eidapp(Qident (mk_id ~loc ("_from_" ^ id.id_str)),[mk_unit ~loc]))
+            mk_expr ~loc (Eidapp(Qident (mk_id ~loc from_label),[mk_unit ~loc]))
           in
+          (*
           List.fold_right
             (fun t acc ->
               let e = mk_check ~loc:t.term_loc t in
               mk_seq ~loc e acc)
             l
-            k
+           *)
+          k
        | CFGswitch(e,cases), [] ->
           let branches =
             List.map
@@ -189,18 +194,10 @@ let declare_local (ghost,id,ty) body =
   mk_expr ~loc:id.id_loc (Elet(id,ghost,Expr.RKnone,e,body))
 
 
-let build_path_function retty pat mask postconds (startlabel, preconds, body) : Ptree.fundef =
-  let body =
-    List.fold_left
-      (fun acc t ->
-        let loc = t.term_loc in
-        let e = mk_assume ~loc t in
-        mk_seq ~loc e acc)
-      body preconds
-  in
+let build_path_function retty pat mask postconds (fun_name, preconds, body) : Ptree.fundef =
   let loc = Loc.dummy_position in
-  let spec = { empty_spec with sp_post = postconds} in
-  let id = mk_id ~loc ("_from_" ^ startlabel) in
+  let spec = { empty_spec with sp_pre = preconds ; sp_post = postconds} in
+  let id = mk_id ~loc fun_name in
   let arg = (loc,None,false,Some unit_type) in
   (id,false,Expr.RKnone, [arg], Some retty, pat, mask, spec, body)
 
@@ -208,10 +205,11 @@ let build_path_function retty pat mask postconds (startlabel, preconds, body) : 
 let translate_letcfg (id,args,retty,pat,mask,spec,locals,block,blocks) =
   Debug.dprintf debug "translating cfg function `%s`@." id.id_str;
   Debug.dprintf debug "return type is `%a`@." pp_pty retty;
-  let funs = translate_cfg spec.sp_pre block blocks in
+  let start_label = id.id_str ^ "'start" in
+  let funs = translate_cfg start_label spec.sp_pre block blocks in
   let loc = Loc.dummy_position in
   let body =
-    mk_expr ~loc (Eidapp(Qident (mk_id ~loc "_from_start"),[mk_unit ~loc]))
+    mk_expr ~loc (Eidapp(Qident (mk_id ~loc start_label),[mk_unit ~loc]))
   in
   let defs =
     List.map (build_path_function retty pat mask spec.sp_post) funs
