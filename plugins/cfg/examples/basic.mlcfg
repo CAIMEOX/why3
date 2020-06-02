@@ -78,11 +78,27 @@ let cfg cfg_finite_loop (x:int) : int
   end
   }
 
+let cfg incr (ref x:int) : int
+  ensures { x = old x + 1 }
+  =
+  {
+  x <- x + 1;
+  x
+  }
 
-let main () =
-  let _ = cfgassert 42 in
-  let _ = cfggoto 43 in
-  let _ = cfg_inv 44 in
+let cfg main () : unit =
+  var tmp : int;
+  var tmp2 : int;
+  {
+  tmp <- cfgassert 42;
+  tmp <- cfggoto 43;
+  tmp <- cfg_inv 44;
+  tmp <- cfg_infinite_loop 45;
+  tmp <- cfg_finite_loop 46;
+  tmp2 <- 47;
+  tmp <- incr tmp2;
+  assert { tmp2 = 48 };
   ()
+  }
 
 end

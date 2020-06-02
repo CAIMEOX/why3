@@ -92,8 +92,37 @@
   </goal>
  </transf>
  </goal>
+ <goal name="incr&#39;vc" expl="VC for incr" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="incr&#39;vc.0" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.05" steps="733"/></proof>
+  </goal>
+  <goal name="incr&#39;vc.1" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.05" steps="732"/></proof>
+  </goal>
+ </transf>
+ </goal>
  <goal name="main&#39;vc" expl="VC for main" proved="true">
- <proof prover="0"><result status="valid" time="0.02" steps="776"/></proof>
+ <transf name="split_vc" proved="true" >
+  <goal name="main&#39;vc.0" expl="precondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.02" steps="721"/></proof>
+  </goal>
+  <goal name="main&#39;vc.1" expl="precondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.03" steps="733"/></proof>
+  </goal>
+  <goal name="main&#39;vc.2" expl="precondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.02" steps="733"/></proof>
+  </goal>
+  <goal name="main&#39;vc.3" expl="precondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.01" steps="746"/></proof>
+  </goal>
+  <goal name="main&#39;vc.4" expl="precondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.01" steps="758"/></proof>
+  </goal>
+  <goal name="main&#39;vc.5" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.01" steps="814"/></proof>
+  </goal>
+ </transf>
  </goal>
 </theory>
 </file>
