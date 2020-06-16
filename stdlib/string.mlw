@@ -480,12 +480,16 @@ module StringP
     ensures { result <-> le s2 s1 }
 
   val s_at (s: string) (n: int): string
-    ensures { length result <= 1 }
-    ensures { result = s_at s n }
+    requires { 0 <= n < length s }
+    requires { s <> empty }
+    ensures  { length result = 1 }
+    ensures  { result = s_at s n }
 
-  val substring (s: string) (index: int) (offset: int): string
+  val substring (s: string) (index: int) (size: int): string
+    requires { 0 <= index < length s }
+    requires { index + size < length s }
     ensures { length result <= length s }
-    ensures { result = substring s index offset }
+    ensures { result = substring s index size }
 
   val prefixof (s1 s2: string): bool
     ensures { result <-> prefixof s1 s2 }
