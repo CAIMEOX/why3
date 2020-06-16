@@ -380,6 +380,12 @@ module String
   axiom from_int_to_int: forall i.
     if i >= 0 then to_int (from_int i) = i else to_int (from_int i) = -1
 
+  val (=) (x y: string) : bool
+    ensures { result <-> x = y }
+
+  val concat (s1 s2: string) : string
+    ensures  { result = concat s1 s2 }
+
 end
 
 (** {2 Characters} *)
@@ -445,6 +451,9 @@ module Char
   axiom make_contents: forall size v. size >= 0 ->
     (forall i. 0 <= i < size -> get (make size v) i = v)
 
+  val eq_char (c1 c2: char) : bool
+    ensures { result <-> c1 = c2 }
+
 end
 
 (** {3 Programming API} *)
@@ -454,9 +463,6 @@ module StringP
   use int.Int
   use export String
   use export Char
-
-  val concat (s1 s2: string): string
-    ensures { result = concat s1 s2 }
 
   val length (s: string): int
     ensures { result = length s }
@@ -545,9 +551,6 @@ module OCaml
 
   (* In OCaml max_string_length is 144_115_188_075_855_863 *)
 
-  val eq_char (c1 c2: char) : bool
-    ensures { result <-> c1 = c2 }
-
   val get (s: string) (i: int63) : char
     requires { 0 <= i < length s }
     ensures  { result = get s i }
@@ -563,9 +566,6 @@ module OCaml
     requires { 0 <= n < 256 }
     ensures  { result = chr n }
 
-  val (=) (x y: string) : bool
-    ensures { result <-> x = y }
-
   val partial length (s: string) : int63
     ensures { result = length s }
 
@@ -573,9 +573,6 @@ module OCaml
     requires { 0 <= start <= length s }
     requires { 0 <= len <= length s - start }
     ensures  { result = substring s start len }
-
-  val concat (s1 s2: string) : string
-    ensures  { result = concat s1 s2 }
 
   val make (size: int63) (v: char) : string
     requires { 0 <= size }
