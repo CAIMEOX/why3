@@ -3,14 +3,79 @@
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
 <prover id="0" name="Alt-Ergo" version="2.3.0" timelimit="5" steplimit="0" memlimit="1000"/>
-<file format="whyml" proved="true">
+<prover id="1" name="Z3" version="4.8.6" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="2" name="CVC4" version="1.7" timelimit="5" steplimit="0" memlimit="1000"/>
+<file format="whyml">
 <path name=".."/><path name="byte_string.mlw"/>
-<theory name="CString" proved="true">
- <goal name="infix =&#39;vc" expl="VC for infix =" proved="true">
- <proof prover="0"><result status="valid" time="0.02" steps="138"/></proof>
+<theory name="CString">
+ <goal name="string_eq&#39;vc" expl="VC for string_eq" proved="true">
+ <proof prover="0"><result status="valid" time="0.01" steps="138"/></proof>
  </goal>
  <goal name="concat&#39;vc" expl="VC for concat" proved="true">
  <proof prover="0"><result status="valid" time="0.06" steps="202"/></proof>
+ </goal>
+ <goal name="eq_char&#39;vc" expl="VC for eq_char" proved="true">
+ <proof prover="0"><result status="valid" time="0.01" steps="2"/></proof>
+ </goal>
+ <goal name="length&#39;vc" expl="VC for length" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="length&#39;vc.0" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.01" steps="2"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="lt&#39;vc" expl="VC for lt">
+ <proof prover="0" obsolete="true"><result status="timeout" time="5.00"/></proof>
+ <proof prover="1" obsolete="true"><result status="timeout" time="5.00" steps="25208315"/></proof>
+ <proof prover="2" obsolete="true"><result status="unknown" time="0.09" steps="11573"/></proof>
+ <transf name="split_vc" >
+  <goal name="lt&#39;vc.0" expl="index in array bounds">
+  <proof prover="0"><result status="timeout" time="5.00"/></proof>
+  <proof prover="1"><result status="unknown" time="0.07" steps="107349"/></proof>
+  <proof prover="2"><result status="unknown" time="0.08" steps="11985"/></proof>
+  </goal>
+  <goal name="lt&#39;vc.1" expl="index in array bounds">
+  <proof prover="0"><result status="timeout" time="5.00"/></proof>
+  <proof prover="1"><result status="unknown" time="0.08" steps="107355"/></proof>
+  <proof prover="2"><result status="unknown" time="0.08" steps="11985"/></proof>
+  </goal>
+  <goal name="lt&#39;vc.2" expl="index in array bounds">
+  <proof prover="0"><result status="timeout" time="5.00"/></proof>
+  <proof prover="1"><result status="timeout" time="5.00" steps="7276980"/></proof>
+  <proof prover="2"><result status="timeout" time="5.00" steps="840953"/></proof>
+  </goal>
+  <goal name="lt&#39;vc.3" expl="index in array bounds">
+  <proof prover="0"><result status="timeout" time="5.00"/></proof>
+  <proof prover="1"><result status="timeout" time="5.00" steps="7276897"/></proof>
+  <proof prover="2"><result status="timeout" time="5.00" steps="812803"/></proof>
+  </goal>
+  <goal name="lt&#39;vc.4" expl="loop variant decrease" proved="true">
+  <proof prover="0"><result status="valid" time="0.01" steps="45"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="le&#39;vc" expl="VC for le">
+ <proof prover="0"><result status="timeout" time="5.00"/></proof>
+ <proof prover="1"><result status="timeout" time="5.00" steps="7940844"/></proof>
+ <proof prover="2"><result status="timeout" time="5.00" steps="813749"/></proof>
+ </goal>
+ <goal name="s_at&#39;vc" expl="VC for s_at" proved="true">
+ <proof prover="0"><result status="valid" time="0.00" steps="8"/></proof>
+ </goal>
+ <goal name="substring&#39;vc" expl="VC for substring">
+ <proof prover="0"><result status="timeout" time="5.00"/></proof>
+ <proof prover="1"><result status="timeout" time="5.00" steps="1823992"/></proof>
+ <proof prover="2"><result status="unknown" time="0.11" steps="12864"/></proof>
+ </goal>
+ <goal name="prefixof&#39;vc" expl="VC for prefixof">
+ <proof prover="0"><result status="timeout" time="5.00"/></proof>
+ <proof prover="1"><result status="unknown" time="0.10" steps="136206"/></proof>
+ <proof prover="2"><result status="timeout" time="5.00" steps="830296"/></proof>
+ </goal>
+ <goal name="suffixof&#39;vc" expl="VC for suffixof">
+ <proof prover="0"><result status="timeout" time="5.00"/></proof>
+ <proof prover="1"><result status="unknown" time="0.08" steps="116949"/></proof>
+ <proof prover="2"><result status="timeout" time="5.00" steps="524021"/></proof>
  </goal>
 </theory>
 </file>

@@ -1,16 +1,16 @@
 module CString
 
-  use mach.int.Int
+  use int.Int
+  use int.MinMax
   use mach.int.Byte
-  use export array.Array
+  use array.Array
   use array.ArrayEq
 
   type char = byte
   type cstring = array char
 
-  exception Break
-
-  let (=) (s1 s2: cstring) : bool
+  exception Break bool
+  let string_eq (s1 s2: cstring) : bool
     ensures {result = True <-> array_eq s1 s2}
   = if s1.length <> s2.length then false else
       try
@@ -19,11 +19,11 @@ module CString
           variant   { s1.length - i }
           invariant { 0 <= i <= s1.length }
           invariant { forall j. 0 <= j < i -> s1[j] = s2[j] }
-          if s1[i] <> s2[i] then raise Break;
+          if s1[i] <> s2[i] then raise (Break false);
           i <- i + 1
         done;
         true
-      with Break -> false end
+      with Break v -> v end
 
   let function concat (s1 s2: cstring) : cstring
     ensures { result.length = s1.length + s2.length }
@@ -48,6 +48,125 @@ module CString
       i <- i + 1
     done;
     r
+
+  let eq_char (c1 c2: char) : bool
+    ensures { result <-> c1 = c2 }
+  = Byte.(=) c1 c2
+
+  let length (s: cstring) : int
+    ensures { result = length s }
+  = length s
+
+  let lt (s1 s2: cstring): bool
+      (* ensures { result <-> lt s1 s2 } *)
+  = let ref i = 0 in
+    try
+      while i < Array.length s1 && i < Array.length s2 do
+        variant   { min (Array.length s1) (Array.length s2) - i }
+        if s1[i] < s2[i] then
+          raise (Break true)
+        else if s1[i] > s2[i] then
+          raise (Break false)
+        else
+          i <- i + 1
+      done;
+      if i >= Array.length s1 then true else false
+    with Break v -> v end
+
+  let le (s1 s2: cstring): bool
+    (* ensures { result <-> le s1 s2 } *)
+  = let ref i = 0 in
+    try
+      while i < Array.length s1 && i < Array.length s2 do
+        variant   { min (Array.length s1) (Array.length s2) - i }
+        if s1[i] <= s2[i] then
+          i <- i + 1
+        else
+          raise (Break false)
+      done;
+      if i >= Array.length s1 then true else false
+    with Break v -> v end
+
+  let gt (s1 s2: cstring): bool
+    (* ensures { result <-> lt s2 s1 } *)
+  = lt s2 s1
+
+  let ge (s1 s2: cstring): bool
+    (* ensures { result <-> le s2 s1 } *)
+  = le s2 s1
+
+  let s_at (s: cstring) (n: int): cstring
+    requires { 0 <= n < length s }
+    requires { length s > 0 (* s <> empty *) }
+    ensures  { length result = 1 }
+    (* ensures  { result = s_at s n } *)
+  = make 1 s[n]
+
+  let substring (s: cstring) (index: int) (size: int): cstring
+    requires { 0 <= index < length s }
+    requires { index + size < length s }
+    ensures { length result <= length s }
+    (* ensures { result = substring s index size } *)
+  = sub s index size
+
+  let prefixof (s1 s2: cstring): bool
+    (* ensures { result <-> prefixof s1 s2 } *)
+  = if Array.length s1 > Array.length s2 then false else
+      try
+        let ref i = 0 in
+        while i < Array.length s1 do
+          variant {Array.length s1 - i }
+          if s1[i] = s2[i] then
+            i <- i + 1
+          else
+            raise (Break false)
+        done; true
+      with Break v -> v end
+
+  let suffixof (s1 s2: cstring): bool
+    (* ensures { result <-> suffixof s1 s2 } *)
+  = if Array.length s1 > Array.length s2 then false else
+      try
+        let offset = Array.length s2 - Array.length s1 in
+        let ref i = 0 in
+        while i < Array.length s1 do
+          variant {Array.length s1 - i }
+          if s1[i] = s2[offset + i] then
+            i <- i + 1
+          else
+            raise (Break false)
+        done; true
+      with Break v -> v end
+
+
+  (* ====== *)
+
+
+  (* let get (s: cstring) (i: int) : char *)
+  (*   requires { 0 <= i < length s } *)
+  (*   ensures  { result = s[i] } *)
+  (* = s[i] *)
+
+  (* let ([]) (s: cstring) (i: int) : char *)
+  (*   requires { 0 <= i < length s } *)
+  (*   ensures  { result = s[i] } *)
+  (* = get s i *)
+
+  (* let code (c: char) : int *)
+  (*   (\* ensures { result = code c } *\) *)
+  (* = to_int c *)
+
+  (* let chr (n: int) : char *)
+  (*   requires { 0 <= n < 256 } *)
+  (*   (\* ensures  { result = chr n } *\) *)
+  (* = Byte.of_int n *)
+
+
+  (* let sub (s: cstring) (start: int) (len: int) : cstring *)
+  (*   requires { 0 <= start <= length s } *)
+  (*   requires { 0 <= len <= length s - start } *)
+  (*   (\* ensures  { result = substring s start len } *\) *)
+  (* = sub s start len *)
 
   (* use string.String
   use string.Char
