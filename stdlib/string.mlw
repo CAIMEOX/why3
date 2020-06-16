@@ -447,10 +447,94 @@ module Char
 
 end
 
-(** {3 Programming API}
+(** {3 Programming API} *)
 
-  The following program functions are mapped to OCaml's functions.
-  See also module `io.StdIO`. *)
+module StringP
+
+  use int.Int
+  use export String
+  use export Char
+
+  val concat (s1 s2: string): string
+    ensures { result = concat s1 s2 }
+
+  val length (s: string): int
+    ensures { result = length s }
+
+  val lt (s1 s2: string): bool
+    ensures { result <-> lt s1 s2 }
+
+  val le (s1 s2: string): bool
+    ensures { result <-> le s1 s2 }
+
+  val gt (s1 s2: string): bool
+    ensures { result <-> lt s2 s1 }
+
+  val ge (s1 s2: string): bool
+    ensures { result <-> le s2 s1 }
+
+  val s_at (s: string) (n: int): string
+    ensures { length result <= 1 }
+    ensures { result = s_at s n }
+
+  val substring (s: string) (index: int) (offset: int): string
+    ensures { length result <= length s }
+    ensures { result = substring s index offset }
+
+  val prefixof (s1 s2: string): bool
+    ensures { result <-> prefixof s1 s2 }
+
+  val suffixof (s1 s2: string): bool
+    ensures { result <-> suffixof s1 s2 }
+
+  val contains (s1 s2: string): bool
+    ensures { result <-> contains s1 s2 }
+
+  val indexof (s1 s2: string) (index: int): int
+    ensures  { -1 <= result < length s1 }
+    ensures  { result = indexof s1 s2 index }
+
+  val replace (s1 s2 s3: string): string
+    ensures { length result = length s1 - length s2 + length s3 }
+    ensures { result = replace s1 s2 s3 }
+
+  val to_int (s: string): int
+    ensures { result = to_int s }
+
+  val is_digit (s: string): bool
+    ensures { result <-> is_digit s }
+
+  val from_int (n: int): string
+    requires { n >= 0 }
+    ensures  { result = from_int n }
+
+  (* Char *)
+
+  val code (c: char): int
+    ensures { 0 <= result < 256 }
+    ensures { result = code c }
+
+  val chr (n: int): char
+    requires { 0 <= n < 256 }
+    ensures  { result = chr n }
+
+  val get (s: string) (i: int): char
+    requires { 0 <= i < length s }
+    ensures  { result = get s i }
+
+  let ([]) (s: string) (i: int): char = get s i
+    requires { 0 <= i < length s }
+    ensures  { result = get s i }
+
+  val make (size: int) (v: char): string
+    requires { size > 0 }
+    ensures  { length result = size }
+    ensures  { result = make size v }
+
+end
+
+(** The following program functions are mapped to OCaml's functions.
+    See also module `io.StdIO`. *)
 
 module OCaml
 
