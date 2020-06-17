@@ -27,6 +27,7 @@ let print_op fmt = function
 let rec print_term fmt = function
   | CTbvar _ -> assert false
   | CTfvar id -> pri fmt id
+  | CTint _ -> verif_failed "integers not supported by Lamdapi yet"
   | CTbinop (op, ct1, ct2) ->
       fprintf fmt "(%a %a %a)"
         print_term ct1
@@ -92,7 +93,7 @@ let rec print_type fmt = function
                         print_type t2
 
 let rec collect typ = function
-  | CTbvar _  -> Mid.empty
+  | CTint _ | CTbvar _  -> Mid.empty
   | CTfvar id -> Mid.singleton id typ
   | CTapp (ct1, ct2) -> Mid.set_union (collect (Arrow (Term, typ)) ct1) (collect Term ct2)
   | CTbinop (_, ct1, ct2) -> Mid.set_union (collect typ ct1) (collect typ ct2)

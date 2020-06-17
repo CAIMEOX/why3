@@ -18,6 +18,12 @@
   <goal name="G1.1">
   </goal>
  </transf>
+ <transf name="split_goal_full_lcert" >
+  <goal name="G1.0">
+  </goal>
+  <goal name="G1.1">
+  </goal>
+ </transf>
  </goal>
  <goal name="G2">
  <transf name="split_goal_full_ccert" >
