@@ -194,6 +194,7 @@ let prle sep pre fmt le =
 let rec pcte fmt = function
   | CTbvar lvl -> pp_print_int fmt lvl
   | CTfvar i -> pri fmt i
+  | CTint i -> fprintf fmt "%s" (BigInt.to_string i)
   | CTapp (f, arg) -> fprintf fmt "%a@ %a" pcte f pcte arg
   | CTbinop (op, t1, t2) ->
       fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
@@ -407,7 +408,7 @@ let ctask_equal cta1 cta2 = Mid.equal cterm_pos_equal cta1 cta2
 (* Bound variable substitution *)
 let rec ct_bv_subst k u t = match t with
   | CTbvar i -> if i = k then u else t
-  | CTfvar _ -> t
+  | CTint _ | CTfvar _ -> t
   | CTapp (t1, t2) ->
       let nt1 = ct_bv_subst k u t1 in
       let nt2 = ct_bv_subst k u t2 in
@@ -434,7 +435,7 @@ let locally_closed =
     | CTbinop (_, t1, t2) -> term t1 && term t2
     | CTquant (_, t) -> term (ct_open t (CTfvar di))
     | CTnot t -> term t
-    | CTfvar _ | CTtrue | CTfalse -> true
+    | CTint _ | CTfvar _ | CTtrue | CTfalse -> true
   in
   term
 
@@ -453,14 +454,14 @@ let rec ct_fv_subst z u t = match t with
       let nt = ct_fv_subst z u t in
       CTquant (q, nt)
   | CTnot t -> CTnot (ct_fv_subst z u t)
-  | CTbvar _ | CTtrue | CTfalse -> t
+  | CTint _ | CTbvar _ | CTtrue | CTfalse -> t
 
 let ct_subst ct m =
   Mid.fold ct_fv_subst ct m
 
 (* Variable closing *)
 let rec ct_fv_close x k t = match t with
-  | CTbvar _ | CTtrue | CTfalse-> t
+  | CTint _ | CTbvar _ | CTtrue | CTfalse-> t
   | CTfvar y -> if id_equal x y then CTbvar k else t
   | CTnot t -> CTnot (ct_fv_close x k t)
   | CTapp (t1, t2) ->
@@ -485,7 +486,7 @@ let rec mem_cont x t cont = match t with
       cont (m1 || m2)))
   | CTquant (_, t)
   | CTnot t -> mem_cont x t cont
-  | CTbvar _ | CTtrue | CTfalse -> cont false
+  | CTint _ | CTbvar _ | CTtrue | CTfalse -> cont false
 
 let mem x t = mem_cont x t (fun x -> x)
 

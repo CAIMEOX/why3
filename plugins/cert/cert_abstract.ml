@@ -14,6 +14,7 @@ type cquant = CTforall | CTexists | CTlambda
 type cterm =
   | CTbvar of int (* bound variables use De Bruijn indices *)
   | CTfvar of ident (* free variables use a name *)
+  | CTint of BigInt.t
   | CTapp of cterm * cterm
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
   | CTquant of cquant * cterm (* quantifier binding *)
@@ -45,9 +46,9 @@ let rec abstract_term_rec bv_lvl lvl t =
             CTbvar (lvl - lvl_id) in
   match t.t_node with
   | Tvar v ->
-      term_from_id (v.vs_name)
+      term_from_id v.vs_name
   | Tapp (ls, lt) ->
-      let vs = term_from_id (ls.ls_name) in
+      let vs = term_from_id ls.ls_name in
       List.fold_left (fun acc t -> CTapp (acc, abstract_term_rec bv_lvl lvl t))
         vs lt
   | Tbinop (op, t1, t2) ->
@@ -55,16 +56,22 @@ let rec abstract_term_rec bv_lvl lvl t =
       let ct2 = abstract_term_rec bv_lvl lvl t2 in
       CTbinop (op, ct1, ct2)
   | Tquant (q, tq) ->
-      let vs, _, t = t_open_quant tq in
-      assert (List.length vs = 1);
-      let ids = (List.hd vs).vs_name in
-      let lvl = lvl + 1 in
-      let ctq = abstract_term_rec (Mid.add ids lvl bv_lvl) lvl t in
-      CTquant (abstract_quant q, ctq)
+      let lvs, _, t = t_open_quant tq in
+      let lvl_ids = List.mapi (fun i vs -> lvl + i + 1, vs.vs_name) lvs in
+      let bv_lvl = List.fold_left (fun m (lvl, ids) -> Mid.add ids lvl m) bv_lvl lvl_ids in
+      let lvl = lvl + List.length lvs in
+      let ctq = abstract_term_rec bv_lvl lvl t in
+      let q = abstract_quant q in
+      List.fold_right (fun _ t -> CTquant (q, t)) lvs ctq
   | Tnot t -> CTnot (abstract_term_rec bv_lvl lvl t)
   | Ttrue -> CTtrue
   | Tfalse -> CTfalse
-  | Tconst _ -> invalid_arg "Cert_abstract.abstract_term Tconst"
+  | Tconst (Constant.ConstInt i) -> CTint i.Number.il_int
+  | Tconst _ ->
+      let open Format in
+      Pretty.print_term str_formatter t;
+      let s = flush_str_formatter () in
+      invalid_arg ("Cert_abstract.abstract_term Tconst : " ^ s)
   | Tif _ -> invalid_arg "Cert_abstract.abstract_term Tif"
   | Tlet _ -> invalid_arg "Cert_abstract.abstract_term Tlet"
   | Tcase _ -> invalid_arg "Cert_abstract.abstract_term Tcase"
