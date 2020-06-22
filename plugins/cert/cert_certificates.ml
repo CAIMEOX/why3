@@ -398,7 +398,9 @@ let rec cterm_equal t1 t2 = match t1, t2 with
   | CTquant (q1, t1), CTquant (q2, t2) when q1 = q2 -> cterm_equal t1 t2
   | CTtrue, CTtrue | CTfalse, CTfalse -> true
   | CTnot t1, CTnot t2 -> cterm_equal t1 t2
-  | _ -> false
+  | CTint i1, CTint i2 -> BigInt.eq i1 i2
+  | (CTbvar _ | CTfvar _ | CTapp _ | CTbinop _ | CTquant _
+     | CTtrue | CTfalse | CTnot _ | CTint _), _ -> false
 
 let cterm_pos_equal (t1, p1) (t2, p2) =
   cterm_equal t1 t2 && p1 = p2
