@@ -12,6 +12,10 @@ open Task
 type cquant = CTforall | CTexists | CTlambda
 
 type cterm =
+  { ct_node : cterm_node;
+    ct_ty : Ty.ty option }
+
+and cterm_node =
   | CTbvar of int (* bound variables use De Bruijn indices *)
   | CTfvar of ident (* free variables use a name *)
   | CTint of BigInt.t
@@ -35,7 +39,11 @@ let abstract_quant = function
   | Tforall -> CTforall
   | Texists -> CTexists
 
-let rec abstract_term_rec bv_lvl lvl t =
+let rec abstract_term { t_node = t; t_ty = ty } =
+  { ct_node = abstract_term_node ty t;
+    ct_ty = ty }
+
+and abstract_term_node_rec ty bv_lvl lvl t =
   (* level <lvl> is the number of forall above in the whole term *)
   (* <bv_lvl> is mapping bound variables to their respective level *)
   let term_from_id id = match Mid.find_opt id bv_lvl with
@@ -44,26 +52,38 @@ let rec abstract_term_rec bv_lvl lvl t =
             (* a variable should not be above its definition *)
             assert (lvl_id <= lvl);
             CTbvar (lvl - lvl_id) in
-  match t.t_node with
+  match t with
   | Tvar v ->
       term_from_id v.vs_name
   | Tapp (ls, lt) ->
       let vs = term_from_id ls.ls_name in
-      List.fold_left (fun acc t -> CTapp (acc, abstract_term_rec bv_lvl lvl t))
+      let open Ty in
+      let app_ty ty1 ty2 =
+        match ty1.ty_node with
+        | Tyvar v -> ty1 (* ty_app v [ty2] *)
+        | Tyapp (v, l1) -> ty_app v (ty2::l1) in
+      let app t1 t2 =
+        let ty = match t1.ct_ty, t2.ct_ty with
+          | Some ty1, Some ty2 -> Some (app_ty ty1 ty2)
+          | _ -> None in
+        { ct_node = CTapp (t1, t2);
+          ct_ty = ty } in
+      List.fold_left
+        (fun acc t -> app acc (abstract_term_node_rec bv_lvl lvl t))
         vs lt
   | Tbinop (op, t1, t2) ->
-      let ct1 = abstract_term_rec bv_lvl lvl t1 in
-      let ct2 = abstract_term_rec bv_lvl lvl t2 in
+      let ct1 = abstract_term_node_rec bv_lvl lvl t1 in
+      let ct2 = abstract_term_node_rec bv_lvl lvl t2 in
       CTbinop (op, ct1, ct2)
   | Tquant (q, tq) ->
       let lvs, _, t = t_open_quant tq in
       let lvl_ids = List.mapi (fun i vs -> lvl + i + 1, vs.vs_name) lvs in
       let bv_lvl = List.fold_left (fun m (lvl, ids) -> Mid.add ids lvl m) bv_lvl lvl_ids in
       let lvl = lvl + List.length lvs in
-      let ctq = abstract_term_rec bv_lvl lvl t in
+      let ctq = abstract_term_node_rec bv_lvl lvl t in
       let q = abstract_quant q in
       List.fold_right (fun _ t -> CTquant (q, t)) lvs ctq
-  | Tnot t -> CTnot (abstract_term_rec bv_lvl lvl t)
+  | Tnot t -> CTnot (abstract_term_node_rec bv_lvl lvl t)
   | Ttrue -> CTtrue
   | Tfalse -> CTfalse
   | Tconst (Constant.ConstInt i) -> CTint i.Number.il_int
@@ -77,8 +97,8 @@ let rec abstract_term_rec bv_lvl lvl t =
   | Tcase _ -> invalid_arg "Cert_abstract.abstract_term Tcase"
   | Teps _ -> invalid_arg "Cert_abstract.abstract_term Teps"
 
-let abstract_term t =
-  abstract_term_rec Mid.empty 0 t
+and abstract_term_node ty t =
+  abstract_term_node_rec ty Mid.empty 0 t
 
 let abstract_decl decl =
   match decl.d_node with
