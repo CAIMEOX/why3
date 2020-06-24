@@ -30,6 +30,8 @@ let lift_node f { ct_node; ct_ty } =
   { ct_node = f ct_node;
     ct_ty   = ct_ty }
 
+let add_ty ty ctn = { ct_node = ctn; ct_ty = ty }
+
 type ctask = (cterm * bool) Mid.t
 (* We will denote a ctask <M> by <Γ ⊢ Δ> where :
    • <Γ> contains all the declarations <H : P> where <H> is mapped to <(P, false)> in <M>
