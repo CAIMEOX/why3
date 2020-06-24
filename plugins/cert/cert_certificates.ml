@@ -191,7 +191,8 @@ let prle sep pre fmt le =
   let prl = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt sep) pre in
   fprintf fmt "[%a]" prl le
 
-let rec pcte fmt = function
+let rec pcte fmt ct =
+  match ct.ct_node with
   | CTbvar lvl -> pp_print_int fmt lvl
   | CTfvar i -> pri fmt i
   | CTint i -> fprintf fmt "%s" (BigInt.to_string i)
@@ -388,7 +389,7 @@ let propagate_ecert f fid ft = function
 
 
 (* Equality *)
-let rec cterm_equal t1 t2 = match t1, t2 with
+let rec cterm_equal t1 t2 = match t1.ct_node, t2.ct_node with
   | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
   | CTfvar i1, CTfvar i2 -> id_equal i1 i2
   | CTapp (tl1, tr1), CTapp (tl2, tr2) ->
@@ -408,21 +409,23 @@ let cterm_pos_equal (t1, p1) (t2, p2) =
 let ctask_equal cta1 cta2 = Mid.equal cterm_pos_equal cta1 cta2
 
 (* Bound variable substitution *)
-let rec ct_bv_subst k u t = match t with
-  | CTbvar i -> if i = k then u else t
-  | CTint _ | CTfvar _ -> t
-  | CTapp (t1, t2) ->
-      let nt1 = ct_bv_subst k u t1 in
-      let nt2 = ct_bv_subst k u t2 in
+let rec ct_bv_subst k u ct = lift_node (ctn_bv_subst k u) ct
+
+and ctn_bv_subst k u ctn = match ctn with
+  | CTbvar i -> if i = k then u else ctn
+  | CTint _ | CTfvar _ -> ctn
+  | CTapp (ct1, ct2) ->
+      let nt1 = ct_bv_subst k u ct1 in
+      let nt2 = ct_bv_subst k u ct2 in
       CTapp (nt1, nt2)
-  | CTbinop (op, t1, t2) ->
-      let nt1 = ct_bv_subst k u t1 in
-      let nt2 = ct_bv_subst k u t2 in
+  | CTbinop (op, ct1, ct2) ->
+      let nt1 = ct_bv_subst k u ct1 in
+      let nt2 = ct_bv_subst k u ct2 in
       CTbinop (op, nt1, nt2)
-  | CTquant (q, t) ->
-      let nt = ct_bv_subst (k+1) u t in
-      CTquant (q, nt)
-  | CTnot t -> CTnot (ct_bv_subst k u t)
+  | CTquant (q, ct) ->
+      let nct = ct_bv_subst (k+1) u ct in
+      CTquant (q, nct)
+  | CTnot ct -> CTnot (ct_bv_subst k u ct)
   | CTtrue -> CTtrue
   | CTfalse -> CTfalse
 
@@ -431,63 +434,67 @@ let ct_open t u = ct_bv_subst 0 u t
 (* Checks if the term is locally closed *)
 let locally_closed =
   let di = id_register (id_fresh "dummy_locally_closed_ident") in
-  let rec term = function
+  let rec term ct = match ct.ct_node with
     | CTbvar _ -> false
-    | CTapp (t1, t2)
-    | CTbinop (_, t1, t2) -> term t1 && term t2
+    | CTapp (ct1, ct2)
+    | CTbinop (_, ct1, ct2) -> term ct1 && term ct2
     | CTquant (_, t) -> term (ct_open t (CTfvar di))
-    | CTnot t -> term t
+    | CTnot ct -> term ct
     | CTint _ | CTfvar _ | CTtrue | CTfalse -> true
   in
   term
 
 (* Free variable substitution *)
-let rec ct_fv_subst z u t = match t with
-  | CTfvar x -> if id_equal z x then u else t
-  | CTapp (t1, t2) ->
-      let nt1 = ct_fv_subst z u t1 in
-      let nt2 = ct_fv_subst z u t2 in
+let rec ct_fv_subst z u ct = lift_node (ctn_fv_subst z u) ct
+
+and ctn_fv_subst z u ctn = match ctn with
+  | CTfvar x -> if id_equal z x then u else ctn
+  | CTapp (ct1, ct2) ->
+      let nt1 = ct_fv_subst z u ct1 in
+      let nt2 = ct_fv_subst z u ct2 in
       CTapp (nt1, nt2)
-  | CTbinop (op, t1, t2) ->
-      let nt1 = ct_fv_subst z u t1 in
-      let nt2 = ct_fv_subst z u t2 in
+  | CTbinop (op, ct1, ct2) ->
+      let nt1 = ct_fv_subst z u ct1 in
+      let nt2 = ct_fv_subst z u ct2 in
       CTbinop (op, nt1, nt2)
-  | CTquant (q, t) ->
-      let nt = ct_fv_subst z u t in
-      CTquant (q, nt)
-  | CTnot t -> CTnot (ct_fv_subst z u t)
-  | CTint _ | CTbvar _ | CTtrue | CTfalse -> t
+  | CTquant (q, ct) ->
+      let nct = ct_fv_subst z u ct in
+      CTquant (q, nct)
+  | CTnot ct -> CTnot (ct_fv_subst z u ct)
+  | CTint _ | CTbvar _ | CTtrue | CTfalse -> ctn
 
 let ct_subst ct m =
   Mid.fold ct_fv_subst ct m
 
 (* Variable closing *)
-let rec ct_fv_close x k t = match t with
-  | CTint _ | CTbvar _ | CTtrue | CTfalse-> t
-  | CTfvar y -> if id_equal x y then CTbvar k else t
-  | CTnot t -> CTnot (ct_fv_close x k t)
-  | CTapp (t1, t2) ->
-      let nt1 = ct_fv_close x k t1 in
-      let nt2 = ct_fv_close x k t2 in
+let rec ct_fv_close x k ct = lift_node (ctn_fv_close x k) ct
+
+and ctn_fv_close x k ct = match ct with
+  | CTint _ | CTbvar _ | CTtrue | CTfalse-> ct
+  | CTfvar y -> if id_equal x y then CTbvar k else ct
+  | CTnot ct -> CTnot (ct_fv_close x k ct)
+  | CTapp (ct1, ct2) ->
+      let nt1 = ct_fv_close x k ct1 in
+      let nt2 = ct_fv_close x k ct2 in
       CTapp (nt1, nt2)
-  | CTbinop (op, t1, t2) ->
-      let nt1 = ct_fv_close x k t1 in
-      let nt2 = ct_fv_close x k t2 in
+  | CTbinop (op, ct1, ct2) ->
+      let nt1 = ct_fv_close x k ct1 in
+      let nt2 = ct_fv_close x k ct2 in
       CTbinop (op, nt1, nt2)
-  | CTquant (q, t) -> CTquant (q, ct_fv_close x (k+1) t)
+  | CTquant (q, ct) -> CTquant (q, ct_fv_close x (k+1) ct)
 
 let ct_close x t = ct_fv_close x 0 t
 
 (* Find free variable with respect to a term *)
-let rec mem_cont x t cont = match t with
+let rec mem_cont x ctn cont = match ctn with
   | CTfvar y -> cont (id_equal x y)
-  | CTapp (t1, t2)
-  | CTbinop (_, t1, t2) ->
-      mem_cont x t1 (fun m1 ->
-      mem_cont x t2 (fun m2 ->
-      cont (m1 || m2)))
-  | CTquant (_, t)
-  | CTnot t -> mem_cont x t cont
+  | CTapp (ct1, ct2)
+  | CTbinop (_, ct1, ct2) ->
+      mem_cont x ct1.ct_node (fun m1 ->
+      mem_cont x ct2.ct_node (fun m2 ->
+          cont (m1 || m2)))
+  | CTquant (_, ct)
+  | CTnot ct -> mem_cont x ct.ct_node cont
   | CTint _ | CTbvar _ | CTtrue | CTfalse -> cont false
 
 let mem x t = mem_cont x t (fun x -> x)
