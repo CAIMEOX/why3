@@ -497,7 +497,7 @@ let rec mem_cont x ctn cont = match ctn with
   | CTnot ct -> mem_cont x ct.ct_node cont
   | CTint _ | CTbvar _ | CTtrue | CTfalse -> cont false
 
-let mem x t = mem_cont x t (fun x -> x)
+let mem x t = mem_cont x t.ct_node (fun x -> x)
 
 
 (* Separates hypotheses and goals *)
