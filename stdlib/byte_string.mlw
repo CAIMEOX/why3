@@ -4,6 +4,7 @@ module CString
   use int.MinMax
   use mach.int.Byte
   use export seq.Seq
+  use seq.FreeMonoid
 
   type char = byte
   type cstring = seq char
@@ -23,35 +24,35 @@ module CString
 
   exception Break
 
-  let function first_diff (s1 s2: cstring) : int
-    ensures { result <= length s1 && result <= length s2 }
+  val function first_diff (s1 s2: cstring) : int
+    ensures { 0 <= result <= length s1 && result <= length s2 }
     ensures { forall i. 0 <= i < result -> s1[i] = s2[i] }
-    ensures { result >= length s1 || result >= length s2
-           || s1[result] <> s2[result] }
-  = let ref i = 0 in
-    try
-      while i < length s1 && i < length s2 do
-        variant   { min (length s1) (length s2) - i }
-        invariant { forall j. 0 <= j < i -> s1[j] = s2[j] }
-        invariant { 0 <= i <= min (length s1) (length s2) }
-        if s1[i] <> s2[i] then raise Break
-        else i <- i + 1
-      done;
-      i
-    with Break -> i end
+    ensures { (result = length s1 /\ length s2 >= length s1) ||
+              (result = length s2 /\ length s1 >= length s2) ||
+              s1[result] <> s2[result] }
+  (* = let ref i = 0 in *)
+  (*   try *)
+  (*     while i < length s1 && i < length s2 do *)
+  (*       variant   { min (length s1) (length s2) - i } *)
+  (*       invariant { forall j. 0 <= j < i -> s1[j] = s2[j] } *)
+  (*       invariant { 0 <= i <= min (length s1) (length s2) } *)
+  (*       if s1[i] <> s2[i] then raise Break *)
+  (*       else i <- i + 1 *)
+  (*     done; *)
+  (*     i *)
+  (*   with Break -> i end *)
 
   goal first_diff_empty: forall s: cstring.
     first_diff s empty = 0
 
-  let predicate lt (s1 s2: cstring)
+  val predicate lt (s1 s2: cstring)
     ensures { let x = first_diff s1 s2 in
               result <->
                 (x >= length s1 && x < length s2) ||
                 (x < length s1 && x < length s2 && s1[x] < s2[x]) }
-
-  = let x = first_diff s1 s2 in
-    if x >= length s1 && x < length s2 then True else
-      if x < length s2 then s1[x] < s2[x] else False
+  (* = let x = first_diff s1 s2 in *)
+  (*   if x >= length s1 && x < length s2 then True else *)
+  (*     if x < length s2 then s1[x] < s2[x] else False *)
 
   goal lt_empty: forall s.
     s <> empty -> lt empty s
@@ -64,11 +65,8 @@ module CString
   goal lt_trans: forall s1 s2 s3.
     lt s1 s2 && lt s2 s3 -> lt s1 s3
 
-  let predicate le (s1 s2: cstring)
-    ensures { let x = first_diff s1 s2 in
-              result <-> lt s1 s2 || x = length s1 = length s2 }
-  = let x = first_diff s1 s2 in
-    if x = length s1 = length s2 then True else lt s1 s2
+  val predicate le (s1 s2: cstring)
+    ensures { result <-> lt s1 s2 || s1 = s2 }
 
   goal le_empty: forall s: cstring.
     le empty s
@@ -85,10 +83,10 @@ module CString
   goal le_trans: forall s1 s2 s3: cstring.
     le s1 s2 && le s2 s3 -> le s1 s3
 
-  let function s_at (s: cstring) (i: int) : cstring
+  val function s_at (s: cstring) (i: int) : cstring
     ensures { 0 <= i < length s -> result = singleton s[i] }
     ensures { i < 0 || i >= length s -> result = empty }
-  = if 0 <= i < length s then singleton s[i] else empty
+  (* = if 0 <= i < length s then singleton s[i] else empty *)
 
   goal at_out_of_range: forall s, i.
     i < 0 || i >= length s -> s_at s i = empty
@@ -105,19 +103,13 @@ module CString
     forall i. (0 <= i < length s1 -> s_at s i = s_at s1 i) &&
               (length s1 <= i < length s -> s_at s i = s_at s2 (i - length s1))
 
-  let function substring (s: cstring) (ofs len: int) : cstring
-    ensures { length result <= length s }
-    ensures { 0 <= ofs < length s && len >= 0 ->
-                result = s[ofs .. min (ofs + len) (length s)]}
-    ensures { ofs < 0 || ofs >= length s || len < 0 -> result = empty }
-  = if ofs < 0 || ofs >= length s || len < 0 then empty else
+  let function substring (s: cstring) (ofs len: int) : cstring =
+    if 0 <= ofs <= length s && len >= 0 then
       s[ofs .. min (ofs + len) (length s)]
+    else empty
 
   goal substring_out_of_range: forall s i x.
     i < 0 || i >= length s -> substring s i x = empty
-
-  goal seq_sub_zero_or_less: forall s: seq 'a, i.
-    s[i .. i] = empty
 
   goal substring_of_length_zero_or_less: forall s i x.
     x <= 0 -> substring s i x = empty
@@ -146,17 +138,19 @@ module CString
     0 <= ofs' <= len -> 0 <= len' -> ofs' + len' <= len ->
     substring (substring s ofs len) ofs' len' = substring s (ofs + ofs') len'
 
+  (* TODO: cannot prove *)
   goal concat_substring:
     forall s ofs len len'.
     0 <= ofs <= length s -> 0 <= len -> ofs + len <= length s ->
     0 <= len' -> 0 <= ofs + len + len' <= length s ->
-    (substring s ofs len) ++ (substring s (ofs+len) len') =
+    (substring s ofs len) ++ (substring s (ofs+len) len') ==
     substring s ofs (len + len')
 
-  let predicate prefixof (s1 s2: cstring)
+  val predicate prefixof (s1 s2: cstring)
     ensures { result <-> first_diff s1 s2 = length s1 }
-  = if first_diff s1 s2 = length s1 then True else False
+  (* = if first_diff s1 s2 = length s1 then True else False *)
 
+  (* TODO: proof needs `assert (s1 == substring s2 0 (length s1))` *)
   goal prefixof_substring: forall s1 s2.
     prefixof s1 s2 <-> s1 = substring s2 0 (length s1)
 
@@ -169,16 +163,13 @@ module CString
   goal prefixof_empty2: forall s1.
     s1 <> empty -> not (prefixof s1 empty)
 
-  use seq.Reverse
-
-  let function rev (s: cstring) : cstring
+  val function rev (s: cstring) : cstring
     ensures { length result = length s }
-    ensures { forall i. 0 <= i < length s -> result[i] = s[length s - 1 - i] }
-  = reverse s
+    ensures { forall i. 0 <= i < length s -> result[i] = s[length s - i - 1] }
 
-  let predicate suffixof (s1 s2: cstring)
+  val predicate suffixof (s1 s2: cstring)
     ensures { result <-> prefixof (rev s1) (rev s2) }
-  = prefixof (rev s1) (rev s2)
+  (* = prefixof (reverse s1) (reverse s2) *)
 
   goal suffixof_substring: forall s1 s2.
     suffixof s1 s2 <-> s1 = substring s2 (length s2 - length s1) (length s1)
@@ -195,24 +186,9 @@ module CString
   val predicate contains (s1 s2: cstring)
     ensures {
       result <-> exists i.
-        forall j. 0 <= j < length s2 -> s1[i + j] = s2[j] }
-  (* = let ref i = 0 in *)
-  (*   try *)
-  (*     while i <= length s1 - length s2 do *)
-  (*       variant   { length s1 - i - length s2 } *)
-  (*       invariant { 0 <= i <= length s1 - length s2 + 1 } *)
-  (*       let ref j = 0 in *)
-  (*       while j < length s2 && s1[i + j] = s2[i] do *)
-  (*         variant   { length s2 - j } *)
-  (*         invariant { 0 <= j <= length s2 } *)
-  (*         invariant { forall x. 0 <= x < j -> s1[i + j] = s2[i] } *)
-  (*         j <- j + 1 *)
-  (*       done; *)
-  (*       if j = length s2 then raise Break; *)
-  (*       i <- i + 1 *)
-  (*     done; *)
-  (*     false *)
-  (*   with Break -> true end *)
+        0 <= i <= length s1 /\
+        substring s1 i (length s2) == s2
+    }
 
   goal contains_prefixof: forall s1 s2.
     prefixof s1 s2 -> contains s2 s1
@@ -243,18 +219,13 @@ module CString
   (*** goal at_contains: forall s1 s2.
     contains s1 s2 && length s2 = 1 -> exists i. s_at s1 i = s2 *)
 
-  predicate is_indexof_after (s1 s2: cstring) (ofs index: int) =
+  predicate is_indexof (s1 s2: cstring) (ofs index: int) =
     0 <= ofs <= index <= length s1 &&
     substring s1 index (length s2) == s2
 
   val function indexof (s1 s2: cstring) (ofs: int) : int
-    requires { 0 <= ofs <= length s1 }
-    ensures  { result = -1 <-> forall i.
-                ofs <= i <= length s1 ->
-                  not (substring s1 i (length s2) == s2) }
-    ensures  { ofs <= result <= length s1 <-> exists i.
-                ofs <= i <= length s1 /\
-                  substring s1 i (length s2) == s2 }
+    ensures { is_indexof s1 s2 ofs result }
+    ensures { forall i. ofs <= i < result /\ is_indexof s1 s2 ofs i -> i >= result }
 
   goal indexof_empty: forall s i.
     0 <= i <= length s -> indexof s empty i = i
@@ -290,196 +261,5 @@ module CString
       i <= indexof s1 s2 i <= length s1
 
 
-
-
-
-
-  (* exception Break bool *)
-  (* let string_eq (s1 s2: cstring) : bool *)
-  (*   ensures {result = True <-> array_eq s1 s2} *)
-  (* = if s1.length <> s2.length then false else *)
-  (*     try *)
-  (*       let ref i = 0 in *)
-  (*       while i < s1.length do *)
-  (*         variant   { s1.length - i } *)
-  (*         invariant { 0 <= i <= s1.length } *)
-  (*         invariant { forall j. 0 <= j < i -> s1[j] = s2[j] } *)
-  (*         if s1[i] <> s2[i] then raise (Break false); *)
-  (*         i <- i + 1 *)
-  (*       done; *)
-  (*       true *)
-  (*     with Break v -> v end *)
-
-  (* let function concat (s1 s2: cstring) : cstring *)
-  (*   ensures { result.length = s1.length + s2.length } *)
-  (*   ensures { forall i. 0 <= i < s1.length -> result[i] = s1[i] } *)
-  (*   ensures { forall i. s1.length <= i < result.length -> *)
-  (*                         result[i] = s2[i - s1.length] } *)
-  (* = let r = make (s1.length + s2.length) 0 in *)
-  (*   let ref i = 0 in *)
-  (*   while i < s1.length do *)
-  (*     variant   { s1.length - i } *)
-  (*     invariant { 0 <= i <= s1.length } *)
-  (*     invariant { forall j. 0 <= j < i -> r[j] = s1[j] } *)
-  (*     r[i] <- s1[i]; *)
-  (*     i <- i + 1 *)
-  (*   done; *)
-  (*   while i < s1.length + s2.length do *)
-  (*     variant   { s1.length + s2.length - i } *)
-  (*     invariant { s1.length <= i <= s1.length + s2.length } *)
-  (*     invariant { forall j. 0 <= j < s1.length -> r[j] = s1[j]} *)
-  (*     invariant { forall j. s1.length <= j < i -> r[j] = s2[j - s1.length] } *)
-  (*     r[i] <- s2[i - s1.length]; *)
-  (*     i <- i + 1 *)
-  (*   done; *)
-  (*   r *)
-
-  (* let eq_char (c1 c2: char) : bool *)
-  (*   ensures { result <-> c1 = c2 } *)
-  (* = Byte.(=) c1 c2 *)
-
-  (* let length (s: cstring) : int *)
-  (*   ensures { result = length s } *)
-  (* = length s *)
-
-  (* let lt (s1 s2: cstring): bool *)
-  (*     (\* ensures { result <-> lt s1 s2 } *\) *)
-  (* = let ref i = 0 in *)
-  (*   try *)
-  (*     while i < Array.length s1 && i < Array.length s2 do *)
-  (*       variant   { min (Array.length s1) (Array.length s2) - i } *)
-  (*       if s1[i] < s2[i] then *)
-  (*         raise (Break true) *)
-  (*       else if s1[i] > s2[i] then *)
-  (*         raise (Break false) *)
-  (*       else *)
-  (*         i <- i + 1 *)
-  (*     done; *)
-  (*     if i >= Array.length s1 then true else false *)
-  (*   with Break v -> v end *)
-
-  (* let le (s1 s2: cstring): bool *)
-  (*   (\* ensures { result <-> le s1 s2 } *\) *)
-  (* = let ref i = 0 in *)
-  (*   try *)
-  (*     while i < Array.length s1 && i < Array.length s2 do *)
-  (*       variant   { min (Array.length s1) (Array.length s2) - i } *)
-  (*       if s1[i] <= s2[i] then *)
-  (*         i <- i + 1 *)
-  (*       else *)
-  (*         raise (Break false) *)
-  (*     done; *)
-  (*     if i >= Array.length s1 then true else false *)
-  (*   with Break v -> v end *)
-
-  (* let gt (s1 s2: cstring): bool *)
-  (*   (\* ensures { result <-> lt s2 s1 } *\) *)
-  (* = lt s2 s1 *)
-
-  (* let ge (s1 s2: cstring): bool *)
-  (*   (\* ensures { result <-> le s2 s1 } *\) *)
-  (* = le s2 s1 *)
-
-  (* let s_at (s: cstring) (n: int): cstring *)
-  (*   requires { 0 <= n < length s } *)
-  (*   requires { length s > 0 (\* s <> empty *\) } *)
-  (*   ensures  { length result = 1 } *)
-  (*   (\* ensures  { result = s_at s n } *\) *)
-  (* = make 1 s[n] *)
-
-  (* let substring (s: cstring) (index: int) (size: int): cstring *)
-  (*   requires { 0 <= index < length s } *)
-  (*   requires { index + size < length s } *)
-  (*   ensures { length result <= length s } *)
-  (*   (\* ensures { result = substring s index size } *\) *)
-  (* = sub s index size *)
-
-  (* let is_eq_from_index (s1: cstring) (i: int) (s2: cstring): bool *)
-  (*   requires { 0 <= i < Array.length s1 } *)
-  (*   requires { i + Array.length s2 < Array.length s1} *)
-  (*   ensures  { to_seq_sub s1 i (Array.length s1) = to_seq s2 } *)
-  (* = if i + Array.length s2 > Array.length s1 then false else *)
-  (*     try *)
-  (*       let ref x = 0 in *)
-  (*       while x < Array.length s2 do *)
-  (*         variant   { Array.length s2 - x } *)
-  (*         invariant { 0 <= x <= Array.length s2 } *)
-  (*         invariant { to_seq_sub s1 i (i+x) = to_seq_sub s2 0 x} *)
-  (*         if s1[i + x] = s2[x] then *)
-  (*           x <- x + 1 *)
-  (*         else raise (Break false) *)
-  (*       done; true *)
-  (*     with Break v -> v end *)
-
-  (* let prefixof (s1 s2: cstring): bool *)
-  (*   (\* ensures { result <-> prefixof s1 s2 } *\) *)
-  (* = if Array.length s1 > Array.length s2 then false else *)
-  (*     try *)
-  (*       let ref i = 0 in *)
-  (*       while i < Array.length s1 do *)
-  (*         variant {Array.length s1 - i } *)
-  (*         if s1[i] = s2[i] then *)
-  (*           i <- i + 1 *)
-  (*         else *)
-  (*           raise (Break false) *)
-  (*       done; true *)
-  (*     with Break v -> v end *)
-
-  (* let suffixof (s1 s2: cstring): bool *)
-  (*   (\* ensures { result <-> suffixof s1 s2 } *\) *)
-  (* = if Array.length s1 > Array.length s2 then false else *)
-  (*     try *)
-  (*       let offset = Array.length s2 - Array.length s1 in *)
-  (*       let ref i = 0 in *)
-  (*       while i < Array.length s1 do *)
-  (*         variant {Array.length s1 - i } *)
-  (*         if s1[i] = s2[offset + i] then *)
-  (*           i <- i + 1 *)
-  (*         else *)
-  (*           raise (Break false) *)
-  (*       done; true *)
-  (*     with Break v -> v end *)
-
-  (* let contains (s1 s2: string): bool *)
-  (*   (\* ensures { result <-> contains s1 s2 } *\) *)
-  (* =  *)
-
-  (* ====== *)
-
-
-  (* let get (s: cstring) (i: int) : char *)
-  (*   requires { 0 <= i < length s } *)
-  (*   ensures  { result = s[i] } *)
-  (* = s[i] *)
-
-  (* let ([]) (s: cstring) (i: int) : char *)
-  (*   requires { 0 <= i < length s } *)
-  (*   ensures  { result = s[i] } *)
-  (* = get s i *)
-
-  (* let code (c: char) : int *)
-  (*   (\* ensures { result = code c } *\) *)
-  (* = to_int c *)
-
-  (* let chr (n: int) : char *)
-  (*   requires { 0 <= n < 256 } *)
-  (*   (\* ensures  { result = chr n } *\) *)
-  (* = Byte.of_int n *)
-
-
-  (* let sub (s: cstring) (start: int) (len: int) : cstring *)
-  (*   requires { 0 <= start <= length s } *)
-  (*   requires { 0 <= len <= length s - start } *)
-  (*   (\* ensures  { result = substring s start len } *\) *)
-  (* = sub s start len *)
-
-  (* use string.String
-  use string.Char
-
-  val function of_string (s: string) : cstring
-    ensures { String.length s = Array.length result }
-    ensures { forall i. 0 <= i < String.length s ->
-                Array.([]) result i = code (Char.get s i) }
-  meta coercion function of_string *)
 
 end
