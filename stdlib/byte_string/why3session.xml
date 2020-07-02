@@ -171,6 +171,9 @@
  <proof prover="2"><result status="valid" time="0.01" steps="21"/></proof>
  </goal>
  <goal name="contains_prefixof">
+ <proof prover="0"><result status="timeout" time="5.00" steps="4236237"/></proof>
+ <proof prover="1"><result status="timeout" time="5.00" steps="366852"/></proof>
+ <proof prover="2"><result status="timeout" time="5.00"/></proof>
  </goal>
  <goal name="contains_suffixof">
  <proof prover="0"><result status="timeout" time="5.00" steps="4721417"/></proof>
@@ -263,6 +266,20 @@
  <proof prover="0" obsolete="true"><result status="timeout" time="5.00" steps="2124548"/></proof>
  <proof prover="1" obsolete="true"><result status="timeout" time="5.00" steps="445007"/></proof>
  <proof prover="2"><result status="valid" time="0.02" steps="30"/></proof>
+ </goal>
+ <goal name="replace_empty" proved="true">
+ <proof prover="1"><result status="valid" time="1.53" steps="184278"/></proof>
+ </goal>
+ <goal name="replace_not_contains" proved="true">
+ <proof prover="2"><result status="valid" time="0.05" steps="192"/></proof>
+ </goal>
+ <goal name="replace_empty2" proved="true">
+ <proof prover="2"><result status="valid" time="0.78" steps="1547"/></proof>
+ </goal>
+ <goal name="replace_substring_indexof" proved="true">
+ <proof prover="0" obsolete="true"><undone/></proof>
+ <proof prover="1" obsolete="true"><result status="timeout" time="5.00" steps="504970"/></proof>
+ <proof prover="2"><result status="valid" time="0.02" steps="50"/></proof>
  </goal>
 </theory>
 </file>

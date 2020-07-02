@@ -225,9 +225,11 @@ module CString
 
   val function indexof (s1 s2: cstring) (ofs: int) : int
     ensures { is_indexof s1 s2 ofs result }
-    ensures { forall i. ofs <= i < result /\ is_indexof s1 s2 ofs i -> i >= result }
+    ensures { forall i. ofs <= i < result /\
+                          is_indexof s1 s2 ofs i
+                        -> i >= result }
 
-  goal indexof_empty: forall s i.
+  lemma indexof_empty: forall s i.
     0 <= i <= length s -> indexof s empty i = i
 
   goal indexof_empty1: forall s i.
@@ -260,6 +262,30 @@ module CString
     0 <= i <= length s1 && contains (substring s1 i (length s1 - i)) s2 ->
       i <= indexof s1 s2 i <= length s1
 
+  let function replace (s1 s2 s3: cstring): cstring =
+    let i = indexof s1 s2 0 in
+    if i < 0 then s1 else
+      (substring s1 0 i ++ s3)
+        ++ (substring s1 (i + length s2) (length s1 - i - length s2))
 
+  (* needs lemma indexof_empty *)
+  goal replace_empty: forall s1 s3.
+    replace s1 empty s3 = s3 ++ s1
+
+  goal replace_not_contains: forall s1 s2 s3.
+    not (contains s1 s2) -> replace s1 s2 s3 = s1
+
+  goal replace_empty2: forall s2 s3.
+    let s4 = replace empty s2 s3 in
+    if s2 = empty then s4 = s3 else s4 = empty
+
+  goal replace_substring_indexof: forall s1 s2 s3.
+    let j = indexof s1 s2 0 in
+    replace s1 s2 s3 =
+      if j < 0 then s1 else
+        (substring s1 0 j ++ s3) ++
+        (substring s1 (j + length s2) (length s1 - j - length s2))
+
+  val function to_int (s: string) : int
 
 end
