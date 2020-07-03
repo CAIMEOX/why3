@@ -90,7 +90,7 @@ type typ =
 let rec print_type fmt = function
   | Term -> fprintf fmt "Term"
   | Prop -> fprintf fmt "Prop"
-  | Arrow (t1, t2) -> fprintf fmt "%a ⇒ %a"
+  | Arrow (t1, t2) -> fprintf fmt "%a → %a"
                         print_type t1
                         print_type t2
 
@@ -108,7 +108,7 @@ let collect_stask (ta : ctask_simple) =
     Mid.empty ta
 
 let print_task fmt (fv, ts) =
-  fprintf fmt "(∀ ";
+  fprintf fmt "(Π ";
   print_list_inter " " (fun fmt (id, typ) ->
       fprintf fmt "(%a : %a)"
         pri id
@@ -209,7 +209,7 @@ let print fmt init_ct res_ct (task_id, certif) =
   let init = Mid.bindings fv, tsi in
   (* The type we need to check is inhabited *)
   let p_type fmt () =
-    print_list_inter " ⇒ "
+    print_list_inter " → "
       print_task
       fmt
       (res @ [init]) in
