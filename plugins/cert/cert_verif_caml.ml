@@ -18,10 +18,10 @@ let rec check_rewrite_term tl (tr : cterm) (t : cterm) path =
   | [], t when cterm_equal t tl -> tr
   | Left::prest, { ct_node = CTbinop (op, t1, t2) } ->
       let t1' = check_rewrite_term tl tr t1 prest in
-      add_ty None (CTbinop (op, t1', t2))
+      add_ty CTprop (CTbinop (op, t1', t2))
   | Right::prest, { ct_node = CTbinop (op, t1, t2) } ->
       let t2' = check_rewrite_term tl tr t2 prest in
-      add_ty None (CTbinop (op, t1, t2'))
+      add_ty CTprop (CTbinop (op, t1, t2'))
   | _ -> verif_failed "Can't follow the rewrite path"
 
 let check_rewrite (cta : ctask) rev h g (terms : cterm list) path : ctask list =
@@ -98,9 +98,9 @@ let rec ccheck c cta =
         let t, pos = find_ident "unfold" i cta in
         begin match t.ct_node with
         | CTbinop (Tiff, t1, t2) ->
-            let imp_pos = add_ty None (CTbinop (Timplies, t1, t2)) in
-            let imp_neg = add_ty None (CTbinop (Timplies, t2, t1)) in
-            let unfolded_iff = add_ty None (CTbinop (Tand, imp_pos, imp_neg)), pos in
+            let imp_pos = add_ty CTprop (CTbinop (Timplies, t1, t2)) in
+            let imp_neg = add_ty CTprop (CTbinop (Timplies, t2, t1)) in
+            let unfolded_iff = add_ty CTprop (CTbinop (Tand, imp_pos, imp_neg)), pos in
             let cta = Mid.add i unfolded_iff cta in
             ccheck c cta
         | _ -> verif_failed "Nothing to unfold" end
@@ -108,13 +108,13 @@ let rec ccheck c cta =
         let t, pos = find_ident "unfold" i cta in
         begin match t.ct_node with
         | CTbinop (Timplies, t1, t2) ->
-            let unfolded_imp = add_ty None (CTbinop (Tor, add_ty None (CTnot t1), t2)), pos in
+            let unfolded_imp = add_ty CTprop (CTbinop (Tor, add_ty CTprop (CTnot t1), t2)), pos in
             let cta = Mid.add i unfolded_imp cta in
             ccheck c cta
         | _ -> verif_failed "Nothing to unfold" end
     | ESwap (_, _, i, c) | ESwapNeg (_, _, i, c) ->
         let t, pos = find_ident "Swap" i cta in
-        let neg_t = match t.ct_node with CTnot t -> t | _ -> add_ty None (CTnot t) in
+        let neg_t = match t.ct_node with CTnot t -> t | _ -> add_ty CTprop (CTnot t) in
         let cta = Mid.add i (neg_t, not pos) cta in
         ccheck c cta
     | EDestruct (_, _, _, i, j1, j2, c) ->

@@ -4,16 +4,24 @@ open Ident
 open Theory
 open Decl
 open Task
-
+open Ty
 
 (** To certify transformations, we will represent Why3 tasks by the type <ctask>
     and we equip transformations with a certificate <certif> *)
 
 type cquant = CTforall | CTexists | CTlambda
 
+type ctype =
+  | CTprop
+  | CTconstant
+  | CTyvar of tvsymbol
+  | CTyapp of tysymbol * ctype list
+  | CTarrow of ctype * ctype
+
+
 type cterm =
   { ct_node : cterm_node;
-    ct_ty   : Ty.ty option }
+    ct_ty   : ctype }
 
 and cterm_node =
   | CTbvar of int (* bound variables use De Bruijn indices *)
@@ -45,14 +53,29 @@ let abstract_quant = function
   | Tforall -> CTforall
   | Texists -> CTexists
 
+let rec abstract_otype = function
+  | None -> CTprop
+  | Some ty -> abstract_type ty
+
+and abstract_type ty =
+  match ty.ty_node with
+  | Tyvar v -> CTyvar v
+  | Tyapp (ts, lts) ->
+      if ts_equal ts ts_func
+      then let l1, l2 = match lts with
+             | [l1; l2] -> l1, l2
+             | _ -> assert false in
+           CTarrow (abstract_type l1, abstract_type l2)
+      else CTyapp (ts, List.map abstract_type lts)
+
 let rec abstract_term t =
   abstract_term_rec Mid.empty 0 t
 
-and abstract_term_rec bv_lvl lvl { t_node = t; t_ty = ty } =
-  { ct_node = abstract_term_node_rec ty bv_lvl lvl t;
-    ct_ty   = ty }
+and abstract_term_rec bv_lvl lvl { t_node = t; t_ty = oty } =
+  { ct_node = abstract_term_node_rec bv_lvl lvl t;
+    ct_ty   = abstract_otype oty }
 
-and abstract_term_node_rec ty bv_lvl lvl t =
+and abstract_term_node_rec bv_lvl (lvl : int) t =
   (* level <lvl> is the number of forall above in the whole term *)
   (* <bv_lvl> is mapping bound variables to their respective level *)
   let cterm_node_from_id id = match Mid.find_opt id bv_lvl with
@@ -66,37 +89,16 @@ and abstract_term_node_rec ty bv_lvl lvl t =
       cterm_node_from_id v.vs_name
   | Tapp (ls, lt) ->
       let open Ty in
-      begin match ty with
-      | Some { ty_node = Tyapp (tys, tyl) } when List.length tyl = List.length lt ->
-          let ts = { ct_node = cterm_node_from_id ls.ls_name;
-                     ct_ty   = Some (ty_app tys []) } in
-          let ct, _, _ = List.fold_left (fun (ct, tyl1, tyl2) t ->
-                             match tyl2 with
-                             | ty2::tyl2 ->
-                                 let tyl1 = ty2 :: tyl1 in
-                                 { ct_node = CTapp (ct, abstract_term_rec bv_lvl lvl t);
-                                   ct_ty   = Some (ty_app tys tyl1) },
-                                 tyl1,
-                                 tyl2
-                             | _ -> assert false)
-                           (ts, [], tyl) lt in
-          ct.ct_node
-      | _ -> assert false end
-
-      (* let open Ty in
-       * let app_ty ty1 ty2 =
-       *   match ty1.ty_node with
-       *   | Tyvar v -> ty1 (\* ty_app v [ty2] *\)
-       *   | Tyapp (v, l1) -> ty_app v (ty2::l1) in
-       * let app t1 t2 =
-       *   let ty = match t1.ct_ty, t2.ct_ty with
-       *     | Some ty1, Some ty2 -> Some (app_ty ty1 ty2)
-       *     | _ -> None in
-       *   { ct_node = CTapp (t1, t2);
-       *     ct_ty = ty } in
-       * List.fold_left
-       *   (fun acc t -> app acc (abstract_term_node_rec bv_lvl lvl t))
-       *   vs lt *)
+      let lt = List.rev_map (abstract_term_rec bv_lvl lvl) lt in
+      let rec construct lte (cty : ctype) =
+        match lte with
+        | hte::lte ->
+            { ct_node = CTapp (construct lte (CTarrow (hte.ct_ty, cty)), hte);
+              ct_ty   = cty }
+        | _ -> { ct_node = cterm_node_from_id (ls.ls_name);
+                 ct_ty   = cty } in
+      let c = construct (List.rev lt) (abstract_otype ls.ls_value) in
+      c.ct_node
   | Tbinop (op, t1, t2) ->
       let ct1 = abstract_term_rec bv_lvl lvl t1 in
       let ct2 = abstract_term_rec bv_lvl lvl t2 in
@@ -108,7 +110,7 @@ and abstract_term_node_rec ty bv_lvl lvl t =
       let lvl = lvl + List.length lvs in
       let ctn_open = abstract_term_rec bv_lvl lvl t_open in
       let q = abstract_quant q in
-      let ctquant q ct = { ct_node = CTquant (q, ct) ; ct_ty = None } in
+      let ctquant q ct = { ct_node = CTquant (q, ct) ; ct_ty = CTprop } in
       let ct_closed = List.fold_right (fun _ ct -> ctquant q ct) lvs ctn_open in
       ct_closed.ct_node
   | Tnot t -> CTnot (abstract_term_rec bv_lvl lvl t)
