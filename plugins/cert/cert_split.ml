@@ -164,7 +164,7 @@ type 'a split_ret = {
      cp ⇓ (⊢  pr : f) ≜  [⊢  prᵢ : conjᵢ]ᵢ *)
   cp : visible_cert;
   (* Certificate to decompose f as a Conjunction in Negative position :
-     cn ⇓ (pr : f ⊢) ≜ [pr₁ : conj₁, ..., prₙ : conjₙ ⊢] *)
+     cn ⇓ (pr : f ⊢) ≜ [pr₁ : conj₁, ..., prₙ : conjₙ ⊢] *)  
   (* WARNING : the previous equality is only valid when byso_split is off,
      and only useful when rev_split is on *)
   cn : visible_cert;
