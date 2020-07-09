@@ -198,6 +198,54 @@
           dl
     | _ -> ()
 
+  exception Lemma_to_function
+
+  let function_of_lemma id_lemma t =
+    let rec split_on_impl acc t = match t.term_desc with
+      | Tbinop (antecedent, Dterm.DTimplies, consequent) ->
+          let acc_ant = split_on_impl acc antecedent in
+          split_on_impl acc_ant consequent
+      | _ -> t :: acc in
+    let rec split_on_conj acc t = match t.term_desc with
+      | Tbinop (t1, Dterm.DTand, t2) ->
+          let acc_t1 = split_on_conj acc t1 in
+          split_on_conj acc_t1 t2
+      | t -> t :: acc in
+    let loc = id_lemma.id_loc in
+    let mk_post t =
+      let id_res = { id_str = "result"; id_ats = []; id_loc = loc } in
+      let pat = { pat_desc = (Pvar id_res); pat_loc = loc } in
+      let t = { term_desc = t; term_loc = loc } in
+      loc, [pat, t] in
+    let param_of_binder (loc, id, ghost, pty) =
+      let pty = match pty with
+        | Some p -> p
+        | None -> raise Lemma_to_function in
+      (loc, id, ghost, pty) in
+    let args, lemma = match t.term_desc with
+      | Tquant (Dterm.DTforall, bl, _, t) ->
+          bl, t
+      | _ -> [], t in
+    let post, pre = match split_on_impl [] lemma with
+      | []     -> assert false
+      | [t]    -> t, []
+      | t :: r -> t, List.rev r in
+    let args = List.map param_of_binder args in
+    let post = List.map mk_post (split_on_conj [] post) in
+    let id = { id_lemma with id_loc = loc } in
+    let ret = { pat_desc = Pwild; pat_loc = loc } in
+    let mask = Ity.MaskVisible in
+    let _spec = { empty_spec with sp_pre = pre; sp_post = post } in (* TODO *)
+    let f = Eany (args, Expr.RKnone, Some (PTtuple []), ret, mask, empty_spec) in
+    let expr = { expr_desc = f; expr_loc = loc } in
+    let d = Dlet (id, true, Expr.RKfunc, expr) in
+    Typing.add_decl id_lemma.id_loc d
+
+  let function_of_lemma = function
+    | Dprop (Decl.Plemma, id_lemma, t) ->
+        function_of_lemma id_lemma t
+    | _ -> ()
+
   let name_term id_opt def t =
     let name = Opt.fold (fun _ id -> id.id_str) def id_opt in
     let attr = ATstr (Ident.create_attribute ("hyp_name:" ^ name)) in
@@ -347,7 +395,8 @@ module_decl:
     { Typing.add_decl (floc $startpos $endpos) (Dimport($2)) }
 | d = pure_decl | d = prog_decl | d = meta_decl
     { Typing.add_decl (floc $startpos $endpos) d;
-      add_record_projections d
+      add_record_projections d;
+      try function_of_lemma d with Lemma_to_function -> ()
     }
 | use_clone { () }
 
