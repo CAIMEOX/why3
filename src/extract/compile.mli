@@ -14,6 +14,8 @@ val clean_name : string -> string
 val module_name : ?fname:string -> string list -> string -> string
 
 module Translate : sig
+  val mlty_of_ity_hack: Ity.ity -> Mltree.ty
+
   val module_ : Pmodule.pmodule -> Mltree.pmodule
 
   val pdecl_m : Pmodule.pmodule -> Pdecl.pdecl -> Mltree.decl list

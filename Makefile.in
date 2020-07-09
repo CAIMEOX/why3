@@ -246,7 +246,7 @@ LIB_INFER = o2oterm domain infer_why3 quant_domain union_find disjunctive_term_d
 endif
 
 LIB_EXTRACT = mltree compile mlinterp pdriver ml_printer \
-              c ocaml cakeml
+              c ocaml cakeml solidity
 
 LIB_PARSER = ptree glob typing parser_messages parser typing report lexer mlw_printer
 
