@@ -33,11 +33,6 @@ module String
   type cstring = { str_content : Seq.seq char }
   meta coercion function str_content
 
-  let function empty: cstring = { str_content = Seq.empty }
-
-  let function singleton (c: char): cstring =
-    { str_content = Seq.singleton c }
-
   let function length (s: cstring) : int = Seq.length s.str_content
 
   lemma length_nonnegative: forall s. 0 <= length s
@@ -54,6 +49,13 @@ module String
     requires { 0 <= i < length s }
     ensures  { result = s[i] }
   = get s i
+
+  let function empty: cstring = { str_content = Seq.empty }
+
+  let function singleton (c: char): cstring
+    ensures { length result = 1 }
+    ensures { result[0] = c }
+  = { str_content = Seq.singleton c }
 
   let predicate (==) (s1 s2: cstring)
     ensures { result <-> length s1 = length s2 &&

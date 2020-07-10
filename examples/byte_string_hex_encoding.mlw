@@ -25,7 +25,7 @@ predicate valid_hex_char (c: char) =
 function hex (i: int) : char =
   if 0 <= i < 10 then chr (i + 48)
   else if 10 <= i < 16 then chr (i + 55)
-  else 0:char
+  else chr 0
 
 let hex (i: int63) : char
   requires { 0 <= i < 16 }
