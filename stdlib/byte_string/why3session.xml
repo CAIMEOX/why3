@@ -30,10 +30,10 @@
  <proof prover="2"><result status="valid" time="0.01" steps="19"/></proof>
  </goal>
  <goal name="infix ==&#39;vc" expl="VC for infix ==" proved="true">
- <proof prover="2"><result status="valid" time="0.01" steps="62"/></proof>
+ <proof prover="2"><result status="valid" time="0.01" steps="69"/></proof>
  </goal>
  <goal name="cons&#39;vc" expl="VC for cons" proved="true">
- <proof prover="2"><result status="valid" time="0.01" steps="115"/></proof>
+ <proof prover="2"><result status="valid" time="0.02" steps="104"/></proof>
  </goal>
  <goal name="make&#39;vc" expl="VC for make" proved="true">
  <proof prover="2"><result status="valid" time="0.01" steps="45"/></proof>
@@ -44,8 +44,11 @@
  <goal name="sub&#39;vc" expl="VC for sub" proved="true">
  <proof prover="2"><result status="valid" time="0.01" steps="58"/></proof>
  </goal>
+ <goal name="concat&#39;vc" expl="VC for concat" proved="true">
+ <proof prover="2"><result status="valid" time="0.01" steps="2"/></proof>
+ </goal>
  <goal name="map&#39;vc" expl="VC for map" proved="true">
- <proof prover="2"><result status="valid" time="0.05" steps="205"/></proof>
+ <proof prover="2"><result status="valid" time="0.05" steps="209"/></proof>
  </goal>
  <goal name="index_from&#39;vc" expl="VC for index_from" proved="true">
  <proof prover="2"><result status="valid" time="0.03" steps="35"/></proof>
@@ -54,7 +57,7 @@
  <proof prover="2"><result status="valid" time="0.02" steps="4"/></proof>
  </goal>
  <goal name="contains&#39;vc" expl="VC for contains" proved="true">
- <proof prover="2"><result status="valid" time="0.09" steps="528"/></proof>
+ <proof prover="2"><result status="valid" time="0.09" steps="559"/></proof>
  </goal>
 </theory>
 <theory name="OCaml" proved="true">

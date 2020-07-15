@@ -19,7 +19,7 @@ module Char
   lemma chr_code: forall c. chr (code c) = c
 
   let (=) (c1 c2: char): bool
-    ensures { result <-> c1.char_content = c2.char_content }
+    ensures { result <-> c1 = c2 }
   = c1.char_content = c2.char_content
 end
 
@@ -60,13 +60,13 @@ module String
   let predicate (==) (s1 s2: cstring)
     ensures { result <-> length s1 = length s2 &&
               forall i: int. 0 <= i < length s1 -> s1[i] = s2[i] }
-    ensures { result -> s1 = s2 }
+    ensures { result <-> s1 = s2 }
   = Seq.(s1.str_content == s2.str_content)
 
   let function cons (c: char) (s: cstring): cstring
-    ensures { length result = length s + 1}
+    ensures { length result = 1 + length s}
     ensures { result[0] = c }
-    ensures { forall i. 1 <= i < length result -> result[i] = s[i - 1]}
+    ensures { forall i. 0 < i <= length s -> result[i] = s[i - 1]}
   = { str_content = Seq.cons c s.str_content }
 
   let function make (len: int) (c: char): cstring
@@ -88,6 +88,7 @@ module String
   = { str_content = Seq.(s.str_content[i..j]) }
 
   let function concat (s1 s2: cstring): cstring
+    ensures { result = { str_content = Seq.(s1.str_content ++ s2.str_content) } }
   = { str_content = Seq.(s1.str_content ++ s2.str_content) }
 
   let rec function map (f: char -> char) (s: cstring): cstring
@@ -105,7 +106,7 @@ module String
     raises  { Not_found -> forall i. j <= i < length s -> s[i] <> c }
   = variant { length s - j }
     if j = length s then raise Not_found else
-      if Byte.(s[j] = c) then j else
+      if s[j] = c then j else
         index_from s (j+1) c
 
   let index (s: cstring) (c: char): int
@@ -119,7 +120,7 @@ module String
     ensures { result <-> mem c s }
   = variant { length s }
     if s == empty then false else
-      if Byte.(s[0] = c) then true else
+      if s[0] = c then true else
         contains (sub s 1 (length s)) c
 
   (* Do we need Sys.max_string_length? *)
