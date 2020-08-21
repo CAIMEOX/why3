@@ -849,14 +849,16 @@ let add_to_model ?vc_term_attrs model model_element =
             Ident.get_model_trace_string ~name:xme.men_name ~attrs:xme.men_attrs
             = Ident.get_model_trace_string ~name:el.men_name ~attrs:el.men_attrs
             &&
+              pos = Opt.get_def Loc.dummy_position x.me_location
+
             (* TODO Add an efficient version of symmetric difference to extset *)
-            let symm_diff =
-              Sattr.diff
-                (Sattr.union x.me_name.men_attrs el.men_attrs)
-                (Sattr.inter x.me_name.men_attrs el.men_attrs) in
-            Sattr.for_all
-              (fun x -> not (Strings.has_prefix "at" x.attr_string))
-              symm_diff)
+            (* let symm_diff =
+             *   Sattr.diff
+             *     (Sattr.union x.me_name.men_attrs el.men_attrs)
+             *     (Sattr.inter x.me_name.men_attrs el.men_attrs) in
+             * Sattr.for_all
+             *   (fun x -> not (Strings.has_prefix "at" x.attr_string))
+             *   symm_diff *))
           elements in
       let model_element =
         match vc_term_attrs with
