@@ -1,0 +1,11 @@
+
+use mach.int.Int
+
+val ref x : int
+val ref y : int
+
+let f (x:int) : int
+  requires { x >= 0 }
+  ensures { result >= 0 }
+= let y = 2*x+1 in 
+  if y % 4 = 1 then x else y
