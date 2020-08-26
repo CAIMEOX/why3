@@ -633,8 +633,8 @@ let elaborate (init_ct : ctask) c =
       let t2, pos2 = find_ident "Construct2" i2 cta in
       assert (pos1 = pos2);
       let t = if pos1
-              then add_ty CTprop (CTbinop (Tor, t1, t2))
-              else add_ty CTprop (CTbinop (Tand, t1, t2)) in
+              then add_ty ctbool (CTbinop (Tor, t1, t2))
+              else add_ty ctbool (CTbinop (Tand, t1, t2)) in
       let cta = Mid.remove i1 cta
                 |> Mid.remove i2
                 |> Mid.add j (t, pos1) in
@@ -643,7 +643,7 @@ let elaborate (init_ct : ctask) c =
       let t, pos = find_ident "Swap" i cta in
       let neg, underlying_t, neg_t = match t.ct_node with
         | CTnot t -> true, t, t
-        | _ -> false, t, add_ty CTprop (CTnot t) in
+        | _ -> false, t, add_ty ctbool (CTnot t) in
       let cta = Mid.add i (neg_t, not pos) cta in
       let pack = pos, underlying_t, i, elab cta c in
       if neg
@@ -660,14 +660,14 @@ let elaborate (init_ct : ctask) c =
         | CTquant (CTforall, t), true | CTquant (CTexists, t), false -> t
         | _ -> elab_failed "Nothing to introduce" in
       let cta = Mid.add i (ct_open t (CTfvar y), pos) cta in
-      EIntroQuant (pos, add_ty CTprop (CTquant (CTlambda, t)), i, y, elab cta c)
+      EIntroQuant (pos, add_ty ctbool (CTquant (CTlambda, t)), i, y, elab cta c)
   | InstQuant (i, j, t_inst, c) ->
       let t, pos = find_ident "InstQuant" i cta in
       let t = match t.ct_node, pos with
         | CTquant (CTforall, t), false | CTquant (CTexists, t), true -> t
         | _ -> elab_failed "trying to instantiate a non-quantified hypothesis" in
       let cta = Mid.add j (ct_open t t_inst.ct_node, pos) cta in
-      EInstQuant (pos, add_ty CTprop (CTquant (CTlambda, t)), i, j, t_inst, elab cta c)
+      EInstQuant (pos, add_ty ctbool (CTquant (CTlambda, t)), i, j, t_inst, elab cta c)
   | Rewrite _ -> elab_failed "TODO : Rewrite"
   (* TODO *)
   (* let lcta = check_rewrite cta rev j i [] path in
@@ -704,14 +704,14 @@ let rec trim_certif c =
                                      eaxiom (not g) a i1' j,
                                      eaxiom (not g) b i2' j) in
               let c1, c2, cut = if g
-                                then c_open, c_closed, add_ty CTprop (CTbinop (Tor, a, b))
-                                else c_closed, c_open, add_ty CTprop (CTbinop (Tand, a, b)) in
+                                then c_open, c_closed, add_ty ctbool (CTbinop (Tor, a, b))
+                                else c_closed, c_open, add_ty ctbool (CTbinop (Tand, a, b)) in
               ECut (j, cut, c1, c2)))
   | EFoldArr (g, a, b, i, c) ->
       let c = trim_certif c in
       let j = id_register (id_fresh "fold_arr_temp") in
-      let pre = add_ty CTprop (CTbinop (Tor, add_ty CTprop (CTnot a), b)) in
-      let post = add_ty CTprop (CTbinop (Timplies, a, b)) in
+      let pre = add_ty ctbool (CTbinop (Tor, add_ty ctbool (CTnot a), b)) in
+      let post = add_ty ctbool (CTbinop (Timplies, a, b)) in
       let c_open = EWeakening (g, pre, j, c) in
       let c_closed = EUnfoldArr (not g, a, b, i, eaxiom g pre i j) in
       let c1, c2 = if g then c_open, c_closed else c_closed, c_open in
