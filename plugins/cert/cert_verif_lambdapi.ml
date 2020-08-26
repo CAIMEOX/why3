@@ -113,7 +113,7 @@ let print_task fmt (fv, ts) =
       fprintf fmt "(%a : %a)"
         pri id
         print_type typ) fmt fv;
-  let tp = snd (List.split ts) @ [add_ty CTprop CTfalse] in
+  let tp = snd (List.split ts) @ [add_ty ctbool CTfalse] in
   fprintf fmt ", prf (%a)"
     (print_list_inter " ⇨ " print_term) tp;
   fprintf fmt ")"
@@ -195,7 +195,7 @@ let print_certif at fmt c =
   pc fmt c
 
 let fv_ts (ct : ctask) =
-  let encode_neg (k, (ct, pos)) = k, if pos then add_ty CTprop (CTnot ct) else ct in
+  let encode_neg (k, (ct, pos)) = k, if pos then add_ty ctbool (CTnot ct) else ct in
   let ts = Mid.bindings ct
            |> List.map encode_neg in
   let fv = collect_stask ts in

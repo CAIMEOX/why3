@@ -12,8 +12,6 @@ open Ty
 type cquant = CTforall | CTexists | CTlambda
 
 type ctype =
-  | CTprop
-  | CTconstant
   | CTyvar of tvsymbol
   | CTyapp of tysymbol * ctype list
   | CTarrow of ctype * ctype
@@ -45,7 +43,7 @@ type ctask = (cterm * bool) Mid.t
    • <Γ> contains all the declarations <H : P> where <H> is mapped to <(P, false)> in <M>
    • <Δ> contains all the declarations <H : P> where <H> is mapped to <(P, true)> in <M>
 *)
-
+let ctbool = CTyapp (Ty.ts_bool, [])
 
 (** Abstracting a Why3 <task> into a <ctask> : extract only the logical core *)
 
@@ -54,7 +52,7 @@ let abstract_quant = function
   | Texists -> CTexists
 
 let rec abstract_otype = function
-  | None -> CTprop
+  | None -> ctbool
   | Some ty -> abstract_type ty
 
 and abstract_type ty =
@@ -109,7 +107,7 @@ and abstract_term_node_rec bv_lvl (lvl : int) t =
       let lvl = lvl + List.length lvs in
       let ctn_open = abstract_term_rec bv_lvl lvl t_open in
       let q = abstract_quant q in
-      let ctquant q ct = { ct_node = CTquant (q, ct) ; ct_ty = CTprop } in
+      let ctquant q ct = { ct_node = CTquant (q, ct) ; ct_ty = ctbool } in
       let ct_closed = List.fold_right (fun _ ct -> ctquant q ct) lvs ctn_open in
       ct_closed.ct_node
   | Tnot t -> CTnot (abstract_term_rec bv_lvl lvl t)
