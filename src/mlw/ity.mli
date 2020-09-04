@@ -434,6 +434,11 @@ type post = term  (** postcondition: eps result . post_fmla *)
 val open_post : post -> vsymbol * term
 val open_post_with : term -> post -> term
 val clone_post_result : post -> preid
+val result_id : ?loc:Loc.position -> ?ql:post list -> unit -> preid
+(** [result_id ?loc ?ql ()] returns a fresh pre-identifier whose name
+   is appropriately chosen with respect to the optionality given list
+   of post-conditions (["result"] by default, as hard-coded in this
+   module implementation). *)
 
 val create_post : vsymbol -> term -> post
 

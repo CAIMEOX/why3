@@ -27,6 +27,9 @@ File result.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "3"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "0"}
+  Line 13:
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "3"}
 
 bench/ce/result.mlw M f'vc: Timeout or Unknown
 Counter-example model:
@@ -61,6 +64,7 @@ File result.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "42"}}]}}
+    result, [[@introduced]] = {"type": "Integer", "val": "2"}
   Line 19:
     A, [[@field:0:contents], [@introduced], [@model], [@model_trace:A]] =
       {"type": "Record",
@@ -73,4 +77,6 @@ File result.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "1"}}]}}
+  Line 21:
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "1"}
 

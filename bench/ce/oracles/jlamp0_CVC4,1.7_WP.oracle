@@ -20,6 +20,7 @@ File jlamp0.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "3"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "0"}
   Line 12:
     a, [[@field:0:contents], [@introduced], [@model_trace:a]] =
       {"type": "Record",
@@ -35,13 +36,13 @@ File jlamp0.mlw:
       {"type": "Record",
        "val":
         {"Field":
-          [{"field": "contents", "value": {"type": "Integer", "val": "7"}}]}}
+          [{"field": "contents", "value": {"type": "Integer", "val": "0"}}]}}
   Line 8:
     b, [[@field:0:contents], [@introduced]] =
       {"type": "Record",
        "val":
         {"Field":
-          [{"field": "contents", "value": {"type": "Integer", "val": "3"}}]}}
+          [{"field": "contents", "value": {"type": "Integer", "val": "10"}}]}}
   Line 10:
     a, [[@field:0:contents], [@introduced], [@model_trace:a]] =
       {"type": "Record",
@@ -54,12 +55,14 @@ File jlamp0.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "10"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "0"}
   Line 13:
     a, [[@field:0:contents], [@introduced]] =
       {"type": "Record",
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "9"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "10"}
 
 bench/ce/jlamp0.mlw M p1'vc: Timeout or Unknown
 Counter-example model:
@@ -69,13 +72,13 @@ File jlamp0.mlw:
       {"type": "Record",
        "val":
         {"Field":
-          [{"field": "contents", "value": {"type": "Integer", "val": "2"}}]}}
+          [{"field": "contents", "value": {"type": "Integer", "val": "0"}}]}}
   Line 8:
     b, [[@field:0:contents], [@introduced]] =
       {"type": "Record",
        "val":
         {"Field":
-          [{"field": "contents", "value": {"type": "Integer", "val": "3"}}]}}
+          [{"field": "contents", "value": {"type": "Integer", "val": "5"}}]}}
   Line 10:
     a, [[@field:0:contents], [@introduced], [@model_trace:a]] =
       {"type": "Record",
@@ -88,6 +91,9 @@ File jlamp0.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "5"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "0"}
+  Line 13:
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "5"}
 
 bench/ce/jlamp0.mlw M p2'vc: Timeout or Unknown
 Counter-example model:
@@ -145,6 +151,7 @@ File jlamp0.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "2"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "2"}
   Line 24:
     c, [[@field:0:contents], [@introduced], [@model_trace:c]] =
       {"type": "Record",
@@ -157,12 +164,14 @@ File jlamp0.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "5"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "3"}
   Line 26:
     c, [[@field:0:contents], [@introduced]] =
       {"type": "Record",
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "4"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "2"}
 
 bench/ce/jlamp0.mlw M p2'vc: Timeout or Unknown
 Counter-example model:
@@ -197,6 +206,7 @@ File jlamp0.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "10"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "10"}
   Line 22:
     c, [[@field:0:contents], [@introduced], [@model_trace:c]] =
       {"type": "Record",
@@ -209,12 +219,14 @@ File jlamp0.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "13"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "3"}
   Line 26:
     c, [[@field:0:contents], [@introduced]] =
       {"type": "Record",
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "12"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "10"}
 
 bench/ce/jlamp0.mlw M p2'vc: Timeout or Unknown
 Counter-example model:
@@ -249,6 +261,7 @@ File jlamp0.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "8"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "8"}
   Line 23:
     a, [[@field:0:contents], [@introduced], [@model_trace:a]] =
       {"type": "Record",
@@ -261,12 +274,14 @@ File jlamp0.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "11"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "3"}
   Line 26:
     c, [[@field:0:contents], [@introduced]] =
       {"type": "Record",
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "10"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "8"}
 
 bench/ce/jlamp0.mlw M p2'vc: Timeout or Unknown
 Counter-example model:
@@ -307,4 +322,5 @@ File jlamp0.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "11"}}]}}
+    (!)'result, [[@introduced]] = {"type": "Integer", "val": "11"}
 
