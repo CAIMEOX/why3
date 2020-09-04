@@ -914,7 +914,7 @@ module InlineProxyVars = struct
     | Evar pv -> begin try (Spv.add pv vars, Spv.add pv occ), Mpv.find pv subst
         with Not_found -> (vars, Spv.add pv occ), e end
     | Elet (Lvar (pv, ({e_effect = eff1} as e1)), e2)
-      when Sattr.mem proxy_attr pv.pv_vs.vs_name.id_attrs &&
+         when (* Sattr.mem proxy_attr pv.pv_vs.vs_name.id_attrs && *)
              eff_pure eff1 && can_inline e1 e2 ->
         let subst' = Mpv.add pv e1 Mpv.empty in
         let (s_union, o_union), e2 = expr info subst' (vars,occ) e2 in

@@ -802,10 +802,11 @@ let c_pur s vl ityl ity =
 let mk_proxy_decl ~ghost e =
   let id =
     match e.e_node with
-    | Eexec ({ c_node = Capp _},cty) ->
-       result_id ?loc:e.e_loc ~attrs:proxy_attrs ~ql:cty.cty_post ()
+    | Eexec ({ c_node = Capp (rs,_)},cty) ->
+       Format.eprintf "mk_proxy_decl for %s@." rs.rs_name.id_string;
+       result_id ?loc:e.e_loc (*~attrs:proxy_attrs*) ~ql:cty.cty_post ()
     | Eexec ({ c_node = Cpur _},_) ->
-       result_id ?loc:e.e_loc ~attrs:proxy_attrs ()
+       result_id ?loc:e.e_loc (*~attrs:proxy_attrs*) ()
     | _ ->
        id_fresh ?loc:e.e_loc ~attrs:proxy_attrs "o"
   in
