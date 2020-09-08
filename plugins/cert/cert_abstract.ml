@@ -129,7 +129,7 @@ and abstract_term_node_rec bv_lvl (lvl : int) t =
 let abstract_decl decl =
   match decl.d_node with
   | Dprop (Pgoal, pr, t) ->
-       Mid.singleton pr.pr_name (abstract_term t, true)
+      Mid.singleton pr.pr_name (abstract_term t, true)
   | Dprop (_, pr, t) ->
       Mid.singleton pr.pr_name (abstract_term t, false)
   | _ -> Mid.empty

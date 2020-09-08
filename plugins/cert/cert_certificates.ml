@@ -13,68 +13,68 @@ type path = dir list
 (** We equip each transformation application with a certificate indicating
     why the resulting list of tasks is implying the initial task *)
 
-type ('a, 'b) cert = (* 'a is used to designate an hypothesis, 'b is used for terms *)
+type ('I, 't) cert = (* 'I is used to designate an hypothesis, 't is used for terms *)
   (* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>.
      For more details, take a look at the OCaml implementation <Cert_verif_caml.ccheck>. *)
   | Nc
   (* Makes verification fail : use it as a placeholder *)
   | Hole of ident
   (* Hole ct ⇓ (Γ ⊢ Δ) ≜  [ct : Γ ⊢ Δ] *)
-  | Cut of 'a * 'b * ('a, 'b) cert * ('a, 'b) cert
+  | Cut of 'I * 't * ('I, 't) cert * ('I, 't) cert
   (* Cut (I, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ, I : A ⊢ Δ)) *)
-  | Let of 'b * 'a * ('a, 'b) cert
+  | Let of 't * 'I * ('I, 't) cert
   (* Let (x, I, c) ⇓ t ≜  c ⇓ t[x ← I(t)] *)
   (* Or : x can be used in c as the formula identified by I in t *)
-  | Rename of 'a * 'a * ('a, 'b) cert
+  | Rename of 'I * 'I * ('I, 't) cert
   (* Rename (I₁, I₂, c) ⇓  (Γ, I₁ : A ⊢ Δ) ≜ c ⇓ (Γ, I₂ : A ⊢ Δ)*)
   (* Rename (I₁, I₂, c) ⇓  (Γ ⊢ Δ, I₁ : A) ≜ c ⇓ (Γ ⊢ Δ, I₂ : A)*)
-  | Axiom of 'a * 'a
+  | Axiom of 'I * 'I
   (* Axiom (i1, i2) ⇓ (Γ, i1 : A ⊢ Δ, i2 : A) ≜  [] *)
   (* Axiom (i1, i2) ⇓ (Γ, i2 : A ⊢ Δ, i1 : A) ≜  [] *)
-  | Trivial of 'a
+  | Trivial of 'I
   (* Trivial I ⇓ (Γ, I : false ⊢ Δ) ≜  [] *)
   (* Trivial I ⇓ (Γ ⊢ Δ, I : true ) ≜  [] *)
-  | Unfold of 'a * ('a, 'b) cert
+  | Unfold of 'I * ('I, 't) cert
   (* Unfold (I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
   (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
   (* Unfold (I, c) ⇓ (Γ, I : A → B ⊢ Δ) ≜  c ⇓ (Γ, I : ¬A ∨ B ⊢ Δ)*)
   (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A → B) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A ∨ B)*)
-  | Fold of 'a * ('a, 'b) cert
+  | Fold of 'I * ('I, 't) cert
   (* Fold (I, c) ⇓ (Γ, I : ¬A ∨ B ⊢ Δ) ≜  c ⇓ (Γ, I : A → B ⊢ Δ)*)
   (* Fold (I, c) ⇓ (Γ ⊢ Δ, I : ¬A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, I : A → B)*)
-  | Split of 'a * ('a, 'b) cert * ('a, 'b) cert
+  | Split of 'I * ('I, 't) cert * ('I, 't) cert
   (* Split (I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
   (* Split (I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
-  | Destruct of 'a * 'a * 'a * ('a, 'b) cert
+  | Destruct of 'I * 'I * 'I * ('I, 't) cert
   (* Destruct (I, J₁, J₂, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, J₁ : A, J₂ : B ⊢ Δ) *)
   (* Destruct (I, J₁, J₂, c) ⇓ (Γ ⊢ Δ, I : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, J₁ : A, J₂ : B) *)
-  | Construct of 'a * 'a * 'a * ('a, 'b) cert
+  | Construct of 'I * 'I * 'I * ('I, 't) cert
   (* Construct (I₁, I₂, J, c) ⇓ (Γ, I₁ : A, I₂ : B ⊢ Δ) ≜  c ⇓ (Γ, J : A ∧ B ⊢ Δ) *)
   (* Construct (I₁, I₂, J, c) ⇓ (Γ ⊢ Δ, I₁ : A, I₂ : B) ≜  c ⇓ (Γ ⊢ Δ, J : A ∧ B) *)
-  | Swap of 'a * ('a, 'b) cert
+  | Swap of 'I * ('I, 't) cert
   (* Swap (I, c) ⇓ (Γ, I : ¬A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, I : A)  *)
   (* Swap (I, c) ⇓ (Γ, I : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A) *)
   (* Swap (I, c) ⇓ (Γ ⊢ Δ, I : A ) ≜  c ⇓ (Γ, I : ¬A ⊢ Δ) *)
   (* Swap (I, c) ⇓ (Γ ⊢ Δ, I : ¬A) ≜  c ⇓ (Γ, I : A ⊢ Δ)  *)
-  | Dir of dir * 'a * ('a, 'b) cert
+  | Dir of dir * 'I * ('I, 't) cert
   (* Dir (Left, I, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, I : A ⊢ Δ) *)
   (* Dir (Right, I, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, I : B ⊢ Δ) *)
   (* Dir (Left, I, c) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  c ⇓ (Γ ⊢ Δ, I : A) *)
   (* Dir (Right, I, c) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  c ⇓ (Γ ⊢ Δ, I : B) *)
-  | Weakening of 'a * ('a, 'b) cert
+  | Weakening of 'I * ('I, 't) cert
   (* Weakening (I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening (I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | IntroQuant of 'a * ident * ('a, 'b) cert
+  | IntroQuant of 'I * ident * ('I, 't) cert
   (* IntroQuant (I, y, c) ⇓ (Γ, I : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : P y ⊢ Δ) (y fresh) *)
   (* IntroQuant (I, y, c) ⇓ (Γ ⊢ Δ, I : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : P y) (y fresh) *)
-  | InstQuant of 'a * 'a * 'b * ('a, 'b) cert
+  | InstQuant of 'I * 'I * 't * ('I, 't) cert
   (* InstQuant (I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
   (* InstQuant (I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
-  | Rewrite of 'a * 'a * path * bool * ('a, 'b) cert list
+  | Rewrite of 'I * 'I * path * bool * ('I, 't) cert list
   (* Rewrite (I, J, path, rev, lc) ⇓ Seq is defined as follows :
      it tries to rewrite in <I> an equality that is in <J>, following the path <path>,
      <rev> indicates if it rewrites from left to right or from right to left.
-     Since <H> can have premises, those are then matched against the certificates <lc> *)
+     Since <J> can have premises, those are then matched against the certificates <lc> *)
 
 type vcert = (prsymbol, term) cert
 

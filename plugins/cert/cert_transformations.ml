@@ -100,6 +100,43 @@ let update_opt o1 o2 = match o1 with
   | Some _ -> o1
   | None -> o2
 
+(* To debug *)
+open Format
+let rec print_ast fmt t = match t.t_node with
+  | Tvar _ -> fprintf fmt "Tvar"
+  | Tconst _ -> fprintf fmt "Tconst"
+  | Tapp (l, ts) ->
+      fprintf fmt "(%a %a)"
+        pri (l.ls_name)
+        (pp_print_list print_ast) ts
+  | Tif _ -> fprintf fmt "Tif"
+  | Tlet _ -> fprintf fmt "Tlet"
+  | Tcase _ -> fprintf fmt "Tcase"
+  | Teps _ -> fprintf fmt "Teps"
+  | Tquant (_, t) -> let _, _, t = t_open_quant t in
+                     fprintf fmt "Tquant (Q, %a)"
+                       print_ast t
+  | Tbinop (_, t1, t2) ->
+      fprintf fmt "%a BOP %a"
+        print_ast t1
+        print_ast t2
+  | Tnot t -> fprintf fmt "Tnot (%a)" print_ast t
+  | Ttrue -> fprintf fmt "Ttrue"
+  | Tfalse -> fprintf fmt "Tfalse"
+
+let tprint_tg target =
+  Trans.decl_acc (target, Hole) update_tg_c (fun d (tg, _) -> match d.d_node with
+      | Dprop (_, pr, t) when match_tg tg pr ->
+          Format.eprintf "%a : %a@." pri (pr.pr_name) print_ast t;
+          [d], None
+      | _ -> [d], None)
+
+let tprint any every where : ctrans = elab_store (fun task ->
+   let tg = find_target any every where task in
+   let ta, (_, c) = tprint_tg tg task in
+   [ta], c)
+
+
 (* Assumption with a certificate : *)
 let assumption_pr_t prg tg = decl_l_cert (fun d -> match d.d_node with
   | Dprop (Paxiom, pr, t) when t_equal t tg -> [], ([], Axiom (pr, prg))
