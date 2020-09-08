@@ -16,7 +16,7 @@ let lchecker trans = Trans.store (checker_ctrans None make_core checker_lambdapi
 (* let cchecker trans = Trans.store (checker_ctrans (Some eprcertif) make_core checker_caml trans)
  * let lchecker trans = Trans.store (checker_ctrans (Some eprcertif) make_core checker_lambdapi trans) *)
 
-
+let print_c any every where = cchecker (tprint any every where)
 let assert_c t              = cchecker (cut t)
 let assumption_c            = cchecker assumption
 let blast_c                 = cchecker blast
@@ -76,6 +76,11 @@ let trivial_l               = lchecker trivial
 let register_caml : unit =
   let open Args_wrapper in
   let open Trans in
+
+  wrap_and_register ~desc:"print given term to debug"
+    "print_ccert" (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
+    print_c;
+
 
   wrap_and_register ~desc:"A OCaml certified version of transformation assert"
     "assert_ccert" (Tformula Ttrans_l) assert_c;
