@@ -58,10 +58,6 @@ File record_one_field.mlw:
        "value": {"type": "Integer", "val": "0"}}
   Line 31:
     x, [[@introduced], [@model_trace:x]] = {"type": "Integer", "val": "43"}
-    y, [[@introduced], [@model_trace:y]] =
-      {"proj_name": "contents",
-       "type": "Proj",
-       "value": {"type": "Integer", "val": "42"}}
     old y, [[@at:'Old], [@at:'Old:loc:bench/ce/record_one_field.mlw:31],
       [@introduced], [@model_trace:y]] =
       {"proj_name": "contents",
@@ -97,7 +93,7 @@ File record_one_field.mlw:
        "type": "Proj",
        "value": {"type": "Integer", "val": "0"}}
   Line 42:
-    x23, [[@introduced], [@model_trace:x23]] =
+    x23, [[@introduced]] =
       {"proj_name": "contents",
        "type": "Proj",
        "value": {"type": "Integer", "val": "2"}}
@@ -161,16 +157,6 @@ File record_one_field.mlw:
        "type": "Proj",
        "value": {"type": "Integer", "val": "0"}}
   Line 56:
-    x at L, [[@at:L], [@at:L:loc:bench/ce/record_one_field.mlw:56],
-      [@introduced], [@model_trace:x]] =
-      {"proj_name": "contents",
-       "type": "Proj",
-       "value": {"type": "Integer", "val": "0"}}
-    x at M, [[@at:M], [@at:M:loc:bench/ce/record_one_field.mlw:56],
-      [@introduced], [@model_trace:x]] =
-      {"proj_name": "contents",
-       "type": "Proj",
-       "value": {"type": "Integer", "val": "2"}}
     x, [[@introduced], [@model_trace:x]] =
       {"proj_name": "contents",
        "type": "Proj",
@@ -226,16 +212,6 @@ File record_one_field.mlw:
        "type": "Proj",
        "value": {"type": "Integer", "val": "3"}}
   Line 56:
-    x at L, [[@at:L], [@at:L:loc:bench/ce/record_one_field.mlw:56],
-      [@introduced], [@model_trace:x]] =
-      {"proj_name": "contents",
-       "type": "Proj",
-       "value": {"type": "Integer", "val": "0"}}
-    x at M, [[@at:M], [@at:M:loc:bench/ce/record_one_field.mlw:56],
-      [@introduced], [@model_trace:x]] =
-      {"proj_name": "contents",
-       "type": "Proj",
-       "value": {"type": "Integer", "val": "2"}}
     [current iteration] x, [[@introduced], [@model_trace:x]] =
       {"proj_name": "contents",
        "type": "Proj",
@@ -278,10 +254,6 @@ File record_one_field.mlw:
        "type": "Proj",
        "value": {"type": "Integer", "val": "-2"}}
   Line 50:
-    x, [[@introduced], [@model_trace:x]] =
-      {"proj_name": "contents",
-       "type": "Proj",
-       "value": {"type": "Integer", "val": "0"}}
     old x, [[@at:'Old], [@at:'Old:loc:bench/ce/record_one_field.mlw:50],
       [@introduced], [@model_trace:x]] =
       {"proj_name": "contents",

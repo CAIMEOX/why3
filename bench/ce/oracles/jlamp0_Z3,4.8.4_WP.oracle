@@ -43,6 +43,11 @@ File jlamp0.mlw:
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "3"}}]}}
   Line 10:
+    a, [[@field:0:contents], [@introduced]] =
+      {"type": "Record",
+       "val":
+        {"Field":
+          [{"field": "contents", "value": {"type": "Integer", "val": "9"}}]}}
     a, [[@field:0:contents], [@introduced], [@model_trace:a]] =
       {"type": "Record",
        "val":
@@ -77,6 +82,11 @@ File jlamp0.mlw:
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "3"}}]}}
   Line 10:
+    a, [[@field:0:contents], [@introduced]] =
+      {"type": "Record",
+       "val":
+        {"Field":
+          [{"field": "contents", "value": {"type": "Integer", "val": "5"}}]}}
     a, [[@field:0:contents], [@introduced], [@model_trace:a]] =
       {"type": "Record",
        "val":
@@ -146,6 +156,11 @@ File jlamp0.mlw:
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "2"}}]}}
   Line 24:
+    c, [[@field:0:contents], [@introduced]] =
+      {"type": "Record",
+       "val":
+        {"Field":
+          [{"field": "contents", "value": {"type": "Integer", "val": "4"}}]}}
     c, [[@field:0:contents], [@introduced], [@model_trace:c]] =
       {"type": "Record",
        "val":
@@ -285,6 +300,11 @@ File jlamp0.mlw:
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "0"}}]}}
   Line 19:
+    a, [[@field:0:contents], [@introduced]] =
+      {"type": "Record",
+       "val":
+        {"Field":
+          [{"field": "contents", "value": {"type": "Integer", "val": "3"}}]}}
     a, [[@field:0:contents], [@introduced], [@model_trace:a]] =
       {"type": "Record",
        "val":

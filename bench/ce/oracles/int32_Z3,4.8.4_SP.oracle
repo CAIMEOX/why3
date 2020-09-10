@@ -14,6 +14,15 @@ File int32.mlw:
               "type": "Proj",
               "value": {"type": "Integer", "val": "22"}}}]}}
   Line 7:
+    r, [[@field:0:contents], [@introduced], [@mlw:reference_var]] =
+      {"type": "Record",
+       "val":
+        {"Field":
+          [{"field": "contents",
+            "value":
+             {"proj_name": "int32'int",
+              "type": "Proj",
+              "value": {"type": "Integer", "val": "84"}}}]}}
     r, [[@field:0:contents], [@introduced], [@mlw:reference_var],
       [@model_trace:r]] =
       {"type": "Record",

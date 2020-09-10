@@ -15,6 +15,19 @@ File map.mlw:
                  "value": {"type": "Integer", "val": "3"}},
                 {"others": {"type": "Integer", "val": "0"}}]}}]}}
   Line 8:
+    x, [[@field:0:contents], [@introduced]] =
+      {"type": "Record",
+       "val":
+        {"Field":
+          [{"field": "contents",
+            "value":
+             {"type": "Array",
+              "val":
+               [{"indice": {"type": "Integer", "val": "0"},
+                 "value": {"type": "Integer", "val": "3"}},
+                {"indice": {"type": "Integer", "val": "1"},
+                 "value": {"type": "Integer", "val": "3"}},
+                {"others": {"type": "Integer", "val": "0"}}]}}]}}
     x, [[@field:0:contents], [@introduced], [@model_trace:x]] =
       {"type": "Record",
        "val":
@@ -59,6 +72,24 @@ File map.mlw:
                   {"type": "Array",
                    "val": [{"others": {"type": "Integer", "val": "0"}}]}}]}}]}}
   Line 14:
+    x, [[@field:0:contents], [@introduced]] =
+      {"type": "Record",
+       "val":
+        {"Field":
+          [{"field": "contents",
+            "value":
+             {"type": "Array",
+              "val":
+               [{"indice": {"type": "Integer", "val": "0"},
+                 "value":
+                  {"type": "Array",
+                   "val":
+                    [{"indice": {"type": "Integer", "val": "0"},
+                      "value": {"type": "Integer", "val": "0"}},
+                     {"others": {"type": "Integer", "val": "1"}}]}},
+                {"others":
+                  {"type": "Array",
+                   "val": [{"others": {"type": "Integer", "val": "0"}}]}}]}}]}}
     x, [[@field:0:contents], [@introduced], [@model_trace:x]] =
       {"type": "Record",
        "val":
@@ -141,6 +172,31 @@ File map.mlw:
                   {"type": "Array",
                    "val": [{"others": {"type": "Integer", "val": "0"}}]}}]}}]}}
   Line 19:
+    x, [[@field:0:contents], [@introduced]] =
+      {"type": "Record",
+       "val":
+        {"Field":
+          [{"field": "contents",
+            "value":
+             {"type": "Array",
+              "val":
+               [{"indice": {"type": "Integer", "val": "0"},
+                 "value":
+                  {"type": "Array",
+                   "val":
+                    [{"indice": {"type": "Integer", "val": "0"},
+                      "value": {"type": "Integer", "val": "3"}},
+                     {"others": {"type": "Integer", "val": "1"}}]}},
+                {"indice": {"type": "Integer", "val": "1"},
+                 "value":
+                  {"type": "Array",
+                   "val":
+                    [{"indice": {"type": "Integer", "val": "1"},
+                      "value": {"type": "Integer", "val": "3"}},
+                     {"others": {"type": "Integer", "val": "0"}}]}},
+                {"others":
+                  {"type": "Array",
+                   "val": [{"others": {"type": "Integer", "val": "0"}}]}}]}}]}}
     x, [[@field:0:contents], [@introduced], [@model_trace:x]] =
       {"type": "Record",
        "val":

@@ -9,6 +9,11 @@ File bv32.mlw:
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "34"}}]}}
   Line 9:
+    r, [[@field:0:contents], [@introduced], [@mlw:reference_var]] =
+      {"type": "Record",
+       "val":
+        {"Field":
+          [{"field": "contents", "value": {"type": "Integer", "val": "132"}}]}}
     r, [[@field:0:contents], [@introduced], [@mlw:reference_var],
       [@model_trace:r]] =
       {"type": "Record",
@@ -38,6 +43,11 @@ File bv32.mlw:
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "34"}}]}}
   Line 15:
+    r, [[@field:0:contents], [@introduced], [@mlw:reference_var]] =
+      {"type": "Record",
+       "val":
+        {"Field":
+          [{"field": "contents", "value": {"type": "Integer", "val": "132"}}]}}
     r, [[@field:0:contents], [@introduced], [@mlw:reference_var],
       [@model_trace:r]] =
       {"type": "Record",
