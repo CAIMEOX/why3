@@ -803,9 +803,9 @@ let mk_proxy_decl ~ghost e =
   let id =
     match e.e_node with
     | Eexec ({ c_node = Capp _},cty) ->
-       result_id ?loc:e.e_loc ~ql:cty.cty_post ()
+       result_id ?loc:e.e_loc ~attrs:proxy_attrs ~ql:cty.cty_post ()
     | Eexec ({ c_node = Cpur _},_) ->
-       result_id ?loc:e.e_loc ()
+       result_id ?loc:e.e_loc ~attrs:proxy_attrs ()
     | _ ->
        id_fresh ?loc:e.e_loc ~attrs:proxy_attrs "o"
   in

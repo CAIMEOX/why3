@@ -1273,10 +1273,10 @@ let clone_post_result q = match q.t_node with
 
 let default_result_name = "result"
 
-let result_id ?loc ?(ql=[]) () : preid =
+let result_id ?loc ?attrs ?(ql=[]) () : preid =
   match ql with
   | q :: _ -> clone_post_result q
-  | _ -> id_fresh ?loc default_result_name
+  | _ -> id_fresh ?loc ?attrs default_result_name
 
 
 let annot_attr = Ident.create_attribute "vc:annotation"
