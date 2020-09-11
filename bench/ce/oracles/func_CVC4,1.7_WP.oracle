@@ -1,0 +1,85 @@
+Weakest Precondition
+bench/ce/func.mlw Top f'vc: Timeout or Unknown
+Counter-example model:
+File func.mlw:
+  Line 5:
+    x, [[@field:0:contents], [@introduced], [@mlw:reference_var]] =
+      {"type": "Record",
+       "val":
+        {"Field":
+          [{"field": "contents", "value": {"type": "Integer", "val": "0"}}]}}
+  Line 7:
+    a, [[@introduced]] = {"type": "Integer", "val": "-1"}
+  Line 8:
+    result, [[@introduced]] = {"type": "Integer", "val": "1"}
+  Line 9:
+    result, [[@introduced]] = {"type": "Integer", "val": "0"}
+  Line 10:
+    result, [[@introduced]] = {"type": "Integer", "val": "-1"}
+
+bench/ce/func.mlw Top f0'vc: Timeout or Unknown
+Counter-example model:
+File func.mlw:
+  Line 5:
+    x, [[@field:0:contents], [@introduced], [@mlw:reference_var]] =
+      {"type": "Record",
+       "val":
+        {"Field":
+          [{"field": "contents", "value": {"type": "Integer", "val": "-2"}}]}}
+  Line 13:
+    result, [[@introduced]] = {"type": "Integer", "val": "1"}
+  Line 14:
+    result, [[@introduced]] = {"type": "Integer", "val": "-2"}
+  Line 15:
+    result, [[@introduced]] = {"type": "Integer", "val": "-1"}
+
+bench/ce/func.mlw Top g'vc: Timeout or Unknown
+Counter-example model:
+File func.mlw:
+  Line 17:
+    a, [[@introduced]] = {"type": "Integer", "val": "-3"}
+  Line 18:
+    r, [[@introduced]] = {"type": "Integer", "val": "1"}
+
+bench/ce/func.mlw Top h'vc: Timeout or Unknown
+Counter-example model:
+File func.mlw:
+  Line 8:
+    t, [[@introduced]] = {"type": "Integer", "val": "-1"}
+  Line 23:
+    t, [[@introduced]] = {"type": "Integer", "val": "-1"}
+  Line 24:
+    t, [[@introduced], [@model_trace:t]] = {"type": "Integer", "val": "-1"}
+
+bench/ce/func.mlw Top i'vc: Timeout or Unknown
+Counter-example model:
+File func.mlw:
+  Line 8:
+    result, [[@introduced]] = {"type": "Integer", "val": "-2"}
+  Line 28:
+    result, [[@introduced]] = {"type": "Integer", "val": "-2"}
+    u, [[@introduced]] = {"type": "Integer", "val": "-1"}
+  Line 29:
+    u, [[@introduced], [@model_trace:u]] = {"type": "Integer", "val": "-1"}
+
+bench/ce/func.mlw Top i2'vc: Timeout or Unknown
+Counter-example model:
+File func.mlw:
+  Line 8:
+    result, [[@introduced]] = {"type": "Integer", "val": "-1"}
+  Line 32:
+    result, [[@introduced]] = {"type": "Integer", "val": "0"}
+    u, [[@introduced]] = {"type": "Integer", "val": "-1"}
+  Line 33:
+    u, [[@introduced], [@model_trace:u]] = {"type": "Integer", "val": "-1"}
+
+bench/ce/func.mlw Top i0'vc: Timeout or Unknown
+Counter-example model:
+File func.mlw:
+  Line 13:
+    result, [[@introduced]] = {"type": "Integer", "val": "-2"}
+  Line 36:
+    u, [[@introduced]] = {"type": "Integer", "val": "-1"}
+  Line 37:
+    u, [[@introduced], [@model_trace:u]] = {"type": "Integer", "val": "-1"}
+

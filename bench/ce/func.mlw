@@ -4,21 +4,34 @@ use int.Int
 
 val ref x : int
 
-let f () : int
+let f (a:int) : int
+  ensures { result < 1 }
+= x <- x+a;
+  x+2
+
+let f0 () : int
   ensures { result < 1 }
 = x <- x+1;
   x+2
 
-let g () : int
+let g (a:int) : int
   returns { r -> r < 1 }
-= 1+4
+= a+4
 
 
 let h () =
-  let t = f ()  in
+  let t = f 42  in
   assert { t  = 0 }
-  
-  
+
+
 let i () =
-  let u = f () + 1 in
+  let u = f 43 + 1 in
+  assert { u  = 0 }
+
+let i2 () =
+  let u = f 43 + f 44 in
+  assert { u  = 0 }
+
+let i0 () =
+  let u = f0 () + 1 in
   assert { u  = 0 }

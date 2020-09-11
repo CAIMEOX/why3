@@ -800,17 +800,24 @@ let c_pur s vl ityl ity =
   mk_cexp (Cpur (s,vl)) cty
 
 let mk_proxy_decl ~ghost e =
-  let id =
+  let mk_attrs id =
+    let s = Format.asprintf "%a'result" Ident.print_decoded id.id_string in
+    let a = create_model_trace_attr s in
+    Sattr.add a proxy_attrs
+  in
+  let rec find_id e =
     match e.e_node with
     | Eexec ({ c_node = Capp (rs,_)},cty) ->
-       Format.eprintf "mk_proxy_decl for %s@." rs.rs_name.id_string;
-       result_id ?loc:e.e_loc (*~attrs:proxy_attrs*) ~ql:cty.cty_post ()
-    | Eexec ({ c_node = Cpur _},_) ->
-       result_id ?loc:e.e_loc (*~attrs:proxy_attrs*) ()
+       let attrs = mk_attrs rs.rs_name in
+       result_id ?loc:e.e_loc ~attrs ~ql:cty.cty_post ()
+    | Eexec ({ c_node = Cpur (ls,_)},_) ->
+       let attrs = mk_attrs ls.ls_name in
+       result_id ?loc:e.e_loc ~attrs ()
+    | Elet(_,e) -> find_id e
     | _ ->
        id_fresh ?loc:e.e_loc ~attrs:proxy_attrs "o"
   in
-  let_var ~ghost id e
+  let_var ~ghost (find_id e) e
 
 let mk_proxy ghost e hd = match e.e_node with
   | Evar v when Sattr.is_empty e.e_attrs -> hd, v

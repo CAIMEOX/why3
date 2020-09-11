@@ -1267,16 +1267,16 @@ let open_post_with t q = match q.t_node with
   | Teps bf -> t_open_bound_with t bf
   | _ -> invalid_arg "Ity.open_post_with"
 
-let clone_post_result q = match q.t_node with
-  | Teps bf -> t_clone_bound_id bf
+let clone_post_result ?loc ?attrs q = match q.t_node with
+  | Teps bf -> t_clone_bound_id ?loc ?attrs bf
   | _ -> invalid_arg "Ity.clone_post_result"
 
 let default_result_name = "result"
 
-let result_id ?loc ?attrs ?(ql=[]) () : preid =
+let result_id ?loc ?(attrs=Sattr.empty) ?(ql=[]) () : preid =
   match ql with
-  | q :: _ -> clone_post_result q
-  | _ -> id_fresh ?loc ?attrs default_result_name
+  | q :: _ -> clone_post_result ?loc ~attrs q
+  | _ -> id_fresh ?loc ~attrs default_result_name
 
 
 let annot_attr = Ident.create_attribute "vc:annotation"
