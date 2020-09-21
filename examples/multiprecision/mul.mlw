@@ -13,6 +13,8 @@ module Mul
   use util.Util
   use add.Add
 
+  let constant toom22_threshold : int32 = 29
+
   (** `wmpn_mul_1 r x sz y` multiplies `x[0..sz-1]` by the limb `y` and
        writes the n least significant limbs in `r`, and returns the most
        significant limb. It corresponds to `mpn_mul_1`. *)

@@ -1,0 +1,252 @@
+module Sqr_basecase
+
+  use int.Int
+  use mach.int.Int32
+  use import mach.int.UInt64GMP as Limb
+  use int.Power
+  use ref.Ref
+  use mach.c.C
+  use array.Array
+  use map.Map
+  use types.Types
+  use lemmas.Lemmas
+  use util.Util
+  use add.Add
+  use add.AddOld
+  use mul.Mul
+  use logical.Logical
+
+  let rec ghost function diag (a: map int limb) (u v:int) : int
+    variant { v - u }
+    = if u >= v then 0
+      else uint64'int a[u] * uint64'int a[u] + radix * radix * diag a (u+1) v
+
+  let rec ghost function halfcrossprods (a: map int limb) (u v:int) : int
+    variant { v - u }
+    = if u >= v - 1 then 0
+      else uint64'int a[u] * value_sub a (u+1) v
+           + radix * radix * halfcrossprods a (u+1) v
+
+  let rec lemma decomp_sqr (a: map int limb) (u v:int)
+    variant { v - u }
+    ensures { value_sub a u v * value_sub a u v
+              = diag a u v + 2 * radix * halfcrossprods a u v }
+  =
+    if u >= v then ()
+    else begin
+      decomp_sqr a (u+1) v;
+      value_sub_head a u v;
+      assert { value_sub a u v * value_sub a u v
+               = (a[u] + radix * value_sub a (u+1) v)
+                 * (a[u] + radix * value_sub a (u+1) v)
+               = a[u] * a[u] + 2 * radix * a[u] * value_sub a (u+1) v
+                 + radix * radix * (diag a (u+1) v)
+                 + radix * radix * 2 * radix * halfcrossprods a (u+1) v
+               = diag a u v
+                 + 2 * radix * (a[u] * value_sub a (u+1) v
+                               + radix * radix * halfcrossprods a (u+1) v)
+               = diag a u v + 2 * radix * halfcrossprods a u v }
+    end
+
+  let wmpn_sqr_basecase (rp up: ptr limb) (n: int32)
+    requires { valid rp (n+n) }
+    requires { valid up n }
+    requires { 1 <= n <= toom22_threshold }
+    requires { writable rp }
+    ensures  { value rp (n+n) = value up n * value up n }
+  =
+    let ref ul = C.get up in
+    let l, h = mul_double ul ul in
+    C.set_ofs rp 0 l;
+    C.set_ofs rp 1 h;
+    value_tail rp 1;
+    assert { value rp 2 = value up 1 * value up 1
+             by value rp 2 = l + radix * h };
+    if n > 1
+    then begin
+      (* FIXME: 2*TOOM2_THRESHOLD ? + precondition sur n *)
+      let tp = salloc (UInt32.of_int32 (2*n)) in
+      let up1 = C.incr up 1 in
+      assert { value up1 (n-1)
+               = value_sub (pelts up) (offset up + 1) (offset up + n) };
+      let ref cy = wmpn_mul_1 tp up1 (n-1) (C.get up) in
+      assert { value tp (n-1) + power radix (n-1) * cy
+               = (pelts up)[offset up]
+                 * value_sub (pelts up) (offset up + 1) (offset up + n) };
+      label Carry in
+      let ghost h = halfcrossprods (pelts up) (offset up)
+                    (offset up + int32'int n) in
+      C.set_ofs tp (n-1) cy;
+      assert { value tp (n-1) = value tp (n-1) at Carry };
+      value_tail tp (n-1);
+      assert { value tp n
+               = (pelts up)[offset up]
+                 * value_sub (pelts up) (offset up + 1) (offset up + n)
+               = h - radix * radix * halfcrossprods (pelts up)
+                                     (offset up + 1) (offset up + n)
+               = h - power radix 2 * halfcrossprods (pelts up)
+                                     (offset up + 1) (offset up + n) };
+      let ref i = 2 in
+      while i < n do
+        variant { n - i }
+        invariant { 2 <= i <= n }
+        invariant { value tp (n+i-2)
+                  = h - power radix (2 * i - 2)
+                            * halfcrossprods (pelts up)
+                              (offset up + i-1) (offset up + n) }
+        let tpi = C.incr tp (2*i-2) in
+        let upi = C.incr up i in
+        value_concat tp (2*i-2) (n+i-2);
+        label HCL in
+        assert { value upi (n-i)
+                 = value_sub (pelts up) (offset up + i) (offset up + n) };
+        cy <- wmpn_addmul_1 tpi upi (n - i) (C.get_ofs up (i-1));
+        assert { value tpi (n-i) + power radix (n-i) * cy
+                 = (pelts up)[offset up + (i - 1)]
+                   * value upi (n-i) + (value tpi (n-i) at HCL) };
+        label HCSet in
+        C.set_ofs tp (n+i-2) cy;
+        assert { offset tp + (n + i - 2) >= offset tpi + (n-i) };
+        value_sub_frame (pelts tpi) (pelts pure { tpi at HCSet })
+                        (offset tpi) (offset tpi + (int32'int n - int32'int i));
+        assert { value tpi (n-i) = value tpi (n-i) at HCSet };
+        value_sub_frame (pelts tp) (pelts pure { tp at HCL })
+                        (offset tp) (offset tp + (2 * int32'int i - 2));
+        assert { value tp (2*i-2) = value tp (2*i-2) at HCL };
+        value_concat tp (2*i-2) (n+i-2);
+        value_tail tp (n+i-2);
+        assert { value tp (n+i-1)
+                 = h - power radix (2 * i) * halfcrossprods (pelts up)
+                                             (offset up + i) (offset up + n)
+                 by value tpi (n-i)
+                    = value_sub (pelts tp) (offset tp + 2 * i - 2)
+                                           (offset tp + n + i - 2)
+                 so value tp (n+i-2)
+                    = value tp (2*i-2) + power radix (2*i-2) * value tpi (n-i)
+                 so value tpi (n-i) + power radix (n-i) * cy
+                    = (pelts up)[offset up + (i - 1)]
+                       * value upi (n-i) + (value tpi (n-i) at HCL)
+                 so power radix (2*i-2) * radix * radix = power radix (2*i)
+                 so value tp (n+i-1)
+                 = value tp (n+i-2) + power radix (n+i-2) * cy
+                 = value tp (2*i-2)
+                   + power radix (2*i-2) * value tpi (n-i)
+                   + power radix (n+i-2) * cy
+                 = value tp (2*i-2)
+                   + power radix (2*i-2) * value tpi (n-i)
+                   + power radix (2*i-2) * power radix (n-i) * cy
+                 = value tp (2*i-2)
+                   + power radix (2*i-2)
+                     * (value tpi (n-i) + power radix (n-i) * cy)
+                 = value tp (2*i-2)
+                   + power radix (2*i-2)
+                     * (((pelts up)[offset up + (i-1)]
+                                           * value upi (n-i))
+                          + value tpi (n-i) at HCL)
+                 = value tp (2*i-2)
+                   + power radix (2*i-2) * ((pelts up)[offset up + (i-1)]
+                                           * value upi (n-i))
+                   + power radix (2*i-2) * value tpi (n-i) at HCL
+                 = value tp (2*i-2) at HCL
+                   + power radix (2*i-2) * value tpi (n-i) at HCL
+                   + power radix (2*i-2) * ((pelts up)[offset up + (i-1)]
+                                           * value upi (n-i))
+                 = value tp (n+i-2) at HCL
+                   + power radix (2*i-2) * ((pelts up)[offset up + (i-1)]
+                                           * value upi (n-i))
+                 = h - power radix (2 * i - 2)
+                            * halfcrossprods (pelts up)
+                              (offset up + i-1) (offset up + n)
+                   + power radix (2*i-2)
+                     * ((pelts up)[offset up + (i-1)]
+                       * value_sub (pelts up) (offset up + i) (offset up + n))
+                 = h - power radix (2*i-2) *
+                     (halfcrossprods (pelts up) (offset up + i - 1)
+                                                (offset up + n)
+                     - (pelts up)[offset up + (i-1)]
+                       * value_sub (pelts up) (offset up + i) (offset up + n))
+                 = h - power radix (2*i-2)
+                     * (radix * radix *  halfcrossprods (pelts up)
+                                         (offset up + i) (offset up + n))
+                 = h - power radix (2 * i) * halfcrossprods (pelts up)
+                                             (offset up + i) (offset up + n) };
+        i <- i + 1;
+      done;
+      assert { value tp (2*n - 2) = h };
+      for j = 0 to n-1 do
+        invariant { value rp (2*j)
+                    = diag (pelts up) (offset up) (offset up + n) -
+                      (power radix (2 * j))
+                      * diag (pelts up) (offset up + j) (offset up + n) }
+        label DiagLoop in
+        ul <- C.get_ofs up j;
+        let l, h = mul_double ul ul in
+        C.set_ofs rp (2*j) l;
+        C.set_ofs rp (2*j + 1) h;
+        value_tail rp (2*j);
+        assert { value rp (2*j+1) = value rp (2*j) + power radix (2*j) * l
+                 by (pelts rp)[offset rp + 2*j] = l };
+        value_tail rp (2*j+1);
+        assert { value rp (2*j) = value rp (2*j) at DiagLoop };
+        assert { value rp (2* (j+1))
+                 = value rp (2*j+1+1)
+                 = value rp (2*j+1) + power radix (2*j+1) * h
+                 = value rp (2*j)
+                   + power radix (2*j) * l + power radix (2*j+1) * h
+                 = value rp (2*j) + power radix (2*j) * (l + radix * h)
+                 = value rp (2*j) at DiagLoop + power radix (2*j) * ul * ul
+                 = diag (pelts up) (offset up) (offset up + n)
+                   - power radix (2*j)
+                     * diag (pelts up) (offset up + j) (offset up + n)
+                   + power radix (2*j) * ul * ul
+                 = diag (pelts up) (offset up) (offset up + n)
+                   - power radix (2*j)
+                     * (radix * radix * diag (pelts up)
+                                        (offset up + j + 1) (offset up + n))
+                 = diag (pelts up) (offset up) (offset up + n)
+                   - power radix (2*(j+1))
+                     * diag (pelts up) (offset up + j + 1) (offset up + n) };
+      done;
+      assert { value rp (2*n) = diag (pelts up) (offset up) (offset up + n) };
+      cy <- wmpn_lshift tp tp (2*n-2) 1;
+      assert { value tp (2*n-2) + power radix (2*n - 2) * cy
+               = 2 * h };
+      let rp1 = C.incr rp 1 in
+      label Add in
+      assert { value rp (2*n-1) = value rp 1 + radix * value rp1 (2*n-2) };
+      value_tail rp (2*n-1);
+      cy <- cy + wmpn_add_n_in_place rp1 tp (2 * n - 2);
+      assert { value rp1 (2*n-2) + power radix (2*n-2) * cy
+               = value (rp1 at Add) (2*n-2)
+                 + 2 * radix * h };
+      assert { value rp 1 = value rp 1 at Add };
+      assert { value rp (2*n-1) + power radix (2*n-1) * cy
+               = value rp 1 + value rp1 (2*n-2) + power radix (2*n-1) * cy
+               = value (rp at Add) 1 + value (rp1 at Add) (2*n-2)
+                 + 2 * radix * h
+               = value (rp at Add) (2*n-1)
+                 + 2 * radix * h };
+      let rpn = C.get_ofs rp (2*n-1) in
+      assert { value rp (2*n-1) + power radix (2*n-1) * (rpn + cy)
+               = value up n * value up n
+               by value rp (2*n-1) + power radix (2*n-1) * (rpn + cy)
+               = value rp (2*n-1) + power radix (2*n-1) * rpn
+                 + power radix (2*(n-1)) * cy
+               = value (rp at Add) (2*n-1) + power radix (2*n-1) * rpn
+                 + 2 * radix * h
+               = value (rp at Add) (2*n)
+                 + 2 * radix * h
+               = diag (pelts up) (offset up) (offset up + n)
+                 + 2 * radix * h };
+      assert { rpn + cy < radix
+               by value up n * value up n
+                  < power radix n * power radix n
+                  = power radix (2*n)
+                  = power radix (2*n-1) * radix
+               so value rp (2*n-1) + power radix (2*n-1) * (rpn + cy)
+                  >= power radix (2*n-1) * (rpn + cy) };
+      C.set_ofs rp (2*n-1) (rpn + cy);
+      value_tail rp (2*n-1)
+    end
+
+end

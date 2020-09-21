@@ -23,8 +23,6 @@ module Toom
   use mul.Mul_basecase
   use logical.Logical
 
-let constant toom22_threshold : int32 = 29
-
 let lemma no_borrow (x y r b m:int)
   requires { 0 <= y <= x }
   requires { 0 <= r < m }
