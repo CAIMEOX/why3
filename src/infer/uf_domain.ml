@@ -101,6 +101,8 @@ module Make(S:sig
 
   let top (man, uf_man) _ =
 
+(* former attempt to support Booleans, not satisfactory
+
     let vt,vf = Var.of_string "true", Var.of_string "false" in
     uf_man.env <- Environment.add uf_man.env [|vt;vf|] [||];
     Hashtbl.add uf_man.variable_mapping vt t_bool_true;
@@ -109,7 +111,12 @@ module Make(S:sig
       Mterm.(add t_bool_true vt
                (add t_bool_false vf uf_man.apron_mapping));
 
+ *)
+
     let dom = Dom.top man uf_man.env in
+
+    (* former attempt to support Booleans, not satisfactory
+
 
     let vt = Mterm.find t_bool_true uf_man.apron_mapping in
     let expr1 = Linexpr1.make uf_man.env in
@@ -126,6 +133,8 @@ module Make(S:sig
     Lincons1.array_set lincons_array 0 lincons1;
     Lincons1.array_set lincons_array 1 lincons2;
     let dom = Dom.meet_lincons_array man dom lincons_array in
+
+*)
 
     dom, empty_uf_domain
 
@@ -474,13 +483,14 @@ module Make(S:sig
             if is_in candidate then raise Not_found else candidate
         with Not_found ->
           try TermToVar.to_term uf_t.uf_to_var v with Not_found ->
-            raise (Bad_domain (Dom.forget_array man dom_t [|v|] false)) in
-      if Ty.ty_equal (t_type t) Ty.ty_bool then raise Not_found else t
+            raise (Bad_domain (Dom.forget_array man dom_t [|v|] false))
+      in
+      (* if Ty.ty_equal (t_type t) Ty.ty_bool then raise Not_found else *) t
     in
     match Dom.get_linexpr man dom_t v with
     | Some x -> begin
         try let t = varlist_to_term find_var x in
-            (* assert (Ty.ty_equal (t_type t) Ty.ty_int); *) Some t
+            assert (Ty.ty_equal (t_type t) Ty.ty_int); Some t
         with Bad_domain dom_t ->
           extract_term (man, uf_man) is_in (dom_t, uf_t) v
       end
@@ -492,20 +502,26 @@ module Make(S:sig
         try Hashtbl.find uf_man.variable_mapping v with Not_found ->
           try TermToVar.to_term uf_t.uf_to_var v with Not_found ->
             Format.eprintf "Couldn't find variable %a@." Var.print v;
-            raise Not_found in
-      if Ty.ty_equal (t_type t) Ty.ty_bool then raise Not_found else t
+            raise Not_found
+      in
+      (* if Ty.ty_equal (t_type t) Ty.ty_bool then raise Not_found else *) t
     in
     let t = Dom.to_term S.Infer_why3.env
       (S.Infer_why3.th_known, S.Infer_why3.mod_known) man dom_t find_var in
+(*
     let mix_int_bool ty1 ty2 =
       Ty.((ty_equal ty_bool ty1 && ty_equal ty_int ty2) ||
         (ty_equal ty_int ty1 && ty_equal ty_bool ty2)) in
+ *)
     Union_find.fold_class (fun t uf1 uf2 ->
         let t1 = TermToClass.to_term uf_man.class_to_term uf1 in
         let t2 = TermToClass.to_term uf_man.class_to_term uf2 in
-        match t1.t_ty, t2.t_ty with
+        (* match t1.t_ty, t2.t_ty with
         | Some ty1, Some ty2 when mix_int_bool ty1 ty2 -> t
-        | _ -> t_and t (t_equ t1 t2)) t uf_t.classes
+        | _ ->
+         *) t_and t (t_equ t1 t2)) t uf_t.classes
+
+    (*
 
   let try_mk_eq (man, uf_man) t1 t2 (dom,uf_t) =
     try
@@ -522,6 +538,7 @@ module Make(S:sig
       Dom.meet_lincons_array man dom lincons_array, uf_t
     with Not_found -> dom,uf_t
 
+     *)
 
   (* Get a set of (apron) linear expressions from a constraint stated
      in why3 logic. *)
@@ -639,14 +656,16 @@ module Make(S:sig
                Lincons1.array_set arr 0 cons;
                Dom.meet_lincons_array man dom arr, !ruf)
           | Tapp (ls, [t1;t2]) when ls_equal ps_equ ls ->
+(*
             let f_eq = try_mk_eq (man,uf_man) t1 t2 in
-            let f_uf = do_eq (man, uf_man) t1 t2 in
+ *)
+             let f_uf = do_eq (man, uf_man) t1 t2 in
             let subv_1 = get_subvalues t1 None in
             let subv_2 = get_subvalues t2 None in
             List.fold_left (fun acc_f ((t1, _), (t2, _)) ->
                 let f_eq = abstract (t_app ps_equ [t1; t2] None) in
                 (fun abs -> acc_f (f_eq abs)))
-              (fun d -> f_eq (f_uf d)) (List.combine subv_1 subv_2)
+              (* (fun d -> f_eq (f_uf d))*) f_uf (List.combine subv_1 subv_2)
           | Tif (t1, t2, t3) ->
             let f1 = abstract t1 in
             let f1_not = abstract (t_push_negation (t_not t1)) in
@@ -792,6 +811,7 @@ module Make(S:sig
 
   let rec tdepth t = 1 + t_fold (fun i t -> max (tdepth t) i) 0 t
 
+                   (*
   let adjust_term t ty =
     if Ty.(ty_equal ty ty_bool) then
       match t.t_node with
@@ -801,6 +821,7 @@ module Make(S:sig
            when BigInt.to_int n.il_int = 0 -> t_bool_false
       | _ -> assert false
     else t
+                    *)
 
   let rec forget_term (man, uf_man) t =
     let forget_fun (dom_t, uf_t) =
@@ -811,7 +832,7 @@ module Make(S:sig
           let dom_t, uf_t =
             match extract_term (man, uf_man) (is_in t) (dom_t, uf_t) var with
             | Some t2 ->
-               let t2 = adjust_term t2 (t_type t) in
+               (*               let t2 = adjust_term t2 (t_type t) in *)
                do_eq (man, uf_man) t t2 (dom_t, uf_t)
             | None -> dom_t, uf_t in
           Dom.forget_array man dom_t [|var|] false, uf_t

@@ -1,7 +1,3 @@
 ### Debug: inferred invariants ###
-(((contents a2 = False /\ contents b = False \/
-   (True = contents x3 /\ contents x1 = False) /\ contents x2 = False) /\
-  contents e = False) /\
- contents d = False) /\
-contents c = False
+(contents e = False /\ contents d = False) /\ contents c = False
 ###

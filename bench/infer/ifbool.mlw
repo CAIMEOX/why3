@@ -1,0 +1,41 @@
+
+
+(*
+
+Tests for path sensitivity with respect to Boolean expressions
+
+*)
+
+use ref.Ref
+use bool.Bool
+use int.Int
+
+val x : ref int
+val y : ref int
+
+
+(* just the expression 'True' *)
+
+let test1 [@infer:Polyhedra:4] () : unit =
+  x := 0;
+  y := 0;
+  while (!x <= 10) do
+    variant { 10 - !x }
+    if True then y := !y+1 else y := 0;
+     x := !x + 1;
+  done
+
+
+(* a Boolean variable *)
+
+val b : ref bool
+
+let test2 [@infer:Polyhedra:4] () : unit =
+  b := True;
+  x := 0;
+  y := 0;
+  while (!b && !x <= 10) do
+    variant { 10 - !x }
+    if !b then y := !y+1 else y := 0;
+    x := !x + 1;
+  done
