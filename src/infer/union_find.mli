@@ -1,4 +1,6 @@
 type t
+val print_class : Format.formatter -> t -> unit
+
 type set
 val empty: set
 val is_leq: set -> set -> bool

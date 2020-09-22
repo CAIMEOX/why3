@@ -1,5 +1,7 @@
 type t = int
 
+let print_class fmt c = Format.fprintf fmt "%d" c
+
 type set = int list list
 
 let empty = []

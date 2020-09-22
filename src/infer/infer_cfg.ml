@@ -365,6 +365,10 @@ module Make(E: sig
               translated to term (not pure), an imprecise invariant \
               will be generated: %a@." Expr.print_expr e1;
             t_true, t_true in
+(*
+       Format.eprintf "e1_true = @[%a@]@." Pretty.print_term e1_true;
+       Format.eprintf "e1_false = @[%a@]@." Pretty.print_term e1_false;
+ *)
        let constraints     = QDom.meet_term manpk e1_true in
        let constraints_not = QDom.meet_term manpk e1_false in
        let start_if = new_node_cfg cfg expr ~lbl:"if start" in
@@ -372,9 +376,15 @@ module Make(E: sig
        let e3_begin, e3_end, e3_exn = put_expr_in_cfg ~ret cfg manpk e3 in
        let end_if   = new_node_cfg cfg expr ~lbl:"if end" in
        new_hedge_cfg cfg start_if e2_begin
-         (fun _ abs -> constraints abs) ~lbl:"if true";
+         (fun _ abs ->
+           let c = constraints abs in
+           (* Format.eprintf "constraint = @[%a@]@." QDom.print c; *)
+           c) ~lbl:"if true";
        new_hedge_cfg cfg start_if e3_begin
-         (fun _ abs -> constraints_not abs) ~lbl:"if false";
+         (fun _ abs ->
+           let c = constraints_not abs in
+           (* Format.eprintf "constraint_not = @[%a@]@." QDom.print c; *)
+           c) ~lbl:"if false";
        new_hedge_cfg cfg e2_end end_if
          (fun _ abs -> abs) ~lbl:"if true end";
        new_hedge_cfg cfg e3_end end_if

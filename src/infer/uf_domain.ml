@@ -48,6 +48,8 @@ module Make(S:sig
   (* abstract state of uf *)
   type uf_t = {
     classes   : Union_find.set; (* union find on terms *)
+    class_constructor: TermToClass.t;
+    (* a constructor term appearing in that class, if any *)
     uf_to_var : TermToVar.t;    (* bijection between vars from uf
                                    domain and terms *)
     var_pool  : VarPool.t;      (* bounded number of variables to
@@ -87,11 +89,13 @@ module Make(S:sig
         region_var = Ity.Mreg.empty;
         env = Environment.make vars [||];
         defined_terms = Mterm.empty;
-        class_to_term = TermToClass.empty; } in
+        class_to_term = TermToClass.empty;
+      } in
     Dom.create_manager (), uf_man
 
   let empty_uf_domain = {
     classes = Union_find.empty;
+    class_constructor = TermToClass.empty;
     uf_to_var = TermToVar.empty;
     var_pool = build_var_pool npool;
   }
@@ -144,11 +148,21 @@ module Make(S:sig
   let is_bottom (man, _) (a, _) =
     Dom.is_bottom man a
 
-  let get_class_for_term uf_man t =
-    try TermToClass.to_t uf_man.class_to_term t with Not_found ->
-      let c = Union_find.new_class () in
-      uf_man.class_to_term <- TermToClass.add uf_man.class_to_term t c;
-      c
+  let get_class_for_term uf_man uf_state t : Union_find.t * uf_t =
+    let c =
+      try
+        TermToClass.to_t uf_man.class_to_term t
+      with Not_found ->
+        let c = Union_find.new_class () in
+        uf_man.class_to_term <- TermToClass.add uf_man.class_to_term t c;
+        c
+    in
+    let uf_state =
+      match t.t_node with
+      | Tapp(ls,_) when ls.ls_constr > 0 ->
+         { uf_state with class_constructor = TermToClass.add uf_state.class_constructor t c }
+      | _ -> uf_state
+    in c, uf_state
 
   (* let get_equivs uf_man uf t =
    *   let tcl = TermToClass.to_t uf_man.class_to_term t in
@@ -240,13 +254,72 @@ module Make(S:sig
     if t_equal t3 t1 then t2
     else t_map (replaceby t1 t2) t3
 
+  (** returns a constructor term currently in a class, if any. The
+     number returned as first componenent is the constructor number in
+     its type *)
+  let get_constructor_symbol_index uf_state cl : (lsymbol * term) option =
+    try
+      let t = TermToClass.to_term uf_state.class_constructor cl in
+      match t.t_node with
+        | Tapp(ls,_) -> assert (ls.ls_constr > 0); Some (ls, t)
+        | _ -> None
+    with Not_found -> None
+
+  let constructor_clash c1 c2 =
+    match (c1,c2) with
+    | Some(n1,_), Some(n2,_) -> not (ls_equal n1 n2)
+    | _ -> false
+
+  let print_constr fmt c =
+    match c with
+    | None -> Format.fprintf fmt "(no constr)"
+    | Some(n,t) -> Format.fprintf fmt "@[(%a,%a)@]" Pretty.print_ls n Pretty.print_term t
+
   let do_eq (man, uf_man) t1 t2 =
-    if Ty.ty_equal (t_type t1) Ity.ty_unit then fun_id else
+(*    Format.eprintf "[Uf_domain] adding equality @[%a@ = %a@]@."
+      Pretty.print_term t1 Pretty.print_term t2;
+ *)    if Ty.ty_equal (t_type t1) Ity.ty_unit then fun_id else
       fun (dom, uf_t) ->
-        let cl1 = get_class_for_term uf_man t1 in
-        let cl2 = get_class_for_term uf_man t2 in
+      let cl1,uf_t = get_class_for_term uf_man uf_t t1 in
+      let constr1 = get_constructor_symbol_index uf_t cl1 in
+(*
+      if constr1 <> None then
+        Format.eprintf "class for @[%a@] is @[%a@] with constructor @[%a@]@."
+        Pretty.print_term t1 Union_find.print_class cl1 print_constr constr1;
+ *)
+      let cl2,uf_t = get_class_for_term uf_man uf_t t2 in
+      let constr2 = get_constructor_symbol_index uf_t cl2 in
+(*
+      if constr2 <> None then
+        Format.eprintf "class for @[%a@] is @[%a@] with constructor @[%a@]@."
+        Pretty.print_term t2 Union_find.print_class cl2 print_constr constr2;
+ *)
+      if constructor_clash constr1 constr2 then
+        begin
+        (* constructor clash *)
+          (*          Format.eprintf "[Uf_domain] constructor clash detected@.";*)
+          bottom (man, uf_man) ()
+        end
+      else
+        let class_constructor =
+          match constr1,constr2 with
+          | Some(_,t),_ ->
+(*
+             Format.eprintf "[Uf_domain] adding constructor term @[%a@] in class %a@."
+               Pretty.print_term t Union_find.print_class cl2;
+ *)
+             TermToClass.add uf_t.class_constructor t cl2
+          | _,Some(_,t) ->
+(*
+             Format.eprintf "[Uf_domain] adding constructor term @[%a@] in class %a@."
+               Pretty.print_term t Union_find.print_class cl1;
+ *)
+             TermToClass.add uf_t.class_constructor t cl1
+          | _ -> uf_t.class_constructor
+        in
         let uf_t = { uf_t with
-          classes = Union_find.union cl1 cl2 uf_t.classes } in
+                     classes = Union_find.union cl1 cl2 uf_t.classes;
+                     class_constructor } in
         let all_values = Union_find.flat uf_t.classes in
         let all_terms = List.map (TermToClass.to_term
                           uf_man.class_to_term) all_values in
@@ -268,9 +341,9 @@ module Make(S:sig
             let t21 = if List.exists (t_equal t21) all_terms
                       then t21 else t in
             if t_equal t t12 && t_equal t t21 then dom, uf_t else
-              let cl   = get_class_for_term uf_man t
-              and cl12 = get_class_for_term uf_man t12
-              and cl21 = get_class_for_term uf_man t21 in
+              let cl,uf_t   = get_class_for_term uf_man uf_t t in
+              let cl12,uf_t = get_class_for_term uf_man uf_t t12 in
+              let cl21,uf_t = get_class_for_term uf_man uf_t t21 in
               let cl_cl12 = Union_find.union cl cl12 uf_t.classes in
               let uf_t = { uf_t with
                 classes = Union_find.union cl cl21 cl_cl12 } in
@@ -325,6 +398,7 @@ module Make(S:sig
     invariant_uf uf_t1;
     invariant_uf uf_t2;
     let classes = Union_find.join uf_t1.classes uf_t2.classes in
+    let class_constructor = TermToClass.empty in (* imprecise *)
     let dom_t = ref dom_t in
     let vars_to_replace = ref [] in
     let tmp_pool = ref tmp_pool in
@@ -343,7 +417,7 @@ module Make(S:sig
       TermToVar.union uf_t2.uf_to_var uf_t1.uf_to_var f_t f_term in
     let var_pool = !var_pool in
     let var_pool = VarPool.inter uf_t1.var_pool var_pool in
-    let rud = ref { classes; uf_to_var; var_pool } in
+    let rud = ref { classes; class_constructor ; uf_to_var; var_pool } in
     List.iter (fun (t, v) ->
         try
           let new_var = get_var_for_term uf_man rud t in
@@ -593,7 +667,8 @@ module Make(S:sig
             | None -> begin
                 try
                   let myvar = get_var_for_term uf_man rud t in
-                  let cl = get_class_for_term uf_man t in
+                  let cl,uf_t = get_class_for_term uf_man !rud t in
+                  rud := uf_t;
                   let classes = Union_find.union cl cl !rud.classes in
                   rud := { !rud with classes };
                   ([myvar, coeff], 0)
@@ -840,7 +915,7 @@ module Make(S:sig
       let (dom_t, uf_t), alt =
         (* t = t', where t' is the value of t in uf_t *)
         try
-          let t_class = get_class_for_term uf_man t in
+          let t_class,uf_t = get_class_for_term uf_man uf_t t in
           let classes = Union_find.get_class t_class uf_t.classes in
           let class2term = TermToClass.to_term uf_man.class_to_term in
           let tl = List.map class2term classes in
@@ -849,9 +924,10 @@ module Make(S:sig
         with Not_found -> (dom_t, uf_t), None in
       let all_values = Union_find.flat uf_t.classes in
       let class2term = List.map (fun c ->
-          c, TermToClass.to_term uf_man.class_to_term c) all_values in
+                           c, TermToClass.to_term uf_man.class_to_term c) all_values in
+      let (x,uf_t) = get_class_for_term uf_man uf_t t in
       let class2term =
-          (get_class_for_term uf_man t, t) ::
+          (x, t) ::
           List.filter (fun (_, t1) ->
               is_in t t1 && not (t_equal t t1) ) class2term in
       let int_values, other_values =
@@ -870,13 +946,17 @@ module Make(S:sig
           let uf_to_var = TermToVar.remove_term uf_t1.uf_to_var t in
           try
             let alt_cl = Union_find.get_class cl old_cl in
-            let alt_cl, classes = match alt with
+            let alt_cl, uf_t1 = match alt with
               | Some alt ->
                  let new_t = replaceby forgot_var alt t in
-                 let new_cl = get_class_for_term uf_man new_t in
-                 new_cl :: alt_cl,
-                 snd (Union_find.forget cl (Union_find.union cl new_cl old_cl))
-              | None -> alt_cl, uf_t1.classes in
+                 let new_cl,uf_t1 = get_class_for_term uf_man uf_t1 new_t in
+                 let uf_t1 = { uf_t1 with
+                               classes =
+                                 snd (Union_find.forget cl (Union_find.union cl new_cl old_cl)) }
+                 in
+                 new_cl :: alt_cl,uf_t1
+              | None -> alt_cl, uf_t1
+            in
             let f c =
               if c <> cl then
                 let t = TermToClass.to_term uf_man.class_to_term c in
@@ -887,7 +967,7 @@ module Make(S:sig
             let cl_t = List.find (function Some _ -> true | _ -> false) alt_cl in
             let alt_term = match cl_t with Some x -> x | _ -> assert false in
             let uf_to_var = TermToVar.add uf_to_var alt_term apron_var in
-            dom_t1, { uf_t1 with uf_to_var; classes }
+            dom_t1, { uf_t1 with uf_to_var }
           with Not_found ->
             Dom.forget_array man dom_t1 [|apron_var|] false,
             { uf_t1 with var_pool = VarPool.add apron_var uf_t1.var_pool; uf_to_var }
@@ -908,7 +988,7 @@ module Make(S:sig
         fun x -> forget x |> forget_t) fun_id members in
     List.fold_left (fun f v ->
         fun (d, ud) ->
-          let acl = get_class_for_term uf_man (t_var v) in
+          let acl,ud = get_class_for_term uf_man ud (t_var v) in
           let ud = { ud with classes = snd (Union_find.forget acl ud.classes) } in
           f (d, ud)) forget_fields vars
 
