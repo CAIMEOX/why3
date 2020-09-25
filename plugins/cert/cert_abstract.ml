@@ -88,7 +88,6 @@ and abstract_term_node_rec bv_lvl (lvl : int) t =
   | Tvar v ->
       cterm_node_from_id v.vs_name
   | Tapp (ls, lt) ->
-      let open Ty in
       let lt = List.rev_map (abstract_term_rec bv_lvl lvl) lt in
       let rec construct lte (cty : ctype) =
         match lte with
