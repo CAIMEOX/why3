@@ -125,13 +125,13 @@ let rec print_ast fmt t = match t.t_node with
   | Tfalse -> fprintf fmt "Tfalse"
 
 let tprint_tg target =
-  Trans.decl_acc (target, Hole) update_tg_c (fun d (tg, _) -> match d.d_node with
+  Trans.decl_acc (target, hole ()) update_tg_c (fun d (tg, _) -> match d.d_node with
       | Dprop (_, pr, t) when match_tg tg pr ->
           Format.eprintf "%a : %a@." pri (pr.pr_name) print_ast t;
           [d], None
       | _ -> [d], None)
 
-let tprint any every where : ctrans = elab_store (fun task ->
+let tprint any every where : ctrans = Trans.store (fun task ->
    let tg = find_target any every where task in
    let ta, (_, c) = tprint_tg tg task in
    [ta], c)
