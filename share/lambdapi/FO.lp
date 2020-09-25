@@ -24,15 +24,15 @@ definition equiv A B ≔  (A ⇨ B) ∧ (B ⇨ A)
 
 constant symbol tt : prf true
 
-rule prf false      ↪  Π C, prf C
-rule prf (¬ ($a))     ↪  (prf $a → prf false)
+rule prf false     ↪ Π C, prf C
+rule prf (¬ ($a))  ↪ (prf $a → prf false)
 rule prf ($A ∧ $B) ↪ Π C, (prf $A → prf $B → prf C) → prf C
 rule prf ($A ∨ $B) ↪ Π C, (prf $A → prf C) → (prf $B → prf C) → prf C
 rule prf ($A ⇨ $B) ↪ prf $A → prf $B
 
 rule prf (forall $P) ↪ Π x, prf ($P x)
 rule prf (exists $P) ↪ Π C, (Π x, prf ($P x) → prf C) → prf C
-rule prf ($x = $y) ↪ Π (P : Term → Prop), prf (P $x) → prf (P $y)
+rule prf ($x = $y)   ↪ Π (P : Term → Prop), prf (P $x) → prf (P $y)
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
 
