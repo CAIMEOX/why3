@@ -199,20 +199,14 @@ let fv_ts (ct : ctask) =
   let ts = Mid.bindings ct
            |> List.map encode_neg in
   let fv = collect_stask ts in
-  fv, ts
+  Mid.bindings fv, ts
 
 let print fmt init_ct res_ct (task_id, certif) =
-  let resm  = List.map fv_ts res_ct in
-  let res = List.map (fun (fv, ts) -> Mid.bindings fv, ts) resm in
-  let fvi, tsi = fv_ts init_ct in
-  let fv = List.fold_left (fun acc (fv, _) -> Mid.set_union acc fv) fvi resm in
-  let init = Mid.bindings fv, tsi in
+  let res = List.map fv_ts res_ct in
+  let init = fv_ts init_ct in
   (* The type we need to check is inhabited *)
   let p_type fmt () =
-    print_list_inter " → "
-      print_task
-      fmt
-      (res @ [init]) in
+    print_list_inter " → " print_task fmt (res @ [init]) in
   (* applied_tasks are used to fill the holes *)
   let applied_tasks =
     List.map2 (fun id (fv_t, t) ->
@@ -230,6 +224,7 @@ let print fmt init_ct res_ct (task_id, certif) =
     let vars = task_id @ fv_ids @ hyp_ids in
     fprintf fmt "λ %a, " (print_list_inter " " pri) vars;
     print_certif applied_tasks fmt certif in
+
   fprintf fmt "definition to_verify : %a \n\
                ≔  %a@."
     p_type ()
