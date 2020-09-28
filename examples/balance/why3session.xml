@@ -15,7 +15,7 @@
 </theory>
 <theory name="Puzzle12" proved="true">
  <goal name="solve12&#39;vc" expl="VC for solve12" proved="true">
- <proof prover="1"><result status="valid" time="0.53" steps="1204"/></proof>
+ <proof prover="1"><result status="valid" time="0.53" steps="1309"/></proof>
  </goal>
 </theory>
 </file>

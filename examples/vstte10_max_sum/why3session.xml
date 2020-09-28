@@ -32,10 +32,10 @@
   <proof prover="3"><result status="valid" time="0.01" steps="16"/></proof>
   </goal>
   <goal name="max_sum&#39;vc.5" expl="index in array bounds" proved="true">
-  <proof prover="3"><result status="valid" time="0.01" steps="18"/></proof>
+  <proof prover="3"><result status="valid" time="0.00" steps="18"/></proof>
   </goal>
   <goal name="max_sum&#39;vc.6" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="36"/></proof>
+  <proof prover="3"><result status="valid" time="0.01" steps="36"/></proof>
   </goal>
   <goal name="max_sum&#39;vc.7" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.06" steps="195"/></proof>
@@ -45,7 +45,7 @@
    <goal name="max_sum&#39;vc.8.0" expl="asserted formula" proved="true">
    <transf name="assert" proved="true" arg1="(i * m1 &lt;= i * m)">
     <goal name="max_sum&#39;vc.8.0.0" expl="asserted formula" proved="true">
-    <proof prover="0"><result status="valid" time="4.59"/></proof>
+    <proof prover="0"><result status="valid" time="2.99"/></proof>
     </goal>
     <goal name="max_sum&#39;vc.8.0.1" expl="asserted formula" proved="true">
     <proof prover="3"><result status="valid" time="0.01" steps="26"/></proof>
@@ -58,10 +58,10 @@
   </transf>
   </goal>
   <goal name="max_sum&#39;vc.9" expl="index in array bounds" proved="true">
-  <proof prover="3"><result status="valid" time="0.00" steps="16"/></proof>
+  <proof prover="3"><result status="valid" time="0.01" steps="16"/></proof>
   </goal>
   <goal name="max_sum&#39;vc.10" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.01" steps="34"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="34"/></proof>
   </goal>
   <goal name="max_sum&#39;vc.11" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.08" steps="198"/></proof>

@@ -13,16 +13,16 @@
   <proof prover="1"><result status="valid" time="0.00" steps="3"/></proof>
   </goal>
   <goal name="fast_exp&#39;vc.1" expl="variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.00" steps="6"/></proof>
+  <proof prover="1"><result status="valid" time="0.00" steps="8"/></proof>
   </goal>
   <goal name="fast_exp&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.00" steps="6"/></proof>
+  <proof prover="1"><result status="valid" time="0.00" steps="7"/></proof>
   </goal>
   <goal name="fast_exp&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.00" steps="3"/></proof>
+  <proof prover="1"><result status="valid" time="0.00" steps="4"/></proof>
   </goal>
   <goal name="fast_exp&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.27" steps="44"/></proof>
+  <proof prover="1"><result status="valid" time="0.27" steps="48"/></proof>
   </goal>
  </transf>
  </goal>

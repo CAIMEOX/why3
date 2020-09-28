@@ -15,7 +15,7 @@
  <proof prover="0"><result status="valid" time="0.00" steps="6"/></proof>
  </goal>
  <goal name="mult_commutative&#39;vc" expl="VC for mult_commutative" proved="true">
- <proof prover="0"><result status="valid" time="0.02" steps="42"/></proof>
+ <proof prover="0"><result status="valid" time="0.02" steps="33"/></proof>
  </goal>
 </theory>
 <theory name="Mirror" proved="true">
@@ -46,7 +46,7 @@
  <goal name="shorten&#39;vc" expl="VC for shorten" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="shorten&#39;vc.0" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="50"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="52"/></proof>
   </goal>
   <goal name="shorten&#39;vc.1" expl="postcondition" proved="true">
   <proof prover="5"><result status="valid" time="0.11"/></proof>
@@ -57,7 +57,7 @@
  </transf>
  </goal>
  <goal name="optimize&#39;vc" expl="VC for optimize" proved="true">
- <proof prover="0"><result status="valid" time="0.06" steps="150"/></proof>
+ <proof prover="0"><result status="valid" time="0.06" steps="152"/></proof>
  </goal>
  <goal name="optimize_and_filter&#39;vc" expl="VC for optimize_and_filter" proved="true">
  <transf name="split_vc" proved="true" >
@@ -73,7 +73,7 @@
   <goal name="optimize_and_filter&#39;vc.3" expl="postcondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="optimize_and_filter&#39;vc.3.0" expl="postcondition" proved="true">
-   <proof prover="1"><result status="valid" time="0.06" steps="19291"/></proof>
+   <proof prover="1"><result status="valid" time="0.06" steps="19803"/></proof>
    </goal>
    <goal name="optimize_and_filter&#39;vc.3.1" expl="postcondition" proved="true">
    <transf name="split_vc" proved="true" >
@@ -81,7 +81,7 @@
     <proof prover="0"><result status="valid" time="0.01" steps="20"/></proof>
     </goal>
     <goal name="optimize_and_filter&#39;vc.3.1.1" expl="postcondition" proved="true">
-    <proof prover="1"><result status="valid" time="0.07" steps="21926"/></proof>
+    <proof prover="1"><result status="valid" time="0.07" steps="21635"/></proof>
     </goal>
     <goal name="optimize_and_filter&#39;vc.3.1.2" expl="postcondition" proved="true">
     <proof prover="0"><result status="valid" time="0.02" steps="19"/></proof>
@@ -101,7 +101,7 @@
  <proof prover="0"><result status="valid" time="0.01" steps="10"/></proof>
  </goal>
  <goal name="to_int_of_int&#39;vc" expl="VC for to_int_of_int" proved="true">
- <proof prover="0"><result status="valid" time="0.00" steps="29"/></proof>
+ <proof prover="0"><result status="valid" time="0.00" steps="26"/></proof>
  </goal>
  <goal name="of_int_to_int&#39;vc" expl="VC for of_int_to_int" proved="true">
  <proof prover="0"><result status="valid" time="0.00" steps="69"/></proof>
@@ -122,10 +122,10 @@
  <proof prover="0"><result status="valid" time="0.03" steps="279"/></proof>
  </goal>
  <goal name="div_mod&#39;vc" expl="VC for div_mod" proved="true">
- <proof prover="4"><result status="valid" time="0.02" steps="11856"/></proof>
+ <proof prover="4"><result status="valid" time="0.02" steps="12181"/></proof>
  </goal>
  <goal name="div_mod_correct&#39;vc" expl="VC for div_mod_correct" proved="true">
- <proof prover="0"><result status="valid" time="0.12" steps="474"/></proof>
+ <proof prover="0"><result status="valid" time="0.12" steps="682"/></proof>
  </goal>
 </theory>
 </file>

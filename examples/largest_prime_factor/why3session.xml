@@ -53,16 +53,16 @@
   <proof prover="4" timelimit="11"><result status="valid" time="0.01" steps="8"/></proof>
   </goal>
   <goal name="smallest_divisor&#39;vc.2" expl="variant decrease" proved="true">
-  <proof prover="4" timelimit="11"><result status="valid" time="0.00" steps="9"/></proof>
+  <proof prover="4" timelimit="11"><result status="valid" time="0.00" steps="10"/></proof>
   </goal>
   <goal name="smallest_divisor&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="4" timelimit="11"><result status="valid" time="0.01" steps="9"/></proof>
+  <proof prover="4" timelimit="11"><result status="valid" time="0.01" steps="10"/></proof>
   </goal>
   <goal name="smallest_divisor&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="4" timelimit="11"><result status="valid" time="0.02" steps="28"/></proof>
+  <proof prover="4" timelimit="11"><result status="valid" time="0.02" steps="29"/></proof>
   </goal>
   <goal name="smallest_divisor&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="4" timelimit="11"><result status="valid" time="0.01" steps="17"/></proof>
+  <proof prover="4" timelimit="11"><result status="valid" time="0.01" steps="18"/></proof>
   </goal>
   <goal name="smallest_divisor&#39;vc.6" expl="postcondition" proved="true">
   <proof prover="4" timelimit="11"><result status="valid" time="0.01" steps="16"/></proof>
@@ -71,7 +71,7 @@
   <proof prover="4" timelimit="11"><result status="valid" time="0.02" steps="46"/></proof>
   </goal>
   <goal name="smallest_divisor&#39;vc.8" expl="postcondition" proved="true">
-  <proof prover="4" timelimit="11"><result status="valid" time="0.92" steps="218"/></proof>
+  <proof prover="4" timelimit="11"><result status="valid" time="0.92" steps="220"/></proof>
   </goal>
  </transf>
  </goal>

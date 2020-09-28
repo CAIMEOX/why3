@@ -14,19 +14,19 @@
   <proof prover="1"><result status="valid" time="0.02" steps="73"/></proof>
   </goal>
   <goal name="rightmost_position_set&#39;vc.1" expl="loop variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.20" steps="200"/></proof>
+  <proof prover="1"><result status="valid" time="0.20" steps="203"/></proof>
   </goal>
   <goal name="rightmost_position_set&#39;vc.2" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.09" steps="323"/></proof>
+  <proof prover="1"><result status="valid" time="0.09" steps="343"/></proof>
   </goal>
   <goal name="rightmost_position_set&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="11982"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="12594"/></proof>
   </goal>
   <goal name="rightmost_position_set&#39;vc.4" expl="postcondition" proved="true">
   <proof prover="1"><result status="valid" time="0.01" steps="75"/></proof>
   </goal>
   <goal name="rightmost_position_set&#39;vc.5" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="10601"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="10765"/></proof>
   </goal>
  </transf>
  </goal>

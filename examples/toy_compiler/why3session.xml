@@ -13,22 +13,22 @@
   <proof prover="2"><result status="valid" time="0.01" steps="37"/></proof>
   </goal>
   <goal name="soundness_gen&#39;vc.1" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="38"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="60"/></proof>
   </goal>
   <goal name="soundness_gen&#39;vc.2" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="75"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="110"/></proof>
   </goal>
   <goal name="soundness_gen&#39;vc.3" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="38"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="60"/></proof>
   </goal>
   <goal name="soundness_gen&#39;vc.4" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="75"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="110"/></proof>
   </goal>
   <goal name="soundness_gen&#39;vc.5" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="38"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="60"/></proof>
   </goal>
   <goal name="soundness_gen&#39;vc.6" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="75"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="110"/></proof>
   </goal>
   <goal name="soundness_gen&#39;vc.7" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
@@ -36,13 +36,13 @@
    <proof prover="0"><result status="valid" time="0.09" steps="13907"/></proof>
    </goal>
    <goal name="soundness_gen&#39;vc.7.1" expl="postcondition" proved="true">
-   <proof prover="2" timelimit="1"><result status="valid" time="0.08" steps="118"/></proof>
+   <proof prover="2" timelimit="1"><result status="valid" time="0.14" steps="170"/></proof>
    </goal>
    <goal name="soundness_gen&#39;vc.7.2" expl="postcondition" proved="true">
-   <proof prover="2" timelimit="1"><result status="valid" time="0.14" steps="156"/></proof>
+   <proof prover="2" timelimit="1"><result status="valid" time="0.08" steps="224"/></proof>
    </goal>
    <goal name="soundness_gen&#39;vc.7.3" expl="postcondition" proved="true">
-   <proof prover="2" timelimit="1"><result status="valid" time="0.06" steps="118"/></proof>
+   <proof prover="2" timelimit="1"><result status="valid" time="0.06" steps="170"/></proof>
    </goal>
   </transf>
   </goal>

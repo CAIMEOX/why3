@@ -8,7 +8,7 @@
 <path name=".."/><path name="fenwick.mlw"/>
 <theory name="Fenwick" proved="true">
  <goal name="make&#39;vc" expl="VC for make" proved="true">
- <proof prover="2"><result status="valid" time="0.06" steps="10501"/></proof>
+ <proof prover="2"><result status="valid" time="0.06" steps="10920"/></proof>
  </goal>
  <goal name="add&#39;vc" expl="VC for add" proved="true">
  <transf name="split_vc" proved="true" >
@@ -16,10 +16,10 @@
   <proof prover="2"><result status="valid" time="0.02" steps="6067"/></proof>
   </goal>
   <goal name="add&#39;vc.1" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.06" steps="8633"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="8633"/></proof>
   </goal>
   <goal name="add&#39;vc.2" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="8633"/></proof>
+  <proof prover="2"><result status="valid" time="0.06" steps="8633"/></proof>
   </goal>
   <goal name="add&#39;vc.3" expl="loop invariant init" proved="true">
   <proof prover="2"><result status="valid" time="0.06" steps="10287"/></proof>
@@ -66,7 +66,7 @@
  <proof prover="0"><result status="valid" time="0.31" steps="390"/></proof>
  </goal>
  <goal name="fen_compact&#39;vc" expl="VC for fen_compact" proved="true">
- <proof prover="2"><result status="valid" time="0.13" steps="34591"/></proof>
+ <proof prover="2"><result status="valid" time="0.13" steps="34821"/></proof>
  </goal>
  <goal name="query&#39;vc" expl="VC for query" proved="true">
  <transf name="split_vc" proved="true" >
@@ -99,19 +99,19 @@
   <proof prover="2"><result status="valid" time="0.03" steps="6822"/></proof>
   </goal>
   <goal name="query&#39;vc.8" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="8049"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="8049"/></proof>
   </goal>
   <goal name="query&#39;vc.9" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.03" steps="6877"/></proof>
   </goal>
   <goal name="query&#39;vc.10" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.07" steps="12879"/></proof>
+  <proof prover="2"><result status="valid" time="0.09" steps="12879"/></proof>
   </goal>
   <goal name="query&#39;vc.11" expl="loop variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.08" steps="10855"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="10855"/></proof>
   </goal>
   <goal name="query&#39;vc.12" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.09" steps="17696"/></proof>
+  <proof prover="2"><result status="valid" time="0.06" steps="17696"/></proof>
   </goal>
   <goal name="query&#39;vc.13" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.04" steps="42"/></proof>
@@ -120,13 +120,13 @@
   <proof prover="2"><result status="valid" time="0.03" steps="6840"/></proof>
   </goal>
   <goal name="query&#39;vc.15" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.09" steps="12603"/></proof>
+  <proof prover="2"><result status="valid" time="0.07" steps="12603"/></proof>
   </goal>
   <goal name="query&#39;vc.16" expl="loop variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="10698"/></proof>
+  <proof prover="2"><result status="valid" time="0.08" steps="10698"/></proof>
   </goal>
   <goal name="query&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.06" steps="10912"/></proof>
+  <proof prover="2"><result status="valid" time="0.09" steps="10912"/></proof>
   </goal>
   <goal name="query&#39;vc.18" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.03" steps="40"/></proof>
@@ -138,7 +138,7 @@
   <proof prover="2"><result status="valid" time="0.04" steps="6793"/></proof>
   </goal>
   <goal name="query&#39;vc.21" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="7977"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="7977"/></proof>
   </goal>
   <goal name="query&#39;vc.22" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.03" steps="6848"/></proof>

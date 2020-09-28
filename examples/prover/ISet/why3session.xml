@@ -31,10 +31,10 @@
   <proof prover="1"><result status="valid" time="0.02" steps="11"/></proof>
   </goal>
   <goal name="insert&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="133"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="134"/></proof>
   </goal>
   <goal name="insert&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="268"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="271"/></proof>
   </goal>
  </transf>
  </goal>

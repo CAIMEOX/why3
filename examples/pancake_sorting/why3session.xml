@@ -33,13 +33,13 @@
   <proof prover="2"><result status="valid" time="0.05" steps="14174"/></proof>
   </goal>
   <goal name="flip&#39;vc.8" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.07" steps="19125"/></proof>
+  <proof prover="2"><result status="valid" time="0.06" steps="19125"/></proof>
   </goal>
   <goal name="flip&#39;vc.9" expl="loop invariant preservation" proved="true">
   <proof prover="2"><result status="valid" time="0.05" steps="14851"/></proof>
   </goal>
   <goal name="flip&#39;vc.10" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.06" steps="19654"/></proof>
+  <proof prover="2"><result status="valid" time="0.07" steps="19654"/></proof>
   </goal>
   <goal name="flip&#39;vc.11" expl="loop invariant preservation" proved="true">
   <proof prover="2"><result status="valid" time="0.04" steps="13463"/></proof>
@@ -100,7 +100,7 @@
   <proof prover="2"><result status="valid" time="0.03" steps="11805"/></proof>
   </goal>
   <goal name="pancake_sort&#39;vc.13" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="10067"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="10067"/></proof>
   </goal>
   <goal name="pancake_sort&#39;vc.14" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.02" steps="11973"/></proof>
@@ -115,7 +115,7 @@
   <proof prover="2"><result status="valid" time="0.20" steps="45943"/></proof>
   </goal>
   <goal name="pancake_sort&#39;vc.18" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="13201"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="13201"/></proof>
   </goal>
   <goal name="pancake_sort&#39;vc.19" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.01" steps="11477"/></proof>

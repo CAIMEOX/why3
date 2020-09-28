@@ -57,7 +57,7 @@
  </transf>
  </goal>
  <goal name="construct_symbol&#39;vc" expl="VC for construct_symbol" proved="true">
- <proof prover="2"><result status="valid" time="0.06" steps="183"/></proof>
+ <proof prover="2"><result status="valid" time="0.06" steps="185"/></proof>
  </goal>
  <goal name="destruct_symbol&#39;vc" expl="VC for destruct_symbol" proved="true">
  <proof prover="2"><result status="valid" time="0.04" steps="84"/></proof>

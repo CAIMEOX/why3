@@ -15,16 +15,16 @@
  <goal name="f&#39;vc" expl="VC for f" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="f&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.00" steps="4"/></proof>
+  <proof prover="2"><result status="valid" time="0.00" steps="6"/></proof>
   </goal>
   <goal name="f&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.00" steps="4"/></proof>
+  <proof prover="2"><result status="valid" time="0.00" steps="6"/></proof>
   </goal>
   <goal name="f&#39;vc.2" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.00" steps="4"/></proof>
+  <proof prover="2"><result status="valid" time="0.00" steps="10"/></proof>
   </goal>
   <goal name="f&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.00" steps="7"/></proof>
+  <proof prover="2"><result status="valid" time="0.00" steps="9"/></proof>
   </goal>
   <goal name="f&#39;vc.4" expl="postcondition" proved="true">
   <transf name="split_vc" proved="true" >
@@ -37,7 +37,7 @@
     <proof prover="2"><result status="valid" time="0.00" steps="6"/></proof>
     </goal>
     <goal name="f&#39;vc.4.1.1" expl="postcondition" proved="true">
-    <proof prover="2"><result status="valid" time="0.00" steps="19"/></proof>
+    <proof prover="2"><result status="valid" time="0.00" steps="16"/></proof>
     </goal>
    </transf>
    </goal>
@@ -51,16 +51,16 @@
  <goal name="m&#39;vc" expl="VC for m" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="m&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.00" steps="4"/></proof>
+  <proof prover="2"><result status="valid" time="0.00" steps="6"/></proof>
   </goal>
   <goal name="m&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.00" steps="4"/></proof>
+  <proof prover="2"><result status="valid" time="0.00" steps="6"/></proof>
   </goal>
   <goal name="m&#39;vc.2" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.00" steps="7"/></proof>
+  <proof prover="2"><result status="valid" time="0.00" steps="9"/></proof>
   </goal>
   <goal name="m&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.00" steps="4"/></proof>
+  <proof prover="2"><result status="valid" time="0.00" steps="6"/></proof>
   </goal>
   <goal name="m&#39;vc.4" expl="postcondition" proved="true">
   <transf name="split_vc" proved="true" >

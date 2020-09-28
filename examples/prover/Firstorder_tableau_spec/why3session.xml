@@ -17,18 +17,18 @@
  <proof prover="1"><result status="valid" time="0.10" steps="103"/></proof>
  </goal>
  <goal name="rename_then_subst_composition_lemma_tableau&#39;vc" expl="VC for rename_then_subst_composition_lemma_tableau" proved="true">
- <proof prover="1"><result status="valid" time="0.11" steps="239"/></proof>
+ <proof prover="1"><result status="valid" time="0.11" steps="202"/></proof>
  </goal>
  <goal name="subst_then_rename_composition_lemma_tableau&#39;vc" expl="VC for subst_then_rename_composition_lemma_tableau" proved="true">
- <proof prover="1"><result status="valid" time="0.12" steps="248"/></proof>
+ <proof prover="1"><result status="valid" time="0.12" steps="200"/></proof>
  </goal>
  <goal name="subst_composition_lemma_tableau&#39;vc" expl="VC for subst_composition_lemma_tableau" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="subst_composition_lemma_tableau&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.10" steps="19"/></proof>
+  <proof prover="1"><result status="valid" time="0.10" steps="37"/></proof>
   </goal>
   <goal name="subst_composition_lemma_tableau&#39;vc.1" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.09" steps="70"/></proof>
+  <proof prover="1"><result status="valid" time="0.09" steps="106"/></proof>
   </goal>
  </transf>
  </goal>
@@ -39,13 +39,13 @@
  <proof prover="1"><result status="valid" time="0.14" steps="91"/></proof>
  </goal>
  <goal name="rename_free_var_constructive_inversion_symbol_tableau&#39;vc" expl="VC for rename_free_var_constructive_inversion_symbol_tableau" proved="true">
- <proof prover="1"><result status="valid" time="0.07" steps="235"/></proof>
+ <proof prover="1"><result status="valid" time="0.07" steps="245"/></proof>
  </goal>
  <goal name="rename_free_var_inversion_symbol_tableau&#39;vc" expl="VC for rename_free_var_inversion_symbol_tableau" proved="true">
  <proof prover="1"><result status="valid" time="0.10" steps="10"/></proof>
  </goal>
  <goal name="rename_free_var_constructive_inversion_fo_term_tableau&#39;vc" expl="VC for rename_free_var_constructive_inversion_fo_term_tableau" proved="true">
- <proof prover="1"><result status="valid" time="0.05" steps="235"/></proof>
+ <proof prover="1"><result status="valid" time="0.05" steps="245"/></proof>
  </goal>
  <goal name="rename_free_var_inversion_fo_term_tableau&#39;vc" expl="VC for rename_free_var_inversion_fo_term_tableau" proved="true">
  <proof prover="1"><result status="valid" time="0.10" steps="10"/></proof>
@@ -57,13 +57,13 @@
  <proof prover="1"><result status="valid" time="0.10" steps="303"/></proof>
  </goal>
  <goal name="subst_free_var_constructive_inversion_symbol_tableau&#39;vc" expl="VC for subst_free_var_constructive_inversion_symbol_tableau" proved="true">
- <proof prover="1"><result status="valid" time="0.48" steps="2752"/></proof>
+ <proof prover="1"><result status="valid" time="0.48" steps="2653"/></proof>
  </goal>
  <goal name="subst_free_var_inversion_symbol_tableau&#39;vc" expl="VC for subst_free_var_inversion_symbol_tableau" proved="true">
  <proof prover="1"><result status="valid" time="0.12" steps="26"/></proof>
  </goal>
  <goal name="subst_free_var_constructive_inversion_fo_term_tableau&#39;vc" expl="VC for subst_free_var_constructive_inversion_fo_term_tableau" proved="true">
- <proof prover="1"><result status="valid" time="0.20" steps="753"/></proof>
+ <proof prover="1"><result status="valid" time="0.20" steps="774"/></proof>
  </goal>
  <goal name="subst_free_var_inversion_fo_term_tableau&#39;vc" expl="VC for subst_free_var_inversion_fo_term_tableau" proved="true">
  <proof prover="1"><result status="valid" time="0.08" steps="10"/></proof>
@@ -71,68 +71,68 @@
  <goal name="subst_free_var_propagation_symbol_symbol_tableau&#39;vc" expl="VC for subst_free_var_propagation_symbol_symbol_tableau" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="subst_free_var_propagation_symbol_symbol_tableau&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.11" steps="19"/></proof>
+  <proof prover="1"><result status="valid" time="0.11" steps="28"/></proof>
   </goal>
   <goal name="subst_free_var_propagation_symbol_symbol_tableau&#39;vc.1" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.09" steps="12"/></proof>
+  <proof prover="1"><result status="valid" time="0.08" steps="25"/></proof>
   </goal>
   <goal name="subst_free_var_propagation_symbol_symbol_tableau&#39;vc.2" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.08" steps="8"/></proof>
+  <proof prover="1"><result status="valid" time="0.10" steps="23"/></proof>
   </goal>
   <goal name="subst_free_var_propagation_symbol_symbol_tableau&#39;vc.3" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.10" steps="8"/></proof>
+  <proof prover="1"><result status="valid" time="0.09" steps="31"/></proof>
   </goal>
   <goal name="subst_free_var_propagation_symbol_symbol_tableau&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.08" steps="460"/></proof>
+  <proof prover="1"><result status="valid" time="0.45" steps="1077"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="subst_free_var_propagation_fo_term_symbol_tableau&#39;vc" expl="VC for subst_free_var_propagation_fo_term_symbol_tableau" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="subst_free_var_propagation_fo_term_symbol_tableau&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.10" steps="19"/></proof>
+  <proof prover="1"><result status="valid" time="0.10" steps="28"/></proof>
   </goal>
   <goal name="subst_free_var_propagation_fo_term_symbol_tableau&#39;vc.1" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.08" steps="8"/></proof>
+  <proof prover="1"><result status="valid" time="0.09" steps="17"/></proof>
   </goal>
   <goal name="subst_free_var_propagation_fo_term_symbol_tableau&#39;vc.2" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.09" steps="8"/></proof>
+  <proof prover="1"><result status="valid" time="0.08" steps="25"/></proof>
   </goal>
   <goal name="subst_free_var_propagation_fo_term_symbol_tableau&#39;vc.3" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.08" steps="8"/></proof>
+  <proof prover="1"><result status="valid" time="0.08" steps="34"/></proof>
   </goal>
   <goal name="subst_free_var_propagation_fo_term_symbol_tableau&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.11" steps="411"/></proof>
+  <proof prover="1"><result status="valid" time="0.24" steps="668"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="subst_free_var_propagation_fo_term_fo_term_tableau&#39;vc" expl="VC for subst_free_var_propagation_fo_term_fo_term_tableau" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="subst_free_var_propagation_fo_term_fo_term_tableau&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.09" steps="19"/></proof>
+  <proof prover="1"><result status="valid" time="0.09" steps="28"/></proof>
   </goal>
   <goal name="subst_free_var_propagation_fo_term_fo_term_tableau&#39;vc.1" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.08" steps="8"/></proof>
+  <proof prover="1"><result status="valid" time="0.09" steps="17"/></proof>
   </goal>
   <goal name="subst_free_var_propagation_fo_term_fo_term_tableau&#39;vc.2" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.09" steps="8"/></proof>
+  <proof prover="1"><result status="valid" time="0.09" steps="25"/></proof>
   </goal>
   <goal name="subst_free_var_propagation_fo_term_fo_term_tableau&#39;vc.3" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.09" steps="8"/></proof>
+  <proof prover="1"><result status="valid" time="0.08" steps="34"/></proof>
   </goal>
   <goal name="subst_free_var_propagation_fo_term_fo_term_tableau&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.10" steps="411"/></proof>
+  <proof prover="1"><result status="valid" time="0.23" steps="668"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="free_var_equivalence_of_subst_tableau&#39;vc" expl="VC for free_var_equivalence_of_subst_tableau" proved="true">
- <proof prover="1"><result status="valid" time="0.17" steps="936"/></proof>
+ <proof prover="1"><result status="valid" time="0.29" steps="1601"/></proof>
  </goal>
  <goal name="free_var_equivalence_of_rename_tableau&#39;vc" expl="VC for free_var_equivalence_of_rename_tableau" proved="true">
  <proof prover="1"><result status="valid" time="0.04" steps="116"/></proof>
  </goal>
  <goal name="free_var_derive_equivalence_of_subst_tableau&#39;vc" expl="VC for free_var_derive_equivalence_of_subst_tableau" proved="true">
- <proof prover="1"><result status="valid" time="0.25" steps="1518"/></proof>
+ <proof prover="1"><result status="valid" time="0.59" steps="2287"/></proof>
  </goal>
  <goal name="free_var_derive_equivalence_of_rename_tableau&#39;vc" expl="VC for free_var_derive_equivalence_of_rename_tableau" proved="true">
  <transf name="split_goal_right" proved="true" >

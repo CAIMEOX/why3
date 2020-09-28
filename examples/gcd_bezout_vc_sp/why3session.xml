@@ -22,34 +22,34 @@
   <proof prover="1"><result status="valid" time="0.02" steps="7200"/></proof>
   </goal>
   <goal name="gcd&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="7453"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="8216"/></proof>
   </goal>
   <goal name="gcd&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="7453"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="8315"/></proof>
   </goal>
   <goal name="gcd&#39;vc.6" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="9260"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="9566"/></proof>
   </goal>
   <goal name="gcd&#39;vc.7" expl="loop variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.04" steps="12749"/></proof>
+  <proof prover="1"><result status="valid" time="0.04" steps="13589"/></proof>
   </goal>
   <goal name="gcd&#39;vc.8" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="9707"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="10534"/></proof>
   </goal>
   <goal name="gcd&#39;vc.9" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="10044"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="11053"/></proof>
   </goal>
   <goal name="gcd&#39;vc.10" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="8049"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="9180"/></proof>
   </goal>
   <goal name="gcd&#39;vc.11" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="8550"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="10005"/></proof>
   </goal>
   <goal name="gcd&#39;vc.12" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="8629"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="8695"/></proof>
   </goal>
   <goal name="gcd&#39;vc.13" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="10"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="11"/></proof>
   </goal>
  </transf>
  </goal>

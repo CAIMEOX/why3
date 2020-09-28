@@ -10,7 +10,7 @@
  <proof prover="0"><result status="valid" time="0.02" steps="42"/></proof>
  </goal>
  <goal name="sum_add&#39;vc" expl="VC for sum_add" proved="true">
- <proof prover="0"><result status="valid" time="0.13" steps="147"/></proof>
+ <proof prover="0"><result status="valid" time="0.13" steps="79"/></proof>
  </goal>
  <goal name="fubini&#39;vc" expl="VC for fubini" proved="true">
  <transf name="split_goal_right" proved="true" >
@@ -18,16 +18,16 @@
   <proof prover="0"><result status="valid" time="0.00" steps="4"/></proof>
   </goal>
   <goal name="fubini&#39;vc.1" expl="variant decrease" proved="true">
-  <proof prover="0"><result status="valid" time="0.00" steps="2"/></proof>
+  <proof prover="0"><result status="valid" time="0.00" steps="3"/></proof>
   </goal>
   <goal name="fubini&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.00" steps="7"/></proof>
+  <proof prover="0"><result status="valid" time="0.00" steps="8"/></proof>
   </goal>
   <goal name="fubini&#39;vc.3" expl="assertion" proved="true">
-  <proof prover="0" timelimit="5"><result status="valid" time="1.56" steps="734"/></proof>
+  <proof prover="0" timelimit="5"><result status="valid" time="2.88" steps="921"/></proof>
   </goal>
   <goal name="fubini&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="79"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="82"/></proof>
   </goal>
  </transf>
  </goal>

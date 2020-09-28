@@ -31,58 +31,58 @@
   <proof prover="3"><result status="valid" time="0.02" steps="5947"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.5" expl="loop invariant init" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="8062"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="8079"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.6" expl="loop invariant init" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="5354"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="5371"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.7" expl="index in array bounds" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="5160"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="5175"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.8" expl="integer overflow" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="6332"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="6347"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.9" expl="loop variant decrease" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="5187"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="5219"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.10" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.06" steps="10981"/></proof>
+  <proof prover="3"><result status="valid" time="0.06" steps="10956"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.11" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="6763"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="6788"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.12" expl="integer overflow" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="9876"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="9934"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.13" expl="index in array bounds" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="5307"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="5322"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.14" expl="loop invariant init" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="4675"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="4687"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.15" expl="loop invariant init" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="4810"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="4822"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.16" expl="index in array bounds" proved="true">
-  <proof prover="3"><result status="valid" time="0.08" steps="14929"/></proof>
+  <proof prover="3"><result status="valid" time="0.08" steps="14975"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="403"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="405"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.18" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.13" steps="459"/></proof>
+  <proof prover="2"><result status="valid" time="0.13" steps="461"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.19" expl="loop variant decrease" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="5644"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="5659"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.20" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="5605"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="5620"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.21" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.26" steps="39960"/></proof>
+  <proof prover="3"><result status="valid" time="0.26" steps="39828"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.22" expl="out of loop bounds" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="7318"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="7347"/></proof>
   </goal>
   <goal name="conjugate&#39;vc.23" expl="assertion" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="4938"/></proof>

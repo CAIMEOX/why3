@@ -65,16 +65,16 @@
   <goal name="find&#39;vc.18" expl="loop invariant preservation" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="find&#39;vc.18.0" expl="VC for find" proved="true">
-   <proof prover="0" timelimit="15"><result status="valid" time="1.95" steps="1677"/></proof>
+   <proof prover="0" timelimit="15"><result status="valid" time="2.38" steps="1885"/></proof>
    </goal>
    <goal name="find&#39;vc.18.1" expl="VC for find" proved="true">
-   <proof prover="0" timelimit="15"><result status="valid" time="1.87" steps="1564"/></proof>
+   <proof prover="0" timelimit="15"><result status="valid" time="1.87" steps="1573"/></proof>
    </goal>
    <goal name="find&#39;vc.18.2" expl="VC for find" proved="true">
-   <proof prover="0"><result status="valid" time="1.52" steps="1196"/></proof>
+   <proof prover="0"><result status="valid" time="1.52" steps="1200"/></proof>
    </goal>
    <goal name="find&#39;vc.18.3" expl="VC for find" proved="true">
-   <proof prover="0"><result status="valid" time="0.94" steps="695"/></proof>
+   <proof prover="0"><result status="valid" time="0.94" steps="697"/></proof>
    </goal>
    <goal name="find&#39;vc.18.4" expl="VC for find" proved="true">
    <proof prover="0"><result status="valid" time="0.02" steps="45"/></proof>
@@ -86,7 +86,7 @@
    <proof prover="0"><result status="valid" time="0.02" steps="57"/></proof>
    </goal>
    <goal name="find&#39;vc.18.7" expl="VC for find" proved="true">
-   <proof prover="0"><result status="valid" time="2.49" steps="819"/></proof>
+   <proof prover="0"><result status="valid" time="2.49" steps="825"/></proof>
    </goal>
   </transf>
   </goal>

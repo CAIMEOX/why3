@@ -21,13 +21,13 @@
  <proof prover="0"><result status="valid" time="0.01" steps="78"/></proof>
  </goal>
  <goal name="all_zeros3&#39;vc" expl="VC for all_zeros3" proved="true">
- <proof prover="0"><result status="valid" time="0.01" steps="41"/></proof>
+ <proof prover="0"><result status="valid" time="0.01" steps="36"/></proof>
  </goal>
  <goal name="all_zeros4&#39;vc" expl="VC for all_zeros4" proved="true">
- <proof prover="0"><result status="valid" time="0.01" steps="55"/></proof>
+ <proof prover="0"><result status="valid" time="0.01" steps="63"/></proof>
  </goal>
  <goal name="all_zeros5&#39;vc" expl="VC for all_zeros5" proved="true">
- <proof prover="0"><result status="valid" time="0.12" steps="415"/></proof>
+ <proof prover="0"><result status="valid" time="0.27" steps="536"/></proof>
  </goal>
 </theory>
 </file>

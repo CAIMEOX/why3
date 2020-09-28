@@ -8,7 +8,7 @@
 <path name=".."/><path name="counting_sort.mlw"/>
 <theory name="Spec" proved="true">
  <goal name="eqlt&#39;vc" expl="VC for eqlt" proved="true">
- <proof prover="1"><result status="valid" time="0.76" steps="777"/></proof>
+ <proof prover="1"><result status="valid" time="0.76" steps="1046"/></proof>
  </goal>
 </theory>
 <theory name="CountingSort" proved="true">

@@ -19,61 +19,61 @@
   <proof prover="1"><result status="valid" time="0.04" steps="12109"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="7920"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="11210"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="7920"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="11422"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.04" steps="12241"/></proof>
+  <proof prover="1"><result status="valid" time="0.04" steps="12541"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.6" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="12348"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="12649"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.7" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="19"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.8" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="11841"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="12144"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.9" expl="postcondition" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="27"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.10" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="14444"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="14754"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.11" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="13"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.12" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.04" steps="12353"/></proof>
+  <proof prover="1"><result status="valid" time="0.04" steps="12654"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.13" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.04" steps="12353"/></proof>
+  <proof prover="1"><result status="valid" time="0.04" steps="12654"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.14" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="12651"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="12952"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.15" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.00" steps="31"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.16" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="12279"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="12582"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.17" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="14005"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="14313"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.18" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.05" steps="15225"/></proof>
+  <proof prover="1"><result status="valid" time="0.05" steps="15535"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.19" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="11339"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="11641"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.20" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="11410"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="11711"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.21" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.04" steps="11656"/></proof>
+  <proof prover="1"><result status="valid" time="0.04" steps="11957"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.22" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="35"/></proof>
@@ -82,28 +82,28 @@
   <proof prover="0"><result status="valid" time="0.01" steps="45"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.24" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.05" steps="14294"/></proof>
+  <proof prover="1"><result status="valid" time="0.05" steps="14600"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.25" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.05" steps="15885"/></proof>
+  <proof prover="1"><result status="valid" time="0.05" steps="16193"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.26" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="11277"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="11529"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.27" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="11177"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="11464"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.28" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="12732"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="12993"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.29" expl="unreachable point" proved="true">
   <proof prover="1"><result status="valid" time="0.04" steps="12004"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.30" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="7920"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="11182"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.31" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.09" steps="11128"/></proof>
+  <proof prover="1"><result status="valid" time="0.09" steps="11176"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.32" expl="postcondition" proved="true">
   <proof prover="1"><result status="valid" time="0.03" steps="7920"/></proof>
@@ -121,58 +121,58 @@
   <proof prover="0"><result status="valid" time="0.10" steps="0"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.37" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.10" steps="11250"/></proof>
+  <proof prover="1"><result status="valid" time="0.10" steps="11298"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.38" expl="variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.09" steps="20485"/></proof>
+  <proof prover="1"><result status="valid" time="0.09" steps="20533"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.39" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.04" steps="13382"/></proof>
+  <proof prover="1"><result status="valid" time="0.04" steps="13430"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.40" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.05" steps="15919"/></proof>
+  <proof prover="1"><result status="valid" time="0.05" steps="15967"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.41" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.02" steps="199"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.42" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.12" steps="15942"/></proof>
+  <proof prover="1"><result status="valid" time="0.12" steps="15990"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.43" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="12207"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="12255"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.44" expl="variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.08" steps="26951"/></proof>
+  <proof prover="1"><result status="valid" time="0.08" steps="26999"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.45" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="16400"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="16448"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.46" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.05" steps="20606"/></proof>
+  <proof prover="1"><result status="valid" time="0.05" steps="20654"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.47" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="18043"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="18091"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.48" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.05" steps="24607"/></proof>
+  <proof prover="1"><result status="valid" time="0.05" steps="24655"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.49" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="13043"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="13091"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.50" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="22940"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="22988"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.51" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.10" steps="27209"/></proof>
+  <proof prover="1"><result status="valid" time="0.10" steps="27257"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.52" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.20" steps="40304"/></proof>
+  <proof prover="1"><result status="valid" time="0.20" steps="40350"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.53" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.25" steps="60463"/></proof>
+  <proof prover="1"><result status="valid" time="0.25" steps="60509"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.54" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.08" steps="26271"/></proof>
+  <proof prover="1"><result status="valid" time="0.08" steps="26317"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.55" expl="postcondition" proved="true">
   <proof prover="0"><result status="valid" time="0.16" steps="1552"/></proof>

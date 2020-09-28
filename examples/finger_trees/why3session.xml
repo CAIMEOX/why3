@@ -10,10 +10,10 @@
  <proof prover="0"><result status="valid" time="0.05" steps="165"/></proof>
  </goal>
  <goal name="d_cons&#39;vc" expl="VC for d_cons" proved="true">
- <proof prover="0"><result status="valid" time="0.12" steps="1157"/></proof>
+ <proof prover="0"><result status="valid" time="0.12" steps="1187"/></proof>
  </goal>
  <goal name="cons&#39;vc" expl="VC for cons" proved="true">
- <proof prover="0"><result status="valid" time="0.30" steps="1351"/></proof>
+ <proof prover="0"><result status="valid" time="0.30" steps="1523"/></proof>
  </goal>
 </theory>
 </file>

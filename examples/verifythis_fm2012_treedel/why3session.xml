@@ -67,13 +67,13 @@
  <goal name="in_zip_tree&#39;vc" expl="VC for in_zip_tree" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="in_zip_tree&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="6"><result status="valid" time="0.01" steps="20"/></proof>
+  <proof prover="6"><result status="valid" time="0.01" steps="25"/></proof>
   </goal>
   <goal name="in_zip_tree&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.01" steps="8"/></proof>
+  <proof prover="6"><result status="valid" time="0.01" steps="5"/></proof>
   </goal>
   <goal name="in_zip_tree&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.01" steps="21"/></proof>
+  <proof prover="6"><result status="valid" time="0.01" steps="22"/></proof>
   </goal>
  </transf>
  </goal>
@@ -102,22 +102,22 @@
   <proof prover="6"><result status="valid" time="0.01" steps="11"/></proof>
   </goal>
   <goal name="subst_zip_tree&#39;vc.4" expl="variant decrease" proved="true">
-  <proof prover="6"><result status="valid" time="0.01" steps="37"/></proof>
+  <proof prover="6"><result status="valid" time="0.01" steps="42"/></proof>
   </goal>
   <goal name="subst_zip_tree&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.01" steps="53"/></proof>
+  <proof prover="6"><result status="valid" time="0.01" steps="55"/></proof>
   </goal>
   <goal name="subst_zip_tree&#39;vc.6" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.01" steps="13"/></proof>
+  <proof prover="6"><result status="valid" time="0.01" steps="14"/></proof>
   </goal>
   <goal name="subst_zip_tree&#39;vc.7" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.01" steps="13"/></proof>
+  <proof prover="6"><result status="valid" time="0.01" steps="14"/></proof>
   </goal>
   <goal name="subst_zip_tree&#39;vc.8" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.01" steps="40"/></proof>
+  <proof prover="6"><result status="valid" time="0.01" steps="41"/></proof>
   </goal>
   <goal name="subst_zip_tree&#39;vc.9" expl="postcondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.00" steps="59"/></proof>
+  <proof prover="6"><result status="valid" time="0.00" steps="61"/></proof>
   </goal>
  </transf>
  </goal>

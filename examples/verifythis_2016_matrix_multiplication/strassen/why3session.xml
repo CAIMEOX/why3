@@ -923,7 +923,7 @@
   <proof prover="1"><result status="valid" time="0.09" steps="167"/></proof>
   </goal>
   <goal name="strassen&#39;vc.163" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.17" steps="438767"/></proof>
+  <proof prover="0"><result status="valid" time="0.17" steps="438842"/></proof>
   </goal>
   <goal name="strassen&#39;vc.164" expl="precondition" proved="true">
   <proof prover="1"><result status="valid" time="0.17" steps="294"/></proof>
@@ -1038,7 +1038,7 @@
   <proof prover="1"><result status="valid" time="0.09" steps="187"/></proof>
   </goal>
   <goal name="strassen&#39;vc.179" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.26" steps="515260"/></proof>
+  <proof prover="0"><result status="valid" time="0.26" steps="515308"/></proof>
   </goal>
   <goal name="strassen&#39;vc.180" expl="precondition" proved="true">
   <proof prover="1"><result status="valid" time="0.35" steps="979"/></proof>
@@ -1083,7 +1083,7 @@
   <proof prover="1"><result status="valid" time="0.10" steps="196"/></proof>
   </goal>
   <goal name="strassen&#39;vc.186" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.28" steps="597837"/></proof>
+  <proof prover="0"><result status="valid" time="0.28" steps="598061"/></proof>
   </goal>
   <goal name="strassen&#39;vc.187" expl="precondition" proved="true">
   <proof prover="1"><result status="valid" time="0.38" steps="1048"/></proof>
@@ -1159,7 +1159,7 @@
    </transf>
    </goal>
    <goal name="strassen&#39;vc.194.2" expl="precondition" proved="true">
-   <proof prover="6"><result status="valid" time="0.11" steps="308534"/></proof>
+   <proof prover="6"><result status="valid" time="0.11" steps="308794"/></proof>
    </goal>
   </transf>
   </goal>

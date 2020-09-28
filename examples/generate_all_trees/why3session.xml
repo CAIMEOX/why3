@@ -62,10 +62,10 @@
   <proof prover="1"><result status="valid" time="0.02" steps="165"/></proof>
   </goal>
   <goal name="combine&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.52" steps="2274"/></proof>
+  <proof prover="1"><result status="valid" time="0.33" steps="1578"/></proof>
   </goal>
   <goal name="combine&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.11" steps="29485"/></proof>
+  <proof prover="3"><result status="valid" time="0.11" steps="29547"/></proof>
   </goal>
   <goal name="combine&#39;vc.4" expl="variant decrease" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="8369"/></proof>

@@ -9,7 +9,7 @@
 <path name=".."/><path name="sumrange.mlw"/>
 <theory name="ArraySum" proved="true">
  <goal name="sum&#39;vc" expl="VC for sum" proved="true">
- <proof prover="3"><result status="valid" time="0.01" steps="2630"/></proof>
+ <proof prover="3"><result status="valid" time="0.01" steps="2774"/></proof>
  </goal>
  <goal name="sum_right" proved="true">
  <transf name="introduce_premises" proved="true" >
@@ -159,44 +159,44 @@
   <proof prover="3"><result status="valid" time="0.02" steps="7001"/></proof>
   </goal>
   <goal name="tree_of_array&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.01" steps="6432"/></proof>
+  <proof prover="3"><result status="valid" time="0.01" steps="6464"/></proof>
   </goal>
   <goal name="tree_of_array&#39;vc.2" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="8080"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="8176"/></proof>
   </goal>
   <goal name="tree_of_array&#39;vc.3" expl="variant decrease" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="7123"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="7234"/></proof>
   </goal>
   <goal name="tree_of_array&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="7126"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="7249"/></proof>
   </goal>
   <goal name="tree_of_array&#39;vc.5" expl="variant decrease" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="7236"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="7414"/></proof>
   </goal>
   <goal name="tree_of_array&#39;vc.6" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="7221"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="7403"/></proof>
   </goal>
   <goal name="tree_of_array&#39;vc.7" expl="assertion" proved="true">
   <transf name="introduce_premises" proved="true" >
    <goal name="tree_of_array&#39;vc.7.0" expl="assertion" proved="true">
    <transf name="destruct_term" proved="true" arg1="l">
     <goal name="tree_of_array&#39;vc.7.0.0" expl="assertion" proved="true">
-    <transf name="destruct_term" proved="true" arg1="r">
+    <transf name="destruct_term" proved="true" arg1="r" arg2="using" arg3="b1,b2,b3">
      <goal name="tree_of_array&#39;vc.7.0.0.0" expl="assertion" proved="true">
-     <proof prover="3"><result status="valid" time="0.08" steps="15167"/></proof>
+     <proof prover="3" timelimit="5"><result status="valid" time="0.11" steps="15277"/></proof>
      </goal>
      <goal name="tree_of_array&#39;vc.7.0.0.1" expl="assertion" proved="true">
-     <proof prover="3"><result status="valid" time="0.04" steps="9196"/></proof>
+     <proof prover="3" timelimit="5"><result status="valid" time="0.04" steps="9451"/></proof>
      </goal>
     </transf>
     </goal>
     <goal name="tree_of_array&#39;vc.7.0.1" expl="assertion" proved="true">
-    <transf name="destruct_term" proved="true" arg1="r" arg2="using" arg3="b1,b2,b3">
+    <transf name="destruct_term" proved="true" arg1="r">
      <goal name="tree_of_array&#39;vc.7.0.1.0" expl="assertion" proved="true">
-     <proof prover="3" timelimit="5"><result status="valid" time="0.11" steps="13644"/></proof>
+     <proof prover="3"><result status="valid" time="0.04" steps="14034"/></proof>
      </goal>
      <goal name="tree_of_array&#39;vc.7.0.1.1" expl="assertion" proved="true">
-     <proof prover="3" timelimit="5"><result status="valid" time="0.04" steps="12675"/></proof>
+     <proof prover="3"><result status="valid" time="0.08" steps="13090"/></proof>
      </goal>
     </transf>
     </goal>
@@ -207,12 +207,12 @@
   <goal name="tree_of_array&#39;vc.8" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="tree_of_array&#39;vc.8.0" expl="postcondition" proved="true">
-   <proof prover="3"><result status="valid" time="0.02" steps="8220"/></proof>
+   <proof prover="3"><result status="valid" time="0.02" steps="8350"/></proof>
    </goal>
    <goal name="tree_of_array&#39;vc.8.1" expl="postcondition" proved="true">
    <transf name="unfold" proved="true" arg1="is_tree_for">
     <goal name="tree_of_array&#39;vc.8.1.0" expl="VC for tree_of_array" proved="true">
-    <proof prover="3"><result status="valid" time="0.22" steps="36067"/></proof>
+    <proof prover="3"><result status="valid" time="0.22" steps="37451"/></proof>
     </goal>
    </transf>
    </goal>
@@ -224,7 +224,7 @@
  <proof prover="3"><result status="valid" time="0.02" steps="6435"/></proof>
  </goal>
  <goal name="query_aux&#39;vc" expl="VC for query_aux" proved="true">
- <proof prover="3"><result status="valid" time="0.25" steps="40436"/></proof>
+ <proof prover="3"><result status="valid" time="0.25" steps="41258"/></proof>
  </goal>
  <goal name="query&#39;vc" expl="VC for query" proved="true">
  <transf name="introduce_premises" proved="true" >
@@ -253,37 +253,37 @@
   <proof prover="3"><result status="valid" time="0.05" steps="7293"/></proof>
   </goal>
   <goal name="update_aux&#39;vc.1" expl="variant decrease" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="7952"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="8024"/></proof>
   </goal>
   <goal name="update_aux&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="7505"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="7579"/></proof>
   </goal>
   <goal name="update_aux&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="7603"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="7688"/></proof>
   </goal>
   <goal name="update_aux&#39;vc.4" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="8668"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="8826"/></proof>
   </goal>
   <goal name="update_aux&#39;vc.5" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="9296"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="9474"/></proof>
   </goal>
   <goal name="update_aux&#39;vc.6" expl="variant decrease" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="7963"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="8037"/></proof>
   </goal>
   <goal name="update_aux&#39;vc.7" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="7527"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="7632"/></proof>
   </goal>
   <goal name="update_aux&#39;vc.8" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="7702"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="7811"/></proof>
   </goal>
   <goal name="update_aux&#39;vc.9" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="9312"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="9405"/></proof>
   </goal>
   <goal name="update_aux&#39;vc.10" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="8745"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="8919"/></proof>
   </goal>
   <goal name="update_aux&#39;vc.11" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.55" steps="78055"/></proof>
+  <proof prover="3"><result status="valid" time="0.55" steps="80094"/></proof>
   </goal>
  </transf>
  </goal>
@@ -309,7 +309,7 @@
  </transf>
  </goal>
  <goal name="depth_is_log&#39;vc" expl="VC for depth_is_log" proved="true">
- <proof prover="0" timelimit="1"><result status="valid" time="0.77" steps="1034"/></proof>
+ <proof prover="0" timelimit="1"><result status="valid" time="0.77" steps="1079"/></proof>
  </goal>
  <goal name="update_aux_complexity&#39;vc" expl="VC for update_aux_complexity" proved="true">
  <transf name="split_goal_right" proved="true" >
@@ -338,10 +338,10 @@
   <proof prover="3"><result status="valid" time="0.04" steps="10792"/></proof>
   </goal>
   <goal name="update_aux_complexity&#39;vc.8" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="11383"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="11946"/></proof>
   </goal>
   <goal name="update_aux_complexity&#39;vc.9" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.12" steps="22778"/></proof>
+  <proof prover="3"><result status="valid" time="0.13" steps="23341"/></proof>
   </goal>
   <goal name="update_aux_complexity&#39;vc.10" expl="variant decrease" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="9326"/></proof>
@@ -359,10 +359,10 @@
   <proof prover="3"><result status="valid" time="0.03" steps="10117"/></proof>
   </goal>
   <goal name="update_aux_complexity&#39;vc.15" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="11476"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="12039"/></proof>
   </goal>
   <goal name="update_aux_complexity&#39;vc.16" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.13" steps="21894"/></proof>
+  <proof prover="3"><result status="valid" time="0.12" steps="22457"/></proof>
   </goal>
  </transf>
  </goal>

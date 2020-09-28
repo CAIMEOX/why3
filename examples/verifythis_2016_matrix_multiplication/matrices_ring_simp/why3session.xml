@@ -8,7 +8,7 @@
 <path name=".."/><path name="matrices_ring_simp.mlw"/>
 <theory name="Symb" proved="true">
  <goal name="LOCAL.l_mdl_ok&#39;vc" expl="VC for l_mdl_ok" proved="true">
- <proof prover="1"><result status="valid" time="0.03" steps="112"/></proof>
+ <proof prover="1"><result status="valid" time="0.03" steps="119"/></proof>
  </goal>
  <goal name="LOCAL.m_mdl_ok&#39;vc" expl="VC for m_mdl_ok" proved="true">
  <proof prover="1"><result status="valid" time="0.02" steps="39"/></proof>
@@ -23,34 +23,34 @@
  <proof prover="1"><result status="valid" time="0.01" steps="83"/></proof>
  </goal>
  <goal name="LOCAL.m_collapse_ok&#39;vc" expl="VC for m_collapse_ok" proved="true">
- <proof prover="3"><result status="valid" time="0.11" steps="30566"/></proof>
+ <proof prover="3"><result status="valid" time="0.11" steps="30908"/></proof>
  </goal>
  <goal name="LOCAL.lm_collapse_ok&#39;vc" expl="VC for lm_collapse_ok" proved="true">
- <proof prover="1"><result status="valid" time="0.13" steps="382"/></proof>
+ <proof prover="1"><result status="valid" time="0.13" steps="387"/></proof>
  </goal>
  <goal name="LOCAL.cat_rev_ok&#39;vc" expl="VC for cat_rev_ok" proved="true">
- <proof prover="1"><result status="valid" time="0.10" steps="295"/></proof>
+ <proof prover="1"><result status="valid" time="0.10" steps="317"/></proof>
  </goal>
  <goal name="LOCAL.lm_dump_ok&#39;vc" expl="VC for lm_dump_ok" proved="true">
- <proof prover="1"><result status="valid" time="0.21" steps="581"/></proof>
+ <proof prover="1"><result status="valid" time="0.21" steps="598"/></proof>
  </goal>
  <goal name="LOCAL.lm_merge_ok&#39;vc" expl="VC for lm_merge_ok" proved="true">
- <proof prover="1" timelimit="5"><result status="valid" time="2.65" steps="4960"/></proof>
+ <proof prover="1" timelimit="5"><result status="valid" time="0.71" steps="2021"/></proof>
  </goal>
  <goal name="LOCAL.cat_ok&#39;vc" expl="VC for cat_ok" proved="true">
- <proof prover="1"><result status="valid" time="0.16" steps="490"/></proof>
+ <proof prover="1"><result status="valid" time="0.16" steps="563"/></proof>
  </goal>
  <goal name="LOCAL.m_mul_ok&#39;vc" expl="VC for m_mul_ok" proved="true">
  <proof prover="1"><result status="valid" time="0.09" steps="267"/></proof>
  </goal>
  <goal name="LOCAL.m_distribute_ok&#39;vc" expl="VC for m_distribute_ok" proved="true">
- <proof prover="1"><result status="valid" time="0.11" steps="364"/></proof>
+ <proof prover="1"><result status="valid" time="0.11" steps="337"/></proof>
  </goal>
  <goal name="LOCAL.lm_distribute_ok&#39;vc" expl="VC for lm_distribute_ok" proved="true">
- <proof prover="1"><result status="valid" time="0.17" steps="772"/></proof>
+ <proof prover="1"><result status="valid" time="0.17" steps="914"/></proof>
  </goal>
  <goal name="LOCAL.lm_opp_ok&#39;vc" expl="VC for lm_opp_ok" proved="true">
- <proof prover="1" timelimit="5"><result status="valid" time="1.51" steps="2817"/></proof>
+ <proof prover="1" timelimit="5"><result status="valid" time="1.03" steps="2883"/></proof>
  </goal>
  <goal name="extends_rw" proved="true">
  <proof prover="1"><result status="valid" time="0.01" steps="4"/></proof>
@@ -62,16 +62,16 @@
  <proof prover="1"><result status="valid" time="0.02" steps="63"/></proof>
  </goal>
  <goal name="symb_opp&#39;vc" expl="VC for symb_opp" proved="true">
- <proof prover="1"><result status="valid" time="0.01" steps="37"/></proof>
+ <proof prover="1"><result status="valid" time="0.01" steps="50"/></proof>
  </goal>
  <goal name="symb_add&#39;vc" expl="VC for symb_add" proved="true">
- <proof prover="1"><result status="valid" time="0.04" steps="171"/></proof>
+ <proof prover="1"><result status="valid" time="0.04" steps="278"/></proof>
  </goal>
  <goal name="symb_sub&#39;vc" expl="VC for symb_sub" proved="true">
  <proof prover="1"><result status="valid" time="0.02" steps="52"/></proof>
  </goal>
  <goal name="symb_mul&#39;vc" expl="VC for symb_mul" proved="true">
- <proof prover="1"><result status="valid" time="0.02" steps="70"/></proof>
+ <proof prover="1"><result status="valid" time="0.02" steps="78"/></proof>
  </goal>
  <goal name="harness&#39;vc" expl="VC for harness" proved="true">
  <transf name="split_goal_right" proved="true" >

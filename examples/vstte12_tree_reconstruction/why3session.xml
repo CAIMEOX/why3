@@ -31,7 +31,7 @@
  <proof prover="1"><result status="valid" time="0.03" steps="74416"/></proof>
  </goal>
  <goal name="depths_subtree&#39;vc" expl="VC for depths_subtree" proved="true">
- <proof prover="0"><result status="valid" time="0.21" steps="540"/></proof>
+ <proof prover="0"><result status="valid" time="0.21" steps="599"/></proof>
  </goal>
  <goal name="depths_unique2" proved="true">
  <proof prover="2"><result status="valid" time="0.02"/></proof>
@@ -56,7 +56,7 @@
   <proof prover="0"><result status="valid" time="0.03" steps="61"/></proof>
   </goal>
   <goal name="build_rec&#39;vc.5" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="17"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="18"/></proof>
   </goal>
   <goal name="build_rec&#39;vc.6" expl="exceptional postcondition" proved="true">
   <proof prover="3"><path name="vstte12_tree_reconstruction_TreeReconstruction_VC_build_rec_1.v"/><result status="valid" time="0.44"/></proof>

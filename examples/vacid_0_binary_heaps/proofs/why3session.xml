@@ -13,16 +13,16 @@
  <goal name="min_of_sorted&#39;vc" expl="VC for min_of_sorted" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="min_of_sorted&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="10250"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="10351"/></proof>
   </goal>
   <goal name="min_of_sorted&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="10227"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="10338"/></proof>
   </goal>
   <goal name="min_of_sorted&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="11106"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="11226"/></proof>
   </goal>
   <goal name="min_of_sorted&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.10" steps="23156"/></proof>
+  <proof prover="0"><result status="valid" time="0.10" steps="23241"/></proof>
   </goal>
  </transf>
  </goal>
@@ -154,19 +154,19 @@
  <goal name="is_heap_relation&#39;vc" expl="VC for is_heap_relation" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="is_heap_relation&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.00" steps="8"/></proof>
-  </goal>
-  <goal name="is_heap_relation&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.00" steps="6"/></proof>
-  </goal>
-  <goal name="is_heap_relation&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.00" steps="6"/></proof>
-  </goal>
-  <goal name="is_heap_relation&#39;vc.3" expl="precondition" proved="true">
   <proof prover="1"><result status="valid" time="0.00" steps="9"/></proof>
   </goal>
+  <goal name="is_heap_relation&#39;vc.1" expl="precondition" proved="true">
+  <proof prover="1"><result status="valid" time="0.00" steps="7"/></proof>
+  </goal>
+  <goal name="is_heap_relation&#39;vc.2" expl="precondition" proved="true">
+  <proof prover="1"><result status="valid" time="0.00" steps="7"/></proof>
+  </goal>
+  <goal name="is_heap_relation&#39;vc.3" expl="precondition" proved="true">
+  <proof prover="1"><result status="valid" time="0.00" steps="16"/></proof>
+  </goal>
   <goal name="is_heap_relation&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="31"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="22"/></proof>
   </goal>
  </transf>
  </goal>
@@ -249,13 +249,13 @@
  <goal name="elements_set_outside&#39;vc" expl="VC for elements_set_outside" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="elements_set_outside&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.00" steps="3"/></proof>
+  <proof prover="1"><result status="valid" time="0.00" steps="4"/></proof>
   </goal>
   <goal name="elements_set_outside&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.00" steps="3"/></proof>
+  <proof prover="1"><result status="valid" time="0.00" steps="4"/></proof>
   </goal>
   <goal name="elements_set_outside&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.02" steps="14549"/></proof>
+  <proof prover="4"><result status="valid" time="0.02" steps="15679"/></proof>
   </goal>
  </transf>
  </goal>
@@ -273,16 +273,16 @@
  <goal name="is_heap_min&#39;vc" expl="VC for is_heap_min" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="is_heap_min&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="4"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="5"/></proof>
   </goal>
   <goal name="is_heap_min&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="4"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="5"/></proof>
   </goal>
   <goal name="is_heap_min&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="20"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="21"/></proof>
   </goal>
   <goal name="is_heap_min&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.96" steps="699"/></proof>
+  <proof prover="1"><result status="valid" time="0.96" steps="597"/></proof>
   </goal>
  </transf>
  </goal>
@@ -460,7 +460,7 @@
    </goal>
    <goal name="extractMin&#39;vc.14.2" expl="VC for extractMin" proved="true">
    <proof prover="0"><result status="valid" time="0.60" steps="89203"/></proof>
-   <proof prover="1"><result status="valid" time="4.56" steps="1435"/></proof>
+   <proof prover="1"><result status="valid" time="5.40" steps="1435"/></proof>
    </goal>
    <goal name="extractMin&#39;vc.14.3" expl="VC for extractMin" proved="true">
    <proof prover="1"><result status="valid" time="0.01" steps="22"/></proof>
@@ -530,7 +530,7 @@
   <proof prover="1"><result status="valid" time="0.03" steps="32"/></proof>
   </goal>
   <goal name="extractMin&#39;vc.24" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="1.93" steps="1188"/></proof>
+  <proof prover="1"><result status="valid" time="2.32" steps="1188"/></proof>
   </goal>
   <goal name="extractMin&#39;vc.25" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
@@ -561,7 +561,7 @@
    </goal>
    <goal name="extractMin&#39;vc.28.2" expl="VC for extractMin" proved="true">
    <proof prover="0"><result status="valid" time="0.38" steps="67330"/></proof>
-   <proof prover="1"><result status="valid" time="2.04" steps="930"/></proof>
+   <proof prover="1"><result status="valid" time="2.55" steps="930"/></proof>
    </goal>
    <goal name="extractMin&#39;vc.28.3" expl="VC for extractMin" proved="true">
    <proof prover="1"><result status="valid" time="0.01" steps="18"/></proof>

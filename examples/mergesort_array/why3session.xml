@@ -32,10 +32,10 @@
   <proof prover="0"><result status="valid" time="0.00" steps="1"/></proof>
   </goal>
   <goal name="merge&#39;vc.7" expl="index in array bounds" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="20"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="22"/></proof>
   </goal>
   <goal name="merge&#39;vc.8" expl="index in array bounds" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="20"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="23"/></proof>
   </goal>
   <goal name="merge&#39;vc.9" expl="index in array bounds" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="19"/></proof>
@@ -59,19 +59,19 @@
   <proof prover="4"><result status="valid" time="0.06"/></proof>
   </goal>
   <goal name="merge&#39;vc.16" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="4.68" steps="5814"/></proof>
+  <proof prover="0"><result status="valid" time="4.68" steps="5829"/></proof>
   </goal>
   <goal name="merge&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="58"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="60"/></proof>
   </goal>
   <goal name="merge&#39;vc.18" expl="index in array bounds" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="21"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="22"/></proof>
   </goal>
   <goal name="merge&#39;vc.19" expl="index in array bounds" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="19"/></proof>
   </goal>
   <goal name="merge&#39;vc.20" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="25"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="26"/></proof>
   </goal>
   <goal name="merge&#39;vc.21" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="25"/></proof>
@@ -372,7 +372,7 @@
 </theory>
 <theory name="NaturalMergesort" proved="true">
  <goal name="find_run&#39;vc" expl="VC for find_run" proved="true">
- <proof prover="0"><result status="valid" time="0.13" steps="167"/></proof>
+ <proof prover="0"><result status="valid" time="0.31" steps="299"/></proof>
  </goal>
  <goal name="natural_mergesort&#39;vc" expl="VC for natural_mergesort" proved="true">
  <transf name="split_goal_right" proved="true" >

@@ -55,10 +55,10 @@
   <proof prover="1"><result status="valid" time="0.00" steps="19"/></proof>
   </goal>
   <goal name="duplets&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="46"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="47"/></proof>
   </goal>
   <goal name="duplets&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="82"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="88"/></proof>
   </goal>
  </transf>
  </goal>

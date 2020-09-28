@@ -8,7 +8,7 @@
 <path name=".."/><path name="monoid.mlw"/>
 <theory name="MonoidSumDef" proved="true">
  <goal name="agg&#39;vc" expl="VC for agg" proved="true">
- <proof prover="2"><result status="valid" time="0.01" steps="14"/></proof>
+ <proof prover="2"><result status="valid" time="0.01" steps="12"/></proof>
  </goal>
  <goal name="agg_sing_core" proved="true">
  <proof prover="2"><result status="valid" time="0.00" steps="22"/></proof>

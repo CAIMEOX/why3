@@ -257,7 +257,7 @@
   <proof prover="2"><result status="valid" time="0.99" steps="1399"/></proof>
   </goal>
   <goal name="huffman_coding&#39;vc.63" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.08" steps="18313"/></proof>
+  <proof prover="3"><result status="valid" time="0.08" steps="20316"/></proof>
   </goal>
  </transf>
  </goal>

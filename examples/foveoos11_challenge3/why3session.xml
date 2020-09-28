@@ -70,41 +70,41 @@
   </transf>
   </goal>
   <goal name="two_equal_elements&#39;vc.15" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="5151"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="5225"/></proof>
   </goal>
   <goal name="two_equal_elements&#39;vc.16" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.04" steps="10570"/></proof>
+  <proof prover="1"><result status="valid" time="0.04" steps="10644"/></proof>
   </goal>
   <goal name="two_equal_elements&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.08" steps="16729"/></proof>
+  <proof prover="1"><result status="valid" time="0.08" steps="16803"/></proof>
   </goal>
   <goal name="two_equal_elements&#39;vc.18" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="16044"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="16118"/></proof>
   </goal>
   <goal name="two_equal_elements&#39;vc.19" expl="loop invariant preservation" proved="true">
   <transf name="inline_all" proved="true" >
    <goal name="two_equal_elements&#39;vc.19.0" expl="loop invariant preservation" proved="true">
-   <proof prover="1"><result status="valid" time="0.02" steps="10453"/></proof>
+   <proof prover="1"><result status="valid" time="0.02" steps="10527"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="two_equal_elements&#39;vc.20" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="9857"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="9931"/></proof>
   </goal>
   <goal name="two_equal_elements&#39;vc.21" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="5071"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="5145"/></proof>
   </goal>
   <goal name="two_equal_elements&#39;vc.22" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="12917"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="12991"/></proof>
   </goal>
   <goal name="two_equal_elements&#39;vc.23" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.00" steps="5341"/></proof>
+  <proof prover="1"><result status="valid" time="0.00" steps="5415"/></proof>
   </goal>
   <goal name="two_equal_elements&#39;vc.24" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.05" steps="13004"/></proof>
+  <proof prover="1"><result status="valid" time="0.05" steps="13078"/></proof>
   </goal>
   <goal name="two_equal_elements&#39;vc.25" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="5676"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="5750"/></proof>
   </goal>
   <goal name="two_equal_elements&#39;vc.26" expl="loop invariant preservation" proved="true">
   <transf name="unfold" proved="true" arg1="appear_twice">
@@ -113,10 +113,10 @@
     <goal name="two_equal_elements&#39;vc.26.0.0" expl="loop invariant preservation" proved="true">
     <transf name="assert" proved="true" arg1="(forall i1 j:int. 0 &lt;= i1 /\ i1 &lt; (i + 1) /\ 0 &lt;= j /\ j &lt; (i + 1) /\ i1 &lt;&gt; j -&gt; a[i1] &lt;&gt; v \/ a[j] &lt;&gt; v)">
      <goal name="two_equal_elements&#39;vc.26.0.0.0" expl="asserted formula" proved="true">
-     <proof prover="1"><result status="valid" time="0.05" steps="13525"/></proof>
+     <proof prover="1"><result status="valid" time="0.05" steps="13544"/></proof>
      </goal>
      <goal name="two_equal_elements&#39;vc.26.0.0.1" expl="loop invariant preservation" proved="true">
-     <proof prover="1"><result status="valid" time="0.03" steps="10162"/></proof>
+     <proof prover="1"><result status="valid" time="0.03" steps="10181"/></proof>
      </goal>
     </transf>
     </goal>

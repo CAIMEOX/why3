@@ -21,19 +21,19 @@
   <proof prover="2"><result status="valid" time="0.01" steps="3749"/></proof>
   </goal>
   <goal name="lcp&#39;vc.1" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="4116"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="4473"/></proof>
   </goal>
   <goal name="lcp&#39;vc.2" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="4116"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="4600"/></proof>
   </goal>
   <goal name="lcp&#39;vc.3" expl="loop variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="4160"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="4611"/></proof>
   </goal>
   <goal name="lcp&#39;vc.4" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="15772"/></proof>
+  <proof prover="1"><result status="valid" time="0.38" steps="541149"/></proof>
   </goal>
   <goal name="lcp&#39;vc.5" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="8708"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="9722"/></proof>
   </goal>
  </transf>
  </goal>
@@ -53,28 +53,28 @@
   <proof prover="2"><result status="valid" time="0.01" steps="3840"/></proof>
   </goal>
   <goal name="compare&#39;vc.2" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="4602"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="4861"/></proof>
   </goal>
   <goal name="compare&#39;vc.3" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="4595"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="4972"/></proof>
   </goal>
   <goal name="compare&#39;vc.4" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="4962"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="5536"/></proof>
   </goal>
   <goal name="compare&#39;vc.5" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="4955"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="5638"/></proof>
   </goal>
   <goal name="compare&#39;vc.6" expl="unreachable point" proved="true">
-  <proof prover="3" timelimit="5"><result status="valid" time="0.01" steps="25"/></proof>
+  <proof prover="3" timelimit="5"><result status="valid" time="0.01" steps="39"/></proof>
   </goal>
   <goal name="compare&#39;vc.7" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.00" steps="3984"/></proof>
+  <proof prover="2"><result status="valid" time="0.00" steps="4896"/></proof>
   </goal>
   <goal name="compare&#39;vc.8" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="5610"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="6517"/></proof>
   </goal>
   <goal name="compare&#39;vc.9" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.01" steps="44"/></proof>
+  <proof prover="3"><result status="valid" time="0.01" steps="58"/></proof>
   </goal>
  </transf>
  </goal>
@@ -114,64 +114,64 @@
   <proof prover="2"><result status="valid" time="0.03" steps="14909"/></proof>
   </goal>
   <goal name="sort&#39;vc.9" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="16923"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="16995"/></proof>
   </goal>
   <goal name="sort&#39;vc.10" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.07" steps="16944"/></proof>
+  <proof prover="2"><result status="valid" time="0.07" steps="17219"/></proof>
   </goal>
   <goal name="sort&#39;vc.11" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.07" steps="20538"/></proof>
+  <proof prover="2"><result status="valid" time="0.08" steps="20884"/></proof>
   </goal>
   <goal name="sort&#39;vc.12" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.08" steps="20791"/></proof>
+  <proof prover="2"><result status="valid" time="0.07" steps="21287"/></proof>
   </goal>
   <goal name="sort&#39;vc.13" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="17694"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="18540"/></proof>
   </goal>
   <goal name="sort&#39;vc.14" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="17708"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="18561"/></proof>
   </goal>
   <goal name="sort&#39;vc.15" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="17694"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="18540"/></proof>
   </goal>
   <goal name="sort&#39;vc.16" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="18065"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="18901"/></proof>
   </goal>
   <goal name="sort&#39;vc.17" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.01" steps="109"/></proof>
+  <proof prover="3"><result status="valid" time="0.01" steps="118"/></proof>
   </goal>
   <goal name="sort&#39;vc.18" expl="loop variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="15994"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="16847"/></proof>
   </goal>
   <goal name="sort&#39;vc.19" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.06" steps="18578"/></proof>
+  <proof prover="2"><result status="valid" time="0.06" steps="19431"/></proof>
   </goal>
   <goal name="sort&#39;vc.20" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.06" steps="177"/></proof>
+  <proof prover="3"><result status="valid" time="0.06" steps="191"/></proof>
   </goal>
   <goal name="sort&#39;vc.21" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.07" steps="23204"/></proof>
+  <proof prover="2"><result status="valid" time="0.07" steps="24057"/></proof>
   </goal>
   <goal name="sort&#39;vc.22" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.20" steps="39491"/></proof>
+  <proof prover="2"><result status="valid" time="0.20" steps="40344"/></proof>
   </goal>
   <goal name="sort&#39;vc.23" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.51" steps="938"/></proof>
+  <proof prover="3"><result status="valid" time="0.76" steps="997"/></proof>
   </goal>
   <goal name="sort&#39;vc.24" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.56" steps="925"/></proof>
+  <proof prover="3"><result status="valid" time="0.56" steps="977"/></proof>
   </goal>
   <goal name="sort&#39;vc.25" expl="assertion" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="17720"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="18573"/></proof>
   </goal>
   <goal name="sort&#39;vc.26" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="15492"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="16345"/></proof>
   </goal>
   <goal name="sort&#39;vc.27" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.13" steps="345"/></proof>
+  <proof prover="3"><result status="valid" time="0.13" steps="428"/></proof>
   </goal>
   <goal name="sort&#39;vc.28" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="15543"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="16396"/></proof>
   </goal>
   <goal name="sort&#39;vc.29" expl="postcondition" proved="true">
   <proof prover="2"><result status="valid" time="0.04" steps="15458"/></proof>

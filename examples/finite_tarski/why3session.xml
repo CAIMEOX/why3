@@ -8,7 +8,7 @@
 <path name=".."/><path name="finite_tarski.mlw"/>
 <theory name="Tarski_rec" proved="true">
  <goal name="least_fix_point&#39;vc" expl="VC for least_fix_point" proved="true">
- <proof prover="0"><result status="valid" time="0.10" steps="379"/></proof>
+ <proof prover="0"><result status="valid" time="0.10" steps="429"/></proof>
  </goal>
 </theory>
 <theory name="Tarski_while" proved="true">

@@ -45,7 +45,7 @@
  </transf>
  </goal>
  <goal name="simple_path&#39;vc" expl="VC for simple_path" proved="true">
- <proof prover="1"><result status="valid" time="0.87" steps="2569"/></proof>
+ <proof prover="1"><result status="valid" time="1.71" steps="3168"/></proof>
  </goal>
  <goal name="key_lemma_1&#39;vc" expl="VC for key_lemma_1" proved="true">
  <transf name="split_goal_right" proved="true" >
@@ -93,10 +93,10 @@
   <proof prover="1"><result status="valid" time="0.01" steps="4"/></proof>
   </goal>
   <goal name="key_lemma_1&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="4"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="13"/></proof>
   </goal>
   <goal name="key_lemma_1&#39;vc.6" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="29"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="19"/></proof>
   </goal>
   <goal name="key_lemma_1&#39;vc.7" expl="postcondition" proved="true">
   <proof prover="1"><result status="valid" time="0.01" steps="12"/></proof>
@@ -332,7 +332,7 @@
    <proof prover="3"><result status="valid" time="0.10" steps="31467"/></proof>
    </goal>
    <goal name="bellman_ford&#39;vc.6.1" expl="VC for bellman_ford" proved="true">
-   <proof prover="2"><result status="valid" time="0.99" steps="7429"/></proof>
+   <proof prover="2"><result status="valid" time="1.21" steps="7429"/></proof>
    </goal>
   </transf>
   </goal>

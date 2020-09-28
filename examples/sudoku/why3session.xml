@@ -9,7 +9,7 @@
 <path name=".."/><path name="sudoku.mlw"/>
 <theory name="Grid" proved="true">
  <goal name="grid_eq_sub" proved="true">
- <proof prover="8"><result status="valid" time="0.00" steps="844"/></proof>
+ <proof prover="8"><result status="valid" time="0.00" steps="845"/></proof>
  </goal>
  <goal name="subset_valid_chunk" proved="true">
  <proof prover="8"><result status="valid" time="0.04" steps="6805"/></proof>
@@ -89,7 +89,7 @@
  <proof prover="8"><result status="valid" time="0.02" steps="6533"/></proof>
  </goal>
  <goal name="full_up_to_frame&#39;vc" expl="VC for full_up_to_frame" proved="true">
- <proof prover="8"><result status="valid" time="0.03" steps="8248"/></proof>
+ <proof prover="8"><result status="valid" time="0.03" steps="8455"/></proof>
  </goal>
  <goal name="full_up_to_frame_all&#39;vc" expl="VC for full_up_to_frame_all" proved="true">
  <proof prover="8"><result status="valid" time="0.02" steps="6923"/></proof>
@@ -103,58 +103,58 @@
   <proof prover="8"><result status="valid" time="0.02" steps="7714"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.1" expl="variant decrease" proved="true">
-  <proof prover="8"><result status="valid" time="0.01" steps="6025"/></proof>
+  <proof prover="8"><result status="valid" time="0.01" steps="6126"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.01" steps="6004"/></proof>
+  <proof prover="8"><result status="valid" time="0.01" steps="6076"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.02" steps="6535"/></proof>
+  <proof prover="8"><result status="valid" time="0.02" steps="6642"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.01" steps="6046"/></proof>
+  <proof prover="8"><result status="valid" time="0.01" steps="6165"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.01" steps="6053"/></proof>
+  <proof prover="8"><result status="valid" time="0.01" steps="6198"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.6" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.01" steps="6601"/></proof>
+  <proof prover="8"><result status="valid" time="0.01" steps="6830"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.7" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.01" steps="6587"/></proof>
+  <proof prover="8"><result status="valid" time="0.01" steps="6889"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.8" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.01" steps="6073"/></proof>
+  <proof prover="8"><result status="valid" time="0.01" steps="6419"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.9" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.03" steps="8273"/></proof>
+  <proof prover="8"><result status="valid" time="0.03" steps="8655"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.10" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.02" steps="6656"/></proof>
+  <proof prover="8"><result status="valid" time="0.02" steps="7092"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.11" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.01" steps="6646"/></proof>
+  <proof prover="8"><result status="valid" time="0.01" steps="7167"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.12" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.01" steps="6101"/></proof>
+  <proof prover="8"><result status="valid" time="0.01" steps="6700"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.13" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.03" steps="8466"/></proof>
+  <proof prover="8"><result status="valid" time="0.03" steps="9103"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.14" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.02" steps="6711"/></proof>
+  <proof prover="8"><result status="valid" time="0.02" steps="7366"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.15" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.02" steps="6705"/></proof>
+  <proof prover="8"><result status="valid" time="0.02" steps="7457"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.16" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.01" steps="6129"/></proof>
+  <proof prover="8"><result status="valid" time="0.01" steps="6993"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.17" expl="precondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.04" steps="8659"/></proof>
+  <proof prover="8"><result status="valid" time="0.04" steps="9563"/></proof>
   </goal>
   <goal name="valid_up_to_frame&#39;vc.18" expl="postcondition" proved="true">
-  <proof prover="8"><result status="valid" time="0.08" steps="16898"/></proof>
+  <proof prover="8"><result status="valid" time="0.08" steps="17638"/></proof>
   </goal>
  </transf>
  </goal>

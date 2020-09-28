@@ -7,7 +7,7 @@
 <path name=".."/><path name="same_fringe.mlw"/>
 <theory name="SameFringe" proved="true">
  <goal name="enum&#39;vc" expl="VC for enum" proved="true">
- <proof prover="0"><result status="valid" time="0.01" steps="70"/></proof>
+ <proof prover="0"><result status="valid" time="0.01" steps="79"/></proof>
  </goal>
  <goal name="eq_enum&#39;vc" expl="VC for eq_enum" proved="true">
  <proof prover="0"><result status="valid" time="0.02" steps="164"/></proof>

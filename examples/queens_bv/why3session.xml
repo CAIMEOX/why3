@@ -248,14 +248,14 @@
     <goal name="t&#39;vc.35.0.1" expl="assertion" proved="true">
     <transf name="split_vc" proved="true" >
      <goal name="t&#39;vc.35.0.1.0" expl="assertion" proved="true">
-     <proof prover="12"><result status="valid" time="7.92" steps="19884"/></proof>
+     <proof prover="12"><result status="valid" time="7.92" steps="20207"/></proof>
      </goal>
     </transf>
     </goal>
    </transf>
    </goal>
    <goal name="t&#39;vc.35.1" expl="assertion" proved="true">
-   <proof prover="4"><result status="valid" time="0.50" steps="101850"/></proof>
+   <proof prover="4"><result status="valid" time="0.50" steps="101855"/></proof>
    </goal>
    <goal name="t&#39;vc.35.2" expl="assertion" proved="true">
    <proof prover="4"><result status="valid" time="0.10" steps="35528"/></proof>
@@ -278,7 +278,7 @@
   <proof prover="3"><result status="valid" time="0.24"/></proof>
   </goal>
   <goal name="t&#39;vc.39" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="1.09"/></proof>
+  <proof prover="3"><result status="valid" time="1.32"/></proof>
   </goal>
   <goal name="t&#39;vc.40" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.12"/></proof>
@@ -317,10 +317,10 @@
      <proof prover="4"><result status="valid" time="0.06" steps="28374"/></proof>
      </goal>
      <goal name="t&#39;vc.45.1.0.2" expl="loop invariant preservation" proved="true">
-     <proof prover="3" timelimit="30"><result status="valid" time="29.26"/></proof>
+     <proof prover="3" timelimit="30"><result status="valid" time="25.23"/></proof>
      </goal>
      <goal name="t&#39;vc.45.1.0.3" expl="loop invariant preservation" proved="true">
-     <proof prover="3" timelimit="30"><result status="valid" time="28.88"/></proof>
+     <proof prover="3" timelimit="30"><result status="valid" time="25.85"/></proof>
      </goal>
     </transf>
     </goal>
