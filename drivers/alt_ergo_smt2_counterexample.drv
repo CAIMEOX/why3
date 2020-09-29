@@ -1,0 +1,16 @@
+prelude ";; produced by alt_ergo_smt2_ce.drv ;;"
+
+import "alt_ergo_smt2.drv"
+
+(* Prepare for counter-example query: get rid of some quantifiers (makes it
+possible to query model values of the variables in premises) and introduce
+counter-example projections  *)
+transformation "prepare_for_counterexmp"
+
+(* Counterexamples: set model parser *)
+model_parser "smtv2"
+
+theory BuiltIn
+  meta "get_counterexmp" ""
+ (* meta "meta_incremental" "" *)
+end
