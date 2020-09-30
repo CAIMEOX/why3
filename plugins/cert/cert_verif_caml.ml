@@ -16,18 +16,18 @@ let rec check_rewrite_term tl (tr : cterm) (t : cterm) path =
   (* returns <t> where the instance at <path> of <tl> is replaced by <tr> *)
   match path, t with
   | [], t when cterm_equal t tl -> tr
-  | Left::prest, { ct_node = CTbinop (op, t1, t2) } ->
+  | Left::prest, CTbinop (op, t1, t2) ->
       let t1' = check_rewrite_term tl tr t1 prest in
-      add_ty ctbool (CTbinop (op, t1', t2))
-  | Right::prest, { ct_node = CTbinop (op, t1, t2) } ->
+      CTbinop (op, t1', t2)
+  | Right::prest, CTbinop (op, t1, t2) ->
       let t2' = check_rewrite_term tl tr t2 prest in
-      add_ty ctbool (CTbinop (op, t1, t2'))
+      CTbinop (op, t1, t2')
   | _ -> verif_failed "Can't follow the rewrite path"
 
 let check_rewrite (cta : ctask) rev h g (terms : cterm list) path : ctask list =
-  let rec introduce acc (inst_terms : cterm list) (t : cterm) = match t.ct_node, inst_terms with
+  let rec introduce acc (inst_terms : cterm list) (t : cterm) = match t, inst_terms with
     | CTbinop (Timplies, t1, t2), _ -> introduce (t1::acc) inst_terms t2
-    | CTquant (CTforall, t), inst::inst_terms -> introduce acc inst_terms (ct_open t inst.ct_node)
+    | CTquant (CTforall, t), inst::inst_terms -> introduce acc inst_terms (ct_open t inst)
     | t, [] -> acc, t
     | _ -> verif_failed "Can't instantiate the hypothesis" in
   let lp, tl, tr =
