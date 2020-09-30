@@ -192,7 +192,7 @@ let prle sep pre fmt le =
   fprintf fmt "[%a]" prl le
 
 let rec pcte fmt ct =
-  match ct.ct_node with
+  match ct with
   | CTbvar lvl -> pp_print_int fmt lvl
   | CTfvar i -> pri fmt i
   | CTint i -> fprintf fmt "%s" (BigInt.to_string i)
@@ -288,11 +288,19 @@ let print_ctasks filename lcta =
   close_out oc
 
 let find_ident s h cta =
-  match Mid.find_opt h cta with
+  match Mid.find_opt h cta.delta_gamma with
   | Some x -> x
   | None ->
       fprintf str_formatter "%s : Can't find ident %a in the task" s pri h;
       verif_failed (flush_str_formatter ())
+
+let remove i cta =
+  { sigma = cta.sigma;
+    delta_gamma = Mid.remove i cta.delta_gamma }
+
+let add i ct cta =
+  { sigma = cta.sigma;
+    delta_gamma = Mid.add i ct cta.delta_gamma }
 
 (** Utility functions on certificate, cterm and ctask *)
 
@@ -389,7 +397,7 @@ let propagate_ecert f fid ft = function
 
 
 (* Equality *)
-let rec cterm_equal t1 t2 = match t1.ct_node, t2.ct_node with
+let rec cterm_equal t1 t2 = match t1, t2 with
   | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
   | CTfvar i1, CTfvar i2 -> id_equal i1 i2
   | CTapp (tl1, tr1), CTapp (tl2, tr2) ->
@@ -409,9 +417,7 @@ let cterm_pos_equal (t1, p1) (t2, p2) =
 let ctask_equal cta1 cta2 = Mid.equal cterm_pos_equal cta1 cta2
 
 (* Bound variable substitution *)
-let rec ct_bv_subst k u ct = lift_node (ctn_bv_subst k u) ct
-
-and ctn_bv_subst k u ctn = match ctn with
+let rec ct_bv_subst k u ctn = match ctn with
   | CTbvar i -> if i = k then u else ctn
   | CTint _ | CTfvar _ -> ctn
   | CTapp (ct1, ct2) ->
@@ -434,7 +440,7 @@ let ct_open t u = ct_bv_subst 0 u t
 (* Checks if the term is locally closed *)
 let locally_closed =
   let di = id_register (id_fresh "dummy_locally_closed_ident") in
-  let rec term ct = match ct.ct_node with
+  let rec term ct = match ct with
     | CTbvar _ -> false
     | CTapp (ct1, ct2)
     | CTbinop (_, ct1, ct2) -> term ct1 && term ct2
@@ -445,9 +451,7 @@ let locally_closed =
   term
 
 (* Free variable substitution *)
-let rec ct_fv_subst z u ct = lift_node (ctn_fv_subst z u) ct
-
-and ctn_fv_subst z u ctn = match ctn with
+let rec ct_fv_subst z u ctn = match ctn with
   | CTfvar x -> if id_equal z x then u else ctn
   | CTapp (ct1, ct2) ->
       let nt1 = ct_fv_subst z u ct1 in
@@ -463,13 +467,11 @@ and ctn_fv_subst z u ctn = match ctn with
   | CTnot ct -> CTnot (ct_fv_subst z u ct)
   | CTint _ | CTbvar _ | CTtrue | CTfalse -> ctn
 
-let ct_subst (m : cterm_node Mid.t) ct =
+let ct_subst (m : cterm Mid.t) ct =
   Mid.fold ct_fv_subst m ct
 
 (* Variable closing *)
-let rec ct_fv_close x k ct = lift_node (ctn_fv_close x k) ct
-
-and ctn_fv_close x k ct = match ct with
+let rec ct_fv_close x k ct = match ct with
   | CTint _ | CTbvar _ | CTtrue | CTfalse-> ct
   | CTfvar y -> if id_equal x y then CTbvar k else ct
   | CTnot ct -> CTnot (ct_fv_close x k ct)
@@ -490,29 +492,30 @@ let rec mem_cont x ctn cont = match ctn with
   | CTfvar y -> cont (id_equal x y)
   | CTapp (ct1, ct2)
   | CTbinop (_, ct1, ct2) ->
-      mem_cont x ct1.ct_node (fun m1 ->
-      mem_cont x ct2.ct_node (fun m2 ->
+      mem_cont x ct1 (fun m1 ->
+      mem_cont x ct2 (fun m2 ->
           cont (m1 || m2)))
   | CTquant (_, ct)
-  | CTnot ct -> mem_cont x ct.ct_node cont
+  | CTnot ct -> mem_cont x ct cont
   | CTint _ | CTbvar _ | CTtrue | CTfalse -> cont false
 
-let mem x t = mem_cont x t.ct_node (fun x -> x)
+let mem x t = mem_cont x t (fun x -> x)
 
 
 (* Separates hypotheses and goals *)
-let split_cta cta =
+let split_hyp_goal cta =
   let open Mid in
-  fold (fun h (ct, pos) (mh, mg) ->
-      if pos then mh, add h (ct, pos) mg
-      else add h (ct, pos) mh, mg)
+  fold (fun h (ct, pos) (delta, gamma) ->
+      if pos then delta, add h (ct, pos) gamma
+      else add h (ct, pos) delta, gamma)
     cta (empty, empty)
 
 (* Creates a new ctask with the same hypotheses but sets the goal with the second argument *)
 let set_goal : ctask -> cterm -> ctask = fun cta ->
-  let mh, mg = split_cta cta in
-  let hg, _ = Mid.choose mg in
-  fun ct -> Mid.add hg (ct, true) mh
+  let delta, gamma = split_hyp_goal cta.delta_gamma in
+  let gpr, _ = Mid.choose gamma in
+  fun ct -> { sigma = cta.sigma;
+              delta_gamma = Mid.add gpr (ct, true) delta }
 
 
 (** Compile chain.
@@ -568,13 +571,13 @@ let elaborate (init_ct : ctask) c =
       ETrivial (pos, i)
   | Rename (i1, i2, c) ->
       let a, pos = find_ident "Rename" i1 cta in
-      let cta = Mid.remove i1 cta
-                |> Mid.add i2 (a, pos) in
+      let cta = remove i1 cta
+                |> add i2 (a, pos) in
       let c = elab cta c in
       ERename (pos, a, i1, i2, c)
   | Cut (i, a, c1, c2) ->
-      let cta1 = Mid.add i (a, true) cta in
-      let cta2 = Mid.add i (a, false) cta in
+      let cta1 = add i (a, true) cta in
+      let cta2 = add i (a, false) cta in
       let c1 = elab cta1 c1 in
       let c2 = elab cta2 c2 in
       ECut (i, a, c1, c2)
@@ -583,16 +586,15 @@ let elaborate (init_ct : ctask) c =
       ELet (x, y, elab cta c)
   | Unfold (i, c) ->
       let t, pos = find_ident "Unfold" i cta in
-      let ty = t.ct_ty in
-      let iff, cta, t1, t2 = match t.ct_node with
+      let iff, cta, t1, t2 = match t with
         | CTbinop (Tiff, t1, t2) ->
-            let imp_pos = add_ty ty (CTbinop (Timplies, t1, t2)) in
-            let imp_neg = add_ty ty (CTbinop (Timplies, t2, t1)) in
-            let unfolded_iff = add_ty ty (CTbinop (Tand, imp_pos, imp_neg)), pos in
-            true, Mid.add i unfolded_iff cta, t1, t2
+            let imp_pos = CTbinop (Timplies, t1, t2) in
+            let imp_neg = CTbinop (Timplies, t2, t1) in
+            let unfolded_iff = CTbinop (Tand, imp_pos, imp_neg), pos in
+            true, add i unfolded_iff cta, t1, t2
         | CTbinop (Timplies, t1, t2) ->
-            let unfolded_imp = add_ty ty (CTbinop (Tor, add_ty ty (CTnot t1), t2)), pos in
-            false, Mid.add i unfolded_imp cta, t1, t2
+            let unfolded_imp = CTbinop (Tor, CTnot t1, t2), pos in
+            false, add i unfolded_imp cta, t1, t2
         | _ -> Format.eprintf "@[%a@]@." pcte t;
                elab_failed "Nothing to unfold" in
       let pack = pos, t1, t2, i, elab cta c in
@@ -601,50 +603,49 @@ let elaborate (init_ct : ctask) c =
       else EUnfoldArr pack
   | Fold (i, c) ->
       let t, pos = find_ident "Fold" i cta in
-      let ty = t.ct_ty in
-      let cta, t1, t2 = match t.ct_node with
-        | CTbinop (Tor, {ct_node = CTnot t1}, t2) ->
-            Mid.add i (add_ty ty (CTbinop (Timplies, t1, t2)), pos) cta, t1, t2
+      let cta, t1, t2 = match t with
+        | CTbinop (Tor, CTnot t1, t2) ->
+            add i (CTbinop (Timplies, t1, t2), pos) cta, t1, t2
         | _ -> Format.eprintf "@[%a@]@." pcte t;
                elab_failed "Nothing to fold" in
       let c = elab cta c in
       EFoldArr (pos, t1, t2, i, c)
   | Split (i, c1, c2) ->
       let t, pos = find_ident "Split" i cta in
-      let t1, t2 = match t.ct_node, pos with
+      let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false -> t1, t2
         | _ -> elab_failed "Not splittable" in
-      let cta1 = Mid.add i (t1, pos) cta in
-      let cta2 = Mid.add i (t2, pos) cta in
+      let cta1 = add i (t1, pos) cta in
+      let cta2 = add i (t2, pos) cta in
       let c1 = elab cta1 c1 in
       let c2 = elab cta2 c2 in
       ESplit (pos, t1, t2, i, c1, c2)
   | Destruct (i, j1, j2, c) ->
       let t, pos = find_ident "Destruct" i cta in
-      let t1, t2 = match t.ct_node, pos with
+      let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), false | CTbinop (Tor, t1, t2), true -> t1, t2
         | _ -> elab_failed "Nothing to destruct" in
-      let cta = Mid.remove i cta
-                |> Mid.add j1 (t1, pos)
-                |> Mid.add j2 (t2, pos) in
+      let cta = remove i cta
+                |> add j1 (t1, pos)
+                |> add j2 (t2, pos) in
       EDestruct (pos, t1, t2, i, j1, j2, elab cta c)
   | Construct (i1, i2, j, c) ->
       let t1, pos1 = find_ident "Construct1" i1 cta in
       let t2, pos2 = find_ident "Construct2" i2 cta in
       assert (pos1 = pos2);
       let t = if pos1
-              then add_ty ctbool (CTbinop (Tor, t1, t2))
-              else add_ty ctbool (CTbinop (Tand, t1, t2)) in
-      let cta = Mid.remove i1 cta
-                |> Mid.remove i2
-                |> Mid.add j (t, pos1) in
+              then CTbinop (Tor, t1, t2)
+              else CTbinop (Tand, t1, t2) in
+      let cta = remove i1 cta
+                |> remove i2
+                |> add j (t, pos1) in
       EConstruct (pos1, t1, t2, i1, i2, j, elab cta c)
   | Swap (i, c) ->
       let t, pos = find_ident "Swap" i cta in
-      let neg, underlying_t, neg_t = match t.ct_node with
+      let neg, underlying_t, neg_t = match t with
         | CTnot t -> true, t, t
-        | _ -> false, t, add_ty ctbool (CTnot t) in
-      let cta = Mid.add i (neg_t, not pos) cta in
+        | _ -> false, t, CTnot t in
+      let cta = add i (neg_t, not pos) cta in
       let pack = pos, underlying_t, i, elab cta c in
       if neg
       then ESwapNeg pack
@@ -652,22 +653,22 @@ let elaborate (init_ct : ctask) c =
   | Dir _ -> verif_failed "Some Dir left during elaboration"
   | Weakening (i, c) ->
       let t, pos = find_ident "Weakening" i cta in
-      let cta = Mid.remove i cta in
+      let cta = remove i cta in
       EWeakening (pos, t, i, elab cta c)
   | IntroQuant (i, y, c) ->
       let t, pos = find_ident "IntroQuant" i cta in
-      let t = match t.ct_node, pos with
+      let t = match t, pos with
         | CTquant (CTforall, t), true | CTquant (CTexists, t), false -> t
         | _ -> elab_failed "Nothing to introduce" in
-      let cta = Mid.add i (ct_open t (CTfvar y), pos) cta in
-      EIntroQuant (pos, add_ty ctbool (CTquant (CTlambda, t)), i, y, elab cta c)
+      let cta = add i (ct_open t (CTfvar y), pos) cta in
+      EIntroQuant (pos, CTquant (CTlambda, t), i, y, elab cta c)
   | InstQuant (i, j, t_inst, c) ->
       let t, pos = find_ident "InstQuant" i cta in
-      let t = match t.ct_node, pos with
+      let t = match t, pos with
         | CTquant (CTforall, t), false | CTquant (CTexists, t), true -> t
         | _ -> elab_failed "trying to instantiate a non-quantified hypothesis" in
-      let cta = Mid.add j (ct_open t t_inst.ct_node, pos) cta in
-      EInstQuant (pos, add_ty ctbool (CTquant (CTlambda, t)), i, j, t_inst, elab cta c)
+      let cta = add j (ct_open t t_inst, pos) cta in
+      EInstQuant (pos, CTquant (CTlambda, t), i, j, t_inst, elab cta c)
   | Rewrite _ -> elab_failed "TODO : Rewrite"
   (* TODO *)
   (* let lcta = check_rewrite cta rev j i [] path in
@@ -704,14 +705,14 @@ let rec trim_certif c =
                                      eaxiom (not g) a i1' j,
                                      eaxiom (not g) b i2' j) in
               let c1, c2, cut = if g
-                                then c_open, c_closed, add_ty ctbool (CTbinop (Tor, a, b))
-                                else c_closed, c_open, add_ty ctbool (CTbinop (Tand, a, b)) in
+                                then c_open, c_closed, CTbinop (Tor, a, b)
+                                else c_closed, c_open, CTbinop (Tand, a, b) in
               ECut (j, cut, c1, c2)))
   | EFoldArr (g, a, b, i, c) ->
       let c = trim_certif c in
       let j = id_register (id_fresh "fold_arr_temp") in
-      let pre = add_ty ctbool (CTbinop (Tor, add_ty ctbool (CTnot a), b)) in
-      let post = add_ty ctbool (CTbinop (Timplies, a, b)) in
+      let pre = CTbinop (Tor, CTnot a, b) in
+      let post = CTbinop (Timplies, a, b) in
       let c_open = EWeakening (g, pre, j, c) in
       let c_closed = EUnfoldArr (not g, a, b, i, eaxiom g pre i j) in
       let c1, c2 = if g then c_open, c_closed else c_closed, c_open in
@@ -721,10 +722,10 @@ let rec trim_certif c =
 let rec eliminate_let m c =
   match c with
     | ELet (x, y, c) ->
-        let x = match x.ct_node with
+        let x = match x with
                 | CTfvar id -> id
                 | _ -> assert false in
-        let m = Mid.add x y.ct_node m in
+        let m = Mid.add x y m in
         eliminate_let m c
     | ECut (i, a, c1, c2) ->
         let c1 = eliminate_let m c1 in
