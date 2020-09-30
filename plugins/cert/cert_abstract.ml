@@ -47,6 +47,13 @@ let ctask_union ct1 ct2 =
   { sigma = Mid.set_union ct1.sigma ct2.sigma;
     delta_gamma = Mid.set_union ct1.delta_gamma ct2.delta_gamma }
 
+let lift_mid_cta f cta =
+  { sigma = cta.sigma;
+    delta_gamma = f (cta.delta_gamma) }
+
+let remove i cta = lift_mid_cta (Mid.remove i) cta
+
+let add i ct cta = lift_mid_cta (Mid.add i ct) cta
 
 (** Abstracting a Why3 <task> into a <ctask> : extract only the logical core *)
 

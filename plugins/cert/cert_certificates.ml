@@ -191,6 +191,26 @@ let prle sep pre fmt le =
   let prl = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt sep) pre in
   fprintf fmt "[%a]" prl le
 
+let rec prty fmt = function
+  | CTyvar _ -> fprintf fmt "Term"
+  (* TODO include some types in lamdapi and translate to them instead of all being Term *)
+  (* Pretty.print_tv fmt v *)
+  | CTyapp (ts, l) ->
+      (* TODO : should we differentiate Prop and bool ? *)
+      if Ty.ts_equal ts Ty.ts_bool
+      then fprintf fmt "Prop"
+      else fprintf fmt "%a %a"
+             Pretty.print_ts ts
+             (prle " " prtyparen) l
+  | CTarrow (t1, t2) ->
+      fprintf fmt "%a ⇒ %a"
+        prtyparen t1
+        prty t2
+
+and prtyparen fmt = function
+  | CTyvar v -> Pretty.print_tv fmt v
+  | cty -> fprintf fmt "(%a)" prty cty
+
 let rec pcte fmt ct =
   match ct with
   | CTbvar lvl -> pp_print_int fmt lvl
@@ -271,15 +291,18 @@ and prcore_certif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab pri pcte
 
 let eprcertif c = eprintf "%a@." prcertif c
 
+let prs fmt mid =
+  Mid.iter (fun x ty -> fprintf fmt "%a : %a\n" pri x prty ty) mid
+
 let prpos fmt = function
   | true  -> fprintf fmt "GOAL| "
   | false -> fprintf fmt "HYP | "
 
-let prmid fmt mid =
+let prdg fmt mid =
   Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a\n" prpos pos pri h pcte cte) mid
 
 let pcta fmt cta =
-  fprintf fmt "%a\n" prmid cta
+  fprintf fmt "%a\n%a\n" prs cta.sigma prdg cta.delta_gamma
 
 let print_ctasks filename lcta =
   let oc = open_out filename in
@@ -294,13 +317,6 @@ let find_ident s h cta =
       fprintf str_formatter "%s : Can't find ident %a in the task" s pri h;
       verif_failed (flush_str_formatter ())
 
-let remove i cta =
-  { sigma = cta.sigma;
-    delta_gamma = Mid.remove i cta.delta_gamma }
-
-let add i ct cta =
-  { sigma = cta.sigma;
-    delta_gamma = Mid.add i ct cta.delta_gamma }
 
 (** Utility functions on certificate, cterm and ctask *)
 
@@ -414,7 +430,17 @@ let rec cterm_equal t1 t2 = match t1, t2 with
 let cterm_pos_equal (t1, p1) (t2, p2) =
   cterm_equal t1 t2 && p1 = p2
 
-let ctask_equal cta1 cta2 = Mid.equal cterm_pos_equal cta1 cta2
+let rec ctype_equal_uncurr (cty1, cty2) = ctype_equal cty1 cty2
+and ctype_equal cty1 cty2 = match cty1, cty2 with
+  | CTyvar v1, CTyvar v2 -> Ty.tv_equal v1 v2
+  | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
+      Ty.ts_equal ty1 ty2 && List.for_all ctype_equal_uncurr (List.combine l1 l2)
+  | CTarrow (f1, a1), CTarrow (f2, a2) ->
+      ctype_equal f1 f2 && ctype_equal a1 a2
+  | (CTyvar _ | CTyapp _ | CTarrow _), _ -> false
+
+let ctask_equal cta1 cta2 =
+  Mid.equal cterm_pos_equal cta1.delta_gamma cta2.delta_gamma
 
 (* Bound variable substitution *)
 let rec ct_bv_subst k u ctn = match ctn with
