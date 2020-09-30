@@ -24,7 +24,7 @@ let print_op fmt = function
   | Timplies -> fprintf fmt "⇨"
   | Tiff -> fprintf fmt "⇔"
 
-let rec print_term fmt { ct_node = ct } = match ct with
+let rec print_term fmt ct = match ct with
   | CTbvar _ -> assert false
   | CTfvar id -> pri fmt id
   | CTint _ -> verif_failed "integers not supported by Lamdapi yet"
@@ -81,39 +81,26 @@ let rec print_list_pre sep pe fmt = function
               (print_list_pre sep pe) t
 
 
-
-type typ =
-  | Term
-  | Prop
-  | Arrow of typ * typ
-
-let rec print_type fmt = function
-  | Term -> fprintf fmt "Term"
-  | Prop -> fprintf fmt "Prop"
-  | Arrow (t1, t2) -> fprintf fmt "%a → %a"
-                        print_type t1
-                        print_type t2
-
-let rec collect typ { ct_node = ct } = match ct with
-  | CTint _ | CTbvar _  -> Mid.empty
-  | CTfvar id -> Mid.singleton id typ
-  | CTapp (ct1, ct2) -> Mid.set_union (collect (Arrow (Term, typ)) ct1) (collect Term ct2)
-  | CTbinop (_, ct1, ct2) -> Mid.set_union (collect typ ct1) (collect typ ct2)
-  | CTquant (_, ct)
-  | CTnot ct -> collect typ ct
-  | CTtrue | CTfalse -> Mid.empty
-
-let collect_stask (ta : ctask_simple) =
-  List.fold_left (fun acc (_, ct) -> Mid.set_union acc (collect Prop ct))
-    Mid.empty ta
+(* let rec collect typ ct = match ct with
+ *   | CTint _ | CTbvar _  -> Mid.empty
+ *   | CTfvar id -> Mid.singleton id typ
+ *   | CTapp (ct1, ct2) -> Mid.set_union (collect (Arrow (Term, typ)) ct1) (collect Term ct2)
+ *   | CTbinop (_, ct1, ct2) -> Mid.set_union (collect typ ct1) (collect typ ct2)
+ *   | CTquant (_, ct)
+ *   | CTnot ct -> collect typ ct
+ *   | CTtrue | CTfalse -> Mid.empty
+ * 
+ * let collect_stask (ta : ctask_simple) =
+ *   List.fold_left (fun acc (_, ct) -> Mid.set_union acc (collect Prop ct))
+ *     Mid.empty ta *)
 
 let print_task fmt (fv, ts) =
   fprintf fmt "(Π ";
-  print_list_inter " " (fun fmt (id, typ) ->
+  print_list_inter " " (fun fmt (id, cty) ->
       fprintf fmt "(%a : %a)"
         pri id
-        print_type typ) fmt fv;
-  let tp = snd (List.split ts) @ [add_ty ctbool CTfalse] in
+        prty cty) fmt fv;
+  let tp = snd (List.split ts) @ [CTfalse] in
   fprintf fmt ", prf (%a)"
     (print_list_inter " ⇨ " print_term) tp;
   fprintf fmt ")"
@@ -194,12 +181,12 @@ let print_certif at fmt c =
   | ERewrite _ -> verif_failed "Rewrite is not yet supported by the Lambdapi checker" in
   pc fmt c
 
-let fv_ts (ct : ctask) =
-  let encode_neg (k, (ct, pos)) = k, if pos then add_ty ctbool (CTnot ct) else ct in
-  let ts = Mid.bindings ct
+let fv_ts (cta : ctask) =
+  let encode_neg (k, (ct, pos)) = k, if pos then CTnot ct else ct in
+  let fv = Mid.bindings cta.sigma in
+  let ts = Mid.bindings cta.delta_gamma
            |> List.map encode_neg in
-  let fv = collect_stask ts in
-  Mid.bindings fv, ts
+  fv, ts
 
 let print fmt init_ct res_ct (task_id, certif) =
   let res = List.map fv_ts res_ct in
