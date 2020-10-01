@@ -430,17 +430,19 @@ let rec cterm_equal t1 t2 = match t1, t2 with
 let cterm_pos_equal (t1, p1) (t2, p2) =
   cterm_equal t1 t2 && p1 = p2
 
-let rec ctype_equal_uncurr (cty1, cty2) = ctype_equal cty1 cty2
-and ctype_equal cty1 cty2 = match cty1, cty2 with
+let rec ctype_equal_uncurr = function
   | CTyvar v1, CTyvar v2 -> Ty.tv_equal v1 v2
   | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
       Ty.ts_equal ty1 ty2 && List.for_all ctype_equal_uncurr (List.combine l1 l2)
   | CTarrow (f1, a1), CTarrow (f2, a2) ->
-      ctype_equal f1 f2 && ctype_equal a1 a2
+      ctype_equal_uncurr (f1, f2) && ctype_equal_uncurr (a1, a2)
   | (CTyvar _ | CTyapp _ | CTarrow _), _ -> false
 
+let ctype_equal cty1 cty2 = ctype_equal_uncurr (cty1, cty2)
+
 let ctask_equal cta1 cta2 =
-  Mid.equal cterm_pos_equal cta1.delta_gamma cta2.delta_gamma
+  Mid.equal ctype_equal cta1.sigma cta2.sigma &&
+    Mid.equal cterm_pos_equal cta1.delta_gamma cta2.delta_gamma
 
 (* Bound variable substitution *)
 let rec ct_bv_subst k u ctn = match ctn with
