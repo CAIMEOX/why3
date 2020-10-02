@@ -1,12 +1,12 @@
 module M1
   use  int.Int
-
+  
   goal g: Int.( = ) 4 (Int.( + ) 2 2)
 end
 
 module M2
   use  int.Int
-
+  
   let f (x : int)
     requires { x = 6 }
     ensures { result = 42 } =
@@ -16,7 +16,7 @@ end
 module M3
   use  int.Int
   use  ref.Ref
-
+  
   let f (_ : ())
     ensures { Int.( >= ) result 0 } =
     let x = Ref.ref 42 in Ref.( ! ) x
@@ -25,7 +25,7 @@ end
 module M4
   use  int.Int
   use  array.Array
-
+  
   let f (a : Array.array int)
     requires { Int.( >= ) (a.Array.length) 1 }
     ensures { (Array.( [] ) a 0) = 42 } =
@@ -34,7 +34,7 @@ end
 module M5
   use  int.Int
   use  array.Array
-
+  
   let f (a : Array.array int)
     requires { Int.( >= ) (a.Array.length) 1 }
     ensures { (Array.( [] ) a 0) = 42 } =
@@ -43,7 +43,7 @@ end
 module M6
   use  int.Int
   use  array.Array
-
+  
   let f (a : Array.array int)
     requires { Int.( >= ) (a.Array.length) 1 }
     ensures { (Array.( [] ) a 0) = 42 } =
