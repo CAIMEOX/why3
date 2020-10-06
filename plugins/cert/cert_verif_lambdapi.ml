@@ -42,7 +42,13 @@ let rec print_term fmt ct = match ct with
       fprintf fmt "(%a) (%a)"
         print_term ct1
         print_term ct2
-  | CTquant ((CTforall | CTexists) as q, t) ->
+  | CTquant (CTlambda, _, t) ->
+      let x = id_register (id_fresh "x") in
+      let t_open = ct_open t (CTfvar x) in
+      fprintf fmt "(λ %a, %a)"
+        pri x
+        print_term t_open
+  | CTquant (q, _, t) ->
       let x = id_register (id_fresh "x") in
       let q_str = match q with CTforall -> "forall"
                              | CTexists -> "exists"
@@ -50,12 +56,6 @@ let rec print_term fmt ct = match ct with
       let t_open = ct_open t (CTfvar x) in
       fprintf fmt "(%s (λ %a, %a))"
         q_str
-        pri x
-        print_term t_open
-  | CTquant (CTlambda, t) ->
-      let x = id_register (id_fresh "x") in
-      let t_open = ct_open t (CTfvar x) in
-      fprintf fmt "(λ %a, %a)"
         pri x
         print_term t_open
 

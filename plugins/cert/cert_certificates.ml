@@ -13,15 +13,20 @@ type path = dir list
 (** We equip each transformation application with a certificate indicating
     why the resulting list of tasks is implying the initial task *)
 
-type ('I, 't) cert = (* 'I is used to designate an hypothesis, 't is used for terms *)
+type ('I, 't) cert =
+  (* 'I is used to designate an hypothesis, 't is used for terms *)
   (* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>.
      For more details, take a look at the OCaml implementation <Cert_verif_caml.ccheck>. *)
   | Nc
   (* Makes verification fail : use it as a placeholder *)
   | Hole of ident
-  (* Hole ct ⇓ (Γ ⊢ Δ) ≜  [ct : Γ ⊢ Δ] *)
+  (* Hole ct ⇓ (Γ ⊢ Δ) ≜  ct refers to Γ ⊢ Δ *)
   | Cut of 'I * 't * ('I, 't) cert * ('I, 't) cert
-  (* Cut (I, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ, I : A ⊢ Δ)) *)
+  (* Cut (I, t, c₁, c₂) ⇓ (Σ | Γ ⊢ Δ) ≜
+         c₁ ⇓ (Σ | Γ ⊢ Δ, I : t)
+     and c₂ ⇓ (Σ | Γ, I : t ⊢ Δ)
+     and Σ ⊩ t : bool
+   *)
   | Let of 't * 'I * ('I, 't) cert
   (* Let (x, I, c) ⇓ t ≜  c ⇓ t[x ← I(t)] *)
   (* Or : x can be used in c as the formula identified by I in t *)
@@ -29,11 +34,11 @@ type ('I, 't) cert = (* 'I is used to designate an hypothesis, 't is used for te
   (* Rename (I₁, I₂, c) ⇓  (Γ, I₁ : A ⊢ Δ) ≜ c ⇓ (Γ, I₂ : A ⊢ Δ)*)
   (* Rename (I₁, I₂, c) ⇓  (Γ ⊢ Δ, I₁ : A) ≜ c ⇓ (Γ ⊢ Δ, I₂ : A)*)
   | Axiom of 'I * 'I
-  (* Axiom (i1, i2) ⇓ (Γ, i1 : A ⊢ Δ, i2 : A) ≜  [] *)
-  (* Axiom (i1, i2) ⇓ (Γ, i2 : A ⊢ Δ, i1 : A) ≜  [] *)
+  (* Axiom (i1, i2) ⇓ (Γ, i1 : A ⊢ Δ, i2 : A) *)
+  (* Axiom (i1, i2) ⇓ (Γ, i2 : A ⊢ Δ, i1 : A) *)
   | Trivial of 'I
-  (* Trivial I ⇓ (Γ, I : false ⊢ Δ) ≜  [] *)
-  (* Trivial I ⇓ (Γ ⊢ Δ, I : true ) ≜  [] *)
+  (* Trivial I ⇓ (Γ, I : false ⊢ Δ) *)
+  (* Trivial I ⇓ (Γ ⊢ Δ, I : true ) *)
   | Unfold of 'I * ('I, 't) cert
   (* Unfold (I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
   (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
@@ -43,8 +48,12 @@ type ('I, 't) cert = (* 'I is used to designate an hypothesis, 't is used for te
   (* Fold (I, c) ⇓ (Γ, I : ¬A ∨ B ⊢ Δ) ≜  c ⇓ (Γ, I : A → B ⊢ Δ)*)
   (* Fold (I, c) ⇓ (Γ ⊢ Δ, I : ¬A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, I : A → B)*)
   | Split of 'I * ('I, 't) cert * ('I, 't) cert
-  (* Split (I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
-  (* Split (I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
+  (* Split (I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜
+         c₁ ⇓ (Γ, I : A ⊢ Δ)
+     and c₂ ⇓ (Γ, I : B ⊢ Δ) *)
+  (* Split (I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (
+         c₁ ⇓ (Γ ⊢ Δ, I : A)
+     and c₂ ⇓ (Γ ⊢ Δ, I : B) *)
   | Destruct of 'I * 'I * 'I * ('I, 't) cert
   (* Destruct (I, J₁, J₂, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, J₁ : A, J₂ : B ⊢ Δ) *)
   (* Destruct (I, J₁, J₂, c) ⇓ (Γ ⊢ Δ, I : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, J₁ : A, J₂ : B) *)
@@ -65,11 +74,19 @@ type ('I, 't) cert = (* 'I is used to designate an hypothesis, 't is used for te
   (* Weakening (I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening (I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
   | IntroQuant of 'I * ident * ('I, 't) cert
-  (* IntroQuant (I, y, c) ⇓ (Γ, I : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : P y ⊢ Δ) (y fresh) *)
-  (* IntroQuant (I, y, c) ⇓ (Γ ⊢ Δ, I : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : P y) (y fresh) *)
+  (* IntroQuant (I, y, c) ⇓ (Σ | Γ, I : ∃ x : τ. P x ⊢ Δ) ≜
+         c ⇓ (Σ, y : τ | Γ, I : P y ⊢ Δ)
+     and y ∉  Σ *)
+  (* IntroQuant (I, y, c) ⇓ (Σ | Γ ⊢ Δ, I : ∀ x : τ. P x) ≜
+         c ⇓ (Σ, y : τ | Γ ⊢ Δ, I : P y)
+     and y ∉  Σ *)
   | InstQuant of 'I * 'I * 't * ('I, 't) cert
-  (* InstQuant (I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
-  (* InstQuant (I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
+  (* InstQuant (I, J, t, c) ⇓ (Σ | Γ, I : ∀ x : τ. P x ⊢ Δ) ≜
+         c ⇓ (Σ | Γ, I : ∀ x : τ. P x, J : P t ⊢ Δ)
+     and Σ ⊩ t : τ *)
+  (* InstQuant (I, J, t, c) ⇓ (Σ | Γ ⊢ Δ, I : ∃ x : τ. P x) ≜
+         c ⇓ (Σ | Γ ⊢ Δ, I : ∃ x : τ. P x, J : P t)
+     and Σ ⊩ t : τ *)
   | Rewrite of 'I * 'I * path * bool * ('I, 't) cert list
   (* Rewrite (I, J, path, rev, lc) ⇓ Seq is defined as follows :
      it tries to rewrite in <I> an equality that is in <J>, following the path <path>,
@@ -219,11 +236,12 @@ let rec pcte fmt ct =
   | CTapp (f, arg) -> fprintf fmt "%a@ %a" pcte f pcte arg
   | CTbinop (op, t1, t2) ->
       fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
-  | CTquant (q, ct) -> begin match q with
-                       | CTforall -> fprintf fmt "∀. %a" pcte ct
-                       | CTexists -> fprintf fmt "∃. %a" pcte ct
-                       | CTlambda -> fprintf fmt "λ. %a" pcte ct
-                       end
+  | CTquant (q, _, ct) ->
+      begin match q with
+      | CTforall -> fprintf fmt "∀. %a" pcte ct
+      | CTexists -> fprintf fmt "∃. %a" pcte ct
+      | CTlambda -> fprintf fmt "λ. %a" pcte ct
+      end
   | CTnot t -> fprintf fmt "(not %a)" pcte t
   | CTtrue -> fprintf fmt "true"
   | CTfalse -> fprintf fmt "false"
@@ -420,17 +438,18 @@ let rec cterm_equal t1 t2 = match t1, t2 with
       cterm_equal tl1 tl2 && cterm_equal tr1 tr2
   | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
       op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
-  | CTquant (q1, t1), CTquant (q2, t2) when q1 = q2 -> cterm_equal t1 t2
+  | CTquant (q1, ty1, t1), CTquant (q2, ty2, t2) when q1 = q2 ->
+      ctype_equal ty1 ty2 && cterm_equal t1 t2
   | CTtrue, CTtrue | CTfalse, CTfalse -> true
   | CTnot t1, CTnot t2 -> cterm_equal t1 t2
   | CTint i1, CTint i2 -> BigInt.eq i1 i2
   | (CTbvar _ | CTfvar _ | CTapp _ | CTbinop _ | CTquant _
      | CTtrue | CTfalse | CTnot _ | CTint _), _ -> false
 
-let cterm_pos_equal (t1, p1) (t2, p2) =
+and cterm_pos_equal (t1, p1) (t2, p2) =
   cterm_equal t1 t2 && p1 = p2
 
-let rec ctype_equal_uncurr = function
+and ctype_equal_uncurr = function
   | CTyvar v1, CTyvar v2 -> Ty.tv_equal v1 v2
   | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
       Ty.ts_equal ty1 ty2 && List.for_all ctype_equal_uncurr (List.combine l1 l2)
@@ -438,7 +457,7 @@ let rec ctype_equal_uncurr = function
       ctype_equal_uncurr (f1, f2) && ctype_equal_uncurr (a1, a2)
   | (CTyvar _ | CTyapp _ | CTarrow _), _ -> false
 
-let ctype_equal cty1 cty2 = ctype_equal_uncurr (cty1, cty2)
+and ctype_equal cty1 cty2 = ctype_equal_uncurr (cty1, cty2)
 
 let ctask_equal cta1 cta2 =
   Mid.equal ctype_equal cta1.sigma cta2.sigma &&
@@ -456,9 +475,9 @@ let rec ct_bv_subst k u ctn = match ctn with
       let nt1 = ct_bv_subst k u ct1 in
       let nt2 = ct_bv_subst k u ct2 in
       CTbinop (op, nt1, nt2)
-  | CTquant (q, ct) ->
+  | CTquant (q, cty, ct) ->
       let nct = ct_bv_subst (k+1) u ct in
-      CTquant (q, nct)
+      CTquant (q, cty, nct)
   | CTnot ct -> CTnot (ct_bv_subst k u ct)
   | CTtrue -> CTtrue
   | CTfalse -> CTfalse
@@ -472,7 +491,7 @@ let locally_closed =
     | CTbvar _ -> false
     | CTapp (ct1, ct2)
     | CTbinop (_, ct1, ct2) -> term ct1 && term ct2
-    | CTquant (_, t) -> term (ct_open t (CTfvar di))
+    | CTquant (_, _, t) -> term (ct_open t (CTfvar di))
     | CTnot ct -> term ct
     | CTint _ | CTfvar _ | CTtrue | CTfalse -> true
   in
@@ -489,9 +508,9 @@ let rec ct_fv_subst z u ctn = match ctn with
       let nt1 = ct_fv_subst z u ct1 in
       let nt2 = ct_fv_subst z u ct2 in
       CTbinop (op, nt1, nt2)
-  | CTquant (q, ct) ->
+  | CTquant (q, cty, ct) ->
       let nct = ct_fv_subst z u ct in
-      CTquant (q, nct)
+      CTquant (q, cty, nct)
   | CTnot ct -> CTnot (ct_fv_subst z u ct)
   | CTint _ | CTbvar _ | CTtrue | CTfalse -> ctn
 
@@ -511,7 +530,7 @@ let rec ct_fv_close x k ct = match ct with
       let nt1 = ct_fv_close x k ct1 in
       let nt2 = ct_fv_close x k ct2 in
       CTbinop (op, nt1, nt2)
-  | CTquant (q, ct) -> CTquant (q, ct_fv_close x (k+1) ct)
+  | CTquant (q, cty, ct) -> CTquant (q, cty, ct_fv_close x (k+1) ct)
 
 let ct_close x t = ct_fv_close x 0 t
 
@@ -523,12 +542,46 @@ let rec mem_cont x ctn cont = match ctn with
       mem_cont x ct1 (fun m1 ->
       mem_cont x ct2 (fun m2 ->
           cont (m1 || m2)))
-  | CTquant (_, ct)
+  | CTquant (_, _, ct)
   | CTnot ct -> mem_cont x ct cont
   | CTint _ | CTbvar _ | CTtrue | CTfalse -> cont false
 
 let mem x t = mem_cont x t (fun x -> x)
 
+
+let rec infer_type sigma t = match t with
+  | CTfvar v -> Mid.find v sigma
+  | CTbvar _ -> assert false
+  | CTtrue | CTfalse -> ctbool
+  | CTnot t -> let ty = infer_type sigma t in
+               assert (ctype_equal ty ctbool);
+               ctbool
+  | CTquant (q, ty1, t) ->
+      let ni = id_register (id_fresh "type_ident") in
+      let sigma = Mid.add ni ty1 sigma in
+      let t = ct_open t (CTfvar ni) in
+      let ty2 = infer_type sigma t in
+      begin match q with
+      | CTlambda -> CTarrow (ty1, ty2)
+      | _ ->  assert (ctype_equal ty2 ctbool); ctbool
+      end
+  | CTapp (t1, t2) ->
+      begin match infer_type sigma t1, infer_type sigma t2 with
+      | CTarrow (ty1, ty2), ty3 when ctype_equal ty1 ty3 -> ty2
+      | _ -> assert false end
+  | CTbinop (_, t1, t2) ->
+      let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
+      assert (ctype_equal ty1 ctbool);
+      assert (ctype_equal ty2 ctbool);
+      ctbool
+  | CTint _ -> ctint
+
+
+let infers_into sigma t ty =
+  try assert (ctype_equal (infer_type sigma t) ty)
+  with _ -> let err_str = fprintf str_formatter "wrong type for %a" pcte t;
+                          flush_str_formatter () in
+            verif_failed err_str
 
 (* Separates hypotheses and goals *)
 let split_hyp_goal cta =
@@ -685,18 +738,18 @@ let elaborate (init_ct : ctask) c =
       EWeakening (pos, t, i, elab cta c)
   | IntroQuant (i, y, c) ->
       let t, pos = find_ident "IntroQuant" i cta in
-      let t = match t, pos with
-        | CTquant (CTforall, t), true | CTquant (CTexists, t), false -> t
+      let t, ty = match t, pos with
+        | CTquant (CTforall, ty, t), true | CTquant (CTexists, ty, t), false -> t, ty
         | _ -> elab_failed "Nothing to introduce" in
       let cta = add i (ct_open t (CTfvar y), pos) cta in
-      EIntroQuant (pos, CTquant (CTlambda, t), i, y, elab cta c)
+      EIntroQuant (pos, CTquant (CTlambda, ty, t), i, y, elab cta c)
   | InstQuant (i, j, t_inst, c) ->
       let t, pos = find_ident "InstQuant" i cta in
-      let t = match t, pos with
-        | CTquant (CTforall, t), false | CTquant (CTexists, t), true -> t
+      let t, ty = match t, pos with
+        | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true -> t, ty
         | _ -> elab_failed "trying to instantiate a non-quantified hypothesis" in
       let cta = add j (ct_open t t_inst, pos) cta in
-      EInstQuant (pos, CTquant (CTlambda, t), i, j, t_inst, elab cta c)
+      EInstQuant (pos, CTquant (CTlambda, ty, t), i, j, t_inst, elab cta c)
   | Rewrite _ -> elab_failed "TODO : Rewrite"
   (* TODO *)
   (* let lcta = check_rewrite cta rev j i [] path in
