@@ -22,12 +22,15 @@ type cterm =
   | CTint of BigInt.t
   | CTapp of cterm * cterm (* binary application *)
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
-  | CTquant of cquant * cterm (* quantifier binding *)
+  | CTquant of cquant * ctype * cterm (* quantifier binding *)
   | CTnot of cterm
   | CTtrue
   | CTfalse
 
 let ctbool = CTyapp (Ty.ts_bool, [])
+let ctint = CTyapp (Ty.ts_int, [])
+
+
 
 type ctask =
   { sigma : ctype Mid.t;
@@ -50,6 +53,10 @@ let ctask_union ct1 ct2 =
 let lift_mid_cta f cta =
   { sigma = cta.sigma;
     delta_gamma = f (cta.delta_gamma) }
+
+let add_var i cty cta =
+  { sigma = Mid.add i cty cta.sigma;
+    delta_gamma = cta.delta_gamma }
 
 let remove i cta = lift_mid_cta (Mid.remove i) cta
 
@@ -116,7 +123,8 @@ and abstract_term_node_rec oty bv_lvl (lvl : int) t =
       let lvl = lvl + List.length lvs in
       let ctn_open, s = abstract_term_rec bv_lvl lvl t_open in
       let q = abstract_quant q in
-      let ctquant q ct = CTquant (q, ct) in
+      let cty = abstract_otype oty in
+      let ctquant q ct = CTquant (q, cty, ct) in
       let ct_closed = List.fold_right (fun _ ct -> ctquant q ct) lvs ctn_open in
       ct_closed, s
   | Tnot t -> let ct, s = abstract_term_rec bv_lvl lvl t in

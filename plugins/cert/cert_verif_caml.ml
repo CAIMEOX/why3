@@ -27,7 +27,9 @@ let rec check_rewrite_term tl (tr : cterm) (t : cterm) path =
 let check_rewrite (cta : ctask) rev h g (terms : cterm list) path : ctask list =
   let rec introduce acc (inst_terms : cterm list) (t : cterm) = match t, inst_terms with
     | CTbinop (Timplies, t1, t2), _ -> introduce (t1::acc) inst_terms t2
-    | CTquant (CTforall, t), inst::inst_terms -> introduce acc inst_terms (ct_open t inst)
+    | CTquant (CTforall, ty, t), inst::inst_terms ->
+        infers_into cta.sigma inst ty;
+        introduce acc inst_terms (ct_open t inst)
     | t, [] -> acc, t
     | _ -> verif_failed "Can't instantiate the hypothesis" in
   let lp, tl, tr =
@@ -130,20 +132,24 @@ let rec ccheck c cta =
         let cta = remove i cta in
         ccheck c cta
     | EIntroQuant (_, _, i, y, c) ->
-        (* TODO : change signature *)
         let t, pos = find_ident "intro_quant" i cta in
         begin match t, pos with
-        | CTquant (CTforall, t), true | CTquant (CTexists, t), false ->
-            if mem y t then verif_failed "non-free variable" else
-              let cta = add i (ct_open t (CTfvar y), pos) cta in
-              ccheck c cta
+        | CTquant (CTforall, cty, t), true | CTquant (CTexists, cty, t), false ->
+            if Mid.mem y cta.sigma || mem y t
+            then verif_failed "non-free variable"
+            else let nt = ct_open t (CTfvar y) in
+                 let cta = cta
+                           |> add i (nt, pos)
+                           |> add_var y cty in
+                 ccheck c cta
         | _ -> verif_failed "Nothing to introduce" end
     | EInstQuant (_, _, i, j, t_inst, c) ->
-        (* TODO : verify type *)
         let t, pos = find_ident "inst_quant" i cta in
         begin match t, pos with
-        | CTquant (CTforall, t), false | CTquant (CTexists, t), true ->
-            let cta = add j (ct_open t t_inst, pos) cta in
+        | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true ->
+            infers_into cta.sigma t_inst ty;
+            let nt = ct_open t t_inst in
+            let cta = add j (nt, pos) cta in
             ccheck c cta
         | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
         end
