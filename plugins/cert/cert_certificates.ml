@@ -431,6 +431,18 @@ let propagate_ecert f fid ft = function
 
 
 (* Equality *)
+
+let rec ctype_equal_uncurr = function
+  | CTyvar v1, CTyvar v2 -> Ty.tv_equal v1 v2
+  | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
+      Ty.ts_equal ty1 ty2 && List.for_all ctype_equal_uncurr (List.combine l1 l2)
+  | CTarrow (f1, a1), CTarrow (f2, a2) ->
+      ctype_equal f1 f2 && ctype_equal a1 a2
+  | (CTyvar _ | CTyapp _ | CTarrow _), _ -> false
+
+and ctype_equal cty1 cty2 = ctype_equal_uncurr (cty1, cty2)
+
+
 let rec cterm_equal t1 t2 = match t1, t2 with
   | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
   | CTfvar i1, CTfvar i2 -> id_equal i1 i2
@@ -446,18 +458,9 @@ let rec cterm_equal t1 t2 = match t1, t2 with
   | (CTbvar _ | CTfvar _ | CTapp _ | CTbinop _ | CTquant _
      | CTtrue | CTfalse | CTnot _ | CTint _), _ -> false
 
-and cterm_pos_equal (t1, p1) (t2, p2) =
+let cterm_pos_equal (t1, p1) (t2, p2) =
   cterm_equal t1 t2 && p1 = p2
 
-and ctype_equal_uncurr = function
-  | CTyvar v1, CTyvar v2 -> Ty.tv_equal v1 v2
-  | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
-      Ty.ts_equal ty1 ty2 && List.for_all ctype_equal_uncurr (List.combine l1 l2)
-  | CTarrow (f1, a1), CTarrow (f2, a2) ->
-      ctype_equal_uncurr (f1, f2) && ctype_equal_uncurr (a1, a2)
-  | (CTyvar _ | CTyapp _ | CTarrow _), _ -> false
-
-and ctype_equal cty1 cty2 = ctype_equal_uncurr (cty1, cty2)
 
 let ctask_equal cta1 cta2 =
   Mid.equal ctype_equal cta1.sigma cta2.sigma &&
@@ -741,13 +744,15 @@ let elaborate (init_ct : ctask) c =
       let t, ty = match t, pos with
         | CTquant (CTforall, ty, t), true | CTquant (CTexists, ty, t), false -> t, ty
         | _ -> elab_failed "Nothing to introduce" in
-      let cta = add i (ct_open t (CTfvar y), pos) cta in
+      let cta = add i (ct_open t (CTfvar y), pos) cta
+                |> add_var y ty in (* maybe not useful to have the signature ... *)
       EIntroQuant (pos, CTquant (CTlambda, ty, t), i, y, elab cta c)
   | InstQuant (i, j, t_inst, c) ->
       let t, pos = find_ident "InstQuant" i cta in
       let t, ty = match t, pos with
         | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true -> t, ty
         | _ -> elab_failed "trying to instantiate a non-quantified hypothesis" in
+      (* ... since we do not check if the types match *)
       let cta = add j (ct_open t t_inst, pos) cta in
       EInstQuant (pos, CTquant (CTlambda, ty, t), i, j, t_inst, elab cta c)
   | Rewrite _ -> elab_failed "TODO : Rewrite"
