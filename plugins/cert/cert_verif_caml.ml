@@ -137,9 +137,7 @@ let rec ccheck c cta =
         | CTquant (CTforall, cty, t), true | CTquant (CTexists, cty, t), false ->
             if Mid.mem y cta.sigma || mem y t
             then verif_failed "non-free variable"
-            else let nt = ct_open t (CTfvar y) in
-                 let cta = cta
-                           |> add i (nt, pos)
+            else let cta = add i (ct_open t (CTfvar y), pos) cta
                            |> add_var y cty in
                  ccheck c cta
         | _ -> verif_failed "Nothing to introduce" end
@@ -148,8 +146,7 @@ let rec ccheck c cta =
         begin match t, pos with
         | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true ->
             infers_into cta.sigma t_inst ty;
-            let nt = ct_open t t_inst in
-            let cta = add j (nt, pos) cta in
+            let cta = add j (ct_open t t_inst, pos) cta in
             ccheck c cta
         | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
         end
@@ -159,11 +156,12 @@ let rec ccheck c cta =
 
 
 let checker_caml (vs, certif) init_ct res_ct =
-  try let map_res = ccheck certif init_ct in
-      let res_ct' = List.map (fun id -> Mid.find id map_res) vs in
-      if not (Lists.equal ctask_equal res_ct res_ct')
+  try let map_cert = ccheck certif init_ct in
+      let map_trans = Mid.of_list (List.combine vs res_ct) in
+      if not (Mid.equal ctask_equal map_cert map_trans)
       then begin
+          let res_ct' = Mid.values map_trans in
           print_ctasks "/tmp/from_trans.log" res_ct;
-          print_ctasks "/tmp/from_cert.log"  res_ct';
+          print_ctasks "/tmp/from_cert.log" res_ct';
           verif_failed "Replaying certif gives different result, log available" end
   with e -> raise (Trans.TransFailure ("Cert_verif_caml.checker_caml", e))
