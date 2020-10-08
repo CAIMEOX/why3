@@ -160,7 +160,7 @@ let checker_caml (vs, certif) init_ct res_ct =
       let map_trans = Mid.of_list (List.combine vs res_ct) in
       if not (Mid.equal ctask_equal map_cert map_trans)
       then begin
-          let res_ct' = Mid.values map_trans in
+          let res_ct' = Mid.values map_cert in
           print_ctasks "/tmp/from_trans.log" res_ct;
           print_ctasks "/tmp/from_cert.log" res_ct';
           verif_failed "Replaying certif gives different result, log available" end
