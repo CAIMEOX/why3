@@ -112,17 +112,19 @@ let rec fmla_quant ~keep_model_vars sign f = function
   | [] -> [], f
   | vs::l ->
      let vsl, f = fmla_quant ~keep_model_vars sign f l in
-     if keep_model_vars && has_a_model_attr vs.vs_name then
-      vs::vsl, f
-     else if t_v_occurs vs f = 0 then
+     if t_v_occurs vs f = 0 then
       vsl, f
      else
       try
         fmla_find_subst (Svs.singleton vs) vs sign f;
         vs::vsl, f
       with Subst_found t ->
-        let f = t_subst_single vs t f in
-        vsl, equ_simp f
+        if keep_model_vars && has_a_model_attr vs.vs_name then
+          let f = t_let t (t_close_bound vs f) in
+          vsl, f
+        else
+          let f = t_subst_single vs t f in
+          vsl, equ_simp f
 
 let rec fmla_remove_quant ~keep_model_vars f =
   match f.t_node with

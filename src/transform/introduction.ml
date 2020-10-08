@@ -359,7 +359,8 @@ let simplify_intros =
 
 let split_vc =
   Trans.compose_l
-    (Trans.compose generalize_intro Split_goal.split_goal_right)
+    (Trans.compose Simplify_formula.simplify_trivial_wp_quantification
+       (Trans.compose generalize_intro Split_goal.split_goal_right))
     (Trans.singleton simplify_intros)
 
 let () = Trans.register_transform_l
