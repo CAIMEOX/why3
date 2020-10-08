@@ -306,8 +306,8 @@ let neg_decompose_tg target =
                 Some (lambda One (fun i ->
                   Swap (pr, Swap (pr, Hole i))))
             | Paxiom, Tbinop (Tor, f1, f2) -> (* destruct *)
-                let pr1 = create_prsymbol (id_clone pr.pr_name) in
-                let pr2 = create_prsymbol (id_clone pr.pr_name) in
+                let pr1 = pr_clone pr in
+                let pr2 = pr_clone pr in
                 [[create_prop_decl Paxiom pr1 (t_not f1);
                   create_prop_decl Paxiom pr2 (t_not f2)]],
                 Some (lambda One (fun i ->
@@ -315,10 +315,10 @@ let neg_decompose_tg target =
                   Destruct (pr, pr1, pr2,
                   Swap (pr1, Swap (pr2, Hole i))))))
             | Pgoal, Tbinop (Tand, f1, f2) ->
-                let pr1 = create_prsymbol (id_clone pr.pr_name) in
-                let pr2 = create_prsymbol (id_clone pr.pr_name) in
+                let pr1 = pr_clone pr in
+                let pr2 = pr_clone pr in
                 [[create_prop_decl Paxiom pr1 f1;
-                  create_prop_decl Pgoal  pr2 (t_not f2)]],
+                  create_prop_decl Pgoal pr2 (t_not f2)]],
                 Some (lambda One (fun i ->
                   Swap (pr,
                   Destruct (pr, pr1, pr2,
