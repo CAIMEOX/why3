@@ -6,4 +6,6 @@ predicate c
 (* goal G1 : (exists x. p x) -> a *)
 (* goal G2 : not a -> a -> false *)
 (* goal G3 : a -> not a -> false *)
-goal G : not (a \/ b)
+(* goal G : not (a \/ b) *)
+goal G : not (not a /\ not b)
+
