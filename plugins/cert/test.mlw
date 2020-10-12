@@ -52,6 +52,7 @@ goal intros : forall x. p x -> d -> p x
 goal clear : a -> d -> a -> a -> d
 
 (* Testing complex transformations *)
+goal blast_simp : not ((not c) /\ (not d))
 goal blast_and : (a /\ b) /\ (a /\ a /\ a /\ b)
 goal blast_and_hole : (b /\ a) /\ ( (a /\ a) /\ c)
 goal blast_or : (a \/ c) /\ (d \/ b)

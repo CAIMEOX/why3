@@ -36,16 +36,6 @@
   </transf>
   </goal>
  </transf>
- <transf name="intro_lcert" >
-  <goal name="intro_exists.0">
-  <transf name="intro_lcert" arg1="in" arg2="H">
-   <goal name="intro_exists.0.0">
-   <transf name="assumption_lcert" proved="true" >
-   </transf>
-   </goal>
-  </transf>
-  </goal>
- </transf>
  </goal>
  <goal name="intro_forall" proved="true">
  <transf name="intro_ccert" proved="true" >
@@ -720,6 +710,16 @@
    </transf>
    </goal>
   </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="blast_simp">
+ <transf name="blast_ccert" >
+  <goal name="blast_simp.0">
+  </goal>
+ </transf>
+ <transf name="blast_lcert" >
+  <goal name="blast_simp.0">
   </goal>
  </transf>
  </goal>
