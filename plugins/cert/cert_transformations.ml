@@ -497,15 +497,19 @@ let inst t_inst where : ctrans = Trans.store (fun task ->
   [ta], c)
 
 (* Rewrite with a certificate *)
-let context tl t =
-  (* finds a context <ctxt> s.t. <ctxt [tl] = t> and <ctxt> doesn't contain <tl>*)
-  let ty = map_ty tl.t_ty in
-  let v = create_vsymbol (id_fresh "ctxt_var") ty in
-  let rec context tl t =
-    if t_equal tl t
-    then t_var v
-    else t_map (context tl) t in
-  v, context tl t
+(* let context tl t =
+ *   (\* finds a context <ctxt> s.t. <ctxt [tl] = t> and <ctxt> doesn't contain <tl>*\)
+ *   let ty = map_ty tl.t_ty in
+ *   let v = t_var (create_vsymbol (id_fresh "ctxt_var") ty) in
+ *   let rec context tl t =
+ *     if t_equal tl t
+ *     then v
+ *     else t_map (context tl) t in
+ *   try
+ *     v, context tl t
+ *   with e ->
+ *     Format.eprintf "error in finding context@.";
+ *     raise e *)
 
 let rec intro_premises acc t = match t.t_node with
   | Tbinop (Timplies, f1, f2) -> intro_premises (f1::acc) f2
@@ -541,11 +545,9 @@ let rewrite_in rev prh prh1 task = (* rewrites <h> in <h1> with direction <rev> 
         match d.d_node with
         | Dprop (p, pr, t)
             when pr_equal pr prh1 && (p = Pgoal || p = Paxiom) ->
-            let v, ctxt = context t1 t in
-            let new_term = t_replace t (t_var v) t2 in
+            let new_term = t_replace t t1 t2 in
             Some (lp, create_prop_decl p pr new_term),
-            lambda One (fun i ->
-                Rewrite (prh1, prh, t_var v, ctxt, Hole i))
+            lambda One (fun i -> Rewrite (prh1, prh, Hole i))
         | _ -> acc, cert) (None, hole ()) in
   (* Pass the premises as new goals. Replace the former toberewritten
      hypothesis to the new rewritten one *)

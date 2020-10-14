@@ -35,6 +35,15 @@ let lift_node f { ct_node; ct_ty } =
   { ct_node = f ct_node;
     ct_ty   = ct_ty }
 
+let cterm_map_node f ct = match ct with
+  | CTbvar _ | CTfvar _ | CTint _ | CTtrue | CTfalse -> ct
+  | CTquant (q, ct) -> CTquant (q, f ct)
+  | CTapp (ct1, ct2) -> CTapp (f ct1, f ct2)
+  | CTbinop (op, ct1, ct2) ->  CTbinop (op, f ct1, f ct2)
+  | CTnot ct -> CTnot (f ct)
+
+let cterm_map f ct = lift_node (cterm_map_node f) ct
+
 let add_ty ty ctn = { ct_node = ctn; ct_ty = ty }
 
 type ctask = (cterm * bool) Mid.t

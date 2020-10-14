@@ -67,10 +67,9 @@ type ('I, 't) cert = (* 'I is used to designate an hypothesis, 't is used for te
   | InstQuant of 'I * 'I * 't * ('I, 't) cert
   (* InstQuant (I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
   (* InstQuant (I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
-  | Rewrite of 'I * 'I * 't * 't * ('I, 't) cert
-  (* Let <ctxt> be formed from <v> and <t>, then
-     Rewrite (I, H, v, t, c) ⇓ (Γ, H : a = b ⊢ Δ, I : ctxt[a] ≜
-     (Γ, H : a = b ⊢ Δ, I : ctxt[b] *)
+  | Rewrite of 'I * 'I * ('I, 't) cert
+  (* Rewrite (I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : C[a] ≜  (Γ, H : a = b ⊢ Δ, I : C[b] *)
+  (* Rewrite (I, H, c) ⇓ (Γ, H : a = b, I : C[a] ⊢ Δ ≜  (Γ, H : a = b, I : C[b] ⊢ Δ *)
 
 
 type vcert = (prsymbol, term) cert
@@ -256,9 +255,7 @@ and prcab : type a b. (formatter -> a -> unit) ->
   | Weakening (i, c) -> fprintf fmt "Weakening@ (%a,@ %a)" pra i prc c
   | IntroQuant (i, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)" pra i pri y prc c
   | InstQuant (i, j, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)" pra i pra j prb t prc c
-  | Rewrite (i, h, v, t, c) ->
-      fprintf fmt "Rewrite (%a, %a, (λ%a. %a),@ %a)"
-        pra i pra h prb v prb t prc c
+  | Rewrite (i, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" pra i pra h prc c
 
 and prli = prle "; " pri
 and prcertif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab prpr pte) c
@@ -313,7 +310,7 @@ let propagate_cert f fid fte = function
   | Weakening (i, c) -> Weakening (fid i, f c)
   | IntroQuant (i, y, c) -> IntroQuant (fid i, y, f c)
   | InstQuant (i, j, t, c) -> InstQuant (fid i, fid j, fte t, f c)
-  | Rewrite (i, h, v, t, c) -> Rewrite (fid i, fid h, fte v, fte t, f c)
+  | Rewrite (i, h, c) -> Rewrite (fid i, fid h, f c)
 
 let rec fill map = function
   | Hole x -> Mid.find x map
@@ -558,6 +555,11 @@ let rewrite_ctask (cta : ctask) i a b ctxt =
     else t, pos in
   Mid.mapi rewrite_decl cta
 
+let rec replace_cterm tl tr t =
+  if cterm_equal t tl
+  then tr
+  else cterm_map (replace_cterm tl tr) t
+
 let elaborate (init_ct : ctask) c =
   (* let res_ct = Stream.of_list res_ct in *)
   (* let tbl = Hashid.create 17 in *)
@@ -677,18 +679,16 @@ let elaborate (init_ct : ctask) c =
         | _ -> elab_failed "trying to instantiate a non-quantified hypothesis" in
       let cta = Mid.add j (ct_open t t_inst.ct_node, pos) cta in
       EInstQuant (pos, add_ty ctbool (CTquant (CTlambda, t)), i, j, t_inst, elab cta c)
-  | Rewrite (i, h, v, t, c) ->
-      let id = match v.ct_node with
-          | CTfvar id -> id
-          | _ -> assert false in
-      let ctxt = { ct_node = CTquant (CTlambda, ct_close id t); ct_ty = ctbool } in
+  | Rewrite (i, h, c) ->
       let t, _ = find_ident "inst_quant" h cta in
-      let cta = match t.ct_node with
-                | CTbinop (Tiff, a, b) ->
-                    rewrite_ctask cta i a b ctxt
-                | _ -> elab_failed "Could not find rewrite hypothesis" in
+      let a, b = match t.ct_node with
+        | CTbinop (Tiff, a, b) -> a, b
+        | _ -> elab_failed "Could not find rewrite hypothesis" in
+      let id = id_register (id_fresh "ctxt_var") in
+      let v = add_ty (a.ct_ty) (CTfvar id) in
+      let ctxt = ct_close id (replace_cterm a v t) in
+      let cta = rewrite_ctask cta i a b ctxt in
       ERewrite (i, h, ctxt, elab cta c)
-
   in
   elab init_ct c
 
