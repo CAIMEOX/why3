@@ -324,6 +324,12 @@ let rec fill map = function
   | Hole x -> Mid.find x map
   | c -> propagate_cert (fill map) (fun t -> t) (fun t -> t) c
 
+let thunk (ids, c) () =
+  let nids = new_idents (List.length ids) in
+  let hole_nids = List.map (fun i -> Hole i) nids in
+  let map = Mid.of_list (List.combine ids hole_nids) in
+  nids, fill map c
+
 let flatten_uniq l =
   let add (s, l) v = if Sid.mem v s
                      then s, l

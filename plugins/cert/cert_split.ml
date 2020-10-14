@@ -164,7 +164,7 @@ type 'a split_ret = {
      cp ⇓ (⊢  pr : f) ≜  [⊢  prᵢ : conjᵢ]ᵢ *)
   cp : visible_cert;
   (* Certificate to decompose f as a Conjunction in Negative position :
-     cn ⇓ (pr : f ⊢) ≜ [pr₁ : conj₁, ..., prₙ : conjₙ ⊢] *)  
+     cn ⇓ (pr : f ⊢) ≜ [pr₁ : conj₁, ..., prₙ : conjₙ ⊢] *)
   (* WARNING : the previous equality is only valid when byso_split is off,
      and only useful when rev_split is on *)
   cn : visible_cert;
@@ -261,8 +261,6 @@ let fold_cond = function
   | Comb c -> !+(fold_cond c)
   | x -> x
 
-
-
 let luop op (pr, t) = pr, op t
 
 let lbop op (pr1, t1) (pr2, t2) =
@@ -288,7 +286,7 @@ let destruct_reconstruct pr c1 c2 =
   lambda One (fun i -> Destruct (pr, pr, pr2, Hole i))
   |>> c1
   ||> (fun () -> lambda One (fun i -> Rename (pr, pr1, (Rename (pr2, pr, Hole i)))))
-  |>> c2
+  ||> thunk c2
   ||> fun () -> lambda One (fun i -> Construct (pr1, pr, pr, Hole i))
 
 let find_pr mon =

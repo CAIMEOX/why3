@@ -57,7 +57,7 @@ let union : ctask Mid.t -> ctask Mid.t -> ctask Mid.t =
       let open Format in
       eprintf "Conflict on ident : %a\n\
                task 1 : %a\n\
-               task 2 : %a\n"
+               task 2 : %a@."
         pri id
         pcta cta1
         pcta cta2;
