@@ -6,13 +6,6 @@ open Format
 
 open Cert_abstract
 
-type dir = Left | Right
-type path = dir list
-
-let prd fmt = function
-  | Left -> fprintf fmt "Left"
-  | Right -> fprintf fmt "Right"
-
 (** We equip each transformation application with a certificate indicating
     why the resulting list of tasks is implying the initial task *)
 
@@ -68,11 +61,11 @@ type ('I, 't) cert =
   (* Swap (I, c) ⇓ (Γ, I : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A) *)
   (* Swap (I, c) ⇓ (Γ ⊢ Δ, I : A ) ≜  c ⇓ (Γ, I : ¬A ⊢ Δ) *)
   (* Swap (I, c) ⇓ (Γ ⊢ Δ, I : ¬A) ≜  c ⇓ (Γ, I : A ⊢ Δ)  *)
-  | Dir of dir * 'I * ('I, 't) cert
-  (* Dir (Left, I, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, I : A ⊢ Δ) *)
-  (* Dir (Right, I, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, I : B ⊢ Δ) *)
-  (* Dir (Left, I, c) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  c ⇓ (Γ ⊢ Δ, I : A) *)
-  (* Dir (Right, I, c) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  c ⇓ (Γ ⊢ Δ, I : B) *)
+  | Dir of bool * 'I * ('I, 't) cert
+  (* Dir (false, I, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, I : A ⊢ Δ) *)
+  (* Dir (true, I, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, I : B ⊢ Δ) *)
+  (* Dir (false, I, c) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  c ⇓ (Γ ⊢ Δ, I : A) *)
+  (* Dir (true, I, c) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  c ⇓ (Γ ⊢ Δ, I : B) *)
   | Weakening of 'I * ('I, 't) cert
   (* Weakening (I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening (I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
@@ -90,11 +83,12 @@ type ('I, 't) cert =
   (* InstQuant (I, J, t, c) ⇓ (Σ | Γ ⊢ Δ, I : ∃ x : τ. P x) ≜
          c ⇓ (Σ | Γ ⊢ Δ, I : ∃ x : τ. P x, J : P t)
      and Σ ⊩ t : τ *)
-  | Rewrite of 'I * 'I * path * bool * ('I, 't) cert list
-  (* Rewrite (I, J, path, rev, lc) ⇓ Seq is defined as follows :
-     it tries to rewrite in <I> an equality that is in <J>, following the path <path>,
-     <rev> indicates if it rewrites from left to right or from right to left.
-     Since <J> can have premises, those are then matched against the certificates <lc> *)
+  (* InstQuant (I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
+  (* InstQuant (I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
+  | Rewrite of 'I * 'I * ('I, 't) cert
+  (* Rewrite (I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : C[a] ≜  (Γ, H : a = b ⊢ Δ, I : C[b] *)
+  (* Rewrite (I, H, c) ⇓ (Γ, H : a = b, I : C[a] ⊢ Δ ≜  (Γ, H : a = b, I : C[b] ⊢ Δ *)
+
 
 type vcert = (prsymbol, term) cert
 
@@ -182,11 +176,9 @@ type ('a, 'b) ecert = (* elaborated certificates, 'a is used to designate an hyp
   | EInstQuant of bool * 'b * 'a * 'a * 'b * ('a, 'b) ecert
   (* InstQuant (false, P, I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
   (* InstQuant (true, P, I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
-  | ERewrite of 'a * 'a * path * bool * ('a, 'b) ecert list
-(* Rewrite (I, J, path, rev, lc) ⇓ Seq is defined as follows :
-   *    it tries to rewrite in <I> an equality that is in <J>, following the path <path>,
-   *    <rev> indicates if it rewrites from left to right or from right to left.
-   *    Since <H> can have premises, those are then matched against the certificates <lc> *)
+  | ERewrite of 'a * 'a * 'b * ('a, 'b) ecert
+  (* ERewrite (I, H, ctxt, c) ⇓ (Γ, H : a = b ⊢ Δ, I : ctxt[a] ≜
+     (Γ, H : a = b ⊢ Δ, I : ctxt[b] *)
 
 type heavy_ecert = ident list * (ident, cterm) ecert
 type trimmed_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct) *)
@@ -219,14 +211,12 @@ and prcab : type a b. (formatter -> a -> unit) ->
   | Construct (i1, i2, j, c) ->
       fprintf fmt "Construct (%a, %a, %a,@ %a)" pra i1 pra i2 pra j prc c
   | Swap (i, c) -> fprintf fmt "Swap (%a,@ %a)" pra i prc c
-  | Dir (d, i, c) ->
-      fprintf fmt "Dir (%a, %a,@ %a)" prd d pra i prc c
+  | Dir (b, i, c) ->
+      fprintf fmt "Dir (%b, %a,@ %a)" b pra i prc c
   | Weakening (i, c) -> fprintf fmt "Weakening@ (%a,@ %a)" pra i prc c
   | IntroQuant (i, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)" pra i pri y prc c
   | InstQuant (i, j, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)" pra i pra j prb t prc c
-  | Rewrite (i, j, path, rev, lc) ->
-      fprintf fmt "Rewrite (%a, %a, %a, %b,@ %a)"
-        pra i pra j (prle "; " prd) path rev (prle "; " prc) lc
+  | Rewrite (i, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" pra i pra h prc c
 
 and prli = prle "; " pri
 and prcertif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab prpr Pretty.print_term) c
@@ -267,7 +257,7 @@ let propagate_cert f fid fte = function
   | Weakening (i, c) -> Weakening (fid i, f c)
   | IntroQuant (i, y, c) -> IntroQuant (fid i, y, f c)
   | InstQuant (i, j, t, c) -> InstQuant (fid i, fid j, fte t, f c)
-  | Rewrite (i, j, path, rev, lc) -> Rewrite (fid i, fid j, path, rev, List.map f lc)
+  | Rewrite (i, h, c) -> Rewrite (fid i, fid h, f c)
 
 let rec fill map = function
   | Hole x -> Mid.find x map
@@ -330,7 +320,7 @@ let propagate_ecert f fid ft = function
   | EWeakening (g, a, i, c) -> EWeakening (g, ft a, fid i, f c)
   | EIntroQuant (g, p, i, y, c) -> EIntroQuant (g, ft p, fid i, y, f c)
   | EInstQuant (g, p, i, j, t, c) -> EInstQuant (g, ft p, fid i, fid j, ft t, f c)
-  | ERewrite (i, j, path, rev, lc) -> ERewrite (fid i, fid j, path, rev, List.map f lc)
+  | ERewrite (i, h, ctxt, c) -> ERewrite (fid i, fid h, ft ctxt, f c)
 
 
 
@@ -404,7 +394,7 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
 
 let dir_smart d prg c =
   let prh = create_prsymbol (id_fresh "Weaken") in
-  let left, right = match d with Left -> prg, prh | Right -> prh, prg in
+  let left, right = match d with false -> prg, prh | true -> prh, prg in
   Destruct (prg, left, right, Weakening (prh, c))
 
 
@@ -418,6 +408,19 @@ let elab_failed s = raise (Elaboration_failed s)
 
 module Hashid = Hashtbl.Make(struct type t = ident let equal = id_equal let hash = id_hash end)
 
+let rewrite_ctask (cta : ctask) i a b ctxt =
+  let ta = ct_open ctxt a in
+  let tb = ct_open ctxt b in
+  let rewrite_decl j (t, pos) =
+    if id_equal j i && cterm_equal t ta
+    then tb, pos
+    else t, pos in
+  lift_mid_cta (Mid.mapi rewrite_decl) cta
+
+let rec replace_cterm tl tr t =
+  if cterm_equal t tl
+  then tr
+  else cterm_map (replace_cterm tl tr) t
 
 let elaborate (init_ct : ctask) c =
   (* let res_ct = Stream.of_list res_ct in *)
@@ -538,10 +541,16 @@ let elaborate (init_ct : ctask) c =
       (* ... since we do not check if the types match *)
       let cta = add j (ct_open t t_inst, pos) cta in
       EInstQuant (pos, CTquant (CTlambda, ty, t), i, j, t_inst, elab cta c)
-  | Rewrite _ -> elab_failed "TODO : Rewrite"
-  (* TODO *)
-  (* let lcta = check_rewrite cta rev j i [] path in
-   * List.map2 ccheck lc lcta |> List.concat *)
+  | Rewrite (i, h, c) ->
+      let t, _ = find_ident "inst_quant" h cta in
+      let a, b = match t with
+        | CTbinop (Tiff, a, b) -> a, b
+        | _ -> elab_failed "Could not find rewrite hypothesis" in
+      let id = id_register (id_fresh "ctxt_var") in
+      let v = CTfvar id in
+      let ctxt = ct_close id (replace_cterm a v t) in
+      let cta = rewrite_ctask cta i a b ctxt in
+      ERewrite (i, h, ctxt, elab cta c)
   in
   elab init_ct c
 
