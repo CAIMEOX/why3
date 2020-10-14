@@ -11,44 +11,6 @@ open Cert_certificates
 
 
 
-
-let rec check_rewrite_term tl (tr : cterm) (t : cterm) path =
-  (* returns <t> where the instance at <path> of <tl> is replaced by <tr> *)
-  match path, t with
-  | [], t when cterm_equal t tl -> tr
-  | Left::prest, CTbinop (op, t1, t2) ->
-      let t1' = check_rewrite_term tl tr t1 prest in
-      CTbinop (op, t1', t2)
-  | Right::prest, CTbinop (op, t1, t2) ->
-      let t2' = check_rewrite_term tl tr t2 prest in
-      CTbinop (op, t1, t2')
-  | _ -> verif_failed "Can't follow the rewrite path"
-
-let check_rewrite (cta : ctask) rev h g (terms : cterm list) path : ctask list =
-  let rec introduce acc (inst_terms : cterm list) (t : cterm) = match t, inst_terms with
-    | CTbinop (Timplies, t1, t2), _ -> introduce (t1::acc) inst_terms t2
-    | CTquant (CTforall, ty, t), inst::inst_terms ->
-        infers_into cta.sigma inst ty;
-        introduce acc inst_terms (ct_open t inst)
-    | t, [] -> acc, t
-    | _ -> verif_failed "Can't instantiate the hypothesis" in
-  let lp, tl, tr =
-    let ct, pos = find_ident "check_rewrite" h cta in
-    if pos then verif_failed "Can't use goal as an hypothesis to rewrite" else
-      match introduce [] terms ct with
-      | lp, CTbinop (Tiff, t1, t2) -> if rev then lp, t1, t2 else lp, t2, t1
-      | _ -> verif_failed "Can't find the hypothesis used to rewrite" in
-  let rewrite_decl h (te, pos) =
-    if id_equal h g
-    then check_rewrite_term tl tr te path, pos
-    else te, pos in
-  lift_mid_cta (Mid.mapi rewrite_decl) cta :: List.map (set_goal cta) lp
-  (* To check a rewriting rule, you need to :
-       • check the rewritten task
-       • check every premises of rewritten equality in the current context
-   *)
-
-
 (** This is the main verification function : <check_certif> replays the certificate on a ctask *)
 
 let union : ctask Mid.t -> ctask Mid.t -> ctask Mid.t =
@@ -150,10 +112,14 @@ let rec ccheck c cta =
             ccheck c cta
         | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
         end
-    | ERewrite (i, j, path, rev, lc) ->
-        let lcta = check_rewrite cta rev j i [] path in
-        List.map2 ccheck lc lcta |> List.fold_left union Mid.empty
-
+    | ERewrite (i, h, ctxt, c) ->
+        let t, pos = find_ident "inst_quant" h cta in
+        begin match t, pos with
+        | CTbinop (Tiff, a, b), false ->
+            let cta = rewrite_ctask cta i a b ctxt in
+            ccheck c cta
+        | _ -> verif_failed "Non-rewritable proposition"
+        end
 
 let checker_caml (vs, certif) init_ct res_ct =
   try let map_cert = ccheck certif init_ct in

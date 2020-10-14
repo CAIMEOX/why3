@@ -253,6 +253,13 @@ and prpv fmt = function
   | CTtrue -> fprintf fmt "true"
   | ct -> fprintf fmt "(%a)" pcte ct
 
+let cterm_map f ct = match ct with
+  | CTbvar _ | CTfvar _ | CTint _ | CTtrue | CTfalse -> ct
+  | CTquant (q, cty, ct) -> CTquant (q, cty, f ct)
+  | CTapp (ct1, ct2) -> CTapp (f ct1, f ct2)
+  | CTbinop (op, ct1, ct2) ->  CTbinop (op, f ct1, f ct2)
+  | CTnot ct -> CTnot (f ct)
+
 (* Typing algorithm *)
 let rec infer_type sigma t = match t with
   | CTfvar v -> Mid.find v sigma
@@ -362,6 +369,8 @@ let print_ctasks filename lcta =
   close_out oc
 
 
+
+let eq = CTfvar (ps_equ.ls_name)
 
 (** Abstracting a Why3 <task> into a <ctask> : extract only the logical core *)
 
