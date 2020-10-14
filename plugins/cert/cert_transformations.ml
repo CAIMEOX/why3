@@ -13,6 +13,10 @@ open Cert_certificates
 let decl_cert f = Trans.decl_acc (hole ()) (|>>) (fun d _ -> f d)
 let decl_l_cert f = Trans.decl_l_acc (hole ()) (|>>) (fun d _ -> f d)
 
+let map_ty = function
+    | None -> Ty.ty_bool
+    | Some ty -> ty
+
 (* Identity transformation with a certificate *)
 let id_ctrans = Trans.store (fun task -> [task], hole ())
 
@@ -442,10 +446,10 @@ let dir_pr d prg =
   Trans.decl_acc false (||) (fun decl found -> match decl.d_node with
     | Dprop (k, pr, t) when pr_equal pr prg && not found ->
         begin match k, t.t_node, d with
-        | (Pgoal as k),           Tbinop (Tor, f, _),  Left
-        | (Pgoal as k),           Tbinop (Tor, _, f),  Right
-        | (Paxiom as k), Tbinop (Tand, f, _), Left
-        | (Paxiom as k), Tbinop (Tand, _, f), Right ->
+        | (Pgoal as k),           Tbinop (Tor, f, _),  false
+        | (Pgoal as k),           Tbinop (Tor, _, f),  true
+        | (Paxiom as k), Tbinop (Tand, f, _), false
+        | (Paxiom as k), Tbinop (Tand, _, f), true ->
             [create_prop_decl k pr f], true
         | _ -> [decl], false end
     | _ -> [decl], false)
@@ -493,18 +497,15 @@ let inst t_inst where : ctrans = Trans.store (fun task ->
   [ta], c)
 
 (* Rewrite with a certificate *)
-let rec rewrite_in_term tl tr t : (term * path) option =
-  (* tries all paths in [t] to replace [tl] with [tr] *)
-  if t_equal tl t
-  then Some (tr, [])
-  else match t.t_node with
-       | Tbinop (op, t1, t2) ->
-           begin match rewrite_in_term tl tr t1 with
-           | Some (nt1, p) -> Some (t_binary op nt1 t2, Left::p)
-           | None -> match rewrite_in_term tl tr t2 with
-                     | Some (nt2, p) -> Some (t_binary op t1 nt2, Right::p)
-                     | None -> None end
-       | _ -> None
+let context tl t =
+  (* finds a context <ctxt> s.t. <ctxt [tl] = t> and <ctxt> doesn't contain <tl>*)
+  let ty = map_ty tl.t_ty in
+  let v = create_vsymbol (id_fresh "ctxt_var") ty in
+  let rec context tl t =
+    if t_equal tl t
+    then t_var v
+    else t_map (context tl) t in
+  v, context tl t
 
 let rec intro_premises acc t = match t.t_node with
   | Tbinop (Timplies, f1, f2) -> intro_premises (f1::acc) f2
@@ -539,14 +540,12 @@ let rewrite_in rev prh prh1 task = (* rewrites <h> in <h1> with direction <rev> 
       Trans.fold_decl (fun d (acc, cert) ->
         match d.d_node with
         | Dprop (p, pr, t)
-              when pr_equal pr prh1 && (p = Pgoal || p = Paxiom) ->
-            begin match rewrite_in_term t1 t2 t with
-              | Some (new_term, path) ->
-                  let n = List.length lp in
-                  Some (lp, create_prop_decl p pr new_term),
-                  lambda (List n) (fun il ->
-                      Rewrite (prh1, prh, path, rev, List.map (fun i -> Hole i) il))
-              | None -> None, cert end
+            when pr_equal pr prh1 && (p = Pgoal || p = Paxiom) ->
+            let v, ctxt = context t1 t in
+            let new_term = t_replace t (t_var v) t2 in
+            Some (lp, create_prop_decl p pr new_term),
+            lambda One (fun i ->
+                Rewrite (prh1, prh, t_var v, ctxt, Hole i))
         | _ -> acc, cert) (None, hole ()) in
   (* Pass the premises as new goals. Replace the former toberewritten
      hypothesis to the new rewritten one *)

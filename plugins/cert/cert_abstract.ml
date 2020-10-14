@@ -16,7 +16,6 @@ type ctype =
   | CTyapp of tysymbol * ctype list
   | CTarrow of ctype * ctype
 
-
 type cterm =
   { ct_node : cterm_node;
     ct_ty   : ctype }
@@ -44,6 +43,8 @@ type ctask = (cterm * bool) Mid.t
    • <Δ> contains all the declarations <H : P> where <H> is mapped to <(P, true)> in <M>
 *)
 let ctbool = CTyapp (Ty.ts_bool, [])
+
+let eq = CTfvar (ps_equ.ls_name)
 
 (** Abstracting a Why3 <task> into a <ctask> : extract only the logical core *)
 
