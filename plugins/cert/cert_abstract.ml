@@ -83,57 +83,52 @@ and abstract_type ty =
            CTarrow (abstract_type l1, abstract_type l2)
       else CTyapp (ts, List.map abstract_type lts)
 
-let rec abstract_term_sig t =
+let type_lsymbol ls =
+  List.fold_right (fun t acc -> CTarrow (abstract_type t, acc))
+    ls.ls_args (abstract_otype ls.ls_value)
+
+let rec abstract_term t =
   abstract_term_rec Mid.empty 0 t
 
-and abstract_term_rec bv_lvl lvl { t_node = t; t_ty = oty } =
-  abstract_term_node_rec oty bv_lvl lvl t
+and abstract_term_rec bv_lvl lvl t =
+  abstract_term_node_rec bv_lvl lvl (abstract_otype t.t_ty) t.t_node
 
-and abstract_term_node_rec oty bv_lvl (lvl : int) t =
+and abstract_term_node_rec bv_lvl (lvl : int) cty t =
   (* level <lvl> is the number of forall above in the whole term *)
   (* <bv_lvl> is mapping bound variables to their respective level *)
-  let cterm_node_sig_from_id id = match Mid.find_opt id bv_lvl with
+  let cterm_node_sig_from_id id  = match Mid.find_opt id bv_lvl with
         | None ->
-            let cty = abstract_otype oty in
-            CTfvar id, Mid.singleton id cty
+            CTfvar id
         | Some lvl_id ->
             (* a variable should not be above its definition *)
             assert (lvl_id <= lvl);
-            CTbvar (lvl - lvl_id), Mid.empty in
+            CTbvar (lvl - lvl_id) in
   match t with
   | Tvar v ->
       cterm_node_sig_from_id v.vs_name
   | Tapp (ls, lt) ->
-      let rec construct lt =
-        match lt with
-        | [] ->
-            (* TODO : type du lsymbol *)
-            cterm_node_sig_from_id ls.ls_name
-        | ht::lt ->
-            let cht, sht = abstract_term_rec bv_lvl lvl ht in
-            let clt, slt = construct lt in
-            CTapp (clt, cht), Mid.set_union slt sht in
-      construct (List.rev lt)
+      let ctls = cterm_node_sig_from_id ls.ls_name in
+      List.fold_left (fun acc h -> CTapp (abstract_term_rec bv_lvl lvl h, acc))
+        ctls lt
   | Tbinop (op, t1, t2) ->
-      let ct1, s1 = abstract_term_rec bv_lvl lvl t1 in
-      let ct2, s2 = abstract_term_rec bv_lvl lvl t2 in
-      CTbinop (op, ct1, ct2), Mid.set_union s1 s2
+      let ct1 = abstract_term_rec bv_lvl lvl t1 in
+      let ct2 = abstract_term_rec bv_lvl lvl t2 in
+      CTbinop (op, ct1, ct2)
   | Tquant (q, tq) ->
       let lvs, _, t_open = t_open_quant tq in
       let lvl_ids = List.mapi (fun i vs -> lvl + i + 1, vs.vs_name) lvs in
       let bv_lvl = List.fold_left (fun m (lvl, ids) -> Mid.add ids lvl m) bv_lvl lvl_ids in
       let lvl = lvl + List.length lvs in
-      let ctn_open, s = abstract_term_rec bv_lvl lvl t_open in
+      let ctn_open = abstract_term_rec bv_lvl lvl t_open in
       let q = abstract_quant q in
-      let cty = abstract_otype oty in
       let ctquant q ct = CTquant (q, cty, ct) in
       let ct_closed = List.fold_right (fun _ ct -> ctquant q ct) lvs ctn_open in
-      ct_closed, s
-  | Tnot t -> let ct, s = abstract_term_rec bv_lvl lvl t in
-              CTnot ct, s
-  | Ttrue -> CTtrue, Mid.empty
-  | Tfalse -> CTfalse, Mid.empty
-  | Tconst (Constant.ConstInt i) -> CTint i.Number.il_int, Mid.empty
+      ct_closed
+  | Tnot t -> let ct = abstract_term_rec bv_lvl lvl t in
+              CTnot ct
+  | Ttrue -> CTtrue
+  | Tfalse -> CTfalse
+  | Tconst (Constant.ConstInt i) -> CTint i.Number.il_int
   | Tconst _ ->
       let s = "" in
       (* let open Format in
@@ -145,26 +140,24 @@ and abstract_term_node_rec oty bv_lvl (lvl : int) t =
   | Tcase _ -> invalid_arg "Cert_abstract.abstract_term Tcase"
   | Teps _ -> invalid_arg "Cert_abstract.abstract_term Teps"
 
-let abstract_term t =
-  let res, _ = abstract_term_sig t in
-  res
-
-let abstract_decl decl =
+let abstract_decl_acc acc decl =
   match decl.d_node with
   | Dprop (k, pr, t) ->
-      let ct, s = abstract_term_sig t in
-      { sigma = s;
-        delta_gamma = Mid.singleton pr.pr_name (ct, k = Pgoal) }
+      let ct = abstract_term t in
+      add pr.pr_name (ct, k = Pgoal) acc
+  | Dparam ls ->
+      let cty = type_lsymbol ls in
+      add_var ls.ls_name cty acc
   | _ -> ctask_empty
 
-let abstract_tdecl td =
+let abstract_tdecl_acc acc td =
   match td.td_node with
-  | Decl decl -> abstract_decl decl
-  | _ -> ctask_empty
+  | Decl decl -> abstract_decl_acc acc decl
+  | _ -> acc
 
 let rec abstract_task_acc acc = function
   | Some {task_decl = td; task_prev = task} ->
-      let new_acc = ctask_union acc (abstract_tdecl td) in
+      let new_acc = abstract_tdecl_acc acc td in
       abstract_task_acc new_acc task
   | None -> acc
 
@@ -181,16 +174,23 @@ let verif_failed s = raise (Certif_verification_failed s)
 
 (** Create a certified transformation from a transformation with a certificate *)
 
+type ('certif, 'ctask) debug =
+  ('certif -> unit) option *
+  ('ctask -> 'ctask list -> unit) option
+
+
 let checker_ctrans
-      (debug : ('certif -> unit) option)
+      (debug :  ('certif, 'ctask) debug )
       (make_core : ctask -> ctask list -> 'certif -> 'core_certif)
       (checker : 'core_certif -> ctask -> ctask list -> unit)
       (ctr : 'certif ctransformation)
       (init_t : task) =
+  let dbg_cert, dbg_ctask = debug in
   let res_t, certif = Trans.apply ctr init_t in
-  Opt.iter (fun print -> print certif) debug;
+  Opt.iter (fun eprcertif -> eprcertif certif) dbg_cert;
   let init_ct = abstract_task init_t in
   let res_ct = List.map abstract_task res_t in
+  Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_ctask;
   let core_certif = make_core init_ct res_ct certif in
   checker core_certif init_ct res_ct;
   res_t

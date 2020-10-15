@@ -10,11 +10,13 @@ open Cert_verif_lambdapi
 
 (** Certified transformations *)
 
-let cchecker trans = Trans.store (checker_ctrans None make_core checker_caml trans)
-let lchecker trans = Trans.store (checker_ctrans None make_core checker_lambdapi trans)
+let no_dbg = None, None
+let cert_dbg = Some eprcertif, None
+let cta_dbg = None, Some eplcta
+let all_dbg = Some eprcertif, Some eplcta
 
-(* let cchecker trans = Trans.store (checker_ctrans (Some eprcertif) make_core checker_caml trans)
- * let lchecker trans = Trans.store (checker_ctrans (Some eprcertif) make_core checker_lambdapi trans) *)
+let cchecker trans = Trans.store (checker_ctrans cta_dbg make_core checker_caml trans)
+let lchecker trans = Trans.store (checker_ctrans cta_dbg make_core checker_lambdapi trans)
 
 let print_c any every where = cchecker (tprint any every where)
 let assert_c t              = cchecker (cut t)
