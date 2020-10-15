@@ -106,7 +106,9 @@ and abstract_term_node_rec oty bv_lvl (lvl : int) t =
   | Tapp (ls, lt) ->
       let rec construct lt =
         match lt with
-        | [] -> cterm_node_sig_from_id ls.ls_name
+        | [] ->
+            (* TODO : type du lsymbol *)
+            cterm_node_sig_from_id ls.ls_name
         | ht::lt ->
             let cht, sht = abstract_term_rec bv_lvl lvl ht in
             let clt, slt = construct lt in

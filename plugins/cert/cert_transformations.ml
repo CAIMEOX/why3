@@ -285,7 +285,7 @@ let destruct_all_tg target =
             Some (lambda Two (fun i j -> Split (pr, Hole i, Hole j)))
         | Pgoal, Tbinop (Tor, f1, f2) ->
             let prh = pr_clone pr in
-            [[create_prop_decl Paxiom prh (t_not f1); create_prop_decl Pgoal pr f2]],
+            [[create_prop_decl Paxiom prh (t_not_simp f1); create_prop_decl Pgoal pr f2]],
             Some (lambda One (fun i -> Destruct (pr, prh, pr, Swap (prh, Hole i))))
         | _ -> [[d]], None end
     | _ -> [[d]], None)
@@ -308,8 +308,8 @@ let neg_decompose_tg target =
             | Paxiom, Tbinop (Tor, f1, f2) -> (* destruct *)
                 let pr1 = pr_clone pr in
                 let pr2 = pr_clone pr in
-                [[create_prop_decl Paxiom pr1 (t_not f1);
-                  create_prop_decl Paxiom pr2 (t_not f2)]],
+                [[create_prop_decl Paxiom pr1 (t_not_simp f1);
+                  create_prop_decl Paxiom pr2 (t_not_simp f2)]],
                 Some (lambda One (fun i ->
                   Swap (pr,
                   Destruct (pr, pr1, pr2,
@@ -318,22 +318,22 @@ let neg_decompose_tg target =
                 let pr1 = pr_clone pr in
                 let pr2 = pr_clone pr in
                 [[create_prop_decl Paxiom pr1 f1;
-                  create_prop_decl Pgoal pr2 (t_not f2)]],
+                  create_prop_decl Pgoal pr2 (t_not_simp f2)]],
                 Some (lambda One (fun i ->
                   Swap (pr,
                   Destruct (pr, pr1, pr2,
                   Swap (pr2, Hole i)))))
             | Paxiom, Tbinop (Tand, f1, f2) -> (* split *)
-                [[create_prop_decl Paxiom pr (t_not f1)];
-                 [create_prop_decl Paxiom pr (t_not f2)]],
+                [[create_prop_decl Paxiom pr (t_not_simp f1)];
+                 [create_prop_decl Paxiom pr (t_not_simp f2)]],
                 Some (lambda Two (fun i j ->
                   Swap (pr,
                   Split (pr,
                          Swap (pr, Hole i),
                          Swap (pr, Hole j)))))
             | Pgoal, Tbinop (Tor, f1, f2) ->
-                [[create_prop_decl Pgoal pr (t_not f1)];
-                 [create_prop_decl Pgoal pr (t_not f2)]],
+                [[create_prop_decl Pgoal pr (t_not_simp f1)];
+                 [create_prop_decl Pgoal pr (t_not_simp f2)]],
                 Some (lambda Two (fun i j ->
                 Swap (pr,
                 Split (pr,
