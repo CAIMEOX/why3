@@ -13,9 +13,11 @@
  <transf name="split_goal_full_ccert" >
   <goal name="G.0">
   </goal>
-  <goal name="G.1">
-  </goal>
-  <goal name="G.0">
+ </transf>
+ </goal>
+ <goal name="G2">
+ <transf name="blast_ccert" >
+  <goal name="G2.0">
   </goal>
  </transf>
  </goal>
