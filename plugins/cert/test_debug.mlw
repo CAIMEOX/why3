@@ -9,3 +9,4 @@ predicate c
 (* goal G : not (a \/ b) *)
 goal G : not (not a /\ not b)
 
+goal G2 : not not a
