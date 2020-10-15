@@ -322,10 +322,16 @@ let prdg fmt mid =
 let pcta fmt cta =
   fprintf fmt "%a\n%a\n" prs cta.sigma prdg cta.delta_gamma
 
+let plcta fmt lcta =
+  fprintf fmt "%a" (prle "==========\n" pcta) lcta
+
+let eplcta cta lcta =
+  eprintf "INIT :\n%a\n\nRES\n==========\n%a@." pcta cta plcta lcta
+
 let print_ctasks filename lcta =
   let oc = open_out filename in
   let fmt = formatter_of_out_channel oc in
-  fprintf fmt "%a@." (prle "==========\n" pcta) lcta;
+  plcta fmt lcta;
   close_out oc
 
 let find_ident s h cta =
