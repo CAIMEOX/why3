@@ -89,7 +89,7 @@ let rec print_list_pre sep pe fmt = function
  *   | CTquant (_, ct)
  *   | CTnot ct -> collect typ ct
  *   | CTtrue | CTfalse -> Mid.empty
- * 
+ *
  * let collect_stask (ta : ctask_simple) =
  *   List.fold_left (fun acc (_, ct) -> Mid.set_union acc (collect Prop ct))
  *     Mid.empty ta *)
