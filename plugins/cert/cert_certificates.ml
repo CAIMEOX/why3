@@ -323,10 +323,10 @@ let pcta fmt cta =
   fprintf fmt "%a\n%a\n" prs cta.sigma prdg cta.delta_gamma
 
 let plcta fmt lcta =
-  fprintf fmt "%a" (prle "==========\n" pcta) lcta
+  fprintf fmt "%a" (prle "========\n" pcta) lcta
 
 let eplcta cta lcta =
-  eprintf "INIT :\n%a\n\nRES\n==========\n%a@." pcta cta plcta lcta
+  eprintf "INIT :\n%a\n==========\nRES\n%a@." pcta cta plcta lcta
 
 let print_ctasks filename lcta =
   let oc = open_out filename in
