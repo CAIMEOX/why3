@@ -11,6 +11,7 @@ predicate c
 
 (* goal G2 : not not a *)
 
-predicate p (x : bool) (y : bool)
+(* predicate p (x : bool) (y : bool) *)
 axiom A : a
-goal G : forall x y. p x y -> p true false
+(* goal G : forall x y. p x y -> p true false *)
+goal G : a
