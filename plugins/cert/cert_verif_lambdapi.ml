@@ -184,7 +184,7 @@ let print_certif at fmt c =
 let fv_ts (cta : ctask) =
   let encode_neg (k, (ct, pos)) = k, if pos then CTnot ct else ct in
   let fv = Mid.bindings cta.sigma in
-  let ts = Mid.bindings cta.delta_gamma
+  let ts = Mid.bindings cta.gamma_delta
            |> List.map encode_neg in
   fv, ts
 
