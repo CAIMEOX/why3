@@ -410,16 +410,19 @@ let intro_tg target =
               Unfold (pr,
               Destruct (pr, hpr, pr,
               Swap (hpr, Hole i)))))
-        | Tquant (Tforall, f), (Pgoal as k) | Tquant (Texists, f), (Paxiom as k) ->
-            let vsl, _, f_t = t_open_quant f in
+        | Tquant ((Tforall as q), f), (Pgoal as k)
+        | Tquant ((Texists as q), f), (Paxiom as k) ->
+            let vsl, tg, f_t = t_open_quant f in
             begin match vsl with
-            | [vs] ->
+            | vs::vsl ->
                 let ls = ls_of_vs vs in
                 let subst = Mvs.singleton vs (fs_app ls [] vs.vs_ty) in
-                let f = t_subst subst f_t in
+                let f = t_subst subst f_t
+                        |> t_close_quant vsl tg
+                        |> t_quant q in
                 [create_param_decl ls; create_prop_decl k pr f],
                 Some (lambda One (fun i -> IntroQuant (pr, ls.ls_name, Hole i)))
-            | _ -> assert false
+            | [] -> assert false
             end
         | _ -> [d], None end
     | _ -> [d], None)
