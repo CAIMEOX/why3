@@ -320,7 +320,7 @@ let prdg fmt mid =
   Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a\n" prpos pos pri h pcte cte) mid
 
 let pcta fmt cta =
-  fprintf fmt "%a\n%a\n" prs cta.sigma prdg cta.delta_gamma
+  fprintf fmt "%a\n%a\n" prs cta.sigma prdg cta.gamma_delta
 
 let plcta fmt lcta =
   fprintf fmt "%a" (prle "========\n" pcta) lcta
@@ -335,7 +335,7 @@ let print_ctasks filename lcta =
   close_out oc
 
 let find_ident s h cta =
-  match Mid.find_opt h cta.delta_gamma with
+  match Mid.find_opt h cta.gamma_delta with
   | Some x -> x
   | None ->
       fprintf str_formatter "%s : Can't find ident %a in the task" s pri h;
@@ -470,7 +470,7 @@ let cterm_pos_equal (t1, p1) (t2, p2) =
 let ctask_equal cta1 cta2 =
   (* TODO fix finding the 'right' signature when abstracting a task *)
   (* Mid.equal ctype_equal cta1.sigma cta2.sigma && *)
-    Mid.equal cterm_pos_equal cta1.delta_gamma cta2.delta_gamma
+    Mid.equal cterm_pos_equal cta1.gamma_delta cta2.gamma_delta
 
 (* Bound variable substitution *)
 let rec ct_bv_subst k u ctn = match ctn with
@@ -602,10 +602,10 @@ let split_hyp_goal cta =
 
 (* Creates a new ctask with the same hypotheses but sets the goal with the second argument *)
 let set_goal : ctask -> cterm -> ctask = fun cta ->
-  let delta, gamma = split_hyp_goal cta.delta_gamma in
+  let delta, gamma = split_hyp_goal cta.gamma_delta in
   let gpr, _ = Mid.choose gamma in
   fun ct -> { sigma = cta.sigma;
-              delta_gamma = Mid.add gpr (ct, true) delta }
+              gamma_delta = Mid.add gpr (ct, true) delta }
 
 
 (** Compile chain.
