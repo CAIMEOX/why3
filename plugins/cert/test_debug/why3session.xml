@@ -8,7 +8,7 @@
  <goal name="G" proved="true">
  <transf name="assumption_ccert" proved="true" >
  </transf>
- <transf name="blast_ccert" proved="true" >
+ <transf name="assumption_lcert" proved="true" >
  </transf>
  </goal>
 </theory>
