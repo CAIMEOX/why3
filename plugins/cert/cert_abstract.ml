@@ -189,27 +189,51 @@ let mem x t = mem_cont x t (fun x -> x)
 
 (* Pretty printing of terms (compatible with lambdapi) *)
 
-let pro fmt = function
-  | Tand -> fprintf fmt "∧"
-  | Tor -> fprintf fmt "∨"
-  | Timplies -> fprintf fmt "⇨"
-  | Tiff -> fprintf fmt "⇔"
-
 let rec pcte fmt = function
-  | CTbinop (op, ct1, ct2) ->
-      fprintf fmt "%a %a %a"
-        prapp ct1
-        pro op
-        prapp ct2
-  | CTnot ct ->
-      fprintf fmt "¬ %a"
-        prpv ct
   | CTquant (CTlambda, _, t) ->
       let x = id_register (id_fresh "x") in
       let t_open = ct_open t (CTfvar x) in
       fprintf fmt "λ %a, %a"
         pri x
         pcte t_open
+  | ct -> prarr fmt ct
+
+and prarr fmt = function
+  | CTbinop (Timplies, ct1, ct2) ->
+      fprintf fmt "%a ⇨ %a"
+        prdisj ct1
+        prarr ct2
+  | CTbinop (Tiff, ct1, ct2) ->
+      fprintf fmt "%a ⇔ %a"
+        prdisj ct1
+        prarr ct2
+  | ct -> prdisj fmt ct
+
+and prdisj fmt = function
+  | CTbinop (Tor, ct1, ct2) ->
+      fprintf fmt "%a ∨ %a"
+        prconj ct1
+        prdisj ct2
+  | ct -> prconj fmt ct
+
+and prconj fmt = function
+  | CTbinop (Tand, ct1, ct2) ->
+      fprintf fmt "%a ∧ %a"
+        prnot ct1
+        prconj ct2
+  | ct -> prnot fmt ct
+
+and prnot fmt = function
+  | CTnot ct ->
+      fprintf fmt "¬ %a"
+        prpv ct
+  | ct -> prapp fmt ct
+
+and prapp fmt = function
+  | CTapp (ct1, ct2) ->
+      fprintf fmt "%a %a"
+        prapp ct1
+        prpv ct2
   | CTquant (q, _, t) ->
       let x = id_register (id_fresh "x") in
       let q_str = match q with CTforall -> "forall"
@@ -220,13 +244,6 @@ let rec pcte fmt = function
         q_str
         pri x
         pcte t_open
-  | ct -> prapp fmt ct
-
-and prapp fmt = function
-  | CTapp (ct1, ct2) ->
-      fprintf fmt "%a %a"
-        prapp ct1
-        prpv ct2
   | ct -> prpv fmt ct
 
 and prpv fmt = function
@@ -337,7 +354,7 @@ let plcta fmt lcta =
   fprintf fmt "%a" (prle "========\n" pcta) lcta
 
 let eplcta cta lcta =
-  eprintf "INIT :\n%a\n==========\nRES\n%a@." pcta cta plcta lcta
+  eprintf "INIT :\n%a==========\nRES :\n%a\n@." pcta cta plcta lcta
 
 let print_ctasks filename lcta =
   let oc = open_out filename in
