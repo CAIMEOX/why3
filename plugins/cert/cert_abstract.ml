@@ -34,7 +34,7 @@ let ctint = CTyapp (Ty.ts_int, [])
 
 type ctask =
   { sigma : ctype Mid.t;
-    delta_gamma : (cterm * bool) Mid.t
+    gamma_delta : (cterm * bool) Mid.t
   }
 (* We will denote a ctask <sigma; gamma_delta> by <Σ | Γ ⊢ Δ> where :
    • <Σ> contains all the signature declarations <x : ty> where <x> is mapped to <ty> in <sigma>
@@ -44,19 +44,19 @@ type ctask =
 
 let ctask_empty =
   { sigma = Mid.empty;
-    delta_gamma = Mid.empty }
+    gamma_delta = Mid.empty }
 
 let ctask_union ct1 ct2 =
   { sigma = Mid.set_union ct1.sigma ct2.sigma;
-    delta_gamma = Mid.set_union ct1.delta_gamma ct2.delta_gamma }
+    gamma_delta = Mid.set_union ct1.gamma_delta ct2.gamma_delta }
 
 let lift_mid_cta f cta =
   { sigma = cta.sigma;
-    delta_gamma = f (cta.delta_gamma) }
+    gamma_delta = f (cta.gamma_delta) }
 
 let add_var i cty cta =
   { sigma = Mid.add i cty cta.sigma;
-    delta_gamma = cta.delta_gamma }
+    gamma_delta = cta.gamma_delta }
 
 let remove i cta = lift_mid_cta (Mid.remove i) cta
 
@@ -72,8 +72,8 @@ let rec abstract_otype = function
   | None -> ctbool
   | Some ty -> abstract_type ty
 
-and abstract_type ty =
-  match ty.ty_node with
+and abstract_type { ty_node } =
+  match ty_node with
   | Tyvar v -> CTyvar v
   | Tyapp (ts, lts) ->
       if ts_equal ts ts_func
@@ -121,9 +121,9 @@ and abstract_term_node_rec bv_lvl (lvl : int) t =
       let lvl = lvl + List.length lvs in
       let ctn_open = abstract_term_rec bv_lvl lvl t_open in
       let q = abstract_quant q in
-      let ctquant ty ct = let cty = abstract_type ty in
+      let ctquant vs ct = let cty = abstract_type vs.vs_ty in
                           CTquant (q, cty, ct) in
-      let ct_closed = List.fold_right (fun vs ct -> ctquant vs.vs_ty ct) lvs ctn_open in
+      let ct_closed = List.fold_right ctquant lvs ctn_open in
       ct_closed
   | Tnot t -> let ct = abstract_term_rec bv_lvl lvl t in
               CTnot ct
@@ -149,7 +149,7 @@ let abstract_decl_acc acc decl =
   | Dparam ls ->
       let cty = type_lsymbol ls in
       add_var ls.ls_name cty acc
-  | _ -> ctask_empty
+  | _ -> acc
 
 let abstract_tdecl_acc acc td =
   match td.td_node with
