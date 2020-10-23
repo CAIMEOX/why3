@@ -108,7 +108,7 @@ and abstract_term_node_rec bv_lvl (lvl : int) t =
       cterm_node_sig_from_id v.vs_name
   | Tapp (ls, lt) ->
       let ctls = cterm_node_sig_from_id ls.ls_name in
-      List.fold_left (fun acc h -> CTapp (abstract_term_rec bv_lvl lvl h, acc))
+      List.fold_left (fun acc h -> CTapp (acc, abstract_term_rec bv_lvl lvl h))
         ctls lt
   | Tbinop (op, t1, t2) ->
       let ct1 = abstract_term_rec bv_lvl lvl t1 in
