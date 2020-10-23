@@ -1,14 +1,17 @@
-open Format
-
 open Why3
 open Decl
 open Term
 open Ident
+open Format
 
 open Cert_abstract
 
 type dir = Left | Right
 type path = dir list
+
+let prd fmt = function
+  | Left -> fprintf fmt "Left"
+  | Right -> fprintf fmt "Right"
 
 (** We equip each transformation application with a certificate indicating
     why the resulting list of tasks is implying the initial task *)
@@ -189,87 +192,6 @@ type heavy_ecert = ident list * (ident, cterm) ecert
 type trimmed_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct) *)
 type kernel_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct,Let) *)
 
-(** Printing of <cterm> and <ctask> : for debugging purposes *)
-
-let ip = create_ident_printer []
-let san = sanitizer char_to_alnum char_to_alnum
-
-let pri fmt i =
-  fprintf fmt "%s" (id_unique ip ~sanitizer:san i)
-
-let prpr fmt pr =
-  pri fmt pr.pr_name
-
-let prd fmt = function
-  | Left -> fprintf fmt "Left"
-  | Right -> fprintf fmt "Right"
-
-let prle sep pre fmt le =
-  let prl = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt sep) pre in
-  fprintf fmt "[%a]" prl le
-
-let rec prty fmt = function
-  | CTyvar v -> prvar fmt v
-  | CTyapp (ts, l) ->
-      (* TODO : should we differentiate Prop and bool ? *)
-      if Ty.ts_equal ts Ty.ts_bool
-      then fprintf fmt "Prop"
-      else fprintf fmt "%a %a"
-             Pretty.print_ts ts
-             (prle " " prtyparen) l
-  | CTarrow (t1, t2) ->
-      fprintf fmt "%a → %a"
-        prtyparen t1
-        prty t2
-
-and prtyparen fmt = function
-  | CTyvar v -> prvar fmt v
-  | cty -> fprintf fmt "(%a)" prty cty
-
-and prvar fmt _ =
-  fprintf fmt "Term"
-  (* TODO include some types in lamdapi and translate to them instead of all being Term *)
-  (* Pretty.print_tv fmt v *)
-
-let rec pcte fmt ct =
-  match ct with
-  | CTbvar lvl -> pp_print_int fmt lvl
-  | CTfvar i -> pri fmt i
-  | CTint i -> fprintf fmt "%s" (BigInt.to_string i)
-  | CTapp (f, arg) -> fprintf fmt "%a@ %a" pcte f pcte arg
-  | CTbinop (op, t1, t2) ->
-      fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
-  | CTquant (q, _, ct) ->
-      begin match q with
-      | CTforall -> fprintf fmt "∀. %a" pcte ct
-      | CTexists -> fprintf fmt "∃. %a" pcte ct
-      | CTlambda -> fprintf fmt "λ. %a" pcte ct
-      end
-  | CTnot t -> fprintf fmt "(not %a)" pcte t
-  | CTtrue -> fprintf fmt "true"
-  | CTfalse -> fprintf fmt "false"
-and pro fmt = function
-  | Tor -> fprintf fmt "\\/"
-  | Tand -> fprintf fmt "/\\"
-  | Timplies -> fprintf fmt "->"
-  | Tiff -> fprintf fmt "<->"
-
-let pte = Pretty.print_term
-
-let po p fmt = function
-  | None -> fprintf fmt "None"
-  | Some x -> fprintf fmt "%a" p x
-
-(* let _ =
- *   let rcd = {
- *       mark_open_tag = (fun _ -> "start");
- *       mark_close_tag = (fun _ -> "");
- *       print_open_tag = (fun _ -> ());
- *       print_close_tag = (fun _ -> ());
- *     } in
- *   pp_set_formatter_tag_functions err_formatter rcd;
- *   pp_set_tags err_formatter true *)
-
 
 let rec print_certif filename cert =
   let oc = open_out filename in
@@ -307,35 +229,11 @@ and prcab : type a b. (formatter -> a -> unit) ->
         pra i pra j (prle "; " prd) path rev (prle "; " prc) lc
 
 and prli = prle "; " pri
-and prcertif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab prpr pte) c
+and prcertif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab prpr Pretty.print_term) c
 and prcore_certif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab pri pcte) c
 
 let eprcertif c = eprintf "%a@." prcertif c
 
-let prs fmt mid =
-  Mid.iter (fun x ty -> fprintf fmt "%a : %a\n" pri x prty ty) mid
-
-let prpos fmt = function
-  | true  -> fprintf fmt "GOAL| "
-  | false -> fprintf fmt "HYP | "
-
-let prdg fmt mid =
-  Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a\n" prpos pos pri h pcte cte) mid
-
-let pcta fmt cta =
-  fprintf fmt "%a\n%a\n" prs cta.sigma prdg cta.gamma_delta
-
-let plcta fmt lcta =
-  fprintf fmt "%a" (prle "========\n" pcta) lcta
-
-let eplcta cta lcta =
-  eprintf "INIT :\n%a\n==========\nRES\n%a@." pcta cta plcta lcta
-
-let print_ctasks filename lcta =
-  let oc = open_out filename in
-  let fmt = formatter_of_out_channel oc in
-  plcta fmt lcta;
-  close_out oc
 
 let find_ident s h cta =
   match Mid.find_opt h cta.gamma_delta with
@@ -345,9 +243,9 @@ let find_ident s h cta =
       verif_failed (flush_str_formatter ())
 
 
-(** Utility functions on certificate, cterm and ctask *)
+(** Utility functions on certificates *)
 
-(* Structural functions on certificates *)
+(* Use propagate to define recursive functions on elements of type cert *)
 let propagate_cert f fid fte = function
   | (Hole _ | Nc)  as c -> c
   | Axiom (h, g) -> Axiom (fid h, fid g)
@@ -384,17 +282,6 @@ let flatten_uniq l =
   let _, fl = add_list_list (Sid.empty, []) l in
   List.rev fl
 
-(* let _ =
- *   let id1 = id_register (id_fresh "H1") in
- *   let id2 = id_register (id_fresh "H2") in
- *   let id3 = id_register (id_fresh "H3") in
- *   let id4 = id_register (id_fresh "H4") in
- *   let id5 = id_register (id_fresh "H5") in
- *   let ll = [[id1; id2]; [id1; id3; id3]; [id2; id1; id4]; [id4; id2; id5]] in
- *   let l = flatten_uniq ll in
- *   List.iter (Format.printf "%a\n" pri) l *)
-
-
 let (|>>>) (v1, c1) lcv2 =
   let lv2, lc2 = List.split lcv2 in
   assert (List.length v1 = List.length lv2);
@@ -414,6 +301,7 @@ let (||>) (v1, c1) f =
   let lcv2 = List.map f (iterate n ()) in
   (v1, c1) |>>> lcv2
 
+(* Use propagate to define recursive functions on elements of type ecert *)
 let propagate_ecert f fid ft = function
   | EHole _ as c -> c
   | ECut (i, a, c1, c2) ->
@@ -439,161 +327,41 @@ let propagate_ecert f fid ft = function
   | ERewrite (i, j, path, rev, lc) -> ERewrite (fid i, fid j, path, rev, List.map f lc)
 
 
-(* Equality *)
-
-let rec ctype_equal_uncurr = function
-  | CTyvar v1, CTyvar v2 -> Ty.tv_equal v1 v2
-  | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
-      Ty.ts_equal ty1 ty2 && List.for_all ctype_equal_uncurr (List.combine l1 l2)
-  | CTarrow (f1, a1), CTarrow (f2, a2) ->
-      ctype_equal f1 f2 && ctype_equal a1 a2
-  | (CTyvar _ | CTyapp _ | CTarrow _), _ -> false
-
-and ctype_equal cty1 cty2 = ctype_equal_uncurr (cty1, cty2)
-
-let rec cterm_equal t1 t2 = match t1, t2 with
-  | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
-  | CTfvar i1, CTfvar i2 -> id_equal i1 i2
-  | CTapp (tl1, tr1), CTapp (tl2, tr2) ->
-      cterm_equal tl1 tl2 && cterm_equal tr1 tr2
-  | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
-      op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
-  | CTquant (q1, ty1, t1), CTquant (q2, ty2, t2) when q1 = q2 ->
-      ctype_equal ty1 ty2 && cterm_equal t1 t2
-  | CTtrue, CTtrue | CTfalse, CTfalse -> true
-  | CTnot t1, CTnot t2 -> cterm_equal t1 t2
-  | CTint i1, CTint i2 -> BigInt.eq i1 i2
-  | (CTbvar _ | CTfvar _ | CTapp _ | CTbinop _ | CTquant _
-     | CTtrue | CTfalse | CTnot _ | CTint _), _ -> false
-
-let cterm_pos_equal (t1, p1) (t2, p2) =
-  cterm_equal t1 t2 && p1 = p2
 
 
-let ctask_equal cta1 cta2 =
-  (* TODO fix finding the 'right' signature when abstracting a task *)
-  (* Mid.equal ctype_equal cta1.sigma cta2.sigma && *)
-    Mid.equal cterm_pos_equal cta1.gamma_delta cta2.gamma_delta
-
-(* Bound variable substitution *)
-let rec ct_bv_subst k u ctn = match ctn with
-  | CTbvar i -> if i = k then u else ctn
-  | CTint _ | CTfvar _ -> ctn
-  | CTapp (ct1, ct2) ->
-      let nt1 = ct_bv_subst k u ct1 in
-      let nt2 = ct_bv_subst k u ct2 in
-      CTapp (nt1, nt2)
-  | CTbinop (op, ct1, ct2) ->
-      let nt1 = ct_bv_subst k u ct1 in
-      let nt2 = ct_bv_subst k u ct2 in
-      CTbinop (op, nt1, nt2)
-  | CTquant (q, cty, ct) ->
-      let nct = ct_bv_subst (k+1) u ct in
-      CTquant (q, cty, nct)
-  | CTnot ct -> CTnot (ct_bv_subst k u ct)
-  | CTtrue -> CTtrue
-  | CTfalse -> CTfalse
-
-let ct_open t u = ct_bv_subst 0 u t
-
-(* Checks if the term is locally closed *)
-let locally_closed =
-  let di = id_register (id_fresh "dummy_locally_closed_ident") in
-  let rec term ct = match ct with
-    | CTbvar _ -> false
-    | CTapp (ct1, ct2)
-    | CTbinop (_, ct1, ct2) -> term ct1 && term ct2
-    | CTquant (_, _, t) -> term (ct_open t (CTfvar di))
-    | CTnot ct -> term ct
-    | CTint _ | CTfvar _ | CTtrue | CTfalse -> true
-  in
-  term
-
-(* Free variable substitution *)
-let rec ct_fv_subst z u ctn = match ctn with
-  | CTfvar x -> if id_equal z x then u else ctn
-  | CTapp (ct1, ct2) ->
-      let nt1 = ct_fv_subst z u ct1 in
-      let nt2 = ct_fv_subst z u ct2 in
-      CTapp (nt1, nt2)
-  | CTbinop (op, ct1, ct2) ->
-      let nt1 = ct_fv_subst z u ct1 in
-      let nt2 = ct_fv_subst z u ct2 in
-      CTbinop (op, nt1, nt2)
-  | CTquant (q, cty, ct) ->
-      let nct = ct_fv_subst z u ct in
-      CTquant (q, cty, nct)
-  | CTnot ct -> CTnot (ct_fv_subst z u ct)
-  | CTint _ | CTbvar _ | CTtrue | CTfalse -> ctn
-
-let ct_subst (m : cterm Mid.t) ct =
-  Mid.fold ct_fv_subst m ct
-
-(* Variable closing *)
-let rec ct_fv_close x k ct = match ct with
-  | CTint _ | CTbvar _ | CTtrue | CTfalse-> ct
-  | CTfvar y -> if id_equal x y then CTbvar k else ct
-  | CTnot ct -> CTnot (ct_fv_close x k ct)
-  | CTapp (ct1, ct2) ->
-      let nt1 = ct_fv_close x k ct1 in
-      let nt2 = ct_fv_close x k ct2 in
-      CTapp (nt1, nt2)
-  | CTbinop (op, ct1, ct2) ->
-      let nt1 = ct_fv_close x k ct1 in
-      let nt2 = ct_fv_close x k ct2 in
-      CTbinop (op, nt1, nt2)
-  | CTquant (q, cty, ct) -> CTquant (q, cty, ct_fv_close x (k+1) ct)
-
-let ct_close x t = ct_fv_close x 0 t
-
-(* Find free variable with respect to a term *)
-let rec mem_cont x ctn cont = match ctn with
-  | CTfvar y -> cont (id_equal x y)
-  | CTapp (ct1, ct2)
-  | CTbinop (_, ct1, ct2) ->
-      mem_cont x ct1 (fun m1 ->
-      mem_cont x ct2 (fun m2 ->
-          cont (m1 || m2)))
-  | CTquant (_, _, ct)
-  | CTnot ct -> mem_cont x ct cont
-  | CTint _ | CTbvar _ | CTtrue | CTfalse -> cont false
-
-let mem x t = mem_cont x t (fun x -> x)
-
-
-let rec infer_type sigma t = match t with
-  | CTfvar v -> Mid.find v sigma
-  | CTbvar _ -> assert false
-  | CTtrue | CTfalse -> ctbool
-  | CTnot t -> let ty = infer_type sigma t in
-               assert (ctype_equal ty ctbool);
-               ctbool
-  | CTquant (q, ty1, t) ->
-      let ni = id_register (id_fresh "type_ident") in
-      let sigma = Mid.add ni ty1 sigma in
-      let t = ct_open t (CTfvar ni) in
-      let ty2 = infer_type sigma t in
-      begin match q with
-      | CTlambda -> CTarrow (ty1, ty2)
-      | _ ->  assert (ctype_equal ty2 ctbool); ctbool
-      end
-  | CTapp (t1, t2) ->
-      begin match infer_type sigma t1, infer_type sigma t2 with
-      | CTarrow (ty1, ty2), ty3 when ctype_equal ty1 ty3 -> ty2
-      | _ -> assert false end
-  | CTbinop (_, t1, t2) ->
-      let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
-      assert (ctype_equal ty1 ctbool);
-      assert (ctype_equal ty2 ctbool);
-      ctbool
-  | CTint _ -> ctint
-
-
-let infers_into sigma t ty =
-  try assert (ctype_equal (infer_type sigma t) ty)
-  with _ -> let err_str = fprintf str_formatter "wrong type for %a" pcte t;
-                          flush_str_formatter () in
-            verif_failed err_str
+(* let rec infer_type sigma t = match t with
+ *   | CTfvar v -> Mid.find v sigma
+ *   | CTbvar _ -> assert false
+ *   | CTtrue | CTfalse -> ctbool
+ *   | CTnot t -> let ty = infer_type sigma t in
+ *                assert (ctype_equal ty ctbool);
+ *                ctbool
+ *   | CTquant (q, ty1, t) ->
+ *       let ni = id_register (id_fresh "type_ident") in
+ *       let sigma = Mid.add ni ty1 sigma in
+ *       let t = ct_open t (CTfvar ni) in
+ *       let ty2 = infer_type sigma t in
+ *       begin match q with
+ *       | CTlambda -> CTarrow (ty1, ty2)
+ *       | _ ->  assert (ctype_equal ty2 ctbool); ctbool
+ *       end
+ *   | CTapp (t1, t2) ->
+ *       begin match infer_type sigma t1, infer_type sigma t2 with
+ *       | CTarrow (ty1, ty2), ty3 when ctype_equal ty1 ty3 -> ty2
+ *       | _ -> assert false end
+ *   | CTbinop (_, t1, t2) ->
+ *       let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
+ *       assert (ctype_equal ty1 ctbool);
+ *       assert (ctype_equal ty2 ctbool);
+ *       ctbool
+ *   | CTint _ -> ctint
+ * 
+ * 
+ * let infers_into sigma t ty =
+ *   try assert (ctype_equal (infer_type sigma t) ty)
+ *   with _ -> let err_str = fprintf str_formatter "wrong type for %a" pcte t;
+ *                           flush_str_formatter () in
+ *             verif_failed err_str *)
 
 (* Separates hypotheses and goals *)
 let split_hyp_goal cta =

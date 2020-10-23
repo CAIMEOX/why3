@@ -107,7 +107,7 @@ let rec print_ast fmt t = match t.t_node with
   | Tconst _ -> fprintf fmt "Tconst"
   | Tapp (l, ts) ->
       fprintf fmt "(%a %a)"
-        pri (l.ls_name)
+        Cert_abstract.pri (l.ls_name)
         (pp_print_list print_ast) ts
   | Tif _ -> fprintf fmt "Tif"
   | Tlet _ -> fprintf fmt "Tlet"
@@ -127,7 +127,7 @@ let rec print_ast fmt t = match t.t_node with
 let tprint_tg target =
   Trans.decl_acc (target, hole ()) update_tg_c (fun d (tg, _) -> match d.d_node with
       | Dprop (_, pr, t) when match_tg tg pr ->
-          Format.eprintf "%a : %a@." pri (pr.pr_name) print_ast t;
+          Format.eprintf "%a : %a@." Cert_abstract.pri (pr.pr_name) print_ast t;
           [d], None
       | _ -> [d], None)
 

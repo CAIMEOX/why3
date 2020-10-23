@@ -1,5 +1,4 @@
 open Why3
-open Term
 open Ident
 open Format
 
@@ -18,46 +17,6 @@ let find_goal cta =
  *)
 type ctask_simple = (ident * cterm) list
 
-let print_op fmt = function
-  | Tand -> fprintf fmt "∧"
-  | Tor -> fprintf fmt "∨"
-  | Timplies -> fprintf fmt "⇨"
-  | Tiff -> fprintf fmt "⇔"
-
-let rec print_term fmt ct = match ct with
-  | CTbvar _ -> assert false
-  | CTfvar id -> pri fmt id
-  | CTint _ -> verif_failed "integers not supported by Lamdapi yet"
-  | CTbinop (op, ct1, ct2) ->
-      fprintf fmt "(%a %a %a)"
-        print_term ct1
-        print_op op
-        print_term ct2
-  | CTnot ct ->
-      fprintf fmt "(¬ %a)"
-        print_term ct
-  | CTfalse -> fprintf fmt "false"
-  | CTtrue -> fprintf fmt "true"
-  | CTapp (ct1, ct2) ->
-      fprintf fmt "(%a) (%a)"
-        print_term ct1
-        print_term ct2
-  | CTquant (CTlambda, _, t) ->
-      let x = id_register (id_fresh "x") in
-      let t_open = ct_open t (CTfvar x) in
-      fprintf fmt "(λ %a, %a)"
-        pri x
-        print_term t_open
-  | CTquant (q, _, t) ->
-      let x = id_register (id_fresh "x") in
-      let q_str = match q with CTforall -> "forall"
-                             | CTexists -> "exists"
-                             | CTlambda -> assert false in
-      let t_open = ct_open t (CTfvar x) in
-      fprintf fmt "(%s (λ %a, %a))"
-        q_str
-        pri x
-        print_term t_open
 
 (* on [e1; ...; en], print_list sep gives :
    e1 sep e2 sep ... en sep
@@ -80,7 +39,6 @@ let rec print_list_pre sep pe fmt = function
               pe h
               (print_list_pre sep pe) t
 
-
 (* let rec collect typ ct = match ct with
  *   | CTint _ | CTbvar _  -> Mid.empty
  *   | CTfvar id -> Mid.singleton id typ
@@ -95,15 +53,16 @@ let rec print_list_pre sep pe fmt = function
  *     Mid.empty ta *)
 
 let print_task fmt (fv, ts) =
-  fprintf fmt "(Π ";
-  print_list_inter " " (fun fmt (id, cty) ->
+  fprintf fmt "@[<hov 0>(Π ";
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "@ ")
+    (fun fmt (id, cty) ->
       fprintf fmt "(%a : %a)"
         pri id
         prty cty) fmt fv;
   let tp = snd (List.split ts) @ [CTfalse] in
-  fprintf fmt ", prf (%a)"
-    (print_list_inter " ⇨ " print_term) tp;
-  fprintf fmt ")"
+  fprintf fmt ",@]@   @[<hv 5>prf (";
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇨@ ") pcte fmt tp;
+  fprintf fmt ")@])"
 
 let rstr goal = if goal then "_goal" else "_hyp"
 
@@ -116,7 +75,7 @@ let print_certif at fmt c =
       fprintf fmt "%s" (Stream.next s)
   | EAxiom (t, h, g) ->
       fprintf fmt "axiom (%a) %a %a"
-        print_term t
+        pcte t
         pri h
         pri g
   | ETrivial (goal, g) ->
@@ -124,58 +83,58 @@ let print_certif at fmt c =
         pri g
   | ECut (i, a, ce1, ce2) ->
       fprintf fmt "cut (%a) (λ %a, %a) (λ %a, %a)"
-        print_term a
+        pcte a
         pri i pc ce1
         pri i pc ce2
   | ESplit (goal, a, b, i, c1, c2) ->
       fprintf fmt "split%s (%a) (%a) (λ %a, %a) (λ %a, %a) %a" (rstr goal)
-        print_term a
-        print_term b
+        pcte a
+        pcte b
         pri i pc c1
         pri i pc c2
         pri i
   | EUnfoldIff (goal, a, b, i, c) ->
       fprintf fmt "unfold_iff%s (%a) (%a) (λ %a, %a) %a" (rstr goal)
-        print_term a
-        print_term b
+        pcte a
+        pcte b
         pri i pc c
         pri i
   | EUnfoldArr (goal, a, b, i, c) ->
       fprintf fmt "unfold_arr%s (%a) (%a) (λ %a, %a) %a" (rstr goal)
-        print_term a
-        print_term b
+        pcte a
+        pcte b
         pri i pc c
         pri i
   | ESwapNeg (goal, a, i, c) ->
       fprintf fmt "swap_neg%s (%a) (λ %a, %a) %a" (rstr goal)
-        print_term a
+        pcte a
         pri i pc c
         pri i
   | ESwap (goal, a, i, c) ->
       fprintf fmt "swap%s (%a) (λ %a, %a) %a" (rstr goal)
-        print_term a
+        pcte a
         pri i pc c
         pri i
   | EDestruct (goal, a, b, i, j1, j2, c) ->
       fprintf fmt "destruct%s (%a) (%a) (λ %a %a, %a) %a" (rstr goal)
-        print_term a
-        print_term b
+        pcte a
+        pcte b
         pri j1 pri j2 pc c
         pri i
   | EWeakening (goal, a, i, c) ->
       fprintf fmt "weakening%s (%a) (%a) %a" (rstr goal)
-        print_term a
+        pcte a
         pc c
         pri i
   | EIntroQuant (goal, p, i, y, c) ->
       fprintf fmt "intro_quant%s (%a) (λ %a %a, %a) %a" (rstr goal)
-        print_term p
+        pcte p
         pri y pri i pc c
         pri i
   | EInstQuant (goal, p, i, j, t, c) ->
       fprintf fmt "inst_quant%s (%a) (%a) (λ %a %a, %a) %a" (rstr goal)
-        print_term p
-        print_term t
+        pcte p
+        pcte t
         pri i pri j pc c
         pri i
   | ERewrite _ -> verif_failed "Rewrite is not yet supported by the Lambdapi checker" in
@@ -193,7 +152,8 @@ let print fmt init_ct res_ct (task_id, certif) =
   let init = fv_ts init_ct in
   (* The type we need to check is inhabited *)
   let p_type fmt () =
-    print_list_inter " → " print_task fmt (res @ [init]) in
+    pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " →@ ")
+      print_task fmt (res @ [init]) in
   (* applied_tasks are used to fill the holes *)
   let applied_tasks =
     List.map2 (fun id (fv_t, t) ->
@@ -212,8 +172,9 @@ let print fmt init_ct res_ct (task_id, certif) =
     fprintf fmt "λ %a, " (print_list_inter " " pri) vars;
     print_certif applied_tasks fmt certif in
 
-  fprintf fmt "definition to_verify : %a \n\
-               ≔  %a@."
+  fprintf fmt "@[<v 0>definition to_verify :@    \
+               @[<v 0>%a@]@ \
+               ≔  %a@]@."
     p_type ()
     p_term ()
 
