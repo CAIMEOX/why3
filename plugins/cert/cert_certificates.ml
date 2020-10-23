@@ -209,9 +209,7 @@ let prle sep pre fmt le =
   fprintf fmt "[%a]" prl le
 
 let rec prty fmt = function
-  | CTyvar _ -> fprintf fmt "Term"
-  (* TODO include some types in lamdapi and translate to them instead of all being Term *)
-  (* Pretty.print_tv fmt v *)
+  | CTyvar v -> prvar fmt v
   | CTyapp (ts, l) ->
       (* TODO : should we differentiate Prop and bool ? *)
       if Ty.ts_equal ts Ty.ts_bool
@@ -220,13 +218,18 @@ let rec prty fmt = function
              Pretty.print_ts ts
              (prle " " prtyparen) l
   | CTarrow (t1, t2) ->
-      fprintf fmt "%a ⇒ %a"
+      fprintf fmt "%a → %a"
         prtyparen t1
         prty t2
 
 and prtyparen fmt = function
-  | CTyvar v -> Pretty.print_tv fmt v
+  | CTyvar v -> prvar fmt v
   | cty -> fprintf fmt "(%a)" prty cty
+
+and prvar fmt _ =
+  fprintf fmt "Term"
+  (* TODO include some types in lamdapi and translate to them instead of all being Term *)
+  (* Pretty.print_tv fmt v *)
 
 let rec pcte fmt ct =
   match ct with
