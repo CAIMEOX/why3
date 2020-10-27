@@ -12,6 +12,7 @@ printer "smtv2"
 import "no-bv.gen"
 import "discrimination.gen"
 
+transformation "simplify_trivial_quantification"
 transformation "inline_trivial"
 transformation "eliminate_builtin"
 transformation "eliminate_definition"

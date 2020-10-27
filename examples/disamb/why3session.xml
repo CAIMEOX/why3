@@ -20,16 +20,16 @@
  <proof prover="0"><result status="valid" time="0.24" steps="68294"/></proof>
  </goal>
  <goal name="di_str&#39;vc" expl="VC for di_str" proved="true">
- <proof prover="3"><result status="valid" time="0.03" steps="165"/></proof>
+ <proof prover="3"><result status="valid" time="0.03" steps="164"/></proof>
  </goal>
  <goal name="disambiguation_included&#39;vc" expl="VC for disambiguation_included" proved="true">
  <proof prover="0"><result status="valid" time="0.04" steps="11001"/></proof>
  </goal>
  <goal name="oi_str&#39;vc" expl="VC for oi_str" proved="true">
- <proof prover="3"><result status="valid" time="0.03" steps="203"/></proof>
+ <proof prover="3"><result status="valid" time="0.03" steps="202"/></proof>
  </goal>
  <goal name="decomp_last_plus&#39;vc" expl="VC for decomp_last_plus" proved="true">
- <proof prover="3"><result status="valid" time="0.14" steps="1062"/></proof>
+ <proof prover="3"><result status="valid" time="0.76" steps="3436"/></proof>
  </goal>
  <goal name="original_included" proved="true">
  <proof prover="0"><result status="valid" time="0.04" steps="9231"/></proof>

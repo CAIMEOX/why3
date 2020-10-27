@@ -16,6 +16,7 @@ import "smt-libv2-bv.gen"
 import "cvc4_bv.gen"
 import "discrimination.gen"
 
+transformation "simplify_trivial_quantification"
 transformation "inline_trivial"
 transformation "eliminate_builtin"
 transformation "detect_polymorphism"

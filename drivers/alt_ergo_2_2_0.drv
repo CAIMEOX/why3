@@ -3,6 +3,7 @@
 prelude "(* this is the prelude for Alt-Ergo, version >= 0.95.2 and <= 2.2.0 *)"
 
 
+transformation "simplify_trivial_quantification"
 transformation "inline_trivial"
 
 transformation "eliminate_builtin"
