@@ -392,9 +392,6 @@ let rec abstract_term t =
   abstract_term_rec Mid.empty 0 t
 
 and abstract_term_rec bv_lvl lvl t =
-  abstract_term_node_rec bv_lvl lvl t.t_node
-
-and abstract_term_node_rec bv_lvl (lvl : int) t =
   (* level <lvl> is the number of forall above in the whole term *)
   (* <bv_lvl> is mapping bound variables to their respective level *)
   let cterm_node_sig_from_id id  = match Mid.find_opt id bv_lvl with
@@ -404,7 +401,11 @@ and abstract_term_node_rec bv_lvl (lvl : int) t =
             (* a variable should not be above its definition *)
             assert (lvl_id <= lvl);
             CTbvar (lvl - lvl_id) in
-  match t with
+  match t.t_node with
+  | Ttrue  -> CTtrue
+  | _ when t_equal t t_bool_true -> CTtrue
+  | Tfalse -> CTfalse
+  | _ when t_equal t t_bool_false -> CTfalse
   | Tvar v ->
       cterm_node_sig_from_id v.vs_name
   | Tapp (ls, lt) ->
@@ -428,8 +429,6 @@ and abstract_term_node_rec bv_lvl (lvl : int) t =
       ct_closed
   | Tnot t -> let ct = abstract_term_rec bv_lvl lvl t in
               CTnot ct
-  | Ttrue -> CTtrue
-  | Tfalse -> CTfalse
   | Tconst (Constant.ConstInt i) -> CTint i.Number.il_int
   | Tconst _ ->
       let s = "" in
