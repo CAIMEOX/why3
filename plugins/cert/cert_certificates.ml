@@ -83,12 +83,9 @@ type ('I, 't) cert =
   (* InstQuant (I, J, t, c) ⇓ (Σ | Γ ⊢ Δ, I : ∃ x : τ. P x) ≜
          c ⇓ (Σ | Γ ⊢ Δ, I : ∃ x : τ. P x, J : P t)
      and Σ ⊩ t : τ *)
-  (* InstQuant (I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
-  (* InstQuant (I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
   | Rewrite of 'I * 'I * ('I, 't) cert
   (* Rewrite (I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : C[a] ≜  (Γ, H : a = b ⊢ Δ, I : C[b] *)
   (* Rewrite (I, H, c) ⇓ (Γ, H : a = b, I : C[a] ⊢ Δ ≜  (Γ, H : a = b, I : C[b] ⊢ Δ *)
-
 
 type vcert = (prsymbol, term) cert
 
@@ -183,7 +180,6 @@ type ('a, 'b) ecert = (* elaborated certificates, 'a is used to designate an hyp
 type heavy_ecert = ident list * (ident, cterm) ecert
 type trimmed_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct) *)
 type kernel_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct,Let) *)
-
 
 let rec print_certif filename cert =
   let oc = open_out filename in
@@ -323,53 +319,17 @@ let propagate_ecert f fid ft = function
   | ERewrite (i, h, ctxt, c) -> ERewrite (fid i, fid h, ft ctxt, f c)
 
 
-
-
-(* let rec infer_type sigma t = match t with
- *   | CTfvar v -> Mid.find v sigma
- *   | CTbvar _ -> assert false
- *   | CTtrue | CTfalse -> ctbool
- *   | CTnot t -> let ty = infer_type sigma t in
- *                assert (ctype_equal ty ctbool);
- *                ctbool
- *   | CTquant (q, ty1, t) ->
- *       let ni = id_register (id_fresh "type_ident") in
- *       let sigma = Mid.add ni ty1 sigma in
- *       let t = ct_open t (CTfvar ni) in
- *       let ty2 = infer_type sigma t in
- *       begin match q with
- *       | CTlambda -> CTarrow (ty1, ty2)
- *       | _ ->  assert (ctype_equal ty2 ctbool); ctbool
- *       end
- *   | CTapp (t1, t2) ->
- *       begin match infer_type sigma t1, infer_type sigma t2 with
- *       | CTarrow (ty1, ty2), ty3 when ctype_equal ty1 ty3 -> ty2
- *       | _ -> assert false end
- *   | CTbinop (_, t1, t2) ->
- *       let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
- *       assert (ctype_equal ty1 ctbool);
- *       assert (ctype_equal ty2 ctbool);
- *       ctbool
- *   | CTint _ -> ctint
- * 
- * 
- * let infers_into sigma t ty =
- *   try assert (ctype_equal (infer_type sigma t) ty)
- *   with _ -> let err_str = fprintf str_formatter "wrong type for %a" pcte t;
- *                           flush_str_formatter () in
- *             verif_failed err_str *)
-
 (* Separates hypotheses and goals *)
 let split_hyp_goal cta =
   let open Mid in
-  fold (fun h (ct, pos) (delta, gamma) ->
-      if pos then delta, add h (ct, pos) gamma
-      else add h (ct, pos) delta, gamma)
+  fold (fun h (ct, pos) (gamma, delta) ->
+      if pos then gamma, add h (ct, pos) delta
+      else add h (ct, pos) gamma, delta)
     cta (empty, empty)
 
 (* Creates a new ctask with the same hypotheses but sets the goal with the second argument *)
 let set_goal : ctask -> cterm -> ctask = fun cta ->
-  let delta, gamma = split_hyp_goal cta.gamma_delta in
+  let gamma, delta = split_hyp_goal cta.gamma_delta in
   let gpr, _ = Mid.choose gamma in
   fun ct -> { sigma = cta.sigma;
               gamma_delta = Mid.add gpr (ct, true) delta }
@@ -538,7 +498,6 @@ let elaborate (init_ct : ctask) c =
       let t, ty = match t, pos with
         | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true -> t, ty
         | _ -> elab_failed "trying to instantiate a non-quantified hypothesis" in
-      (* ... since we do not check if the types match *)
       let cta = add j (ct_open t t_inst, pos) cta in
       EInstQuant (pos, CTquant (CTlambda, ty, t), i, j, t_inst, elab cta c)
   | Rewrite (i, h, c) ->
