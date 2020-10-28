@@ -61,7 +61,7 @@ let print_task fmt (fv, ts) =
         prty cty) fmt fv;
   let tp = snd (List.split ts) @ [CTfalse] in
   fprintf fmt ",@]@   @[<hv 5>etype (";
-  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇨@ ") pcte fmt tp;
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇨@ ") prpv fmt tp;
   fprintf fmt ")@])"
 
 let rstr goal = if goal then "_goal" else "_hyp"
