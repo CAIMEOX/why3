@@ -86,6 +86,13 @@ type cterm =
 
 (** Utility functions on cterm *)
 
+let cterm_map f ct = match ct with
+  | CTbvar _ | CTfvar _ | CTint _ | CTtrue | CTfalse -> ct
+  | CTquant (q, cty, ct) -> CTquant (q, cty, f ct)
+  | CTapp (ct1, ct2) -> CTapp (f ct1, f ct2)
+  | CTbinop (op, ct1, ct2) ->  CTbinop (op, f ct1, f ct2)
+  | CTnot ct -> CTnot (f ct)
+
 let rec cterm_equal t1 t2 = match t1, t2 with
   | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
   | CTfvar i1, CTfvar i2 -> id_equal i1 i2
@@ -252,13 +259,6 @@ and prpv fmt = function
   | CTfalse -> fprintf fmt "false"
   | CTtrue -> fprintf fmt "true"
   | ct -> fprintf fmt "(%a)" pcte ct
-
-let cterm_map f ct = match ct with
-  | CTbvar _ | CTfvar _ | CTint _ | CTtrue | CTfalse -> ct
-  | CTquant (q, cty, ct) -> CTquant (q, cty, f ct)
-  | CTapp (ct1, ct2) -> CTapp (f ct1, f ct2)
-  | CTbinop (op, ct1, ct2) ->  CTbinop (op, f ct1, f ct2)
-  | CTnot ct -> CTnot (f ct)
 
 (* Typing algorithm *)
 let rec infer_type sigma t = match t with
