@@ -60,7 +60,7 @@ let print_task fmt (fv, ts) =
         pri id
         prty cty) fmt fv;
   let tp = snd (List.split ts) @ [CTfalse] in
-  fprintf fmt ",@]@   @[<hv 5>prf (";
+  fprintf fmt ",@]@   @[<hv 5>etype (";
   pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇨@ ") pcte fmt tp;
   fprintf fmt ")@])"
 
@@ -184,9 +184,9 @@ let checker_lambdapi certif init_ct res_ct =
     let fmt = formatter_of_out_channel oc in
     print fmt init_ct res_ct certif;
     close_out oc;
-    let fo = Filename.(concat Config.datadir (concat "lambdapi" "FO.lp")) in
+    let coc = Filename.(concat Config.datadir (concat "lambdapi" "CoC.lp")) in
     let pkg_conf = Filename.(concat Config.datadir (concat "lambdapi" "lambdapi.pkg")) in
-    Sys.command ("cat " ^ fo ^ " > /tmp/check_all.lp") |> ignore;
+    Sys.command ("cat " ^ coc ^ " > /tmp/check_all.lp") |> ignore;
     Sys.command "cat /tmp/check_line.lp >> /tmp/check_all.lp" |> ignore;
     Sys.command ("cp " ^ pkg_conf ^ " /tmp/lambdapi.pkg") |> ignore;
     let ret = Sys.command "lambdapi check /tmp/check_all.lp 2> /dev/null 1> /dev/null" in
