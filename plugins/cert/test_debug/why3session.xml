@@ -6,6 +6,10 @@
 <path name=".."/><path name="test_debug.mlw"/>
 <theory name="Top">
  <goal name="G">
+ <transf name="rewrite_ccert" arg1="A">
+  <goal name="G.0">
+  </goal>
+ </transf>
  </goal>
 </theory>
 </file>
