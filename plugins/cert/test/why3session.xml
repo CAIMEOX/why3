@@ -611,21 +611,21 @@
   </goal>
  </transf>
  </goal>
- <goal name="inst_hyp">
- <transf name="intro_ccert" >
-  <goal name="inst_hyp.0">
-  <transf name="instantiate_ccert" arg1="true" arg2="in" arg3="H">
-   <goal name="inst_hyp.0.0">
+ <goal name="inst_hyp" proved="true">
+ <transf name="intro_ccert" proved="true" >
+  <goal name="inst_hyp.0" proved="true">
+  <transf name="instantiate_ccert" proved="true" arg1="true" arg2="in" arg3="H">
+   <goal name="inst_hyp.0.0" proved="true">
    <transf name="assumption_ccert" proved="true" >
    </transf>
    </goal>
   </transf>
   </goal>
  </transf>
- <transf name="intro_lcert" >
-  <goal name="inst_hyp.0">
-  <transf name="instantiate_lcert" arg1="true" arg2="in" arg3="H">
-   <goal name="inst_hyp.0.0">
+ <transf name="intro_lcert" proved="true" >
+  <goal name="inst_hyp.0" proved="true">
+  <transf name="instantiate_lcert" proved="true" arg1="true" arg2="in" arg3="H">
+   <goal name="inst_hyp.0.0" proved="true">
    <transf name="assumption_lcert" proved="true" >
    </transf>
    </goal>
@@ -633,21 +633,21 @@
   </goal>
  </transf>
  </goal>
- <goal name="inst_goal">
- <transf name="intro_ccert" >
-  <goal name="inst_goal.0">
-  <transf name="instantiate_ccert" arg1="true">
-   <goal name="inst_goal.0.0">
+ <goal name="inst_goal" proved="true">
+ <transf name="intro_ccert" proved="true" >
+  <goal name="inst_goal.0" proved="true">
+  <transf name="instantiate_ccert" proved="true" arg1="true">
+   <goal name="inst_goal.0.0" proved="true">
    <transf name="assumption_ccert" proved="true" >
    </transf>
    </goal>
   </transf>
   </goal>
  </transf>
- <transf name="intro_lcert" >
-  <goal name="inst_goal.0">
-  <transf name="instantiate_lcert" arg1="true">
-   <goal name="inst_goal.0.0">
+ <transf name="intro_lcert" proved="true" >
+  <goal name="inst_goal.0" proved="true">
+  <transf name="instantiate_lcert" proved="true" arg1="true">
+   <goal name="inst_goal.0.0" proved="true">
    <transf name="assumption_lcert" proved="true" >
    </transf>
    </goal>
@@ -843,8 +843,8 @@
   </goal>
  </transf>
  </goal>
- <goal name="drinker">
- <transf name="case_ccert" arg1="(exists x. not p x)">
+ <goal name="drinker" proved="true">
+ <transf name="case_ccert" proved="true" arg1="(exists x. not p x)">
   <goal name="drinker.0" proved="true">
   <transf name="intro_ccert" proved="true" arg1="in" arg2="H">
    <goal name="drinker.0.0" proved="true">
@@ -865,17 +865,17 @@
    </goal>
   </transf>
   </goal>
-  <goal name="drinker.1">
-  <transf name="instantiate_ccert" arg1="True">
-   <goal name="drinker.1.0">
-   <transf name="intros_ccert" >
-    <goal name="drinker.1.0.0">
-    <transf name="swap_ccert" >
-     <goal name="drinker.1.0.0.0">
-     <transf name="swap_ccert" arg1="in" arg2="H3">
-      <goal name="drinker.1.0.0.0.0">
-      <transf name="instantiate_ccert" arg1="y">
-       <goal name="drinker.1.0.0.0.0.0">
+  <goal name="drinker.1" proved="true">
+  <transf name="instantiate_ccert" proved="true" arg1="True">
+   <goal name="drinker.1.0" proved="true">
+   <transf name="intros_ccert" proved="true" >
+    <goal name="drinker.1.0.0" proved="true">
+    <transf name="swap_ccert" proved="true" >
+     <goal name="drinker.1.0.0.0" proved="true">
+     <transf name="swap_ccert" proved="true" arg1="in" arg2="H3">
+      <goal name="drinker.1.0.0.0.0" proved="true">
+      <transf name="instantiate_ccert" proved="true" arg1="y">
+       <goal name="drinker.1.0.0.0.0.0" proved="true">
        <transf name="assumption_ccert" proved="true" >
        </transf>
        </goal>
@@ -890,7 +890,7 @@
   </transf>
   </goal>
  </transf>
- <transf name="case_lcert" arg1="(exists x. not p x)">
+ <transf name="case_lcert" proved="true" arg1="(exists x. not p x)">
   <goal name="drinker.0" proved="true">
   <transf name="intro_lcert" proved="true" arg1="in" arg2="H">
    <goal name="drinker.0.0" proved="true">
@@ -911,17 +911,17 @@
    </goal>
   </transf>
   </goal>
-  <goal name="drinker.1">
-  <transf name="instantiate_lcert" arg1="True">
-   <goal name="drinker.1.0">
-   <transf name="intros_lcert" >
-    <goal name="drinker.1.0.0">
-    <transf name="swap_lcert" >
-     <goal name="drinker.1.0.0.0">
-     <transf name="swap_lcert" arg1="in" arg2="H3">
-      <goal name="drinker.1.0.0.0.0">
-      <transf name="instantiate_lcert" arg1="y">
-       <goal name="drinker.1.0.0.0.0.0">
+  <goal name="drinker.1" proved="true">
+  <transf name="instantiate_lcert" proved="true" arg1="True">
+   <goal name="drinker.1.0" proved="true">
+   <transf name="intros_lcert" proved="true" >
+    <goal name="drinker.1.0.0" proved="true">
+    <transf name="swap_lcert" proved="true" >
+     <goal name="drinker.1.0.0.0" proved="true">
+     <transf name="swap_lcert" proved="true" arg1="in" arg2="H3">
+      <goal name="drinker.1.0.0.0.0" proved="true">
+      <transf name="instantiate_lcert" proved="true" arg1="y">
+       <goal name="drinker.1.0.0.0.0.0" proved="true">
        <transf name="assumption_lcert" proved="true" >
        </transf>
        </goal>
