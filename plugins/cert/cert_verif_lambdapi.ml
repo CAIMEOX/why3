@@ -1,5 +1,4 @@
 open Why3
-open Term
 open Ident
 open Format
 
@@ -18,46 +17,6 @@ let find_goal cta =
  *)
 type ctask_simple = (ident * cterm) list
 
-let print_op fmt = function
-  | Tand -> fprintf fmt "∧"
-  | Tor -> fprintf fmt "∨"
-  | Timplies -> fprintf fmt "⇨"
-  | Tiff -> fprintf fmt "⇔"
-
-let rec print_term fmt { ct_node = ct } = match ct with
-  | CTbvar _ -> assert false
-  | CTfvar id -> pri fmt id
-  | CTint _ -> verif_failed "integers not supported by Lamdapi yet"
-  | CTbinop (op, ct1, ct2) ->
-      fprintf fmt "(%a %a %a)"
-        print_term ct1
-        print_op op
-        print_term ct2
-  | CTnot ct ->
-      fprintf fmt "(¬ %a)"
-        print_term ct
-  | CTfalse -> fprintf fmt "false"
-  | CTtrue -> fprintf fmt "true"
-  | CTapp (ct1, ct2) ->
-      fprintf fmt "(%a) (%a)"
-        print_term ct1
-        print_term ct2
-  | CTquant ((CTforall | CTexists) as q, t) ->
-      let x = id_register (id_fresh "x") in
-      let q_str = match q with CTforall -> "forall"
-                             | CTexists -> "exists"
-                             | CTlambda -> assert false in
-      let t_open = ct_open t (CTfvar x) in
-      fprintf fmt "(%s (λ %a, %a))"
-        q_str
-        pri x
-        print_term t_open
-  | CTquant (CTlambda, t) ->
-      let x = id_register (id_fresh "x") in
-      let t_open = ct_open t (CTfvar x) in
-      fprintf fmt "(λ %a, %a)"
-        pri x
-        print_term t_open
 
 (* on [e1; ...; en], print_list sep gives :
    e1 sep e2 sep ... en sep
@@ -80,43 +39,30 @@ let rec print_list_pre sep pe fmt = function
               pe h
               (print_list_pre sep pe) t
 
-
-
-type typ =
-  | Term
-  | Prop
-  | Arrow of typ * typ
-
-let rec print_type fmt = function
-  | Term -> fprintf fmt "Term"
-  | Prop -> fprintf fmt "Prop"
-  | Arrow (t1, t2) -> fprintf fmt "%a → %a"
-                        print_type t1
-                        print_type t2
-
-let rec collect typ { ct_node = ct } = match ct with
-  | CTint _ | CTbvar _  -> Mid.empty
-  | CTfvar id -> Mid.singleton id typ
-  | CTapp (ct1, ct2) -> Mid.set_union (collect (Arrow (Term, typ)) ct1) (collect Term ct2)
-  | CTbinop (_, ct1, ct2) -> Mid.set_union (collect typ ct1) (collect typ ct2)
-  | CTquant (_, ct)
-  | CTnot ct -> collect typ ct
-  | CTtrue | CTfalse -> Mid.empty
-
-let collect_stask (ta : ctask_simple) =
-  List.fold_left (fun acc (_, ct) -> Mid.set_union acc (collect Prop ct))
-    Mid.empty ta
+(* let rec collect typ ct = match ct with
+ *   | CTint _ | CTbvar _  -> Mid.empty
+ *   | CTfvar id -> Mid.singleton id typ
+ *   | CTapp (ct1, ct2) -> Mid.set_union (collect (Arrow (Term, typ)) ct1) (collect Term ct2)
+ *   | CTbinop (_, ct1, ct2) -> Mid.set_union (collect typ ct1) (collect typ ct2)
+ *   | CTquant (_, ct)
+ *   | CTnot ct -> collect typ ct
+ *   | CTtrue | CTfalse -> Mid.empty
+ *
+ * let collect_stask (ta : ctask_simple) =
+ *   List.fold_left (fun acc (_, ct) -> Mid.set_union acc (collect Prop ct))
+ *     Mid.empty ta *)
 
 let print_task fmt (fv, ts) =
-  fprintf fmt "(Π ";
-  print_list_inter " " (fun fmt (id, typ) ->
+  fprintf fmt "@[<hov 3>(Π ";
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "@ ")
+    (fun fmt (id, cty) ->
       fprintf fmt "(%a : %a)"
         pri id
-        print_type typ) fmt fv;
-  let tp = snd (List.split ts) @ [add_ty ctbool CTfalse] in
-  fprintf fmt ", prf (%a)"
-    (print_list_inter " ⇨ " print_term) tp;
-  fprintf fmt ")"
+        prty cty) fmt fv;
+  let tp = snd (List.split ts) @ [CTfalse] in
+  fprintf fmt ",@]@  @[<hv 7>etype (";
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇨@ ") prdisj fmt tp;
+  fprintf fmt ")@])"
 
 let rstr goal = if goal then "_goal" else "_hyp"
 
@@ -129,7 +75,7 @@ let print_certif at fmt c =
       fprintf fmt "%s" (Stream.next s)
   | EAxiom (t, h, g) ->
       fprintf fmt "axiom (%a) %a %a"
-        print_term t
+        pcte t
         pri h
         pri g
   | ETrivial (goal, g) ->
@@ -137,76 +83,77 @@ let print_certif at fmt c =
         pri g
   | ECut (i, a, ce1, ce2) ->
       fprintf fmt "cut (%a) (λ %a, %a) (λ %a, %a)"
-        print_term a
+        pcte a
         pri i pc ce1
         pri i pc ce2
   | ESplit (goal, a, b, i, c1, c2) ->
       fprintf fmt "split%s (%a) (%a) (λ %a, %a) (λ %a, %a) %a" (rstr goal)
-        print_term a
-        print_term b
+        pcte a
+        pcte b
         pri i pc c1
         pri i pc c2
         pri i
   | EUnfoldIff (goal, a, b, i, c) ->
       fprintf fmt "unfold_iff%s (%a) (%a) (λ %a, %a) %a" (rstr goal)
-        print_term a
-        print_term b
+        pcte a
+        pcte b
         pri i pc c
         pri i
   | EUnfoldArr (goal, a, b, i, c) ->
       fprintf fmt "unfold_arr%s (%a) (%a) (λ %a, %a) %a" (rstr goal)
-        print_term a
-        print_term b
+        pcte a
+        pcte b
         pri i pc c
         pri i
   | ESwapNeg (goal, a, i, c) ->
       fprintf fmt "swap_neg%s (%a) (λ %a, %a) %a" (rstr goal)
-        print_term a
+        pcte a
         pri i pc c
         pri i
   | ESwap (goal, a, i, c) ->
       fprintf fmt "swap%s (%a) (λ %a, %a) %a" (rstr goal)
-        print_term a
+        pcte a
         pri i pc c
         pri i
   | EDestruct (goal, a, b, i, j1, j2, c) ->
       fprintf fmt "destruct%s (%a) (%a) (λ %a %a, %a) %a" (rstr goal)
-        print_term a
-        print_term b
+        pcte a
+        pcte b
         pri j1 pri j2 pc c
         pri i
   | EWeakening (goal, a, i, c) ->
       fprintf fmt "weakening%s (%a) (%a) %a" (rstr goal)
-        print_term a
+        pcte a
         pc c
         pri i
   | EIntroQuant (goal, p, i, y, c) ->
       fprintf fmt "intro_quant%s (%a) (λ %a %a, %a) %a" (rstr goal)
-        print_term p
+        pcte p
         pri y pri i pc c
         pri i
   | EInstQuant (goal, p, i, j, t, c) ->
       fprintf fmt "inst_quant%s (%a) (%a) (λ %a %a, %a) %a" (rstr goal)
-        print_term p
-        print_term t
+        pcte p
+        pcte t
         pri i pri j pc c
         pri i
   | ERewrite _ -> verif_failed "Rewrite is not yet supported by the Lambdapi checker" in
   pc fmt c
 
-let fv_ts (ct : ctask) =
-  let encode_neg (k, (ct, pos)) = k, if pos then add_ty ctbool (CTnot ct) else ct in
-  let ts = Mid.bindings ct
+let fv_ts (cta : ctask) =
+  let encode_neg (k, (ct, pos)) = k, if pos then CTnot ct else ct in
+  let fv = Mid.bindings cta.sigma in
+  let ts = Mid.bindings cta.gamma_delta
            |> List.map encode_neg in
-  let fv = collect_stask ts in
-  Mid.bindings fv, ts
+  fv, ts
 
 let print fmt init_ct res_ct (task_id, certif) =
   let res = List.map fv_ts res_ct in
   let init = fv_ts init_ct in
   (* The type we need to check is inhabited *)
   let p_type fmt () =
-    print_list_inter " → " print_task fmt (res @ [init]) in
+    pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " →@ ")
+      print_task fmt (res @ [init]) in
   (* applied_tasks are used to fill the holes *)
   let applied_tasks =
     List.map2 (fun id (fv_t, t) ->
@@ -225,8 +172,9 @@ let print fmt init_ct res_ct (task_id, certif) =
     fprintf fmt "λ %a, " (print_list_inter " " pri) vars;
     print_certif applied_tasks fmt certif in
 
-  fprintf fmt "definition to_verify : %a \n\
-               ≔  %a@."
+  fprintf fmt "@[<v 0>definition to_verify :@   \
+               @[<v 0>%a@]@ \
+               ≔  %a@]@."
     p_type ()
     p_term ()
 
@@ -236,9 +184,9 @@ let checker_lambdapi certif init_ct res_ct =
     let fmt = formatter_of_out_channel oc in
     print fmt init_ct res_ct certif;
     close_out oc;
-    let fo = Filename.(concat Config.datadir (concat "lambdapi" "FO.lp")) in
+    let coc = Filename.(concat Config.datadir (concat "lambdapi" "CoC.lp")) in
     let pkg_conf = Filename.(concat Config.datadir (concat "lambdapi" "lambdapi.pkg")) in
-    Sys.command ("cat " ^ fo ^ " > /tmp/check_all.lp") |> ignore;
+    Sys.command ("cat " ^ coc ^ " > /tmp/check_all.lp") |> ignore;
     Sys.command "cat /tmp/check_line.lp >> /tmp/check_all.lp" |> ignore;
     Sys.command ("cp " ^ pkg_conf ^ " /tmp/lambdapi.pkg") |> ignore;
     let ret = Sys.command "lambdapi check /tmp/check_all.lp 2> /dev/null 1> /dev/null" in

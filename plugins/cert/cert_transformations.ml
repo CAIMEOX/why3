@@ -111,7 +111,7 @@ let rec print_ast fmt t = match t.t_node with
   | Tconst _ -> fprintf fmt "Tconst"
   | Tapp (l, ts) ->
       fprintf fmt "(%a %a)"
-        pri (l.ls_name)
+        Cert_abstract.pri (l.ls_name)
         (pp_print_list print_ast) ts
   | Tif _ -> fprintf fmt "Tif"
   | Tlet _ -> fprintf fmt "Tlet"
@@ -131,7 +131,7 @@ let rec print_ast fmt t = match t.t_node with
 let tprint_tg target =
   Trans.decl_acc (target, hole ()) update_tg_c (fun d (tg, _) -> match d.d_node with
       | Dprop (_, pr, t) when match_tg tg pr ->
-          Format.eprintf "%a : %a@." pri (pr.pr_name) print_ast t;
+          Format.eprintf "%a : %a@." Cert_abstract.pri (pr.pr_name) print_ast t;
           [d], None
       | _ -> [d], None)
 
@@ -289,7 +289,7 @@ let destruct_all_tg target =
             Some (lambda Two (fun i j -> Split (pr, Hole i, Hole j)))
         | Pgoal, Tbinop (Tor, f1, f2) ->
             let prh = pr_clone pr in
-            [[create_prop_decl Paxiom prh (t_not f1); create_prop_decl Pgoal pr f2]],
+            [[create_prop_decl Paxiom prh (t_not_simp f1); create_prop_decl Pgoal pr f2]],
             Some (lambda One (fun i -> Destruct (pr, prh, pr, Swap (prh, Hole i))))
         | _ -> [[d]], None end
     | _ -> [[d]], None)
@@ -310,34 +310,34 @@ let neg_decompose_tg target =
                 Some (lambda One (fun i ->
                   Swap (pr, Swap (pr, Hole i))))
             | Paxiom, Tbinop (Tor, f1, f2) -> (* destruct *)
-                let pr1 = create_prsymbol (id_clone pr.pr_name) in
-                let pr2 = create_prsymbol (id_clone pr.pr_name) in
-                [[create_prop_decl Paxiom pr1 (t_not f1);
-                  create_prop_decl Paxiom pr2 (t_not f2)]],
+                let pr1 = pr_clone pr in
+                let pr2 = pr_clone pr in
+                [[create_prop_decl Paxiom pr1 (t_not_simp f1);
+                  create_prop_decl Paxiom pr2 (t_not_simp f2)]],
                 Some (lambda One (fun i ->
                   Swap (pr,
                   Destruct (pr, pr1, pr2,
                   Swap (pr1, Swap (pr2, Hole i))))))
             | Pgoal, Tbinop (Tand, f1, f2) ->
-                let pr1 = create_prsymbol (id_clone pr.pr_name) in
-                let pr2 = create_prsymbol (id_clone pr.pr_name) in
+                let pr1 = pr_clone pr in
+                let pr2 = pr_clone pr in
                 [[create_prop_decl Paxiom pr1 f1;
-                  create_prop_decl Pgoal  pr2 (t_not f2)]],
+                  create_prop_decl Pgoal pr2 (t_not_simp f2)]],
                 Some (lambda One (fun i ->
                   Swap (pr,
                   Destruct (pr, pr1, pr2,
                   Swap (pr2, Hole i)))))
             | Paxiom, Tbinop (Tand, f1, f2) -> (* split *)
-                [[create_prop_decl Paxiom pr (t_not f1)];
-                 [create_prop_decl Paxiom pr (t_not f2)]],
+                [[create_prop_decl Paxiom pr (t_not_simp f1)];
+                 [create_prop_decl Paxiom pr (t_not_simp f2)]],
                 Some (lambda Two (fun i j ->
                   Swap (pr,
                   Split (pr,
                          Swap (pr, Hole i),
                          Swap (pr, Hole j)))))
             | Pgoal, Tbinop (Tor, f1, f2) ->
-                [[create_prop_decl Pgoal pr (t_not f1)];
-                 [create_prop_decl Pgoal pr (t_not f2)]],
+                [[create_prop_decl Pgoal pr (t_not_simp f1)];
+                 [create_prop_decl Pgoal pr (t_not_simp f2)]],
                 Some (lambda Two (fun i j ->
                 Swap (pr,
                 Split (pr,
@@ -414,16 +414,19 @@ let intro_tg target =
               Unfold (pr,
               Destruct (pr, hpr, pr,
               Swap (hpr, Hole i)))))
-        | Tquant (Tforall, f), (Pgoal as k) | Tquant (Texists, f), (Paxiom as k) ->
-            let vsl, _, f_t = t_open_quant f in
+        | Tquant ((Tforall as q), f), (Pgoal as k)
+        | Tquant ((Texists as q), f), (Paxiom as k) ->
+            let vsl, tg, f_t = t_open_quant f in
             begin match vsl with
-            | [vs] ->
+            | vs::vsl ->
                 let ls = ls_of_vs vs in
                 let subst = Mvs.singleton vs (fs_app ls [] vs.vs_ty) in
-                let f = t_subst subst f_t in
+                let f = t_subst subst f_t
+                        |> t_close_quant vsl tg
+                        |> t_quant q in
                 [create_param_decl ls; create_prop_decl k pr f],
                 Some (lambda One (fun i -> IntroQuant (pr, ls.ls_name, Hole i)))
-            | _ -> assert false
+            | [] -> assert false
             end
         | _ -> [d], None end
     | _ -> [d], None)

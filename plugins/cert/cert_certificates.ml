@@ -1,24 +1,28 @@
-open Format
-
 open Why3
 open Decl
 open Term
 open Ident
+open Format
 
 open Cert_abstract
 
 (** We equip each transformation application with a certificate indicating
     why the resulting list of tasks is implying the initial task *)
 
-type ('I, 't) cert = (* 'I is used to designate an hypothesis, 't is used for terms *)
+type ('I, 't) cert =
+  (* 'I is used to designate an hypothesis, 't is used for terms *)
   (* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>.
      For more details, take a look at the OCaml implementation <Cert_verif_caml.ccheck>. *)
   | Nc
   (* Makes verification fail : use it as a placeholder *)
   | Hole of ident
-  (* Hole ct ⇓ (Γ ⊢ Δ) ≜  [ct : Γ ⊢ Δ] *)
+  (* Hole ct ⇓ (Γ ⊢ Δ) ≜  ct refers to Γ ⊢ Δ *)
   | Cut of 'I * 't * ('I, 't) cert * ('I, 't) cert
-  (* Cut (I, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ, I : A ⊢ Δ)) *)
+  (* Cut (I, t, c₁, c₂) ⇓ (Σ | Γ ⊢ Δ) ≜
+         c₁ ⇓ (Σ | Γ ⊢ Δ, I : t)
+     and c₂ ⇓ (Σ | Γ, I : t ⊢ Δ)
+     and Σ ⊩ t : bool
+   *)
   | Let of 't * 'I * ('I, 't) cert
   (* Let (x, I, c) ⇓ t ≜  c ⇓ t[x ← I(t)] *)
   (* Or : x can be used in c as the formula identified by I in t *)
@@ -26,11 +30,11 @@ type ('I, 't) cert = (* 'I is used to designate an hypothesis, 't is used for te
   (* Rename (I₁, I₂, c) ⇓  (Γ, I₁ : A ⊢ Δ) ≜ c ⇓ (Γ, I₂ : A ⊢ Δ)*)
   (* Rename (I₁, I₂, c) ⇓  (Γ ⊢ Δ, I₁ : A) ≜ c ⇓ (Γ ⊢ Δ, I₂ : A)*)
   | Axiom of 'I * 'I
-  (* Axiom (i1, i2) ⇓ (Γ, i1 : A ⊢ Δ, i2 : A) ≜  [] *)
-  (* Axiom (i1, i2) ⇓ (Γ, i2 : A ⊢ Δ, i1 : A) ≜  [] *)
+  (* Axiom (i1, i2) ⇓ (Γ, i1 : A ⊢ Δ, i2 : A) *)
+  (* Axiom (i1, i2) ⇓ (Γ, i2 : A ⊢ Δ, i1 : A) *)
   | Trivial of 'I
-  (* Trivial I ⇓ (Γ, I : false ⊢ Δ) ≜  [] *)
-  (* Trivial I ⇓ (Γ ⊢ Δ, I : true ) ≜  [] *)
+  (* Trivial I ⇓ (Γ, I : false ⊢ Δ) *)
+  (* Trivial I ⇓ (Γ ⊢ Δ, I : true ) *)
   | Unfold of 'I * ('I, 't) cert
   (* Unfold (I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
   (* Unfold (I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
@@ -40,8 +44,12 @@ type ('I, 't) cert = (* 'I is used to designate an hypothesis, 't is used for te
   (* Fold (I, c) ⇓ (Γ, I : ¬A ∨ B ⊢ Δ) ≜  c ⇓ (Γ, I : A → B ⊢ Δ)*)
   (* Fold (I, c) ⇓ (Γ ⊢ Δ, I : ¬A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, I : A → B)*)
   | Split of 'I * ('I, 't) cert * ('I, 't) cert
-  (* Split (I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
-  (* Split (I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
+  (* Split (I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜
+         c₁ ⇓ (Γ, I : A ⊢ Δ)
+     and c₂ ⇓ (Γ, I : B ⊢ Δ) *)
+  (* Split (I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (
+         c₁ ⇓ (Γ ⊢ Δ, I : A)
+     and c₂ ⇓ (Γ ⊢ Δ, I : B) *)
   | Destruct of 'I * 'I * 'I * ('I, 't) cert
   (* Destruct (I, J₁, J₂, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, J₁ : A, J₂ : B ⊢ Δ) *)
   (* Destruct (I, J₁, J₂, c) ⇓ (Γ ⊢ Δ, I : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, J₁ : A, J₂ : B) *)
@@ -62,15 +70,22 @@ type ('I, 't) cert = (* 'I is used to designate an hypothesis, 't is used for te
   (* Weakening (I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening (I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
   | IntroQuant of 'I * ident * ('I, 't) cert
-  (* IntroQuant (I, y, c) ⇓ (Γ, I : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : P y ⊢ Δ) (y fresh) *)
-  (* IntroQuant (I, y, c) ⇓ (Γ ⊢ Δ, I : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : P y) (y fresh) *)
+  (* IntroQuant (I, y, c) ⇓ (Σ | Γ, I : ∃ x : τ. P x ⊢ Δ) ≜
+         c ⇓ (Σ, y : τ | Γ, I : P y ⊢ Δ)
+     and y ∉  Σ *)
+  (* IntroQuant (I, y, c) ⇓ (Σ | Γ ⊢ Δ, I : ∀ x : τ. P x) ≜
+         c ⇓ (Σ, y : τ | Γ ⊢ Δ, I : P y)
+     and y ∉  Σ *)
   | InstQuant of 'I * 'I * 't * ('I, 't) cert
-  (* InstQuant (I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
-  (* InstQuant (I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
+  (* InstQuant (I, J, t, c) ⇓ (Σ | Γ, I : ∀ x : τ. P x ⊢ Δ) ≜
+         c ⇓ (Σ | Γ, I : ∀ x : τ. P x, J : P t ⊢ Δ)
+     and Σ ⊩ t : τ *)
+  (* InstQuant (I, J, t, c) ⇓ (Σ | Γ ⊢ Δ, I : ∃ x : τ. P x) ≜
+         c ⇓ (Σ | Γ ⊢ Δ, I : ∃ x : τ. P x, J : P t)
+     and Σ ⊩ t : τ *)
   | Rewrite of 'I * 'I * ('I, 't) cert
   (* Rewrite (I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : C[a] ≜  (Γ, H : a = b ⊢ Δ, I : C[b] *)
   (* Rewrite (I, H, c) ⇓ (Γ, H : a = b, I : C[a] ⊢ Δ ≜  (Γ, H : a = b, I : C[b] ⊢ Δ *)
-
 
 type vcert = (prsymbol, term) cert
 
@@ -166,64 +181,6 @@ type heavy_ecert = ident list * (ident, cterm) ecert
 type trimmed_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct) *)
 type kernel_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct,Let) *)
 
-(** Printing of <cterm> and <ctask> : for debugging purposes *)
-
-let ip = create_ident_printer []
-let san = sanitizer char_to_alnum char_to_alnum
-
-let pri fmt i =
-  fprintf fmt "%s" (id_unique ip ~sanitizer:san i)
-
-let prpr fmt pr =
-  pri fmt pr.pr_name
-
-let prd fmt = function
-  | false -> fprintf fmt "Left"
-  | true -> fprintf fmt "Right"
-
-let prle sep pre fmt le =
-  let prl = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt sep) pre in
-  fprintf fmt "[%a]" prl le
-
-let rec pcte fmt ct =
-  match ct.ct_node with
-  | CTbvar lvl -> pp_print_int fmt lvl
-  | CTfvar i -> pri fmt i
-  | CTint i -> fprintf fmt "%s" (BigInt.to_string i)
-  | CTapp (f, arg) -> fprintf fmt "%a@ %a" pcte f pcte arg
-  | CTbinop (op, t1, t2) ->
-      fprintf fmt "(%a %a %a)" pcte t1 pro op pcte t2
-  | CTquant (q, ct) -> begin match q with
-                       | CTforall -> fprintf fmt "∀. %a" pcte ct
-                       | CTexists -> fprintf fmt "∃. %a" pcte ct
-                       | CTlambda -> fprintf fmt "λ. %a" pcte ct
-                       end
-  | CTnot t -> fprintf fmt "(not %a)" pcte t
-  | CTtrue -> fprintf fmt "true"
-  | CTfalse -> fprintf fmt "false"
-and pro fmt = function
-  | Tor -> fprintf fmt "\\/"
-  | Tand -> fprintf fmt "/\\"
-  | Timplies -> fprintf fmt "->"
-  | Tiff -> fprintf fmt "<->"
-
-let pte = Pretty.print_term
-
-let po p fmt = function
-  | None -> fprintf fmt "None"
-  | Some x -> fprintf fmt "%a" p x
-
-(* let _ =
- *   let rcd = {
- *       mark_open_tag = (fun _ -> "start");
- *       mark_close_tag = (fun _ -> "");
- *       print_open_tag = (fun _ -> ());
- *       print_close_tag = (fun _ -> ());
- *     } in
- *   pp_set_formatter_tag_functions err_formatter rcd;
- *   pp_set_tags err_formatter true *)
-
-
 let rec print_certif filename cert =
   let oc = open_out filename in
   let fmt = formatter_of_out_channel oc in
@@ -250,45 +207,31 @@ and prcab : type a b. (formatter -> a -> unit) ->
   | Construct (i1, i2, j, c) ->
       fprintf fmt "Construct (%a, %a, %a,@ %a)" pra i1 pra i2 pra j prc c
   | Swap (i, c) -> fprintf fmt "Swap (%a,@ %a)" pra i prc c
-  | Dir (d, i, c) ->
-      fprintf fmt "Dir (%a, %a,@ %a)" prd d pra i prc c
+  | Dir (b, i, c) ->
+      fprintf fmt "Dir (%b, %a,@ %a)" b pra i prc c
   | Weakening (i, c) -> fprintf fmt "Weakening@ (%a,@ %a)" pra i prc c
   | IntroQuant (i, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)" pra i pri y prc c
   | InstQuant (i, j, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)" pra i pra j prb t prc c
   | Rewrite (i, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" pra i pra h prc c
 
 and prli = prle "; " pri
-and prcertif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab prpr pte) c
+and prcertif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab prpr Pretty.print_term) c
 and prcore_certif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab pri pcte) c
 
 let eprcertif c = eprintf "%a@." prcertif c
 
-let prpos fmt = function
-  | true  -> fprintf fmt "GOAL| "
-  | false -> fprintf fmt "HYP | "
-
-let prmid fmt mid =
-  Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a\n" prpos pos pri h pcte cte) mid
-
-let pcta fmt cta =
-  fprintf fmt "%a\n" prmid cta
-
-let print_ctasks filename lcta =
-  let oc = open_out filename in
-  let fmt = formatter_of_out_channel oc in
-  fprintf fmt "%a@." (prle "==========\n" pcta) lcta;
-  close_out oc
 
 let find_ident s h cta =
-  match Mid.find_opt h cta with
+  match Mid.find_opt h cta.gamma_delta with
   | Some x -> x
   | None ->
       fprintf str_formatter "%s : Can't find ident %a in the task" s pri h;
       verif_failed (flush_str_formatter ())
 
-(** Utility functions on certificate, cterm and ctask *)
 
-(* Structural functions on certificates *)
+(** Utility functions on certificates *)
+
+(* Use propagate to define recursive functions on elements of type cert *)
 let propagate_cert f fid fte = function
   | (Hole _ | Nc)  as c -> c
   | Axiom (h, g) -> Axiom (fid h, fid g)
@@ -331,17 +274,6 @@ let flatten_uniq l =
   let _, fl = add_list_list (Sid.empty, []) l in
   List.rev fl
 
-(* let _ =
- *   let id1 = id_register (id_fresh "H1") in
- *   let id2 = id_register (id_fresh "H2") in
- *   let id3 = id_register (id_fresh "H3") in
- *   let id4 = id_register (id_fresh "H4") in
- *   let id5 = id_register (id_fresh "H5") in
- *   let ll = [[id1; id2]; [id1; id3; id3]; [id2; id1; id4]; [id4; id2; id5]] in
- *   let l = flatten_uniq ll in
- *   List.iter (Format.printf "%a\n" pri) l *)
-
-
 let (|>>>) (v1, c1) lcv2 =
   let lv2, lc2 = List.split lcv2 in
   assert (List.length v1 = List.length lv2);
@@ -361,6 +293,7 @@ let (||>) (v1, c1) f =
   let lcv2 = List.map f (iterate n ()) in
   (v1, c1) |>>> lcv2
 
+(* Use propagate to define recursive functions on elements of type ecert *)
 let propagate_ecert f fid ft = function
   | EHole _ as c -> c
   | ECut (i, a, c1, c2) ->
@@ -386,131 +319,56 @@ let propagate_ecert f fid ft = function
   | ERewrite (i, h, ctxt, c) -> ERewrite (fid i, fid h, ft ctxt, f c)
 
 
-(* Equality *)
-let rec cterm_equal t1 t2 = match t1.ct_node, t2.ct_node with
-  | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
-  | CTfvar i1, CTfvar i2 -> id_equal i1 i2
-  | CTapp (tl1, tr1), CTapp (tl2, tr2) ->
-      cterm_equal tl1 tl2 && cterm_equal tr1 tr2
-  | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
-      op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
-  | CTquant (q1, t1), CTquant (q2, t2) when q1 = q2 -> cterm_equal t1 t2
-  | CTtrue, CTtrue | CTfalse, CTfalse -> true
-  | CTnot t1, CTnot t2 -> cterm_equal t1 t2
-  | CTint i1, CTint i2 -> BigInt.eq i1 i2
-  | (CTbvar _ | CTfvar _ | CTapp _ | CTbinop _ | CTquant _
-     | CTtrue | CTfalse | CTnot _ | CTint _), _ -> false
 
-let cterm_pos_equal (t1, p1) (t2, p2) =
-  cterm_equal t1 t2 && p1 = p2
 
-let ctask_equal cta1 cta2 = Mid.equal cterm_pos_equal cta1 cta2
-
-(* Bound variable substitution *)
-let rec ct_bv_subst k u ct = lift_node (ctn_bv_subst k u) ct
-
-and ctn_bv_subst k u ctn = match ctn with
-  | CTbvar i -> if i = k then u else ctn
-  | CTint _ | CTfvar _ -> ctn
-  | CTapp (ct1, ct2) ->
-      let nt1 = ct_bv_subst k u ct1 in
-      let nt2 = ct_bv_subst k u ct2 in
-      CTapp (nt1, nt2)
-  | CTbinop (op, ct1, ct2) ->
-      let nt1 = ct_bv_subst k u ct1 in
-      let nt2 = ct_bv_subst k u ct2 in
-      CTbinop (op, nt1, nt2)
-  | CTquant (q, ct) ->
-      let nct = ct_bv_subst (k+1) u ct in
-      CTquant (q, nct)
-  | CTnot ct -> CTnot (ct_bv_subst k u ct)
-  | CTtrue -> CTtrue
-  | CTfalse -> CTfalse
-
-let ct_open t u = ct_bv_subst 0 u t
-
-(* Checks if the term is locally closed *)
-let locally_closed =
-  let di = id_register (id_fresh "dummy_locally_closed_ident") in
-  let rec term ct = match ct.ct_node with
-    | CTbvar _ -> false
-    | CTapp (ct1, ct2)
-    | CTbinop (_, ct1, ct2) -> term ct1 && term ct2
-    | CTquant (_, t) -> term (ct_open t (CTfvar di))
-    | CTnot ct -> term ct
-    | CTint _ | CTfvar _ | CTtrue | CTfalse -> true
-  in
-  term
-
-(* Free variable substitution *)
-let rec ct_fv_subst z u ct = lift_node (ctn_fv_subst z u) ct
-
-and ctn_fv_subst z u ctn = match ctn with
-  | CTfvar x -> if id_equal z x then u else ctn
-  | CTapp (ct1, ct2) ->
-      let nt1 = ct_fv_subst z u ct1 in
-      let nt2 = ct_fv_subst z u ct2 in
-      CTapp (nt1, nt2)
-  | CTbinop (op, ct1, ct2) ->
-      let nt1 = ct_fv_subst z u ct1 in
-      let nt2 = ct_fv_subst z u ct2 in
-      CTbinop (op, nt1, nt2)
-  | CTquant (q, ct) ->
-      let nct = ct_fv_subst z u ct in
-      CTquant (q, nct)
-  | CTnot ct -> CTnot (ct_fv_subst z u ct)
-  | CTint _ | CTbvar _ | CTtrue | CTfalse -> ctn
-
-let ct_subst (m : cterm_node Mid.t) ct =
-  Mid.fold ct_fv_subst m ct
-
-(* Variable closing *)
-let rec ct_fv_close x k ct = lift_node (ctn_fv_close x k) ct
-
-and ctn_fv_close x k ct = match ct with
-  | CTint _ | CTbvar _ | CTtrue | CTfalse-> ct
-  | CTfvar y -> if id_equal x y then CTbvar k else ct
-  | CTnot ct -> CTnot (ct_fv_close x k ct)
-  | CTapp (ct1, ct2) ->
-      let nt1 = ct_fv_close x k ct1 in
-      let nt2 = ct_fv_close x k ct2 in
-      CTapp (nt1, nt2)
-  | CTbinop (op, ct1, ct2) ->
-      let nt1 = ct_fv_close x k ct1 in
-      let nt2 = ct_fv_close x k ct2 in
-      CTbinop (op, nt1, nt2)
-  | CTquant (q, ct) -> CTquant (q, ct_fv_close x (k+1) ct)
-
-let ct_close x t = ct_fv_close x 0 t
-
-(* Find free variable with respect to a term *)
-let rec mem_cont x ctn cont = match ctn with
-  | CTfvar y -> cont (id_equal x y)
-  | CTapp (ct1, ct2)
-  | CTbinop (_, ct1, ct2) ->
-      mem_cont x ct1.ct_node (fun m1 ->
-      mem_cont x ct2.ct_node (fun m2 ->
-          cont (m1 || m2)))
-  | CTquant (_, ct)
-  | CTnot ct -> mem_cont x ct.ct_node cont
-  | CTint _ | CTbvar _ | CTtrue | CTfalse -> cont false
-
-let mem x t = mem_cont x t.ct_node (fun x -> x)
-
+(* let rec infer_type sigma t = match t with
+ *   | CTfvar v -> Mid.find v sigma
+ *   | CTbvar _ -> assert false
+ *   | CTtrue | CTfalse -> ctbool
+ *   | CTnot t -> let ty = infer_type sigma t in
+ *                assert (ctype_equal ty ctbool);
+ *                ctbool
+ *   | CTquant (q, ty1, t) ->
+ *       let ni = id_register (id_fresh "type_ident") in
+ *       let sigma = Mid.add ni ty1 sigma in
+ *       let t = ct_open t (CTfvar ni) in
+ *       let ty2 = infer_type sigma t in
+ *       begin match q with
+ *       | CTlambda -> CTarrow (ty1, ty2)
+ *       | _ ->  assert (ctype_equal ty2 ctbool); ctbool
+ *       end
+ *   | CTapp (t1, t2) ->
+ *       begin match infer_type sigma t1, infer_type sigma t2 with
+ *       | CTarrow (ty1, ty2), ty3 when ctype_equal ty1 ty3 -> ty2
+ *       | _ -> assert false end
+ *   | CTbinop (_, t1, t2) ->
+ *       let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
+ *       assert (ctype_equal ty1 ctbool);
+ *       assert (ctype_equal ty2 ctbool);
+ *       ctbool
+ *   | CTint _ -> ctint
+ * 
+ * 
+ * let infers_into sigma t ty =
+ *   try assert (ctype_equal (infer_type sigma t) ty)
+ *   with _ -> let err_str = fprintf str_formatter "wrong type for %a" pcte t;
+ *                           flush_str_formatter () in
+ *             verif_failed err_str *)
 
 (* Separates hypotheses and goals *)
-let split_cta cta =
+let split_hyp_goal cta =
   let open Mid in
-  fold (fun h (ct, pos) (mh, mg) ->
-      if pos then mh, add h (ct, pos) mg
-      else add h (ct, pos) mh, mg)
+  fold (fun h (ct, pos) (delta, gamma) ->
+      if pos then delta, add h (ct, pos) gamma
+      else add h (ct, pos) delta, gamma)
     cta (empty, empty)
 
 (* Creates a new ctask with the same hypotheses but sets the goal with the second argument *)
 let set_goal : ctask -> cterm -> ctask = fun cta ->
-  let mh, mg = split_cta cta in
-  let hg, _ = Mid.choose mg in
-  fun ct -> Mid.add hg (ct, true) mh
+  let delta, gamma = split_hyp_goal cta.gamma_delta in
+  let gpr, _ = Mid.choose gamma in
+  fun ct -> { sigma = cta.sigma;
+              gamma_delta = Mid.add gpr (ct, true) delta }
 
 
 (** Compile chain.
@@ -547,13 +405,13 @@ let elab_failed s = raise (Elaboration_failed s)
 module Hashid = Hashtbl.Make(struct type t = ident let equal = id_equal let hash = id_hash end)
 
 let rewrite_ctask (cta : ctask) i a b ctxt =
-  let ta = ct_open ctxt a.ct_node in
-  let tb = ct_open ctxt b.ct_node in
+  let ta = ct_open ctxt a in
+  let tb = ct_open ctxt b in
   let rewrite_decl j (t, pos) =
     if id_equal j i && cterm_equal t ta
     then tb, pos
     else t, pos in
-  Mid.mapi rewrite_decl cta
+  lift_mid_cta (Mid.mapi rewrite_decl) cta
 
 let rec replace_cterm tl tr t =
   if cterm_equal t tl
@@ -579,13 +437,13 @@ let elaborate (init_ct : ctask) c =
       ETrivial (pos, i)
   | Rename (i1, i2, c) ->
       let a, pos = find_ident "Rename" i1 cta in
-      let cta = Mid.remove i1 cta
-                |> Mid.add i2 (a, pos) in
+      let cta = remove i1 cta
+                |> add i2 (a, pos) in
       let c = elab cta c in
       ERename (pos, a, i1, i2, c)
   | Cut (i, a, c1, c2) ->
-      let cta1 = Mid.add i (a, true) cta in
-      let cta2 = Mid.add i (a, false) cta in
+      let cta1 = add i (a, true) cta in
+      let cta2 = add i (a, false) cta in
       let c1 = elab cta1 c1 in
       let c2 = elab cta2 c2 in
       ECut (i, a, c1, c2)
@@ -594,16 +452,15 @@ let elaborate (init_ct : ctask) c =
       ELet (x, y, elab cta c)
   | Unfold (i, c) ->
       let t, pos = find_ident "Unfold" i cta in
-      let ty = t.ct_ty in
-      let iff, cta, t1, t2 = match t.ct_node with
+      let iff, cta, t1, t2 = match t with
         | CTbinop (Tiff, t1, t2) ->
-            let imp_pos = add_ty ty (CTbinop (Timplies, t1, t2)) in
-            let imp_neg = add_ty ty (CTbinop (Timplies, t2, t1)) in
-            let unfolded_iff = add_ty ty (CTbinop (Tand, imp_pos, imp_neg)), pos in
-            true, Mid.add i unfolded_iff cta, t1, t2
+            let imp_pos = CTbinop (Timplies, t1, t2) in
+            let imp_neg = CTbinop (Timplies, t2, t1) in
+            let unfolded_iff = CTbinop (Tand, imp_pos, imp_neg), pos in
+            true, add i unfolded_iff cta, t1, t2
         | CTbinop (Timplies, t1, t2) ->
-            let unfolded_imp = add_ty ty (CTbinop (Tor, add_ty ty (CTnot t1), t2)), pos in
-            false, Mid.add i unfolded_imp cta, t1, t2
+            let unfolded_imp = CTbinop (Tor, CTnot t1, t2), pos in
+            false, add i unfolded_imp cta, t1, t2
         | _ -> Format.eprintf "@[%a@]@." pcte t;
                elab_failed "Nothing to unfold" in
       let pack = pos, t1, t2, i, elab cta c in
@@ -612,50 +469,49 @@ let elaborate (init_ct : ctask) c =
       else EUnfoldArr pack
   | Fold (i, c) ->
       let t, pos = find_ident "Fold" i cta in
-      let ty = t.ct_ty in
-      let cta, t1, t2 = match t.ct_node with
-        | CTbinop (Tor, {ct_node = CTnot t1}, t2) ->
-            Mid.add i (add_ty ty (CTbinop (Timplies, t1, t2)), pos) cta, t1, t2
+      let cta, t1, t2 = match t with
+        | CTbinop (Tor, CTnot t1, t2) ->
+            add i (CTbinop (Timplies, t1, t2), pos) cta, t1, t2
         | _ -> Format.eprintf "@[%a@]@." pcte t;
                elab_failed "Nothing to fold" in
       let c = elab cta c in
       EFoldArr (pos, t1, t2, i, c)
   | Split (i, c1, c2) ->
       let t, pos = find_ident "Split" i cta in
-      let t1, t2 = match t.ct_node, pos with
+      let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false -> t1, t2
         | _ -> elab_failed "Not splittable" in
-      let cta1 = Mid.add i (t1, pos) cta in
-      let cta2 = Mid.add i (t2, pos) cta in
+      let cta1 = add i (t1, pos) cta in
+      let cta2 = add i (t2, pos) cta in
       let c1 = elab cta1 c1 in
       let c2 = elab cta2 c2 in
       ESplit (pos, t1, t2, i, c1, c2)
   | Destruct (i, j1, j2, c) ->
       let t, pos = find_ident "Destruct" i cta in
-      let t1, t2 = match t.ct_node, pos with
+      let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), false | CTbinop (Tor, t1, t2), true -> t1, t2
         | _ -> elab_failed "Nothing to destruct" in
-      let cta = Mid.remove i cta
-                |> Mid.add j1 (t1, pos)
-                |> Mid.add j2 (t2, pos) in
+      let cta = remove i cta
+                |> add j1 (t1, pos)
+                |> add j2 (t2, pos) in
       EDestruct (pos, t1, t2, i, j1, j2, elab cta c)
   | Construct (i1, i2, j, c) ->
       let t1, pos1 = find_ident "Construct1" i1 cta in
       let t2, pos2 = find_ident "Construct2" i2 cta in
       assert (pos1 = pos2);
       let t = if pos1
-              then add_ty ctbool (CTbinop (Tor, t1, t2))
-              else add_ty ctbool (CTbinop (Tand, t1, t2)) in
-      let cta = Mid.remove i1 cta
-                |> Mid.remove i2
-                |> Mid.add j (t, pos1) in
+              then CTbinop (Tor, t1, t2)
+              else CTbinop (Tand, t1, t2) in
+      let cta = remove i1 cta
+                |> remove i2
+                |> add j (t, pos1) in
       EConstruct (pos1, t1, t2, i1, i2, j, elab cta c)
   | Swap (i, c) ->
       let t, pos = find_ident "Swap" i cta in
-      let neg, underlying_t, neg_t = match t.ct_node with
+      let neg, underlying_t, neg_t = match t with
         | CTnot t -> true, t, t
-        | _ -> false, t, add_ty ctbool (CTnot t) in
-      let cta = Mid.add i (neg_t, not pos) cta in
+        | _ -> false, t, CTnot t in
+      let cta = add i (neg_t, not pos) cta in
       let pack = pos, underlying_t, i, elab cta c in
       if neg
       then ESwapNeg pack
@@ -663,29 +519,30 @@ let elaborate (init_ct : ctask) c =
   | Dir _ -> verif_failed "Some Dir left during elaboration"
   | Weakening (i, c) ->
       let t, pos = find_ident "Weakening" i cta in
-      let cta = Mid.remove i cta in
+      let cta = remove i cta in
       EWeakening (pos, t, i, elab cta c)
   | IntroQuant (i, y, c) ->
       let t, pos = find_ident "IntroQuant" i cta in
-      let t = match t.ct_node, pos with
-        | CTquant (CTforall, t), true | CTquant (CTexists, t), false -> t
+      let t, ty = match t, pos with
+        | CTquant (CTforall, ty, t), true | CTquant (CTexists, ty, t), false -> t, ty
         | _ -> elab_failed "Nothing to introduce" in
-      let cta = Mid.add i (ct_open t (CTfvar y), pos) cta in
-      EIntroQuant (pos, add_ty ctbool (CTquant (CTlambda, t)), i, y, elab cta c)
+      let cta = add i (ct_open t (CTfvar y), pos) cta
+                |> add_var y ty in (* maybe not useful to have the signature ... *)
+      EIntroQuant (pos, CTquant (CTlambda, ty, t), i, y, elab cta c)
   | InstQuant (i, j, t_inst, c) ->
       let t, pos = find_ident "InstQuant" i cta in
-      let t = match t.ct_node, pos with
-        | CTquant (CTforall, t), false | CTquant (CTexists, t), true -> t
+      let t, ty = match t, pos with
+        | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true -> t, ty
         | _ -> elab_failed "trying to instantiate a non-quantified hypothesis" in
-      let cta = Mid.add j (ct_open t t_inst.ct_node, pos) cta in
-      EInstQuant (pos, add_ty ctbool (CTquant (CTlambda, t)), i, j, t_inst, elab cta c)
+      let cta = add j (ct_open t t_inst, pos) cta in
+      EInstQuant (pos, CTquant (CTlambda, ty, t), i, j, t_inst, elab cta c)
   | Rewrite (i, h, c) ->
       let t, _ = find_ident "inst_quant" h cta in
-      let a, b = match t.ct_node with
+      let a, b = match t with
         | CTbinop (Tiff, a, b) -> a, b
         | _ -> elab_failed "Could not find rewrite hypothesis" in
       let id = id_register (id_fresh "ctxt_var") in
-      let v = add_ty (a.ct_ty) (CTfvar id) in
+      let v = CTfvar id in
       let ctxt = ct_close id (replace_cterm a v t) in
       let cta = rewrite_ctask cta i a b ctxt in
       ERewrite (i, h, ctxt, elab cta c)
@@ -721,14 +578,14 @@ let rec trim_certif c =
                                      eaxiom (not g) a i1' j,
                                      eaxiom (not g) b i2' j) in
               let c1, c2, cut = if g
-                                then c_open, c_closed, add_ty ctbool (CTbinop (Tor, a, b))
-                                else c_closed, c_open, add_ty ctbool (CTbinop (Tand, a, b)) in
+                                then c_open, c_closed, CTbinop (Tor, a, b)
+                                else c_closed, c_open, CTbinop (Tand, a, b) in
               ECut (j, cut, c1, c2)))
   | EFoldArr (g, a, b, i, c) ->
       let c = trim_certif c in
       let j = id_register (id_fresh "fold_arr_temp") in
-      let pre = add_ty ctbool (CTbinop (Tor, add_ty ctbool (CTnot a), b)) in
-      let post = add_ty ctbool (CTbinop (Timplies, a, b)) in
+      let pre = CTbinop (Tor, CTnot a, b) in
+      let post = CTbinop (Timplies, a, b) in
       let c_open = EWeakening (g, pre, j, c) in
       let c_closed = EUnfoldArr (not g, a, b, i, eaxiom g pre i j) in
       let c1, c2 = if g then c_open, c_closed else c_closed, c_open in
@@ -738,10 +595,10 @@ let rec trim_certif c =
 let rec eliminate_let m c =
   match c with
     | ELet (x, y, c) ->
-        let x = match x.ct_node with
+        let x = match x with
                 | CTfvar id -> id
                 | _ -> assert false in
-        let m = Mid.add x y.ct_node m in
+        let m = Mid.add x y m in
         eliminate_let m c
     | ECut (i, a, c1, c2) ->
         let c1 = eliminate_let m c1 in
