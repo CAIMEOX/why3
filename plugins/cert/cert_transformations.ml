@@ -546,9 +546,8 @@ let rewrite_in rev prh prh1 task = (* rewrites <h> in <h1> with direction <rev> 
     | Some (lp, t1, t2) ->
       Trans.fold_decl (fun d (acc, cert) ->
         match d.d_node with
-        | Dprop (p, pr, t)
-            when pr_equal pr prh1 && (p = Pgoal || p = Paxiom) ->
-            let new_term = t_replace t t1 t2 in
+        | Dprop (p, pr, t) when pr_equal pr prh1 ->
+            let new_term = t_replace t1 t2 t in
             Some (lp, create_prop_decl p pr new_term),
             lambda One (fun i -> Rewrite (prh1, prh, Hole i))
         | _ -> acc, cert) (None, hole ()) in
