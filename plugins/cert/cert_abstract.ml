@@ -50,7 +50,6 @@ let prle sep pre fmt le =
   let prl = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt sep) pre in
   fprintf fmt "[%a]" prl le
 
-(* TODO : should we differentiate Prop and bool ? *)
 let rec prty fmt = function
   | CTyapp (ts, l) when not (Ty.ts_equal ts Ty.ts_bool) ->
       fprintf fmt "%a %a"
@@ -64,12 +63,12 @@ let rec prty fmt = function
 
 and prtyparen fmt = function
   | CTyvar v -> prvar fmt v
-  | CTyapp (ts, _) when Ty.ts_equal ts Ty.ts_bool -> fprintf fmt "Prop"
+  | CTyapp (ts, _) when Ty.ts_equal ts Ty.ts_bool -> fprintf fmt "Utype"
   | cty -> fprintf fmt "(%a)" prty cty
 
 and prvar fmt _ =
-  fprintf fmt "Term"
-  (* TODO include some types in lamdapi and translate to them instead of all being Term *)
+  fprintf fmt "Utype"
+  (* TODO include some types in lamdapi and translate to them instead of all being Utype *)
   (* Pretty.print_tv fmt v *)
 
 
