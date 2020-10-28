@@ -319,53 +319,17 @@ let propagate_ecert f fid ft = function
   | ERewrite (i, h, ctxt, c) -> ERewrite (fid i, fid h, ft ctxt, f c)
 
 
-
-
-(* let rec infer_type sigma t = match t with
- *   | CTfvar v -> Mid.find v sigma
- *   | CTbvar _ -> assert false
- *   | CTtrue | CTfalse -> ctbool
- *   | CTnot t -> let ty = infer_type sigma t in
- *                assert (ctype_equal ty ctbool);
- *                ctbool
- *   | CTquant (q, ty1, t) ->
- *       let ni = id_register (id_fresh "type_ident") in
- *       let sigma = Mid.add ni ty1 sigma in
- *       let t = ct_open t (CTfvar ni) in
- *       let ty2 = infer_type sigma t in
- *       begin match q with
- *       | CTlambda -> CTarrow (ty1, ty2)
- *       | _ ->  assert (ctype_equal ty2 ctbool); ctbool
- *       end
- *   | CTapp (t1, t2) ->
- *       begin match infer_type sigma t1, infer_type sigma t2 with
- *       | CTarrow (ty1, ty2), ty3 when ctype_equal ty1 ty3 -> ty2
- *       | _ -> assert false end
- *   | CTbinop (_, t1, t2) ->
- *       let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
- *       assert (ctype_equal ty1 ctbool);
- *       assert (ctype_equal ty2 ctbool);
- *       ctbool
- *   | CTint _ -> ctint
- * 
- * 
- * let infers_into sigma t ty =
- *   try assert (ctype_equal (infer_type sigma t) ty)
- *   with _ -> let err_str = fprintf str_formatter "wrong type for %a" pcte t;
- *                           flush_str_formatter () in
- *             verif_failed err_str *)
-
 (* Separates hypotheses and goals *)
 let split_hyp_goal cta =
   let open Mid in
-  fold (fun h (ct, pos) (delta, gamma) ->
-      if pos then delta, add h (ct, pos) gamma
-      else add h (ct, pos) delta, gamma)
+  fold (fun h (ct, pos) (gamma, delta) ->
+      if pos then gamma, add h (ct, pos) delta
+      else add h (ct, pos) gamma, delta)
     cta (empty, empty)
 
 (* Creates a new ctask with the same hypotheses but sets the goal with the second argument *)
 let set_goal : ctask -> cterm -> ctask = fun cta ->
-  let delta, gamma = split_hyp_goal cta.gamma_delta in
+  let gamma, delta = split_hyp_goal cta.gamma_delta in
   let gpr, _ = Mid.choose gamma in
   fun ct -> { sigma = cta.sigma;
               gamma_delta = Mid.add gpr (ct, true) delta }
