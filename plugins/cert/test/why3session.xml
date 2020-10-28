@@ -713,14 +713,10 @@
   </goal>
  </transf>
  </goal>
- <goal name="blast_simp">
- <transf name="blast_ccert" >
-  <goal name="blast_simp.0">
-  </goal>
+ <goal name="blast_simp" proved="true">
+ <transf name="blast_ccert" proved="true" >
  </transf>
- <transf name="blast_lcert" >
-  <goal name="blast_simp.0">
-  </goal>
+ <transf name="blast_lcert" proved="true" >
  </transf>
  </goal>
  <goal name="blast_and" proved="true">
