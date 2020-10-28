@@ -383,15 +383,10 @@ let rec replace_cterm tl tr t =
   else cterm_map (replace_cterm tl tr) t
 
 let elaborate (init_ct : ctask) c =
-  (* let res_ct = Stream.of_list res_ct in *)
-  (* let tbl = Hashid.create 17 in *)
   let rec elab (cta : ctask) c =
   match c with
   | Nc -> elab_failed "No certificates"
   | Hole i -> EHole i
-  (* TODO : match cta against nct and update tbl accordingly *)
-  (* let nct = Stream.next res_ct inc *)
-  (* EHole nct *)
   | Axiom (i1, i2) ->
       let a, posi2 = find_ident "Axiom" i2 cta in
       let i1, i2 = if posi2 then i1, i2 else i2, i1 in
@@ -491,7 +486,7 @@ let elaborate (init_ct : ctask) c =
         | CTquant (CTforall, ty, t), true | CTquant (CTexists, ty, t), false -> t, ty
         | _ -> elab_failed "Nothing to introduce" in
       let cta = add i (ct_open t (CTfvar y), pos) cta
-                |> add_var y ty in (* maybe not useful to have the signature ... *)
+                |> add_var y ty in (* signature is not useful when elaborating for now... *)
       EIntroQuant (pos, CTquant (CTlambda, ty, t), i, y, elab cta c)
   | InstQuant (i, j, t_inst, c) ->
       let t, pos = find_ident "InstQuant" i cta in
@@ -501,10 +496,11 @@ let elaborate (init_ct : ctask) c =
       let cta = add j (ct_open t t_inst, pos) cta in
       EInstQuant (pos, CTquant (CTlambda, ty, t), i, j, t_inst, elab cta c)
   | Rewrite (i, h, c) ->
-      let t, _ = find_ident "inst_quant" h cta in
-      let a, b = match t with
+      let rew_hyp, _ = find_ident "Finding rewrite hypothesis" h cta in
+      let a, b = match rew_hyp with
         | CTbinop (Tiff, a, b) -> a, b
-        | _ -> elab_failed "Could not find rewrite hypothesis" in
+        | _ -> elab_failed "Rewrite hypothesis is badly-formed" in
+      let t, _ = find_ident "Finding to be rewritten goal" i cta in
       let id = id_register (id_fresh "ctxt_var") in
       let v = CTfvar id in
       let ctxt = ct_close id (replace_cterm a v t) in
