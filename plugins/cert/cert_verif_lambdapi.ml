@@ -53,15 +53,15 @@ let rec print_list_pre sep pe fmt = function
  *     Mid.empty ta *)
 
 let print_task fmt (fv, ts) =
-  fprintf fmt "@[<hov 0>(Π ";
+  fprintf fmt "@[<hov 3>(Π ";
   pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "@ ")
     (fun fmt (id, cty) ->
       fprintf fmt "(%a : %a)"
         pri id
         prty cty) fmt fv;
   let tp = snd (List.split ts) @ [CTfalse] in
-  fprintf fmt ",@]@   @[<hv 5>etype (";
-  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇨@ ") prpv fmt tp;
+  fprintf fmt ",@]@  @[<hv 7>etype (";
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇨@ ") prdisj fmt tp;
   fprintf fmt ")@])"
 
 let rstr goal = if goal then "_goal" else "_hyp"
@@ -172,7 +172,7 @@ let print fmt init_ct res_ct (task_id, certif) =
     fprintf fmt "λ %a, " (print_list_inter " " pri) vars;
     print_certif applied_tasks fmt certif in
 
-  fprintf fmt "@[<v 0>definition to_verify :@    \
+  fprintf fmt "@[<v 0>definition to_verify :@   \
                @[<v 0>%a@]@ \
                ≔  %a@]@."
     p_type ()

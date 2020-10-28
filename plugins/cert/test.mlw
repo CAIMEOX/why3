@@ -74,4 +74,3 @@ goal drinker : exists x : bool. p x -> (forall y. p y)
 
 
 goal contra_hyps : (c /\ (not c \/ d) /\ (not d \/ e) /\ (not e \/ f) /\ not f) -> false
-
