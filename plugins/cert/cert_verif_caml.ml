@@ -112,7 +112,7 @@ let rec ccheck c cta =
             ccheck c cta
         | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
         end
-    | ERewrite (i, h, ctxt, c) ->
+    | ERewrite (_, _, _, ctxt, i, h, c) ->
         let t, pos = find_ident "inst_quant" h cta in
         begin match t, pos with
         | CTbinop (Tiff, a, b), false ->

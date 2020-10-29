@@ -138,7 +138,17 @@ let print_certif at fmt c =
         prpv t
         pri i pri j pc c
         pri i
-  | ERewrite _ -> verif_failed "Rewrite is not yet supported by the Lambdapi checker"
+  | ERewrite (goal, a, b, ctxt, i, h, c) ->
+      fprintf fmt "rewrite%s %a %a %a@ \
+                   (λ %a %a, @[<hv 0>%a@])@ \
+                   %a@ \
+                   %a"
+        (rstr goal)
+        prpv a prpv b prpv ctxt
+        pri h pri i pc c
+        pri h
+        pri i
+      (* verif_failed "Rewrite is not yet supported by the Lambdapi checker" *)
   in
   pc fmt c
 
