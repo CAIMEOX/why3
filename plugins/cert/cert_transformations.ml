@@ -500,19 +500,6 @@ let inst t_inst where : ctrans = Trans.store (fun task ->
   [ta], c)
 
 (* Rewrite with a certificate *)
-(* let context tl t =
- *   (\* finds a context <ctxt> s.t. <ctxt [tl] = t> and <ctxt> doesn't contain <tl>*\)
- *   let ty = map_ty tl.t_ty in
- *   let v = t_var (create_vsymbol (id_fresh "ctxt_var") ty) in
- *   let rec context tl t =
- *     if t_equal tl t
- *     then v
- *     else t_map (context tl) t in
- *   try
- *     v, context tl t
- *   with e ->
- *     Format.eprintf "error in finding context@.";
- *     raise e *)
 
 let rec intro_premises acc t = match t.t_node with
   | Tbinop (Timplies, f1, f2) -> intro_premises (f1::acc) f2
@@ -521,8 +508,6 @@ let rec intro_premises acc t = match t.t_node with
 let rewrite_in rev prh prh1 task = (* rewrites <h> in <h1> with direction <rev> *)
   let found_eq =
     (* Used to find the equality we are rewriting on *)
-    (* TODO here should fold with a boolean stating if we found equality yet to
-       not go through all possible hypotheses *)
     Trans.fold_decl (fun d acc ->
       match d.d_node with
       | Dprop (Paxiom, pr, t) when pr_equal pr prh ->
@@ -542,7 +527,7 @@ let rewrite_in rev prh prh1 task = (* rewrites <h> in <h1> with direction <rev> 
   (* Return instantiated premises and the hypothesis correctly rewritten *)
   let lp_new found_eq =
     match found_eq with
-    | None -> raise (Args_wrapper.Arg_error "rewrite") (* Should not happen *)
+    | None -> raise (Args_wrapper.Arg_error "Did not find rewrite hypothesis")
     | Some (lp, t1, t2) ->
       Trans.fold_decl (fun d (acc, cert) ->
         match d.d_node with
@@ -553,15 +538,13 @@ let rewrite_in rev prh prh1 task = (* rewrites <h> in <h1> with direction <rev> 
         | _ -> acc, cert) (None, hole ()) in
   (* Pass the premises as new goals. Replace the former toberewritten
      hypothesis to the new rewritten one *)
-
   let recreate_tasks (lp_new, cert) =
     match lp_new with
     | None -> raise (Arg_trans "recreate_tasks")
     | Some (lp, new_decl) ->
       let trans_rewriting =
         Trans.decl (fun decl -> match decl.d_node with
-        | Dprop (p, pr, _) when pr_equal pr prh1 && (p = Paxiom || p = Pgoal) ->
-            [new_decl]
+        | Dprop (_, pr, _) when pr_equal pr prh1 -> [new_decl]
         | _ -> [decl]) None in
       let list_par =
         List.map (fun t ->
@@ -571,10 +554,7 @@ let rewrite_in rev prh prh1 task = (* rewrites <h> in <h1> with direction <rev> 
             | _ -> [decl])
           None) lp in
       Trans.store (fun task -> Trans.apply (Trans.par (trans_rewriting :: list_par)) task, cert)
-
   in
-
-
   (* Composing previous functions *)
   Trans.apply (Trans.bind (Trans.bind found_eq lp_new) recreate_tasks) task
 
