@@ -148,16 +148,21 @@ definition eq_trans : Π x y z, etype (x = y) → etype (y = z) → etype (x = z
 
 // Certificate lines
 
-definition hole : etype false → etype false
+definition hole :
+  etype empty →
+  etype empty
 ≔  λ f, f
 
-definition axiom : Π A, etype A → etype (¬ A) → etype false
+definition axiom : Π A,
+  etype (hyp A (goal A empty))
 ≔  λ A a na, na a
 
-definition trivial_hyp : etype false → etype false
+definition trivial_hyp :
+  etype (hyp false empty)
 ≔  λ f, f
 
-definition trivial_goal : etype (¬ true) → etype false
+definition trivial_goal :
+  etype (goal true empty)
 ≔  λ ntt, ntt tt
 
 definition cut : Π A,
@@ -176,7 +181,7 @@ definition split_goal : Π A B,
     etype (goal A empty) →
     etype (goal B empty) →
     etype (goal (A ∧ B) empty)
-≔ λ A B nna nnb, nni (A ∧ B) (and_intro A B (nne A nna) (nne B nnb))
+≔  λ A B nna nnb, nni (A ∧ B) (and_intro A B (nne A nna) (nne B nnb))
 
 definition unfold_iff_hyp : Π A B,
     etype (hyp ((A ⇨ B) ∧ (B ⇨ A)) empty) →
@@ -289,6 +294,18 @@ definition inst_quant_hyp : Π P t,
     etype (hyp (forall (λ x, P x)) empty)
 ≔  λ P t s h, s h (h t)
 
+definition rewrite_hyp : Π a b (P : Utype → Utype),
+   etype (hyp (a = b) (hyp (P b) empty)) →
+   etype (hyp (a = b) (hyp (P a) empty))
+≔  λ a b P s h i, s h (h P i)
+
+definition rewrite_goal : Π a b (P : Utype → Utype),
+   etype (hyp (a = b) (goal (P b) empty)) →
+   etype (hyp (a = b) (goal (P a) empty))
+≔  λ a b P s h i, s h (h (λ x, ¬ P x) i)
+
+
 
 // To verify
+
 

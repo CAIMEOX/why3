@@ -123,8 +123,10 @@ type abstract_cert = ident list * (ident, cterm) cert
 
 type ctrans = visible_cert ctransformation
 
-type ('a, 'b) ecert = (* elaborated certificates, 'a is used to designate an hypothesis,
- 'b is used for terms, 'c is used for tasks *)
+type ('a, 'b) ecert =
+  (* elaborated certificates :
+     ∙ 'a is used to designate an hypothesis
+     ∙ 'b is used for terms *)
   | EHole of ident
   (* EHole ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
   | ECut of 'a * 'b * ('a, 'b) ecert * ('a, 'b) ecert
@@ -173,9 +175,11 @@ type ('a, 'b) ecert = (* elaborated certificates, 'a is used to designate an hyp
   | EInstQuant of bool * 'b * 'a * 'a * 'b * ('a, 'b) ecert
   (* InstQuant (false, P, I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
   (* InstQuant (true, P, I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
-  | ERewrite of 'a * 'a * 'b * ('a, 'b) ecert
-  (* ERewrite (I, H, ctxt, c) ⇓ (Γ, H : a = b ⊢ Δ, I : ctxt[a] ≜
+  | ERewrite of bool * 'b * 'b * 'b * 'a * 'a * ('a, 'b) ecert
+  (* ERewrite (true, a, b, ctxt, I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : ctxt[a] ≜
      (Γ, H : a = b ⊢ Δ, I : ctxt[b] *)
+  (* ERewrite (false, a, b, ctxt, I, H, c) ⇓ (Γ, H : a = b, I : ctxt[a] ⊢ Δ ≜
+     (Γ, H : a = b, I : ctxt[b] ⊢ Δ *)
 
 type heavy_ecert = ident list * (ident, cterm) ecert
 type trimmed_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct) *)
@@ -316,7 +320,7 @@ let propagate_ecert f fid ft = function
   | EWeakening (g, a, i, c) -> EWeakening (g, ft a, fid i, f c)
   | EIntroQuant (g, p, i, y, c) -> EIntroQuant (g, ft p, fid i, y, f c)
   | EInstQuant (g, p, i, j, t, c) -> EInstQuant (g, ft p, fid i, fid j, ft t, f c)
-  | ERewrite (i, h, ctxt, c) -> ERewrite (fid i, fid h, ft ctxt, f c)
+  | ERewrite (g, a, b, ctxt, i, h, c) -> ERewrite (g, ft a, ft b, ft ctxt, fid i, fid h, f c)
 
 
 (* Separates hypotheses and goals *)
@@ -369,6 +373,9 @@ let elab_failed s = raise (Elaboration_failed s)
 module Hashid = Hashtbl.Make(struct type t = ident let equal = id_equal let hash = id_hash end)
 
 let rewrite_ctask (cta : ctask) i a b ctxt =
+  let ctxt = match ctxt with
+    | CTquant (CTlambda, _, ctxt) -> ctxt
+    | _ -> assert false in
   let ta = ct_open ctxt a in
   let tb = ct_open ctxt b in
   let rewrite_decl j (t, pos) =
@@ -500,12 +507,14 @@ let elaborate (init_ct : ctask) c =
       let a, b = match rew_hyp with
         | CTbinop (Tiff, a, b) -> a, b
         | _ -> elab_failed "Rewrite hypothesis is badly-formed" in
-      let t, _ = find_ident "Finding to be rewritten goal" i cta in
+      let t, pos = find_ident "Finding to be rewritten goal" i cta in
       let id = id_register (id_fresh "ctxt_var") in
       let v = CTfvar id in
-      let ctxt = ct_close id (replace_cterm a v t) in
+      (* let cty = infer_type cta.sigma a in *)
+      let cty = ctbool in
+      let ctxt = CTquant (CTlambda, cty, ct_close id (replace_cterm a v t)) in
       let cta = rewrite_ctask cta i a b ctxt in
-      ERewrite (i, h, ctxt, elab cta c)
+      ERewrite (pos, a, b, ctxt, i, h, elab cta c)
   in
   elab init_ct c
 
