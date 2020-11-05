@@ -54,15 +54,15 @@ let print_certif at fmt c =
         pri g
   | ECut (i, a, ce1, ce2) ->
       fprintf fmt "cut %a@ \
-                   (λ %a, @[<hv 0>%a@])@ \
-                   (λ %a, @[<hv 0>%a@])"
+                   (λ %a, @[<hv>%a@])@ \
+                   (λ %a, @[<hv>%a@])"
         prpv a
         pri i pc ce1
         pri i pc ce2
   | ESplit (goal, a, b, i, c1, c2) ->
       fprintf fmt "split%s %a %a@ \
-                   (λ %a, @[<hv 0>%a@])@ \
-                   (λ %a, @[<hv 0>%a@])@ \
+                   (λ %a, @[<hv>%a@])@ \
+                   (λ %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv a
@@ -72,7 +72,7 @@ let print_certif at fmt c =
         pri i
   | EUnfoldIff (goal, a, b, i, c) ->
       fprintf fmt "unfold_iff%s %a %a@ \
-                   (λ %a, @[<hv 0>%a@])@ \
+                   (λ %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv a
@@ -81,7 +81,7 @@ let print_certif at fmt c =
         pri i
   | EUnfoldArr (goal, a, b, i, c) ->
       fprintf fmt "unfold_arr%s %a %a@ \
-                   (λ %a, @[<hv 0>%a@])@ \
+                   (λ %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv a
@@ -90,7 +90,7 @@ let print_certif at fmt c =
         pri i
   | ESwapNeg (goal, a, i, c) ->
       fprintf fmt "swap_neg%s %a@ \
-                   (λ %a, @[<hv 0>%a@])@ \
+                   (λ %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv a
@@ -98,7 +98,7 @@ let print_certif at fmt c =
         pri i
   | ESwap (goal, a, i, c) ->
       fprintf fmt "swap%s %a@ \
-                   (λ %a, @[<hv 0>%a@])@ \
+                   (λ %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv a
@@ -106,7 +106,7 @@ let print_certif at fmt c =
         pri i
   | EDestruct (goal, a, b, i, j1, j2, c) ->
       fprintf fmt "destruct%s %a %a@ \
-                   (λ %a %a, @[<hv 0>%a@])@ \
+                   (λ %a %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv a
@@ -115,7 +115,7 @@ let print_certif at fmt c =
         pri i
   | EWeakening (goal, a, i, c) ->
       fprintf fmt "weakening%s %a@ \
-                   (@[<hv 0>%a@])@ \
+                   (@[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv a
@@ -123,7 +123,7 @@ let print_certif at fmt c =
         pri i
   | EIntroQuant (goal, p, i, y, c) ->
       fprintf fmt "intro_quant%s %a@ \
-                   (λ %a %a, @[<hv 0>%a@])@ \
+                   (λ %a %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv p
@@ -131,7 +131,7 @@ let print_certif at fmt c =
         pri i
   | EInstQuant (goal, p, i, j, t, c) ->
       fprintf fmt "inst_quant%s %a %a@ \
-                   (λ %a %a, @[<hv 0>%a@])@ \
+                   (λ %a %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv p
@@ -140,7 +140,7 @@ let print_certif at fmt c =
         pri i
   | ERewrite (goal, a, b, ctxt, i, h, c) ->
       fprintf fmt "rewrite%s %a %a %a@ \
-                   (λ %a %a, @[<hv 0>%a@])@ \
+                   (λ %a %a, @[<hv>%a@])@ \
                    %a@ \
                    %a"
         (rstr goal)
@@ -183,9 +183,9 @@ let print fmt init res (task_ids, certif) =
     fprintf fmt ",@ ";
     print_certif applied_tasks fmt certif in
 
-  fprintf fmt "@[<v 0>definition to_verify :@   \
-               @[<v 0>%a@]@ \
-               ≔  @[<v 0>%a@]@]@."
+  fprintf fmt "@[<v>definition to_verify :@   \
+               @[<v>%a@]@ \
+               ≔  @[<v>%a@]@]@."
     p_type ()
     p_term ()
 
