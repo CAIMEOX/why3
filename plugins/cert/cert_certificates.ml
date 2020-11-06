@@ -341,19 +341,26 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
 
 (** Compile chain.
     1. visible_cert
-       The certificates given by transformations. Many constructors and few
-       parameters to ease certification.
+       The certificates given by certifying transformations.
+       Many constructors and few parameters to ease making certifying
+       a transformation.
     2. abstract_cert
-       With simpler types that can be used by our checkers. Also removes some
-       easily derivable rules from the core such as Dir.
+       Same as before but with simpler types that can be used by our checkers.
+       Also removes some easily derivable rules from other rules.
+       An example of such easily derible rule is Dir.
     3. heavy_ecert
        The result of the elaboration and as such contains many additional
-       information such as the current formula.
+       information such as the current formula and whether the focus is on a
+       goal or on a hypothesis.
     4. trimmed_ecert
-       Removes rules that are derivable with core rules but with additional
-       information such as Rename and Construct.
+       Same as before except that rules that are derivable with core rules when
+       given additional information are replaced.
+       Examples of such rules are Rename and Construct.
     5. kernel_ecert
-       Only the core rules with additional information.
+       The certificates used by checkers.
+       Few constructors and many parameters to ease formal verification of
+       checkers.
+
 *)
 
 let dir_smart d prg c =
@@ -506,7 +513,12 @@ let elaborate (init_ct : ctask) c =
       let rew_hyp, _ = find_ident "Finding rewrite hypothesis" h cta in
       let a, b = match rew_hyp with
         | CTbinop (Tiff, a, b) -> a, b
-        | _ -> elab_failed "Rewrite hypothesis is badly-formed" in
+        | CTapp (CTapp (f, a), b) when cterm_equal f eq -> a, b
+        | _ -> let str_err = fprintf str_formatter
+                               "Rewrite hypothesis is badly-formed : %a"
+                               pcte rew_hyp;
+                             flush_str_formatter () in
+               elab_failed str_err in
       let t, pos = find_ident "Finding to be rewritten goal" i cta in
       let id = id_register (id_fresh "ctxt_var") in
       let v = CTfvar id in
