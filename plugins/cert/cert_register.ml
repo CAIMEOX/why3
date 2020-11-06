@@ -62,6 +62,7 @@ let left_l where            = lchecker (dir false where)
 (* let pose_l name t           = lchecker (pose name t) *)
 let rename_l pr1            = lchecker (rename pr1)
 let revert_l ls             = lchecker (revert ls)
+let rewrite_l rev g where   = lchecker (rewrite g rev where)
 let right_l where           = lchecker (dir true where)
 let split_l any every where = lchecker (split_logic any every where)
 let split_all_full_l        = lchecker split_all_full
@@ -225,6 +226,9 @@ let register_lambdapi : unit =
   wrap_and_register ~desc:"A Lambdapi certified transformation to generalize a variable"
     "revert_lcert" (Tlsymbol (Ttrans_l))
     revert_l;
+
+  wrap_and_register ~desc:"A Lambdapi certified version of transformation rewrite"
+    "rewrite_lcert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l)))))) rewrite_l;
 
   wrap_and_register ~desc:"A Lambdapi certified version of coq tactic [right]"
     "right_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
