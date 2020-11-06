@@ -1,3 +1,6 @@
+
+// Define CoC encoding
+
 constant symbol Utype : TYPE
 constant symbol Ukind : TYPE
 
@@ -19,37 +22,45 @@ rule ekind (dotpi2 $x $y) ↪  Π (w : etype $x), ekind ($y w)
 rule ekind (dotpi4 $x $y) ↪  Π (w : ekind $x), ekind ($y w)
 
 constant symbol true : Utype
-constant symbol false : Utype
-
 constant symbol tt : etype true
 
-symbol prop_neg : Utype → Utype
-symbol prop_and : Utype → Utype → Utype
-symbol prop_or  : Utype → Utype → Utype
-symbol prop_imp : Utype → Utype → Utype
+definition forall P ≔  dotpi3 dottype P
+set prefix 20 "∀" ≔  forall
 
-symbol forall : (Utype → Utype) → Utype
-symbol exists : (Utype → Utype) → Utype
-symbol eq : Utype → Utype → Utype
+definition false ≔  ∀ (λ C, C)
 
-set prefix      20 "¬" ≔  prop_neg
-set infix right 18 "∧" ≔  prop_and
-set infix right 16 "∨" ≔  prop_or
-set infix right 14 "⇨" ≔  prop_imp
-set infix right 22 "=" ≔  eq
+definition type_imp A B ≔  dotpi1 A (λ _, B)
+set infix right 14 "⇨" ≔  type_imp
+
+definition type_neg A ≔  A ⇨ false
+set prefix      20 "¬" ≔  type_neg
+
+definition type_and A B ≔  ∀ (λ C, (A ⇨ B ⇨ C) ⇨ C)
+set infix right 18 "∧" ≔  type_and
+
+definition type_or  A B ≔ ∀ (λ C, (A ⇨ C) ⇨ (B ⇨ C) ⇨ C)
+set infix right 16 "∨" ≔  type_or
+
+definition exists P ≔  ∀ (λ C, (∀ (λ x, P x ⇨ C)) ⇨ C)
+set prefix 20 "∃" ≔  exists
+
 
 definition equiv A B ≔  (A ⇨ B) ∧ (B ⇨ A)
 
-rule etype false     ↪ Π C, etype C
-rule etype (¬ ($a))  ↪ (etype $a → etype false)
-rule etype ($A ∧ $B) ↪ Π C, (etype $A → etype $B → etype C) → etype C
-rule etype ($A ∨ $B) ↪ Π C, (etype $A → etype C) → (etype $B → etype C) → etype C
-rule etype ($A ⇨ $B) ↪ etype $A → etype $B
+definition eq x y ≔  dotpi3 (dotpi4 dottype (λ _, dottype))
+                            (λ P, P x ⇨ P y)
 
-rule etype (forall $P) ↪ Π x, etype ($P x)
-rule etype (exists $P) ↪ Π C, (Π x, etype ($P x) → etype C) → etype C
-rule etype ($x = $y)   ↪ Π (P : Utype → Utype), etype (P $x) → etype (P $y)
+//Integer support
+constant symbol Nat : Ukind
 
+constant symbol zero : ekind Nat
+
+constant symbol succ : ekind Nat → ekind Nat
+
+definition one ≔  succ zero
+
+set builtin "0"  ≔  zero
+set builtin "+1" ≔  succ
 
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
@@ -135,14 +146,14 @@ definition exists_elim : Π P Q, etype (exists P) →  (Π x, etype (P x ⇨ Q))
 
 // Equality
 
-definition eq_refl : Π x, etype (x = x)
+definition eq_refl : Π x, etype (eq x x)
 ≔  λ x P px, px
 
-definition eq_sym : Π x y, etype (x = y) → etype (y = x)
-≔  λ x y eqxy, eqxy (λ t, t = x) (eq_refl x)
+definition eq_sym : Π x y, etype (eq x y) → etype (eq y x)
+≔  λ x y eqxy, eqxy (λ t, eq t x) (eq_refl x)
 
-definition eq_trans : Π x y z, etype (x = y) → etype (y = z) → etype (x = z)
-≔  λ x y z eqxy eqyz, eqyz (λ t, x = t) eqxy
+definition eq_trans : Π x y z, etype (eq x y) → etype (eq y z) → etype (eq x z)
+≔  λ x y z eqxy eqyz, eqyz (λ t, eq x t) eqxy
 
 
 
@@ -295,17 +306,16 @@ definition inst_quant_hyp : Π P t,
 ≔  λ P t s h, s h (h t)
 
 definition rewrite_hyp : Π a b (P : Utype → Utype),
-   etype (hyp (a = b) (hyp (P b) empty)) →
-   etype (hyp (a = b) (hyp (P a) empty))
+   etype (hyp (eq a b) (hyp (P b) empty)) →
+   etype (hyp (eq a b) (hyp (P a) empty))
 ≔  λ a b P s h i, s h (h P i)
 
 definition rewrite_goal : Π a b (P : Utype → Utype),
-   etype (hyp (a = b) (goal (P b) empty)) →
-   etype (hyp (a = b) (goal (P a) empty))
+   etype (hyp (eq a b) (goal (P b) empty)) →
+   etype (hyp (eq a b) (goal (P a) empty))
 ≔  λ a b P s h i, s h (h (λ x, ¬ P x) i)
 
 
 
 // To verify
-
 
