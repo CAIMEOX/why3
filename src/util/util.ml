@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -62,3 +62,13 @@ let anyd fold pr1 pr2 x =
 (* constant boolean function *)
 let ttrue _ = true
 let ffalse _ = false
+
+let is_sexp_simple_token s =
+  let rec loop i =
+    i < 0 || (
+      match s.[i] with
+      | 'a'..'z' | 'A'..'Z' | '0'..'9' | '_' | '-' ->
+          (* Very conservative for compatiblity with python's sexpdata in bench/test_mlw_printer *)
+          loop (pred i)
+      | _ -> false ) in
+  String.length s > 0 && loop (pred (String.length s))

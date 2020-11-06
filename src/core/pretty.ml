@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -818,6 +818,11 @@ let () = Exn_printer.register
       fprintf fmt "Not a term: %a" print_term t
   | Term.FmlaExpected t ->
       fprintf fmt "Not a formula: %a" print_term t
+  | Term.InvalidIntegerLiteralType ty
+  | Term.InvalidRealLiteralType ty
+  | Term.InvalidStringLiteralType ty when
+         (match ty.ty_node with Tyvar _ -> true | _ -> false) ->
+      fprintf fmt "literal has an ambiguous type"
   | Term.InvalidIntegerLiteralType ty ->
       fprintf fmt "Cannot cast an integer literal to type %a" print_ty ty
   | Term.InvalidRealLiteralType ty ->

@@ -42,6 +42,7 @@ why3.conf
 /why3regtests.out
 /src/jessie/.merlin
 /_build
+/public
 
 # /bench/
 /bench/programs/good/booleans/
@@ -61,90 +62,22 @@ why3.conf
 /bin/why3.byte
 /bin/why3.opt
 /bin/why3
-/bin/why3ide.byte
-/bin/why3ide.opt
-/bin/why3ide
-/bin/why3config.byte
-/bin/why3config.opt
-/bin/why3config
-/bin/why3doc.byte
-/bin/why3doc.opt
-/bin/why3doc
-/bin/why3extract.byte
-/bin/why3extract.opt
-/bin/why3extract
-/bin/why3execute.byte
-/bin/why3execute.opt
-/bin/why3execute
-/bin/why3prove.byte
-/bin/why3prove.opt
-/bin/why3prove
-/bin/why3realize.byte
-/bin/why3realize.opt
-/bin/why3realize
-/bin/why3replay.byte
-/bin/why3replay.opt
-/bin/why3replay
-/bin/why3pp.opt
-/bin/why3pp.byte
-/bin/why3pp
-/bin/why3session.opt
-/bin/why3session.byte
-/bin/why3session
-/bin/why3shell.opt
-/bin/why3shell.byte
-/bin/why3shell
-/bin/why3wc.opt
-/bin/why3wc.byte
-/bin/why3wc
-/bin/why3webserver.opt
-/bin/why3webserver.byte
-/bin/why3webserver
-/bin/why3pp.opt
-/bin/why3pp.byte
-/bin/why3pp
 /bin/isabelle_client.opt
 /bin/isabelle_client.byte
 /bin/isabelle_client
 
 # /doc/
-/doc/version.tex
-/doc/ocamldoc.sty
 /doc/*whizzy*
-/doc/manual.wdvi
-/doc/manual.raux
-/doc/manual.log
-/doc/manual.lof
-/doc/manual.toc
-/doc/manual.aux
-/doc/manual.bbl
-/doc/manual.blg
-/doc/manual.ind
-/doc/manual.ilg
-/doc/manual.idx
-/doc/manual.rel
-/doc/manual.glg
-/doc/manual.glo
-/doc/manual.gls
-/doc/manual.ist
-/doc/manual.out
-/doc/manual.image.out
-/doc/manual.synctex.gz
-/doc/*.haux
-/doc/*.pdf
 /doc/generated/
 /doc/html/
-/doc/*.hind
-/doc/*.htoc
-/doc/bnf
-/doc/bnf.ml
+/doc/latex/
 /doc/apidoc.tex
 /doc/apidoc/
 /doc/stdlibdoc/
-/doc/texput.log
-/doc/extract_ocaml_code
-/doc/*__*.ml
-/doc/*_bnf.tex
+/doc/_build
+/doc/.doctrees/
+
+/public/
 
 # /lib
 /lib/why3-cpulimit
@@ -184,8 +117,8 @@ pvsbin/
 /lib/isabelle/map/
 /lib/isabelle/real/
 /lib/isabelle/set/
-/lib/isabelle/Why3_Number.thy
-/lib/isabelle/Why3_Real.thy
+/lib/isabelle/Why3_BV.thy
+/lib/isabelle/Why3_Map.thy
 /lib/isabelle/why3.ML
 /lib/isabelle/last_build
 /lib/isabelle/bv
@@ -195,10 +128,8 @@ pvsbin/
 /src/driver/driver_parser.ml
 /src/driver/driver_parser.mli
 /src/driver/driver_parser.conflicts
-/src/driver/parse_smtv2_model_lexer.ml
-/src/driver/parse_smtv2_model_parser.ml
-/src/driver/parse_smtv2_model_parser.mli
-/src/driver/parse_smtv2_model_parser.conflicts
+/src/driver/sexp.ml
+/src/driver/sexp.mli
 
 # /src/parser/
 /src/parser/lexer.ml
@@ -221,6 +152,7 @@ pvsbin/
 /src/util/json_parser.ml
 /src/util/json_parser.conflicts
 /src/util/mlmpfr_wrapper.ml
+/src/util/mysexplib.ml
 /src/util/ppx_debug_optim
 
 # /src/session
@@ -230,6 +162,7 @@ pvsbin/
 
 # /src/tools
 /src/tools/why3wc.ml
+/src/tools/why3pp_sexp.ml
 
 # /src/ide
 /src/ide/gtkcompat.ml
@@ -257,11 +190,11 @@ pvsbin/
 /plugins/microc/test/
 /plugins/microc/mc_parser.conflicts
 
-# /plugins/ada_terms/
-/plugins/ada_terms/ada_lexer.ml
-/plugins/ada_terms/ada_parser.conflicts
-/plugins/ada_terms/ada_parser.ml
-/plugins/ada_terms/ada_parser.mli
+# /plugins/cfg/
+/plugins/cfg/cfg_lexer.ml
+/plugins/cfg/cfg_parser.ml
+/plugins/cfg/cfg_parser.mli
+/plugins/cfg/cfg_parser.conflicts
 
 # /drivers
 /drivers/coq-realizations.aux
@@ -281,6 +214,7 @@ pvsbin/
 /tests/microc/*/why3shapes.gz
 
 # /examples/
+/examples/use_api/results
 /examples/in_progress/course/
 /examples/in_progress/wcet_hull/
 /examples/in_progress/binary_search2/
@@ -307,8 +241,6 @@ pvsbin/
 /examples/*/*.tex
 /examples/*/*/*.tex
 /examples/*/*/*/*.tex
-/examples/use_api/runstrat/makejob.opt
-/examples/use_api/runstrat/runstrat.opt
 /examples/vstte10_max_sum/vstte10_max_sum.ml
 /examples/euler001/euler001.ml
 /examples/sudoku/sudoku.ml

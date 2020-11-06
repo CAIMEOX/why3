@@ -1,5 +1,53 @@
 :x: marks a potential source of incompatibility
 
+Tools
+  * command-line options now follow the getopt standard;
+    in particular, long options start with `--`
+  * binaries `why3config`, `why3prove`, etc, no longer exist;
+    they are now plugins that can be loaded only using the main `why3` binary,
+    e.g., `why3 config`
+
+IDE
+  * use native modifiers on macOS
+
+TryWhy3
+  * `?lang=foo` can now be used to select an input format other than WhyML;
+    the input format can also be changed dynamically using a combobox
+  * examples are no longer embedded; only files mentioned
+    in `examples/index.txt` are considered
+
+Provers
+  * support for PVS 7.1 (released Apr 30, 2020)
+
+Version 1.3.3, September 11, 2020
+---------------------------------
+
+Bug fixes
+  * fixed compilation on OpenBSD
+
+Provers
+  * support for Coq 8.12.0 (released Jul 27, 2020)
+
+Version 1.3.2, September 5, 2020
+--------------------------------
+
+Bug fixes
+  * fixed compilation on FreeBSD and macOS
+  * fixed `use_api` examples
+  * removed support for strings from the default variant of CVC4 1.7
+  * fixed custom editors for provers not being saved
+
+Version 1.3.1, March 24, 2020
+-----------------------------
+
+Bug fixes
+  * fixed conflicting symbols for CVC4 1.7
+  * fixed META file
+  * fixed infinite loops in strategies
+
+Version 1.3.0, March 17, 2020
+-----------------------------
+
 Standard library
   * `pqueue.Pqueue` is now modeled using sequences instead of lists :x:
   * `queue.Queue` is now modeled using sequences instead of lists :x:
@@ -10,20 +58,19 @@ Standard library
       - in `set.SetApp` and `set.SetImp`, type `t` becomes `set`;
         field `contents` becomes `to_fset`; call to `empty` becomes `empty ()`
   * new library `fmap` for finite maps
-      - Fmap: polymorphic, logic finite maps to be used in logic
-      - MapApp, MapAppInt, MapImp, MapImpInt: monomorphic finite maps to
+      - `Fmap`: polymorphic, logic finite maps to be used in logic
+      - `MapApp`, `MapAppInt`, `MapImp`, `MapImpInt`: monomorphic finite maps to
         be used in programs
-  * no more libraries `appmap` and `impmap`
-  * no more library `sum.Sum` (subsumed by `int.Sum`)
+  * no more libraries `appmap` and `impmap` :x:
+  * no more library `sum.Sum` (subsumed by `int.Sum`) :x:
   * new library `string` for character strings
       - `String`: basic string operations
       - `OCaml`: additional operations dedicated to extraction to OCaml
       - `RegExpr`: regular expressions
 
 Language
-  :x: the type `string` is a new built-in type. string literals can be
-    given between double-quotes.  See documentation Section 6.1
-    String operations are defined in the library `string.String`
+  * the type `string` is a new built-in type; string literals can be
+    given between double-quotes; see manual, Section 7.1 :x:
   * it is now possible to give a name to preconditions and assertions;
     `requires Foo { a = 3 }` sets the attribute `[@hyp_name:Foo]`, which tries
     to give the name `Foo` to the corresponding hypothesis after introduction
@@ -41,29 +88,29 @@ Tools
     formatting of mlw files)
 
 Documentation
-  * improved Section 9.4 on drivers, including an automatically generated
+  * improved Chapter 7 on the WhyML language (record types, various
+    kinds of function declarations, module cloning, etc.)
+  * improved Section 11.4 on drivers, including an automatically generated
     dependency graph of driver files
-  * improved Section 9.5 on transformations, including transformations
+  * improved Section 11.5 on transformations, including transformations
     with arguments
-  :x: lexical conventions are slightly changed regarding strings, see Section 6.1
-  * documentation for tools `why3pp` and `why3latex`
 
 API
   * `Call_provers.print_prover_result` now takes an additional argument
     `~json_model` to indicate whether counterexamples are printed using JSON :x:
   * indices of array are now `model_value` for counterexamples :x:
   * ITP constructor `Task` now contains the location of the goal :x:
-  * ITP constructor `Source_and_ce` now has 3 arguments instead of 2 :x:
+  * ITP constructor `Source_and_ce` has now 3 arguments instead of 2 :x:
   * ITP constructors `File_contents` and `Source_and_ce` has a new argument for
     the file format :x:
   * ITP constructor `File_contents` has a new boolean argument for
     interpretation of the file in the IDE as `read_only` :x:
-  * New ITP constructor `Ident_notif_loc`
+  * new ITP constructor `Ident_notif_loc` :x:
   * ITP constructor `Get_first_unproven_node` now takes a heuristic name
     argument :x:
 
 Transformations
-  * `apply`/`rewrite` behaves better in presence of `let`;
+  * `apply` and `rewrite` now behave better in presence of `let`;
     hypotheses with nested let-bindings can now be applied :x:
   * passing arguments to argument-free transformations is now forbidden
     (previously ignored) :x:
@@ -78,7 +125,7 @@ Transformations
     `meta reflection val foo` :x:
   * `remove` and `bisect` should not raise unnecessary popups anymore
   * added `remove_rec`
-  * the attribute `inline:trivial` can be added on definitions to force its
+  * attribute `inline:trivial` can be put on definitions to force their
     inlining by the transformation `inline_trivial`
 
 IDE
@@ -89,23 +136,25 @@ IDE
   * default proof strategies "Auto level 1" and "Auto level 2"
     have been respectively renamed "Auto level 2" and "Auto level 3";
     "Auto level 1" now behaves similarly to "Auto level 0" but with a longer
-    time limit; more details in the manual, section 9.6 "Proof Strategies" :x:
+    time limit; more details in the manual, Section 10.6 "Proof Strategies" :x:
   * strategies can now be defined using `%t` (resp. `%m`) to call a prover with
     the default timelimit (resp. memlimit)
   * added minimal search menu
-  * A merlin-like feature to find the ident located under the cursor has been
+  * a merlin-like feature to find the identifier located under the cursor has been
     added in the Edit menu.
-  * Read only file can now be displayed and removed by right clicking on their
+  * read-only files can now be displayed and removed by right-clicking on their
     tab titles
-  * Colors for error can now be edited in the why3.conf more precisely
-  * Most of the preferences can now be changed for the current session
-  * Ctrl-Down/Ctrl-Up are mapped to more straightforward moves. The former
-    movement can be triggered with Ctrl-Left/Ctrl-Right
+  * colors for error can now be edited in why3.conf more precisely
+  * most of the preferences can now be changed for the current session
+  * Ctrl-Down/Ctrl-Up are mapped to more straightforward moves; the former
+    movements can be triggered with Ctrl-Left/Ctrl-Right
 
 Realizations
   * added experimental realizations for new Set theories in both Isabelle and Coq
 
 Provers
+  * support for Alt-Ergo 2.3.1 (released Feb 19, 2020)
+  * support for Isabelle 2019 (released June 2019)
   * support for Vampire 4.2.2 (released Dec 14, 2017)
   * support for Coq 8.10.0 (released Oct 8, 2019)
   * support for Coq 8.10.1 (released Oct 25, 2019)

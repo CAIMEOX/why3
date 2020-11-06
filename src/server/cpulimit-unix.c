@@ -1,7 +1,7 @@
 /********************************************************************/
 /*                                                                  */
 /*  The Why3 Verification Platform   /   The Why3 Development Team  */
-/*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  */
+/*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  */
 /*                                                                  */
 /*  This software is distributed under the terms of the GNU Lesser  */
 /*  General Public License version 2.1, with the special exception  */
@@ -23,6 +23,10 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/wait.h>
+
+#if defined(__OpenBSD__) && !defined(RLIMIT_AS)
+#define RLIMIT_AS RLIMIT_DATA
+#endif
 
 static int wallclock_timelimit = 60;
 static int showtime = 0, hidetime = 0;

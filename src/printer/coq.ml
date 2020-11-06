@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -20,8 +20,13 @@ open Decl
 open Printer
 
 let black_list =
-  [ "at"; "cofix"; "exists2"; "fix"; "IF"; "left"; "mod"; "Prop";
-    "return"; "right"; "Set"; "Type"; "using"; "where"; ]
+  [ "_"; "Axiom"; "CoFixpoint"; "Definition"; "Fixpoint"; "Hypothesis";
+    "Parameter"; "Prop"; "SProp"; "Set"; "Theorem"; "Type"; "Variable";
+    "as"; "at"; "cofix"; "else"; "end"; "fix"; "for"; "forall"; "fun";
+    "if"; "in"; "let"; "left"; "match"; "mod"; "return"; "right"; "then";
+    "where"; "with";
+    (* In prelude: *)
+    "IF"; "by"; "exists"; "exists2"; "using"; ]
 
 (* wrong: ' not allowed as first character in Coq identifiers
 let char_to_alpha c =

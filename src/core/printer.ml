@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -24,8 +24,10 @@ open Task
 
 type prelude = string list
 type prelude_map = prelude Mid.t
+type prelude_export_map = prelude Mid.t
 type interface = string list
 type interface_map = interface Mid.t
+type interface_export_map = interface Mid.t
 type blacklist = string list
 
 type 'a pp = Pp.formatter -> 'a -> unit
@@ -33,6 +35,7 @@ type 'a pp = Pp.formatter -> 'a -> unit
 type printer_mapping = {
   lsymbol_m     : string -> Term.lsymbol;
   vc_term_loc   : Loc.position option;
+  vc_term_attrs : Sattr.t;
   queried_terms : Term.term Mstr.t;
   list_projections: Ident.ident Mstr.t;
   list_fields: Ident.ident Mstr.t;
@@ -40,6 +43,9 @@ type printer_mapping = {
   noarg_constructors: string list;
   set_str: Sattr.t Mstr.t
 }
+
+let list_projs pm =
+  Wstdlib.Mstr.union (fun _ x _ -> Some x) pm.list_projections pm.list_fields
 
 type printer_args = {
   env        : Env.env;
@@ -61,6 +67,7 @@ exception UnknownPrinter of string
 let get_default_printer_mapping = {
   lsymbol_m = (function _ -> raise Not_found);
   vc_term_loc = None;
+  vc_term_attrs = Sattr.empty;
   queried_terms = Mstr.empty;
   list_projections = Mstr.empty;
   list_fields = Mstr.empty;

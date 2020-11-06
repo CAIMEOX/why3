@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -9,6 +9,7 @@
 (*                                                                  *)
 (********************************************************************)
 
+open Mysexplib.Std [@@warning "-33"]
 open Wstdlib
 
 (** Attributes *)
@@ -17,6 +18,7 @@ type attribute = {
   attr_string : string;
   attr_tag    : int;
 }
+[@@deriving sexp_of]
 
 module Attr = MakeMSH (struct
   type t = attribute
@@ -45,7 +47,7 @@ let list_attributes () =
 
 let attr_equal : attribute -> attribute -> bool = (==)
 let attr_hash a = a.attr_tag
-let attr_compare a1 a2 = Pervasives.compare a1.attr_tag a2.attr_tag
+let attr_compare a1 a2 = Int.compare a1.attr_tag a2.attr_tag
 
 (** Naming convention *)
 
@@ -138,9 +140,7 @@ let sn_decode s =
           | _ -> SNword (if m = len then s else String.sub s 0 m) in
   if m = len then w (* no appended suffix *) else
   if s.[m] <> '\'' && s.[m] <> '_' then SNword s else
-  let p = print_sn Format.str_formatter w;
-          Format.flush_str_formatter () in
-  SNword (p ^ String.sub s m (len - m))
+  SNword (Format.asprintf "%a%s" print_sn w (String.sub s m (len - m)))
 
 let print_decoded fmt s = print_sn fmt (sn_decode s)
 
@@ -171,7 +171,7 @@ type preid = {
 
 let id_equal : ident -> ident -> bool = (==)
 let id_hash id = Weakhtbl.tag_hash id.id_tag
-let id_compare id1 id2 = Pervasives.compare (id_hash id1) (id_hash id2)
+let id_compare id1 id2 = Int.compare (id_hash id1) (id_hash id2)
 
 (* constructors *)
 
@@ -447,7 +447,7 @@ let compute_model_trace_field pj d =
 let extract_field attr =
   try
     match Strings.bounded_split ':' attr.attr_string 3 with
-    | "field" :: n :: [field_name] -> Some (int_of_string n, field_name)
+    | ["field"; n; field_name] -> Some (int_of_string n, field_name)
     | _ -> None
   with
   | _ -> None

@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -17,8 +17,6 @@ open Ide_utils
 open History
 open Itp_communication
 open Gtkcompat
-
-external reset_gc : unit -> unit = "ml_reset_gc"
 
 let debug = Debug.lookup_flag "ide_info"
 let debug_stack_trace = Debug.lookup_flag "stack_trace"
@@ -174,34 +172,30 @@ let files : string Queue.t = Queue.create ()
 let opt_parser = ref None
 let opt_batch = ref None
 
-let spec = [
-  "-F", Arg.String (fun s -> opt_parser := Some s),
-      "<format> select input format (default: \"why\")";
-  "--format", Arg.String (fun s -> opt_parser := Some s),
-      " same as -F";
-(*
-  "-f",
-   Arg.String (fun s -> input_files := s :: !input_files),
-   "<file> add file to the project (ignored if it is already there)";
-*)
-  Termcode.arg_extra_expl_prefix;
-  "--batch", Arg.String (fun s -> opt_batch := Some s), "";
-]
+let spec =
+  let open Getopt in
+  [ Key ('F', "format"), Hnd1 (AString, fun s -> opt_parser := Some s),
+    "<format> select input format (default: \"why\")";
+    Termcode.opt_extra_expl_prefix;
+    KLong "batch", Hnd1 (AString, fun s -> opt_batch := Some s), "";
+  ]
 
 let usage_str = sprintf
-  "Usage: %s [options] [<file.why>|<project directory>]..."
+  "Usage: %s [options] [<file.why>|<project directory>]...\n\
+   Open a graphical interface for Why3.\n"
   (Filename.basename Sys.argv.(0))
 
-let env, gconfig = try
-  let config, base_config, env =
-    Whyconf.Args.initialize spec (fun f -> Queue.add f files) usage_str in
+let env, gconfig =
+  try
+    let config, base_config, env =
+      Whyconf.Args.initialize spec (fun f -> Queue.add f files) usage_str
+    in
     if Queue.is_empty files then
       Whyconf.Args.exit_with_usage spec usage_str;
     Gconfig.load_config config base_config;
     env, Gconfig.config ()
-
   with e when not (Debug.test_flag Debug.stack_trace) ->
-    eprintf "%a@." Exn_printer.exn_printer e;
+    eprintf "Anomaly while loading configuration: %a@." Exn_printer.exn_printer e;
     exit 1
 
 
@@ -834,9 +828,7 @@ let clear_message_zone () =
 
 (* Function used to print stuff on the message_zone *)
 let print_message ~kind ~notif_kind fmt =
-  (* TODO: use kasprintf once OCaml 4.03 is used *)
-  Format.kfprintf
-    (fun _ -> let s = flush_str_formatter () in
+  Format.kasprintf (fun s ->
               let s = try_convert s in
               add_to_log notif_kind s;
               let buf = message_zone#buffer in
@@ -850,7 +842,6 @@ let print_message ~kind ~notif_kind fmt =
                     buf#insert (s ^ "\n");
                   messages_notebook#goto_page error_page;
                 end)
-    str_formatter
     fmt
 
 let display_warnings fmt warnings =
@@ -1046,7 +1037,6 @@ let fan =
 let update_monitor =
   let c = ref 0 in
   fun t s r ->
-  reset_gc ();
   incr c;
   let f = if r = 0 then " " else fan !c in
   let text = Printf.sprintf "%s %d/%d/%d" f t s r in
@@ -1994,6 +1984,9 @@ let hide_context_provers, add_submenu_prover =
 (* Main menu *)
 (*************)
 
+(* Use the command key (⌘) for shortcuts when on mac *)
+let primary_modifiers = snd (GtkData.AccelGroup.parse "<Primary>A")
+
 let tools_accel_group = GtkData.AccelGroup.create ()
 let factory = new menu_factory ~accel_path:"<Why3-Main>/" ~accel_group menubar
 let context_factory = new menu_factory context_tools_menu
@@ -2042,19 +2035,19 @@ let (_: GMenu.menu_item) =
 
 let (_: GMenu.menu_item) =
   file_factory#add_item "_Save session and files"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._S
+    ~modi:primary_modifiers ~key:GdkKeysyms._S
     ~tooltip:"Save the current proof session and the source files"
     ~callback:(fun () -> save_sources(); send_request Save_req)
 
 let (_: GMenu.menu_item) =
   file_factory#add_item "Save all and _Refresh session"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._R
+    ~modi:primary_modifiers ~key:GdkKeysyms._R
     ~tooltip:"Save the current proof session and the source files, then refresh the proof session with updated source files."
     ~callback:save_and_reload
 
 let (_: GMenu.menu_item) =
   file_factory#add_item "_Quit"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._Q
+    ~modi:primary_modifiers ~key:GdkKeysyms._Q
     ~tooltip:"See the Preferences for setting the policy on automatic file saving at exit."
     ~callback:exit_function_safe
 
@@ -2133,13 +2126,13 @@ let edit_factory = new menu_factory edit_menu ~accel_path:"<Why3-Main>/Edit/" ~a
 
 let (_: GMenu.menu_item) =
   edit_factory#add_item "Search forward"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._F
+    ~modi:primary_modifiers ~key:GdkKeysyms._F
     ~tooltip:"Search in the source file."
     ~callback:(search_forward ~forward:true)
 
 let (_: GMenu.menu_item) =
   edit_factory#add_item "Search backward"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._B
+    ~modi:primary_modifiers ~key:GdkKeysyms._B
     ~tooltip:"Search backward in the source file."
     ~callback:(search_forward ~forward:false)
 
@@ -2239,13 +2232,13 @@ let find_cursor_ident, get_back_loc =
 
 let (_: GMenu.menu_item) =
   edit_factory#add_item "Find cursor ident"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._L
+    ~modi:primary_modifiers ~key:GdkKeysyms._L
     ~tooltip:"This finds the definition of the ident under user cursor"
     ~callback:find_cursor_ident
 
 let (_: GMenu.menu_item) =
   edit_factory#add_item "Back"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._ampersand (* & *)
+    ~modi:primary_modifiers ~key:GdkKeysyms._ampersand (* & *)
     ~tooltip:"After find cursor ident, return back to cursor"
     ~callback:get_back_loc
 
@@ -2274,16 +2267,16 @@ let view_factory = new menu_factory ~accel_path:"<Why3-Main>/View/" ~accel_group
 
 let (_ : GMenu.menu_item) =
   view_factory#add_item "Enlarge font"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._plus
+    ~modi:primary_modifiers ~key:GdkKeysyms._plus
     ~callback:enlarge_fonts
 
 let (_ : GMenu.menu_item) =
   view_factory#add_item "Reduce font"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._minus
+    ~modi:primary_modifiers ~key:GdkKeysyms._minus
     ~callback:reduce_fonts
 
 let (_: GMenu.menu_item) =
-  view_factory#add_item "Collapse proven goals"
+  view_factory#add_item "Collapse proved goals"
     ~accel_group:tools_accel_group ~key:GdkKeysyms._exclam
     ~tooltip:"Collapse all the proven nodes under the current node"
     ~callback:collapse_proven_goals
@@ -2306,7 +2299,7 @@ let (_: GMenu.menu_item) =
 
 let (_: GMenu.menu_item) =
   view_factory#add_item "Go to parent node"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._Left
+    ~modi:primary_modifiers ~key:GdkKeysyms._Left
     ~callback:move_current_row_selection_to_parent
 
 let (_: GMenu.menu_item) =
@@ -2315,17 +2308,17 @@ let (_: GMenu.menu_item) =
 
 let (_: GMenu.menu_item) =
   view_factory#add_item "Select next unproven goal"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._Right
+    ~modi:primary_modifiers ~key:GdkKeysyms._Right
     ~callback:(fun () -> move_to_next_unproven_node_id Clever)
 
 let (_: GMenu.menu_item) =
   view_factory#add_item "Go down (skipping proved goals)"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._Down
+    ~modi:primary_modifiers ~key:GdkKeysyms._Down
     ~callback:(fun () -> move_to_next_unproven_node_id Next)
 
 let (_: GMenu.menu_item) =
   view_factory#add_item "Go up (skipping proved goals)"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._Up
+    ~modi:primary_modifiers ~key:GdkKeysyms._Up
     ~callback:(fun () -> move_to_next_unproven_node_id Prev)
 
 (* "Help" menu items *)
@@ -2543,12 +2536,12 @@ let () = tools_factory#add_separator ()
 
 let copy_item =
   tools_factory#add_item "Copy node"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._C
+    ~modi:primary_modifiers ~key:GdkKeysyms._C
     ~tooltip:"Copy the current node"
 
 let paste_item =
   tools_factory#add_item "Paste node"
-    ~modi:[`CONTROL] ~key:GdkKeysyms._V
+    ~modi:primary_modifiers ~key:GdkKeysyms._V
     ~tooltip:"Paste the copied node below the current node"
 
 (* complete the contextual menu (but only after provers and strategies, hence the function) *)
@@ -2736,8 +2729,9 @@ let treat_notification n =
              selected at once when a prover successfully end. To continue the
              proof, it is better to only have the new goal selected *)
           goals_view#selection#unselect_all ();
-          let iter = (get_node_row next_unproved_id)#iter in
-          select_iter iter
+          let row = get_node_row next_unproved_id in
+          goals_view#expand_to_path row#path;
+          select_iter row#iter
         end
   | New_node (id, parent_id, typ, name, detached) ->
      begin

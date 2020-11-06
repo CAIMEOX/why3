@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -64,6 +64,7 @@ type rs_kind =
   | RKfunc    (* top-level let-function *)
   | RKpred    (* top-level let-predicate *)
   | RKlemma   (* top-level or local let-lemma *)
+[@@deriving sexp_of]
 
 let rs_kind s = match s.rs_logic with
   | RLnone  -> RKnone
@@ -297,8 +298,10 @@ let create_prog_pattern pp ity mask =
 (** {2 Program expressions} *)
 
 type assertion_kind = Assert | Assume | Check
+[@@deriving sexp_of]
 
 type for_direction = To | DownTo
+[@@deriving sexp_of]
 
 type for_bounds = pvsymbol * for_direction * pvsymbol
 
@@ -633,12 +636,7 @@ let rec post_of_expr res e = match e.e_node with
   | _ when ity_equal e.e_ity ity_unit -> t_true
   | Eassign _ | Ewhile _ | Efor _ | Eassert _ -> assert false
   | Evar v -> post_of_term res (t_var v.pv_vs)
-  | Econst (Constant.ConstInt _ as c)->
-      post_of_term res (t_const c ty_int)
-  | Econst (Constant.ConstReal _ as c)->
-      post_of_term res (t_const c ty_real)
-  | Econst (Constant.ConstStr _ as c) ->
-      post_of_term res (t_const c ty_str)
+  | Econst c -> post_of_term res (t_const c (ty_of_ity e.e_ity))
   | Epure t -> post_of_term res t
   | Eghost e | Eexn (_,e) -> post_of_expr res e
   | Eexec (_,c) ->

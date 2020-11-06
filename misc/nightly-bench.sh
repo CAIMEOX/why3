@@ -52,8 +52,7 @@ echo "Current branch: "$GITBRANCH >> $REPORT
 echo "Current commit: "$NEWCOMMITHASH >> $REPORT
 
 # configuration
-autoconf
-automake --add-missing
+./autogen.sh
 ./configure --enable-local &> $OUT
 if test "$?" != "0" ; then
     echo "Configure failed" >> $REPORT
@@ -76,7 +75,7 @@ else
 fi
 
 # detection of provers
-bin/why3config --detect &> $OUT
+bin/why3 config --detect &> $OUT
 if test "$?" != "0" ; then
     echo "Prover detection failed" >> $REPORT
     cat $OUT >> $REPORT

@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -656,7 +656,13 @@ let rec inject kn uf pins caps pos f = match f.t_node with
       let p = Mint.find n pins in
       let check _ (_,c) = assert (cap_valid uf c) in
       Mls.iter check p.p_vars;
-      let inv = List.map (t_attr_copy f) p.p_inv in
+      let rec relocate g =
+        t_attr_set ?loc:f.t_loc g.t_attrs
+          (TermTF.t_map (fun t -> t) relocate g) in
+      let inv_attr_copy g =
+        t_attr_copy f
+          (if f.t_loc = None then g else relocate g) in
+      let inv = List.map inv_attr_copy p.p_inv in
       t_and_asym_l inv, uf
   | Tapp (ls,[t]) when not pos && ls_equal ls ls_valid ->
       let t, c = cap_of_term kn uf pins caps t in

@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -57,7 +57,7 @@ val stack_trace : flag
 
 (** Command line arguments *)
 module Args : sig
-  type spec = (Arg.key * Arg.spec * Arg.doc)
+  type spec = Getopt.opt
 
   val desc_debug_list : spec
   (** Option for printing the list of debug flags *)
@@ -72,12 +72,13 @@ module Args : sig
   val desc_debug : spec
   (** Option for specifying a debug flag to set *)
 
-  val desc_shortcut : string -> Arg.key -> Arg.doc -> spec
+  val desc_shortcut : string -> Getopt.key -> Getopt.doc -> spec
   (** Option for setting a specific flag *)
 
-  val set_flags_selected : unit -> unit
+  val set_flags_selected : ?silent:bool -> unit -> unit
   (** Set the flags selected by debug_all, debug or a shortcut.
-      You should run this function after the plugins have been loaded. *)
+      When called before the plugins are loaded, pass [~silent:true] to
+      prevent errors due to unknown plugin flags. *)
 end
 
 val stats: flag

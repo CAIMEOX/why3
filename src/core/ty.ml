@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -80,7 +80,7 @@ let ts_hash ts = id_hash ts.ts_name
 let ty_hash ty = Weakhtbl.tag_hash ty.ty_tag
 
 let ts_compare ts1 ts2 = id_compare ts1.ts_name ts2.ts_name
-let ty_compare ty1 ty2 = Pervasives.compare (ty_hash ty1) (ty_hash ty2)
+let ty_compare ty1 ty2 = Int.compare (ty_hash ty1) (ty_hash ty2)
 
 let mk_ts name args def = {
   ts_name      = id_register name;

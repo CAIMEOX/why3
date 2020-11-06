@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -645,7 +645,7 @@ let parse_prover_result j =
     pr_output = pr_output;
     pr_time = pr_time;
     pr_steps = pr_steps;
-    pr_model = Model_parser.default_model (* pr_model *)}
+    pr_model = Model_parser.empty_model (* pr_model *)}
     (* TODO pr_model is a string, should be model *)
 
 exception NotProofAttempt

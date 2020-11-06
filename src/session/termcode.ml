@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -9,6 +9,7 @@
 (*                                                                  *)
 (********************************************************************)
 
+open Wstdlib
 open Term
 open Number
 open Constant
@@ -17,12 +18,18 @@ open Constant
 (*          explanations       *)
 (*******************************)
 
-let expl_prefixes = ref ["expl:"]
+let expl_prefixes = ref ["expl:";"infer:"]
 
 let arg_extra_expl_prefix =
   ("--extra-expl-prefix",
    Arg.String (fun s -> expl_prefixes := s :: !expl_prefixes),
    "<s> register s as an additional prefix for VC explanations")
+
+let opt_extra_expl_prefix =
+  let open Getopt in
+  KLong "extra-expl-prefix",
+  Hnd1 (AString, fun s -> expl_prefixes := s :: !expl_prefixes),
+  "<expl> register <expl> as an additional prefix\nfor VC explanations"
 
 let collect_expls attr =
   Ident.Sattr.fold
@@ -219,6 +226,29 @@ type shape = string
 
 type bound_shape = int list
 
+type sum_shape_version = SV1 | SV2 | SV3 | SV4 | SV5 | SV6
+
+let current_sum_shape_version = SV6
+
+exception InvalidShape
+
+let string_to_sum_shape_version n =
+  match n with
+  | "1" -> SV1 | "2" -> SV2 | "3" -> SV3 | "4" -> SV4 | "5" -> SV5 | "6" -> SV6
+  | _ -> raise InvalidShape
+
+let string_of_sum_shape_version n =
+  match n with
+  | SV1 -> "1" | SV2 -> "2" | SV3 -> "3" | SV4 -> "4" | SV5 -> "5" | SV6 -> "6"
+
+let pp_sum_shape_version fmt v =
+  Format.pp_print_string fmt (string_of_sum_shape_version v)
+
+let is_bound_sum_shape_version v =
+    match v with
+    | SV1 | SV2 | SV3 | SV4 | SV5 -> false
+    | SV6 -> true
+
 type shape_v =
   | Old_shape of shape
   | Bound_shape of bound_shape
@@ -232,7 +262,7 @@ let string_of_shape sv =
 let shape_of_string =
   let cache = ref [] in
   fun ~version s ->
-  if version >= 8 then
+  if is_bound_sum_shape_version version then
     let s = Strings.rev_split 'H' s in
     (* most consecutive shapes have very long common suffixes,
        so we look for some sharing with the previously computed shape
@@ -268,10 +298,6 @@ let empty_bound_shape = []
 let debug = Debug.register_info_flag "session_pairing"
   ~desc:"Print@ debugging@ messages@ about@ reconstruction@ of@ \
          session@ trees@ after@ modification@ of@ source@ files."
-
-let current_shape_version = 6
-
-type shape_version = SV1 | SV2 | SV3 | SV4 | SV5
 
 module Shape = struct
 
@@ -366,16 +392,16 @@ let ident_shape id = id_string_shape id.Ident.id_string
 let const_shape v c =
   let fmt = Format.formatter_of_buffer shape_buffer in
   begin match v with
-  | SV1 | SV2 | SV3 | SV4 -> Common.const_v1 fmt c
-  | SV5 -> Common.const_v2 fmt c
+  | SV1 | SV2 | SV3 | SV4 | SV5 -> Common.const_v1 fmt c
+  | SV6 -> Common.const_v2 fmt c
   end;
   Format.pp_print_flush fmt ();
   check ()
 
 let ident_shape v pr m id =
   match v with
-  | SV1 | SV2 | SV3 | SV4 -> ident_v4 m id
-  | SV5 -> ident_v5 pr m id
+  | SV1 | SV2 | SV3 | SV4 | SV5 -> ident_v4 m id
+  | SV6 -> ident_v5 pr m id
 
 let rec pat_shape ~version pr c m p : 'a =
   match p.pat_node with
@@ -401,7 +427,7 @@ let rec t_shape ~version pr c m t =
     | Tif (f,t1,t2) ->
       begin match version with
       | SV1 | SV2 -> pushc tag_if; fn f; fn t1; fn t2
-      | SV3 | SV4 | SV5 -> pushc tag_if; fn t2; fn t1; fn f
+      | SV3 | SV4 | SV5 | SV6 -> pushc tag_if; fn t2; fn t1; fn f
       end
     | Tcase (t1,bl) ->
         let br_shape b =
@@ -411,7 +437,7 @@ let rec t_shape ~version pr c m t =
             pat_shape ~version pr c m p;
             pat_rename_alpha c m p;
             fn t2
-          | SV3 | SV4 | SV5 ->
+          | SV3 | SV4 | SV5 | SV6 ->
             pat_rename_alpha c m p;
             fn t2;
             pat_shape ~version pr c m p
@@ -421,7 +447,7 @@ let rec t_shape ~version pr c m t =
                  pushc tag_case;
                  fn t1;
                  List.iter br_shape bl
-        | SV3 | SV4 | SV5 ->
+        | SV3 | SV4 | SV5 | SV6->
            pushc tag_case;
            List.iter br_shape bl;
            fn t1
@@ -458,14 +484,14 @@ let rec t_shape ~version pr c m t =
           match version with
             | SV1 ->
                 pushc tag_let; fn t1; fn t2
-            | SV2 | SV3 | SV4 | SV5 ->
+            | SV2 | SV3 | SV4 | SV5 | SV6 ->
                 (* t2 first, intentionally *)
                 fn t2; pushc tag_let; fn t1
         end
     | Tnot f ->
       begin match version with
       | SV1 | SV2 -> fn f; pushc tag_not
-      | SV3 | SV4 | SV5 -> pushc tag_not; fn f
+      | SV3 | SV4 | SV5 | SV6 -> pushc tag_not; fn f
       end
     | Ttrue -> pushc tag_true
     | Tfalse -> pushc tag_false
@@ -481,13 +507,13 @@ let t_shape_task ~version ~expl t =
       (* expl *)
       begin match version with
       | SV1 | SV2 -> ()
-      | SV3 | SV4 | SV5 -> push expl end;
+      | SV3 | SV4 | SV5 | SV6 -> push expl end;
       (* goal shape *)
       t_shape ~version pr c m f;
       (* All declarations shape *)
       begin match version with
-      | SV1 | SV2 | SV3 -> ()
-      | SV4 | SV5 ->
+      | SV1 | SV2 | SV3 | SV4 -> ()
+      | SV5 | SV6 ->
          let open Decl in
          let do_td td = match td.Theory.td_node with
            | Theory.Decl d ->
@@ -506,16 +532,6 @@ let t_shape_task ~version ~expl t =
   Buffer.contents shape_buffer
 
 end
-
-let int_to_shape_version n =
-  match n with
-  | 1 -> SV1 | 2 -> SV2 | 3 | 4 -> SV3 | 5 -> SV4 | 6 -> SV5
-  | _ -> assert false
-
-let is_bound_shape_version v =
-  match int_to_shape_version v with
-  | SV1 | SV2 | SV3 | SV4 -> false
-  | SV5 -> true
 
 module Gshape = struct
 
@@ -573,7 +589,8 @@ module Gshape = struct
           ""
     with Not_found -> ""
 
-  let t_shape_task_v5 ~expl gs t =
+  let t_bound_shape_task gs ~version ~expl t =
+    assert (is_bound_sum_shape_version version);
     let current_shape = ref [] in
     Buffer.clear Shape.shape_buffer;
     let pr = Ident.create_ident_printer [] in
@@ -589,7 +606,7 @@ module Gshape = struct
       | Dparam _ls -> ()
       | Dprop (_, _pr, f) ->
           let sh =
-            (try Shape.t_shape ~version:SV5 pr c m f with Shape.ShapeTooLong -> ());
+            (try Shape.t_shape ~version pr c m f with Shape.ShapeTooLong -> ());
             Buffer.contents Shape.shape_buffer in
           Buffer.clear Shape.shape_buffer;
           add_and_prepend gs current_shape sh
@@ -601,36 +618,13 @@ module Gshape = struct
     (* The order should be [|shape|] :: [|goal|] :: [|rest of decl|] *)
     !current_shape
 
-  let t_bound_shape_task gs ~version ~expl t =
-    if is_bound_shape_version version then
-      t_shape_task_v5 gs ~expl t
-    else
-      assert false
-
   let empty_bshape = []
 
 end
 
-(*
-let time = ref 0.0
- *)
-
 let t_shape_task ~version ~expl t =
-  let version = int_to_shape_version version in
-(*
-  let tim = Unix.gettimeofday () in
- *)
-  let s =
-    match version with
-    | SV1 | SV2 | SV3 | SV4 -> Shape.t_shape_task ~version ~expl t
-    | SV5 -> assert false
-  in
-(*
-  let tim = Unix.gettimeofday () -. tim in
-  time := !time +. tim;
-  Format.eprintf "[Shape times] %f/%f@." tim !time;
-*)
-  s
+  if is_bound_sum_shape_version version then empty_shape else
+  Shape.t_shape_task ~version ~expl t
 
 (* Checksums *)
 
@@ -644,8 +638,6 @@ let dumb_checksum = ""
 let buffer_checksum b =
   let s = Buffer.contents b in
   Digest.to_hex (Digest.string s)
-
-type checksum_version = CV1 | CV2 | CV3
 
 module Checksum = struct
 
@@ -673,14 +665,14 @@ module Checksum = struct
     int b i
 
   let ident (v,_,_,_ as b) id = match v with
-    | CV1 -> ident_v1 b id
-    | CV2 | CV3 -> ident_v2 b id
+    | SV1 | SV2 | SV3 -> ident_v1 b id
+    | SV4 | SV5 | SV6 -> ident_v2 b id
 
   let const (v,_,_,buf) c =
     let fmt = Format.formatter_of_buffer buf in
     begin match v with
-    | CV1 | CV2 -> Common.const_v1 fmt c
-    | CV3 -> Common.const_v2 fmt c
+    | SV1 | SV2 | SV3 | SV4 | SV5 -> Common.const_v1 fmt c
+    | SV6 -> Common.const_v2 fmt c
     end;
     Format.pp_print_flush fmt ()
 
@@ -691,8 +683,8 @@ module Checksum = struct
     | Ty.Tyapp (ts, tyl) -> char b 'a'; ident b ts.Ty.ts_name; list ty b tyl
 
   let vsymbol (v,_,_,_ as b) vs = match v with
-    | CV1 -> ty b vs.vs_ty
-    | CV2 | CV3 -> ident b vs.vs_name; ty b vs.vs_ty
+    | SV1 | SV2 | SV3 -> ty b vs.vs_ty
+    | SV4 | SV5 | SV6 -> ident b vs.vs_name; ty b vs.vs_ty
 
   (* start: _ V ident a o *)
   let rec pat b p = match p.pat_node with
@@ -860,7 +852,7 @@ module Checksum = struct
     let m = ref Ident.Mid.empty in
     let b = Buffer.create 8192 in
     fun t ->
-      Task.task_iter (tdecl (CV1,c,m,b)) t;
+      Task.task_iter (tdecl (SV1,c,m,b)) t;
       clear_ident_v1 ();
       let dnew = Digest.string (Buffer.contents b) in
       Buffer.clear b;
@@ -873,7 +865,7 @@ module Checksum = struct
     let task_hd t (cold,mold,dold) =
       c := cold;
       m := mold;
-      tdecl (CV2,c,m,b) t.Task.task_decl;
+      tdecl (SV4,c,m,b) t.Task.task_decl;
       Buffer.add_string b (Digest.to_hex dold);
       let dnew = Digest.string (Buffer.contents b) in
       Buffer.clear b;
@@ -905,7 +897,7 @@ module Checksum = struct
       c := cold;
       let mo = DMid.get mold in
       m := mo;
-      tdecl (CV3,c,m,b) t.Task.task_decl;
+      tdecl (SV6,c,m,b) t.Task.task_decl;
       Buffer.add_string b (Digest.to_hex dold);
       let dnew = Digest.string (Buffer.contents b) in
       Buffer.clear b;
@@ -924,9 +916,9 @@ module Checksum = struct
       Digest.to_hex dnew
 
   let task ~version t = match version with
-    | CV1 -> task_v1 t
-    | CV2 -> task_v2 t
-    | CV3 -> task_v3 t
+    | SV1 | SV2 | SV3 -> task_v1 t
+    | SV4 | SV5  -> task_v2 t
+    | SV6 -> task_v3 t
 
 end
 
@@ -934,14 +926,16 @@ end
 let time = ref 0.0
  *)
 
-let task_checksum ?(version=current_shape_version) t =
+let task_checksum ?(version=current_sum_shape_version) t =
+(*
   let version = match version with
-    | 1 | 2 | 3 -> CV1
+    | SV1 | SV2 | SV3 -> CV1
     | 4 | 5 -> CV2
     | 6 -> CV3
-    | _ -> assert false
+    | _ -> assert false (* FIXME !!! *)
   in
-(*
+ *)
+  (*
   let tim = Unix.gettimeofday () in
 *)
   let s = Checksum.task ~version t in
@@ -1032,11 +1026,11 @@ module Pairing (Old: S)(New: S) = struct
       | Old g ->
           let (sh, l) = Old.shape table.table_old.(g) in
           (* Sanitazing: sort the lists only once *)
-          (sh, List.sort Pervasives.compare l)
+          (sh, List.sort Int.compare l)
       | New g ->
           let (sh, l) = New.shape table.table_new.(g) in
           (* Sanitazing: sort the lists only once *)
-          (sh, List.sort Pervasives.compare l)
+          (sh, List.sort Int.compare l)
     in
     let rec n = { prev = n; shape = s; elt = g; next = n; valid = true }
     in n
@@ -1089,7 +1083,8 @@ module Pairing (Old: S)(New: S) = struct
     in
     let newgoals =
       let acc = ref old_goals_without_checksum in
-      for newi = 0 to Array.length table.table_new - 1 do
+      (* in reverse order, since the hashtable acts like a LIFO *)
+      for newi = Array.length table.table_new - 1 downto 0 do
         try
           let newg = table.table_new.(newi) in
           match New.checksum newg with
@@ -1115,7 +1110,10 @@ module Pairing (Old: S)(New: S) = struct
       let module E = struct
         let dummy = let n = List.hd allgoals (* safe *) in (0, 0), (n, n)
         type t = (int * int) * (node * node)
-        let compare (v1, _) (v2, _) = Pervasives.compare v2 v1
+        let compare ((u1,u2), _) ((v1,v2), _) =
+          let c = Int.compare v1 u1 in
+          if c <> 0 then c
+          else Int.compare v2 u2
       end in
       let module PQ = Pqueue.Make(E) in
       let pq = PQ.create () in

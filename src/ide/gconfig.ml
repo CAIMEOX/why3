@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -665,7 +665,7 @@ let show_about_window ~parent () =
                 "Piotr Trojanek";
                 "Makarius Wenzel";
                ]
-      ~copyright:"Copyright 2010-2019 Inria, CNRS, Paris-Sud University"
+      ~copyright:"Copyright 2010-2020 Inria, CNRS, Paris-Sud University"
       ~license:("See file " ^ Filename.concat Config.datadir "LICENSE")
       ~website:"http://why3.lri.fr/"
       ~website_label:"http://why3.lri.fr/"
@@ -1224,9 +1224,17 @@ let editors_page c (notebook:GPack.notebook) =
 	    (* Debug.dprintf debug "prover %a: selected editor '%s'@." *)
             (*   print_prover p data; *)
             let provers = Whyconf.get_provers c.config in
-            c.config <-
-              Whyconf.set_provers c.config
-              (Mprover.add p { pi with editor = data} provers)
+            let pi =
+              if String.equal pi.editor data
+              then pi (* keep detected_at_startup if no change *)
+              else { pi with
+                     editor = data;
+                     detected_at_startup = false;
+                   }
+            in
+              c.config <-
+                Whyconf.set_provers c.config
+                  (Mprover.add p pi provers)
       )
     in
     ()

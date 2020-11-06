@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -17,6 +17,7 @@ type attribute = private {
   attr_string : string;
   attr_tag    : int;
 }
+[@@deriving sexp_of]
 
 module Mattr : Extmap.S with type key = attribute
 module Sattr : Extset.S with module M = Mattr
@@ -233,7 +234,8 @@ val compute_model_trace_field: ident option -> int -> Sattr.t
     the built field attribute associated *)
 
 val extract_field: attribute -> (int * string) option
-(** Take an attribute and extract its depth, name if it was a field attribute *)
+(** Take an attribute and extract its depth, name if it was a field attribute
+    (["field:depth:field_name"]) *)
 
 val get_model_trace_attr : attrs:Sattr.t -> attribute
 (** Return an attribute of the form ["model_trace:*"].

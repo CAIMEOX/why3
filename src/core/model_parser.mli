@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -11,42 +11,44 @@
 
 (** {1 Counter-example model values} *)
 
-type float_type =
-  | Plus_infinity
-  | Minus_infinity
-  | Plus_zero
-  | Minus_zero
-  | Not_a_number
-  | Float_value of string * string * string
-    (** [Float_value (sign, exponent, mantissa)] *)
-  | Float_hexa of string * float
+type model_int = { int_value: BigInt.t; int_verbatim: string }
 
-val interp_float: ?interp:bool -> string -> string -> string -> float_type
+type model_dec = { dec_int: BigInt.t; dec_frac: BigInt.t; dec_verbatim: string }
+
+type model_frac = { frac_nom: BigInt.t; frac_den: BigInt.t; frac_verbatim: string }
+
+type model_bv = { bv_value: BigInt.t; bv_length: int; bv_verbatim: string }
+
+type model_float_binary = { sign: model_bv; exp: model_bv; mant: model_bv }
+
+type model_float =
+  | Plus_infinity | Minus_infinity | Plus_zero | Minus_zero | Not_a_number
+  | Float_number of {hex: string option (* e.g., 0x1.ffp99 *); binary: model_float_binary}
 
 type model_value =
- | String of string
- | Integer of string
- | Decimal of (string * string)
- | Fraction of (string * string)
- | Float of float_type
- | Boolean of bool
- | Array of model_array
- | Record of model_record
- | Proj of model_proj
- | Bitvector of string
- | Apply of string * model_value list
- | Unparsed of string
-and  arr_index = {
-  arr_index_key : model_value;
-  arr_index_value : model_value;
-}
-and model_array = {
-  arr_others  : model_value;
-  arr_indices : arr_index list;
-}
-and model_proj = (proj_name * model_value)
-and proj_name = string
+  | Boolean of bool
+  | String of string
+  | Integer of model_int
+  | Float of model_float
+  | Bitvector of model_bv
+  | Decimal of model_dec
+  | Fraction of model_frac
+  | Array of model_array
+  | Record of model_record
+  | Proj of model_proj
+  | Apply of string * model_value list
+  | Unparsed of string
+
+and arr_index = {arr_index_key: model_value; arr_index_value: model_value}
+
+and model_array = {arr_others: model_value; arr_indices: arr_index list}
+
 and model_record = (field_name * model_value) list
+
+and model_proj = proj_name * model_value
+
+and proj_name = string
+
 and field_name = string
 
 val array_create_constant :
@@ -67,6 +69,8 @@ val array_add_element :
     @param value : the value of the element to be added
 *)
 
+val float_of_binary : model_float_binary -> model_float
+
 val print_model_value : Format.formatter -> model_value -> unit
 
 
@@ -77,13 +81,14 @@ val print_model_value : Format.formatter -> model_value -> unit
 *)
 
 type model_element_kind =
-| Result
-  (* Result of a function call (if the counter-example is for postcondition)  *)
-| Old
-  (* Old value of function argument (if the counter-example is for postcondition) *)
-| Error_message
-  (* The model element represents error message, not source-code element.
-     The error message is saved in the name of the model element.*)
+| Result (* Result of a function call (if the counter-example is for postcondition)  *)
+| Old (* Old value of function argument (if the counter-example is for postcondition) *)
+| At of string (* Value at label *)
+| Error_message (* The model element represents error message, not source-code element.
+                   The error message is saved in the name of the model element.*)
+| Loop_before
+| Loop_previous_iteration
+| Loop_current_iteration
 | Other
 
 (** Information about the name of the model element *)
@@ -112,9 +117,6 @@ val create_model_element :
   name      : string ->
   value     : model_value ->
   attrs     : Ident.Sattr.t ->
-  ?location : Loc.position ->
-  ?term     : Term.term ->
-  unit ->
   model_element
 (** Creates a counter-example model element.
     @param name : the name of the source-code element
@@ -131,9 +133,11 @@ val create_model_element :
 type model
 
 val is_model_empty : model -> bool
-val default_model : model
+val empty_model : model
 
 (** {2 Querying the model} *)
+
+val get_model_elements: model -> model_element list
 
 val print_model :
   ?me_name_trans:(model_element_name -> string) ->
@@ -157,9 +161,7 @@ val print_model_human :
   model ->
   print_attrs:bool ->
   unit
-(** Same as print_model but is intended to be human readable.
-
-*)
+(** Same as print_model but is intended to be human readable.*)
 
 val print_model_json :
   ?me_name_trans:(model_element_name -> string) ->
@@ -194,6 +196,10 @@ val print_model_json :
       - "kind": kind of counterexample element:
         - "result": Result of a function call (if the counter-example is for postcondition)
         - "old": Old value of function argument (if the counter-example is for postcondition)
+        - "\@X": Value at label X
+        - "before_loop": Value before entering the loop
+        - "previous_iteration": Value in the previous loop iteration
+        - "current_iteration": Value in the current loop iteration
         - "error_message": The model element represents error message, not source-code element.
             The error message is saved in the name of the model element
         - "other"
@@ -271,26 +277,13 @@ val model_for_positions_and_decls : model ->
 ** Registering model parser
 ***************************************************************
 *)
-type model_parser =  string -> Printer.printer_mapping -> model
+
+type model_parser = Printer.printer_mapping -> string -> model
 (** Parses the input string into model elements, estabilishes
     a mapping between these elements and mapping from printer
-    and builds model data structure.
-*)
+    and builds model data structure.*)
 
-type raw_model_parser =
-  Ident.ident Wstdlib.Mstr.t -> Ident.ident Wstdlib.Mstr.t -> ((string * string) list) Wstdlib.Mstr.t ->
-    string list -> Ident.Sattr.t Wstdlib.Mstr.t -> string -> model_element list
-(** Parses the input string into model elements.
-    [raw_model_parser: proj->record_map->noarg_cons->s->mel]
-    [proj]: is the list of projections
-    [list_field]: is the list of field function definition
-    [record_map]: is a map associating the name of printed projections to the
-      fields (couple of printed field and model_trace name).
-    [noarg_cons]: List of constructors with no arguments (collected to avoid
-      confusion between variable and constructors)
-    [s]: model
-    [mel]: collected model
- *)
+type raw_model_parser = Printer.printer_mapping -> string -> model_element list
 
 val register_remove_field:
   (Ident.Sattr.t * model_value -> Ident.Sattr.t * model_value) -> unit

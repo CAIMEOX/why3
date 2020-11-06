@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -205,9 +205,10 @@ omega.
 subst n0.
 auto with zarith.
 intro; rewrite IHv;auto.
-intuition; auto with zarith.
+destruct H.
+left; auto with zarith.
 right.
-rewrite Zpos_P_of_succ_nat in H0.
+rewrite Zpos_P_of_succ_nat in H.
 omega.
 Qed.
 

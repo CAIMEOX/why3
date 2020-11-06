@@ -6,8 +6,19 @@
 
 @string{lncs = {Lecture Notes in Computer Science}}
 
+@techreport{baudin17,
+  topics = {team},
+  TITLE = {Deductive Verification with the Help of Abstract Interpretation},
+  AUTHOR = {Lucas Baudin},
+  hal = {https://hal.inria.fr/hal-01634318},
+  TYPE = {Technical Report},
+  INSTITUTION = {Univ Paris-Sud},
+  YEAR = 2017,
+  MONTH = nov
+}
+
 @book{CoqArt,
-  author = {Yves Bertot and Pierre Cast\'eran},
+  author = {Yves Bertot and Pierre Castéran},
   title = {Interactive Theorem Proving and Program Development},
   subtitle = {Coq'Art: The Calculus of Inductive Constructions},
   publisher = {Springer-Verlag},
@@ -38,7 +49,6 @@
   pages = {1--58},
   title = {{IEEE} Standard for Floating-Point Arithmetic},
   year = {2008},
-  note = {\url{https://dx.doi.org/10.1109/IEEESTD.2008.4610935}}
 }
 
 @misc{vstte10comp,
@@ -48,7 +58,7 @@
   month = {August},
   year = 2010,
   address = {Edinburgh, Scotland},
-  note = {\url{http://www.macs.hw.ac.uk/vstte10/Competition.html}}
+  url = {http://www.macs.hw.ac.uk/vstte10/Competition.html}
 }
 
 @book{okasaki98,
@@ -59,24 +69,22 @@
 }
 
 @inproceedings{barrett11cade,
-  author = {Barrett, Clark and Conway, Christopher L. and Deters, Morgan and Hadarean, Liana and Jovanovi\'{c}, Dejan and King, Tim and Reynolds, Andrew and Tinelli, Cesare},
+  author = {Barrett, Clark and Conway, Christopher L. and Deters, Morgan and Hadarean, Liana and Jovanović, Dejan and King, Tim and Reynolds, Andrew and Tinelli, Cesare},
   title = {{CVC4}},
-  booktitle = {Proceedings of the 23rd international conference on Computer aided verification},
-  series = {CAV'11},
+  booktitle = {23rd International Conference on Computer Aided Verification},
   year = 2011,
   isbn = {978-3-642-22109-5},
-  location = {Snowbird, UT},
+  address = {Snowbird, UT},
   pages = {171--177},
   numpages = 7,
   url = {http://dl.acm.org/citation.cfm?id=2032305.2032319},
   acmid = 2032319,
   publisher = {Springer-Verlag},
-  address = {Berlin, Heidelberg}
 }
 
 @inproceedings{conchon08smt,
-  author = {Fran\c{c}ois Bobot and Sylvain Conchon and \'Evelyne Contejean
-  and St\'ephane Lescuyer},
+  author = {François Bobot and Sylvain Conchon and Évelyne Contejean
+  and Stéphane Lescuyer},
   title = {{Implementing Polymorphism in SMT solvers}},
   booktitle = {SMT 2008: 6th International Workshop on Satisfiability Modulo},
   pages = {1--5},
@@ -102,11 +110,9 @@
 }
 
 @misc{ergo,
-  author = {Sylvain Conchon and \'Evelyne Contejean},
+  author = {Sylvain Conchon and Évelyne Contejean},
   title = {The {Alt-Ergo} automatic Theorem Prover},
   url = {http://alt-ergo.lri.fr/},
-  howpublished = {\url{http://alt-ergo.lri.fr/}},
-  note = {APP deposit under the number IDDN FR 001 110026 000 S P 2010 000 1000},
   topics = {team,lri},
   year = 2008,
   x-equipes = {demons PROVAL},
@@ -115,13 +121,19 @@
 }
 
 @inproceedings{filliatre07cav,
-  author = {Jean-Christophe Filli\^atre and Claude March\'e},
+  author = {Jean-Christophe Filliâtre and Claude Marché},
   title = {The {Why/Krakatoa/Caduceus} Platform for Deductive Program
   Verification},
-  crossref = {cav07},
+  booktitle = {19th International Conference on Computer Aided Verification},
+  editor = {Werner Damm and Holger Hermanns},
+  series = lncs,
+  volume = 4590,
+  address = {Berlin, Germany},
+  month = jul,
+  year = {2007},
   pages = {173--177},
   topics = {team, lri},
-  hal = {https://hal.inria.fr/inria-00270820v1},
+  url = {https://hal.inria.fr/inria-00270820v1},
   type_digiteo = {conf_isbn},
   type_publi = {icolcomlec},
   x-pdf = {http://www.lri.fr/~filliatr/ftp/publis/cav07.pdf},
@@ -138,30 +150,29 @@
   institution = {INRIA},
   year = 2009,
   topics = {team},
-  hal = {http://hal.inria.fr/inria-00439232},
-  note = {\url{http://hal.inria.fr/inria-00439232}},
+  url = {http://hal.inria.fr/inria-00439232},
   number = 7128
 }
 
 @inproceedings{hauzar16sefm,
   topics = {team},
-  author = {Hauzar, David and March\'e, Claude and Moy, Yannick},
+  author = {Hauzar, David and Marché, Claude and Moy, Yannick},
   title = {Counterexamples from Proof Failures in {SPARK}},
   booktitle = {Software Engineering and Formal Methods},
   year = 2016,
   pages = {215--233},
   doi = {10.1007/978-3-319-41591-8_15},
-  editor = {De Nicola, Rocco and Eva K\"uhn},
+  editor = {De Nicola, Rocco and Eva Kühn},
   series = lncs,
   address = {Vienna, Austria},
-  hal = {https://hal.inria.fr/hal-01314885}
+  url = {https://hal.inria.fr/hal-01314885}
 }
 
 @article{dailler18jlamp,
   topics = {team},
   title = {Instrumenting a Weakest Precondition Calculus for Counterexample Generation},
-  author = {Dailler, Sylvain and Hauzar, David and March{\'e}, Claude and Moy, Yannick},
-  hal = {https://hal.inria.fr/hal-01802488},
+  author = {Dailler, Sylvain and Hauzar, David and Marché, Claude and Moy, Yannick},
+  url = {https://hal.inria.fr/hal-01802488},
   journal = {Journal of Logical and Algebraic Methods in Programming},
   publisher = {Elsevier},
   volume = 99,
@@ -170,15 +181,12 @@
   keywords = {Deductive Program Verification ; Weakest Precondition Calculus ; Satisfiability Modulo Theories ; Counterexamples}
 }
 
-@proceedings{cav07,
-  editor = {Werner Damm and Holger Hermanns},
-  title = {Computer Aided Verification},
-  booktitle = {19th International Conference on Computer Aided Verification},
-  publisher = sv,
-  series = lncs,
-  volume = 4590,
-  address = {Berlin, Germany},
-  month = jul,
-  year = {2007}
-}
 
+@Manual{baudin18acsl,
+  title = 	 {{ACSL}: {ANSI/ISO C} Specification Language},
+  author = 	 {Patrick Baudin  and Jean-Christophe Filliâtre and Claude Marché and Benjamin Monate and Yannick Moy and Virgile Prevosto},
+  year = 	 2018,
+  note = 	 {\url{https://frama-c.com/acsl.html}},
+  url = 	 {https://frama-c.com/acsl.html},
+  x-pdf = 	 {https://frama-c.com/download/acsl_1.14.pdf}
+}

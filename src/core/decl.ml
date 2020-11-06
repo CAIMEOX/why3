@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -305,6 +305,7 @@ let pr_clone pr = create_prsymbol (id_clone pr.pr_name)
 type ind_decl = lsymbol * (prsymbol * term) list
 
 type ind_sign = Ind | Coind
+[@@deriving sexp_of]
 
 type ind_list = ind_sign * ind_decl list
 
@@ -314,6 +315,7 @@ type prop_kind =
   | Plemma    (* prove, use as a premise *)
   | Paxiom    (* do not prove, use as a premise *)
   | Pgoal     (* prove, do not use as a premise *)
+[@@deriving sexp_of]
 
 type prop_decl = prop_kind * prsymbol * term
 
@@ -406,11 +408,16 @@ let d_hash d = Weakhtbl.tag_hash d.d_tag
 
 (** Declaration constructors *)
 
-let mk_decl node news = Hsdecl.hashcons {
-  d_node = node;
-  d_news = news;
-  d_tag  = Weakhtbl.dummy_tag;
-}
+let mk_decl node news =
+  let d = {
+      d_node = node;
+      d_news = news;
+      d_tag  = Weakhtbl.dummy_tag;
+    } in
+  match node with
+  | Dprop (Pgoal,_,_) -> Hsdecl.unique d
+  | _ -> Hsdecl.hashcons d
+
 
 exception IllegalTypeAlias of tysymbol
 exception ClashIdent of ident

@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
 #include <time.h>
 #include <math.h>
@@ -8,7 +9,7 @@
 
 #if defined(TEST_GMP) || defined(TEST_WHY3) || defined(TEST_MINIGMP)
 #define BENCH
-#if !(defined(TEST_ADD) || defined(TEST_MUL) || defined(TEST_TOOMB) || defined(TEST_TOOMM) || defined(TEST_TOOMU) || defined(TEST_DIV) || defined(TEST_SQRT1) || defined(TEST_SQRTREM) || defined(TEST_POWM) || defined(TEST_ZADD) || defined(TEST_ZSUB) || defined(TEST_ZMUL) || defined(TEST_MILLERRABIN))
+#if !(defined(TEST_ADD) || defined(TEST_MUL) || defined(TEST_TOOMB) || defined(TEST_TOOMM) || defined(TEST_TOOMU) || defined(TEST_DIV) || defined(TEST_SQRT1) || defined(TEST_SQRTREM) || defined(TEST_POWM) || defined(TEST_ZADD) || defined(TEST_ZSUB) || defined(TEST_ZMUL) || defined(TEST_ZDIV) || defined (TEST_ZGETSET) || defined(TEST_MILLERRABIN))
 #error "missing TEST_foo macro definition"
 #endif //no TEST_OP
 #else //no TEST_LIB
@@ -31,6 +32,8 @@
 #define TEST_ZADD
 #define TEST_ZSUB
 #define TEST_ZMUL
+#define TEST_ZDIV
+#define TEST_ZGETSET
 #ifndef COMPARE_MINI
 #define TEST_MILLERRABIN
 #endif
@@ -80,7 +83,7 @@ void init_mpz_1 (mpz_ptr a, mp_size_t an) {
     ap[i] = genrand64_int64();
   while (ap[an-1]<1)
     ap[an-1] = genrand64_int64();
-  SIZ(a) = an;
+  SIZ(a) = genrand64_int64() & 1 ? an : - an;
   return;
 }
 
@@ -92,15 +95,17 @@ void init_valid_1(mp_ptr ap, mp_size_t an) {
   return;
 }
 
-void compare_mpz (mpz_ptr u, mpz_ptr v, mpz_ptr w, mpz_ptr refw,
-                  mp_size_t an, mp_size_t bn) {
-  if (SIZ(w) != SIZ(refw) || (mpn_cmp (PTR(w), PTR(refw), SIZ(w))))
+void compare_mpz (mpz_ptr u, mpz_ptr v, mpz_ptr w, mpz_ptr refw) {
+  mp_size_t an, bn;
+  if (mpz_cmp(w, refw))
     {
-      printf ("ERROR, an = %d, bn = %d", (int) an, (int) bn);
+      an = abs (SIZ(u));
+      bn = abs (SIZ(v));
+      printf ("ERROR, an = %d, bn = %d\n", (int) an, (int) bn);
       printf ("a: "); mpn_dump (PTR(u), an);
       printf ("b: "); mpn_dump (PTR(v), bn);
-      printf ("r:   "); mpn_dump (PTR(w), SIZ(w));
-      printf ("ref: "); mpn_dump (PTR(refw), SIZ(refw));
+      printf ("r:   "); mpn_dump (PTR(w), abs (SIZ(w)));
+      printf ("ref: "); mpn_dump (PTR(refw), abs (SIZ(refw)));
       abort();
     }
 }
@@ -291,7 +296,7 @@ static int wmpz_millerrabin (mpz_ptr n, int reps)
 
   if (wmpz_cmp_ui (y, 1L) != 0)
     {
-      goto ret;
+      return 0;
     }
 
   MPZ_TMP_INIT(q, SIZ(n));
@@ -313,11 +318,12 @@ static int wmpz_millerrabin (mpz_ptr n, int reps)
     }
  ret:
   //  if (r > 0) printf ("%d reps done", r);
-  return r;
+  return is_prime;
 }
 
 void mr_candidate (mpz_t c, int len) {
   init_mpz_1(c, len);
+  SIZ(c) = abs (SIZ(c));
   mpz_setbit (c, 0);
 }
 
@@ -326,15 +332,20 @@ void mr_candidate (mpz_t c, int len) {
 int main () {
   mp_ptr ap, bp, rp, refp, rq, rr, refq, refr, ep, rep, mp, tp;
   mp_size_t max_n, max_add, max_mul, max_toom, max_div, max_sqrt, max_powm,
-    an, bn, rn, cn;
-  mpz_t u, v, w, refw, cp;
-  int nb, nb_iter;
+    max_getset, an, bn, rn, cn;
+  mpz_t q, r, u, v, w, refzq, refzr, refw, cp;
+  int nb, nb_iter, base;
+  char * sp, * refsp;
   double elapsed;
   mpz_init(cp);
   mpz_init(u);
   mpz_init(v);
   mpz_init(w);
   mpz_init(refw);
+  mpz_init(q);
+  mpz_init(refzq);
+  mpz_init(r);
+  mpz_init(refzr);
 #ifdef BENCH
   struct timeval begin, end;
 #endif
@@ -362,6 +373,8 @@ int main () {
   max_div = 20;
   max_sqrt = 95;
   max_powm = 50;
+  max_getset = 50;
+
   ap = TMP_ALLOC_LIMBS (max_n + 1);
   bp = TMP_ALLOC_LIMBS (max_n + 1);
   /* nap = TMP_ALLOC_LIMBS (max_n + 1); */
@@ -375,6 +388,8 @@ int main () {
   tp = TMP_ALLOC_LIMBS(2 * max_n);
   ep = TMP_ALLOC_LIMBS(max_n + 1);
   mp = TMP_ALLOC_LIMBS(max_n + 1);
+  sp = malloc (max_getset * 64);
+  refsp = malloc (max_getset * 64);
 
 #ifdef TEST_ADD
 #ifdef BENCH
@@ -1001,20 +1016,20 @@ int main () {
             printf ("\n"); //for gnuplot
 #endif
 #ifdef COMPARE
-          compare_mpz (u, v, w, refw, an, bn);
+          compare_mpz (u, v, w, refw);
           mpz_add (refw, u, u);
           wmpz_add (w, u, u);
-          compare_mpz (u, u, w, refw, an, bn);
+          compare_mpz (u, u, w, refw);
           mpz_set(w,u);
           mpz_set (refw, u);
           mpz_add (refw, refw, v);
           wmpz_add (w, w, v);
-          compare_mpz (w,v,w,refw,an,bn);
+          compare_mpz (w,v,w,refw);
           mpz_set(w,v);
           mpz_set (refw, v);
           mpz_add (refw, u, refw);
           wmpz_add (w, u, w);
-          compare_mpz (u,w,w,refw,an,bn);
+          compare_mpz (u,w,w,refw);
 #endif
         }
     }
@@ -1068,20 +1083,20 @@ int main () {
             printf ("\n"); //for gnuplot
 #endif
 #ifdef COMPARE
-          compare_mpz (u, v, w, refw, an, bn);
+          compare_mpz (u, v, w, refw);
           mpz_sub (refw, u, u);
           wmpz_sub (w, u, u);
-          compare_mpz (u, u, w, refw, an, bn);
+          compare_mpz (u, u, w, refw);
           mpz_set(w,u);
           mpz_set (refw, u);
           mpz_sub (refw, refw, v);
           wmpz_sub (w, w, v);
-          compare_mpz (w,v,w,refw,an,bn);
+          compare_mpz (w,v,w,refw);
           mpz_set(w,v);
           mpz_set (refw, v);
           mpz_sub (refw, u, refw);
           wmpz_sub (w, u, w);
-          compare_mpz (u,w,w,refw,an,bn);
+          compare_mpz (u,w,w,refw);
 #endif
         }
     }
@@ -1135,20 +1150,20 @@ int main () {
             printf ("\n"); //for gnuplot
 #endif
 #ifdef COMPARE
-          compare_mpz (u, v, w, refw, an, bn);
+          compare_mpz (u, v, w, refw);
           mpz_mul (refw, u, u);
           wmpz_mul (w, u, u);
-          compare_mpz (u, u, w, refw, an, bn);
+          compare_mpz (u, u, w, refw);
           mpz_set(w,u);
           mpz_set (refw, u);
           mpz_mul (refw, refw, v);
           wmpz_mul (w, w, v);
-          compare_mpz (w,v,w,refw,an,bn);
+          compare_mpz (w,v,w,refw);
           mpz_set(w,v);
           mpz_set (refw, v);
           mpz_mul (refw, u, refw);
           wmpz_mul (w, u, w);
-          compare_mpz (u,w,w,refw,an,bn);
+          compare_mpz (u,w,w,refw);
 #endif
         }
     }
@@ -1156,6 +1171,96 @@ int main () {
   printf ("mpz multiplication ok\n");
 #endif
 #endif
+
+#ifdef TEST_ZDIV
+#ifdef BENCH
+  printf ("#an bn t(µs)\n");
+#endif
+  for (an = 2; an <= max_div; an += 1)
+    {
+      for (bn = 1; bn <= an; bn += 1)
+        {
+          elapsed = 0;
+          nb_iter = 1000;
+          for (int iter = 0; iter != nb_iter; ++iter) {
+            init_mpz_1(u, an);
+            init_mpz_1(v, bn);
+            mpz_realloc (q, an - bn + 1);
+            mpz_realloc (r, bn);
+            nb = 1500 / an;
+#ifdef BENCH
+            gettimeofday(&begin, NULL);
+            for (int i = 0; i != nb; ++i)
+              {
+#endif
+#ifdef TEST_GMP
+                mpz_tdiv_qr(refzq, refzr, u, v);
+#endif
+#ifdef TEST_WHY3
+                wmpz_tdiv_qr(q, r, u, v);
+#endif
+
+#ifdef BENCH
+              }
+            gettimeofday(&end, NULL);
+            elapsed +=
+              (end.tv_sec - begin.tv_sec) * 1000000.0
+              + (end.tv_usec - begin.tv_usec);
+#endif
+          }
+          elapsed = elapsed / (nb * nb_iter);
+#ifdef BENCH
+          printf ("%d %d %g\n", (int)an, (int)bn, elapsed);
+          if (an==bn)
+            printf ("\n"); //for gnuplot
+#endif
+#ifdef COMPARE
+          compare_mpz (u, v, q, refzq);
+          compare_mpz (u, v, r, refzr);
+
+          wmpz_tdiv_qr (q, r, u, u);
+          mpz_tdiv_qr (refzq, refzr, u, u);
+          compare_mpz (u, v, q, refzq);
+          compare_mpz (u, v, r, refzr);
+
+          mpz_set (w, u);
+          mpz_set (refw, u);
+          wmpz_tdiv_qr (w, r, w, v);
+          mpz_tdiv_qr (refw, refzr, refw, v);
+          compare_mpz (u, v, w, refw);
+          compare_mpz (u, v, r, refzr);
+
+          mpz_set (w, u);
+          mpz_set (refw, u);
+          wmpz_tdiv_qr (q, w, w, v);
+          mpz_tdiv_qr (refzq, refw, refw, v);
+          compare_mpz (u, v, w, refw);
+          compare_mpz (u, v, r, refzr);
+
+          mpz_set (q, u);
+          mpz_set (refzq, u);
+          mpz_set (r, v);
+          mpz_set (refzr, v);
+          wmpz_tdiv_qr (q, r, q, r);
+          mpz_tdiv_qr (refzq, refzr, refzq, refzr);
+          compare_mpz (u, v, q, refzq);
+          compare_mpz (u, v, r, refzr);
+
+          mpz_set (r, u);
+          mpz_set (refzr, u);
+          mpz_set (q, v);
+          mpz_set (refzq, v);
+          wmpz_tdiv_qr (q, r, r, q);
+          mpz_tdiv_qr (refzq, refzr, refzr, refzq);
+          compare_mpz (u, v, q, refzq);
+          compare_mpz (u, v, r, refzr);
+#endif
+        }
+        }
+#ifdef COMPARE
+  printf ("mpz division ok\n");
+#endif
+#endif //TEST_ZDIV
 
 #ifdef TEST_MILLERRABIN
 #define REPS 25
@@ -1185,15 +1290,72 @@ int main () {
 #endif
 #ifdef COMPARE
     refc = mpz_millerrabin(cp,REPS);
-    if (c != refc)
+    if (c != refc) {
+      printf ("c %ld refc %ld\n", c, refc);
       abort ();
+    }
 #endif
   }
 #ifdef COMPARE
   printf ("Miller-Rabin ok\n");
 #endif
 #endif
+#ifdef TEST_ZGETSET
+  elapsed = 0;
+  for (len = 1; len < max_getset; len=(int)ceil(len * 1.1)){
+    for (base = -36; base <= 62; base++) {
+      if (-2 < base && base < 2)
+        continue;
+      init_mpz_1(u,len);
+#ifdef BENCH
+      gettimeofday(&begin, NULL);
+#endif
+      wmpz_get_str(sp, base, u);
+      mpz_get_str(refsp, base, u);
+#ifdef COMPARE
+      if (strcmp(sp, refsp)) {
+        printf ("ERROR in wmpz_get_str, len = %d, base = %d :\n", len, base);
+        mpn_dump (PTR(u), len);
+        printf ("sp %s refsp %s\n", sp, refsp);
+        abort ();
+      }
+#endif
+      c = wmpz_set_str(w, refsp, abs (base));
+      refc = mpz_set_str(refw, refsp, abs (base));
+#ifdef COMPARE
+      if (c != refc) {
+        printf ("ERROR in wmpz_set_str, c = %ld refc = %ld : \n", c, refc);
+        printf ("base %d, sp %s, refsp %s, strlen %lu\n",
+                base, sp, refsp, strlen(refsp));
+        printf ("w:   "); mpn_dump (PTR(w), abs SIZ(w));
+        printf ("refw: "); mpn_dump (PTR(refw), abs SIZ(refw));
+        abort();
+      }
+      if (mpz_cmp(w, refw))
+        {
+          printf ("ERROR, an = %d\n", SIZ(u));
+          printf ("a: "); mpn_dump (PTR(u), len);
+          printf ("r:   "); mpn_dump (PTR(w), abs SIZ(w));
+          printf ("ref: "); mpn_dump (PTR(refw), abs SIZ(refw));
+          abort();
+        }
+#endif
+#ifdef BENCH
+      gettimeofday(&end, NULL);
+      elapsed +=
+        (end.tv_sec - begin.tv_sec) * 1000000.0
+        + (end.tv_usec - begin.tv_usec);
+#endif
+    }
+  }
+#ifdef BENCH
+  printf ("%d   %g\n", len, elapsed);
+#endif
+#ifdef COMPARE
+  printf ("mpz get/set_str ok\n");
+#endif
+#endif
   //TMP_FREE;
   //tests_end ();
-  return 0;
-}
+    return 0;
+  }

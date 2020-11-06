@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -16,84 +16,91 @@
   let () =
     List.iter
       (fun (x,y) -> Hashtbl.add keywords x y)
+      (* keep the following files synchronized:
+
+         doc/ext/why3.py
+         src/trywhy3/mode-why3.js
+         src/why3doc/doc_lexer.mll
+         share/emacs/why3.el
+         share/vim/syntax/why3.vim
+       *)
       [
-        "alias", ALIAS;
-        "as", AS;
-        "axiom", AXIOM;
-        "by", BY;
-        "clone", CLONE;
-        "coinductive", COINDUCTIVE;
-        "constant", CONSTANT;
-        "else", ELSE;
-        "end", END;
-        "epsilon", EPSILON;
-        "exists", EXISTS;
-        "export", EXPORT;
-        "false", FALSE;
-        "float", FLOAT;
-        "forall", FORALL;
-        "function", FUNCTION;
-        "goal", GOAL;
-        "if", IF;
-        "import", IMPORT;
-        "in", IN;
-        "inductive", INDUCTIVE;
-        "lemma", LEMMA;
-        "let", LET;
-        "match", MATCH;
-        "meta", META;
-        "not", NOT;
-        "partial", PARTIAL;
-        "predicate", PREDICATE;
-        "range", RANGE;
-        "scope", SCOPE;
-        "so", SO;
-        "then", THEN;
-        "theory", THEORY;
-        "true", TRUE;
-        "type", TYPE;
-        "use", USE;
-        "with", WITH;
-        (* programs *)
         "abstract", ABSTRACT;
         "absurd", ABSURD;
+        "alias", ALIAS;
         "any", ANY;
+        "as", AS;
         "assert", ASSERT;
         "assume", ASSUME;
         "at", AT;
+        "axiom", AXIOM;
         "begin", BEGIN;
         "break", BREAK;
+        "by", BY;
         "check", CHECK;
+        "clone", CLONE;
+        "coinductive", COINDUCTIVE;
+        "constant", CONSTANT;
         "continue", CONTINUE;
         "diverges", DIVERGES;
         "do", DO;
         "done", DONE;
         "downto", DOWNTO;
+        "else", ELSE;
+        "end", END;
         "ensures", ENSURES;
+        "epsilon", EPSILON;
         "exception", EXCEPTION;
+        "exists", EXISTS;
+        "export", EXPORT;
+        "false", FALSE;
+        "float", FLOAT; (* contextual *)
         "for", FOR;
+        "forall", FORALL;
         "fun", FUN;
+        "function", FUNCTION;
         "ghost", GHOST;
+        "goal", GOAL;
+        "if", IF;
+        "import", IMPORT;
+        "in", IN;
+        "inductive", INDUCTIVE;
         "invariant", INVARIANT;
         "label", LABEL;
+        "lemma", LEMMA;
+        "let", LET;
+        "match", MATCH;
+        "meta", META;
         "module", MODULE;
         "mutable", MUTABLE;
+        "not", NOT;
         "old", OLD;
+        "partial", PARTIAL;
+        "predicate", PREDICATE;
         "private", PRIVATE;
         "pure", PURE;
         "raise", RAISE;
         "raises", RAISES;
+        "range", RANGE; (* contextual *)
         "reads", READS;
         "rec", REC;
-        "ref", REF;
+        "ref", REF; (* contextual *)
         "requires", REQUIRES;
         "return", RETURN;
         "returns", RETURNS;
+        "scope", SCOPE;
+        "so", SO;
+        "then", THEN;
+        "theory", THEORY;
         "to", TO;
+        "true", TRUE;
         "try", TRY;
+        "type", TYPE;
+        "use", USE;
         "val", VAL;
         "variant", VARIANT;
         "while", WHILE;
+        "with", WITH;
         "writes", WRITES;
       ]
 }
@@ -273,7 +280,7 @@ rule token = parse
   (* This ad hoc switch allows to not edit the automatically generated
      handcrafted.messages in ad hoc ways. *)
   | Error None -> Format.fprintf fmt "syntax error"
-  | Error (Some s) -> Format.fprintf fmt "syntax error:\n %s" s
+  | Error (Some s) -> Format.fprintf fmt "syntax error: %s" s
   | _ -> raise exn)
 
   let build_parsing_function (parser_entry: Lexing.position -> 'a) lb =

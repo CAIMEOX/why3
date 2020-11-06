@@ -15,7 +15,7 @@ suffix=$1
 
 # TODO: remove the hack about int.mlw once it has become builtin
 goods () {
-    pgm="bin/why3prove$suffix"
+    pgm="bin/why3$suffix prove"
     ERROR=
     test -d $1 || exit 1
     rm -f bench_errors
@@ -47,7 +47,7 @@ goods () {
 }
 
 plugins () {
-    pgm="bin/why3prove$suffix"
+    pgm="bin/why3$suffix prove"
     test -d $1 || exit 1
     for f in $1/*.$3 ; do
 	printf "  $f... "
@@ -61,7 +61,7 @@ plugins () {
 }
 
 bads () {
-    pgm="bin/why3prove$suffix"
+    pgm="bin/why3$suffix prove"
     test -d $1 || exit 1
     for f in $1/*.[wm][hl][yw] ; do
 	printf "  $f... "
@@ -76,7 +76,7 @@ bads () {
 }
 
 warns () {
-    pgm="bin/why3prove$suffix"
+    pgm="bin/why3$suffix prove"
     test -d $1 || exit 1
     rm -f bench_errors
     for f in $1/*.[wm][hl][yw] ; do
@@ -96,7 +96,7 @@ warns () {
 }
 
 drivers () {
-    pgm="bin/why3prove$suffix"
+    pgm="bin/why3$suffix prove"
     test -d $1 || exit 1
     for f in $1/*.drv; do
         if [[ $f == drivers/ocaml*.drv ]]; then continue; fi
@@ -104,9 +104,9 @@ drivers () {
         if [[ $f == drivers/cakeml.drv ]]; then continue; fi
 	printf "  $f... "
 	# running Why
-	if ! echo "theory Test goal G : 1=2 end" | $pgm -F whyml --driver $f - > /dev/null; then
+	if ! echo "theory Test goal G : 1=2 end" | $pgm -F whyml --driver=$f - > /dev/null; then
 	    echo "why FAILED"
-            echo "theory Test goal G : 1=2 end" | $pgm -F whyml --driver $f -
+            echo "theory Test goal G : 1=2 end" | $pgm -F whyml --driver=$f -
 	    exit 1
 	fi
 	echo "ok"
@@ -115,7 +115,7 @@ drivers () {
 
 valid_goals () {
     bin/why3$suffix --list-provers | grep -q Alt-Ergo || return 0
-    pgm="bin/why3prove$suffix"
+    pgm="bin/why3$suffix prove"
     test -d $1 || exit 1
     for f in $1/*.mlw; do
 	printf "  $f... "
@@ -131,7 +131,7 @@ valid_goals () {
 
 invalid_goals () {
     bin/why3$suffix --list-provers | grep -q Alt-Ergo || return 0
-    pgm="bin/why3prove$suffix"
+    pgm="bin/why3$suffix prove"
     test -d $1 || exit 1
     for f in $1/*.mlw; do
 	printf "  $f... "
@@ -147,7 +147,7 @@ invalid_goals () {
 }
 
 replay () {
-    pgm="bin/why3replay$suffix"
+    pgm="bin/why3$suffix replay"
     test -d $1 || exit 1
     for f in $1/*/; do
         printf "  $f... "
@@ -162,8 +162,31 @@ replay () {
     done
 }
 
+replay_without_shape () {
+    pgm="bin/why3$suffix replay"; test=$1
+    test -d "$test" || exit 1
+    echo -n "Replay $test with shapes... "
+    if $pgm "$test" > /dev/null 2>&1; then
+        echo "OK."
+    else
+        echo "Failure!"
+        exit 1
+    fi
+    echo -n "Replay $test without shapes... "
+    noshapes=$(mktemp -d -p $(dirname "$test") "$(basename "$test")-without-shapes.XXXXXXXX")
+    cp "$test/why3session.xml" "$noshapes"
+    if $pgm "$noshapes" > /dev/null 2>&1 ; then
+        echo "OK."
+        rm -rf "$noshapes"
+    else
+        echo "Failure!"
+        rm -rf "$noshapes"
+        exit 1
+    fi
+}
+
 execute () {
-    pgm="bin/why3execute$suffix"
+    pgm="bin/why3$suffix execute"
     printf "  $1 $2... "
     if $pgm $1 $2 > /dev/null; then
         echo "ok"
@@ -176,7 +199,7 @@ execute () {
 }
 
 extract () {
-    pgm="bin/why3extract$suffix"
+    pgm="bin/why3$suffix extract"
     dir=$1
     shift
     for f in $dir/*.mlw; do
@@ -284,6 +307,45 @@ extract_and_test_wmp () {
     fi
 }
 
+extract_and_test_c () {
+    dir=$1
+    shift
+    printf "  $dir... "
+    printf "clean... "
+    if BENCH=yes make -C $dir clean > /dev/null; then
+        printf "extract... "
+        if BENCH=yes make -C $dir extract > /dev/null; then
+            printf "compile... "
+            if BENCH=yes make -C $dir cfiles > /dev/null; then
+                printf "execute... "
+                if BENCH=yes make -C $dir tests > /dev/null; then
+                    echo "ok"
+                else
+                    echo "execution failed!"
+                    echo BENCH=yes make -C $dir tests
+                    BENCH=yes make -C $dir tests
+                    exit 1
+                fi
+            else
+                echo "compilation failed!"
+                echo BENCH=yes make -C $dir cfiles
+                BENCH=yes make -C $dir cfiles
+                exit 1
+            fi
+        else
+            echo "extract failed!"
+            echo BENCH=yes make -C $dir extract
+            BENCH=yes make -C $dir extract
+            exit 1
+        fi
+    else
+        echo "clean failed!"
+        echo BENCH=yes make -C $dir clean
+        BENCH=yes make -C $dir clean
+        exit 1
+    fi
+}
+
 list_stuff () {
     pgm="bin/why3$suffix"
     printf '  %s ' "$1"
@@ -294,6 +356,27 @@ list_stuff () {
         $pgm $1
         exit 1
     fi
+}
+
+test_mlw_printer () {
+    why3pp="bin/why3$suffix pp"
+    if ! python3 -m sexpdata 2> /dev/null; then
+        echo "Skipping (Python module sexpdata not installed)" >&2
+        return
+    fi
+    if ! "$why3pp" --output=sexp <(echo '') > /dev/null 2>&1; then
+        echo 'Skipping (s-exp output unavailable for why3pp)' >&2
+        return
+    fi
+    find stdlib examples bench -name '*.mlw' \
+         -not -path '*/\.*' \
+         -not -path "bench/parsing/bad/*" \
+         -not -path "bench/programs/bad-to-keep/*" \
+         -not -path "examples/in_progress/*" |
+    sort | \
+    while read filename; do
+        bench/test_mlw_printer "$why3pp" "$filename" || exit 1
+    done
 }
 
 echo "=== Checking stdlib ==="
@@ -321,7 +404,7 @@ goods bench/typing/x-good --parse-only
 bads bench/typing/x-good --type-only
 goods bench/programs/good
 goods bench/ce
-goods src/trywhy3/examples "--debug ignore_missing_diverges"
+goods src/trywhy3/examples "--debug=ignore_missing_diverges"
 goods examples/bts
 goods examples/tests
 goods examples/tests-provers
@@ -337,7 +420,7 @@ goods examples/verifythis_2016_matrix_multiplication "-L examples/verifythis_201
 goods examples/double_wp "-L examples/double_wp"
 goods examples/in_progress/ring_decision "-L examples/in_progress/ring_decision"
 goods examples/multiprecision "-L examples/multiprecision"
-goods examples/prover "-L examples/prover --debug ignore_unused_vars"
+goods examples/prover "-L examples/prover --debug=ignore_unused_vars"
 goods examples/in_progress
 plugins tests/python --type-only py
 plugins tests/microc --type-only c
@@ -432,11 +515,15 @@ echo ""
 
 echo "=== Checking extraction to C ==="
 extract_and_test_wmp examples/multiprecision
+extract_and_test_c examples/c_cursor
+echo ""
+
+echo "=== Checking replay without shapes ==="
+replay_without_shape examples/tests/replay
 echo ""
 
 echo "=== Checking replay (no prover) ==="
 replay bench/replay
-replay tests/ada_terms # TODO ada plugin only
 replay examples/stdlib --merging-only
 replay examples/bts --merging-only
 replay examples/tests --merging-only
@@ -449,11 +536,12 @@ replay examples/WP_revisited --merging-only
 replay examples/vacid_0_binary_heaps "-L examples/vacid_0_binary_heaps --merging-only"
 replay examples/bitvectors "-L examples/bitvectors --merging-only"
 replay examples/avl "-L examples/avl --merging-only"
+replay examples/c_cursor "-L examples/c_cursor --merging-only"
 replay examples/verifythis_2016_matrix_multiplication "-L examples/verifythis_2016_matrix_multiplication --merging-only"
 replay examples/double_wp "-L examples/double_wp --merging-only"
 #replay examples/in_progress/ring_decision "-L examples/in_progress/ring_decision --merging-only"
 replay examples/multiprecision "-L examples/multiprecision --merging-only"
-replay examples/prover "-L examples/prover --merging-only --debug ignore_unused_vars"
+replay examples/prover "-L examples/prover --merging-only --debug=ignore_unused_vars"
 #replay examples/in_progress --merging-only
 echo ""
 
@@ -467,4 +555,7 @@ list_stuff --list-debug-flags
 echo ""
 
 echo "=== Checking realizations ==="
-exec bench/check_realizations.sh
+bench/check_realizations.sh || exit $?
+
+echo "=== Checking mlw_printer ==="
+test_mlw_printer

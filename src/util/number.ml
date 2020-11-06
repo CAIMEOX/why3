@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2019   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -9,41 +9,60 @@
 (*                                                                  *)
 (********************************************************************)
 
+open Mysexplib.Std [@@warning "-33"]
+
 let debug_float = Debug.register_info_flag "float"
   ~desc:"Avoid@ catching@ exceptions@ in@ order@ to@ get@ \
          float@ literal@ checks@ messages."
 
 (** Construction *)
 type int_value = BigInt.t
+[@@deriving sexp_of]
 
 type int_literal_kind =
   ILitUnk | ILitDec | ILitHex | ILitOct | ILitBin
+[@@deriving sexp_of]
 
 type int_constant = {
   il_kind : int_literal_kind;
   il_int  : BigInt.t;
 }
+[@@deriving sexp_of]
 
 type real_value = {
   rv_sig  : BigInt.t;
   rv_pow2 : BigInt.t;
   rv_pow5 : BigInt.t;
 }
+[@@deriving sexp_of]
 
 type real_literal_kind =
   RLitUnk | RLitDec of int | RLitHex of int
+[@@deriving sexp_of]
 
 type real_constant = {
   rl_kind : real_literal_kind;
   rl_real : real_value
 }
+[@@deriving sexp_of]
 
-let compare_real { rv_sig = s1; rv_pow2 = p21; rv_pow5 = p51 } { rv_sig = s2; rv_pow2 = p22; rv_pow5 = p52 } =
-  let c = BigInt.compare s1 s2 in
-  if c <> 0 then c else
-  let c = BigInt.compare p21 p22 in
-  if c <> 0 then c else
-  BigInt.compare p51 p52
+let compare_real ?(structural=true) { rv_sig = s1; rv_pow2 = p21; rv_pow5 = p51 }
+                                    { rv_sig = s2; rv_pow2 = p22; rv_pow5 = p52 } =
+  if structural then
+    let c = BigInt.compare s1 s2 in
+    if c <> 0 then c else
+    let c = BigInt.compare p21 p22 in
+    if c <> 0 then c else
+    BigInt.compare p51 p52
+  else
+    let p2_min,p5_min = BigInt.min p21 p22, BigInt.min p51 p52 in
+    let v1 = BigInt.pow_int_pos_bigint 2 (BigInt.sub p21 p2_min) in
+    let v1 = BigInt.mul v1 (BigInt.pow_int_pos_bigint 5 (BigInt.sub p51 p5_min)) in
+    let v1 = BigInt.mul s1 v1 in
+    let v2 = BigInt.pow_int_pos_bigint 2 (BigInt.sub p22 p2_min) in
+    let v2 = BigInt.mul v2 (BigInt.pow_int_pos_bigint 5 (BigInt.sub p52 p5_min)) in
+    let v2 = BigInt.mul s2 v2 in
+    BigInt.compare v1 v2
 
 let neg_int { il_kind; il_int = i } =
   { il_kind; il_int = BigInt.minus i }
@@ -386,6 +405,7 @@ type int_range = {
   ir_lower : BigInt.t;
   ir_upper : BigInt.t;
 }
+[@@deriving sexp_of]
 
 let create_range lo hi =
   { ir_lower = lo;
@@ -404,6 +424,7 @@ type float_format = {
   fp_exponent_digits    : int;
   fp_significand_digits : int; (* counting the hidden bit *)
 }
+[@@deriving sexp_of]
 
 exception NonRepresentableFloat of real_constant
 
