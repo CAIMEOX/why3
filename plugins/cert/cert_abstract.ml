@@ -84,6 +84,8 @@ type cterm =
   | CTtrue
   | CTfalse
 
+let eq = CTfvar ps_equ.ls_name
+
 (** Utility functions on cterm *)
 
 let cterm_map f ct = match ct with
@@ -240,7 +242,7 @@ and prapp fmt = function
       fprintf fmt "%a %a"
         prapp ct1
         prpv ct2
-  | CTquant (q, _, t) ->
+  | CTquant (q, _, t) when q <> CTlambda ->
       let x = id_register (id_fresh "x") in
       let q_str = match q with CTforall -> "forall"
                              | CTexists -> "exists"
@@ -367,10 +369,6 @@ let print_ctasks filename lcta =
   let fmt = formatter_of_out_channel oc in
   plcta fmt lcta;
   close_out oc
-
-
-
-let eq = CTfvar (ps_equ.ls_name)
 
 (** Abstracting a Why3 <task> into a <ctask> : extract only the logical core *)
 
