@@ -1,4 +1,3 @@
-
 // Define CoC encoding
 
 constant symbol Utype : TYPE
@@ -21,8 +20,9 @@ rule ekind dottype ↪ Utype
 rule ekind (dotpi2 $x $y) ↪  Π (w : etype $x), ekind ($y w)
 rule ekind (dotpi4 $x $y) ↪  Π (w : ekind $x), ekind ($y w)
 
-constant symbol true : Utype
-constant symbol tt : etype true
+
+
+// Derive first-order logic connectives
 
 definition forall P ≔  dotpi3 dottype P
 set prefix 20 "∀" ≔  forall
@@ -31,6 +31,10 @@ definition false ≔  ∀ (λ C, C)
 
 definition type_imp A B ≔  dotpi1 A (λ _, B)
 set infix right 14 "⇨" ≔  type_imp
+
+definition true ≔  false ⇨ false
+
+definition tt : etype true ≔  λ x, x
 
 definition type_neg A ≔  A ⇨ false
 set prefix      20 "¬" ≔  type_neg
@@ -44,13 +48,11 @@ set infix right 16 "∨" ≔  type_or
 definition exists P ≔  ∀ (λ C, (∀ (λ x, P x ⇨ C)) ⇨ C)
 set prefix 20 "∃" ≔  exists
 
-
-definition equiv A B ≔  (A ⇨ B) ∧ (B ⇨ A)
-
 definition eq x y ≔  dotpi3 (dotpi4 dottype (λ _, dottype))
                             (λ P, P x ⇨ P y)
 
-//Integer support
+definition equiv A B ≔  (A ⇨ B) ∧ (B ⇨ A)
+
 constant symbol Nat : Ukind
 
 constant symbol zero : ekind Nat
@@ -61,6 +63,7 @@ definition one ≔  succ zero
 
 set builtin "0"  ≔  zero
 set builtin "+1" ≔  succ
+
 
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
@@ -318,4 +321,6 @@ definition rewrite_goal : Π a b (P : Utype → Utype),
 
 
 // To verify
+
+
 
