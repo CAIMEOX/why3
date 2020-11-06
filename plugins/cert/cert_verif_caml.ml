@@ -114,12 +114,12 @@ let rec ccheck c cta =
         end
     | ERewrite (_, _, _, ctxt, i, h, c) ->
         let t, pos = find_ident "inst_quant" h cta in
-        begin match t, pos with
-        | CTbinop (Tiff, a, b), false ->
-            let cta = rewrite_ctask cta i a b ctxt in
-            ccheck c cta
-        | _ -> verif_failed "Non-rewritable proposition"
-        end
+        let a, b = match t, pos with
+          | CTbinop (Tiff, a, b), false -> a, b
+          | CTapp (CTapp (f, a), b), false when cterm_equal f eq -> a, b
+          | _ -> verif_failed "Non-rewritable proposition" in
+        let cta = rewrite_ctask cta i a b ctxt in
+        ccheck c cta
 
 let checker_caml (vs, certif) init_ct res_ct =
   try let map_cert = ccheck certif init_ct in

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<file format="whyml">
+<path name=".."/><path name="test_rewrite.mlw"/>
+<theory name="Top">
+ <goal name="G">
+ <transf name="rewrite" arg1="X">
+  <goal name="G.0">
+  </goal>
+ </transf>
+ <transf name="rewrite_ccert" arg1="X">
+  <goal name="G.0">
+  </goal>
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>
