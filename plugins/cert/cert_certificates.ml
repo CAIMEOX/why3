@@ -373,9 +373,7 @@ let rec abstract_cert = function
   | Dir (d, pr, c) -> abstract_cert (dir_smart d pr c)
   | c -> propagate_cert abstract_cert (fun pr -> pr.pr_name) abstract_term c
 
-exception Elaboration_failed of string
-
-let elab_failed s = raise (Elaboration_failed s)
+exception Elaboration_failed
 
 module Hashid = Hashtbl.Make(struct type t = ident let equal = id_equal let hash = id_hash end)
 
@@ -399,7 +397,8 @@ let rec replace_cterm tl tr t =
 let elaborate (init_ct : ctask) c =
   let rec elab (cta : ctask) c =
   match c with
-  | Nc -> elab_failed "No certificates"
+  | Nc -> eprintf "No certificates";
+          raise Elaboration_failed
   | Hole i -> EHole i
   | Axiom (i1, i2) ->
       let a, posi2 = find_ident "Axiom" i2 cta in
@@ -434,8 +433,8 @@ let elaborate (init_ct : ctask) c =
         | CTbinop (Timplies, t1, t2) ->
             let unfolded_imp = CTbinop (Tor, CTnot t1, t2), pos in
             false, add i unfolded_imp cta, t1, t2
-        | _ -> Format.eprintf "@[%a@]@." pcte t;
-               elab_failed "Nothing to unfold" in
+        | _ -> Format.eprintf "Nothing to unfold : @[%a@]@." pcte t;
+               raise Elaboration_failed in
       let pack = pos, t1, t2, i, elab cta c in
       if iff
       then EUnfoldIff pack
@@ -445,15 +444,16 @@ let elaborate (init_ct : ctask) c =
       let cta, t1, t2 = match t with
         | CTbinop (Tor, CTnot t1, t2) ->
             add i (CTbinop (Timplies, t1, t2), pos) cta, t1, t2
-        | _ -> Format.eprintf "@[%a@]@." pcte t;
-               elab_failed "Nothing to fold" in
+        | _ -> Format.eprintf "Nothing to fold : @[%a@]@." pcte t;
+               raise Elaboration_failed in
       let c = elab cta c in
       EFoldArr (pos, t1, t2, i, c)
   | Split (i, c1, c2) ->
       let t, pos = find_ident "Split" i cta in
       let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false -> t1, t2
-        | _ -> elab_failed "Not splittable" in
+        | _ -> eprintf "Not splittable";
+               raise Elaboration_failed in
       let cta1 = add i (t1, pos) cta in
       let cta2 = add i (t2, pos) cta in
       let c1 = elab cta1 c1 in
@@ -463,7 +463,8 @@ let elaborate (init_ct : ctask) c =
       let t, pos = find_ident "Destruct" i cta in
       let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), false | CTbinop (Tor, t1, t2), true -> t1, t2
-        | _ -> elab_failed "Nothing to destruct" in
+        | _ -> eprintf "Nothing to destruct";
+               raise Elaboration_failed in
       let cta = remove i cta
                 |> add j1 (t1, pos)
                 |> add j2 (t2, pos) in
@@ -498,7 +499,8 @@ let elaborate (init_ct : ctask) c =
       let t, pos = find_ident "IntroQuant" i cta in
       let t, ty = match t, pos with
         | CTquant (CTforall, ty, t), true | CTquant (CTexists, ty, t), false -> t, ty
-        | _ -> elab_failed "Nothing to introduce" in
+        | _ -> eprintf "Nothing to introduce";
+               raise Elaboration_failed in
       let cta = add i (ct_open t (CTfvar y), pos) cta
                 |> add_var y ty in (* signature is not useful when elaborating for now... *)
       EIntroQuant (pos, CTquant (CTlambda, ty, t), i, y, elab cta c)
@@ -506,7 +508,8 @@ let elaborate (init_ct : ctask) c =
       let t, pos = find_ident "InstQuant" i cta in
       let t, ty = match t, pos with
         | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true -> t, ty
-        | _ -> elab_failed "trying to instantiate a non-quantified hypothesis" in
+        | _ -> eprintf "trying to instantiate a non-quantified hypothesis";
+               raise Elaboration_failed in
       let cta = add j (ct_open t t_inst, pos) cta in
       EInstQuant (pos, CTquant (CTlambda, ty, t), i, j, t_inst, elab cta c)
   | Rewrite (i, h, c) ->
@@ -514,11 +517,8 @@ let elaborate (init_ct : ctask) c =
       let a, b = match rew_hyp with
         | CTbinop (Tiff, a, b) -> a, b
         | CTapp (CTapp (f, a), b) when cterm_equal f eq -> a, b
-        | _ -> let str_err = fprintf str_formatter
-                               "Rewrite hypothesis is badly-formed : %a"
-                               pcte rew_hyp;
-                             flush_str_formatter () in
-               elab_failed str_err in
+        | _ -> eprintf "Rewrite hypothesis is badly-formed : %a" pcte rew_hyp;
+               raise Elaboration_failed in
       let t, pos = find_ident "Finding to be rewritten goal" i cta in
       let id = id_register (id_fresh "ctxt_var") in
       let v = CTfvar id in
