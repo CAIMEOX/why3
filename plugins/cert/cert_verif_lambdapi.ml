@@ -26,9 +26,9 @@ let print_task fmt {s; gd} =
   fprintf fmt "@[<hov 3>(Π ";
   pp_print_list ~pp_sep:pp_print_space
     (fun fmt (id, cty) ->
-      fprintf fmt "(%a : %a)"
+      fprintf fmt "(%a : ekind %a)"
         pri id
-        prty cty) fmt s;
+        prtyparen cty) fmt s;
   let _, terms = List.split gd in
   let tp = terms @ [CTfalse] in
   fprintf fmt ",@]@  @[<hv 7>etype (";
