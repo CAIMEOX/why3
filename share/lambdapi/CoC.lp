@@ -7,6 +7,7 @@ symbol etype : Utype → TYPE
 symbol ekind : Ukind → TYPE
 
 constant symbol dottype : Ukind
+rule ekind dottype ↪ Utype
 
 symbol dotpi1 : Π (x : Utype), (etype x → Utype) → Utype
 symbol dotpi2 : Π (x : Utype), (etype x → Ukind) → Ukind
@@ -15,19 +16,20 @@ symbol dotpi4 : Π (x : Ukind), (ekind x → Ukind) → Ukind
 
 rule etype (dotpi1 $x $y) ↪  Π (w : etype $x), etype ($y w)
 rule etype (dotpi3 $x $y) ↪  Π (w : ekind $x), etype ($y w)
-
-rule ekind dottype ↪ Utype
 rule ekind (dotpi2 $x $y) ↪  Π (w : etype $x), ekind ($y w)
 rule ekind (dotpi4 $x $y) ↪  Π (w : ekind $x), ekind ($y w)
 
 
-
 // Derive first-order logic connectives
 
-definition forall P ≔  dotpi3 dottype P
-set prefix 20 "∀" ≔  forall
+definition arrow A B ≔  dotpi4 A (λ _, B)
+set infix right 14 "⇒" ≔  arrow
 
-definition false ≔  ∀ (λ C, C)
+set prefix 20 "∀" ≔  dotpi3
+
+definition forall ≔  ∀ dottype
+
+definition false ≔  forall (λ C, C)
 
 definition type_imp A B ≔  dotpi1 A (λ _, B)
 set infix right 14 "⇨" ≔  type_imp
@@ -39,17 +41,19 @@ definition tt : etype true ≔  λ x, x
 definition type_neg A ≔  A ⇨ false
 set prefix      20 "¬" ≔  type_neg
 
-definition type_and A B ≔  ∀ (λ C, (A ⇨ B ⇨ C) ⇨ C)
+definition type_and A B ≔  forall (λ C, (A ⇨ B ⇨ C) ⇨ C)
 set infix right 18 "∧" ≔  type_and
 
-definition type_or  A B ≔ ∀ (λ C, (A ⇨ C) ⇨ (B ⇨ C) ⇨ C)
+definition type_or  A B ≔  forall (λ C, (A ⇨ C) ⇨ (B ⇨ C) ⇨ C)
 set infix right 16 "∨" ≔  type_or
 
-definition exists P ≔  ∀ (λ C, (∀ (λ x, P x ⇨ C)) ⇨ C)
-set prefix 20 "∃" ≔  exists
+definition exists_gen T P ≔  forall (λ C, (∀ T) (λ x, P x ⇨ C) ⇨  C)
+set prefix 20 "∃" ≔  exists_gen
 
-definition eq x y ≔  dotpi3 (dotpi4 dottype (λ _, dottype))
-                            (λ P, P x ⇨ P y)
+definition exists ≔  exists_gen dottype
+
+definition eq x y ≔  (∀ (dottype ⇒ dottype))
+                       (λ P, P x ⇨ P y)
 
 definition equiv A B ≔  (A ⇨ B) ∧ (B ⇨ A)
 
