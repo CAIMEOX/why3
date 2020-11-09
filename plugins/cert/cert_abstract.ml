@@ -51,24 +51,27 @@ let prle sep pre fmt le =
   fprintf fmt "[%a]" prl le
 
 let rec prty fmt = function
-  | CTyapp (ts, l) when not (Ty.ts_equal ts Ty.ts_bool) ->
+  | CTyapp (ts, l)
+      when not (Ty.ts_equal ts Ty.ts_bool || Ty.ts_equal ts Ty.ts_int ) ->
       fprintf fmt "%a %a"
         Pretty.print_ts ts
         (prle " " prtyparen) l
   | CTarrow (t1, t2) ->
-      fprintf fmt "%a → %a"
+      fprintf fmt "%a ⇒ %a"
         prtyparen t1
         prty t2
   | ty -> prtyparen fmt ty
 
 and prtyparen fmt = function
   | CTyvar v -> prvar fmt v
-  | CTyapp (ts, _) when Ty.ts_equal ts Ty.ts_bool -> fprintf fmt "Utype"
+  | CTyapp (ts, _) when Ty.ts_equal ts Ty.ts_bool -> fprintf fmt "dottype"
+  | CTyapp (ts, _) when Ty.ts_equal ts Ty.ts_int -> fprintf fmt "Nat"
   | cty -> fprintf fmt "(%a)" prty cty
 
 and prvar fmt _ =
-  fprintf fmt "Utype"
-  (* TODO include some types in lamdapi and translate to them instead of all being Utype *)
+  fprintf fmt "Nat"
+  (* TODO include some types in lamdapi and translate to them *)
+  (* for now we only have Nat *)
   (* Pretty.print_tv fmt v *)
 
 
@@ -242,14 +245,15 @@ and prapp fmt = function
       fprintf fmt "%a %a"
         prapp ct1
         prpv ct2
-  | CTquant (q, _, t) when q <> CTlambda ->
+  | CTquant (q, ty, t) when q <> CTlambda ->
       let x = id_register (id_fresh "x") in
-      let q_str = match q with CTforall -> "forall"
-                             | CTexists -> "exists"
+      let q_str = match q with CTforall -> "∀"
+                             | CTexists -> "∃"
                              | CTlambda -> assert false in
       let t_open = ct_open t (CTfvar x) in
-      fprintf fmt "%s (λ %a, %a)"
+      fprintf fmt "(%s %a) (λ %a, %a)"
         q_str
+        prty ty
         pri x
         pcte t_open
   | ct -> prpv fmt ct
