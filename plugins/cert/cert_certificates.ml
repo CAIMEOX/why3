@@ -175,10 +175,10 @@ type ('a, 'b) ecert =
   | EInstQuant of bool * 'b * 'a * 'a * 'b * ('a, 'b) ecert
   (* InstQuant (false, P, I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
   (* InstQuant (true, P, I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
-  | ERewrite of bool * 'b * 'b * 'b * 'a * 'a * ('a, 'b) ecert
-  (* ERewrite (true, a, b, ctxt, I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : ctxt[a] ≜
+  | ERewrite of bool * ctype * 'b * 'b * 'b * 'a * 'a * ('a, 'b) ecert
+  (* ERewrite (true, _, a, b, ctxt, I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : ctxt[a] ≜
      (Γ, H : a = b ⊢ Δ, I : ctxt[b] *)
-  (* ERewrite (false, a, b, ctxt, I, H, c) ⇓ (Γ, H : a = b, I : ctxt[a] ⊢ Δ ≜
+  (* ERewrite (false, _, a, b, ctxt, I, H, c) ⇓ (Γ, H : a = b, I : ctxt[a] ⊢ Δ ≜
      (Γ, H : a = b, I : ctxt[b] ⊢ Δ *)
 
 type heavy_ecert = ident list * (ident, cterm) ecert
@@ -320,7 +320,8 @@ let propagate_ecert f fid ft = function
   | EWeakening (g, a, i, c) -> EWeakening (g, ft a, fid i, f c)
   | EIntroQuant (g, p, i, y, c) -> EIntroQuant (g, ft p, fid i, y, f c)
   | EInstQuant (g, p, i, j, t, c) -> EInstQuant (g, ft p, fid i, fid j, ft t, f c)
-  | ERewrite (g, a, b, ctxt, i, h, c) -> ERewrite (g, ft a, ft b, ft ctxt, fid i, fid h, f c)
+  | ERewrite (g, ty, a, b, ctxt, i, h, c) ->
+      ERewrite (g, ty, ft a, ft b, ft ctxt, fid i, fid h, f c)
 
 
 (* Separates hypotheses and goals *)
@@ -522,11 +523,10 @@ let elaborate (init_ct : ctask) c =
       let t, pos = find_ident "Finding to be rewritten goal" i cta in
       let id = id_register (id_fresh "ctxt_var") in
       let v = CTfvar id in
-      (* let cty = infer_type cta.sigma a in *)
-      let cty = ctbool in
+      let cty = infer_type cta.sigma a in
       let ctxt = CTquant (CTlambda, cty, ct_close id (replace_cterm a v t)) in
       let cta = rewrite_ctask cta i a b ctxt in
-      ERewrite (pos, a, b, ctxt, i, h, elab cta c)
+      ERewrite (pos, cty, a, b, ctxt, i, h, elab cta c)
   in
   elab init_ct c
 
