@@ -206,7 +206,8 @@ let rec pcte fmt = function
       let t_open = ct_open t (CTfvar x) in
       fprintf fmt "λ %a, %a"
         pri x
-        pcte t_open
+        pcte t_open;
+      forget_id ip x
   | ct -> prarr fmt ct
 
 and prarr fmt = function
@@ -255,7 +256,8 @@ and prapp fmt = function
         q_str
         prty ty
         pri x
-        pcte t_open
+        pcte t_open;
+      forget_id ip x
   | ct -> prpv fmt ct
 
 and prpv fmt = function
@@ -356,11 +358,11 @@ let prpos fmt = function
   | true  -> fprintf fmt "GOAL| "
   | false -> fprintf fmt "HYP | "
 
-let prdg fmt mid =
+let prgd fmt mid =
   Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a\n" prpos pos pri h pcte cte) mid
 
 let pcta fmt cta =
-  fprintf fmt "%a\n%a\n" prs cta.sigma prdg cta.gamma_delta
+  fprintf fmt "%a\n%a\n" prs cta.sigma prgd cta.gamma_delta
 
 let plcta fmt lcta =
   fprintf fmt "%a" (prle "========\n" pcta) lcta
@@ -460,6 +462,17 @@ let abstract_decl_acc acc decl =
   | Dparam ls ->
       let cty = type_lsymbol ls in
       add_var ls.ls_name cty acc
+  | Dlogic l ->
+      List.fold_left (fun cta (ls, ls_defn) ->
+          let cty = type_lsymbol ls in
+          let cta = add_var ls.ls_name cty cta in
+
+          let t = ls_defn_axiom ls_defn in
+          let ct = abstract_term t in
+          let nm = ls.ls_name.id_string ^ "'def" in
+          let pr = create_prsymbol (id_derive nm ls.ls_name) in
+          add pr.pr_name (ct, false) cta)
+        acc l
   | _ -> acc
 
 let abstract_tdecl_acc acc td =
