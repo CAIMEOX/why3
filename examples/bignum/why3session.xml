@@ -2,9 +2,8 @@
 <!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
-<prover id="0" name="Z3" version="4.5.0" timelimit="5" steplimit="0" memlimit="1000"/>
 <prover id="1" name="CVC4" version="1.4" timelimit="5" steplimit="0" memlimit="1000"/>
-<prover id="3" name="Z3" version="4.4.0" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="2" name="Z3" version="4.8.6" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="4" name="Alt-Ergo" version="2.0.0" timelimit="5" steplimit="0" memlimit="1000"/>
 <file format="whyml" proved="true">
 <path name=".."/><path name="bignum.mlw"/>
@@ -15,10 +14,10 @@
   <proof prover="4"><result status="valid" time="0.01" steps="15"/></proof>
   </goal>
   <goal name="nonneg&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.02"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="46062"/></proof>
   </goal>
   <goal name="nonneg&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="21219"/></proof>
+  <proof prover="2" timelimit="5"><result status="valid" time="0.05" steps="51069"/></proof>
   </goal>
  </transf>
  </goal>
@@ -28,10 +27,10 @@
   <proof prover="4"><result status="valid" time="0.01" steps="16"/></proof>
   </goal>
   <goal name="msd&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.01"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="46889"/></proof>
   </goal>
   <goal name="msd&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="19949"/></proof>
+  <proof prover="2" timelimit="5"><result status="valid" time="0.02" steps="55095"/></proof>
   </goal>
  </transf>
  </goal>
@@ -41,13 +40,13 @@
   <proof prover="4"><result status="valid" time="0.01" steps="21"/></proof>
   </goal>
   <goal name="add_digit&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.02"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="51301"/></proof>
   </goal>
   <goal name="add_digit&#39;vc.2" expl="precondition" proved="true">
   <proof prover="4"><result status="valid" time="0.00" steps="10"/></proof>
   </goal>
   <goal name="add_digit&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.03"/></proof>
+  <proof prover="2"><result status="valid" time="0.26" steps="1476536"/></proof>
   </goal>
   <goal name="add_digit&#39;vc.4" expl="postcondition" proved="true">
   <proof prover="4"><result status="valid" time="0.03" steps="82"/></proof>
@@ -84,7 +83,7 @@
   <proof prover="4"><result status="valid" time="0.03" steps="28"/></proof>
   </goal>
   <goal name="add_cin&#39;vc.9" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.07"/></proof>
+  <proof prover="2"><result status="valid" time="0.07" steps="663889"/></proof>
   </goal>
   <goal name="add_cin&#39;vc.10" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
