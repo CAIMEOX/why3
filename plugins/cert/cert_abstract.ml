@@ -37,11 +37,25 @@ and ctype_equal cty1 cty2 = ctype_equal_uncurr (cty1, cty2)
 
 (* Pretty printing of ctype (compatible with lambdapi) *)
 
-let ip = create_ident_printer []
-let san = sanitizer char_to_alnum char_to_alnum
+let san s =
+  let open String in
+  let s = sanitizer char_to_alnum char_to_alnum s in
+  let n = length s in
+  if n >= 3 && equal (sub s (n-3) 3) "def"
+  then sub s 0 (n-3) ^ "d"
+  else s
+
+let san_def s =
+  san s ^ "def"
+
+let ip = create_ident_printer ~sanitizer:san []
+let ip_def = create_ident_printer ~sanitizer:san_def []
 
 let pri fmt i =
-  fprintf fmt "%s" (id_unique ip ~sanitizer:san i)
+  fprintf fmt "%s" (id_unique ip i)
+
+let pri_def fmt i =
+  fprintf fmt "%s" (id_unique ip_def i)
 
 let prpr fmt pr =
   pri fmt pr.pr_name
@@ -63,12 +77,12 @@ let rec prty fmt = function
   | ty -> prtyparen fmt ty
 
 and prtyparen fmt = function
-  | CTyvar v -> prvar fmt v
+  | CTyvar v -> prtyvar fmt v
   | CTyapp (ts, _) when Ty.ts_equal ts Ty.ts_bool -> fprintf fmt "dottype"
   | CTyapp (ts, _) when Ty.ts_equal ts Ty.ts_int -> fprintf fmt "Nat"
   | cty -> fprintf fmt "(%a)" prty cty
 
-and prvar fmt _ =
+and prtyvar fmt _ =
   fprintf fmt "Nat"
   (* TODO include some types in lamdapi and translate to them *)
   (* for now we only have Nat *)
@@ -463,15 +477,11 @@ let abstract_decl_acc acc decl =
       let cty = type_lsymbol ls in
       add_var ls.ls_name cty acc
   | Dlogic l ->
-      List.fold_left (fun cta (ls, ls_defn) ->
+      List.fold_left (fun cta (ls, ax) ->
           let cty = type_lsymbol ls in
-          let cta = add_var ls.ls_name cty cta in
-
-          let t = ls_defn_axiom ls_defn in
-          let ct = abstract_term t in
-          let nm = ls.ls_name.id_string ^ "'def" in
-          let pr = create_prsymbol (id_derive nm ls.ls_name) in
-          add pr.pr_name (ct, false) cta)
+          let ct = abstract_term (ls_defn_axiom ax) in
+          add_var ls.ls_name cty cta
+          |> add ls.ls_name (ct, false))
         acc l
   | _ -> acc
 
