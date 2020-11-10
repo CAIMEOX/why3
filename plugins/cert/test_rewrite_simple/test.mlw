@@ -1,0 +1,7 @@
+type t
+
+constant a : t
+
+function f t t : t
+
+goal G : forall x y. x = y -> f x a = f y a
