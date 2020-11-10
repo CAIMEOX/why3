@@ -84,8 +84,12 @@ type ('I, 't) cert =
          c ⇓ (Σ | Γ ⊢ Δ, I : ∃ x : τ. P x, J : P t)
      and Σ ⊩ t : τ *)
   | Rewrite of 'I * 'I * ('I, 't) cert
-  (* Rewrite (I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : C[a] ≜  (Γ, H : a = b ⊢ Δ, I : C[b] *)
-  (* Rewrite (I, H, c) ⇓ (Γ, H : a = b, I : C[a] ⊢ Δ ≜  (Γ, H : a = b, I : C[b] ⊢ Δ *)
+  (* Rewrite (I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : C[a]) ≜
+     c ⇓ (Γ, H : a = b ⊢ Δ, I : C[b])
+     TODO expliquer C
+   *)
+  (* Rewrite (I, H, c) ⇓ (Γ, H : a = b, I : C[a] ⊢ Δ) ≜
+     c ⇓ (Γ, H : a = b, I : C[b] ⊢ Δ) *)
 
 type vcert = (prsymbol, term) cert
 
@@ -398,7 +402,7 @@ let rec replace_cterm tl tr t =
 let elaborate (init_ct : ctask) c =
   let rec elab (cta : ctask) c =
   match c with
-  | Nc -> eprintf "No certificates";
+  | Nc -> eprintf "No certificates@.";
           raise Elaboration_failed
   | Hole i -> EHole i
   | Axiom (i1, i2) ->
@@ -434,7 +438,7 @@ let elaborate (init_ct : ctask) c =
         | CTbinop (Timplies, t1, t2) ->
             let unfolded_imp = CTbinop (Tor, CTnot t1, t2), pos in
             false, add i unfolded_imp cta, t1, t2
-        | _ -> Format.eprintf "Nothing to unfold : @[%a@]@." pcte t;
+        | _ -> eprintf "Nothing to unfold : @[%a@]@." pcte t;
                raise Elaboration_failed in
       let pack = pos, t1, t2, i, elab cta c in
       if iff
@@ -445,7 +449,7 @@ let elaborate (init_ct : ctask) c =
       let cta, t1, t2 = match t with
         | CTbinop (Tor, CTnot t1, t2) ->
             add i (CTbinop (Timplies, t1, t2), pos) cta, t1, t2
-        | _ -> Format.eprintf "Nothing to fold : @[%a@]@." pcte t;
+        | _ -> eprintf "Nothing to fold : @[%a@]@." pcte t;
                raise Elaboration_failed in
       let c = elab cta c in
       EFoldArr (pos, t1, t2, i, c)
@@ -453,7 +457,7 @@ let elaborate (init_ct : ctask) c =
       let t, pos = find_ident "Split" i cta in
       let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false -> t1, t2
-        | _ -> eprintf "Not splittable";
+        | _ -> eprintf "Not splittable@.";
                raise Elaboration_failed in
       let cta1 = add i (t1, pos) cta in
       let cta2 = add i (t2, pos) cta in
@@ -464,7 +468,7 @@ let elaborate (init_ct : ctask) c =
       let t, pos = find_ident "Destruct" i cta in
       let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), false | CTbinop (Tor, t1, t2), true -> t1, t2
-        | _ -> eprintf "Nothing to destruct";
+        | _ -> eprintf "Nothing to destruct@.";
                raise Elaboration_failed in
       let cta = remove i cta
                 |> add j1 (t1, pos)
@@ -500,7 +504,7 @@ let elaborate (init_ct : ctask) c =
       let t, pos = find_ident "IntroQuant" i cta in
       let t, ty = match t, pos with
         | CTquant (CTforall, ty, t), true | CTquant (CTexists, ty, t), false -> t, ty
-        | _ -> eprintf "Nothing to introduce";
+        | _ -> eprintf "Nothing to introduce@.";
                raise Elaboration_failed in
       let cta = add i (ct_open t (CTfvar y), pos) cta
                 |> add_var y ty in (* signature is not useful when elaborating for now... *)
@@ -509,7 +513,7 @@ let elaborate (init_ct : ctask) c =
       let t, pos = find_ident "InstQuant" i cta in
       let t, ty = match t, pos with
         | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true -> t, ty
-        | _ -> eprintf "trying to instantiate a non-quantified hypothesis";
+        | _ -> eprintf "trying to instantiate a non-quantified hypothesis@.";
                raise Elaboration_failed in
       let cta = add j (ct_open t t_inst, pos) cta in
       EInstQuant (pos, CTquant (CTlambda, ty, t), i, j, t_inst, elab cta c)
@@ -518,7 +522,7 @@ let elaborate (init_ct : ctask) c =
       let a, b = match rew_hyp with
         | CTbinop (Tiff, a, b) -> a, b
         | CTapp (CTapp (f, a), b) when cterm_equal f eq -> a, b
-        | _ -> eprintf "Rewrite hypothesis is badly-formed : %a" pcte rew_hyp;
+        | _ -> eprintf "Rewrite hypothesis is badly-formed : %a@." pcte rew_hyp;
                raise Elaboration_failed in
       let t, pos = find_ident "Finding to be rewritten goal" i cta in
       let id = id_register (id_fresh "ctxt_var") in

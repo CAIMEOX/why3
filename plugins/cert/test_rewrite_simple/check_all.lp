@@ -332,3 +332,17 @@ definition rewrite_goal : Π T a b P,
 
 
 
+definition to_verify t :
+  (Π (a : ekind (t))
+     (f : ekind ((t) ⇒ (t) ⇒ t)) (x : ekind (t))
+     (y : ekind (t)),
+   etype (¬ (eq t (f y a) (f y a)) ⇨ eq t x y ⇨ false)) →
+  (Π (a : ekind (t))
+     (f : ekind ((t) ⇒ (t) ⇒ t)) (x : ekind (t))
+     (y : ekind (t)),
+   etype (¬ (eq t (f x a) (f y a)) ⇨ eq t x y ⇨ false))
+≔  λ s a f x y G H,
+     rewrite_goal (t) x y (λ x1, eq t (f x1 a) (f y a))
+     (λ H G, s a f x y G H)
+     H
+     G
