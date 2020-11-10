@@ -58,14 +58,8 @@
   </transf>
   </goal>
  </transf>
- <transf name="intro_lcert" proved="true" >
-  <goal name="intro_forall.0" proved="true">
-  <transf name="intro_lcert" proved="true" >
-   <goal name="intro_forall.0.0" proved="true">
-   <transf name="assumption_lcert" proved="true" >
-   </transf>
-   </goal>
-  </transf>
+ <transf name="intro_lcert" >
+  <goal name="intro_forall.0">
   </goal>
  </transf>
  </goal>

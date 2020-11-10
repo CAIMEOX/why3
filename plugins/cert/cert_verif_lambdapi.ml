@@ -138,13 +138,13 @@ let print_certif at fmt c =
         prpv t
         pri i pri j pc c
         pri i
-  | ERewrite (goal, a, b, ctxt, i, h, c) ->
-      fprintf fmt "rewrite%s %a %a %a@ \
+  | ERewrite (goal, ty, a, b, ctxt, i, h, c) ->
+      fprintf fmt "rewrite%s %a %a %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
                    %a@ \
                    %a"
         (rstr goal)
-        prpv a prpv b prpv ctxt
+        prtyparen ty prpv a prpv b prpv ctxt
         pri h pri i pc c
         pri h
         pri i

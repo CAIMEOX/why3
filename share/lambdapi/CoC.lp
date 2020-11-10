@@ -52,7 +52,7 @@ set prefix 20 "∃" ≔  exists_gen
 
 definition exists ≔  exists_gen dottype
 
-definition eq x y ≔  (∀ (dottype ⇒ dottype))
+definition eq T x y ≔  (∀ (T ⇒ dottype))
                        (λ P, P x ⇨ P y)
 
 definition equiv A B ≔  (A ⇨ B) ∧ (B ⇨ A)
@@ -153,14 +153,14 @@ definition exists_elim : Π P Q, etype (exists P) →  (Π x, etype (P x ⇨ Q))
 
 // Equality
 
-definition eq_refl : Π x, etype (eq x x)
-≔  λ x P px, px
+definition eq_refl : Π T x, etype (eq T x x)
+≔  λ T x P px, px
 
-definition eq_sym : Π x y, etype (eq x y) → etype (eq y x)
-≔  λ x y eqxy, eqxy (λ t, eq t x) (eq_refl x)
+definition eq_sym : Π T x y, etype (eq T x y) → etype (eq T y x)
+≔  λ T x y eqxy, eqxy (λ t, eq T t x) (eq_refl T x)
 
-definition eq_trans : Π x y z, etype (eq x y) → etype (eq y z) → etype (eq x z)
-≔  λ x y z eqxy eqyz, eqyz (λ t, eq x t) eqxy
+definition eq_trans : Π T x y z, etype (eq T x y) → etype (eq T y z) → etype (eq T x z)
+≔  λ T x y z eqxy eqyz, eqyz (λ t, eq T x t) eqxy
 
 
 
@@ -312,15 +312,15 @@ definition inst_quant_hyp : Π P t,
     etype (hyp (forall (λ x, P x)) empty)
 ≔  λ P t s h, s h (h t)
 
-definition rewrite_hyp : Π a b (P : Utype → Utype),
-   etype (hyp (eq a b) (hyp (P b) empty)) →
-   etype (hyp (eq a b) (hyp (P a) empty))
-≔  λ a b P s h i, s h (h P i)
+definition rewrite_hyp : Π T a b P,
+   etype (hyp (eq T a b) (hyp (P b) empty)) →
+   etype (hyp (eq T a b) (hyp (P a) empty))
+≔  λ T a b P s h i, s h (h P i)
 
-definition rewrite_goal : Π a b (P : Utype → Utype),
-   etype (hyp (eq a b) (goal (P b) empty)) →
-   etype (hyp (eq a b) (goal (P a) empty))
-≔  λ a b P s h i, s h (h (λ x, ¬ P x) i)
+definition rewrite_goal : Π T a b P,
+   etype (hyp (eq T a b) (goal (P b) empty)) →
+   etype (hyp (eq T a b) (goal (P a) empty))
+≔  λ T a b P s h i, s h (h (λ x, ¬ P x) i)
 
 
 

@@ -14,12 +14,6 @@
   </transf>
   </goal>
  </transf>
- <transf name="intro_lcert" >
-  <goal name="G.0">
-  <transf name="blast_lcert" proved="true" >
-  </transf>
-  </goal>
- </transf>
  </goal>
 </theory>
 </file>
