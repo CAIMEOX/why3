@@ -53,19 +53,19 @@
   <proof prover="1"><result status="valid" time="0.02" steps="129"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.14" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.04" steps="438"/></proof>
+  <proof prover="1"><result status="valid" time="0.04" steps="431"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.15" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.12" steps="1221"/></proof>
+  <proof prover="1"><result status="valid" time="0.12" steps="1089"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.16" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.12" steps="886"/></proof>
+  <proof prover="1"><result status="valid" time="0.12" steps="710"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="161"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="155"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.18" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.30" steps="58795"/></proof>
+  <proof prover="3"><result status="valid" time="0.30" steps="58619"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.19" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.41" steps="91201"/></proof>
@@ -92,7 +92,7 @@
   <proof prover="3"><result status="valid" time="0.02" steps="9885"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.27" expl="out of loop bounds" proved="true">
-  <proof prover="3"><result status="valid" time="0.05" steps="16842"/></proof>
+  <proof prover="3"><result status="valid" time="0.05" steps="16422"/></proof>
   </goal>
  </transf>
  </goal>

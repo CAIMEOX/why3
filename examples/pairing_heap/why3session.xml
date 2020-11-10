@@ -60,7 +60,7 @@
   <proof prover="0"><result status="valid" time="0.01" steps="14"/></proof>
   </goal>
   <goal name="root_is_minimum&#39;vc.1" expl="postcondition" proved="true">
-  <proof prover="0" timelimit="1"><result status="valid" time="0.77" steps="2560"/></proof>
+  <proof prover="0" timelimit="1"><result status="valid" time="0.59" steps="2560"/></proof>
   </goal>
  </transf>
  </goal>
@@ -82,10 +82,10 @@
   <proof prover="0"><result status="valid" time="0.01" steps="18"/></proof>
   </goal>
   <goal name="merge&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="256"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="223"/></proof>
   </goal>
   <goal name="merge&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="258"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="225"/></proof>
   </goal>
   <goal name="merge&#39;vc.5" expl="postcondition" proved="true">
   <transf name="split_vc" proved="true" >
@@ -99,10 +99,10 @@
    <proof prover="0"><result status="valid" time="0.00" steps="18"/></proof>
    </goal>
    <goal name="merge&#39;vc.5.3" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.01" steps="30"/></proof>
+   <proof prover="0"><result status="valid" time="0.01" steps="22"/></proof>
    </goal>
    <goal name="merge&#39;vc.5.4" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.01" steps="30"/></proof>
+   <proof prover="0"><result status="valid" time="0.01" steps="22"/></proof>
    </goal>
   </transf>
   </goal>
@@ -118,10 +118,10 @@
    <proof prover="0"><result status="valid" time="0.01" steps="21"/></proof>
    </goal>
    <goal name="merge&#39;vc.6.3" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.03" steps="264"/></proof>
+   <proof prover="0"><result status="valid" time="0.03" steps="241"/></proof>
    </goal>
    <goal name="merge&#39;vc.6.4" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.03" steps="266"/></proof>
+   <proof prover="0"><result status="valid" time="0.03" steps="243"/></proof>
    </goal>
   </transf>
   </goal>
@@ -136,46 +136,46 @@
  <goal name="merge_pairs&#39;vc" expl="VC for merge_pairs" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="merge_pairs&#39;vc.0" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="18"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="16"/></proof>
   </goal>
   <goal name="merge_pairs&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="20"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="18"/></proof>
   </goal>
   <goal name="merge_pairs&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="20"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="18"/></proof>
   </goal>
   <goal name="merge_pairs&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.00" steps="24"/></proof>
+  <proof prover="0"><result status="valid" time="0.00" steps="20"/></proof>
   </goal>
   <goal name="merge_pairs&#39;vc.4" expl="variant decrease" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="27"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="23"/></proof>
   </goal>
   <goal name="merge_pairs&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="26"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="22"/></proof>
   </goal>
   <goal name="merge_pairs&#39;vc.6" expl="postcondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="merge_pairs&#39;vc.6.0" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.01" steps="20"/></proof>
+   <proof prover="0"><result status="valid" time="0.01" steps="18"/></proof>
    </goal>
    <goal name="merge_pairs&#39;vc.6.1" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.01" steps="22"/></proof>
+   <proof prover="0"><result status="valid" time="0.01" steps="20"/></proof>
    </goal>
    <goal name="merge_pairs&#39;vc.6.2" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.00" steps="32"/></proof>
+   <proof prover="0"><result status="valid" time="0.00" steps="28"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="merge_pairs&#39;vc.7" expl="postcondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="merge_pairs&#39;vc.7.0" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.03" steps="23"/></proof>
+   <proof prover="0"><result status="valid" time="0.03" steps="21"/></proof>
    </goal>
    <goal name="merge_pairs&#39;vc.7.1" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.01" steps="77"/></proof>
+   <proof prover="0"><result status="valid" time="0.01" steps="75"/></proof>
    </goal>
    <goal name="merge_pairs&#39;vc.7.2" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.02" steps="200"/></proof>
+   <proof prover="0"><result status="valid" time="0.02" steps="194"/></proof>
    </goal>
   </transf>
   </goal>

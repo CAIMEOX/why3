@@ -26,85 +26,85 @@
   <proof prover="0" timelimit="5" memlimit="2000"><result status="valid" time="1.58" steps="181340"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.5" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.10" steps="15760"/></proof>
+  <proof prover="0"><result status="valid" time="0.10" steps="14366"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.6" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.11" steps="16021"/></proof>
+  <proof prover="0"><result status="valid" time="0.11" steps="15711"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.7" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.08" steps="15007"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="14489"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.8" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.09" steps="15958"/></proof>
+  <proof prover="0"><result status="valid" time="0.09" steps="14450"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.9" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.16" steps="28933"/></proof>
+  <proof prover="0"><result status="valid" time="0.16" steps="28455"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.10" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.08" steps="15206"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="14573"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.11" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.10" steps="16166"/></proof>
+  <proof prover="0"><result status="valid" time="0.10" steps="14619"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.12" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.23" steps="28322"/></proof>
+  <proof prover="0"><result status="valid" time="0.23" steps="27834"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.13" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="15410"/></proof>
+  <proof prover="0"><result status="valid" time="0.07" steps="14742"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.14" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.08" steps="16379"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="14791"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.15" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.20" steps="28360"/></proof>
+  <proof prover="0"><result status="valid" time="0.20" steps="27862"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.16" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.08" steps="15619"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="14914"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.17" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.09" steps="16598"/></proof>
+  <proof prover="0"><result status="valid" time="0.09" steps="14969"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.18" expl="postcondition" proved="true">
-  <proof prover="0" timelimit="5" memlimit="2000"><result status="valid" time="0.10" steps="16726"/></proof>
+  <proof prover="0" timelimit="5" memlimit="2000"><result status="valid" time="0.10" steps="16359"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.19" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="15834"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="15085"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.20" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.10" steps="16823"/></proof>
+  <proof prover="0"><result status="valid" time="0.10" steps="15153"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.21" expl="postcondition" proved="true">
-  <proof prover="0" timelimit="5" memlimit="2000"><result status="valid" time="0.07" steps="16951"/></proof>
+  <proof prover="0" timelimit="5" memlimit="2000"><result status="valid" time="0.07" steps="16574"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.22" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="16055"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="15269"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.23" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.10" steps="17054"/></proof>
+  <proof prover="0"><result status="valid" time="0.10" steps="15343"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.24" expl="postcondition" proved="true">
-  <proof prover="0" timelimit="5" memlimit="2000"><result status="valid" time="0.07" steps="17182"/></proof>
+  <proof prover="0" timelimit="5" memlimit="2000"><result status="valid" time="0.07" steps="16795"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.25" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="16282"/></proof>
+  <proof prover="0"><result status="valid" time="0.07" steps="15459"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.26" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.10" steps="17291"/></proof>
+  <proof prover="0"><result status="valid" time="0.10" steps="15539"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.27" expl="postcondition" proved="true">
-  <proof prover="0" timelimit="5" memlimit="2000"><result status="valid" time="0.07" steps="17419"/></proof>
+  <proof prover="0" timelimit="5" memlimit="2000"><result status="valid" time="0.07" steps="17022"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.28" expl="postcondition" proved="true">
-  <proof prover="0" timelimit="5" memlimit="2000"><result status="valid" time="0.06" steps="16515"/></proof>
+  <proof prover="0" timelimit="5" memlimit="2000"><result status="valid" time="0.06" steps="15655"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.29" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.12" steps="17093"/></proof>
+  <proof prover="0"><result status="valid" time="0.12" steps="15650"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.30" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.08" steps="16123"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="14214"/></proof>
   </goal>
   <goal name="wmpn_base_power_of_two_p&#39;vc.31" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.30" steps="55804"/></proof>
+  <proof prover="0"><result status="valid" time="0.30" steps="55413"/></proof>
   </goal>
  </transf>
  </goal>
@@ -127,38 +127,38 @@
  <goal name="pow_compat&#39;vc" expl="VC for pow_compat" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="pow_compat&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="0"><result status="valid" time="0.08" steps="14163"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="14090"/></proof>
   </goal>
   <goal name="pow_compat&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="12966"/></proof>
+  <proof prover="0"><result status="valid" time="0.06" steps="12948"/></proof>
   </goal>
   <goal name="pow_compat&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="14201"/></proof>
+  <proof prover="0"><result status="valid" time="0.07" steps="14164"/></proof>
   </goal>
   <goal name="pow_compat&#39;vc.3" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="pow_compat&#39;vc.3.0" expl="assertion" proved="true">
-   <proof prover="0"><result status="valid" time="0.06" steps="14205"/></proof>
+   <proof prover="0"><result status="valid" time="0.06" steps="13000"/></proof>
    </goal>
    <goal name="pow_compat&#39;vc.3.1" expl="VC for pow_compat" proved="true">
-   <proof prover="0"><result status="valid" time="0.12" steps="16397"/></proof>
+   <proof prover="0"><result status="valid" time="0.12" steps="16289"/></proof>
    </goal>
    <goal name="pow_compat&#39;vc.3.2" expl="VC for pow_compat" proved="true">
-   <proof prover="4"><result status="valid" time="0.01" steps="32"/></proof>
+   <proof prover="4"><result status="valid" time="0.01" steps="29"/></proof>
    </goal>
    <goal name="pow_compat&#39;vc.3.3" expl="VC for pow_compat" proved="true">
-   <proof prover="4"><result status="valid" time="0.01" steps="32"/></proof>
+   <proof prover="4"><result status="valid" time="0.01" steps="29"/></proof>
    </goal>
    <goal name="pow_compat&#39;vc.3.4" expl="VC for pow_compat" proved="true">
-   <proof prover="0"><result status="valid" time="0.06" steps="16356"/></proof>
+   <proof prover="0"><result status="valid" time="0.06" steps="16262"/></proof>
    </goal>
    <goal name="pow_compat&#39;vc.3.5" expl="VC for pow_compat" proved="true">
-   <proof prover="0"><result status="valid" time="0.08" steps="14581"/></proof>
+   <proof prover="0"><result status="valid" time="0.08" steps="14354"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="pow_compat&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="14516"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="14423"/></proof>
   </goal>
  </transf>
  </goal>
@@ -221,16 +221,16 @@
   <proof prover="4"><result status="valid" time="0.02" steps="39"/></proof>
   </goal>
   <goal name="wmpn_get_base_info&#39;vc.8" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.13" steps="18486"/></proof>
+  <proof prover="0"><result status="valid" time="0.13" steps="18471"/></proof>
   </goal>
   <goal name="wmpn_get_base_info&#39;vc.9" expl="loop variant decrease" proved="true">
   <proof prover="2"><result status="valid" time="0.04"/></proof>
   </goal>
   <goal name="wmpn_get_base_info&#39;vc.10" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.04" steps="47"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="43"/></proof>
   </goal>
   <goal name="wmpn_get_base_info&#39;vc.11" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.02" steps="49"/></proof>
+  <proof prover="4"><result status="valid" time="0.02" steps="45"/></proof>
   </goal>
   <goal name="wmpn_get_base_info&#39;vc.12" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
