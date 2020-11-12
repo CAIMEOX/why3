@@ -73,6 +73,16 @@ set builtin "0"  ≔  zero
 set builtin "+1" ≔  succ
 
 
+definition infixspeq ≔  eq Nat
+
+
+// Booleans
+
+constant symbol Bool : Ukind
+
+constant symbol True : ekind Bool
+constant symbol False : ekind Bool
+
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
 
@@ -149,11 +159,11 @@ definition forall_elim : Π P t, etype (forall P) → etype (P t)
 
 // Existential quantifier
 
-definition exists_intro : Π P t, etype (P t) → etype (exists P)
-≔  λ P t pt C (q : Π x, etype (P x) → etype C), q t pt
+definition exists_intro : Π T P t, etype (P t) → etype ((∃ T) P)
+≔  λ T P t pt C (q : Π x, etype (P x) → etype C), q t pt
 
-definition exists_elim : Π P Q, etype (exists P) →  (Π x, etype (P x ⇨ Q)) → etype Q
-≔  λ P Q e pq, e Q pq
+definition exists_elim : Π T P Q, etype ((∃ T) P) →  (Π x, etype (P x ⇨ Q)) → etype Q
+≔  λ T P Q e pq, e Q pq
 
 // Equality
 
@@ -296,25 +306,25 @@ definition weakening_goal : Π A,
     etype (goal A empty)
 ≔  λ A f _, f
 
-definition intro_quant_hyp : Π P,
+definition intro_quant_hyp : Π T (P : ekind (T ⇒ dottype)),
     (Π y, etype (hyp (P y) empty)) →
-    etype (hyp (exists P) empty)
-≔  λ P s ep, exists_elim P false ep s
+    etype (hyp ((∃ T) P) empty)
+≔  λ T P s ep, exists_elim T P false ep s
 
-definition intro_quant_goal : Π P,
+definition intro_quant_goal : Π T P,
     (Π y, etype (goal (P y) empty)) →
-    etype (goal (forall P) empty)
-≔  λ P s nfp, nfp (λ t, nne (P t) (s t))
+    etype (goal ((∀ T) P) empty)
+≔  λ T P s nfp, nfp (λ t, nne (P t) (s t))
 
-definition inst_quant_goal : Π P t,
-    etype (goal (exists P) (goal (P t) empty)) →
-    etype (goal (exists P) empty)
-≔  λ P t s nep, s nep (λ pt, nep (exists_intro P t pt))
+definition inst_quant_goal : Π T P t,
+    etype (goal ((∃ T) P) (goal (P t) empty)) →
+    etype (goal ((∃ T) P) empty)
+≔  λ T P t s nep, s nep (λ pt, nep (exists_intro T P t pt))
 
-definition inst_quant_hyp : Π P t,
-    etype (hyp (forall (λ x, P x)) (hyp (P t) empty)) →
-    etype (hyp (forall (λ x, P x)) empty)
-≔  λ P t s h, s h (h t)
+definition inst_quant_hyp : Π T P t,
+    etype (hyp ((∀ T) (λ x, P x)) (hyp (P t) empty)) →
+    etype (hyp ((∀ T) (λ x, P x)) empty)
+≔  λ T P t s h, s h (h t)
 
 definition rewrite_hyp : Π T a b P,
    etype (hyp (eq T a b) (hyp (P b) empty)) →

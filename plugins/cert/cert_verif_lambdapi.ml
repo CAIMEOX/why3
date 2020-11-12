@@ -9,8 +9,7 @@ open Cert_certificates
    x₁ : ty₁,.., xᵢ : tyᵢ | H₁ : A₁,.., Hⱼ : Aⱼ ⊢ G₁ : B₁, ..., Gₖ : Bₖ
    by the formula
    ∀ x₁ : ty₁, ... ∀ xᵢ: tyᵢ, A₁ → ... → Aⱼ → ¬B₁ → ... → ¬Bₖ → ⊥
-   As an intermediate data structure, we use lists in order to fix the order
-   and remember the idents which are used to construct the proof term.
+   As an intermediate data structure we use lists to fix the order
  *)
 type ctask_simple =
   { s  : (ident * ctype) list;
@@ -150,9 +149,6 @@ let print_certif at fmt c =
         hpri i
   in
   pc fmt c
-
-let pp_print_blank fmt () =
-  fprintf fmt " "
 
 let print fmt init res (task_ids, certif) =
   let res = List.map simplify_task res in
