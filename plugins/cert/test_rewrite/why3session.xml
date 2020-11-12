@@ -12,6 +12,10 @@
    <goal name="G.0.0">
    </goal>
   </transf>
+  <transf name="rewrite_ccert" arg1="X">
+   <goal name="G.0.0">
+   </goal>
+  </transf>
   </goal>
  </transf>
  </goal>
