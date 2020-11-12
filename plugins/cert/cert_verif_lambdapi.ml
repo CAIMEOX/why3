@@ -46,19 +46,19 @@ let print_certif at fmt c =
   | EAxiom (t, h, g) ->
       fprintf fmt "axiom %a %a %a"
         prpv t
-        pri h
-        pri g
+        hpri h
+        hpri g
   | ETrivial (goal, g) ->
       fprintf fmt "trivial%s %a"
         (rstr goal)
-        pri g
+        hpri g
   | ECut (i, a, ce1, ce2) ->
       fprintf fmt "cut %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    (λ %a, @[<hv>%a@])"
         prpv a
-        pri i pc ce1
-        pri i pc ce2
+        hpri i pc ce1
+        hpri i pc ce2
   | ESplit (goal, a, b, i, c1, c2) ->
       fprintf fmt "split%s %a %a@ \
                    (λ %a, @[<hv>%a@])@ \
@@ -67,9 +67,9 @@ let print_certif at fmt c =
         (rstr goal)
         prpv a
         prpv b
-        pri i pc c1
-        pri i pc c2
-        pri i
+        hpri i pc c1
+        hpri i pc c2
+        hpri i
   | EUnfoldIff (goal, a, b, i, c) ->
       fprintf fmt "unfold_iff%s %a %a@ \
                    (λ %a, @[<hv>%a@])@ \
@@ -77,8 +77,8 @@ let print_certif at fmt c =
         (rstr goal)
         prpv a
         prpv b
-        pri i pc c
-        pri i
+        hpri i pc c
+        hpri i
   | EUnfoldArr (goal, a, b, i, c) ->
       fprintf fmt "unfold_arr%s %a %a@ \
                    (λ %a, @[<hv>%a@])@ \
@@ -86,24 +86,24 @@ let print_certif at fmt c =
         (rstr goal)
         prpv a
         prpv b
-        pri i pc c
-        pri i
+        hpri i pc c
+        hpri i
   | ESwapNeg (goal, a, i, c) ->
       fprintf fmt "swap_neg%s %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv a
-        pri i pc c
-        pri i
+        hpri i pc c
+        hpri i
   | ESwap (goal, a, i, c) ->
       fprintf fmt "swap%s %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv a
-        pri i pc c
-        pri i
+        hpri i pc c
+        hpri i
   | EDestruct (goal, a, b, i, j1, j2, c) ->
       fprintf fmt "destruct%s %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
@@ -111,8 +111,8 @@ let print_certif at fmt c =
         (rstr goal)
         prpv a
         prpv b
-        pri j1 pri j2 pc c
-        pri i
+        hpri j1 hpri j2 pc c
+        hpri i
   | EWeakening (goal, a, i, c) ->
       fprintf fmt "weakening%s %a@ \
                    (@[<hv>%a@])@ \
@@ -120,15 +120,15 @@ let print_certif at fmt c =
         (rstr goal)
         prpv a
         pc c
-        pri i
+        hpri i
   | EIntroQuant (goal, p, i, y, c) ->
       fprintf fmt "intro_quant%s %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv p
-        pri y pri i pc c
-        pri i
+        pri y hpri i pc c
+        hpri i
   | EInstQuant (goal, p, i, j, t, c) ->
       fprintf fmt "inst_quant%s %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
@@ -136,8 +136,8 @@ let print_certif at fmt c =
         (rstr goal)
         prpv p
         prpv t
-        pri i pri j pc c
-        pri i
+        hpri i hpri j pc c
+        hpri i
   | ERewrite (goal, ty, a, b, ctxt, i, h, c) ->
       fprintf fmt "rewrite%s %a %a %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
@@ -145,10 +145,9 @@ let print_certif at fmt c =
                    %a"
         (rstr goal)
         prtyparen ty prpv a prpv b prpv ctxt
-        pri h pri i pc c
-        pri h
-        pri i
-      (* verif_failed "Rewrite is not yet supported by the Lambdapi checker" *)
+        hpri h hpri i pc c
+        hpri h
+        hpri i
   in
   pc fmt c
 
@@ -167,8 +166,9 @@ let print fmt init res (task_ids, certif) =
     List.map2 (fun task_id {s; gd} ->
         let fv_ids, _ = List.split s in
         let hyp_ids, _ = List.split gd in
-        pp_print_list ~pp_sep:pp_print_blank
-          pri str_formatter (task_id :: fv_ids @ hyp_ids);
+        fprintf str_formatter "%a %a"
+          (pp_print_list ~pp_sep:pp_print_blank pri) (task_id :: fv_ids)
+          (pp_print_list ~pp_sep:pp_print_blank hpri) hyp_ids;
         flush_str_formatter ())
       task_ids
       res in
@@ -177,9 +177,9 @@ let print fmt init res (task_ids, certif) =
     let {s; gd} = init in
     let fv_ids, _ = List.split s in
     let hyp_ids, _ = List.split gd in
-    let vars = task_ids @ fv_ids @ hyp_ids in
-    fprintf fmt "λ ";
-    pp_print_list ~pp_sep:pp_print_blank pri fmt vars;
+    fprintf fmt "λ %a %a"
+          (pp_print_list ~pp_sep:pp_print_blank pri) (task_ids @ fv_ids)
+          (pp_print_list ~pp_sep:pp_print_blank hpri) hyp_ids;
     fprintf fmt ",@ ";
     print_certif applied_tasks fmt certif in
 
@@ -187,7 +187,8 @@ let print fmt init res (task_ids, certif) =
                @[<v>%a@]@ \
                ≔  @[<v>%a@]@]@."
     p_type ()
-    p_term ()
+    p_term ();
+  forget_all ip
 
 let checker_lambdapi certif init res =
   try

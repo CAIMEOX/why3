@@ -37,25 +37,20 @@ and ctype_equal cty1 cty2 = ctype_equal_uncurr (cty1, cty2)
 
 (* Pretty printing of ctype (compatible with lambdapi) *)
 
-let san s =
-  let open String in
-  let s = sanitizer char_to_alnum char_to_alnum s in
-  let n = length s in
-  if n >= 3 && equal (sub s (n-3) 3) "def"
-  then sub s 0 (n-3) ^ "d"
-  else s
+let san =
+  let lower_h c = if c = 'H' then "h" else char_to_alnum c in
+  sanitizer lower_h char_to_alnum
 
-let san_def s =
-  san s ^ "def"
+let hsan s =
+  "H" ^ san s
 
-let ip = create_ident_printer ~sanitizer:san []
-let ip_def = create_ident_printer ~sanitizer:san_def []
+let ip = create_ident_printer []
 
 let pri fmt i =
-  fprintf fmt "%s" (id_unique ip i)
+  fprintf fmt "%s" (id_unique ~sanitizer:san ip i)
 
-let pri_def fmt i =
-  fprintf fmt "%s" (id_unique ip_def i)
+let hpri fmt i =
+  fprintf fmt "%s" (id_unique ~sanitizer:hsan ip i)
 
 let prpr fmt pr =
   pri fmt pr.pr_name
@@ -328,9 +323,18 @@ type ctask =
      where <H> is mapped to <(P, false)> in <gamma_delta>
    • <Δ> contains all the declarations <H : P>
      where <H> is mapped to <(P,  true)> in <gamma_delta>
+
+   We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ>
 *)
 
 (** Utility functions on ctask *)
+
+let find_ident s h cta =
+  match Mid.find_opt h cta.gamma_delta with
+  | Some x -> x
+  | None ->
+      fprintf str_formatter "%s : Can't find ident %a in the task" s pri h;
+      verif_failed (flush_str_formatter ())
 
 let ctask_empty =
   { sigma = Mid.empty;
