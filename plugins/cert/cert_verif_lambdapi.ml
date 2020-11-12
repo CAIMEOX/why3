@@ -120,19 +120,21 @@ let print_certif at fmt c =
         prpv a
         pc c
         hpri i
-  | EIntroQuant (goal, p, i, y, c) ->
-      fprintf fmt "intro_quant%s %a@ \
+  | EIntroQuant (goal, (CTquant (_, cty, _) as p), i, y, c) ->
+      fprintf fmt "intro_quant%s %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
+        prty cty
         prpv p
         pri y hpri i pc c
         hpri i
-  | EInstQuant (goal, p, i, j, t, c) ->
-      fprintf fmt "inst_quant%s %a %a@ \
+  | EInstQuant (goal, (CTquant (_, cty, _) as p), i, j, t, c) ->
+      fprintf fmt "inst_quant%s %a %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
+        prty cty
         prpv p
         prpv t
         hpri i hpri j pc c
@@ -147,6 +149,7 @@ let print_certif at fmt c =
         hpri h hpri i pc c
         hpri h
         hpri i
+  | _ -> assert false
   in
   pc fmt c
 
