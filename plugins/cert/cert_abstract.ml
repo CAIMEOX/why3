@@ -7,6 +7,10 @@ open Task
 open Ty
 open Format
 
+(** Utility **)
+let pp_print_blank fmt () =
+  fprintf fmt " "
+
 exception Certif_verification_failed of string
 let verif_failed s = raise (Certif_verification_failed s)
 
@@ -20,8 +24,11 @@ type ctype =
   | CTyapp of tysymbol * ctype list
   | CTarrow of ctype * ctype
 
-let ctbool = CTyapp (Ty.ts_bool, [])
-let ctint = CTyapp (Ty.ts_int, [])
+let ts_prop = create_tysymbol (id_fresh "prop") [] NoDef
+
+let ctprop = CTyapp (ts_prop, [])
+let ctbool = CTyapp (ts_bool, [])
+let ctint = CTyapp (ts_int, [])
 
 (** Utility functions on ctype *)
 
@@ -55,33 +62,29 @@ let hpri fmt i =
 let prpr fmt pr =
   pri fmt pr.pr_name
 
-let prle sep pre fmt le =
-  let prl = pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt sep) pre in
-  fprintf fmt "[%a]" prl le
-
-let rec prty fmt = function
-  | CTyapp (ts, l)
-      when not (Ty.ts_equal ts Ty.ts_bool || Ty.ts_equal ts Ty.ts_int ) ->
+let rec prty fmt ty = match ty with
+  | CTyapp (ts, l) when l <> [] ->
       fprintf fmt "%a %a"
-        Pretty.print_ts ts
-        (prle " " prtyparen) l
+        prts ts
+        (pp_print_list ~pp_sep:pp_print_blank prtyparen) l
   | CTarrow (t1, t2) ->
       fprintf fmt "%a ⇒ %a"
         prtyparen t1
         prty t2
-  | ty -> prtyparen fmt ty
+  | _ -> prtyparen fmt ty
 
 and prtyparen fmt = function
-  | CTyvar v -> prtyvar fmt v
-  | CTyapp (ts, _) when Ty.ts_equal ts Ty.ts_bool -> fprintf fmt "dottype"
-  | CTyapp (ts, _) when Ty.ts_equal ts Ty.ts_int -> fprintf fmt "Nat"
+  | CTyvar _ -> fprintf fmt "Nat"
+  (* TODO handle polymorphic symbols *)
+  (* Pretty.print_tv fmt v *)
+  | CTyapp (ts, []) -> prts fmt ts
   | cty -> fprintf fmt "(%a)" prty cty
 
-and prtyvar fmt _ =
-  fprintf fmt "Nat"
-  (* TODO include some types in lamdapi and translate to them *)
-  (* for now we only have Nat *)
-  (* Pretty.print_tv fmt v *)
+and prts fmt ts =
+  if ts_equal ts ts_bool then fprintf fmt "Bool"
+  else if ts_equal ts ts_int then fprintf fmt "Nat"
+  else if ts_equal ts ts_prop then fprintf fmt "dottype"
+  else Pretty.print_ts fmt ts
 
 
 
@@ -281,28 +284,25 @@ and prpv fmt = function
 let rec infer_type sigma t = match t with
   | CTfvar v -> Mid.find v sigma
   | CTbvar _ -> assert false
-  | CTtrue | CTfalse -> ctbool
+  | CTtrue | CTfalse -> ctprop
   | CTnot t -> let ty = infer_type sigma t in
-               assert (ctype_equal ty ctbool);
-               ctbool
-  | CTquant (q, ty1, t) ->
+               assert (ctype_equal ty ctprop);
+               ctprop
+  | CTquant (_, ty1, t) ->
       let ni = id_register (id_fresh "type_ident") in
       let sigma = Mid.add ni ty1 sigma in
       let t = ct_open t (CTfvar ni) in
       let ty2 = infer_type sigma t in
-      begin match q with
-      | CTlambda -> CTarrow (ty1, ty2)
-      | _ ->  assert (ctype_equal ty2 ctbool); ctbool
-      end
+      CTarrow (ty1, ty2)
   | CTapp (t1, t2) ->
       begin match infer_type sigma t1, infer_type sigma t2 with
       | CTarrow (ty1, ty2), ty3 when ctype_equal ty1 ty3 -> ty2
       | _ -> assert false end
   | CTbinop (_, t1, t2) ->
       let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
-      assert (ctype_equal ty1 ctbool);
-      assert (ctype_equal ty2 ctbool);
-      ctbool
+      assert (ctype_equal ty1 ctprop);
+      assert (ctype_equal ty2 ctprop);
+      ctprop
   | CTint _ -> ctint
 
 
@@ -382,8 +382,8 @@ let prgd fmt mid =
 let pcta fmt cta =
   fprintf fmt "%a\n%a\n" prs cta.sigma prgd cta.gamma_delta
 
-let plcta fmt lcta =
-  fprintf fmt "%a" (prle "========\n" pcta) lcta
+let plcta =
+  pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "========\n") pcta
 
 let eplcta cta lcta =
   eprintf "INIT :\n%a==========\nRES :\n%a\n@." pcta cta plcta lcta
@@ -401,7 +401,7 @@ let abstract_quant = function
   | Texists -> CTexists
 
 let rec abstract_otype = function
-  | None -> ctbool
+  | None -> ctprop
   | Some ty -> abstract_type ty
 
 and abstract_type { ty_node } =
@@ -434,9 +434,7 @@ and abstract_term_rec bv_lvl lvl t =
             CTbvar (lvl - lvl_id) in
   match t.t_node with
   | Ttrue  -> CTtrue
-  | _ when t_equal t t_bool_true -> CTtrue
   | Tfalse -> CTfalse
-  | _ when t_equal t t_bool_false -> CTfalse
   | Tvar v ->
       cterm_node_sig_from_id v.vs_name
   | Tapp (ls, lt) ->
