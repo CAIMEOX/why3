@@ -190,7 +190,7 @@ definition trivial_goal :
 definition cut : Π A,
   etype (goal A empty) →
   etype (hyp A empty) →
-  etype false
+  etype empty
 ≔  λ A nna na, nna na
 
 definition split_hyp : Π A B,
