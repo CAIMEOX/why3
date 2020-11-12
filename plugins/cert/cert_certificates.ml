@@ -84,12 +84,14 @@ type ('I, 't) cert =
          c ⇓ (Σ | Γ ⊢ Δ, I : ∃ x : τ. P x, J : P t)
      and Σ ⊩ t : τ *)
   | Rewrite of 'I * 'I * ('I, 't) cert
-  (* Rewrite (I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : C[a]) ≜
-     c ⇓ (Γ, H : a = b ⊢ Δ, I : C[b])
-     TODO expliquer C
+  (* Rewrite (I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : ctxt[a]) ≜
+     c ⇓ (Γ, H : a = b ⊢ Δ, I : ctxt[b])
    *)
-  (* Rewrite (I, H, c) ⇓ (Γ, H : a = b, I : C[a] ⊢ Δ) ≜
-     c ⇓ (Γ, H : a = b, I : C[b] ⊢ Δ) *)
+  (* Rewrite (I, H, c) ⇓ (Γ, H : a = b, I : ctxt[a] ⊢ Δ) ≜
+     c ⇓ (Γ, H : a = b, I : ctxt[b] ⊢ Δ) *)
+  (* in the previous rules <ctxt> stands for the context obtained by taking
+     the formula contained in <I> and replacing each occurrence of <a> by a
+     hole *)
 
 type vcert = (prsymbol, term) cert
 
@@ -127,63 +129,71 @@ type abstract_cert = ident list * (ident, cterm) cert
 
 type ctrans = visible_cert ctransformation
 
-type ('a, 'b) ecert =
-  (* elaborated certificates :
-     ∙ 'a is used to designate an hypothesis
-     ∙ 'b is used for terms *)
+type ('I, 't) ecert =
+  (* 'I is used to designate an hypothesis, 't is used for terms *)
   | EHole of ident
   (* EHole ⇓ (Γ ⊢ Δ) ≜  [Γ ⊢ Δ] *)
-  | ECut of 'a * 'b * ('a, 'b) ecert * ('a, 'b) ecert
+  | ECut of 'I * 't * ('I, 't) ecert * ('I, 't) ecert
   (* ECut (I, A, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ, I : A ⊢ Δ)) *)
-  | ELet of 'b * 'b * ('a, 'b) ecert
+  | ELet of 't * 't * ('I, 't) ecert
   (* ELet (x, y, c) ⇓ t ≜  c ⇓ t[x ←  y] *)
-  | EAxiom of 'b * 'a * 'a
+  | EAxiom of 't * 'I * 'I
   (* EAxiom (A, i1, i2) ⇓ (Γ, i1 : A ⊢ Δ, i2 : A) ≜  [] *)
   (* Notice that there is only one rule *)
-  | ETrivial of bool * 'a
+  | ETrivial of bool * 'I
   (* ETrivial (false, I) ⇓ (Γ, I : false ⊢ Δ) ≜  [] *)
   (* ETrivial (true, I) ⇓ (Γ ⊢ Δ, I : true ) ≜  [] *)
-  | ERename of bool * 'b * 'a * 'a * ('a, 'b) ecert
+  | ERename of bool * 't * 'I * 'I * ('I, 't) ecert
   (* ERename (false, A, I₁, I₂, c) ⇓  (Γ, I₁ : A ⊢ Δ) ≜ c ⇓ (Γ, I₂ : A ⊢ Δ)*)
   (* ERename (true, A, I₁, I₂, c) ⇓  (Γ ⊢ Δ, I₁ : A) ≜ c ⇓ (Γ ⊢ Δ, I₂ : A)*)
-  | EUnfoldIff of (bool * 'b * 'b * 'a * ('a, 'b) ecert)
+  | EUnfoldIff of (bool * 't * 't * 'I * ('I, 't) ecert)
   (* EUnfoldIff (false, A, B, I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
   (* EUnfoldIff (true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
-  | EUnfoldArr of (bool * 'b * 'b * 'a * ('a, 'b) ecert)
+  | EUnfoldArr of (bool * 't * 't * 'I * ('I, 't) ecert)
   (* EUnfoldArr (false, A, B, I, c) ⇓ (Γ, I : A → B ⊢ Δ) ≜  c ⇓ (Γ, I : ¬A ∨ B ⊢ Δ)*)
   (* EUnfoldArr (true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : A → B) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A ∨ B)*)
-  | EFoldArr of (bool * 'b * 'b * 'a * ('a, 'b) ecert)
+  | EFoldArr of (bool * 't * 't * 'I * ('I, 't) ecert)
   (* EFoldArr (false, A, B, I, c) ⇓ (Γ, I : ¬A ∨ B ⊢ Δ) ≜  c ⇓ (Γ, I : A → B ⊢ Δ)*)
   (* EFoldArr (true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : ¬A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, I : A → B)*)
-  | ESplit of bool * 'b * 'b * 'a * ('a, 'b) ecert * ('a, 'b) ecert
+  | ESplit of bool * 't * 't * 'I * ('I, 't) ecert * ('I, 't) ecert
   (* ESplit (false, A, B, I, c₁, c₂) ⇓ (Γ, I : A ∨ B ⊢ Δ) ≜  (c₁ ⇓ (Γ, I : A ⊢ Δ))  @  (c₂ ⇓ (Γ, I : B ⊢ Δ)) *)
   (* ESplit (true, A, B, I, c₁, c₂) ⇓ (Γ ⊢ Δ, I : A ∧ B) ≜  (c₁ ⇓ (Γ ⊢ Δ, I : A))  @  (c₂ ⇓ (Γ ⊢ Δ, I : B)) *)
-  | EDestruct of bool * 'b * 'b * 'a * 'a * 'a * ('a, 'b) ecert
+  | EDestruct of bool * 't * 't * 'I * 'I * 'I * ('I, 't) ecert
   (* EDestruct (false, A, B, I, J₁, J₂, c) ⇓ (Γ, I : A ∧ B ⊢ Δ) ≜  c ⇓ (Γ, J₁ : A, J₂ : B ⊢ Δ) *)
   (* EDestruct (true, A, B, I, J₁, J₂, c) ⇓ (Γ ⊢ Δ, I : A ∨ B) ≜  c ⇓ (Γ ⊢ Δ, J₁ : A, J₂ : B) *)
-  | EConstruct of bool * 'b * 'b * 'a * 'a * 'a * ('a, 'b) ecert
+  | EConstruct of bool * 't * 't * 'I * 'I * 'I * ('I, 't) ecert
   (* EConstruct (false, A, B, I₁, I₂, J, c) ⇓ (Γ, I₁ : A, I₂ : B ⊢ Δ) ≜  c ⇓ (Γ, J : A ∧ B ⊢ Δ) *)
   (* EConstruct (true, A, B, I₁, I₂, J, c) ⇓ (Γ ⊢ Δ, I₁ : A, I₂ : B) ≜  c ⇓ (Γ ⊢ Δ, J : A ∧ B) *)
-  | ESwap of (bool * 'b * 'a * ('a, 'b) ecert)
+  | ESwap of (bool * 't * 'I * ('I, 't) ecert)
   (* ESwap (false, A, I, c) ⇓ (Γ, I : A ⊢ Δ ) ≜  c ⇓ (Γ ⊢ Δ, I : ¬A) *)
   (* ESwap (true, A, I, c) ⇓ (Γ ⊢ Δ, I : A ) ≜  c ⇓ (Γ, I : ¬A ⊢ Δ) *)
-  | ESwapNeg of (bool * 'b * 'a * ('a, 'b) ecert)
+  | ESwapNeg of (bool * 't * 'I * ('I, 't) ecert)
   (* ESwap_neg (false, A, I, c) ⇓ (Γ, I : ¬A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, I : A)  *)
   (* ESwap_neg (true, A, I, c) ⇓ (Γ ⊢ Δ, I : ¬A) ≜  c ⇓ (Γ, I : A ⊢ Δ)  *)
-  | EWeakening of bool * 'b * 'a * ('a, 'b) ecert
+  | EWeakening of bool * 't * 'I * ('I, 't) ecert
   (* EWeakening (true, A, I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* EWeakening (false, A, I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | EIntroQuant of bool * 'b * 'a * ident * ('a, 'b) ecert
-  (* EIntroQuant (false, P, I, y, c) ⇓ (Γ, I : ∃ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : P y ⊢ Δ) (y fresh) *)
-  (* EIntroQuant (true, P, I, y, c) ⇓ (Γ ⊢ Δ, I : ∀ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : P y) (y fresh) *)
-  | EInstQuant of bool * 'b * 'a * 'a * 'b * ('a, 'b) ecert
-  (* InstQuant (false, P, I, J, t, c) ⇓ (Γ, I : ∀ x. P x ⊢ Δ) ≜  c ⇓ (Γ, I : ∀ x. P x, J : P t ⊢ Δ) *)
-  (* InstQuant (true, P, I, J, t, c) ⇓ (Γ ⊢ Δ, I : ∃ x. P x) ≜  c ⇓ (Γ ⊢ Δ, I : ∃ x. P x, J : P t) *)
-  | ERewrite of bool * ctype * 'b * 'b * 'b * 'a * 'a * ('a, 'b) ecert
-  (* ERewrite (true, _, a, b, ctxt, I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : ctxt[a] ≜
-     (Γ, H : a = b ⊢ Δ, I : ctxt[b] *)
-  (* ERewrite (false, _, a, b, ctxt, I, H, c) ⇓ (Γ, H : a = b, I : ctxt[a] ⊢ Δ ≜
-     (Γ, H : a = b, I : ctxt[b] ⊢ Δ *)
+  | EIntroQuant of bool * 't * 'I * ident * ('I, 't) ecert
+  (* EIntroQuant (false, P, I, y, c) ⇓ (Σ | Γ, I : ∃ x : τ. P x ⊢ Δ) ≜
+         c ⇓ (Σ, y : τ | Γ, I : P y ⊢ Δ)
+     and y ∉  Σ *)
+  (* EIntroQuant (true, P, I, y, c) ⇓ (Σ | Γ ⊢ Δ, I : ∀ x : τ. P x) ≜
+         c ⇓ (Σ, y : τ | Γ ⊢ Δ, I : P y)
+     and y ∉  Σ *)
+  | EInstQuant of bool * 't * 'I * 'I * 't * ('I, 't) ecert
+  (* EInstQuant (false, P, I, J, t, c) ⇓ (Σ | Γ, I : ∀ x : τ. P x ⊢ Δ) ≜
+         c ⇓ (Σ | Γ, I : ∀ x : τ. P x, J : P t ⊢ Δ)
+     and Σ ⊩ t : τ *)
+  (* EInstQuant (true, P, I, J, t, c) ⇓ (Σ | Γ ⊢ Δ, I : ∃ x : τ. P x) ≜
+         c ⇓ (Σ | Γ ⊢ Δ, I : ∃ x : τ. P x, J : P t)
+     and Σ ⊩ t : τ *)
+  | ERewrite of bool * ctype * 't * 't * 't * 'I * 'I * ('I, 't) ecert
+  (* ERewrite (true, τ, a, b, ctxt, I, H, c) ⇓ (Γ, H : a = b ⊢ Δ, I : ctxt[a] ≜
+     (Γ, H : a = b ⊢ Δ, I : ctxt[b]
+     and a and b have type τ *)
+  (* ERewrite (false, τ, a, b, ctxt, I, H, c) ⇓ (Γ, H : a = b, I : ctxt[a] ⊢ Δ ≜
+     (Γ, H : a = b, I : ctxt[b] ⊢ Δ
+     and a and b have type τ  *)
 
 type heavy_ecert = ident list * (ident, cterm) ecert
 type trimmed_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct) *)
@@ -222,19 +232,14 @@ and prcab : type a b. (formatter -> a -> unit) ->
   | InstQuant (i, j, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)" pra i pra j prb t prc c
   | Rewrite (i, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" pra i pra h prc c
 
-and prli = prle "; " pri
-and prcertif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab prpr Pretty.print_term) c
-and prcore_certif fmt (v, c) = fprintf fmt  "%a,@ @[%a@]" prli v (prcab pri pcte) c
+and prli = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") pri
+and prcertif fmt (v, c) = fprintf fmt "@[<v>[%a],@ @[%a@]@]"
+                            prli v (prcab prpr Pretty.print_term) c
+and prcore_certif fmt (v, c) = fprintf fmt "@[<v>[%a],@ @[%a@]@]"
+                                 prli v (prcab pri pcte) c
 
 let eprcertif c = eprintf "%a@." prcertif c
 
-
-let find_ident s h cta =
-  match Mid.find_opt h cta.gamma_delta with
-  | Some x -> x
-  | None ->
-      fprintf str_formatter "%s : Can't find ident %a in the task" s pri h;
-      verif_failed (flush_str_formatter ())
 
 
 (** Utility functions on certificates *)
@@ -324,8 +329,8 @@ let propagate_ecert f fid ft = function
   | EWeakening (g, a, i, c) -> EWeakening (g, ft a, fid i, f c)
   | EIntroQuant (g, p, i, y, c) -> EIntroQuant (g, ft p, fid i, y, f c)
   | EInstQuant (g, p, i, j, t, c) -> EInstQuant (g, ft p, fid i, fid j, ft t, f c)
-  | ERewrite (g, ty, a, b, ctxt, i, h, c) ->
-      ERewrite (g, ty, ft a, ft b, ft ctxt, fid i, fid h, f c)
+  | ERewrite (g, cty, a, b, ctxt, i, h, c) ->
+      ERewrite (g, cty, ft a, ft b, ft ctxt, fid i, fid h, f c)
 
 
 (* Separates hypotheses and goals *)
@@ -507,7 +512,7 @@ let elaborate (init_ct : ctask) c =
         | _ -> eprintf "Nothing to introduce@.";
                raise Elaboration_failed in
       let cta = add i (ct_open t (CTfvar y), pos) cta
-                |> add_var y ty in (* signature is not useful when elaborating for now... *)
+                |> add_var y ty in
       EIntroQuant (pos, CTquant (CTlambda, ty, t), i, y, elab cta c)
   | InstQuant (i, j, t_inst, c) ->
       let t, pos = find_ident "InstQuant" i cta in
