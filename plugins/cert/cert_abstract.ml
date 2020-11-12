@@ -25,7 +25,6 @@ type ctype =
   | CTarrow of ctype * ctype
 
 let ts_prop = create_tysymbol (id_fresh "prop") [] NoDef
-
 let ctprop = CTyapp (ts_prop, [])
 let ctbool = CTyapp (ts_bool, [])
 let ctint = CTyapp (ts_int, [])
@@ -100,6 +99,8 @@ type cterm =
   | CTfalse
 
 let eq = CTfvar ps_equ.ls_name
+let id_true = fs_bool_true.ls_name
+let id_false = fs_bool_false.ls_name
 
 (** Utility functions on cterm *)
 
@@ -281,7 +282,14 @@ and prpv fmt = function
   | ct -> fprintf fmt "(%a)" pcte ct
 
 (* Typing algorithm *)
-let rec infer_type sigma t = match t with
+
+let interp_var_type =
+  let l = [ id_true, ctbool;
+            id_false, ctbool ] in
+  List.fold_left (fun m (id, ty) -> Mid.add id ty m) Mid.empty l
+
+let infer_type sigma t =
+  let rec infer_type sigma t = match t with
   | CTfvar v -> Mid.find v sigma
   | CTbvar _ -> assert false
   | CTtrue | CTfalse -> ctprop
@@ -303,14 +311,15 @@ let rec infer_type sigma t = match t with
       assert (ctype_equal ty1 ctprop);
       assert (ctype_equal ty2 ctprop);
       ctprop
-  | CTint _ -> ctint
+  | CTint _ -> ctint in
+  let sigma_interp = Mid.set_union sigma interp_var_type in
+  infer_type sigma_interp t
 
 
 let infers_into sigma t ty =
   try assert (ctype_equal (infer_type sigma t) ty)
-  with _ -> let err_str = fprintf str_formatter "wrong type for %a" pcte t;
-                          flush_str_formatter () in
-            verif_failed err_str
+  with e -> eprintf "wrong type for %a@." pcte t;
+            raise e
 
 type ctask =
   { sigma : ctype Mid.t;
