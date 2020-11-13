@@ -99,9 +99,18 @@ type cterm =
   | CTtrue
   | CTfalse
 
-let eq = CTfvar ps_equ.ls_name
+let id_eq = ps_equ.ls_name
+let eq = CTfvar id_eq
 let id_true = fs_bool_true.ls_name
 let id_false = fs_bool_false.ls_name
+
+let interp_var_type =
+  let l = [ id_true, ctbool;
+            id_false, ctbool;
+            id_eq, CTarrow (ctint, CTarrow (ctint, ctprop))
+          ] in
+  List.fold_left (fun m (id, ty) -> Mid.add id ty m) Mid.empty l
+
 
 (** Utility functions on cterm *)
 
@@ -283,11 +292,6 @@ and prpv fmt = function
   | ct -> fprintf fmt "(%a)" pcte ct
 
 (* Typing algorithm *)
-
-let interp_var_type =
-  let l = [ id_true, ctbool;
-            id_false, ctbool ] in
-  List.fold_left (fun m (id, ty) -> Mid.add id ty m) Mid.empty l
 
 let infer_type sigma t =
   let rec infer_type sigma t = match t with
