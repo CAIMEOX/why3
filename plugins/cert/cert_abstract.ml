@@ -8,8 +8,7 @@ open Ty
 open Format
 
 (** Utility **)
-let pp_print_blank fmt () =
-  fprintf fmt " "
+let print_list pre = pp_print_list ~pp_sep:pp_print_space pre
 
 exception Certif_verification_failed of string
 let verif_failed s = raise (Certif_verification_failed s)
@@ -31,15 +30,13 @@ let ctint = CTyapp (ts_int, [])
 
 (** Utility functions on ctype *)
 
-let rec ctype_equal_uncurr = function
+let rec ctype_equal l1 l2 = match l1, l2 with
   | CTyvar v1, CTyvar v2 -> Ty.tv_equal v1 v2
   | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
-      Ty.ts_equal ty1 ty2 && List.for_all ctype_equal_uncurr (List.combine l1 l2)
+      ts_equal ty1 ty2 && List.for_all2 ctype_equal l1 l2
   | CTarrow (f1, a1), CTarrow (f2, a2) ->
       ctype_equal f1 f2 && ctype_equal a1 a2
   | (CTyvar _ | CTyapp _ | CTarrow _), _ -> false
-
-and ctype_equal cty1 cty2 = ctype_equal_uncurr (cty1, cty2)
 
 (* Pretty printing of ctype (compatible with lambdapi) *)
 
@@ -47,28 +44,24 @@ let san =
   let lower_h c = if c = 'H' then "h" else char_to_alnum c in
   sanitizer lower_h char_to_alnum
 
-let hsan s =
-  "H" ^ san s
+let hsan s = "H" ^ san s
 
 let ip = create_ident_printer ~sanitizer:san []
 let hip = create_ident_printer ~sanitizer:hsan []
 
-let pri fmt i =
-  fprintf fmt "%s" (id_unique ip i)
+let pri fmt i = fprintf fmt "%s" (id_unique ip i)
 
-let hpri fmt i =
-  fprintf fmt "%s" (id_unique hip i)
+let hpri fmt i = fprintf fmt "%s" (id_unique hip i)
 
-let prpr fmt pr =
-  pri fmt pr.pr_name
+let prpr fmt pr = pri fmt pr.pr_name
 
 let rec prty fmt ty = match ty with
   | CTyapp (ts, l) when l <> [] ->
-      fprintf fmt "%a %a"
+      fprintf fmt "@[<2>%a@ %a@]"
         prts ts
-        (pp_print_list ~pp_sep:pp_print_blank prtyparen) l
+        (print_list prtyparen) l
   | CTarrow (t1, t2) ->
-      fprintf fmt "%a ⇒ %a"
+      fprintf fmt "@[%a ⇒@ %a@]"
         prtyparen t1
         prty t2
   | _ -> prtyparen fmt ty
@@ -109,7 +102,7 @@ let interp_var_type =
             id_false, ctbool;
             id_eq, CTarrow (ctint, CTarrow (ctint, ctprop))
           ] in
-  List.fold_left (fun m (id, ty) -> Mid.add id ty m) Mid.empty l
+  Mid.of_list l
 
 
 (** Utility functions on cterm *)
@@ -347,8 +340,8 @@ let find_ident s h cta =
   match Mid.find_opt h cta.gamma_delta with
   | Some x -> x
   | None ->
-      fprintf str_formatter "%s : Can't find ident %a in the task" s pri h;
-      verif_failed (flush_str_formatter ())
+      let s = asprintf "%s : Can't find ident %a in the task" s pri h in
+      verif_failed s
 
 let ctask_empty =
   { sigma = Mid.empty;
@@ -362,8 +355,11 @@ let lift_mid_cta f cta =
   { sigma = cta.sigma;
     gamma_delta = f (cta.gamma_delta) }
 
+(* Make sure to not add interpreted variables to the signature *)
 let add_var i cty cta =
-  { sigma = Mid.add i cty cta.sigma;
+  { sigma = if Mid.mem i interp_var_type
+            then cta.sigma
+            else Mid.add i cty cta.sigma;
     gamma_delta = cta.gamma_delta }
 
 let remove i cta = lift_mid_cta (Mid.remove i) cta
@@ -371,8 +367,7 @@ let remove i cta = lift_mid_cta (Mid.remove i) cta
 let add i ct cta = lift_mid_cta (Mid.add i ct) cta
 
 let ctask_equal cta1 cta2 =
-  (* TODO fix finding the 'right' signature when abstracting a task *)
-  (* Mid.equal ctype_equal cta1.sigma cta2.sigma && *)
+  Mid.equal ctype_equal cta1.sigma cta2.sigma &&
   let cterm_pos_equal (t1, p1) (t2, p2) =
     cterm_equal t1 t2 && p1 = p2 in
   Mid.equal cterm_pos_equal cta1.gamma_delta cta2.gamma_delta
@@ -437,32 +432,32 @@ let rec abstract_term t =
   abstract_term_rec Mid.empty 0 t
 
 and abstract_term_rec bv_lvl lvl t =
+  let abstract = abstract_term_rec bv_lvl lvl in
   (* level <lvl> is the number of forall above in the whole term *)
   (* <bv_lvl> is mapping bound variables to their respective level *)
   let cterm_node_sig_from_id id  = match Mid.find_opt id bv_lvl with
-        | None ->
-            CTfvar id
-        | Some lvl_id ->
-            (* a variable should not be above its definition *)
-            assert (lvl_id <= lvl);
-            CTbvar (lvl - lvl_id) in
+    | None -> CTfvar id
+    | Some lvl_id ->
+        (* a variable should not be above its definition *)
+        assert (lvl_id <= lvl);
+        CTbvar (lvl - lvl_id) in
   match t.t_node with
   | Ttrue  -> CTtrue
   | Tfalse -> CTfalse
-  | Tvar v ->
-      cterm_node_sig_from_id v.vs_name
+  | Tvar v -> cterm_node_sig_from_id v.vs_name
   | Tapp (ls, lt) ->
-      let ctls = cterm_node_sig_from_id ls.ls_name in
-      List.fold_left (fun acc h -> CTapp (acc, abstract_term_rec bv_lvl lvl h))
-        ctls lt
+      let cts = cterm_node_sig_from_id ls.ls_name in
+      let ctapp ct t = CTapp (ct, abstract t) in
+      List.fold_left ctapp cts lt
   | Tbinop (op, t1, t2) ->
-      let ct1 = abstract_term_rec bv_lvl lvl t1 in
-      let ct2 = abstract_term_rec bv_lvl lvl t2 in
+      let ct1 = abstract t1 in
+      let ct2 = abstract t2 in
       CTbinop (op, ct1, ct2)
   | Tquant (q, tq) ->
       let lvs, _, t_open = t_open_quant tq in
-      let lvl_ids = List.mapi (fun i vs -> lvl + i + 1, vs.vs_name) lvs in
-      let bv_lvl = List.fold_left (fun m (lvl, ids) -> Mid.add ids lvl m) bv_lvl lvl_ids in
+      let ids_lvl = List.mapi (fun i vs -> vs.vs_name, lvl + i + 1) lvs in
+      let bv_lvl = List.fold_left (fun m (ids, lvl) -> Mid.add ids lvl m)
+                     bv_lvl ids_lvl in
       let lvl = lvl + List.length lvs in
       let ctn_open = abstract_term_rec bv_lvl lvl t_open in
       let q = abstract_quant q in
@@ -470,15 +465,12 @@ and abstract_term_rec bv_lvl lvl t =
                           CTquant (q, cty, ct) in
       let ct_closed = List.fold_right ctquant lvs ctn_open in
       ct_closed
-  | Tnot t -> let ct = abstract_term_rec bv_lvl lvl t in
-              CTnot ct
+  | Tnot t -> CTnot (abstract t)
   | Tconst (Constant.ConstInt i) -> CTint i.Number.il_int
   | Tconst _ ->
-      let s = "" in
-      (* let open Format in
-       * Pretty.print_term str_formatter t;
-       * let s = flush_str_formatter () in *)
-      invalid_arg ("Cert_abstract.abstract_term Tconst : " ^ s)
+      let s = asprintf "Cert_abstract.abstract_term Tconst : %a"
+                Pretty.print_term t in
+      invalid_arg s
   | Tif _ -> invalid_arg "Cert_abstract.abstract_term Tif"
   | Tlet _ -> invalid_arg "Cert_abstract.abstract_term Tlet"
   | Tcase _ -> invalid_arg "Cert_abstract.abstract_term Tcase"
@@ -507,9 +499,9 @@ let abstract_tdecl_acc acc td =
   | _ -> acc
 
 let rec abstract_task_acc acc = function
-  | Some {task_decl = td; task_prev = task} ->
-      let new_acc = abstract_tdecl_acc acc td in
-      abstract_task_acc new_acc task
+  | Some {task_decl; task_prev} ->
+      let new_acc = abstract_tdecl_acc acc task_decl in
+      abstract_task_acc new_acc task_prev
   | None -> acc
 
 let abstract_task task =
