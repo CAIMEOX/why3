@@ -50,13 +50,14 @@ let san =
 let hsan s =
   "H" ^ san s
 
-let ip = create_ident_printer []
+let ip = create_ident_printer ~sanitizer:san []
+let hip = create_ident_printer ~sanitizer:hsan []
 
 let pri fmt i =
-  fprintf fmt "%s" (id_unique ~sanitizer:san ip i)
+  fprintf fmt "%s" (id_unique ip i)
 
 let hpri fmt i =
-  fprintf fmt "%s" (id_unique ~sanitizer:hsan ip i)
+  fprintf fmt "%s" (id_unique hip i)
 
 let prpr fmt pr =
   pri fmt pr.pr_name
