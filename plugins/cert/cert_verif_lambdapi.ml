@@ -10,7 +10,6 @@ open Cert_certificates
    by the formula
    ∀ x₁ : ty₁, ... ∀ xᵢ: tyᵢ, A₁ → ... → Aⱼ → ¬B₁ → ... → ¬Bₖ → ⊥
    As an intermediate data structure we use lists to fix the order
-   Also remove interpreted symbols from the signature
  *)
 type ctask_simple =
   { s  : (ident * ctype) list;
@@ -18,14 +17,12 @@ type ctask_simple =
 
 let simplify_task (cta : ctask) : ctask_simple =
   let encode_neg (k, (ct, pos)) = k, if pos then CTnot ct else ct in
-  let not_interp (id, _) = not (Mid.mem id interp_var_type) in
-  { s = Mid.bindings cta.sigma
-        |> List.filter not_interp;
+  { s = Mid.bindings cta.sigma;
     gd = Mid.bindings cta.gamma_delta
          |> List.map encode_neg }
 
 let print_task fmt {s; gd} =
-  fprintf fmt "@[<hov 3>(Π ";
+  fprintf fmt "@[<3>(Π ";
   pp_print_list ~pp_sep:pp_print_space
     (fun fmt (id, cty) ->
       fprintf fmt "(%a : ekind %a)"
@@ -37,14 +34,13 @@ let print_task fmt {s; gd} =
   pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇨@ ") prdisj fmt tp;
   fprintf fmt ")@])"
 
-let print_certif at fmt c =
-  let s = Stream.of_list at in
+let print_certif print_next fmt c =
   let rstr goal = if goal then "_goal" else "_hyp" in
   let rec pc fmt = function
   | ELet _ | EConstruct _ | ERename _ | EFoldArr _ ->
       verif_failed "Construct/Let/Rename/Fold left"
   | EHole _ ->
-      fprintf fmt "%s" (Stream.next s)
+      print_next fmt ()
   | EAxiom (t, h, g) ->
       fprintf fmt "axiom %a %a %a"
         prpv t
@@ -163,34 +159,36 @@ let print fmt init res (task_ids, certif) =
   let p_type fmt () =
     pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " →@ ")
       print_task fmt (res @ [init]) in
-  (* applied_tasks are used to fill the holes *)
-  let applied_tasks =
-    List.map2 (fun task_id {s; gd} ->
-        let fv_ids, _ = List.split s in
-        let hyp_ids, _ = List.split gd in
-        fprintf str_formatter "%a %a"
-          (pp_print_list ~pp_sep:pp_print_blank pri) (task_id :: fv_ids)
-          (pp_print_list ~pp_sep:pp_print_blank hpri) hyp_ids;
-        flush_str_formatter ())
-      task_ids
-      res in
+  (* Print next applied_task, used to fill the holes *)
+  let print_next =
+    let str = Stream.of_list (List.combine task_ids res) in
+    fun fmt () ->
+    let task_id, {s; gd } = Stream.next str in
+    let fv_ids, _ = List.split s in
+    let hyp_ids, _ = List.split gd in
+    fprintf fmt "@[%a %a@]"
+      (print_list pri) (task_id :: fv_ids)
+      (print_list hpri) hyp_ids in
   (* The term that has the correct type *)
   let p_term fmt () =
     let {s; gd} = init in
     let fv_ids, _ = List.split s in
     let hyp_ids, _ = List.split gd in
-    fprintf fmt "λ %a %a"
-          (pp_print_list ~pp_sep:pp_print_blank pri) (task_ids @ fv_ids)
-          (pp_print_list ~pp_sep:pp_print_blank hpri) hyp_ids;
+    fprintf fmt "@[<2>@<1>%s %a@ %a@]"
+      "λ"
+      (print_list pri) (task_ids @ fv_ids)
+      (print_list hpri) hyp_ids;
     fprintf fmt ",@ ";
-    print_certif applied_tasks fmt certif in
+    print_certif print_next fmt certif in
 
   fprintf fmt "@[<v>definition to_verify :@   \
                @[<v>%a@]@ \
-               ≔  @[<v>%a@]@]@."
+               @<3>%s@[<v>%a@]@]@."
     p_type ()
+    "≔  "
     p_term ();
-  forget_all ip
+  forget_all ip;
+  forget_all hip
 
 let checker_lambdapi certif init res =
   try
