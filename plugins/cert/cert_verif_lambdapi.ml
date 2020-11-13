@@ -10,6 +10,7 @@ open Cert_certificates
    by the formula
    ∀ x₁ : ty₁, ... ∀ xᵢ: tyᵢ, A₁ → ... → Aⱼ → ¬B₁ → ... → ¬Bₖ → ⊥
    As an intermediate data structure we use lists to fix the order
+   Also remove interpreted symbols from the signature
  *)
 type ctask_simple =
   { s  : (ident * ctype) list;
@@ -17,7 +18,9 @@ type ctask_simple =
 
 let simplify_task (cta : ctask) : ctask_simple =
   let encode_neg (k, (ct, pos)) = k, if pos then CTnot ct else ct in
-  { s = Mid.bindings cta.sigma;
+  let not_interp (id, _) = not (Mid.mem id interp_var_type) in
+  { s = Mid.bindings cta.sigma
+        |> List.filter not_interp;
     gd = Mid.bindings cta.gamma_delta
          |> List.map encode_neg }
 
