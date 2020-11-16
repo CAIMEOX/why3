@@ -169,10 +169,10 @@ let ren pr1 =
    | Dprop (k, pr, t) when pr_equal pr pr1 ->
        let pr2 = pr_clone pr1 in
        [create_prop_decl k pr2 t],
-       lambda One (fun i -> Rename (pr1, pr2, Hole i))
+       lambda One (fun i -> rename pr1 pr2 (Hole i))
    | _ -> [d], hole ())
 
-let rename pr1 : ctrans = Trans.store (fun task ->
+let crename pr1 : ctrans = Trans.store (fun task ->
   let ta, c = ren pr1 task in
   [ta], c)
 
@@ -445,7 +445,7 @@ let intro any every where : ctrans = Trans.store (fun task ->
 (* choose Left (A) or Right (B) when
     • the goal is of the form A ∨ B
     • the hypothesis is of the form A ∧ B *)
-let dir_pr d prg =
+let cdir_pr d prg =
   Trans.decl_acc false (||) (fun decl found -> match decl.d_node with
     | Dprop (k, pr, t) when pr_equal pr prg && not found ->
         begin match k, t.t_node, d with
@@ -457,10 +457,10 @@ let dir_pr d prg =
         | _ -> [decl], false end
     | _ -> [decl], false)
 
-let dir d where : ctrans =  Trans.store (fun task ->
+let cdir d where : ctrans =  Trans.store (fun task ->
   let pr = default_goal task where in
-  let nt, b = dir_pr d pr task in
-  if b then [nt], lambda One (fun i -> Dir (d, pr, Hole i))
+  let nt, b = cdir_pr d pr task in
+  if b then [nt], lambda One (fun i -> dir d pr (Hole i))
   else [task], hole ())
 
 (* Assert with certificate *)
@@ -506,6 +506,7 @@ let rec intro_premises acc t = match t.t_node with
   | _ -> acc, t
 
 let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
+  let nprh = pr_clone prh in
   let found_eq =
     (* Used to find the equality we are rewriting on *)
     Trans.fold_decl (fun d acc ->
@@ -529,32 +530,48 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
     match found_eq with
     | None -> raise (Args_wrapper.Arg_error "Did not find rewrite hypothesis")
     | Some (lp, t1, t2) ->
-      Trans.fold_decl (fun d (acc, cert) ->
+      Trans.fold_decl (fun d acc ->
         match d.d_node with
         | Dprop (p, pr, t) when pr_equal pr pri ->
             let new_term = t_replace t1 t2 t in
-            Some (lp, create_prop_decl p pr new_term),
-            lambda One (fun i -> Rewrite (pri, prh, Hole i))
-        | _ -> acc, cert) (None, hole ()) in
+            Some (lp, create_prop_decl p pr new_term)
+        | _ -> acc) None in
   (* Pass the premises as new goals. Replace the former toberewritten
      hypothesis to the new rewritten one *)
-  let recreate_tasks (lp_new, cert) =
+  let recreate_tasks lp_new =
     match lp_new with
     | None -> raise (Arg_trans "recreate_tasks")
     | Some (lp, new_decl) ->
-      let trans_rewriting =
-        Trans.decl (fun decl -> match decl.d_node with
-        | Dprop (_, pr, _) when pr_equal pr pri -> [new_decl]
-        | _ -> [decl]) None in
-      let list_par =
-        List.map (fun t ->
-            Trans.decl (fun decl -> match decl.d_node with
-            | Dprop (Pgoal, pr, _) ->
-                [create_goal ~expl:"rewrite premises" pr t]
-            | _ -> [decl])
-          None) lp in
-      Trans.store (fun task -> Trans.apply (Trans.par (trans_rewriting :: list_par)) task, cert)
+        let trans_rewriting =
+          Trans.decl (fun decl -> match decl.d_node with
+          | Dprop (_, pr, _) when pr_equal pr pri -> [new_decl]
+          | _ -> [decl]) None in
+        let list_par =
+          List.map (fun t ->
+              Trans.decl (fun decl -> match decl.d_node with
+              | Dprop (Pgoal, pr, _) ->
+                  [create_goal ~expl:"rewrite premises" pr t]
+              | _ -> [decl])
+            None) lp in
+        let pr = task_goal task in
+        let n = List.length lp + 1 in
+        let cert =
+          lambda (List n) (fun l ->
+              let s = Stream.of_list l in
+              let hole () = Hole (Stream.next s) in
+              let apply _ c =
+                Unfold (nprh, Split (nprh,
+                Weakening (pr, Swap (nprh, rename nprh pr (hole ()))),
+                c)) in
+              Duplicate (prh, nprh,
+              List.fold_right apply lp
+                (Rewrite (pri, nprh, Weakening (nprh, hole ()))))) in
+        Trans.store (fun task ->
+            Trans.apply (Trans.par (trans_rewriting :: list_par)) task,
+            cert)
   in
+
+
   (* Composing previous functions *)
   Trans.apply (Trans.bind (Trans.bind found_eq lp_new) recreate_tasks) task
 
