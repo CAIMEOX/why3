@@ -49,11 +49,11 @@ let hsan s = "H" ^ san s
 let ip = create_ident_printer ~sanitizer:san []
 let hip = create_ident_printer ~sanitizer:hsan []
 
-let pri fmt i = fprintf fmt "%s" (id_unique ip i)
+let prid fmt i = fprintf fmt "%s" (id_unique ip i)
 
-let hpri fmt i = fprintf fmt "%s" (id_unique hip i)
+let prhyp fmt i = fprintf fmt "%s" (id_unique hip i)
 
-let prpr fmt pr = pri fmt pr.pr_name
+let prpr fmt pr = prhyp fmt pr.pr_name
 
 let rec prty fmt ty = match ty with
   | CTyapp (ts, l) when l <> [] ->
@@ -221,7 +221,7 @@ let rec pcte fmt = function
       let x = id_register (id_fresh "x") in
       let t_open = ct_open t (CTfvar x) in
       fprintf fmt "λ %a, %a"
-        pri x
+        prid x
         pcte t_open;
       forget_id ip x
   | ct -> prarr fmt ct
@@ -271,14 +271,14 @@ and prapp fmt = function
       fprintf fmt "(%s %a) (λ %a, %a)"
         q_str
         prty ty
-        pri x
+        prid x
         pcte t_open;
       forget_id ip x
   | ct -> prpv fmt ct
 
 and prpv fmt = function
   | CTbvar n -> pp_print_int fmt n
-  | CTfvar id -> pri fmt id
+  | CTfvar id -> prid fmt id
   | CTint i -> pp_print_string fmt (BigInt.to_string i)
   | CTfalse -> fprintf fmt "false"
   | CTtrue -> fprintf fmt "true"
@@ -340,7 +340,7 @@ let find_ident s h cta =
   match Mid.find_opt h cta.gamma_delta with
   | Some x -> x
   | None ->
-      let s = asprintf "%s : Can't find ident %a in the task" s pri h in
+      let s = asprintf "%s : Can't find ident %a in the task" s prhyp h in
       verif_failed s
 
 let ctask_empty =
@@ -379,14 +379,14 @@ let po p fmt = function
   | Some x -> fprintf fmt "%a" p x
 
 let prs fmt mid =
-  Mid.iter (fun x ty -> fprintf fmt "%a : %a\n" pri x prty ty) mid
+  Mid.iter (fun x ty -> fprintf fmt "%a : %a\n" prid x prty ty) mid
 
 let prpos fmt = function
   | true  -> fprintf fmt "GOAL| "
   | false -> fprintf fmt "HYP | "
 
 let prgd fmt mid =
-  Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a\n" prpos pos pri h pcte cte) mid
+  Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a\n" prpos pos prhyp h pcte cte) mid
 
 let pcta fmt cta =
   fprintf fmt "%a\n%a\n" prs cta.sigma prgd cta.gamma_delta

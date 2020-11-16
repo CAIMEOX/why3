@@ -111,7 +111,7 @@ let rec print_ast fmt t = match t.t_node with
   | Tconst _ -> fprintf fmt "Tconst"
   | Tapp (l, ts) ->
       fprintf fmt "(%a %a)"
-        Cert_abstract.pri (l.ls_name)
+        Cert_abstract.prid (l.ls_name)
         (pp_print_list print_ast) ts
   | Tif _ -> fprintf fmt "Tif"
   | Tlet _ -> fprintf fmt "Tlet"
@@ -131,7 +131,7 @@ let rec print_ast fmt t = match t.t_node with
 let tprint_tg target =
   Trans.decl_acc (target, hole ()) update_tg_c (fun d (tg, _) -> match d.d_node with
       | Dprop (_, pr, t) when match_tg tg pr ->
-          Format.eprintf "%a : %a@." Cert_abstract.pri (pr.pr_name) print_ast t;
+          Format.eprintf "%a : %a@." Cert_abstract.prhyp (pr.pr_name) print_ast t;
           [d], None
       | _ -> [d], None)
 
@@ -505,7 +505,7 @@ let rec intro_premises acc t = match t.t_node with
   | Tbinop (Timplies, f1, f2) -> intro_premises (f1::acc) f2
   | _ -> acc, t
 
-let rewrite_in rev prh prh1 task = (* rewrites <h> in <h1> with direction <rev> *)
+let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
   let found_eq =
     (* Used to find the equality we are rewriting on *)
     Trans.fold_decl (fun d acc ->
@@ -531,10 +531,10 @@ let rewrite_in rev prh prh1 task = (* rewrites <h> in <h1> with direction <rev> 
     | Some (lp, t1, t2) ->
       Trans.fold_decl (fun d (acc, cert) ->
         match d.d_node with
-        | Dprop (p, pr, t) when pr_equal pr prh1 ->
+        | Dprop (p, pr, t) when pr_equal pr pri ->
             let new_term = t_replace t1 t2 t in
             Some (lp, create_prop_decl p pr new_term),
-            lambda One (fun i -> Rewrite (prh1, prh, Hole i))
+            lambda One (fun i -> Rewrite (pri, prh, Hole i))
         | _ -> acc, cert) (None, hole ()) in
   (* Pass the premises as new goals. Replace the former toberewritten
      hypothesis to the new rewritten one *)
@@ -544,7 +544,7 @@ let rewrite_in rev prh prh1 task = (* rewrites <h> in <h1> with direction <rev> 
     | Some (lp, new_decl) ->
       let trans_rewriting =
         Trans.decl (fun decl -> match decl.d_node with
-        | Dprop (_, pr, _) when pr_equal pr prh1 -> [new_decl]
+        | Dprop (_, pr, _) when pr_equal pr pri -> [new_decl]
         | _ -> [decl]) None in
       let list_par =
         List.map (fun t ->
