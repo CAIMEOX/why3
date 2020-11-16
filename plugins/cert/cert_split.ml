@@ -19,18 +19,6 @@ open Decl
 
 open Cert_certificates
 
-let rec ren_vcert pr1 pr2 c =
-  propagate_cert (ren_vcert pr1 pr2)
-    (fun pr -> if pr_equal pr pr1 then pr2 else pr)
-    (fun ct -> ct) c
-
-let rename_vcert pr1 pr2 = function
-  | Hole i -> Rename (pr2, pr1, Hole i)
-  | c -> ren_vcert pr1 pr2 c
-
-let rename_cert pr1 pr2 (l, c) =
-  l, rename_vcert pr1 pr2 c
-
 type split = {
   right_only : bool;
   (* split only the right side every time. This makes split more efficient
@@ -285,7 +273,7 @@ let destruct_reconstruct pr c1 c2 =
   let pr2 = create_prsymbol (id_fresh "pr2") in
   lambda One (fun i -> Destruct (pr, pr, pr2, Hole i))
   |>> c1
-  ||> (fun () -> lambda One (fun i -> Rename (pr, pr1, (Rename (pr2, pr, Hole i)))))
+  ||> fun () -> lambda One (fun i -> rename pr pr1 (rename pr2 pr (Hole i)))
   ||> thunk c2
   ||> fun () -> lambda One (fun i -> Construct (pr1, pr, pr, Hole i))
 
@@ -446,8 +434,8 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       let remove_all = remove_all sf1.disj sf2.disj in
 
       let h = hole () in
-      let dp = lambda Two (fun i j -> Split (pr, Rename (pr, pr1, Hole i),
-                                             Rename (pr, pr2, Hole j)))
+      let dp = lambda Two (fun i j -> Split (pr, rename pr pr1 (Hole i),
+                                             rename pr pr2 (Hole j)))
                |>>> [sf1.dp ; sf2.dp]
                |>>> [lambda One (fun i -> add_all true (remove_all true (Hole i)));
                      lambda One (fun j -> add_all false (remove_all false (Hole j)))]

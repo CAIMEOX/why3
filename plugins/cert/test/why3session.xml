@@ -839,6 +839,20 @@
   </goal>
  </transf>
  </goal>
+ <goal name="rew_prem_hyp">
+ <transf name="intros_ccert" >
+  <goal name="rew_prem_hyp.0">
+  <transf name="rewrite_ccert" arg1="H1" arg2="in" arg3="H">
+   <goal name="rew_prem_hyp.0.0">
+   </goal>
+   <goal name="rew_prem_hyp.0.1" expl="rewrite premises">
+   </goal>
+   <goal name="rew_prem_hyp.0.2" expl="rewrite premises">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
  <goal name="rew_inv_prem_hyp">
  <transf name="intros_ccert" >
   <goal name="rew_inv_prem_hyp.0">
