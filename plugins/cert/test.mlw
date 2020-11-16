@@ -65,6 +65,7 @@ goal blast_big_big : ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
 goal rew_goal  : (c <-> a) -> (d \/ c)
 goal rew_hyp : (c <-> d) -> c -> d
 goal rew_inv_hyp : (d <-> c) -> c -> d
+goal rew_prem_hyp : (a -> b -> c <-> d) -> c -> d
 goal rew_inv_prem_hyp : (a -> b -> d <-> c) -> c -> d
 goal rew_forall_hyp : forall x. (forall u. u <-> a) -> (x <-> x)
 
