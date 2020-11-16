@@ -26,7 +26,7 @@ let print_task fmt {s; gd} =
   pp_print_list ~pp_sep:pp_print_space
     (fun fmt (id, cty) ->
       fprintf fmt "(%a : ekind %a)"
-        pri id
+        prid id
         prtyparen cty) fmt s;
   let _, terms = List.split gd in
   let tp = terms @ [CTfalse] in
@@ -37,26 +37,26 @@ let print_task fmt {s; gd} =
 let print_certif print_next fmt c =
   let rstr goal = if goal then "_goal" else "_hyp" in
   let rec pc fmt = function
-  | ELet _ | EConstruct _ | ERename _ | EFoldArr _ ->
+  | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _ ->
       verif_failed "Construct/Let/Rename/Fold left"
   | EHole _ ->
       print_next fmt ()
   | EAxiom (t, h, g) ->
       fprintf fmt "axiom %a %a %a"
         prpv t
-        hpri h
-        hpri g
+        prhyp h
+        prhyp g
   | ETrivial (goal, g) ->
       fprintf fmt "trivial%s %a"
         (rstr goal)
-        hpri g
+        prhyp g
   | ECut (i, a, ce1, ce2) ->
       fprintf fmt "cut %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    (λ %a, @[<hv>%a@])"
         prpv a
-        hpri i pc ce1
-        hpri i pc ce2
+        prhyp i pc ce1
+        prhyp i pc ce2
   | ESplit (goal, a, b, i, c1, c2) ->
       fprintf fmt "split%s %a %a@ \
                    (λ %a, @[<hv>%a@])@ \
@@ -65,9 +65,9 @@ let print_certif print_next fmt c =
         (rstr goal)
         prpv a
         prpv b
-        hpri i pc c1
-        hpri i pc c2
-        hpri i
+        prhyp i pc c1
+        prhyp i pc c2
+        prhyp i
   | EUnfoldIff (goal, a, b, i, c) ->
       fprintf fmt "unfold_iff%s %a %a@ \
                    (λ %a, @[<hv>%a@])@ \
@@ -75,8 +75,8 @@ let print_certif print_next fmt c =
         (rstr goal)
         prpv a
         prpv b
-        hpri i pc c
-        hpri i
+        prhyp i pc c
+        prhyp i
   | EUnfoldArr (goal, a, b, i, c) ->
       fprintf fmt "unfold_arr%s %a %a@ \
                    (λ %a, @[<hv>%a@])@ \
@@ -84,24 +84,24 @@ let print_certif print_next fmt c =
         (rstr goal)
         prpv a
         prpv b
-        hpri i pc c
-        hpri i
+        prhyp i pc c
+        prhyp i
   | ESwapNeg (goal, a, i, c) ->
       fprintf fmt "swap_neg%s %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv a
-        hpri i pc c
-        hpri i
+        prhyp i pc c
+        prhyp i
   | ESwap (goal, a, i, c) ->
       fprintf fmt "swap%s %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
         prpv a
-        hpri i pc c
-        hpri i
+        prhyp i pc c
+        prhyp i
   | EDestruct (goal, a, b, i, j1, j2, c) ->
       fprintf fmt "destruct%s %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
@@ -109,8 +109,8 @@ let print_certif print_next fmt c =
         (rstr goal)
         prpv a
         prpv b
-        hpri j1 hpri j2 pc c
-        hpri i
+        prhyp j1 prhyp j2 pc c
+        prhyp i
   | EWeakening (goal, a, i, c) ->
       fprintf fmt "weakening%s %a@ \
                    (@[<hv>%a@])@ \
@@ -118,7 +118,7 @@ let print_certif print_next fmt c =
         (rstr goal)
         prpv a
         pc c
-        hpri i
+        prhyp i
   | EIntroQuant (goal, (CTquant (_, cty, _) as p), i, y, c) ->
       fprintf fmt "intro_quant%s %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
@@ -126,8 +126,8 @@ let print_certif print_next fmt c =
         (rstr goal)
         prty cty
         prpv p
-        pri y hpri i pc c
-        hpri i
+        prid y prhyp i pc c
+        prhyp i
   | EInstQuant (goal, (CTquant (_, cty, _) as p), i, j, t, c) ->
       fprintf fmt "inst_quant%s %a %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
@@ -136,8 +136,8 @@ let print_certif print_next fmt c =
         prty cty
         prpv p
         prpv t
-        hpri i hpri j pc c
-        hpri i
+        prhyp i prhyp j pc c
+        prhyp i
   | ERewrite (goal, ty, a, b, ctxt, i, h, c) ->
       fprintf fmt "rewrite%s %a %a %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
@@ -145,9 +145,9 @@ let print_certif print_next fmt c =
                    %a"
         (rstr goal)
         prtyparen ty prpv a prpv b prpv ctxt
-        hpri h hpri i pc c
-        hpri h
-        hpri i
+        prhyp h prhyp i pc c
+        prhyp h
+        prhyp i
   | _ -> assert false
   in
   pc fmt c
@@ -167,8 +167,8 @@ let print fmt init res (task_ids, certif) =
     let fv_ids, _ = List.split s in
     let hyp_ids, _ = List.split gd in
     fprintf fmt "@[%a %a@]"
-      (print_list pri) (task_id :: fv_ids)
-      (print_list hpri) hyp_ids in
+      (print_list prid) (task_id :: fv_ids)
+      (print_list prhyp) hyp_ids in
   (* The term that has the correct type *)
   let p_term fmt () =
     let {s; gd} = init in
@@ -176,8 +176,8 @@ let print fmt init res (task_ids, certif) =
     let hyp_ids, _ = List.split gd in
     fprintf fmt "@[<2>@<1>%s %a@ %a@]"
       "λ"
-      (print_list pri) (task_ids @ fv_ids)
-      (print_list hpri) hyp_ids;
+      (print_list prid) (task_ids @ fv_ids)
+      (print_list prhyp) hyp_ids;
     fprintf fmt ",@ ";
     print_certif print_next fmt certif in
 

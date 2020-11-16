@@ -22,7 +22,7 @@ let union : ctask Mid.t -> ctask Mid.t -> ctask Mid.t =
       eprintf "Conflict on ident : %a\n\
                task 1 : %a\n\
                task 2 : %a@."
-        pri id
+        prhyp id
         pcta cta1
         pcta cta2;
       verif_failed "Conflict of ident, see stderr" in
@@ -30,8 +30,8 @@ let union : ctask Mid.t -> ctask Mid.t -> ctask Mid.t =
 
 let rec ccheck c cta =
   match c with
-  | ELet _ | EConstruct _ | ERename _ | EFoldArr _ ->
-      verif_failed "Construct/Let/Rename/Fold left"
+  | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _ ->
+      verif_failed "Construct/Let/Duplicate/Fold left"
     | EHole i -> Mid.singleton i cta
     | EAxiom (_, i1, i2) ->
         let t1, pos1 = find_ident "axiom1" i1 cta in

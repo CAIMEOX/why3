@@ -69,6 +69,9 @@ type ('I, 't) cert =
   | Weakening of 'I * ('I, 't) cert
   (* Weakening (I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Weakening (I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
+  | Duplicate of 'I * 'I * ('I, 't) cert
+  (* Duplicate (I₁, I₂, c) ⇓ (Γ ⊢ Δ, I₁ : A) ≜  c ⇓ (Γ ⊢ Δ, I₁ : A, I₂ : A) *)
+  (* Duplicate (I₁, I₂, c) ⇓ (Γ, I₁ : A ⊢ Δ) ≜  c ⇓ (Γ, I₁ : A, I₂ : A ⊢ Δ) *)
   | IntroQuant of 'I * ident * ('I, 't) cert
   (* IntroQuant (I, y, c) ⇓ (Σ | Γ, I : ∃ x : τ. P x ⊢ Δ) ≜
          c ⇓ (Σ, y : τ | Γ, I : P y ⊢ Δ)
@@ -143,9 +146,6 @@ type ('I, 't) ecert =
   | ETrivial of bool * 'I
   (* ETrivial (false, I) ⇓ (Γ, I : false ⊢ Δ) ≜  [] *)
   (* ETrivial (true, I) ⇓ (Γ ⊢ Δ, I : true ) ≜  [] *)
-  | ERename of bool * 't * 'I * 'I * ('I, 't) ecert
-  (* ERename (false, A, I₁, I₂, c) ⇓  (Γ, I₁ : A ⊢ Δ) ≜ c ⇓ (Γ, I₂ : A ⊢ Δ)*)
-  (* ERename (true, A, I₁, I₂, c) ⇓  (Γ ⊢ Δ, I₁ : A) ≜ c ⇓ (Γ ⊢ Δ, I₂ : A)*)
   | EUnfoldIff of (bool * 't * 't * 'I * ('I, 't) ecert)
   (* EUnfoldIff (false, A, B, I, c) ⇓ (Γ, I : A ↔ B ⊢ Δ) ≜  c ⇓ (Γ, I : (A → B) ∧ (B → A) ⊢ Δ) *)
   (* EUnfoldIff (true, A, B, I, c) ⇓ (Γ ⊢ Δ, I : A ↔ B) ≜  c ⇓ (Γ ⊢ Δ, I : (A → B) ∧ (B → A)) *)
@@ -173,6 +173,9 @@ type ('I, 't) ecert =
   | EWeakening of bool * 't * 'I * ('I, 't) ecert
   (* EWeakening (true, A, I, c) ⇓ (Γ ⊢ Δ, I : A) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* EWeakening (false, A, I, c) ⇓ (Γ, I : A ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
+  | EDuplicate of bool * 't * 'I * 'I * ('I, 't) ecert
+  (* EDuplicate (true, A, I₁, I₂, c) ⇓ (Γ ⊢ Δ, I₁ : A) ≜  c ⇓ (Γ ⊢ Δ, I₁ : A, I₂ : A) *)
+  (* EDuplicate (false, A, I₁, I₂, c) ⇓ (Γ, I₁ : A ⊢ Δ) ≜  c ⇓ (Γ, I₁ : A, I₂ : A ⊢ Δ) *)
   | EIntroQuant of bool * 't * 'I * ident * ('I, 't) ecert
   (* EIntroQuant (false, P, I, y, c) ⇓ (Σ | Γ, I : ∃ x : τ. P x ⊢ Δ) ≜
          c ⇓ (Σ, y : τ | Γ, I : P y ⊢ Δ)
@@ -196,47 +199,50 @@ type ('I, 't) ecert =
      and a and b have type τ  *)
 
 type heavy_ecert = ident list * (ident, cterm) ecert
-type trimmed_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct) *)
-type kernel_ecert = ident list * (ident, cterm) ecert (* without (Rename,Construct,Let) *)
+type trimmed_ecert = ident list * (ident, cterm) ecert (* without (Construct, Duplicate) *)
+type kernel_ecert = ident list * (ident, cterm) ecert (* without (Construct, Duplicate,Let) *)
 
 let rec print_certif filename cert =
   let oc = open_out filename in
   let fmt = formatter_of_out_channel oc in
   fprintf fmt "%a@." prcertif cert;
   close_out oc
-and prcab : type a b. (formatter -> a -> unit) ->
-                 (formatter -> b -> unit) ->
-                 formatter -> (a, b) cert -> unit
-  = fun pra prb fmt c ->
-  let prc = prcab pra prb in
+and prcit : type i t. (formatter -> i -> unit) ->
+                 (formatter -> t -> unit) ->
+                 formatter -> (i, t) cert -> unit
+  = fun pri prt fmt c ->
+  let prc = prcit pri prt in
   match c with
   | Nc -> fprintf fmt "No_certif"
-  | Hole ct -> fprintf fmt "Hole %a" pri ct
-  | Cut (i, a, c1, c2) -> fprintf fmt "Cut (@[%a, %a,@ @[<4>%a@],@ @[<4>%a@])@]" pra i prb a prc c1 prc c2
-  | Let (x, i, c) -> fprintf fmt "Let (%a, %a,@ %a)" prb x pra i prc c
-  | Rename (i1, i2, c) -> fprintf fmt "Rename (%a, %a,@ %a)" pra i1 pra i2 prc c
-  | Axiom (i1, i2) -> fprintf fmt "Axiom (%a, %a)" pra i1 pra i2
-  | Trivial i -> fprintf fmt "Trivial %a" pra i
-  | Unfold (i, c) -> fprintf fmt "Unfold (%a,@ %a)" pra i prc c
-  | Fold (i, c) -> fprintf fmt "Fold (%a,@ %a)" pra i prc c
-  | Split (i, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]" pra i prc c1 prc c2
+  | Hole ct -> fprintf fmt "Hole %a" prid ct
+  | Cut (i, a, c1, c2) -> fprintf fmt "Cut (@[%a, %a,@ @[<4>%a@],@ @[<4>%a@])@]"
+                            pri i prt a prc c1 prc c2
+  | Let (x, i, c) -> fprintf fmt "Let (%a, %a,@ %a)" prt x pri i prc c
+  | Rename (i1, i2, c) -> fprintf fmt "Rename (%a, %a,@ %a)" pri i1 pri i2 prc c
+  | Axiom (i1, i2) -> fprintf fmt "Axiom (%a, %a)" pri i1 pri i2
+  | Trivial i -> fprintf fmt "Trivial %a" pri i
+  | Unfold (i, c) -> fprintf fmt "Unfold (%a,@ %a)" pri i prc c
+  | Fold (i, c) -> fprintf fmt "Fold (%a,@ %a)" pri i prc c
+  | Split (i, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]"
+                           pri i prc c1 prc c2
   | Destruct (i, j1, j2, c) ->
-      fprintf fmt "Destruct (%a, %a, %a,@ %a)" pra i pra j1 pra j2 prc c
+      fprintf fmt "Destruct (%a, %a, %a,@ %a)" pri i pri j1 pri j2 prc c
   | Construct (i1, i2, j, c) ->
-      fprintf fmt "Construct (%a, %a, %a,@ %a)" pra i1 pra i2 pra j prc c
-  | Swap (i, c) -> fprintf fmt "Swap (%a,@ %a)" pra i prc c
+      fprintf fmt "Construct (%a, %a, %a,@ %a)" pri i1 pri i2 pri j prc c
+  | Swap (i, c) -> fprintf fmt "Swap (%a,@ %a)" pri i prc c
   | Dir (b, i, c) ->
-      fprintf fmt "Dir (%b, %a,@ %a)" b pra i prc c
-  | Weakening (i, c) -> fprintf fmt "Weakening@ (%a,@ %a)" pra i prc c
-  | IntroQuant (i, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)" pra i pri y prc c
-  | InstQuant (i, j, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)" pra i pra j prb t prc c
-  | Rewrite (i, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" pra i pra h prc c
+      fprintf fmt "Dir (%b, %a,@ %a)" b pri i prc c
+  | Weakening (i, c) -> fprintf fmt "Weakening@ (%a,@ %a)" pri i prc c
+  | Duplicate (i1, i2, c) -> fprintf fmt "Duplicate@ (%a, %a, @ %a)" pri i1 pri i2 prc c
+  | IntroQuant (i, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)" pri i prid y prc c
+  | InstQuant (i, j, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)" pri i pri j prt t prc c
+  | Rewrite (i, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" pri i pri h prc c
 
-and prli = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") pri
+and prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
 and prcertif fmt (v, c) = fprintf fmt "@[<v>[%a],@ @[%a@]@]"
-                            prli v (prcab prpr Pretty.print_term) c
+                            prlid v (prcit prpr Pretty.print_term) c
 and prcore_certif fmt (v, c) = fprintf fmt "@[<v>[%a],@ @[%a@]@]"
-                                 prli v (prcab pri pcte) c
+                                 prlid v (prcit prhyp pcte) c
 
 let eprcertif c = eprintf "%a@." prcertif c
 
@@ -264,6 +270,7 @@ let propagate_cert f fid fte = function
   | Swap (i, c) -> Swap (fid i, f c)
   | Dir (d, i, c) -> Dir (d, fid i, f c)
   | Weakening (i, c) -> Weakening (fid i, f c)
+  | Duplicate (i1, i2, c) -> Duplicate (fid i1, fid i2, f c)
   | IntroQuant (i, y, c) -> IntroQuant (fid i, y, f c)
   | InstQuant (i, j, t, c) -> InstQuant (fid i, fid j, fte t, f c)
   | Rewrite (i, h, c) -> Rewrite (fid i, fid h, f c)
@@ -313,7 +320,6 @@ let propagate_ecert f fid ft = function
       let f1 = f c1 in let f2 = f c2 in
       ECut (fid i, ft a, f1, f2)
   | ELet (x, y, c) -> ELet (ft x, ft y, f c)
-  | ERename (g, a, i1, i2, c) -> ERename (g, ft a, fid i1, fid i2, f c)
   | EAxiom (a, i1, i2) -> EAxiom (ft a, fid i1, fid i2)
   | ETrivial (g, i) -> ETrivial (g, fid i)
   | ESplit (g, a, b, i, c1, c2) ->
@@ -327,6 +333,7 @@ let propagate_ecert f fid ft = function
   | ESwap (g, a, i, c) -> ESwap (g, ft a, fid i, f c)
   | ESwapNeg (g, a, i, c) -> ESwapNeg (g, ft a, fid i, f c)
   | EWeakening (g, a, i, c) -> EWeakening (g, ft a, fid i, f c)
+  | EDuplicate (g, a, i1, i2, c) -> EDuplicate (g, ft a, fid i1, fid i2, f c)
   | EIntroQuant (g, p, i, y, c) -> EIntroQuant (g, ft p, fid i, y, f c)
   | EInstQuant (g, p, i, j, t, c) -> EInstQuant (g, ft p, fid i, fid j, ft t, f c)
   | ERewrite (g, cty, a, b, ctxt, i, h, c) ->
@@ -357,7 +364,7 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
     2. abstract_cert
        Same as before but with simpler types that can be used by our checkers.
        Also removes some easily derivable rules from other rules.
-       An example of such easily derible rule is Dir.
+       Examples of such easily derible rule are Dir and Rename.
     3. heavy_ecert
        The result of the elaboration and as such contains many additional
        information such as the current formula and whether the focus is on a
@@ -375,12 +382,15 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
 
 let dir_smart d prg c =
   let prh = create_prsymbol (id_fresh "Weaken") in
-  let left, right = match d with false -> prg, prh | true -> prh, prg in
+  let left, right = if d then prh, prg else prg, prh in
   Destruct (prg, left, right, Weakening (prh, c))
 
+let rename_smart i1 i2 c =
+  Duplicate (i1, i2, Weakening (i1, c))
 
 let rec abstract_cert = function
   | Dir (d, pr, c) -> abstract_cert (dir_smart d pr c)
+  | Rename (i1, i2, c) -> abstract_cert (rename_smart i1 i2 c)
   | c -> propagate_cert abstract_cert (fun pr -> pr.pr_name) abstract_term c
 
 exception Elaboration_failed
@@ -417,12 +427,7 @@ let elaborate (init_ct : ctask) c =
   | Trivial i ->
       let _, pos = find_ident "Trivial" i cta in
       ETrivial (pos, i)
-  | Rename (i1, i2, c) ->
-      let a, pos = find_ident "Rename" i1 cta in
-      let cta = remove i1 cta
-                |> add i2 (a, pos) in
-      let c = elab cta c in
-      ERename (pos, a, i1, i2, c)
+  | Rename _ -> verif_failed "Some Rename left during elaboration"
   | Cut (i, a, c1, c2) ->
       let cta1 = add i (a, true) cta in
       let cta2 = add i (a, false) cta in
@@ -505,6 +510,10 @@ let elaborate (init_ct : ctask) c =
       let t, pos = find_ident "Weakening" i cta in
       let cta = remove i cta in
       EWeakening (pos, t, i, elab cta c)
+  | Duplicate (i1, i2, c) ->
+      let t, pos = find_ident "Duplicate" i1 cta in
+      let cta = add i2 (t, pos) cta in
+      EDuplicate (pos, t, i1, i2, elab cta c)
   | IntroQuant (i, y, c) ->
       let t, pos = find_ident "IntroQuant" i cta in
       let t, ty = match t, pos with
@@ -543,20 +552,21 @@ let eaxiom g a i j =
   if g then EAxiom (a, i, j)
   else EAxiom (a, j, i)
 
-let erename g a i1 i2 c =
-  let c_open = EWeakening (g, a, i1, c) in
+let eduplicate g a i1 i2 c =
   let c_closed = eaxiom (not g) a i1 i2 in
   let c1, c2 = if g
-               then c_open, c_closed
-               else c_closed, c_open in
+               then c, c_closed
+               else c_closed, c in
   ECut (i2, a, c1, c2)
 
+let erename g a i1 i2 c =
+  eduplicate g a i1 i2 (EWeakening (g, a, i1, c))
 
 let rec trim_certif c =
   match c with
-  | ERename (g, a, i1, i2, c) ->
+  | EDuplicate (g, a, i1, i2, c) ->
       let c = trim_certif c in
-      erename g a i1 i2 c
+      eduplicate g a i1 i2 c
   | EConstruct (g, a, b, i1, i2, j, c) ->
       let c = trim_certif c in
       let i1' = id_register (id_fresh "i1") in
