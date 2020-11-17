@@ -513,15 +513,19 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
       match d.d_node with
       | Dprop (Paxiom, pr, t) when pr_equal pr prh ->
           let lp, f = intro_premises [] t in
-          let t1, t2 = (match f.t_node with
+          let revert, t1, t2 = (match f.t_node with
           | Tapp (ls, [t1; t2]) when ls_equal ls ps_equ ->
               (* Support to rewrite from the right *)
-              if rev then (t1, t2) else (t2, t1)
+              if rev
+              then (fun c -> c), t1, t2
+              else (fun c -> EqSym (nprh, c)), t2, t1
           | Tbinop (Tiff, t1, t2) ->
               (* Support to rewrite from the right *)
-              if rev then (t1, t2) else (t2, t1)
+              if rev
+              then (fun c -> c), t1, t2
+              else (iffsym nprh), t2, t1
           | _ -> raise (Arg_bad_hypothesis ("rewrite", f))) in
-          Some (lp, t1, t2)
+          Some (lp, revert, t1, t2)
       | _ -> acc)
       None
   in
@@ -529,19 +533,19 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
   let lp_new found_eq =
     match found_eq with
     | None -> raise (Args_wrapper.Arg_error "Did not find rewrite hypothesis")
-    | Some (lp, t1, t2) ->
+    | Some (lp, revert, t1, t2) ->
       Trans.fold_decl (fun d acc ->
         match d.d_node with
         | Dprop (p, pr, t) when pr_equal pr pri ->
             let new_term = t_replace t1 t2 t in
-            Some (lp, create_prop_decl p pr new_term)
+            Some (lp, revert, create_prop_decl p pr new_term)
         | _ -> acc) None in
   (* Pass the premises as new goals. Replace the former toberewritten
      hypothesis to the new rewritten one *)
   let recreate_tasks lp_new =
     match lp_new with
     | None -> raise (Arg_trans "recreate_tasks")
-    | Some (lp, new_decl) ->
+    | Some (lp, revert, new_decl) ->
         let trans_rewriting =
           Trans.decl (fun decl -> match decl.d_node with
           | Dprop (_, pr, _) when pr_equal pr pri -> [new_decl]
@@ -565,7 +569,7 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
                 c)) in
               let rew_cert = Rewrite (pri, nprh, Weakening (nprh, hole ())) in
               Duplicate (prh, nprh,
-              List.fold_right apply lp rew_cert)) in
+              List.fold_right apply lp (revert rew_cert))) in
 
         Trans.store (fun task ->
             Trans.apply (Trans.par (trans_rewriting :: list_par)) task,
