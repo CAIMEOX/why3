@@ -563,9 +563,10 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
                 Unfold (nprh, Split (nprh,
                 Weakening (pr, Swap (nprh, rename nprh pr (hole ()))),
                 c)) in
+              let rew_cert = Rewrite (pri, nprh, Weakening (nprh, hole ())) in
               Duplicate (prh, nprh,
-              List.fold_right apply lp
-                (Rewrite (pri, nprh, Weakening (nprh, hole ()))))) in
+              List.fold_right apply lp rew_cert)) in
+
         Trans.store (fun task ->
             Trans.apply (Trans.par (trans_rewriting :: list_par)) task,
             cert)
