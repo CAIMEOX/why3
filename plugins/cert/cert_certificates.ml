@@ -100,6 +100,15 @@ let create_eqrefl i t c =
   Cut (i, CTapp (CTapp (eq, t), t), eqrefl i, c)
 (* create_eqrefl i t c ⇓ (Γ ⊢ Δ) ≜  c ⇓ (Γ, i : t = t ⊢ Δ) *)
 
+(* TODO : fix this when the equivalence is in delta *)
+let iffsym pr c =
+  let pr1 = pr_clone pr in
+  let pr2 = pr_clone pr in
+  Unfold (pr,
+  Destruct (pr, pr1, pr2,
+  Construct (pr2, pr1, pr,
+  Fold (pr, c))))
+
 let rename i1 i2 c =
   Duplicate (i1, i2, Weakening (i1, c))
 (* rename i₁ i₂ c ⇓ (Γ ⊢ Δ, i₁ : t) ≜  c ⇓ (Γ ⊢ Δ, i₂ : t) *)
@@ -510,6 +519,7 @@ let elaborate (init_ct : ctask) c =
             false, add i unfolded_imp cta, t1, t2
         | _ -> eprintf "Nothing to unfold : @[%a@]@." pcte t;
                raise Elaboration_failed in
+      (* TODO remove pack *)
       let pack = pos, t1, t2, i, elab cta c in
       if iff
       then EUnfoldIff pack
@@ -523,6 +533,7 @@ let elaborate (init_ct : ctask) c =
                raise Elaboration_failed in
       let c = elab cta c in
       EFoldArr (pos, t1, t2, i, c)
+      (* TODO fold iff *)
   | Split (i, c1, c2) ->
       let t, pos = find_ident "Split" i cta in
       let t1, t2 = match t, pos with
