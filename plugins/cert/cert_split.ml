@@ -692,10 +692,10 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       { r with conj = Unit; disj = Unit; fwd = pr, t_false; bwd = pr, t_true }
   | _ -> r
 
-let split_core sp pr t =
-  let res = split_core sp pr t in
-  print_ret_err res;
-  res
+(* let split_core sp pr t =
+ *   let res = split_core sp pr t in
+ *   print_ret_err res;
+ *   res *)
 
 let full_split kn = {
   right_only = false;

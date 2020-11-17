@@ -114,6 +114,7 @@ let cterm_map f ct = match ct with
   | CTbinop (op, ct1, ct2) ->  CTbinop (op, f ct1, f ct2)
   | CTnot ct -> CTnot (f ct)
 
+(* TODO : rename this ct_equal *)
 let rec cterm_equal t1 t2 = match t1, t2 with
   | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
   | CTfvar i1, CTfvar i2 -> id_equal i1 i2
@@ -284,9 +285,24 @@ and prpv fmt = function
   | CTtrue -> fprintf fmt "true"
   | ct -> fprintf fmt "(%a)" pcte ct
 
+type ctask =
+  { sigma : ctype Mid.t;
+    gamma_delta : (cterm * bool) Mid.t
+  }
+(* We will denote a ctask <sigma; gamma_delta> by <Σ | Γ ⊢ Δ> where:
+   • <Σ> contains all the signature declarations <x : ty>
+     where <x> is mapped to <ty> in <sigma>
+   • <Γ> contains all the declarations <H : P>
+     where <H> is mapped to <(P, false)> in <gamma_delta>
+   • <Δ> contains all the declarations <H : P>
+     where <H> is mapped to <(P,  true)> in <gamma_delta>
+
+   We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ>
+*)
+
 (* Typing algorithm *)
 
-let infer_type sigma t =
+let infer_type cta t =
   let rec infer_type sigma t = match t with
   | CTfvar v -> Mid.find v sigma
   | CTbvar _ -> assert false
@@ -310,29 +326,15 @@ let infer_type sigma t =
       assert (ctype_equal ty2 ctprop);
       ctprop
   | CTint _ -> ctint in
-  let sigma_interp = Mid.set_union sigma interp_var_type in
+  let sigma_interp = Mid.set_union cta.sigma interp_var_type in
   infer_type sigma_interp t
 
 
-let infers_into sigma t ty =
-  try assert (ctype_equal (infer_type sigma t) ty)
+let infers_into cta t ty =
+  try assert (ctype_equal (infer_type cta t) ty)
   with e -> eprintf "wrong type for %a@." pcte t;
             raise e
 
-type ctask =
-  { sigma : ctype Mid.t;
-    gamma_delta : (cterm * bool) Mid.t
-  }
-(* We will denote a ctask <sigma; gamma_delta> by <Σ | Γ ⊢ Δ> where:
-   • <Σ> contains all the signature declarations <x : ty>
-     where <x> is mapped to <ty> in <sigma>
-   • <Γ> contains all the declarations <H : P>
-     where <H> is mapped to <(P, false)> in <gamma_delta>
-   • <Δ> contains all the declarations <H : P>
-     where <H> is mapped to <(P,  true)> in <gamma_delta>
-
-   We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ>
-*)
 
 (** Utility functions on ctask *)
 

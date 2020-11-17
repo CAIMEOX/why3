@@ -15,7 +15,7 @@ let cert_dbg = Some eprcertif, None
 let cta_dbg = None, Some eplcta
 let all_dbg = Some eprcertif, Some eplcta
 
-let cchecker trans = Trans.store (checker_ctrans all_dbg make_core checker_caml trans)
+let cchecker trans = Trans.store (checker_ctrans no_dbg make_core checker_caml trans)
 let lchecker trans = Trans.store (checker_ctrans no_dbg make_core checker_lambdapi trans)
 
 let print_c any every where = cchecker (tprint any every where)
