@@ -46,6 +46,30 @@ let rec ccheck c cta =
         | CTfalse, false | CTtrue, true -> Mid.empty
         | _ -> verif_failed "Non trivial hypothesis"
         end
+    | EEqRefl (_, _, i) ->
+        let t, pos = find_ident "eqrefl" i cta in
+        begin match t, pos with
+        | CTapp (CTapp (e, t1), t2), _ when cterm_equal t1 t2 && cterm_equal e eq ->
+            Mid.empty
+        | _ -> verif_failed "Non eqrefl hypothesis" end
+    | EEqSym (_, _, _, _, i, c) ->
+        let t, pos = find_ident "EqSym" i cta in
+        begin match t with
+        | CTapp (CTapp (e, t1), t2) when cterm_equal e eq ->
+            let rev_eq = CTapp (CTapp (eq, t2), t1) in
+            let cta = add i (rev_eq, pos) (remove i cta) in
+            ccheck c cta
+        | _ -> verif_failed "Non eq hypothesis" end
+    | EEqTrans (_, _, _, _, i1, i2, i3, c) ->
+        let t1, pos1 = find_ident "EqTrans" i1 cta in
+        let t2, pos2 = find_ident "EqTrans" i2 cta in
+        begin match t1, t2, pos1, pos2 with
+        | CTapp (CTapp (e1, t11), t12), CTapp (CTapp (e2, t21), t22), false, false
+            when cterm_equal t12 t21 && cterm_equal e1 eq && cterm_equal e2 eq ->
+            let new_eq = CTapp (CTapp (eq, t11), t22) in
+            let cta = add i3 (new_eq, false) cta in
+            ccheck c cta
+        | _ -> verif_failed "wrong hyps form in eqtrans" end
     | ECut (i, a, c1, c2) ->
         let cta1 = add i (a, true) cta in
         let cta2 = add i (a, false) cta in
@@ -107,7 +131,7 @@ let rec ccheck c cta =
         let t, pos = find_ident "inst_quant" i cta in
         begin match t, pos with
         | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true ->
-            infers_into cta.sigma t_inst ty;
+            infers_into cta t_inst ty;
             let cta = add j (ct_open t t_inst, pos) cta in
             ccheck c cta
         | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"

@@ -50,13 +50,35 @@ let print_certif print_next fmt c =
       fprintf fmt "trivial%s %a"
         (rstr goal)
         prhyp g
-  | ECut (i, a, ce1, ce2) ->
+  | EEqRefl (cty, t, i) ->
+      fprintf fmt "eqrefl %a %a %a"
+        prtyparen cty
+        prpv t
+        prhyp i
+  | EEqSym (goal, cty, t1, t2, i, c) ->
+      fprintf fmt "eqsym%s %a %a %a (λ %a, %a) %a"
+        (rstr goal)
+        prtyparen cty
+        prpv t1
+        prpv t2
+        prhyp i pc c
+        prhyp i
+  | EEqTrans (cty, t1, t2, t3, i1, i2, i3, c) ->
+      fprintf fmt "eqtrans %a %a %a %a (λ %a, %a) %a %a"
+        prtyparen cty
+        prpv t1
+        prpv t2
+        prpv t3
+        prhyp i3 pc c
+        prhyp i1
+        prhyp i2
+  | ECut (i, a, c1, c2) ->
       fprintf fmt "cut %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    (λ %a, @[<hv>%a@])"
         prpv a
-        prhyp i pc ce1
-        prhyp i pc ce2
+        prhyp i pc c1
+        prhyp i pc c2
   | ESplit (goal, a, b, i, c1, c2) ->
       fprintf fmt "split%s %a %a@ \
                    (λ %a, @[<hv>%a@])@ \
@@ -124,20 +146,22 @@ let print_certif print_next fmt c =
                    (λ %a %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
-        prty cty
+        prtyparen cty
         prpv p
         prid y prhyp i pc c
         prhyp i
+  | EIntroQuant _ -> assert false
   | EInstQuant (goal, (CTquant (_, cty, _) as p), i, j, t, c) ->
       fprintf fmt "inst_quant%s %a %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
                    %a"
         (rstr goal)
-        prty cty
+        prtyparen cty
         prpv p
         prpv t
         prhyp i prhyp j pc c
         prhyp i
+  | EInstQuant _ -> assert false
   | ERewrite (goal, ty, a, b, ctxt, i, h, c) ->
       fprintf fmt "rewrite%s %a %a %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
@@ -148,7 +172,6 @@ let print_certif print_next fmt c =
         prhyp h prhyp i pc c
         prhyp h
         prhyp i
-  | _ -> assert false
   in
   pc fmt c
 
