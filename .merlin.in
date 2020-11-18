@@ -20,6 +20,7 @@ S plugins/printer
 S plugins/transform
 S plugins/tptp
 S plugins/python
+S plugins/cert
 
 B src/util
 B src/core
@@ -43,6 +44,7 @@ B plugins/printer
 B plugins/transform
 B plugins/tptp
 B plugins/python
+B plugins/cert
 B lib/why3
 
 PKG @SEQLIB@ @RELIB@ unix num dynlink @ZIPLIB@ @LABLGTKPKG@ @META_OCAMLGRAPH@ @JSOFOCAMLPKG@ @MLMPFR@ @INFERPKG@ @SEXPLIB@
