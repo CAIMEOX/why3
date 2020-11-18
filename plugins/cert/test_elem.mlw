@@ -23,3 +23,4 @@ goal G17 : (a by b) -> c
 goal G18 : (a /\ b) -> c
 goal G19 : (a \/ b) /\ (c \/ d)
 goal G20 : not ((a \/ b) /\ (c \/ d))
+goal G21 : not ((a \/ b) /\ (c \/ d)) -> c
