@@ -48,6 +48,9 @@ type ('i, 't) cert =
   (* Fold (i, c) ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) ≜  c ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) *)
   (* Fold (i, c) ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) *)
   (* Fold (i, c) ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₁ → t₂) *)
+  | IffSym of 'i * ('i, 't) cert
+  (* IffSym (i, c) ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₂ ↔ t₁) *)
+  (* IffSym (i, c) ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ ↔ t₁ ⊢ Δ) *)
   | Split of 'i * ('i, 't) cert * ('i, 't) cert
   (* Split (i, c₁, c₂) ⇓ (Γ, i : t₁ ∨ t₂ ⊢ Δ) ≜
                        c₁ ⇓ (Γ, i : t₁ ⊢ Δ)
@@ -100,15 +103,6 @@ let eqrefl i = Trivial i
 let create_eqrefl i t c =
   Cut (i, CTapp (CTapp (eq, t), t), eqrefl i, c)
 (* create_eqrefl i t c ⇓ (Γ ⊢ Δ) ≜  c ⇓ (Γ, i : t = t ⊢ Δ) *)
-
-(* TODO : fix this when the equivalence is in delta *)
-let iffsym pr c =
-  let pr1 = pr_clone pr in
-  let pr2 = pr_clone pr in
-  Unfold (pr,
-  Destruct (pr, pr1, pr2,
-  Construct (pr2, pr1, pr,
-  Fold (pr, c))))
 
 let rename i1 i2 c =
   Duplicate (i1, i2, Weakening (i1, c))
@@ -279,6 +273,7 @@ and prcit : type i t. (formatter -> i -> unit) ->
                                  pri i1 pri i2 pri i3 prc c
   | Unfold (i, c) -> fprintf fmt "Unfold (%a,@ %a)" pri i prc c
   | Fold (i, c) -> fprintf fmt "Fold (%a,@ %a)" pri i prc c
+  | IffSym (i, c) -> fprintf fmt "IffSym (%a,@ %a)" pri i prc c
   | Split (i, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]"
                            pri i prc c1 prc c2
   | Destruct (i, j1, j2, c) ->
@@ -305,29 +300,30 @@ let eprcertif c = eprintf "%a@." prcertif c
 (** Utility functions on certificates *)
 
 (* Use propagate to define recursive functions on elements of type cert *)
-let propagate_cert f fid fte = function
+let propagate_cert fc fi ft = function
   | (Hole _ | Nc)  as c -> c
-  | Axiom (h, g) -> Axiom (fid h, fid g)
-  | Trivial i -> Trivial (fid i)
-  | EqSym (i, c) -> EqSym (fid i, f c)
-  | EqTrans (i1, i2, i3, c) -> EqTrans (fid i1, fid i2, fid i3, f c)
+  | Axiom (h, g) -> Axiom (fi h, fi g)
+  | Trivial i -> Trivial (fi i)
+  | EqSym (i, c) -> EqSym (fi i, fc c)
+  | EqTrans (i1, i2, i3, c) -> EqTrans (fi i1, fi i2, fi i3, fc c)
   | Cut (i, a, c1, c2) ->
-      let f1 = f c1 in let f2 = f c2 in
-      Cut (fid i, fte a, f1, f2)
-  | Let (x, i, c) -> Let (fte x, fid i, f c)
-  | Unfold (i, c) -> Unfold (fid i, f c)
-  | Fold (i, c) -> Fold (fid i, f c)
+      let f1 = fc c1 in let f2 = fc c2 in
+      Cut (fi i, ft a, f1, f2)
+  | Let (x, i, c) -> Let (ft x, fi i, fc c)
+  | Unfold (i, c) -> Unfold (fi i, fc c)
+  | Fold (i, c) -> Fold (fi i, fc c)
+  | IffSym (i, c) -> IffSym (fi i, fc c)
   | Split (i, c1, c2) ->
-      let f1 = f c1 in let f2 = f c2 in
-      Split (fid i, f1, f2)
-  | Destruct (i, j1, j2, c) -> Destruct (fid i, fid j1, fid j2, f c)
-  | Construct (i1, i2, j, c) -> Construct (fid i1, fid i2, fid j, f c)
-  | Swap (i, c) -> Swap (fid i, f c)
-  | Weakening (i, c) -> Weakening (fid i, f c)
-  | Duplicate (i1, i2, c) -> Duplicate (fid i1, fid i2, f c)
-  | IntroQuant (i, y, c) -> IntroQuant (fid i, y, f c)
-  | InstQuant (i, j, t, c) -> InstQuant (fid i, fid j, fte t, f c)
-  | Rewrite (i, h, c) -> Rewrite (fid i, fid h, f c)
+      let f1 = fc c1 in let f2 = fc c2 in
+      Split (fi i, f1, f2)
+  | Destruct (i, j1, j2, c) -> Destruct (fi i, fi j1, fi j2, fc c)
+  | Construct (i1, i2, j, c) -> Construct (fi i1, fi i2, fi j, fc c)
+  | Swap (i, c) -> Swap (fi i, fc c)
+  | Weakening (i, c) -> Weakening (fi i, fc c)
+  | Duplicate (i1, i2, c) -> Duplicate (fi i1, fi i2, fc c)
+  | IntroQuant (i, y, c) -> IntroQuant (fi i, y, fc c)
+  | InstQuant (i, j, t, c) -> InstQuant (fi i, fi j, ft t, fc c)
+  | Rewrite (i, h, c) -> Rewrite (fi i, fi h, fc c)
 
 let rec fill map = function
   | Hole x -> Mid.find x map
@@ -491,7 +487,7 @@ let elaborate (init_ct : ctask) c =
       | CTapp (CTapp (e, t1), t2) when ct_equal e eq ->
           let cty = infer_type cta t1 in
           let rev_eq = CTapp (CTapp (eq, t2), t1) in
-          let cta = add i (rev_eq, pos) (remove i cta) in
+          let cta = add i (rev_eq, pos) cta in
           EEqSym (pos, cty, t1, t2, i, elab cta c)
       | _ -> eprintf "not an equality"; raise Elaboration_failed end
   | EqTrans (i1, i2, i3, c) ->
@@ -543,6 +539,25 @@ let elaborate (init_ct : ctask) c =
             EFoldArr (pos, t1, t2, i, elab cta c)
         | _ -> eprintf "Nothing to fold : @[%a@]@." pcte t;
                raise Elaboration_failed end
+  | IffSym (i, c) ->
+      let t, pos = find_ident "IffSym" i cta in
+      begin match t with
+      | CTbinop (Tiff, t1, t2)  ->
+          let rev_iff = CTbinop (Tiff, t2, t1) in
+          let pos_impl = CTbinop (Timplies, t1, t2) in
+          let neg_impl = CTbinop (Timplies, t2, t1) in
+          let cta = add i (rev_iff, pos) cta in
+          let c = elab cta c in
+          if pos
+          then assert false
+              (* TODO complete (and move ?) this *)
+          else let i1 = id_register (id_clone i) in
+               let i2 = id_register (id_clone i) in
+               EUnfoldIff (pos, t1, t2, i,
+               EDestruct (pos, pos_impl, neg_impl, i, i1, i2,
+               EConstruct (pos, neg_impl, pos_impl, i2, i1, i,
+               EFoldIff (pos, t2, t1, i, c))))
+      | _ -> eprintf "not an equality"; raise Elaboration_failed end
   | Split (i, c1, c2) ->
       let t, pos = find_ident "Split" i cta in
       let t1, t2 = match t, pos with
