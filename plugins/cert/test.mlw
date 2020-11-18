@@ -67,7 +67,7 @@ goal rew_hyp : (c <-> d) -> c -> d
 goal rew_inv_hyp : (d <-> c) -> c -> d
 goal rew_prem_hyp : (a -> b -> c <-> d) -> c -> d
 goal rew_inv_prem_hyp : (a -> b -> d <-> c) -> c -> d
-goal rew_forall_hyp : forall x. (forall u. u <-> a) -> (x <-> x)
+goal rew_forall_hyp : forall x. (forall u. p u <-> a) -> (p x <-> p x)
 
 
 (* Drinker's paradox example *)

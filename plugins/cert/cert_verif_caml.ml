@@ -30,7 +30,7 @@ let union : ctask Mid.t -> ctask Mid.t -> ctask Mid.t =
 
 let rec ccheck c cta =
   match c with
-  | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _ ->
+  | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _ | EFoldIff _ ->
       verif_failed "Construct/Let/Duplicate/Fold left"
     | EHole i -> Mid.singleton i cta
     | EAxiom (_, i1, i2) ->

@@ -37,7 +37,7 @@ let print_task fmt {s; gd} =
 let print_certif print_next fmt c =
   let rstr goal = if goal then "_goal" else "_hyp" in
   let rec pc fmt = function
-  | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _ ->
+  | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _ | EFoldIff _ ->
       verif_failed "Construct/Let/Rename/Fold left"
   | EHole _ ->
       print_next fmt ()
