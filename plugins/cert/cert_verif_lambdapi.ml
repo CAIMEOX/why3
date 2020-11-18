@@ -41,23 +41,23 @@ let print_certif print_next fmt c =
       verif_failed "Construct/Let/Rename/Fold left"
   | EHole task_id ->
       print_next fmt task_id
-  | EAxiom (t, h, g) ->
+  | EAxiom (t, i1, i2) ->
       fprintf fmt "axiom %a %a %a"
         prpv t
-        prhyp h
-        prhyp g
-  | ETrivial (goal, g) ->
+        prhyp i1
+        prhyp i2
+  | ETrivial (pos, i) ->
       fprintf fmt "trivial%s %a"
-        (rstr goal)
-        prhyp g
+        (rstr pos)
+        prhyp i
   | EEqRefl (cty, t, i) ->
       fprintf fmt "eqrefl %a %a %a"
         prtyparen cty
         prpv t
         prhyp i
-  | EEqSym (goal, cty, t1, t2, i, c) ->
+  | EEqSym (pos, cty, t1, t2, i, c) ->
       fprintf fmt "eqsym%s %a %a %a (λ %a, %a) %a"
-        (rstr goal)
+        (rstr pos)
         prtyparen cty
         prpv t1
         prpv t2
@@ -72,106 +72,106 @@ let print_certif print_next fmt c =
         prhyp i3 pc c
         prhyp i1
         prhyp i2
-  | ECut (i, a, c1, c2) ->
+  | ECut (i, t, c1, c2) ->
       fprintf fmt "cut %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    (λ %a, @[<hv>%a@])"
-        prpv a
+        prpv t
         prhyp i pc c1
         prhyp i pc c2
-  | ESplit (goal, a, b, i, c1, c2) ->
+  | ESplit (pos, t1, t2, i, c1, c2) ->
       fprintf fmt "split%s %a %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    (λ %a, @[<hv>%a@])@ \
                    %a"
-        (rstr goal)
-        prpv a
-        prpv b
+        (rstr pos)
+        prpv t1
+        prpv t2
         prhyp i pc c1
         prhyp i pc c2
         prhyp i
-  | EUnfoldIff (goal, a, b, i, c) ->
+  | EUnfoldIff (pos, t1, t2, i, c) ->
       fprintf fmt "unfold_iff%s %a %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    %a"
-        (rstr goal)
-        prpv a
-        prpv b
+        (rstr pos)
+        prpv t1
+        prpv t2
         prhyp i pc c
         prhyp i
-  | EUnfoldArr (goal, a, b, i, c) ->
+  | EUnfoldArr (pos, t1, t2, i, c) ->
       fprintf fmt "unfold_arr%s %a %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    %a"
-        (rstr goal)
-        prpv a
-        prpv b
+        (rstr pos)
+        prpv t1
+        prpv t2
         prhyp i pc c
         prhyp i
-  | ESwapNeg (goal, a, i, c) ->
+  | ESwapNeg (pos, t, i, c) ->
       fprintf fmt "swap_neg%s %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    %a"
-        (rstr goal)
-        prpv a
+        (rstr pos)
+        prpv t
         prhyp i pc c
         prhyp i
-  | ESwap (goal, a, i, c) ->
+  | ESwap (pos, t, i, c) ->
       fprintf fmt "swap%s %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    %a"
-        (rstr goal)
-        prpv a
+        (rstr pos)
+        prpv t
         prhyp i pc c
         prhyp i
-  | EDestruct (goal, a, b, i, j1, j2, c) ->
+  | EDestruct (pos, t1, t2, i, i1, i2, c) ->
       fprintf fmt "destruct%s %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
                    %a"
-        (rstr goal)
-        prpv a
-        prpv b
-        prhyp j1 prhyp j2 pc c
+        (rstr pos)
+        prpv t1
+        prpv t2
+        prhyp i1 prhyp i2 pc c
         prhyp i
-  | EWeakening (goal, a, i, c) ->
+  | EWeakening (pos, t, i, c) ->
       fprintf fmt "weakening%s %a@ \
                    (@[<hv>%a@])@ \
                    %a"
-        (rstr goal)
-        prpv a
+        (rstr pos)
+        prpv t
         pc c
         prhyp i
-  | EIntroQuant (goal, (CTquant (_, cty, _) as p), i, y, c) ->
+  | EIntroQuant (pos, (CTquant (_, cty, _) as p), i, y, c) ->
       fprintf fmt "intro_quant%s %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
                    %a"
-        (rstr goal)
+        (rstr pos)
         prtyparen cty
         prpv p
         prid y prhyp i pc c
         prhyp i
   | EIntroQuant _ -> assert false
-  | EInstQuant (goal, (CTquant (_, cty, _) as p), i, j, t, c) ->
+  | EInstQuant (pos, (CTquant (_, cty, _) as p), i1, i2, t, c) ->
       fprintf fmt "inst_quant%s %a %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
                    %a"
-        (rstr goal)
+        (rstr pos)
         prtyparen cty
         prpv p
         prpv t
-        prhyp i prhyp j pc c
-        prhyp i
+        prhyp i1 prhyp i2 pc c
+        prhyp i1
   | EInstQuant _ -> assert false
-  | ERewrite (goal, ty, a, b, ctxt, i, h, c) ->
+  | ERewrite (pos, cty, t1, t2, ctxt, i1, i2, c) ->
       fprintf fmt "rewrite%s %a %a %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
                    %a@ \
                    %a"
-        (rstr goal)
-        prtyparen ty prpv a prpv b prpv ctxt
-        prhyp h prhyp i pc c
-        prhyp h
-        prhyp i
+        (rstr pos)
+        prtyparen cty prpv t1 prpv t2 prpv ctxt
+        prhyp i2 prhyp i1 pc c
+        prhyp i2
+        prhyp i1
   in
   pc fmt c
 
