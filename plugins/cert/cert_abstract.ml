@@ -30,12 +30,12 @@ let ctint = CTyapp (ts_int, [])
 
 (** Utility functions on ctype *)
 
-let rec ctype_equal l1 l2 = match l1, l2 with
+let rec cty_equal l1 l2 = match l1, l2 with
   | CTyvar v1, CTyvar v2 -> Ty.tv_equal v1 v2
   | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
-      ts_equal ty1 ty2 && List.for_all2 ctype_equal l1 l2
+      ts_equal ty1 ty2 && List.for_all2 cty_equal l1 l2
   | CTarrow (f1, a1), CTarrow (f2, a2) ->
-      ctype_equal f1 f2 && ctype_equal a1 a2
+      cty_equal f1 f2 && cty_equal a1 a2
   | (CTyvar _ | CTyapp _ | CTarrow _), _ -> false
 
 (* Pretty printing of ctype (compatible with lambdapi) *)
@@ -114,18 +114,17 @@ let cterm_map f ct = match ct with
   | CTbinop (op, ct1, ct2) ->  CTbinop (op, f ct1, f ct2)
   | CTnot ct -> CTnot (f ct)
 
-(* TODO : rename this ct_equal *)
-let rec cterm_equal t1 t2 = match t1, t2 with
+let rec ct_equal t1 t2 = match t1, t2 with
   | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
   | CTfvar i1, CTfvar i2 -> id_equal i1 i2
   | CTapp (tl1, tr1), CTapp (tl2, tr2) ->
-      cterm_equal tl1 tl2 && cterm_equal tr1 tr2
+      ct_equal tl1 tl2 && ct_equal tr1 tr2
   | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
-      op1 = op2 && cterm_equal tl1 tl2 && cterm_equal tr1 tr2
+      op1 = op2 && ct_equal tl1 tl2 && ct_equal tr1 tr2
   | CTquant (q1, ty1, t1), CTquant (q2, ty2, t2) when q1 = q2 ->
-      ctype_equal ty1 ty2 && cterm_equal t1 t2
+      cty_equal ty1 ty2 && ct_equal t1 t2
   | CTtrue, CTtrue | CTfalse, CTfalse -> true
-  | CTnot t1, CTnot t2 -> cterm_equal t1 t2
+  | CTnot t1, CTnot t2 -> ct_equal t1 t2
   | CTint i1, CTint i2 -> BigInt.eq i1 i2
   | (CTbvar _ | CTfvar _ | CTapp _ | CTbinop _ | CTquant _
      | CTtrue | CTfalse | CTnot _ | CTint _), _ -> false
@@ -308,7 +307,7 @@ let infer_type cta t =
   | CTbvar _ -> assert false
   | CTtrue | CTfalse -> ctprop
   | CTnot t -> let ty = infer_type sigma t in
-               assert (ctype_equal ty ctprop);
+               assert (cty_equal ty ctprop);
                ctprop
   | CTquant (_, ty1, t) ->
       let ni = id_register (id_fresh "type_ident") in
@@ -318,12 +317,12 @@ let infer_type cta t =
       CTarrow (ty1, ty2)
   | CTapp (t1, t2) ->
       begin match infer_type sigma t1, infer_type sigma t2 with
-      | CTarrow (ty1, ty2), ty3 when ctype_equal ty1 ty3 -> ty2
+      | CTarrow (ty1, ty2), ty3 when cty_equal ty1 ty3 -> ty2
       | _ -> assert false end
   | CTbinop (_, t1, t2) ->
       let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
-      assert (ctype_equal ty1 ctprop);
-      assert (ctype_equal ty2 ctprop);
+      assert (cty_equal ty1 ctprop);
+      assert (cty_equal ty2 ctprop);
       ctprop
   | CTint _ -> ctint in
   let sigma_interp = Mid.set_union cta.sigma interp_var_type in
@@ -331,7 +330,7 @@ let infer_type cta t =
 
 
 let infers_into cta t ty =
-  try assert (ctype_equal (infer_type cta t) ty)
+  try assert (cty_equal (infer_type cta t) ty)
   with e -> eprintf "wrong type for %a@." pcte t;
             raise e
 
@@ -369,9 +368,9 @@ let remove i cta = lift_mid_cta (Mid.remove i) cta
 let add i ct cta = lift_mid_cta (Mid.add i ct) cta
 
 let ctask_equal cta1 cta2 =
-  Mid.equal ctype_equal cta1.sigma cta2.sigma &&
+  Mid.equal cty_equal cta1.sigma cta2.sigma &&
   let cterm_pos_equal (t1, p1) (t2, p2) =
-    cterm_equal t1 t2 && p1 = p2 in
+    ct_equal t1 t2 && p1 = p2 in
   Mid.equal cterm_pos_equal cta1.gamma_delta cta2.gamma_delta
 
 (* Pretty printing of ctask *)

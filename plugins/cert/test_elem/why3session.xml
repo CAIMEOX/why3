@@ -68,6 +68,14 @@
   <goal name="G8.2">
   </goal>
  </transf>
+ <transf name="split_goal_full_lcert" >
+  <goal name="G8.0">
+  </goal>
+  <goal name="G8.1">
+  </goal>
+  <goal name="G8.2">
+  </goal>
+ </transf>
  </goal>
  <goal name="G9">
  </goal>
@@ -93,6 +101,16 @@
   </goal>
  </transf>
  <transf name="split_all_full_ccert" >
+  <goal name="G10.0">
+  </goal>
+  <goal name="G10.1">
+  </goal>
+  <goal name="G10.2">
+  </goal>
+  <goal name="G10.3">
+  </goal>
+ </transf>
+ <transf name="split_all_full_lcert" >
   <goal name="G10.0">
   </goal>
   <goal name="G10.1">
@@ -168,6 +186,24 @@
   <goal name="G20.2">
   </goal>
   <goal name="G20.3">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G21">
+ <transf name="introduce_premises" >
+  <goal name="G21.0">
+  <transf name="split_all_full" >
+   <goal name="G21.0.0">
+   </goal>
+  </transf>
+  <transf name="split_all_full_ccert" >
+   <goal name="G21.0.0">
+   </goal>
+  </transf>
+  <transf name="split_all_full_lcert" >
+   <goal name="G21.0.0">
+   </goal>
+  </transf>
   </goal>
  </transf>
  </goal>

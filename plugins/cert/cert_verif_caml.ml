@@ -37,7 +37,7 @@ let rec ccheck c cta =
         let t1, pos1 = find_ident "axiom1" i1 cta in
         let t2, pos2 = find_ident "axiom2" i2 cta in
         if not pos1 && pos2
-        then if cterm_equal t1 t2 then Mid.empty
+        then if ct_equal t1 t2 then Mid.empty
              else verif_failed "The hypothesis and goal given do not match"
         else verif_failed "Terms have wrong positivities in the task"
     | ETrivial (_, i) ->
@@ -49,13 +49,13 @@ let rec ccheck c cta =
     | EEqRefl (_, _, i) ->
         let t, pos = find_ident "eqrefl" i cta in
         begin match t, pos with
-        | CTapp (CTapp (e, t1), t2), _ when cterm_equal t1 t2 && cterm_equal e eq ->
+        | CTapp (CTapp (e, t1), t2), _ when ct_equal t1 t2 && ct_equal e eq ->
             Mid.empty
         | _ -> verif_failed "Non eqrefl hypothesis" end
     | EEqSym (_, _, _, _, i, c) ->
         let t, pos = find_ident "EqSym" i cta in
         begin match t with
-        | CTapp (CTapp (e, t1), t2) when cterm_equal e eq ->
+        | CTapp (CTapp (e, t1), t2) when ct_equal e eq ->
             let rev_eq = CTapp (CTapp (eq, t2), t1) in
             let cta = add i (rev_eq, pos) (remove i cta) in
             ccheck c cta
@@ -65,7 +65,7 @@ let rec ccheck c cta =
         let t2, pos2 = find_ident "EqTrans" i2 cta in
         begin match t1, t2, pos1, pos2 with
         | CTapp (CTapp (e1, t11), t12), CTapp (CTapp (e2, t21), t22), false, false
-            when cterm_equal t12 t21 && cterm_equal e1 eq && cterm_equal e2 eq ->
+            when ct_equal t12 t21 && ct_equal e1 eq && ct_equal e2 eq ->
             let new_eq = CTapp (CTapp (eq, t11), t22) in
             let cta = add i3 (new_eq, false) cta in
             ccheck c cta
@@ -140,7 +140,7 @@ let rec ccheck c cta =
         let t, pos = find_ident "inst_quant" h cta in
         let a, b = match t, pos with
           | CTbinop (Tiff, a, b), false -> a, b
-          | CTapp (CTapp (f, a), b), false when cterm_equal f eq -> a, b
+          | CTapp (CTapp (f, a), b), false when ct_equal f eq -> a, b
           | _ -> verif_failed "Non-rewritable proposition" in
         let cta = rewrite_ctask cta i a b ctxt in
         ccheck c cta
