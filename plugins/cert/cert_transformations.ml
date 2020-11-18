@@ -523,7 +523,7 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
               (* Support to rewrite from the right *)
               if rev
               then (fun c -> c), t1, t2
-              else (iffsym nprh), t2, t1
+              else (fun c -> IffSym (nprh, c)), t2, t1
           | _ -> raise (Arg_bad_hypothesis ("rewrite", f))) in
           Some (lp, revert, t1, t2)
       | _ -> acc)
