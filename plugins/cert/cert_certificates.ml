@@ -44,6 +44,8 @@ type ('i, 't) cert =
   (* Unfold (i, c) ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ)*)
   (* Unfold (i, c) ⇓ (Γ ⊢ Δ, i : t₁ → t₂) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂)*)
   | Fold of 'i * ('i, 't) cert
+  (* Fold (i, c) ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) *)
+  (* Fold (i, c) ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) ≜  c ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) *)
   (* Fold (i, c) ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) *)
   (* Fold (i, c) ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₁ → t₂) *)
   | Split of 'i * ('i, 't) cert * ('i, 't) cert
@@ -192,6 +194,11 @@ type ('i, 't) ecert =
   | EUnfoldArr of (bool * 't * 't * 'i * ('i, 't) ecert)
   (* EUnfoldArr (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ)*)
   (* EUnfoldArr (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ → t₂) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂)*)
+  | EFoldIff of (bool * 't * 't * 'i * ('i, 't) ecert)
+  (* EFoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) ≜
+                                  c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) *)
+  (* EFoldIff (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) ≜
+                                 c ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) *)
   | EFoldArr of (bool * 't * 't * 'i * ('i, 't) ecert)
   (* EFoldArr (false, t₁, t₂, i, c) ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ → t₂ ⊢ Δ)*)
   (* EFoldArr (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₁ → t₂)*)
@@ -378,6 +385,7 @@ let propagate_ecert f fid ft = function
       ESplit (g, ft a, ft b, fid i, f1, f2)
   | EUnfoldIff (g, a, b, i, c) -> EUnfoldIff (g, ft a, ft b, fid i, f c)
   | EUnfoldArr (g, a, b, i, c) -> EUnfoldArr (g, ft a, ft b, fid i, f c)
+  | EFoldIff (g, a, b, i, c) -> EFoldIff (g, ft a, ft b, fid i, f c)
   | EFoldArr (g, a, b, i, c) -> EFoldArr (g, ft a, ft b, fid i, f c)
   | EDestruct (g, a, b, i, j1, j2, c) -> EDestruct (g, ft a, ft b, fid i, fid j1, fid j2, f c)
   | EConstruct (g, a, b, i1, i2, j, c) -> EConstruct (g, ft a, ft b, fid i1, fid i2, fid j, f c)
@@ -508,32 +516,32 @@ let elaborate (init_ct : ctask) c =
       ELet (x, y, elab cta c)
   | Unfold (i, c) ->
       let t, pos = find_ident "Unfold" i cta in
-      let iff, cta, t1, t2 = match t with
+      begin match t with
         | CTbinop (Tiff, t1, t2) ->
-            let imp_pos = CTbinop (Timplies, t1, t2) in
-            let imp_neg = CTbinop (Timplies, t2, t1) in
-            let unfolded_iff = CTbinop (Tand, imp_pos, imp_neg), pos in
-            true, add i unfolded_iff cta, t1, t2
+            let unfolded_iff = CTbinop (Tand, CTbinop (Timplies, t1, t2),
+                                        CTbinop (Timplies, t2, t1)), pos in
+            let cta = add i unfolded_iff cta in
+            EUnfoldIff (pos, t1, t2, i, elab cta c)
         | CTbinop (Timplies, t1, t2) ->
             let unfolded_imp = CTbinop (Tor, CTnot t1, t2), pos in
-            false, add i unfolded_imp cta, t1, t2
+            let cta = add i unfolded_imp cta in
+            EUnfoldArr (pos, t1, t2, i, elab cta c)
         | _ -> eprintf "Nothing to unfold : @[%a@]@." pcte t;
-               raise Elaboration_failed in
-      (* TODO remove pack *)
-      let pack = pos, t1, t2, i, elab cta c in
-      if iff
-      then EUnfoldIff pack
-      else EUnfoldArr pack
+               raise Elaboration_failed end
   | Fold (i, c) ->
       let t, pos = find_ident "Fold" i cta in
-      let cta, t1, t2 = match t with
+      begin match t with
+        | CTbinop (Tand, CTbinop (Timplies, t1, t2),
+                   CTbinop (Timplies, t2', t1'))
+            when cterm_equal t1 t1' && cterm_equal t2 t2' ->
+            let folded_iff = CTbinop (Tiff, t1, t2), pos in
+            let cta = add i folded_iff cta in
+            EFoldIff (pos, t1, t2, i, elab cta c)
         | CTbinop (Tor, CTnot t1, t2) ->
-            add i (CTbinop (Timplies, t1, t2), pos) cta, t1, t2
+            let cta = add i (CTbinop (Timplies, t1, t2), pos) cta in
+            EFoldArr (pos, t1, t2, i, elab cta c)
         | _ -> eprintf "Nothing to fold : @[%a@]@." pcte t;
-               raise Elaboration_failed in
-      let c = elab cta c in
-      EFoldArr (pos, t1, t2, i, c)
-      (* TODO fold iff *)
+               raise Elaboration_failed end
   | Split (i, c1, c2) ->
       let t, pos = find_ident "Split" i cta in
       let t1, t2 = match t, pos with
@@ -658,6 +666,15 @@ let rec trim_certif c =
       let post = CTbinop (Timplies, a, b) in
       let c_open = EWeakening (g, pre, j, c) in
       let c_closed = EUnfoldArr (not g, a, b, i, eaxiom g pre i j) in
+      let c1, c2 = if g then c_open, c_closed else c_closed, c_open in
+      erename g pre i j (ECut (i, post, c1, c2))
+  | EFoldIff (g, a, b, i, c) ->
+      let c = trim_certif c in
+      let j = id_register (id_fresh "fold_iff_temp") in
+      let pre = CTbinop (Tand, CTbinop (Timplies, a, b), CTbinop (Timplies, b, a)) in
+      let post = CTbinop (Tiff, a, b) in
+      let c_open = EWeakening (g, pre, j, c) in
+      let c_closed = EUnfoldIff (not g, a, b, i, eaxiom g pre i j) in
       let c1, c2 = if g then c_open, c_closed else c_closed, c_open in
       erename g pre i j (ECut (i, post, c1, c2))
   | _ -> propagate_ecert trim_certif (fun t -> t) (fun i -> i) c
