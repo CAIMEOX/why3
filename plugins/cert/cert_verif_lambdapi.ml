@@ -35,12 +35,12 @@ let print_task fmt {s; gd} =
   fprintf fmt ")@])"
 
 let print_certif print_next fmt c =
-  let rstr goal = if goal then "_goal" else "_hyp" in
+  let rstr pos = if pos then "_goal" else "_hyp" in
   let rec pc fmt = function
   | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _ | EFoldIff _ ->
       verif_failed "Construct/Let/Rename/Fold left"
-  | EHole _ ->
-      print_next fmt ()
+  | EHole task_id ->
+      print_next fmt task_id
   | EAxiom (t, h, g) ->
       fprintf fmt "axiom %a %a %a"
         prpv t
@@ -178,21 +178,21 @@ let print_certif print_next fmt c =
 let print fmt init res (task_ids, certif) =
   let res = List.map simplify_task res in
   let init = simplify_task init in
-  (* The type we need to check is inhabited *)
+  (* The type we need to check is inhabited. *)
   let p_type fmt () =
     pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " →@ ")
       print_task fmt (res @ [init]) in
-  (* Print next applied_task, used to fill the holes *)
-  let print_next =
-    let str = Stream.of_list (List.combine task_ids res) in
-    fun fmt () ->
-    let task_id, {s; gd } = Stream.next str in
+  (* The following function is used to fill the holes. *)
+  let print_applied_task =
+    let map = Mid.of_list (List.combine task_ids res) in
+    fun fmt task_id ->
+    let {s; gd} = Mid.find task_id map in
     let fv_ids, _ = List.split s in
     let hyp_ids, _ = List.split gd in
     fprintf fmt "@[%a %a@]"
       (print_list prid) (task_id :: fv_ids)
       (print_list prhyp) hyp_ids in
-  (* The term that has the correct type *)
+  (* The term that has the correct type. *)
   let p_term fmt () =
     let {s; gd} = init in
     let fv_ids, _ = List.split s in
@@ -202,7 +202,7 @@ let print fmt init res (task_ids, certif) =
       (print_list prid) (task_ids @ fv_ids)
       (print_list prhyp) hyp_ids;
     fprintf fmt ",@ ";
-    print_certif print_next fmt certif in
+    print_certif print_applied_task fmt certif in
 
   fprintf fmt "@[<v>definition to_verify :@   \
                @[<v>%a@]@ \
