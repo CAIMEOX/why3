@@ -80,20 +80,19 @@ type ('i, 't) cert =
                         c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p y)
                     and y ∉  Σ *)
   | InstQuant of 'i * 'i * 't * ('i, 't) cert
-  (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. P x ⊢ Δ) ≜
-                            c ⇓ (Σ | Γ, i₁ : ∀ x : τ. P x, i₂ : P t ⊢ Δ)
+  (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p x ⊢ Δ) ≜
+                            c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p x, i₂ : p t ⊢ Δ)
                       and Σ ⊩ t : τ *)
-  (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. P x) ≜
-                            c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. P x, i₂ : P t)
+  (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x) ≜
+                            c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p t)
                         and Σ ⊩ t : τ *)
   | Rewrite of 'i * 'i * ('i, 't) cert
-  (* Rewrite (i₁, i₂, c) ⇓ (Γ, i₁ : a = b ⊢ Δ, i₂ : ctxt[a]) ≜
-                       c ⇓ (Γ, i₁ : a = b ⊢ Δ, i₂ : ctxt[b]) *)
-  (* Rewrite (i₁, i₂, c) ⇓ (Γ, H : a = b, i₁ : ctxt[a] ⊢ Δ) ≜
-                       c ⇓ (Γ, H : a = b, i₂ : ctxt[b] ⊢ Δ) *)
-  (* In the previous rules <ctxt> stands for the context obtained by taking
-     the formula contained in <i₁> and replacing each occurrence of <a> by a
-     hole. *)
+  (* Rewrite (i₁, i₂, c) ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
+                       c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
+  (* Rewrite (i₁, i₂, c) ⇓ (Γ, H : t₁ = t₂, i₁ : ctxt[t₁] ⊢ Δ) ≜
+                       c ⇓ (Γ, H : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
+  (* In the 2 previous rules <ctxt> stands for the context obtained by taking the
+     formula contained in <i₂> and replacing each occurrence of <t₁> by a hole. *)
 
 let eqrefl i = Trivial i
 (* eqrefl i ⇓ (Γ ⊢ Δ, i : t = t) stands *)
@@ -232,24 +231,26 @@ type ('i, 't) ecert =
   (* EDuplicate (true, t, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i₁ : t) ≜  c ⇓ (Γ ⊢ Δ, i₁ : t, i₂ : t) *)
   (* EDuplicate (false, t, i₁, i₂, c) ⇓ (Γ, i₁ : t ⊢ Δ) ≜  c ⇓ (Γ, i₁ : t, i₂ : t ⊢ Δ) *)
   | EIntroQuant of bool * 't * 'i * ident * ('i, 't) ecert
-  (* EIntroQuant (false, P, i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. P x ⊢ Δ) ≜
-                                   c ⇓ (Σ, y : τ | Γ, i : P y ⊢ Δ)
+  (* EIntroQuant (false, p, i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p x ⊢ Δ) ≜
+                                   c ⇓ (Σ, y : τ | Γ, i : p y ⊢ Δ)
                                and y ∉  Σ *)
-  (* EIntroQuant (true, P, i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. P x) ≜
-                                  c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : P y)
+  (* EIntroQuant (true, p, i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p x) ≜
+                                  c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p y)
                               and y ∉  Σ *)
   | EInstQuant of bool * 't * 'i * 'i * 't * ('i, 't) ecert
-  (* EInstQuant (false, P, i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. P x ⊢ Δ) ≜
-                                       c ⇓ (Σ | Γ, i₁ : ∀ x : τ. P x, i₂ : P t ⊢ Δ)
+  (* EInstQuant (false, p, i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p x ⊢ Δ) ≜
+                                       c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p x, i₂ : p t ⊢ Δ)
                                    and Σ ⊩ t : τ *)
-  (* EInstQuant (true, P, i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. P x) ≜
-                                      c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. P x, i₂ : P t)
+  (* EInstQuant (true, p, i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x) ≜
+                                      c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p t)
                                   and Σ ⊩ t : τ *)
   | ERewrite of bool * ctype * 't * 't * 't * 'i * 'i * ('i, 't) ecert
-  (* ERewrite (true, τ, a, b, ctxt, i₁, i₂, c) ⇓ (Γ, i₁ : a = b ⊢ Δ, i₂ : ctxt[a]) ≜
-                                             c ⇓ (Γ, i₁ : a = b ⊢ Δ, i₂ : ctxt[b]) *)
-  (* ERewrite (false, τ, a, b, ctxt, i₁, i₂, c) ⇓ (Γ, i₁ : a = b, i₂ : ctxt[a] ⊢ Δ) ≜
-                                              c ⇓ (Γ, i₁ : a = b, i₂ : ctxt[b] ⊢ Δ) *)
+  (* ERewrite (true, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
+                                               c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
+  (* ERewrite (false, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
+                                                c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
+  (* In the 2 previous rules <ctxt> stands for the context obtained by taking the
+     formula contained in <i₂> and replacing each occurrence of <t₁> by a hole. *)
 
 type heavy_ecert = ident list * (ident, cterm) ecert
 type trimmed_ecert = ident list * (ident, cterm) ecert (* without (Construct, Duplicate) *)
