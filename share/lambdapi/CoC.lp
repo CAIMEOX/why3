@@ -300,12 +300,12 @@ definition dir_right_goal : Π A B,
     etype (goal (A ∨ B) empty)
 ≔  λ A B nnb nab, nab (or_intro_2 A B (nne B nnb))
 
-definition weakening_hyp : Π A,
+definition clear_hyp : Π A,
     etype empty →
     etype (hyp A empty)
 ≔  λ A f _, f
 
-definition weakening_goal : Π A,
+definition clear_goal : Π A,
     etype empty →
     etype (goal A empty)
 ≔  λ A f _, f

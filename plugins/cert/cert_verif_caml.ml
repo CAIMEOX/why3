@@ -48,7 +48,7 @@ let rec ccheck c cta =
       | CTapp (CTapp (e, t1), t2), _ when ct_equal t1 t2 && ct_equal e eq ->
           Mid.empty
       | _ -> verif_failed "Non eqrefl hypothesis" end
-  | ECut (i, a, c1, c2) ->
+  | EAssert (i, a, c1, c2) ->
       let cta1 = add i (a, true) cta in
       let cta2 = add i (a, false) cta in
       union (ccheck c1 cta1) (ccheck c2 cta2)
@@ -92,7 +92,7 @@ let rec ccheck c cta =
                     |> add j2 (t2, pos) in
           ccheck c cta
       | _ -> verif_failed "Nothing to destruct" end
-  | EWeakening (_, _, i, c) ->
+  | EClear (_, _, i, c) ->
       let cta = remove i cta in
       ccheck c cta
   | EIntroQuant (_, _, i, y, c) ->

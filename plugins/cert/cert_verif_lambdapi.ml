@@ -55,7 +55,7 @@ let print_certif print_next fmt c =
         prtyparen cty
         prpv t
         prhyp i
-  | ECut (i, t, c1, c2) ->
+  | EAssert (i, t, c1, c2) ->
       fprintf fmt "cut %a@ \
                    (λ %a, @[<hv>%a@])@ \
                    (λ %a, @[<hv>%a@])"
@@ -116,8 +116,8 @@ let print_certif print_next fmt c =
         prpv t2
         prhyp i1 prhyp i2 pc c
         prhyp i
-  | EWeakening (pos, t, i, c) ->
-      fprintf fmt "weakening%s %a@ \
+  | EClear (pos, t, i, c) ->
+      fprintf fmt "clear%s %a@ \
                    (@[<hv>%a@])@ \
                    %a"
         (rstr pos)

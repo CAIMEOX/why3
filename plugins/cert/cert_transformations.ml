@@ -346,14 +346,14 @@ let neg_decompose_tg target =
             | Pgoal, Ttrue -> (* ⊥ and ⊤ *)
                 [[create_prop_decl Pgoal pr t_false]],
                 Some (lambda one (fun i ->
-                Weakening (pr,
-                Cut (pr, t_false,
-                     Hole i,
-                     Trivial pr))))
+                Clear (pr,
+                Assert (pr, t_false,
+                        Hole i,
+                        Trivial pr))))
             | Pgoal, Tfalse ->
                 [], Some (lambda Z (Swap (pr, Trivial pr)))
             | Paxiom, Tfalse ->
-                [[]], Some (lambda one (fun i -> Weakening (pr, Hole i)))
+                [[]], Some (lambda one (fun i -> Clear (pr, Hole i)))
             | Paxiom, Ttrue ->
                 [], Some (lambda Z (Swap (pr, Trivial pr)))
             | k, Tbinop (Tiff, f1, f2) -> (* unfold *)
@@ -464,16 +464,16 @@ let cdir d where : ctrans =  Trans.store (fun task ->
   else [task], hole ())
 
 (* Assert with certificate *)
-let cut_h_t h t = Trans.decl_l (fun decl -> match decl.d_node with
+let assert_h_t h t = Trans.decl_l (fun decl -> match decl.d_node with
   | Dprop (Pgoal, _, _) ->
       [ [create_prop_decl Pgoal h t]; [create_prop_decl Paxiom h t; decl] ]
   | _ -> [[decl]]) None
 
-let cut t : ctrans = Trans.store (fun task ->
+let cassert t : ctrans = Trans.store (fun task ->
   let h = create_prsymbol (gen_ident "H") in
   let prg = task_goal task in
-  Trans.apply (cut_h_t h t) task,
-  lambda two (fun i j -> Cut (h, t, Weakening (prg, Hole i), Hole j)))
+  Trans.apply (assert_h_t h t) task,
+  lambda two (fun i j -> Assert (h, t, Clear (prg, Hole i), Hole j)))
 
 (* Instantiate with certificate *)
 
@@ -490,7 +490,7 @@ let inst_tg t_inst target = Trans.decl_acc (target, hole ()) update_tg_c
             let hpr = create_prsymbol (gen_ident "H") in
             let t_subst = subst_exist t t_inst in
             [create_prop_decl k hpr t_subst],
-            Some (lambda one (fun i -> InstQuant (pr, hpr, t_inst, Weakening (pr, Hole i))))
+            Some (lambda one (fun i -> InstQuant (pr, hpr, t_inst, Clear (pr, Hole i))))
         | _ -> [decl], None end
     | _ -> [decl], None)
 
@@ -523,7 +523,7 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
               (* Support to rewrite from the right *)
               if rev
               then (fun c -> c), t1, t2
-              else (fun c -> IffSym (nprh, c)), t2, t1
+              else iffsym_hyp nprh, t2, t1
           | _ -> raise (Arg_bad_hypothesis ("rewrite", f))) in
           Some (lp, revert, t1, t2)
       | _ -> acc)
@@ -565,9 +565,9 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
               let hole () = Hole (Stream.next s) in
               let apply _ c =
                 Unfold (nprh, Split (nprh,
-                Weakening (pr, Swap (nprh, rename nprh pr (hole ()))),
+                Clear (pr, Swap (nprh, rename nprh pr (hole ()))),
                 c)) in
-              let rew_cert = Rewrite (pri, nprh, Weakening (nprh, hole ())) in
+              let rew_cert = Rewrite (pri, nprh, Clear (nprh, hole ())) in
               Duplicate (prh, nprh,
               List.fold_right apply lp (revert rew_cert))) in
 
@@ -592,7 +592,7 @@ let exfalso : ctrans = Trans.store (fun task ->
      | _ -> [decl]) None in
   let g = task_goal task in
   [Trans.apply trans task],
-  lambda one (fun i -> Cut (h, t_false, Weakening (g, Hole i), Trivial h)))
+  lambda one (fun i -> Assert (h, t_false, Clear (g, Hole i), Trivial h)))
 
 let case t : ctrans = Trans.store (fun task ->
   let h = create_prsymbol (gen_ident "H") in
@@ -602,7 +602,7 @@ let case t : ctrans = Trans.store (fun task ->
            [create_prop_decl Paxiom h (t_not t); decl] ]
      | _ -> [[decl]]) None in
   Trans.apply trans task,
-  lambda two (fun i j->  Cut (h, t_not t, Swap (h, Hole i), Hole j)))
+  lambda two (fun i j->  Assert (h, t_not t, Swap (h, Hole i), Hole j)))
 
 (* if formula <f> designed by <where> is a premise, dismiss the old
  goal and put <not f> in its place *)
@@ -626,7 +626,7 @@ let swap where : ctrans = Trans.store (fun task ->
       let not_t = match t.t_node with Tnot t' -> t' | _ -> t_not t in
       let decl = create_prop_decl Pgoal gpr not_t in
       [add_decl nt decl],
-      lambda one (fun i -> Swap (gpr, Weakening (pr_goal, Hole i)))
+      lambda one (fun i -> Swap (gpr, Clear (pr_goal, Hole i)))
   | None -> [task], hole ())
 
 let revert ls : ctrans = Trans.store (fun task ->
@@ -642,15 +642,15 @@ let revert ls : ctrans = Trans.store (fun task ->
   let prinst = create_prsymbol (gen_ident "Hinst") in
   [task],
   lambda one (fun i ->
-      Cut (gpr, close_t,
-       Weakening (idg, Hole i),
-       InstQuant (gpr, prinst, x, Axiom (prinst, idg)))))
+      Assert (gpr, close_t,
+        Clear (idg, Hole i),
+        InstQuant (gpr, prinst, x, Axiom (prinst, idg)))))
 
 
 (* Clear transformation with a certificate : *)
 (*   removes hypothesis <g> from the task *)
 let clear_one_d g = decl_cert (fun decl -> match decl.d_node with
-  | Dprop (_, pr, _) when pr_equal g pr -> [], lambda one (fun i -> Weakening (pr, Hole i))
+  | Dprop (_, pr, _) when pr_equal g pr -> [], lambda one (fun i -> Clear (pr, Hole i))
   | _ -> [decl], hole ())
 
 let clear_one g : ctrans = Trans.store (fun task ->
@@ -678,7 +678,7 @@ let clear_one g : ctrans = Trans.store (fun task ->
  *                 Swap_neg (h1, Axiom (h1, h2)))) in
  *   let eq_cert = Unfold (h1, Split (h1, id_cert, id_cert)) in
  *   [Trans.apply trans_new_task task],
- *   Cut (pr.pr_name,
+ *   Assert (pr.pr_name,
  *        t_exists (t_close_quant [vs] [] eq),
  *        Inst_quant (pr.pr_name, h1, t, eq_cert),
  *        Intro_quant (pr.pr_name, vs.vs_name, Hole)) *)
