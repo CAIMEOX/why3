@@ -37,8 +37,8 @@ let print_task fmt {s; gd} =
 let print_certif print_next fmt c =
   let rstr pos = if pos then "_goal" else "_hyp" in
   let rec pc fmt = function
-  | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _ | EFoldIff _ ->
-      verif_failed "Construct/Let/Rename/Fold left"
+  | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _ | EFoldIff _ | EEqSym _ | EEqTrans _ ->
+      verif_failed "Construct/Duplicate/Fold/Eq/Let left"
   | EHole task_id ->
       print_next fmt task_id
   | EAxiom (t, i1, i2) ->
@@ -55,23 +55,6 @@ let print_certif print_next fmt c =
         prtyparen cty
         prpv t
         prhyp i
-  | EEqSym (pos, cty, t1, t2, i, c) ->
-      fprintf fmt "eqsym%s %a %a %a (λ %a, %a) %a"
-        (rstr pos)
-        prtyparen cty
-        prpv t1
-        prpv t2
-        prhyp i pc c
-        prhyp i
-  | EEqTrans (cty, t1, t2, t3, i1, i2, i3, c) ->
-      fprintf fmt "eqtrans %a %a %a %a (λ %a, %a) %a %a"
-        prtyparen cty
-        prpv t1
-        prpv t2
-        prpv t3
-        prhyp i3 pc c
-        prhyp i1
-        prhyp i2
   | ECut (i, t, c1, c2) ->
       fprintf fmt "cut %a@ \
                    (λ %a, @[<hv>%a@])@ \

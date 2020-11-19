@@ -201,21 +201,6 @@ definition eqrefl : Π T t,
   etype (goal (eq T t t) empty)
 ≔  λ T t neqtt, neqtt (eq_refl T t)
 
-definition eqsym_hyp : Π T t1 t2,
-  etype (hyp (eq T t2 t1) empty) →
-  etype (hyp (eq T t1 t2) empty)
-≔  λ T t1 t2 s eq12, s (eq_sym T t1 t2 eq12)
-
-definition eqsym_goal : Π T t1 t2,
-  etype (goal (eq T t2 t1) empty) →
-  etype (goal (eq T t1 t2) empty)
-≔  λ T t1 t2 s neq12, s (λ eq21, neq12 (eq_sym T t2 t1 eq21))
-
-definition eqtrans : Π T t1 t2 t3,
-  etype (hyp (eq T t1 t3) empty) →
-  etype (hyp (eq T t1 t2) (hyp (eq T t2 t3) empty))
-≔  λ T t1 t2 t3 s eq12 eq23, s (eq_trans T t1 t2 t3 eq12 eq23)
-
 definition cut : Π A,
   etype (goal A empty) →
   etype (hyp A empty) →
