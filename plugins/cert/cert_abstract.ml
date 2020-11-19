@@ -107,7 +107,7 @@ let interp_var_type =
 
 (** Utility functions on cterm *)
 
-let cterm_map f ct = match ct with
+let ct_map f ct = match ct with
   | CTbvar _ | CTfvar _ | CTint _ | CTtrue | CTfalse -> ct
   | CTquant (q, cty, ct) -> CTquant (q, cty, f ct)
   | CTapp (ct1, ct2) -> CTapp (f ct1, f ct2)
