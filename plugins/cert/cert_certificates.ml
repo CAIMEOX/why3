@@ -126,29 +126,31 @@ let nc = [], Nc
 
 type 'a args =
   | Z : vcert args
-  | One : (ident -> vcert) args
-  | Two : (ident -> ident -> vcert) args
+  | Succ : 'a args -> (ident -> 'a) args
   | List : int -> (ident list -> vcert) args
+
+
 
 let rec new_idents n =
   if n = 0 then [] else
     let i = id_register (id_fresh "s") in
     i:: new_idents (n-1)
 
-let lambda : type a. a args -> a -> visible_cert  = fun args f ->
+let rec lambda : type a. a args -> a -> visible_cert  = fun args f ->
   match args with
   | Z -> [], f
-  | One -> let i = id_register (id_fresh "s") in
-           [i], f i
-  | Two -> let i1 = id_register (id_fresh "s") in
-           let i2 = id_register (id_fresh "s") in
-           [i1; i2], f i1 i2
+  | Succ args -> let i = id_register (id_fresh "s") in
+                 let l, c = lambda args (f i) in
+                 i::l, c
   | List n ->
       let il = new_idents n in
       il, f il
 
+let one = Succ Z
+let two = Succ one
+
 let hole () : visible_cert =
-  lambda One (fun i -> Hole i)
+  lambda one (fun i -> Hole i)
 
 type abstract_cert = ident list * (ident, cterm) cert
 
@@ -664,16 +666,16 @@ let rec trim_certif c =
       let c = trim_certif c in
       let i1' = id_register (id_fresh "i1") in
       let i2' = id_register (id_fresh "i2") in
-      erename pos t1 i1 i1' (
-          erename pos t2 i2 i2' (
-              let c_open = EWeakening (pos, t1, i1', EWeakening (pos, t2, i2', c)) in
-              let c_closed = ESplit (not pos, t1, t2, i,
-                                     eaxiom (not pos) t1 i1' i,
-                                     eaxiom (not pos) t1 i2' i) in
-              let c1, c2, cut = if pos
-                                then c_open, c_closed, CTbinop (Tor, t1, t2)
-                                else c_closed, c_open, CTbinop (Tand, t1, t2) in
-              ECut (i, cut, c1, c2)))
+      let c_open = EWeakening (pos, t1, i1', EWeakening (pos, t2, i2', c)) in
+      let c_closed = ESplit (not pos, t1, t2, i,
+                             eaxiom (not pos) t1 i1' i,
+                             eaxiom (not pos) t1 i2' i) in
+      let c1, c2, cut = if pos
+                        then c_open, c_closed, CTbinop (Tor, t1, t2)
+                        else c_closed, c_open, CTbinop (Tand, t1, t2) in
+      erename pos t1 i1 i1' @@
+        erename pos t2 i2 i2' @@
+          ECut (i, cut, c1, c2)
   | EFoldArr (pos, t1, t2, i, c) | EFoldIff (pos, t1, t2, i, c) ->
       let is_arr = match c with EFoldArr _ -> true | _ -> false in
       let c = trim_certif c in
@@ -688,7 +690,8 @@ let rec trim_certif c =
       let c_open = EWeakening (pos, pre, j, c) in
       let c_closed = unfold (not pos, t1, t2, i, eaxiom pos pre i j) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
-      erename pos pre i j (ECut (i, post, c1, c2))
+      erename pos pre i j @@
+        ECut (i, post, c1, c2)
   | EEqSym (pos, cty, t1, t2, i, c) ->
       let c = trim_certif c in
       let j = id_register (id_fresh "eqsym_temp") in
@@ -696,36 +699,36 @@ let rec trim_certif c =
       let post = CTapp (CTapp (eq, t2), t1) in
       let c_open = EWeakening (pos, pre, j, c) in
       let h, g, a, b = if pos then i, j, t2, t1 else j, i, t1, t2 in
-      (* We want to close the task of the form <Γ, h : a = b ⊢ Δ, g : b = a> *)
+      (* We want to close a task of the form <Γ, h : a = b ⊢ Δ, g : b = a> *)
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq, b), CTbvar 0)) in
       let c_closed = ERewrite (not pos, cty, a, b, ctxt, h, g,
                      EEqRefl (cty, b, g)) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
-      erename pos pre i j (ECut (i, post, c1, c2))
+      erename pos pre i j @@
+        ECut (i, post, c1, c2)
   | EEqTrans (cty, t1, t2, t3, i1, i2, i3, c) ->
       let c = trim_certif c in
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq, t1), CTbvar 0)) in
-      eduplicate false (CTapp (CTapp (eq, t1), t2)) i1 i3
-        (ERewrite (false, cty, t2, t3, ctxt, i2, i3, c))
+      eduplicate false (CTapp (CTapp (eq, t1), t2)) i1 i3 @@
+        ERewrite (false, cty, t2, t3, ctxt, i2, i3, c)
   | _ -> propagate_ecert trim_certif (fun t -> t) (fun i -> i) c
 
 let rec eliminate_let m c =
   match c with
-    | ELet (x, y, c) ->
-        let x = match x with
-                | CTfvar id -> id
-                | _ -> assert false in
-        let m = Mid.add x y m in
-        eliminate_let m c
-    | ECut (i, a, c1, c2) ->
-        let c1 = eliminate_let m c1 in
-        let c2 = eliminate_let m c2 in
-        let a = ct_subst m a in
-        ECut (i, a, c1, c2)
-    | _ -> propagate_ecert (eliminate_let m) (fun t -> t) (fun i -> i) c
+  | ELet (x, y, c) ->
+      let x = match x with
+        | CTfvar id -> id
+        | _ -> assert false in
+      let m = Mid.add x y m in
+      eliminate_let m c
+  | ECut (i, a, c1, c2) ->
+      let c1 = eliminate_let m c1 in
+      let c2 = eliminate_let m c2 in
+      let a = ct_subst m a in
+      ECut (i, a, c1, c2)
+  | _ -> propagate_ecert (eliminate_let m) (fun t -> t) (fun i -> i) c
 
 let make_core (init_ct : ctask) (_ : ctask list) (v, c : visible_cert) : heavy_ecert =
-  (* Format.eprintf "%a@." prcertif c; *)
   v, abstract_cert c
      |> elaborate init_ct
      |> trim_certif
