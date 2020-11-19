@@ -162,7 +162,7 @@ type ('i, 't) ecert =
   (* ECut (i, t, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜
                       c₁ ⇓ (Γ ⊢ Δ, i : t)
                   and c₂ ⇓ (Γ, i : t ⊢ Δ) *)
-  | ELet of 't * 't * ('i, 't) ecert
+  | ELet of 't * 't * ('i, 't) ecert (* not kernel *)
   (* ELet (x, y, c) ⇓ t ≜  c ⇓ t[x ←  y] *)
   | EAxiom of 't * 'i * 'i
   (* EAxiom (t, i1, i2) ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
@@ -173,10 +173,10 @@ type ('i, 't) ecert =
   (* Notice that trivial equalities use the following certificate. *)
   | EEqRefl of ctype * 't * 'i
   (* EEqRefl (τ, t, i) ⇓ (Γ ⊢ Δ, i : t = t) stands *)
-  | EEqSym of bool * ctype * 't * 't * 'i * ('i, 't) ecert
+  | EEqSym of bool * ctype * 't * 't * 'i * ('i, 't) ecert (* not kernel *)
   (* EEqSym (true, τ, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ = t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₂ = t₁) *)
   (* EEqSym (false, τ, t₁, t₂, i, c) ⇓ (Γ, i : t₁ = t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ = t₁ ⊢ Δ) *)
-  | EEqTrans of ctype * 't * 't * 't * 'i * 'i * 'i * ('i, 't) ecert
+  | EEqTrans of ctype * 't * 't * 't * 'i * 'i * 'i * ('i, 't) ecert (* not kernel *)
   (* EEqTrans (τ, t₁, t₂, t₃, i₁, i₂, i₃, c) ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃ ⊢ Δ) ≜
                                            c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃, i₃ : t₁ = t₃ ⊢ Δ) *)
   | EUnfoldIff of (bool * 't * 't * 'i * ('i, 't) ecert)
@@ -187,12 +187,12 @@ type ('i, 't) ecert =
   | EUnfoldArr of (bool * 't * 't * 'i * ('i, 't) ecert)
   (* EUnfoldArr (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ)*)
   (* EUnfoldArr (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ → t₂) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂)*)
-  | EFoldIff of (bool * 't * 't * 'i * ('i, 't) ecert)
+  | EFoldIff of (bool * 't * 't * 'i * ('i, 't) ecert) (* not kernel *)
   (* EFoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) ≜
                                   c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) *)
   (* EFoldIff (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) ≜
                                  c ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) *)
-  | EFoldArr of (bool * 't * 't * 'i * ('i, 't) ecert)
+  | EFoldArr of (bool * 't * 't * 'i * ('i, 't) ecert) (* not kernel *)
   (* EFoldArr (false, t₁, t₂, i, c) ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ → t₂ ⊢ Δ)*)
   (* EFoldArr (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₁ → t₂)*)
   | ESplit of bool * 't * 't * 'i * ('i, 't) ecert * ('i, 't) ecert
@@ -207,7 +207,7 @@ type ('i, 't) ecert =
                                            c ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) *)
   (* EDestruct (true, t₁, t₂, i, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i : t₁ ∨ t₂) ≜
                                           c ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) *)
-  | EConstruct of bool * 't * 't * 'i * 'i * 'i * ('i, 't) ecert
+  | EConstruct of bool * 't * 't * 'i * 'i * 'i * ('i, 't) ecert (* not kernel *)
   (* EConstruct (false, t₁, t₂, i₁, i₂, i, c) ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) ≜
                                             c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) *)
   (* EConstruct (true, t₁, t₂, i₁, i₂, i, c) ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) ≜
@@ -221,7 +221,7 @@ type ('i, 't) ecert =
   | EWeakening of bool * 't * 'i * ('i, 't) ecert
   (* EWeakening (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* EWeakening (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | EDuplicate of bool * 't * 'i * 'i * ('i, 't) ecert
+  | EDuplicate of bool * 't * 'i * 'i * ('i, 't) ecert (* not kernel *)
   (* EDuplicate (true, t, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i₁ : t) ≜  c ⇓ (Γ ⊢ Δ, i₁ : t, i₂ : t) *)
   (* EDuplicate (false, t, i₁, i₂, c) ⇓ (Γ, i₁ : t ⊢ Δ) ≜  c ⇓ (Γ, i₁ : t, i₂ : t ⊢ Δ) *)
   | EIntroQuant of bool * 't * 'i * ident * ('i, 't) ecert
@@ -247,8 +247,10 @@ type ('i, 't) ecert =
      formula contained in <i₂> and replacing each occurrence of <t₁> by a hole. *)
 
 type heavy_ecert = ident list * (ident, cterm) ecert
-type trimmed_ecert = ident list * (ident, cterm) ecert (* without (Construct, Duplicate) *)
-type kernel_ecert = ident list * (ident, cterm) ecert (* without (Construct, Duplicate,Let) *)
+(* removing Construct, Duplicate, EqSym and EqTrans) *)
+type trimmed_ecert = ident list * (ident, cterm) ecert
+(* removing Let *)
+type kernel_ecert = ident list * (ident, cterm) ecert 
 
 let rec print_certif filename cert =
   let oc = open_out filename in
@@ -364,36 +366,35 @@ let (||>) (v1, c1) f =
   (v1, c1) |>>> lcv2
 
 (* Use propagate to define recursive functions on elements of type ecert *)
-(* TODO : rename g in pos, f in fc, fid in fi *)
-let propagate_ecert f fid ft = function
+let propagate_ecert fc fi ft = function
   | EHole _ as c -> c
   | ECut (i, a, c1, c2) ->
-      let f1 = f c1 in let f2 = f c2 in
-      ECut (fid i, ft a, f1, f2)
-  | ELet (x, y, c) -> ELet (ft x, ft y, f c)
-  | EAxiom (a, i1, i2) -> EAxiom (ft a, fid i1, fid i2)
-  | ETrivial (pos, i) -> ETrivial (pos, fid i)
-  | EEqRefl (cty, t, i) -> EEqRefl (cty, ft t, fid i)
-  | EEqSym (pos, cty, t1, t2, i, c) -> EEqSym (pos, cty, ft t1, ft t2, fid i, f c)
+      let f1 = fc c1 in let f2 = fc c2 in
+      ECut (fi i, ft a, f1, f2)
+  | ELet (x, y, c) -> ELet (ft x, ft y, fc c)
+  | EAxiom (a, i1, i2) -> EAxiom (ft a, fi i1, fi i2)
+  | ETrivial (pos, i) -> ETrivial (pos, fi i)
+  | EEqRefl (cty, t, i) -> EEqRefl (cty, ft t, fi i)
+  | EEqSym (pos, cty, t1, t2, i, c) -> EEqSym (pos, cty, ft t1, ft t2, fi i, fc c)
   | EEqTrans (cty, t1, t2, t3, i1, i2, i3, c) ->
-      EEqTrans (cty, ft t1, ft t2, ft t3, fid i1, fid i2, fid i3, f c)
+      EEqTrans (cty, ft t1, ft t2, ft t3, fi i1, fi i2, fi i3, fc c)
   | ESplit (pos, a, b, i, c1, c2) ->
-      let f1 = f c1 in let f2 = f c2 in
-      ESplit (pos, ft a, ft b, fid i, f1, f2)
-  | EUnfoldIff (pos, a, b, i, c) -> EUnfoldIff (pos, ft a, ft b, fid i, f c)
-  | EUnfoldArr (pos, a, b, i, c) -> EUnfoldArr (pos, ft a, ft b, fid i, f c)
-  | EFoldIff (pos, a, b, i, c) -> EFoldIff (pos, ft a, ft b, fid i, f c)
-  | EFoldArr (pos, a, b, i, c) -> EFoldArr (pos, ft a, ft b, fid i, f c)
-  | EDestruct (pos, a, b, i, j1, j2, c) -> EDestruct (pos, ft a, ft b, fid i, fid j1, fid j2, f c)
-  | EConstruct (pos, a, b, i1, i2, j, c) -> EConstruct (pos, ft a, ft b, fid i1, fid i2, fid j, f c)
-  | ESwap (pos, a, i, c) -> ESwap (pos, ft a, fid i, f c)
-  | ESwapNeg (pos, a, i, c) -> ESwapNeg (pos, ft a, fid i, f c)
-  | EWeakening (pos, a, i, c) -> EWeakening (pos, ft a, fid i, f c)
-  | EDuplicate (pos, a, i1, i2, c) -> EDuplicate (pos, ft a, fid i1, fid i2, f c)
-  | EIntroQuant (pos, p, i, y, c) -> EIntroQuant (pos, ft p, fid i, y, f c)
-  | EInstQuant (pos, p, i, j, t, c) -> EInstQuant (pos, ft p, fid i, fid j, ft t, f c)
+      let f1 = fc c1 in let f2 = fc c2 in
+      ESplit (pos, ft a, ft b, fi i, f1, f2)
+  | EUnfoldIff (pos, a, b, i, c) -> EUnfoldIff (pos, ft a, ft b, fi i, fc c)
+  | EUnfoldArr (pos, a, b, i, c) -> EUnfoldArr (pos, ft a, ft b, fi i, fc c)
+  | EFoldIff (pos, a, b, i, c) -> EFoldIff (pos, ft a, ft b, fi i, fc c)
+  | EFoldArr (pos, a, b, i, c) -> EFoldArr (pos, ft a, ft b, fi i, fc c)
+  | EDestruct (pos, a, b, i, j1, j2, c) -> EDestruct (pos, ft a, ft b, fi i, fi j1, fi j2, fc c)
+  | EConstruct (pos, a, b, i1, i2, j, c) -> EConstruct (pos, ft a, ft b, fi i1, fi i2, fi j, fc c)
+  | ESwap (pos, a, i, c) -> ESwap (pos, ft a, fi i, fc c)
+  | ESwapNeg (pos, a, i, c) -> ESwapNeg (pos, ft a, fi i, fc c)
+  | EWeakening (pos, a, i, c) -> EWeakening (pos, ft a, fi i, fc c)
+  | EDuplicate (pos, a, i1, i2, c) -> EDuplicate (pos, ft a, fi i1, fi i2, fc c)
+  | EIntroQuant (pos, p, i, y, c) -> EIntroQuant (pos, ft p, fi i, y, fc c)
+  | EInstQuant (pos, p, i, j, t, c) -> EInstQuant (pos, ft p, fi i, fi j, ft t, fc c)
   | ERewrite (pos, cty, a, b, ctxt, i, h, c) ->
-      ERewrite (pos, cty, ft a, ft b, ft ctxt, fid i, fid h, f c)
+      ERewrite (pos, cty, ft a, ft b, ft ctxt, fi i, fi h, fc c)
 
 
 (* Separates hypotheses and goals *)
@@ -438,9 +439,6 @@ let rec abstract_cert c =
 
 exception Elaboration_failed
 
-(* TODO can we remove this ? *)
-module Hashid = Hashtbl.Make(struct type t = ident let equal = id_equal let hash = id_hash end)
-
 let rewrite_ctask (cta : ctask) i a b ctxt =
   let ctxt = match ctxt with
     | CTquant (CTlambda, _, ctxt) -> ctxt
@@ -453,11 +451,10 @@ let rewrite_ctask (cta : ctask) i a b ctxt =
     else t, pos in
   lift_mid_cta (Mid.mapi rewrite_decl) cta
 
-(* TODO can we remove this ? *)
 let rec replace_cterm tl tr t =
   if ct_equal t tl
   then tr
-  else cterm_map (replace_cterm tl tr) t
+  else ct_map (replace_cterm tl tr) t
 
 let elaborate (init_ct : ctask) c =
   let rec elab (cta : ctask) c =
@@ -642,57 +639,74 @@ let elaborate (init_ct : ctask) c =
   in
   elab init_ct c
 
-let eaxiom pos a i j =
-  if pos then EAxiom (a, i, j)
-  else EAxiom (a, j, i)
+let eaxiom pos t i1 i2 =
+  if pos then EAxiom (t, i1, i2)
+  else EAxiom (t, i2, i1)
+(* eaxiom true t i1 i2 ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
+(* eaxiom false t i1 i2 ⇓ (Γ, i2 : t ⊢ Δ, i1 : t) stands *)
 
-let eduplicate pos a i1 i2 c =
-  let c_closed = eaxiom (not pos) a i1 i2 in
+let eduplicate pos t i1 i2 c =
+  let c_closed = eaxiom (not pos) t i1 i2 in
   let c1, c2 = if pos
                then c, c_closed
                else c_closed, c in
-  ECut (i2, a, c1, c2)
+  ECut (i2, t, c1, c2)
 
 let erename pos a i1 i2 c =
   eduplicate pos a i1 i2 (EWeakening (pos, a, i1, c))
 
 let rec trim_certif c =
   match c with
-  | EDuplicate (pos, a, i1, i2, c) ->
+  | EDuplicate (pos, t, i1, i2, c) ->
       let c = trim_certif c in
-      eduplicate pos a i1 i2 c
-  | EConstruct (pos, a, b, i1, i2, j, c) ->
+      eduplicate pos t i1 i2 c
+  | EConstruct (pos, t1, t2, i1, i2, i, c) ->
       let c = trim_certif c in
       let i1' = id_register (id_fresh "i1") in
       let i2' = id_register (id_fresh "i2") in
-      erename pos a i1 i1' (
-          erename pos b i2 i2' (
-              let c_open = EWeakening (pos, a, i1', EWeakening (pos, b, i2', c)) in
-              let c_closed = ESplit (not pos, a, b, j,
-                                     eaxiom (not pos) a i1' j,
-                                     eaxiom (not pos) b i2' j) in
+      erename pos t1 i1 i1' (
+          erename pos t2 i2 i2' (
+              let c_open = EWeakening (pos, t1, i1', EWeakening (pos, t2, i2', c)) in
+              let c_closed = ESplit (not pos, t1, t2, i,
+                                     eaxiom (not pos) t1 i1' i,
+                                     eaxiom (not pos) t1 i2' i) in
               let c1, c2, cut = if pos
-                                then c_open, c_closed, CTbinop (Tor, a, b)
-                                else c_closed, c_open, CTbinop (Tand, a, b) in
-              ECut (j, cut, c1, c2)))
-  | EFoldArr (pos, a, b, i, c) ->
+                                then c_open, c_closed, CTbinop (Tor, t1, t2)
+                                else c_closed, c_open, CTbinop (Tand, t1, t2) in
+              ECut (i, cut, c1, c2)))
+  | EFoldArr (pos, t1, t2, i, c) | EFoldIff (pos, t1, t2, i, c) ->
+      let is_arr = match c with EFoldArr _ -> true | _ -> false in
       let c = trim_certif c in
-      let j = id_register (id_fresh "fold_arr_temp") in
-      let pre = CTbinop (Tor, CTnot a, b) in
-      let post = CTbinop (Timplies, a, b) in
+      let j = id_register (id_fresh "fold_temp") in
+      let pre, post = if is_arr
+                      then CTbinop (Tor, CTnot t1, t2),
+                           CTbinop (Timplies, t1, t2)
+                      else CTbinop (Tand, CTbinop (Timplies, t1, t2),
+                                    CTbinop (Timplies, t2, t1)),
+                           CTbinop (Tiff, t1, t2) in
+      let unfold pack = if is_arr then EUnfoldArr pack else EUnfoldIff pack in
       let c_open = EWeakening (pos, pre, j, c) in
-      let c_closed = EUnfoldArr (not pos, a, b, i, eaxiom pos pre i j) in
+      let c_closed = unfold (not pos, t1, t2, i, eaxiom pos pre i j) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
       erename pos pre i j (ECut (i, post, c1, c2))
-  | EFoldIff (pos, a, b, i, c) ->
+  | EEqSym (pos, cty, t1, t2, i, c) ->
       let c = trim_certif c in
-      let j = id_register (id_fresh "fold_iff_temp") in
-      let pre = CTbinop (Tand, CTbinop (Timplies, a, b), CTbinop (Timplies, b, a)) in
-      let post = CTbinop (Tiff, a, b) in
+      let j = id_register (id_fresh "eqsym_temp") in
+      let pre = CTapp (CTapp (eq, t1), t2) in
+      let post = CTapp (CTapp (eq, t2), t1) in
       let c_open = EWeakening (pos, pre, j, c) in
-      let c_closed = EUnfoldIff (not pos, a, b, i, eaxiom pos pre i j) in
+      let h, g, a, b = if pos then i, j, t2, t1 else j, i, t1, t2 in
+      (* We want to close the task of the form <Γ, h : a = b ⊢ Δ, g : b = a> *)
+      let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq, b), CTbvar 0)) in
+      let c_closed = ERewrite (not pos, cty, a, b, ctxt, h, g,
+                     EEqRefl (cty, b, g)) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
       erename pos pre i j (ECut (i, post, c1, c2))
+  | EEqTrans (cty, t1, t2, t3, i1, i2, i3, c) ->
+      let c = trim_certif c in
+      let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq, t1), CTbvar 0)) in
+      eduplicate false (CTapp (CTapp (eq, t1), t2)) i1 i3
+        (ERewrite (false, cty, t2, t3, ctxt, i2, i3, c))
   | _ -> propagate_ecert trim_certif (fun t -> t) (fun i -> i) c
 
 let rec eliminate_let m c =
