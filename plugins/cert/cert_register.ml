@@ -19,7 +19,7 @@ let cchecker trans = Trans.store (checker_ctrans no_dbg make_core checker_caml t
 let lchecker trans = Trans.store (checker_ctrans no_dbg make_core checker_lambdapi trans)
 
 let print_c any every where = cchecker (tprint any every where)
-let assert_c t              = cchecker (cut t)
+let assert_c t              = cchecker (cassert t)
 let assumption_c            = cchecker assumption
 let blast_c                 = cchecker blast
 let case_c t                = cchecker (case t)
@@ -47,7 +47,7 @@ let swap_c where            = cchecker (swap where)
 let trivial_c               = cchecker trivial
 
 
-let assert_l t              = lchecker (cut t)
+let assert_l t              = lchecker (cassert t)
 let assumption_l            = lchecker assumption
 let blast_l                 = lchecker blast
 let case_l t                = lchecker (case t)

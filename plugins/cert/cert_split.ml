@@ -300,7 +300,7 @@ let add find_a find_b what is_a c (pr, t) =
     | AddAnd -> c, dest
     | AddOr  -> dest, c
     | AddImplies -> Unfold (pr, dest), c in
-  Cut (pr, t, c1, c2)
+  Assert (pr, t, c1, c2)
 
 let add_all mon_a mon_b mon_res what is_a c =
   let find_a = find_pr mon_a in
@@ -311,7 +311,7 @@ let add_all mon_a mon_b mon_res what is_a c =
 let remove_all mon_a mon_b is_a c =
   let rem = if is_a then mon_a else mon_b in
   let rem_names = List.map fst (to_list rem) in
-  List.fold_left (fun c pr -> Weakening (pr, c)) c rem_names
+  List.fold_left (fun c pr -> Clear (pr, c)) c rem_names
 
 let swap pr () = lambda one (fun i -> Swap (pr, Hole i))
 
@@ -366,16 +366,16 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
           !+(pr, df) (hole ()) (hole ())
           (pr, f) (pr, df) Unit false false
     | Ttrue ->
-        let weak = lambda one (fun i -> Weakening (pr, Hole i)) in
+        let clear = lambda one (fun i -> Clear (pr, Hole i)) in
         let triv = lambda Z (Trivial pr) in
-        ret Unit triv weak
+        ret Unit triv clear
           (Zero (pr, f)) (hole ()) triv
           (pr, f) (pr, f) Unit false false
     | Tfalse ->
-        let weak = lambda one (fun i -> Weakening (pr, Hole i)) in
+        let clear = lambda one (fun i -> Clear (pr, Hole i)) in
         let triv = lambda Z (Trivial pr) in
         ret (Zero (pr, f)) (hole ()) triv
-          Unit triv weak
+          Unit triv clear
           (pr, f) (pr, f) Unit false false
     | Tapp _ -> let uf = !+(pr, f) in
                 ret uf (hole ()) (hole ())
