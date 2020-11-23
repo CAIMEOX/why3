@@ -117,6 +117,7 @@ let command cur =
   try
     Dynlink.allow_unsafe_modules true;
     Dynlink.loadfile cmd;
+    !Plugin.command_main_point ();
     exit 0
   with Dynlink.Error e ->
     Printf.eprintf "Failed to load %s: %s\n%!" cmd (Dynlink.error_message e);

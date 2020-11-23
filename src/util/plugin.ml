@@ -66,3 +66,5 @@ let () =
       | Dynlink.Error (error) ->
         Format.fprintf fmt "Dynlink error: %s" (Dynlink.error_message error)
       | _ -> raise exn)
+
+let command_main_point = ref (fun () -> ())

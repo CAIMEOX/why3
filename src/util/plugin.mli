@@ -35,3 +35,7 @@ type plu =
   | Pluother
 
 val check_plugin : plugin -> plu
+
+(**/*)
+
+val command_main_point: (unit -> unit) ref

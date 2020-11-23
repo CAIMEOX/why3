@@ -339,7 +339,7 @@ let do_input env drv = function
         else
           Queue.iter (do_local_theory env drv fname m) tlist
 
-let () =
+let main () =
   try
     let load (f,ef) = load_driver (Whyconf.get_main config) env f ef in
     let drv = Opt.map load !opt_driver in
@@ -348,6 +348,8 @@ let () =
   with e when not (Debug.test_flag Debug.stack_trace) ->
     eprintf "%a@." Exn_printer.exn_printer e;
     exit 1
+
+let () = Plugin.command_main_point := main
 
 (*
 Local Variables:
