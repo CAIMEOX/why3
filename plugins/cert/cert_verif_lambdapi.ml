@@ -152,9 +152,9 @@ let print_certif print_next fmt c =
                    %a"
         (rstr pos)
         prtyparen cty prpv t1 prpv t2 prpv ctxt
-        prhyp i2 prhyp i1 pc c
-        prhyp i2
+        prhyp i1 prhyp i2 pc c
         prhyp i1
+        prhyp i2
   in
   pc fmt c
 

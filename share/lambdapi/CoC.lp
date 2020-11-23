@@ -57,7 +57,9 @@ definition eq T x y ≔  (∀ (T ⇒ dottype))
 
 definition equiv A B ≔  (A ⇨ B) ∧ (B ⇨ A)
 
-
+symbol iff_eq : Π (A : Utype) (B : Utype),
+       	        etype (equiv A B) →
+		etype (eq dottype A B)
 
 // Integers
 
@@ -340,6 +342,11 @@ definition rewrite_goal : Π T a b P,
    etype (hyp (eq T a b) (goal (P a) empty))
 ≔  λ T a b P s h i, s h (h (λ x, ¬ P x) i)
 
+definition iffeq : Π (A : Utype) (B : Utype),
+	   	   etype (hyp (eq dottype A B) empty) →
+		   etype (hyp (equiv A B) empty)
+
+≔  λ A B s eab, s (iff_eq A B eab)
 
 
 // To verify
