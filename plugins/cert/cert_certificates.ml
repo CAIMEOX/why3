@@ -553,17 +553,17 @@ let elaborate (init_ct : ctask) c =
       let c1 = elab cta1 c1 in
       let c2 = elab cta2 c2 in
       ESplit (pos, t1, t2, i, c1, c2)
-  | Destruct (i, j1, j2, c) ->
+  | Destruct (i, i1, i2, c) ->
       let t, pos = find_ident "Destruct" i cta in
       let t1, t2 = match t, pos with
         | CTbinop (Tand, t1, t2), false | CTbinop (Tor, t1, t2), true -> t1, t2
         | _ -> eprintf "Nothing to destruct@.";
                raise Elaboration_failed in
       let cta = remove i cta
-                |> add j1 (t1, pos)
-                |> add j2 (t2, pos) in
-      EDestruct (pos, t1, t2, i, j1, j2, elab cta c)
-  | Construct (i1, i2, j, c) ->
+                |> add i1 (t1, pos)
+                |> add i2 (t2, pos) in
+      EDestruct (pos, t1, t2, i, i1, i2, elab cta c)
+  | Construct (i1, i2, i, c) ->
       let t1, pos1 = find_ident "Construct1" i1 cta in
       let t2, pos2 = find_ident "Construct2" i2 cta in
       assert (pos1 = pos2);
@@ -572,8 +572,8 @@ let elaborate (init_ct : ctask) c =
               else CTbinop (Tand, t1, t2) in
       let cta = remove i1 cta
                 |> remove i2
-                |> add j (t, pos1) in
-      EConstruct (pos1, t1, t2, i1, i2, j, elab cta c)
+                |> add i (t, pos1) in
+      EConstruct (pos1, t1, t2, i1, i2, i, elab cta c)
   | Swap (i, c) ->
       let t, pos = find_ident "Swap" i cta in
       let neg, underlying_t, neg_t = match t with
@@ -601,28 +601,28 @@ let elaborate (init_ct : ctask) c =
       let cta = add i (ct_open t (CTfvar y), pos) cta
                 |> add_var y ty in
       EIntroQuant (pos, CTquant (CTlambda, ty, t), i, y, elab cta c)
-  | InstQuant (i, j, t_inst, c) ->
-      let t, pos = find_ident "InstQuant" i cta in
+  | InstQuant (i1, i2, t_inst, c) ->
+      let t, pos = find_ident "InstQuant" i1 cta in
       let t, ty = match t, pos with
         | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true -> t, ty
         | _ -> eprintf "trying to instantiate a non-quantified hypothesis@.";
                raise Elaboration_failed in
-      let cta = add j (ct_open t t_inst, pos) cta in
-      EInstQuant (pos, CTquant (CTlambda, ty, t), i, j, t_inst, elab cta c)
-  | Rewrite (i, h, c) ->
-      let rew_hyp, _ = find_ident "Finding rewrite hypothesis" h cta in
+      let cta = add i2 (ct_open t t_inst, pos) cta in
+      EInstQuant (pos, CTquant (CTlambda, ty, t), i1, i2, t_inst, elab cta c)
+  | Rewrite (i1, i2, c) ->
+      let rew_hyp, _ = find_ident "Finding rewrite hypothesis" i1 cta in
       let a, b = match rew_hyp with
         | CTbinop (Tiff, a, b) -> a, b
         | CTapp (CTapp (f, a), b) when ct_equal f eq -> a, b
         | _ -> eprintf "Rewrite hypothesis is badly-formed : %a@." pcte rew_hyp;
                raise Elaboration_failed in
-      let t, pos = find_ident "Finding to be rewritten goal" i cta in
+      let t, pos = find_ident "Finding to be rewritten goal" i2 cta in
       let id = id_register (id_fresh "ctxt_var") in
       let v = CTfvar id in
       let cty = infer_type cta a in
       let ctxt = CTquant (CTlambda, cty, ct_close id (replace_cterm a v t)) in
-      let cta = rewrite_ctask cta i a b ctxt in
-      ERewrite (pos, cty, a, b, ctxt, i, h, elab cta c)
+      let cta = rewrite_ctask cta i2 a b ctxt in
+      ERewrite (pos, cty, a, b, ctxt, i1, i2, elab cta c)
   in
   elab init_ct c
 

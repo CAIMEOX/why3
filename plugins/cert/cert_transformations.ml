@@ -567,7 +567,7 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
                 Unfold (nprh, Split (nprh,
                 Clear (pr, Swap (nprh, rename nprh pr (hole ()))),
                 c)) in
-              let rew_cert = Rewrite (pri, nprh, Clear (nprh, hole ())) in
+              let rew_cert = Rewrite (nprh, pri, Clear (nprh, hole ())) in
               Duplicate (prh, nprh,
               List.fold_right apply lp (revert rew_cert))) in
 
