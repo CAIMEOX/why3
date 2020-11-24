@@ -302,15 +302,19 @@ definition dir_right_goal : Π A B,
     etype (goal (A ∨ B) empty)
 ≔  λ A B nnb nab, nab (or_intro_2 A B (nne B nnb))
 
-definition clear_hyp : Π A,
+definition clearhyp : Π A,
     etype empty →
     etype (hyp A empty)
 ≔  λ A f _, f
 
-definition clear_goal : Π A,
+definition clear_hyp A HA s ≔  clearhyp A s HA
+
+definition cleargoal : Π A,
     etype empty →
     etype (goal A empty)
 ≔  λ A f _, f
+
+definition clear_goal A HA s ≔  cleargoal A s HA
 
 definition intro_quant_hyp : Π T (P : ekind (T ⇒ dottype)),
     (Π y, etype (hyp (P y) empty)) →
