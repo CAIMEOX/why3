@@ -57,15 +57,15 @@ let print_certif print_next fmt c =
         prhyp i
   | EAssert (i, t, c1, c2) ->
       fprintf fmt "cut %a@ \
-                   (λ %a, @[<hv>%a@])@ \
-                   (λ %a, @[<hv>%a@])"
+                   @[<hv 3>(λ %a,@ %a)@]@ \
+                   @[<hv 3>(λ %a,@ %a)@]"
         prpv t
         prhyp i pc c1
         prhyp i pc c2
   | ESplit (pos, t1, t2, i, c1, c2) ->
       fprintf fmt "split%s %a %a@ \
-                   (λ %a, @[<hv>%a@])@ \
-                   (λ %a, @[<hv>%a@])@ \
+                   @[<hv 3>(λ %a,@ %a)@]@ \
+                   @[<hv 3>(λ %a,@ %a)@]@ \
                    %a"
         (rstr pos)
         prpv t1
@@ -74,8 +74,8 @@ let print_certif print_next fmt c =
         prhyp i pc c2
         prhyp i
   | EUnfoldIff (pos, t1, t2, i, c) ->
-      fprintf fmt "unfold_iff%s %a %a@ \
-                   (λ %a, @[<hv>%a@])@ \
+      fprintf fmt "unfold_iff%s %a %a (λ %a,@ \
+                   @[<hv>%a@])@ \
                    %a"
         (rstr pos)
         prpv t1
@@ -83,8 +83,8 @@ let print_certif print_next fmt c =
         prhyp i pc c
         prhyp i
   | EUnfoldArr (pos, t1, t2, i, c) ->
-      fprintf fmt "unfold_arr%s %a %a@ \
-                   (λ %a, @[<hv>%a@])@ \
+      fprintf fmt "unfold_arr%s %a %a (λ %a,@ \
+                   @[<hv>%a@])@ \
                    %a"
         (rstr pos)
         prpv t1
@@ -92,24 +92,24 @@ let print_certif print_next fmt c =
         prhyp i pc c
         prhyp i
   | ESwapNeg (pos, t, i, c) ->
-      fprintf fmt "swap_neg%s %a@ \
-                   (λ %a, @[<hv>%a@])@ \
+      fprintf fmt "swap_neg%s %a (λ %a,@ \
+                   @[<hv>%a@])@ \
                    %a"
         (rstr pos)
         prpv t
         prhyp i pc c
         prhyp i
   | ESwap (pos, t, i, c) ->
-      fprintf fmt "swap%s %a@ \
-                   (λ %a, @[<hv>%a@])@ \
+      fprintf fmt "swap%s %a (λ %a,@ \
+                   @[<hv>%a@])@ \
                    %a"
         (rstr pos)
         prpv t
         prhyp i pc c
         prhyp i
   | EDestruct (pos, t1, t2, i, i1, i2, c) ->
-      fprintf fmt "destruct%s %a %a@ \
-                   (λ %a %a, @[<hv>%a@])@ \
+      fprintf fmt "destruct%s %a %a (λ %a %a,@ \
+                   @[<hv>%a@])@ \
                    %a"
         (rstr pos)
         prpv t1
@@ -117,15 +117,15 @@ let print_certif print_next fmt c =
         prhyp i1 prhyp i2 pc c
         prhyp i
   | EClear (pos, t, i, c) ->
-      fprintf fmt "clear%s %a %a@ \
-                   (@[<hv>%a@])"
+      fprintf fmt "clear%s %a %a (@ \
+                   @[<hv>%a@])"
         (rstr pos)
         prpv t
         prhyp i
         pc c
   | EIntroQuant (pos, (CTquant (_, cty, _) as p), i, y, c) ->
-      fprintf fmt "intro_quant%s %a %a@ \
-                   (λ %a %a, @[<hv>%a@])@ \
+      fprintf fmt "intro_quant%s %a %a (λ %a %a,@ \
+                   @[<hv>%a@])@ \
                    %a"
         (rstr pos)
         prtyparen cty
@@ -134,8 +134,8 @@ let print_certif print_next fmt c =
         prhyp i
   | EIntroQuant _ -> assert false
   | EInstQuant (pos, (CTquant (_, cty, _) as p), i1, i2, t, c) ->
-      fprintf fmt "inst_quant%s %a %a %a@ \
-                   (λ %a %a, @[<hv>%a@])@ \
+      fprintf fmt "inst_quant%s %a %a %a (λ %a %a,@ \
+                   @[<hv>%a@])@ \
                    %a"
         (rstr pos)
         prtyparen cty
@@ -146,8 +146,8 @@ let print_certif print_next fmt c =
   | EInstQuant _ -> assert false
   | ERewrite (pos, is_eq, cty, t1, t2, ctxt, i1, i2, c) ->
       if is_eq
-      then fprintf fmt "rewrite%s %a %a %a %a@ \
-                        (λ %a %a, @[<hv>%a@])@ \
+      then fprintf fmt "rewrite%s %a %a %a %a (λ %a %a,@ \
+                        @[<hv>%a@])@ \
                         %a@ \
                         %a"
              (rstr pos)
@@ -157,8 +157,8 @@ let print_certif print_next fmt c =
              prhyp i2
       else let ideq = id_register (id_fresh "iff_rewrite") in
            let crew = ERewrite (pos, true, cty, t1, t2, ctxt, ideq, i2, c) in
-           fprintf fmt "iffeq %a %a@ \
-                        (λ %a, @[<hv>%a@])@ \
+           fprintf fmt "iffeq %a %a (λ %a,@ \
+                        @[<hv>%a@])@ \
                         %a"
            prpv t1 prpv t2
            prhyp ideq pc crew
