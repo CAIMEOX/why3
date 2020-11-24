@@ -854,8 +854,14 @@
   </transf>
   </goal>
  </transf>
- <transf name="intros_lcert" >
-  <goal name="rew_inv_hyp.0">
+ <transf name="intros_lcert" proved="true" >
+  <goal name="rew_inv_hyp.0" proved="true">
+  <transf name="rewrite_lcert" proved="true" arg1="&lt;-" arg2="H1" arg3="in" arg4="H">
+   <goal name="rew_inv_hyp.0.0" proved="true">
+   <transf name="assumption_lcert" proved="true" >
+   </transf>
+   </goal>
+  </transf>
   </goal>
  </transf>
  </goal>
@@ -873,6 +879,24 @@
    </goal>
    <goal name="rew_prem_hyp.0.2" expl="rewrite premises" proved="true">
    <transf name="assumption_ccert" proved="true" >
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ <transf name="intros_lcert" proved="true" >
+  <goal name="rew_prem_hyp.0" proved="true">
+  <transf name="rewrite_ccert" proved="true" arg1="H1" arg2="in" arg3="H">
+   <goal name="rew_prem_hyp.0.0" proved="true">
+   <transf name="assumption_lcert" proved="true" >
+   </transf>
+   </goal>
+   <goal name="rew_prem_hyp.0.1" expl="rewrite premises" proved="true">
+   <transf name="assumption_lcert" proved="true" >
+   </transf>
+   </goal>
+   <goal name="rew_prem_hyp.0.2" expl="rewrite premises" proved="true">
+   <transf name="assumption_lcert" proved="true" >
    </transf>
    </goal>
   </transf>
@@ -898,6 +922,24 @@
   </transf>
   </goal>
  </transf>
+ <transf name="intros_lcert" proved="true" >
+  <goal name="rew_inv_prem_hyp.0" proved="true">
+  <transf name="rewrite_lcert" proved="true" arg1="&lt;-" arg2="H1" arg3="in" arg4="H">
+   <goal name="rew_inv_prem_hyp.0.0" proved="true">
+   <transf name="assumption_lcert" proved="true" >
+   </transf>
+   </goal>
+   <goal name="rew_inv_prem_hyp.0.1" expl="rewrite premises" proved="true">
+   <transf name="assumption_lcert" proved="true" >
+   </transf>
+   </goal>
+   <goal name="rew_inv_prem_hyp.0.2" expl="rewrite premises" proved="true">
+   <transf name="assumption_lcert" proved="true" >
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
  </goal>
  <goal name="rew_forall_hyp" proved="true">
  <transf name="introduce_premises" proved="true" >
@@ -906,11 +948,17 @@
    <goal name="rew_forall_hyp.0.0" proved="true">
    <transf name="rewrite_ccert" proved="true" arg1="H">
     <goal name="rew_forall_hyp.0.0.0" proved="true">
-    <transf name="rewrite_ccert" proved="true" arg1="H">
-     <goal name="rew_forall_hyp.0.0.0.0" proved="true">
-     <transf name="blast_ccert" proved="true" >
-     </transf>
-     </goal>
+    <transf name="blast_ccert" proved="true" >
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  <transf name="instantiate_lcert" proved="true" arg1="x" arg2="in" arg3="H">
+   <goal name="rew_forall_hyp.0.0" proved="true">
+   <transf name="rewrite_lcert" proved="true" arg1="H">
+    <goal name="rew_forall_hyp.0.0.0" proved="true">
+    <transf name="blast_lcert" proved="true" >
     </transf>
     </goal>
    </transf>
@@ -1017,6 +1065,12 @@
  <transf name="intro_ccert" proved="true" >
   <goal name="contra_hyps.0" proved="true">
   <transf name="blast_ccert" proved="true" >
+  </transf>
+  </goal>
+ </transf>
+ <transf name="intro_lcert" proved="true" >
+  <goal name="contra_hyps.0" proved="true">
+  <transf name="blast_lcert" proved="true" >
   </transf>
   </goal>
  </transf>
