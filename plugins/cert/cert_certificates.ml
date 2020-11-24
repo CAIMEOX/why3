@@ -658,7 +658,7 @@ let rec trim_certif c =
       let c_open = EClear (pos, t1, i1', EClear (pos, t2, i2', c)) in
       let c_closed = ESplit (not pos, t1, t2, i,
                              eaxiom (not pos) t1 i1' i,
-                             eaxiom (not pos) t1 i2' i) in
+                             eaxiom (not pos) t2 i2' i) in
       let c1, c2, cut = if pos
                         then c_open, c_closed, CTbinop (Tor, t1, t2)
                         else c_closed, c_open, CTbinop (Tand, t1, t2) in
