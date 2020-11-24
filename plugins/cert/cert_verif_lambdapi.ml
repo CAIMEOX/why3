@@ -117,13 +117,12 @@ let print_certif print_next fmt c =
         prhyp i1 prhyp i2 pc c
         prhyp i
   | EClear (pos, t, i, c) ->
-      fprintf fmt "clear%s %a@ \
-                   (@[<hv>%a@])@ \
-                   %a"
+      fprintf fmt "clear%s %a %a@ \
+                   (@[<hv>%a@])"
         (rstr pos)
         prpv t
-        pc c
         prhyp i
+        pc c
   | EIntroQuant (pos, (CTquant (_, cty, _) as p), i, y, c) ->
       fprintf fmt "intro_quant%s %a %a@ \
                    (λ %a %a, @[<hv>%a@])@ \
