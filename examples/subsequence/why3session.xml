@@ -12,10 +12,10 @@
   <proof prover="2"><result status="valid" time="0.03" steps="10499"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="10983"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="10983"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="11005"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="11005"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.3" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.28" steps="55428"/></proof>
@@ -50,10 +50,10 @@
     </transf>
     </goal>
     <goal name="is_subsequence&#39;vc.10.0.1" expl="postcondition" proved="true">
-    <proof prover="2"><result status="valid" time="0.04" steps="8301"/></proof>
+    <proof prover="2"><result status="valid" time="0.03" steps="8302"/></proof>
     </goal>
     <goal name="is_subsequence&#39;vc.10.0.2" expl="postcondition" proved="true">
-    <proof prover="2"><result status="valid" time="0.03" steps="7833"/></proof>
+    <proof prover="2"><result status="valid" time="0.04" steps="7833"/></proof>
     </goal>
    </transf>
    </goal>

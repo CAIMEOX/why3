@@ -260,64 +260,64 @@
   <proof prover="0"><result status="valid" time="0.04" steps="6175"/></proof>
   </goal>
   <goal name="delta&#39;vc.1" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="6562"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="6446"/></proof>
   </goal>
   <goal name="delta&#39;vc.2" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="6633"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="6572"/></proof>
   </goal>
   <goal name="delta&#39;vc.3" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="6720"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="6657"/></proof>
   </goal>
   <goal name="delta&#39;vc.4" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="6861"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="6775"/></proof>
   </goal>
   <goal name="delta&#39;vc.5" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="7046"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="6983"/></proof>
   </goal>
   <goal name="delta&#39;vc.6" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="8016"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="7893"/></proof>
   </goal>
   <goal name="delta&#39;vc.7" expl="integer overflow" proved="true">
   <proof prover="0"><result status="valid" time="0.04" steps="6471"/></proof>
   </goal>
   <goal name="delta&#39;vc.8" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="6616"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="6614"/></proof>
   </goal>
   <goal name="delta&#39;vc.9" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="7366"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="7364"/></proof>
   </goal>
   <goal name="delta&#39;vc.10" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="6429"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="6427"/></proof>
   </goal>
   <goal name="delta&#39;vc.11" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="7077"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="7075"/></proof>
   </goal>
   <goal name="delta&#39;vc.12" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="6553"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="6551"/></proof>
   </goal>
   <goal name="delta&#39;vc.13" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="6627"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="6509"/></proof>
   </goal>
   <goal name="delta&#39;vc.14" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="6714"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="6651"/></proof>
   </goal>
   <goal name="delta&#39;vc.15" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="6783"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="6716"/></proof>
   </goal>
   <goal name="delta&#39;vc.16" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="6993"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="6905"/></proof>
   </goal>
   <goal name="delta&#39;vc.17" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="7856"/></proof>
+  <proof prover="0"><result status="valid" time="0.06" steps="7770"/></proof>
   </goal>
   <goal name="delta&#39;vc.18" expl="integer overflow" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="6548"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="6544"/></proof>
   </goal>
   <goal name="delta&#39;vc.19" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="7413"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="7409"/></proof>
   </goal>
   <goal name="delta&#39;vc.20" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="6468"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="6368"/></proof>
   </goal>
  </transf>
  </goal>
@@ -423,7 +423,7 @@
   <proof prover="0"><result status="valid" time="0.18" steps="18981"/></proof>
   </goal>
   <goal name="fulcrum&#39;vc.31" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.05" steps="526457"/></proof>
+  <proof prover="3"><result status="valid" time="0.16" steps="526457"/></proof>
   </goal>
   <goal name="fulcrum&#39;vc.32" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.03" steps="6907"/></proof>

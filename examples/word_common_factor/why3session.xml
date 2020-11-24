@@ -19,48 +19,48 @@
   <proof prover="1"><result status="valid" time="0.01" steps="10"/></proof>
   </goal>
   <goal name="common_factor&#39;vc.1" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.14" steps="42859"/></proof>
+  <proof prover="2"><result status="valid" time="0.14" steps="42855"/></proof>
   </goal>
   <goal name="common_factor&#39;vc.2" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="15318"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="15314"/></proof>
   </goal>
   <goal name="common_factor&#39;vc.3" expl="precondition" proved="true">
   <transf name="split_all_full" proved="true" >
    <goal name="common_factor&#39;vc.3.0" expl="precondition" proved="true">
-   <proof prover="2"><result status="valid" time="0.06" steps="16733"/></proof>
+   <proof prover="2"><result status="valid" time="0.06" steps="16729"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="common_factor&#39;vc.4" expl="variant decrease" proved="true">
   <transf name="split_all_full" proved="true" >
    <goal name="common_factor&#39;vc.4.0" expl="variant decrease" proved="true">
-   <proof prover="2"><result status="valid" time="0.05" steps="15902"/></proof>
+   <proof prover="2"><result status="valid" time="0.05" steps="15899"/></proof>
    </goal>
    <goal name="common_factor&#39;vc.4.1" expl="variant decrease" proved="true">
-   <proof prover="2"><result status="valid" time="0.05" steps="15910"/></proof>
+   <proof prover="2"><result status="valid" time="0.05" steps="15907"/></proof>
    </goal>
    <goal name="common_factor&#39;vc.4.2" expl="variant decrease" proved="true">
-   <proof prover="2"><result status="valid" time="0.04" steps="15921"/></proof>
+   <proof prover="2"><result status="valid" time="0.04" steps="15918"/></proof>
    </goal>
    <goal name="common_factor&#39;vc.4.3" expl="variant decrease" proved="true">
-   <proof prover="2"><result status="valid" time="0.04" steps="13619"/></proof>
+   <proof prover="2"><result status="valid" time="0.04" steps="13616"/></proof>
    </goal>
    <goal name="common_factor&#39;vc.4.4" expl="variant decrease" proved="true">
-   <proof prover="2"><result status="valid" time="0.04" steps="13619"/></proof>
+   <proof prover="2"><result status="valid" time="0.04" steps="13616"/></proof>
    </goal>
    <goal name="common_factor&#39;vc.4.5" expl="variant decrease" proved="true">
-   <proof prover="2"><result status="valid" time="0.03" steps="13621"/></proof>
+   <proof prover="2"><result status="valid" time="0.03" steps="13618"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="common_factor&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="9534"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="9531"/></proof>
   </goal>
   <goal name="common_factor&#39;vc.6" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.06" steps="16136"/></proof>
+  <proof prover="2"><result status="valid" time="0.06" steps="16098"/></proof>
   </goal>
   <goal name="common_factor&#39;vc.7" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.34" steps="44051"/></proof>
+  <proof prover="2"><result status="valid" time="0.34" steps="43467"/></proof>
   </goal>
  </transf>
  </goal>

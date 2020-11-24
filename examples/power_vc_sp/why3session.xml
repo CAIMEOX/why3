@@ -32,16 +32,16 @@
   <proof prover="1"><result status="valid" time="0.01" steps="3400"/></proof>
   </goal>
   <goal name="fast_exp_imperative&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="3442"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="3440"/></proof>
   </goal>
   <goal name="fast_exp_imperative&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="3544"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="3490"/></proof>
   </goal>
   <goal name="fast_exp_imperative&#39;vc.3" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="5099"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="5054"/></proof>
   </goal>
   <goal name="fast_exp_imperative&#39;vc.4" expl="loop variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="4875"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="4830"/></proof>
   </goal>
   <goal name="fast_exp_imperative&#39;vc.5" expl="loop invariant preservation" proved="true">
   <proof prover="2" timelimit="1"><result status="valid" time="0.73" steps="64"/></proof>
