@@ -114,11 +114,11 @@ let rec ccheck c cta =
           ccheck c cta
       | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
       end
-  | ERewrite (_, _, _, _, ctxt, i1, i2, c) ->
+  | ERewrite (_, is_eq, _, _, _, ctxt, i1, i2, c) ->
       let t, pos = find_ident "inst_quant" i1 cta in
-      let a, b = match t, pos with
-        | CTbinop (Tiff, a, b), false -> a, b
-        | CTapp (CTapp (f, a), b), false when ct_equal f eq -> a, b
+      let a, b = match t, pos, is_eq with
+        | CTbinop (Tiff, a, b), false, false -> a, b
+        | CTapp (CTapp (f, a), b), false, true when ct_equal f eq -> a, b
         | _ -> verif_failed "Non-rewritable proposition" in
       let cta = rewrite_ctask cta i2 a b ctxt in
       ccheck c cta

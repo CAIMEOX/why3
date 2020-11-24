@@ -246,11 +246,15 @@ type ('i, 't) ecert =
   (* EInstQuant (true, p, i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x) ≜
                                       c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p t)
                                   and Σ ⊩ t : τ *)
-  | ERewrite of bool * ctype * 't * 't * 't * 'i * 'i * ('i, 't) ecert
-  (* ERewrite (true, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
-                                               c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
-  (* ERewrite (false, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
-                                                c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
+  | ERewrite of bool * bool * ctype * 't * 't * 't * 'i * 'i * ('i, 't) ecert
+  (* ERewrite (true, true, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
+                                                     c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
+  (* ERewrite (false, true, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
+                                                      c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
+  (* ERewrite (true, false, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓ (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
+                                                      c ⇓ (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
+  (* ERewrite (false, false, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
+                                                       c ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
   (* In the 2 previous rules <ctxt> stands for the context obtained by taking the
      formula contained in <i₂> and replacing each occurrence of <t₁> by a hole. *)
 
@@ -399,8 +403,8 @@ let propagate_ecert fc fi ft = function
   | EDuplicate (pos, a, i1, i2, c) -> EDuplicate (pos, ft a, fi i1, fi i2, fc c)
   | EIntroQuant (pos, p, i, y, c) -> EIntroQuant (pos, ft p, fi i, y, fc c)
   | EInstQuant (pos, p, i, j, t, c) -> EInstQuant (pos, ft p, fi i, fi j, ft t, fc c)
-  | ERewrite (pos, cty, a, b, ctxt, i, h, c) ->
-      ERewrite (pos, cty, ft a, ft b, ft ctxt, fi i, fi h, fc c)
+  | ERewrite (pos, is_eq, cty, a, b, ctxt, i, h, c) ->
+      ERewrite (pos, is_eq, cty, ft a, ft b, ft ctxt, fi i, fi h, fc c)
 
 
 (* Separates hypotheses and goals *)
@@ -611,9 +615,9 @@ let elaborate (init_ct : ctask) c =
       EInstQuant (pos, CTquant (CTlambda, ty, t), i1, i2, t_inst, elab cta c)
   | Rewrite (i1, i2, c) ->
       let rew_hyp, _ = find_ident "Finding rewrite hypothesis" i1 cta in
-      let a, b = match rew_hyp with
-        | CTbinop (Tiff, a, b) -> a, b
-        | CTapp (CTapp (f, a), b) when ct_equal f eq -> a, b
+      let a, b, is_eq = match rew_hyp with
+        | CTbinop (Tiff, a, b) -> a, b, false
+        | CTapp (CTapp (f, a), b) when ct_equal f eq -> a, b, true
         | _ -> eprintf "Rewrite hypothesis is badly-formed : %a@." pcte rew_hyp;
                raise Elaboration_failed in
       let t, pos = find_ident "Finding to be rewritten goal" i2 cta in
@@ -622,7 +626,7 @@ let elaborate (init_ct : ctask) c =
       let cty = infer_type cta a in
       let ctxt = CTquant (CTlambda, cty, ct_close id (replace_cterm a v t)) in
       let cta = rewrite_ctask cta i2 a b ctxt in
-      ERewrite (pos, cty, a, b, ctxt, i1, i2, elab cta c)
+      ERewrite (pos, is_eq, cty, a, b, ctxt, i1, i2, elab cta c)
   in
   elab init_ct c
 
@@ -686,7 +690,7 @@ let rec trim_certif c =
       let h, g, a, b = if pos then i, j, t2, t1 else j, i, t1, t2 in
       (* We want to close a task of the form <Γ, h : a = b ⊢ Δ, g : b = a> *)
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq, b), CTbvar 0)) in
-      let c_closed = ERewrite (not pos, cty, a, b, ctxt, h, g,
+      let c_closed = ERewrite (not pos, true, cty, a, b, ctxt, h, g,
                      EEqRefl (cty, b, g)) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
       erename pos pre i j @@
@@ -695,7 +699,7 @@ let rec trim_certif c =
       let c = trim_certif c in
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq, t1), CTbvar 0)) in
       eduplicate false (CTapp (CTapp (eq, t1), t2)) i1 i3 @@
-        ERewrite (false, cty, t2, t3, ctxt, i2, i3, c)
+        ERewrite (false, true, cty, t2, t3, ctxt, i2, i3, c)
   | _ -> propagate_ecert trim_certif (fun t -> t) (fun i -> i) c
 
 let rec eliminate_let m c =
