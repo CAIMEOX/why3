@@ -1,5 +1,7 @@
 predicate a
 predicate b
+predicate c
+predicate d
 
 goal G1 : a /\ b
 goal G2 : not (a /\ b)
@@ -13,3 +15,4 @@ goal G9 : a -> b
 goal G10 : not (a -> b)
 goal G11 : (a -> b) -> false
 goal G12 : (not (a -> b)) -> false
+goal G13 : not ( (a \/ b) /\ (c \/ d))
