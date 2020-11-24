@@ -145,16 +145,25 @@ let print_certif print_next fmt c =
         prhyp i1 prhyp i2 pc c
         prhyp i1
   | EInstQuant _ -> assert false
-  | ERewrite (pos, cty, t1, t2, ctxt, i1, i2, c) ->
-      fprintf fmt "rewrite%s %a %a %a %a@ \
-                   (λ %a %a, @[<hv>%a@])@ \
-                   %a@ \
-                   %a"
-        (rstr pos)
-        prtyparen cty prpv t1 prpv t2 prpv ctxt
-        prhyp i1 prhyp i2 pc c
-        prhyp i1
-        prhyp i2
+  | ERewrite (pos, is_eq, cty, t1, t2, ctxt, i1, i2, c) ->
+      if is_eq
+      then fprintf fmt "rewrite%s %a %a %a %a@ \
+                        (λ %a %a, @[<hv>%a@])@ \
+                        %a@ \
+                        %a"
+             (rstr pos)
+             prtyparen cty prpv t1 prpv t2 prpv ctxt
+             prhyp i1 prhyp i2 pc c
+             prhyp i1
+             prhyp i2
+      else let ideq = id_register (id_fresh "iff_rewrite") in
+           let crew = ERewrite (pos, true, cty, t1, t2, ctxt, ideq, i2, c) in
+           fprintf fmt "iffeq %a %a@ \
+                        (λ %a, @[<hv>%a@])@ \
+                        %a"
+           prpv t1 prpv t2
+           prhyp ideq pc crew
+           prhyp i1
   in
   pc fmt c
 
