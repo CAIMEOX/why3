@@ -25,7 +25,8 @@ rule ekind (dotpi4 $x $y) ↪  Π (w : ekind $x), ekind ($y w)
 definition arrow A B ≔  dotpi4 A (λ _, B)
 set infix right 14 "⇒" ≔  arrow
 
-set prefix 20 "∀" ≔  dotpi3
+set declared "∀"
+definition ∀ ≔  dotpi3
 
 definition forall ≔  ∀ dottype
 
@@ -47,12 +48,12 @@ set infix right 18 "∧" ≔  type_and
 definition type_or  A B ≔  forall (λ C, (A ⇨ C) ⇨ (B ⇨ C) ⇨ C)
 set infix right 16 "∨" ≔  type_or
 
-definition exists_gen T P ≔  forall (λ C, (∀ T) (λ x, P x ⇨ C) ⇨  C)
-set prefix 20 "∃" ≔  exists_gen
+set declared "∃"
+definition ∃ T P ≔  forall (λ C, ∀ T (λ x, P x ⇨ C) ⇨  C)
 
-definition exists ≔  exists_gen dottype
+definition exists ≔  ∃ dottype
 
-definition eq T x y ≔  (∀ (T ⇒ dottype))
+definition eq T x y ≔  ∀ (T ⇒ dottype)
                        (λ P, P x ⇨ P y)
 
 definition equiv A B ≔  (A ⇨ B) ∧ (B ⇨ A)
@@ -161,10 +162,10 @@ definition forall_elim : Π P t, etype (forall P) → etype (P t)
 
 // Existential quantifier
 
-definition exists_intro : Π T P t, etype (P t) → etype ((∃ T) P)
+definition exists_intro : Π T P t, etype (P t) → etype (∃ T P)
 ≔  λ T P t pt C (q : Π x, etype (P x) → etype C), q t pt
 
-definition exists_elim : Π T P Q, etype ((∃ T) P) →  (Π x, etype (P x ⇨ Q)) → etype Q
+definition exists_elim : Π T P Q, etype (∃ T P) →  (Π x, etype (P x ⇨ Q)) → etype Q
 ≔  λ T P Q e pq, e Q pq
 
 // Equality
@@ -318,22 +319,22 @@ definition clear_goal A HA s ≔  cleargoal A s HA
 
 definition intro_quant_hyp : Π T (P : ekind (T ⇒ dottype)),
     (Π y, etype (hyp (P y) empty)) →
-    etype (hyp ((∃ T) P) empty)
+    etype (hyp (∃ T P) empty)
 ≔  λ T P s ep, exists_elim T P false ep s
 
 definition intro_quant_goal : Π T P,
     (Π y, etype (goal (P y) empty)) →
-    etype (goal ((∀ T) P) empty)
+    etype (goal (∀ T P) empty)
 ≔  λ T P s nfp, nfp (λ t, nne (P t) (s t))
 
 definition inst_quant_goal : Π T P t,
-    etype (goal ((∃ T) P) (goal (P t) empty)) →
-    etype (goal ((∃ T) P) empty)
+    etype (goal (∃ T P) (goal (P t) empty)) →
+    etype (goal (∃ T P) empty)
 ≔  λ T P t s nep, s nep (λ pt, nep (exists_intro T P t pt))
 
 definition inst_quant_hyp : Π T P t,
-    etype (hyp ((∀ T) (λ x, P x)) (hyp (P t) empty)) →
-    etype (hyp ((∀ T) (λ x, P x)) empty)
+    etype (hyp (∀ T (λ x, P x)) (hyp (P t) empty)) →
+    etype (hyp (∀ T (λ x, P x)) empty)
 ≔  λ T P t s h, s h (h t)
 
 definition rewrite_hyp : Π T a b P,

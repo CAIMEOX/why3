@@ -268,7 +268,7 @@ and prapp fmt = function
                              | CTexists -> "∃"
                              | CTlambda -> assert false in
       let t_open = ct_open t (CTfvar x) in
-      fprintf fmt "(%s %a) (λ %a, %a)"
+      fprintf fmt "%s %a (λ %a, %a)"
         q_str
         prty ty
         prid x
