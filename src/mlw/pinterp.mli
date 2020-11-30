@@ -48,6 +48,7 @@ module type Log = sig
 
   type log_entry_desc = private
     | Val_assumed of (ident * value)
+    | Val_not_found of (string * ity)
     | Const_init of ident
     | Exec_call of (rsymbol option * value Mvs.t  * exec_kind)
     | Exec_pure of (lsymbol * exec_kind)
@@ -67,6 +68,7 @@ module type Log = sig
   type log_uc
 
   val log_val : log_uc -> ident -> value -> Loc.position option -> unit
+  val log_val_not_found : log_uc -> string -> ity -> Loc.position option -> unit
   val log_const : log_uc -> ident -> Loc.position option -> unit
   val log_call : log_uc -> rsymbol option -> value Mvs.t ->
                  exec_kind -> Loc.position option -> unit
@@ -134,6 +136,7 @@ type rac_config = private {
   (** import values when they are needed *)
   log_uc : Log.log_uc;
   (** log *)
+  use_default : bool
 }
 
 val rac_config :

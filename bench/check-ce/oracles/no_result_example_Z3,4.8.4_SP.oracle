@@ -7,12 +7,12 @@
               the check fails with all inputs
 <check-ce>Interpreting concretly
 <rac-values>Missing value for parameter _, continue with default value ().
-<rac-values>No value for result at "bench/check-ce/no_result_example.mlw", line 4, characters 10-14, taking default.
+<rac-values>Value imported for x at "bench/check-ce/no_result_example.mlw", line 4, characters 6-7: true
 <check-ce>Interpreting abstractly
 <rac-values>Missing value for parameter _, continue with default value ().
-<rac-values>No value for result at "bench/check-ce/no_result_example.mlw", line 4, characters 10-14, taking default.
+<rac-values>Value imported for x at "bench/check-ce/no_result_example.mlw", line 4, characters 6-7: true
 <check-ce>Result of checking model 0:
-            - Concrete: bad model (Concrete RAC does not confirm the counter-example, no contradiction during execution)
+            - Concrete: good model (Concrete RAC confirms the counter-example)
               File no_result_example.mlw:
                 Line 3:
                   _ = ()
@@ -22,10 +22,13 @@
                   Concrete execution of Tuple0 with args:
                   (abstract) execution of any function f with args:
                     _ = ()
-                  result = false
-                Line 3:
-                  Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC does not confirm the counter-example, no contradiction during execution)
+                  value for result of type bool not found
+                  x = true
+                Line 5:
+                  Property failure, Assertion with:
+                    False = UNDEFINED
+                    x = true
+            - Abstract: good model (Abstract RAC confirms the counter-example)
               File no_result_example.mlw:
                 Line 3:
                   _ = ()
@@ -35,9 +38,12 @@
                   Concrete execution of Tuple0 with args:
                   Abstract execution of f with args:
                     _ = ()
-                  result = false
-                Line 3:
-                  Execution of main function terminated normally
+                  value for result of type bool not found
+                  x = true
+                Line 5:
+                  Property failure, Assertion with:
+                    False = UNDEFINED
+                    x = true
 <check-ce>Check model 1 ("bench/check-ce/no_result_example.mlw", line 5, characters 10-19)
 <check-ce>Validating model:
           File no_result_example.mlw:
@@ -47,12 +53,12 @@
               x = {"type": "Boolean", "val": true}
 <check-ce>Interpreting concretly
 <rac-values>Missing value for parameter _, continue with default value ().
-<rac-values>No value for result at "bench/check-ce/no_result_example.mlw", line 4, characters 10-14, taking default.
+<rac-values>Value imported for x at "bench/check-ce/no_result_example.mlw", line 4, characters 6-7: true
 <check-ce>Interpreting abstractly
 <rac-values>Missing value for parameter _, continue with default value ().
-<rac-values>No value for result at "bench/check-ce/no_result_example.mlw", line 4, characters 10-14, taking default.
+<rac-values>Value imported for x at "bench/check-ce/no_result_example.mlw", line 4, characters 6-7: true
 <check-ce>Result of checking model 1:
-            - Concrete: bad model (Concrete RAC does not confirm the counter-example, no contradiction during execution)
+            - Concrete: good model (Concrete RAC confirms the counter-example)
               File no_result_example.mlw:
                 Line 3:
                   _ = ()
@@ -62,10 +68,13 @@
                   Concrete execution of Tuple0 with args:
                   (abstract) execution of any function f with args:
                     _ = ()
-                  result = false
-                Line 3:
-                  Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC does not confirm the counter-example, no contradiction during execution)
+                  value for result of type bool not found
+                  x = true
+                Line 5:
+                  Property failure, Assertion with:
+                    False = UNDEFINED
+                    x = true
+            - Abstract: good model (Abstract RAC confirms the counter-example)
               File no_result_example.mlw:
                 Line 3:
                   _ = ()
@@ -75,9 +84,12 @@
                   Concrete execution of Tuple0 with args:
                   Abstract execution of f with args:
                     _ = ()
-                  result = false
-                Line 3:
-                  Execution of main function terminated normally
+                  value for result of type bool not found
+                  x = true
+                Line 5:
+                  Property failure, Assertion with:
+                    False = UNDEFINED
+                    x = true
 <check-ce>Check model 2 ("bench/check-ce/no_result_example.mlw", line 5, characters 10-19)
 <check-ce>Validating model:
           File no_result_example.mlw:
@@ -87,12 +99,12 @@
               x = {"type": "Boolean", "val": true}
 <check-ce>Interpreting concretly
 <rac-values>Missing value for parameter _, continue with default value ().
-<rac-values>No value for result at "bench/check-ce/no_result_example.mlw", line 4, characters 10-14, taking default.
+<rac-values>Value imported for x at "bench/check-ce/no_result_example.mlw", line 4, characters 6-7: true
 <check-ce>Interpreting abstractly
 <rac-values>Missing value for parameter _, continue with default value ().
-<rac-values>No value for result at "bench/check-ce/no_result_example.mlw", line 4, characters 10-14, taking default.
+<rac-values>Value imported for x at "bench/check-ce/no_result_example.mlw", line 4, characters 6-7: true
 <check-ce>Result of checking model 2:
-            - Concrete: bad model (Concrete RAC does not confirm the counter-example, no contradiction during execution)
+            - Concrete: good model (Concrete RAC confirms the counter-example)
               File no_result_example.mlw:
                 Line 3:
                   _ = ()
@@ -102,10 +114,13 @@
                   Concrete execution of Tuple0 with args:
                   (abstract) execution of any function f with args:
                     _ = ()
-                  result = false
-                Line 3:
-                  Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC does not confirm the counter-example, no contradiction during execution)
+                  value for result of type bool not found
+                  x = true
+                Line 5:
+                  Property failure, Assertion with:
+                    False = UNDEFINED
+                    x = true
+            - Abstract: good model (Abstract RAC confirms the counter-example)
               File no_result_example.mlw:
                 Line 3:
                   _ = ()
@@ -115,19 +130,37 @@
                   Concrete execution of Tuple0 with args:
                   Abstract execution of f with args:
                     _ = ()
-                  result = false
-                Line 3:
-                  Execution of main function terminated normally
+                  value for result of type bool not found
+                  x = true
+                Line 5:
+                  Property failure, Assertion with:
+                    False = UNDEFINED
+                    x = true
 <check-ce>Models:
-- Checked model 0 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
-- Checked model 1 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
-- Selected model 2 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
+- Selected model 0 (Concrete: good model, Abstract: good model)
+    Summary: The program does not comply to the verification goal
+- Checked model 1 (Concrete: good model, Abstract: good model)
+    Summary: The program does not comply to the verification goal
+- Checked model 2 (Concrete: good model, Abstract: good model)
+    Summary: The program does not comply to the verification goal
 File "bench/check-ce/no_result_example.mlw", line 5, characters 10-19:
 Goal Assertion from verification condition g'vc.
-Prover result is: unknown (sat) (0.02s, 113 steps).
-Sorry, we don't have a good counterexample for you :(
-
+Prover result is: unknown (sat) (0.00s, 113 steps).
+The program does not comply to the verification goal, for example during the
+  following execution:
+File no_result_example.mlw:
+  Line 3:
+    _ = ()
+    Execution of main function g's body with env:
+      _ = ()
+  Line 4:
+    Concrete execution of Tuple0 with args:
+    (abstract) execution of any function f with args:
+      _ = ()
+    value for result of type bool not found
+    x = true
+  Line 5:
+    Property failure, Assertion with:
+      False = UNDEFINED
+      x = true
 

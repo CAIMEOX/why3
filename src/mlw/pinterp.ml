@@ -362,6 +362,7 @@ module type Log = sig
 
   type log_entry_desc = private
     | Val_assumed of (ident * value)
+    | Val_not_found of (string * ity)
     | Const_init of ident
     | Exec_call of (rsymbol option * value Mvs.t  * exec_kind)
     | Exec_pure of (lsymbol * exec_kind)
@@ -381,6 +382,7 @@ module type Log = sig
   type log_uc
 
   val log_val : log_uc -> ident -> value -> Loc.position option -> unit
+  val log_val_not_found : log_uc -> string -> ity -> Loc.position option -> unit
   val log_const : log_uc -> ident -> Loc.position option -> unit
   val log_call : log_uc -> rsymbol option -> value Mvs.t ->
                  exec_kind -> Loc.position option -> unit
@@ -408,6 +410,7 @@ module Log : Log = struct
 
   type log_entry_desc =
     | Val_assumed of (ident * value)
+    | Val_not_found of (string * ity)
     | Const_init of ident
     | Exec_call of (rsymbol option * value Mvs.t  * exec_kind)
     | Exec_pure of (lsymbol * exec_kind)
@@ -438,6 +441,9 @@ module Log : Log = struct
 
   let log_val log_uc id v loc =
     log_entry log_uc (Val_assumed (id,v)) loc
+
+  let log_val_not_found log_uc nm ity loc =
+    log_entry log_uc (Val_not_found (nm,ity)) loc
 
   let log_const log_uc id loc =
     log_entry log_uc (Const_init id) loc
@@ -500,6 +506,9 @@ module Log : Log = struct
     match e.log_desc with
     | Val_assumed (id, v) ->
         fprintf fmt "@[<h2>%a = %a@]" print_decoded id.id_string print_value v;
+    | Val_not_found (nm,ity) ->
+       fprintf fmt "@[<h2>value for %a of type %a not found@]"
+         print_decoded nm print_ity ity;
     | Const_init id ->
         fprintf fmt "@[<h2>Constant %a initialization@]" print_decoded id.id_string;
     | Exec_call (None, mvs, k) ->
@@ -564,6 +573,11 @@ module Log : Log = struct
               (print_json_field "vs" print_json)
               (string "%a" print_decoded id.id_string)
               (print_json_field "value" print_value) v
+        | Val_not_found (nm, ity) ->
+            fprintf fmt "@[@[<hv1>{%a;@ %a;@ %a@]}@]"
+              (print_json_field "kind" print_json) (string "VAL_NOT_FOUND")
+              (print_json_field "name" print_json) (string "%s" nm)
+              (print_json_field "ity" print_ity) ity
         | Const_init id ->
             fprintf fmt "@[@[<hv1>{%a;@ %a@]}@]"
               (print_json_field "kind" print_json) (string "CONST_INIT")
@@ -629,7 +643,7 @@ module Log : Log = struct
     else
       let entry_log = List.filter (fun le ->
             match le.log_desc with
-            | Val_assumed _ | Const_init _ | Exec_main _ -> true
+            | Val_assumed _ | Val_not_found _ | Const_init _ | Exec_main _ -> true
             | Exec_call _ | Exec_pure _ | Exec_any _
                  when verb_lvl > 1 -> true
             | Exec_loop _ when verb_lvl > 2 -> true
@@ -688,6 +702,7 @@ type rac_config = {
   rac_reduce          : rac_reduce_config;
   get_value           : import_value;
   log_uc              : Log.log_uc;
+  use_default          : bool
 }
 
 let default_get_value ?name:_ ?loc:_ _ = None
@@ -700,7 +715,7 @@ let rac_config ~do_rac ~abstract:rac_abstract
     | Some r -> r
     | None -> rac_reduce_config () in
   {do_rac; rac_abstract; rac_reduce; log_uc= Log.empty_log_uc ();
-   get_value; skip_cannot_compute }
+   get_value; skip_cannot_compute; use_default= true }
 
 type env =
   { mod_known   : Pdecl.known_map;
@@ -717,6 +732,9 @@ let default_env env rac mod_known th_known =
 
 let register_used_value env loc id value =
   Log.log_val env.rac.log_uc id (snapshot value) loc
+
+let register_val_not_found env nm ity loc =
+  Log.log_val_not_found env.rac.log_uc nm ity loc
 
 let register_const_init env loc id =
   Log.log_const env.rac.log_uc id loc
@@ -1725,6 +1743,8 @@ let print_result fmt = function
   | Excep (xs, v) -> fprintf fmt "EXC %a: %a" print_xs xs print_value v
   | Irred e -> fprintf fmt "IRRED: %a" (pp_limited print_expr) e
 
+exception No_value_found of (string * Loc.position * ity)
+
 let get_and_register_value env ?def ?ity vs loc =
   let ity = match ity with None -> ity_of_ty vs.vs_ty | Some ity -> ity in
   let name = string_or_model_trace vs.vs_name in
@@ -1737,7 +1757,12 @@ let get_and_register_value env ?def ?ity vs loc =
          print_value v; v
     | None ->
        let v = match def with
-         | None -> default_value_of_type env.env env.mod_known ity
+         | None -> if env.rac.use_default then
+                        default_value_of_type env.env env.mod_known ity
+                   else begin
+                       register_val_not_found env name ity (Some loc);
+                       raise (No_value_found (name,loc,ity))
+                     end
          | Some v -> v in
        Debug.dprintf debug_rac_values
          "@[<h>No value for %s at %a, taking default%t.@]@." name print_loc' loc
@@ -1869,10 +1894,15 @@ and eval_expr' env e =
   | Elet (ld, e2) -> (
     match ld with
     | LDvar (pvs, e1) -> (
-      match eval_expr env e1 with
+      match eval_expr {env with rac={env.rac with use_default=false}}e1 with
       | Normal v ->
         let env = bind_pvs pvs v env in
         eval_expr env e2
+      | exception No_value_found _ ->
+         let v = get_and_register_value env
+                   ~ity:pvs.pv_ity pvs.pv_vs (Opt.get pvs.pv_vs.vs_name.id_loc) in
+         let env = bind_pvs pvs v env in
+         eval_expr env e2
       | r -> r )
     | LDsym (rs, ce) ->
         let env = {env with funenv= Mrs.add rs ce env.funenv} in
