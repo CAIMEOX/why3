@@ -1,0 +1,233 @@
+<check-ce>Check model 0 ("bench/check-ce/no_result_example2.mlw", line 8, characters 10-20)
+<check-ce>Validating model:
+          File no_result_example2.mlw:
+            Line 7:
+              x =
+                {"type": "Record",
+                 "val":
+                  {"Field":
+                    [{"field": "contents",
+                      "value": {"type": "Boolean", "val": true}}]}}
+            Line 8:
+              the check fails with all inputs
+<check-ce>Interpreting concretly
+<rac-values>Missing value for parameter _, continue with default value ().
+<rac-values>No value for result at "bench/check-ce/no_result_example2.mlw", line 7, characters 7-11, taking default.
+<check-ce>Interpreting abstractly
+<rac-values>Missing value for parameter _, continue with default value ().
+<rac-values>No value for result at "bench/check-ce/no_result_example2.mlw", line 6, characters 10-19, taking default.
+<rac-values>No value for result at "bench/check-ce/no_result_example2.mlw", line 7, characters 7-11, taking default.
+<rac-values>Value imported for x at "bench/check-ce/no_result_example2.mlw", line 7, characters 2-11: (ref'mk true)
+<rac-values>No value for result at "bench/check-ce/no_result_example2.mlw", line 7, characters 2-11, taking default.
+<check-ce>Result of checking model 0:
+            - Concrete: bad model (Concrete RAC does not confirm the counter-example, no contradiction during execution)
+              File no_result_example2.mlw:
+                Line 5:
+                  _ = ()
+                  Execution of main function g's body with env:
+                    _ = ()
+                Line 6:
+                  Concrete execution of False with args:
+                  Concrete execution of ref with args:
+                    contents = false
+                  Concrete execution of ref'mk with args:
+                    contents = false
+                Line 7:
+                  Concrete execution of Tuple0 with args:
+                  (abstract) execution of any function f with args:
+                    _ = ()
+                  result = false
+                  Concrete execution of (:=) with args:
+                    r = (ref'mk false)
+                    v = false
+                Line 5:
+                  Execution of main function terminated normally
+            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "WHY3DATA/stdlib/ref.mlw", line 20, characters 39-44)
+              File no_result_example2.mlw:
+                Line 5:
+                  _ = ()
+                  Execution of main function g's body with env:
+                    _ = ()
+                Line 6:
+                  Concrete execution of False with args:
+                  Abstract execution of ref with args:
+                    contents = false
+                  result = (ref'mk false)
+                Line 7:
+                  Concrete execution of Tuple0 with args:
+                  Abstract execution of f with args:
+                    _ = ()
+                  result = false
+                  Abstract execution of (:=) with args:
+                    r = (ref'mk false)
+                    v = false
+                  x = (ref'mk true)
+                  result = ()
+              File ref.mlw:
+                Line 20:
+                  Execution got stuck, Assume postcondition of (:=) with:
+                    r = (ref'mk true)
+                    v = false
+<check-ce>Check model 1 ("bench/check-ce/no_result_example2.mlw", line 8, characters 10-20)
+<check-ce>Validating model:
+          File no_result_example2.mlw:
+            Line 7:
+              x =
+                {"type": "Record",
+                 "val":
+                  {"Field":
+                    [{"field": "contents",
+                      "value": {"type": "Boolean", "val": true}}]}}
+            Line 8:
+              x =
+                {"type": "Record",
+                 "val":
+                  {"Field":
+                    [{"field": "contents",
+                      "value": {"type": "Boolean", "val": true}}]}}
+<check-ce>Interpreting concretly
+<rac-values>Missing value for parameter _, continue with default value ().
+<rac-values>No value for result at "bench/check-ce/no_result_example2.mlw", line 7, characters 7-11, taking default.
+<check-ce>Interpreting abstractly
+<rac-values>Missing value for parameter _, continue with default value ().
+<rac-values>No value for result at "bench/check-ce/no_result_example2.mlw", line 6, characters 10-19, taking default.
+<rac-values>No value for result at "bench/check-ce/no_result_example2.mlw", line 7, characters 7-11, taking default.
+<rac-values>Value imported for x at "bench/check-ce/no_result_example2.mlw", line 7, characters 2-11: (ref'mk true)
+<rac-values>No value for result at "bench/check-ce/no_result_example2.mlw", line 7, characters 2-11, taking default.
+<check-ce>Result of checking model 1:
+            - Concrete: bad model (Concrete RAC does not confirm the counter-example, no contradiction during execution)
+              File no_result_example2.mlw:
+                Line 5:
+                  _ = ()
+                  Execution of main function g's body with env:
+                    _ = ()
+                Line 6:
+                  Concrete execution of False with args:
+                  Concrete execution of ref with args:
+                    contents = false
+                  Concrete execution of ref'mk with args:
+                    contents = false
+                Line 7:
+                  Concrete execution of Tuple0 with args:
+                  (abstract) execution of any function f with args:
+                    _ = ()
+                  result = false
+                  Concrete execution of (:=) with args:
+                    r = (ref'mk false)
+                    v = false
+                Line 5:
+                  Execution of main function terminated normally
+            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "WHY3DATA/stdlib/ref.mlw", line 20, characters 39-44)
+              File no_result_example2.mlw:
+                Line 5:
+                  _ = ()
+                  Execution of main function g's body with env:
+                    _ = ()
+                Line 6:
+                  Concrete execution of False with args:
+                  Abstract execution of ref with args:
+                    contents = false
+                  result = (ref'mk false)
+                Line 7:
+                  Concrete execution of Tuple0 with args:
+                  Abstract execution of f with args:
+                    _ = ()
+                  result = false
+                  Abstract execution of (:=) with args:
+                    r = (ref'mk false)
+                    v = false
+                  x = (ref'mk true)
+                  result = ()
+              File ref.mlw:
+                Line 20:
+                  Execution got stuck, Assume postcondition of (:=) with:
+                    r = (ref'mk true)
+                    v = false
+<check-ce>Check model 2 ("bench/check-ce/no_result_example2.mlw", line 8, characters 10-20)
+<check-ce>Validating model:
+          File no_result_example2.mlw:
+            Line 7:
+              x =
+                {"type": "Record",
+                 "val":
+                  {"Field":
+                    [{"field": "contents",
+                      "value": {"type": "Boolean", "val": true}}]}}
+            Line 8:
+              x =
+                {"type": "Record",
+                 "val":
+                  {"Field":
+                    [{"field": "contents",
+                      "value": {"type": "Boolean", "val": true}}]}}
+<check-ce>Interpreting concretly
+<rac-values>Missing value for parameter _, continue with default value ().
+<rac-values>No value for result at "bench/check-ce/no_result_example2.mlw", line 7, characters 7-11, taking default.
+<check-ce>Interpreting abstractly
+<rac-values>Missing value for parameter _, continue with default value ().
+<rac-values>No value for result at "bench/check-ce/no_result_example2.mlw", line 6, characters 10-19, taking default.
+<rac-values>No value for result at "bench/check-ce/no_result_example2.mlw", line 7, characters 7-11, taking default.
+<rac-values>Value imported for x at "bench/check-ce/no_result_example2.mlw", line 7, characters 2-11: (ref'mk true)
+<rac-values>No value for result at "bench/check-ce/no_result_example2.mlw", line 7, characters 2-11, taking default.
+<check-ce>Result of checking model 2:
+            - Concrete: bad model (Concrete RAC does not confirm the counter-example, no contradiction during execution)
+              File no_result_example2.mlw:
+                Line 5:
+                  _ = ()
+                  Execution of main function g's body with env:
+                    _ = ()
+                Line 6:
+                  Concrete execution of False with args:
+                  Concrete execution of ref with args:
+                    contents = false
+                  Concrete execution of ref'mk with args:
+                    contents = false
+                Line 7:
+                  Concrete execution of Tuple0 with args:
+                  (abstract) execution of any function f with args:
+                    _ = ()
+                  result = false
+                  Concrete execution of (:=) with args:
+                    r = (ref'mk false)
+                    v = false
+                Line 5:
+                  Execution of main function terminated normally
+            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "WHY3DATA/stdlib/ref.mlw", line 20, characters 39-44)
+              File no_result_example2.mlw:
+                Line 5:
+                  _ = ()
+                  Execution of main function g's body with env:
+                    _ = ()
+                Line 6:
+                  Concrete execution of False with args:
+                  Abstract execution of ref with args:
+                    contents = false
+                  result = (ref'mk false)
+                Line 7:
+                  Concrete execution of Tuple0 with args:
+                  Abstract execution of f with args:
+                    _ = ()
+                  result = false
+                  Abstract execution of (:=) with args:
+                    r = (ref'mk false)
+                    v = false
+                  x = (ref'mk true)
+                  result = ()
+              File ref.mlw:
+                Line 20:
+                  Execution got stuck, Assume postcondition of (:=) with:
+                    r = (ref'mk true)
+                    v = false
+<check-ce>Models:
+- Checked model 0 (Concrete: bad model, Abstract: bad model)
+    Summary: Sorry, we don't have a good counterexample for you :(
+- Checked model 1 (Concrete: bad model, Abstract: bad model)
+    Summary: Sorry, we don't have a good counterexample for you :(
+- Selected model 2 (Concrete: bad model, Abstract: bad model)
+    Summary: Sorry, we don't have a good counterexample for you :(
+File "bench/check-ce/no_result_example2.mlw", line 8, characters 10-20:
+Goal Assertion from verification condition g'vc.
+Prover result is: timeout (1.00s, 5942373 steps).
+Sorry, we don't have a good counterexample for you :(
+
+

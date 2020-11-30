@@ -1,0 +1,5 @@
+val f () : bool
+
+let g () =
+  let x = f () in
+  assert {x = false}

@@ -1,0 +1,8 @@
+val f () : bool
+
+use ref.Ref
+
+let g () =
+  let x = ref false in
+  x := f ();
+  assert {!x = false}
