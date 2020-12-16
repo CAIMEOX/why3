@@ -100,7 +100,8 @@ let mode_to_string m =
   | Faithful -> assert false
 
 module rec Value : sig
-  type value = {v_desc: value_desc; v_ty: ty}
+  type origin = [`Computation | `Default | `Other]
+  type value = {v_desc: value_desc; v_ty: ty; v_origin: origin}
   and value_desc =
     | Vconstr of rsymbol * field list
     | Vnum of BigInt.t
@@ -118,7 +119,8 @@ module rec Value : sig
   and field = Field of value ref
   val compare_values : value -> value -> int
 end = struct
-  type value = {v_desc: value_desc; v_ty: ty}
+  type origin = [`Computation | `Default | `Other]
+  type value = {v_desc: value_desc; v_ty: ty; v_origin: origin}
   and value_desc =
     | Vconstr of rsymbol * field list
     | Vnum of BigInt.t
@@ -200,27 +202,28 @@ and Mv : Extmap.S with type key = Value.value =
 
 include Value
 
-let value ty desc = {v_desc= desc; v_ty= ty}
+let value ?(origin:origin=`Computation) ty desc =
+  {v_desc= desc; v_ty= ty; v_origin= origin}
 let field v = Field (ref v)
 let v_desc v = v.v_desc
 let v_ty v = v.v_ty
 let field_get (Field r) = r.contents
 let field_set (Field r) v = r := v
 
-let int_value n = value ty_int (Vnum n)
-let range_value ity n = value (ty_of_ity ity) (Vnum n)
-let string_value s = value ty_str (Vstring s)
-let bool_value b = value ty_bool (Vbool b)
-let proj_value ity ls v =
-  value (ty_of_ity ity) (Vproj (ls, v))
-let constr_value ity rs vl =
-  value (ty_of_ity ity) (Vconstr (rs, List.map field vl))
-let purefun_value ~result_ity ~arg_ity mv v =
-  value (ty_of_ity result_ity) (Vpurefun (ty_of_ity arg_ity, mv, v))
-let unit_value =
-  value (ty_tuple []) (Vconstr (Expr.rs_void, []))
-let undefined_value ity =
-  value (ty_of_ity ity) Vundefined
+let int_value ?origin n = value ?origin ty_int (Vnum n)
+let range_value ?origin ity n = value ?origin (ty_of_ity ity) (Vnum n)
+let string_value ?origin s = value ?origin ty_str (Vstring s)
+let bool_value ?origin b = value ?origin ty_bool (Vbool b)
+let proj_value ?origin ity ls v =
+  value ?origin (ty_of_ity ity) (Vproj (ls, v))
+let constr_value ?origin ity rs vl =
+  value ?origin (ty_of_ity ity) (Vconstr (rs, List.map field vl))
+let purefun_value ?origin ~result_ity ~arg_ity mv v =
+  value ?origin (ty_of_ity result_ity) (Vpurefun (ty_of_ity arg_ity, mv, v))
+let unit_value ?origin () =
+  value ?origin (ty_tuple []) (Vconstr (Expr.rs_void, []))
+let undefined_value ?origin ity =
+  value ?origin (ty_of_ity ity) Vundefined
 
 let rec print_value fmt v =
   match v.v_desc with
@@ -772,16 +775,16 @@ let eval_int_op op ls l =
   | _ -> assert false
 
 let eval_int_uop op ls l =
-  let v_desc = match List.map v_desc l with
-    | [Vnum i1] -> Vnum (op i1)
+  let n = match List.map v_desc l with
+    | [Vnum i1] -> op i1
     | _ -> assert false in
-  Some {v_desc; v_ty=ty_of_ity ls.rs_cty.cty_result}
+  Some (range_value ~origin:`Computation ls.rs_cty.cty_result n)
 
 let eval_int_rel op _ l =
-  let v_desc = match List.map v_desc l with
-    | [Vnum i1; Vnum i2] -> Vbool (op i1 i2)
+  let b = match List.map v_desc l with
+    | [Vnum i1; Vnum i2] -> op i1 i2
     | _ -> assert false in
-  Some {v_desc; v_ty= ty_bool}
+  Some (bool_value ~origin:`Computation b)
 
 (* This initialize Mpfr for float32 behavior *)
 let initialize_float32 () =
@@ -828,7 +831,7 @@ let eval_float :
       | Mode_rel, [Vfloat f1; Vfloat f2] -> Vbool (op f1 f2)
       | Mode_rel1, [Vfloat f] -> Vbool (op f)
       | _ -> cannot_compute "arity error in float operation" in
-    Some {v_desc; v_ty= ty_result}
+    Some (value ~origin:`Computation ty_result v_desc)
   with Mlmpfr_wrapper.Not_Implemented ->
     cannot_compute "mlmpfr wrapper is not implemented"
 
@@ -847,7 +850,7 @@ let eval_real : type a. a real_arity -> a -> rsymbol -> value list -> value opti
       | Mode_relr, [Vreal r1; Vreal r2] -> Vbool (op r1 r2)
       | Modeconst, [] -> Vreal op
       | _ -> cannot_compute "arity error in real operation" in
-    Some {v_desc; v_ty= ty_real}
+    Some (value ~origin:`Computation ty_real v_desc)
   with
   | Big_real.Undetermined ->
       (* Cannot decide interval comparison *)
@@ -999,7 +1002,7 @@ let built_in_modules () =
           | [{v_desc= Varray a}; {v_desc= Vnum i}; v] -> (
               try
                 a.(BigInt.to_int i) <- v;
-                Some unit_value
+                Some (unit_value ())
               with e ->
                 cannot_compute "array element could not be set: %a" Exn_printer.exn_printer e )
           | _ -> assert false) ;
@@ -1047,31 +1050,32 @@ let is_array_its env its =
 
 (* TODO Remove argument [env] after replacing Varray by model substitution *)
 let rec default_value_of_type env known ity : value =
+  let origin = `Default in
   let ty = ty_of_ity ity in
   match ity.ity_node with
   | Ityvar _ -> failwith "default_value_of_type: type variable"
-  | Ityapp (ts, _, _) when its_equal ts its_int -> value ty (Vnum BigInt.zero)
+  | Ityapp (ts, _, _) when its_equal ts its_int -> value ~origin ty (Vnum BigInt.zero)
   | Ityapp (ts, _, _) when its_equal ts its_real -> assert false (* TODO *)
-  | Ityapp (ts, _, _) when its_equal ts its_bool -> value ty (Vbool false)
-  | Ityapp (ts, _, _) when its_equal ts its_str -> value ty (Vstring "")
+  | Ityapp (ts, _, _) when its_equal ts its_bool -> value ~origin ty (Vbool false)
+  | Ityapp (ts, _, _) when its_equal ts its_str -> value ~origin ty (Vstring "")
   | Ityapp(ts,ityl1,_) when is_ts_tuple ts.its_ts ->
       let vs = List.map (default_value_of_type env known) ityl1 in
-      constr_value ity (rs_tuple (List.length ityl1)) vs
+      constr_value ~origin ity (rs_tuple (List.length ityl1)) vs
   | Ityapp (its, l1, l2)
   | Ityreg {reg_its= its; reg_args= l1; reg_regs= l2} ->
       if is_array_its env its then
-        value ty (Varray (Array.init 0 (fun _ -> assert false)))
+        value ~origin ty (Varray (Array.init 0 (fun _ -> assert false)))
       else match Pdecl.find_its_defn known its with
         | {Pdecl.itd_its= {its_def= Range r}} ->
             let zero_in_range = BigInt.(le r.Number.ir_lower zero && le zero r.Number.ir_upper) in
             let n = if zero_in_range then BigInt.zero else r.Number.ir_lower in
-            range_value ity n
+            range_value ~origin ity n
         | {Pdecl.itd_constructors= rs :: _} ->
             let subst = its_match_regs its l1 l2 in
             let ityl = List.map (fun pv -> pv.pv_ity) rs.rs_cty.cty_args in
             let tyl = List.map (ity_full_inst subst) ityl in
             let vs = List.map (default_value_of_type env known) tyl in
-            constr_value ity rs vs
+            constr_value ~origin ity rs vs
         | {Pdecl.itd_constructors= []} ->
             (* if its.its_private then
              *   (\* There is no constructor so we can just invent a Vconstr,
@@ -1080,7 +1084,7 @@ let rec default_value_of_type env known ity : value =
              *   let fl = List.map (fun ity -> field (default_value_of_type env known ity)) itys in
              *   value ty (Vconstr (None, fl))
              * else *)
-            value ty Vundefined
+            value ~origin ty Vundefined
 
 (* ROUTINE DEFINITIONS *)
 
@@ -1845,7 +1849,7 @@ and eval_expr' env e =
             | _ -> assert false in
           search_and_assign cstr.rs_cty.cty_args args)
         l ;
-      Normal unit_value
+      Normal (unit_value ())
   | Elet (ld, e2) -> (
     match ld with
     | LDvar (pvs, e1) -> (
@@ -1915,7 +1919,7 @@ and eval_expr' env e =
              | r -> r
            end
          else if is_false v then
-           Normal unit_value
+           Normal (unit_value ())
          else (
            Warning.emit "@[[Exec] Cannot decide condition of while: @[%a@]@]@."
              print_value v ;
@@ -1937,7 +1941,7 @@ and eval_expr' env e =
                 eval_expr env e
             | r -> r )
           else if is_false v then
-            Normal unit_value
+            Normal (unit_value ())
           else (
             Warning.emit "@[[Exec] Cannot decide condition of while: @[%a@]@]@."
               print_value v ;
@@ -2022,11 +2026,11 @@ and eval_expr' env e =
             (* i is already equal to b + 1 *)
             let ctx = cntr_ctx "Invariant after last iteration" env in
             check_assume_terms ctx inv;
-            Normal unit_value
+            Normal (unit_value ())
           end
         end
         else
-          Normal unit_value
+          Normal (unit_value ())
       with NotNum -> Irred e
     end
   | Efor (pvs, (pvs1, dir, pvs2), _i, inv, e1) -> (
@@ -2050,7 +2054,7 @@ and eval_expr' env e =
               iter (suc i)
           | r -> r
         else
-          Normal unit_value in
+          Normal (unit_value ()) in
       ( if env.rac.do_rac then
           let env' = bind_vs pvs.pv_vs (value ty_int (Vnum a)) env in
           check_terms (cntr_ctx "Loop invariant initialization" env') inv ) ;
@@ -2086,7 +2090,7 @@ and eval_expr' env e =
           | Assume -> check_assume_term (cntr_ctx "Assumption" env) t
           | Check -> check_term (cntr_ctx "Check" env) t
         end;
-      Normal unit_value
+      Normal (unit_value ())
   | Eghost e1 ->
       Debug.dprintf debug_trace_exec "@[<h>%tEVAL EXPR: GHOST %a@]@." pp_indent print_expr e1;
       (* TODO: do not eval ghost if no assertion check *)
@@ -2383,3 +2387,15 @@ let report_eval_result body fmt (res, vsenv, rsenv) =
 
 let report_cntr fmt (ctx, term) =
   report_cntr fmt (ctx, "has failed", term)
+
+(* Export constructors for values with [~origin:`Other]: *)
+let origin = `Other
+let int_value = int_value ~origin
+let range_value = range_value ~origin
+let string_value = string_value ~origin
+let bool_value = bool_value ~origin
+let proj_value = proj_value ~origin
+let constr_value = constr_value ~origin
+let purefun_value = purefun_value ~origin
+let unit_value = unit_value ~origin ()
+let undefined_value = undefined_value ~origin
