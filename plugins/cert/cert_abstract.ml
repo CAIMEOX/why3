@@ -76,7 +76,7 @@ and prtyparen fmt = function
 and prts fmt ts =
   if ts_equal ts ts_bool then fprintf fmt "Bool"
   else if ts_equal ts ts_int then fprintf fmt "Nat"
-  else if ts_equal ts ts_prop then fprintf fmt "dottype"
+  else if ts_equal ts ts_prop then fprintf fmt "Prop"
   else Pretty.print_ts fmt ts
 
 
