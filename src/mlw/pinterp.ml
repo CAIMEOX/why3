@@ -1592,32 +1592,59 @@ let check_assume_term ctx t =
     register_stucked ctx.c_env t.t_loc ctx.c_desc mid;
     raise (RACStuck (ctx.c_env, t.t_loc))
 
+let free_vars_with_default_value env t =
+  let sid1 =
+    t_v_fold (fun sid vs ->
+        if (get_vs env vs).v_origin = `Default then
+          Sid.add vs.vs_name sid
+        else sid ) Sid.empty t in
+  let sid2 =
+    t_app_fold (fun sid ls tyl _ ->
+        if tyl = [] then
+          match Mrs.find_opt (restore_rs ls) env.rsenv with
+          | Some {v_origin= `Default} -> Sid.add ls.ls_name sid
+          | _ -> sid
+        else sid) Sid.empty t in
+  Sid.union sid1 sid2
+
 let check_assume_terms ctx tl =
   try check_terms ctx tl with Contr (ctx,t) ->
-    let mid = value_of_free_vars ctx.c_env t in
-    register_stucked ctx.c_env t.t_loc ctx.c_desc mid;
-    raise (RACStuck (ctx.c_env, t.t_loc))
+    let vars = free_vars_with_default_value ctx.c_env t in
+    if Sid.is_empty vars then
+      let mid = value_of_free_vars ctx.c_env t in
+      register_stucked ctx.c_env t.t_loc ctx.c_desc mid;
+      raise (RACStuck (ctx.c_env, t.t_loc))
+    else
+      cannot_compute "cannot assume contract for variables with default values: %a"
+        Pp.(print_list (constant_string " ") print_decoded)
+        (List.map (fun id -> id.id_string) (Sid.elements vars))
 
 let check_assume_posts ctx v posts =
   try check_posts ctx.c_desc ctx.c_trigger_loc ctx.c_env v posts with Contr (ctx,t) ->
-    let mid = value_of_free_vars ctx.c_env t in
-    register_stucked ctx.c_env t.t_loc ctx.c_desc mid;
-    raise (RACStuck (ctx.c_env,t.t_loc))
+    let vars = free_vars_with_default_value ctx.c_env t in
+    if Sid.is_empty vars then
+      let mid = value_of_free_vars ctx.c_env t in
+      register_stucked ctx.c_env t.t_loc ctx.c_desc mid;
+      raise (RACStuck (ctx.c_env,t.t_loc))
+    else
+      cannot_compute "cannot assume contract for variables with default values: %a"
+        Pp.(print_list (constant_string " ") print_decoded)
+        (List.map (fun id -> id.id_string) (Sid.elements vars))
 
 let check_term ?vsenv ctx t =
-  try check_term ?vsenv ctx t with (Contr (ctx,t)) as e ->
+  try check_term ?vsenv ctx t with Contr (ctx,t) as e ->
     let mid = value_of_free_vars ctx.c_env t in
     register_failure ctx.c_env t.t_loc ctx.c_desc mid;
     raise e
 
 let check_terms ctx tl =
-  try check_terms ctx tl with (Contr (ctx,t)) as e ->
+  try check_terms ctx tl with Contr (ctx,t) as e ->
     let mid = value_of_free_vars ctx.c_env t in
     register_failure ctx.c_env t.t_loc ctx.c_desc mid;
     raise e
 
 let check_posts desc loc env v posts =
-  try check_posts desc loc env v posts with (Contr (ctx,t)) as e ->
+  try check_posts desc loc env v posts with Contr (ctx,t) as e ->
     let mid = value_of_free_vars ctx.c_env t in
     register_failure ctx.c_env t.t_loc ctx.c_desc mid;
     raise e
