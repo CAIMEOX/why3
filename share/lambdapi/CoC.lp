@@ -1,43 +1,44 @@
 // Define CoC encoding
 
-constant symbol Utype : TYPE
-constant symbol Ukind : TYPE
 
-symbol etype : Utype → TYPE
-symbol ekind : Ukind → TYPE
+constant symbol Type : TYPE
+constant symbol Kind : TYPE
 
-constant symbol dottype : Ukind
-rule ekind dottype ↪ Utype
+symbol tEv : Type → TYPE
+symbol kEv : Kind → TYPE
 
-symbol dotpi1 : Π (x : Utype), (etype x → Utype) → Utype
-symbol dotpi2 : Π (x : Utype), (etype x → Ukind) → Ukind
-symbol dotpi3 : Π (x : Ukind), (ekind x → Utype) → Utype
-symbol dotpi4 : Π (x : Ukind), (ekind x → Ukind) → Ukind
+constant symbol Prop : Kind
+rule kEv Prop ↪ Type
 
-rule etype (dotpi1 $x $y) ↪  Π (w : etype $x), etype ($y w)
-rule etype (dotpi3 $x $y) ↪  Π (w : ekind $x), etype ($y w)
-rule ekind (dotpi2 $x $y) ↪  Π (w : etype $x), ekind ($y w)
-rule ekind (dotpi4 $x $y) ↪  Π (w : ekind $x), ekind ($y w)
+symbol ttPi : Π (x : Type), (tEv x → Type) → Type
+symbol tkPi : Π (x : Type), (tEv x → Kind) → Kind
+symbol ktPi : Π (x : Kind), (kEv x → Type) → Type
+symbol kkPi : Π (x : Kind), (kEv x → Kind) → Kind
+
+rule tEv (ttPi $x $y) ↪  Π (w : tEv $x), tEv ($y w)
+rule tEv (ktPi $x $y) ↪  Π (w : kEv $x), tEv ($y w)
+rule kEv (tkPi $x $y) ↪  Π (w : tEv $x), kEv ($y w)
+rule kEv (kkPi $x $y) ↪  Π (w : kEv $x), kEv ($y w)
 
 
 // Derive first-order logic connectives
 
-definition arrow A B ≔  dotpi4 A (λ _, B)
+definition arrow A B ≔  kkPi A (λ _, B)
 set infix right 14 "⇒" ≔  arrow
 
 set declared "∀"
-definition ∀ ≔  dotpi3
+definition ∀ ≔  ktPi
 
-definition forall ≔  ∀ dottype
+definition forall ≔  ∀ Prop
 
 definition false ≔  forall (λ C, C)
 
-definition type_imp A B ≔  dotpi1 A (λ _, B)
+definition type_imp A B ≔  ttPi A (λ _, B)
 set infix right 14 "⇨" ≔  type_imp
 
 definition true ≔  false ⇨ false
 
-definition tt : etype true ≔  λ x, x
+definition tt : tEv true ≔  λ x, x
 
 definition type_neg A ≔  A ⇨ false
 set prefix      20 "¬" ≔  type_neg
@@ -51,24 +52,25 @@ set infix right 16 "∨" ≔  type_or
 set declared "∃"
 definition ∃ T P ≔  forall (λ C, ∀ T (λ x, P x ⇨ C) ⇨  C)
 
-definition exists ≔  ∃ dottype
+definition exists ≔  ∃ Prop
 
-definition eq T x y ≔  ∀ (T ⇒ dottype)
+definition eq T x y ≔  ∀ (T ⇒ Prop)
                        (λ P, P x ⇨ P y)
 
-definition equiv A B ≔  (A ⇨ B) ∧ (B ⇨ A)
+definition type_iff A B ≔  (A ⇨ B) ∧ (B ⇨ A)
+set infix right 14 "⇔" ≔  type_iff
 
-symbol iff_eq : Π (A : Utype) (B : Utype),
-       	        etype (equiv A B) →
-		etype (eq dottype A B)
+symbol iff_eq : Π (A : Type) (B : Type),
+       	        tEv (type_iff A B) →
+		tEv (eq Prop A B)
 
 // Integers
 
-constant symbol Nat : Ukind
+constant symbol Nat : Kind
 
-constant symbol zero : ekind Nat
+constant symbol zero : kEv Nat
 
-constant symbol succ : ekind Nat → ekind Nat
+constant symbol succ : kEv Nat → kEv Nat
 
 definition one ≔  succ zero
 
@@ -81,41 +83,36 @@ definition infixspeq ≔  eq Nat
 
 // Booleans
 
-constant symbol Bool : Ukind
+constant symbol Bool : Kind
 
-constant symbol True : ekind Bool
-constant symbol False : ekind Bool
+constant symbol True : kEv Bool
+constant symbol False : kEv Bool
 
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
 
-definition empty : Utype
+definition empty : Type
 ≔  false
 
-definition hyp : Utype → Utype → Utype
+definition hyp : Type → Type → Type
 ≔  λ A s, A ⇨ s
 
-definition goal : Utype → Utype → Utype
+definition goal : Type → Type → Type
 ≔  λ A s, ¬ A ⇨ s
 
 
 
 // Excluded-middle axiom and reasoning about negation.
 
-definition prop_iff : Utype → Utype → Utype
-≔  λ A B, (A ⇨ B) ∧ (B ⇨ A)
-
-set infix right 14 "⇔" ≔  prop_iff
-
-definition nni : Π A, etype A → etype (¬ ¬ A)
+definition nni : Π A, tEv A → tEv (¬ ¬ A)
 ≔  λ A a na, na a
 
-definition contra : Π A B, (etype A → etype B) → etype (¬ B) → etype (¬ A)
+definition contra : Π A B, (tEv A → tEv B) → tEv (¬ B) → tEv (¬ A)
 ≔  λ A B p nb a, nb (p a)
 
-symbol em : Π A, etype (A ∨ ¬ A)
+symbol em : Π A, tEv (A ∨ ¬ A)
 
-definition nne : Π A, etype (¬ ¬ A) → etype A
+definition nne : Π A, tEv (¬ ¬ A) → tEv A
 ≔  λ A nna, em A A (λ a, a) (λ na, nna na A)
 
 
@@ -124,59 +121,59 @@ definition nne : Π A, etype (¬ ¬ A) → etype A
 
 // Implication
 
-definition imp_elim : Π A B, etype (A ⇨ B) → etype A → etype B
+definition imp_elim : Π A B, tEv (A ⇨ B) → tEv A → tEv B
 ≔  λ A B p, p
 
-definition imp_intro : Π A B, (etype A → etype B) → etype (A ⇨ B)
+definition imp_intro : Π A B, (tEv A → tEv B) → tEv (A ⇨ B)
 ≔  λ A B p, p
 
 // Disjunction
 
-definition or_intro_1 : Π A B, etype A → etype (A ∨ B)
-≔  λ A B (a : etype A) C (ac: etype A → etype C) _, ac a
+definition or_intro_1 : Π A B, tEv A → tEv (A ∨ B)
+≔  λ A B (a : tEv A) C (ac: tEv A → tEv C) _, ac a
 
-definition or_intro_2 : Π A B, etype B → etype (A ∨ B)
-≔  λ A B (b : etype B) C _ (bc: etype B → etype C), bc b
+definition or_intro_2 : Π A B, tEv B → tEv (A ∨ B)
+≔  λ A B (b : tEv B) C _ (bc: tEv B → tEv C), bc b
 
-definition or_elim : Π A B, etype (A ∨ B) → Π C, etype (A ⇨ C) → etype (B ⇨ C) → etype C
+definition or_elim : Π A B, tEv (A ∨ B) → Π C, tEv (A ⇨ C) → tEv (B ⇨ C) → tEv C
 ≔  λ A B ab, ab
 
 // Conjunction
 
-definition and_intro : Π A B, etype A → etype B → etype (A ∧ B)
-≔  λ A B a b C (p : etype A → etype B → etype C), p a b
+definition and_intro : Π A B, tEv A → tEv B → tEv (A ∧ B)
+≔  λ A B a b C (p : tEv A → tEv B → tEv C), p a b
 
-definition and_elim_1 : Π A B, etype (A ∧ B) → etype A
-≔  λ A B (ab : etype (A ∧ B)), ab A (λ a _, a)
+definition and_elim_1 : Π A B, tEv (A ∧ B) → tEv A
+≔  λ A B (ab : tEv (A ∧ B)), ab A (λ a _, a)
 
-definition and_elim_2 : Π A B, etype (A ∧ B) → etype B
-≔  λ A B (ab : etype (A ∧ B)), ab B (λ _ b, b)
+definition and_elim_2 : Π A B, tEv (A ∧ B) → tEv B
+≔  λ A B (ab : tEv (A ∧ B)), ab B (λ _ b, b)
 
 // Universal quantifier
 
-definition forall_intro : Π P, (Π t, etype (P t)) → etype (forall P)
+definition forall_intro : Π P, (Π t, tEv (P t)) → tEv (forall P)
 ≔  λ P p, p
 
-definition forall_elim : Π P t, etype (forall P) → etype (P t)
+definition forall_elim : Π P t, tEv (forall P) → tEv (P t)
 ≔  λ P t p, p t
 
 // Existential quantifier
 
-definition exists_intro : Π T P t, etype (P t) → etype (∃ T P)
-≔  λ T P t pt C (q : Π x, etype (P x) → etype C), q t pt
+definition exists_intro : Π T P t, tEv (P t) → tEv (∃ T P)
+≔  λ T P t pt C (q : Π x, tEv (P x) → tEv C), q t pt
 
-definition exists_elim : Π T P Q, etype (∃ T P) →  (Π x, etype (P x ⇨ Q)) → etype Q
+definition exists_elim : Π T P Q, tEv (∃ T P) →  (Π x, tEv (P x ⇨ Q)) → tEv Q
 ≔  λ T P Q e pq, e Q pq
 
 // Equality
 
-definition eq_refl : Π T x, etype (eq T x x)
+definition eq_refl : Π T x, tEv (eq T x x)
 ≔  λ T x P px, px
 
-definition eq_sym : Π T x y, etype (eq T x y) → etype (eq T y x)
+definition eq_sym : Π T x y, tEv (eq T x y) → tEv (eq T y x)
 ≔  λ T x y eqxy, eqxy (λ t, eq T t x) (eq_refl T x)
 
-definition eq_trans : Π T x y z, etype (eq T x y) → etype (eq T y z) → etype (eq T x z)
+definition eq_trans : Π T x y z, tEv (eq T x y) → tEv (eq T y z) → tEv (eq T x z)
 ≔  λ T x y z eqxy eqyz, eqyz (λ t, eq T x t) eqxy
 
 
@@ -184,172 +181,172 @@ definition eq_trans : Π T x y z, etype (eq T x y) → etype (eq T y z) → etyp
 // Certificate lines
 
 definition hole :
-  etype empty →
-  etype empty
+  tEv empty →
+  tEv empty
 ≔  λ f, f
 
 definition axiom : Π A,
-  etype (hyp A (goal A empty))
+  tEv (hyp A (goal A empty))
 ≔  λ A a na, na a
 
 definition trivial_hyp :
-  etype (hyp false empty)
+  tEv (hyp false empty)
 ≔  λ f, f
 
 definition trivial_goal :
-  etype (goal true empty)
+  tEv (goal true empty)
 ≔  λ ntt, ntt tt
 
 definition eqrefl : Π T t,
-  etype (goal (eq T t t) empty)
+  tEv (goal (eq T t t) empty)
 ≔  λ T t neqtt, neqtt (eq_refl T t)
 
 definition cut : Π A,
-  etype (goal A empty) →
-  etype (hyp A empty) →
-  etype empty
+  tEv (goal A empty) →
+  tEv (hyp A empty) →
+  tEv empty
 ≔  λ A nna na, nna na
 
 definition split_hyp : Π A B,
-  etype (hyp A empty) →
-  etype (hyp B empty) →
-  etype (hyp (A ∨ B) empty)
+  tEv (hyp A empty) →
+  tEv (hyp B empty) →
+  tEv (hyp (A ∨ B) empty)
 ≔  λ A B s1 s2 ab, or_elim A B ab false s1 s2
 
 definition split_goal : Π A B,
-    etype (goal A empty) →
-    etype (goal B empty) →
-    etype (goal (A ∧ B) empty)
+    tEv (goal A empty) →
+    tEv (goal B empty) →
+    tEv (goal (A ∧ B) empty)
 ≔  λ A B nna nnb, nni (A ∧ B) (and_intro A B (nne A nna) (nne B nnb))
 
 definition unfold_iff_hyp : Π A B,
-    etype (hyp ((A ⇨ B) ∧ (B ⇨ A)) empty) →
-    etype (hyp (A ⇔ B) empty)
+    tEv (hyp ((A ⇨ B) ∧ (B ⇨ A)) empty) →
+    tEv (hyp (A ⇔ B) empty)
 ≔  λ A B s, s
 
 definition unfold_iff_goal : Π A B,
-    etype (goal ((A ⇨ B) ∧ (B ⇨ A)) empty) →
-    etype (goal (A ⇔ B) empty)
+    tEv (goal ((A ⇨ B) ∧ (B ⇨ A)) empty) →
+    tEv (goal (A ⇔ B) empty)
 ≔  λ A B s, s
 
 definition unfold_arr_hyp : Π A B,
-    etype (hyp (¬ A ∨ B) empty) →
-    etype (hyp (A ⇨ B) empty)
+    tEv (hyp (¬ A ∨ B) empty) →
+    tEv (hyp (A ⇨ B) empty)
 ≔  λ A B s impab,
    s (em A (¬ A ∨ B) (λ a, or_intro_2 (¬ A) B (impab a))
      	      	     (λ na, or_intro_1 (¬ A) B na))
 
 definition unfold_arr_goal : Π A B,
-    etype (goal (¬ A ∨ B) empty) →
-    etype (goal (A ⇨ B) empty)
+    tEv (goal (¬ A ∨ B) empty) →
+    tEv (goal (A ⇨ B) empty)
 ≔  λ A B s, nni (A ⇨ B) (λ a,
       nne (¬ A ∨ B) s B (λ na, na a B)
                         (λ b, b))
 
 definition swap_neg_hyp : Π A,
-    etype (goal A empty) →
-    etype (hyp (¬ A) empty)
+    tEv (goal A empty) →
+    tEv (hyp (¬ A) empty)
 ≔  λ A s, s
 
 definition swap_hyp : Π A,
-    etype (goal (¬ A) empty) →
-    etype (hyp A empty)
+    tEv (goal (¬ A) empty) →
+    tEv (hyp A empty)
 ≔  λ A nnna, nne (¬ A) nnna
 
 definition swap_goal : Π A,
-    etype (hyp (¬ A) empty) →
-    etype (goal A empty)
+    tEv (hyp (¬ A) empty) →
+    tEv (goal A empty)
 ≔  λ A s, s
 
 definition swap_neg_goal : Π A,
-    etype (hyp A empty) →
-    etype (goal (¬ A) empty)
+    tEv (hyp A empty) →
+    tEv (goal (¬ A) empty)
 ≔  λ A na, nni (¬ A) na
 
 definition destruct_hyp : Π A B,
-    etype (hyp A (hyp B empty)) →
-    etype (hyp (A ∧ B) empty)
+    tEv (hyp A (hyp B empty)) →
+    tEv (hyp (A ∧ B) empty)
 ≔  λ A B s ab,
    s (and_elim_1 A B ab) (and_elim_2 A B ab)
 
 definition destruct_goal : Π A B,
-    etype (goal A (goal B empty)) →
-    etype (goal (A ∨ B) empty)
+    tEv (goal A (goal B empty)) →
+    tEv (goal (A ∨ B) empty)
 ≔  λ A B s nab, s (λ a, nab (or_intro_1 A B a))
                   (λ b, nab (or_intro_2 A B b))
 
 definition construct_goal : Π A B,
-    etype (goal (A ∨ B) empty) →
-    etype (goal A (goal B empty))
+    tEv (goal (A ∨ B) empty) →
+    tEv (goal A (goal B empty))
 ≔  λ A B s na nb, or_elim A B (nne (A ∨ B) s) false na nb
 
 definition dir_left_hyp : Π A B,
-    etype (hyp A empty) →
-    etype (hyp (A ∧ B) empty)
+    tEv (hyp A empty) →
+    tEv (hyp (A ∧ B) empty)
 ≔  λ A B na ab, na (and_elim_1 A B ab)
 
 definition dir_left_goal : Π A B,
-    etype (goal A empty) →
-    etype (goal (A ∨ B) empty)
+    tEv (goal A empty) →
+    tEv (goal (A ∨ B) empty)
 ≔  λ A B nna nab, nab (or_intro_1 A B (nne A nna))
 
 definition dir_right_hyp : Π A B,
-    etype (hyp B empty) →
-    etype (hyp (A ∧ B) empty)
+    tEv (hyp B empty) →
+    tEv (hyp (A ∧ B) empty)
 ≔  λ A B nb ab, nb (and_elim_2 A B ab)
 
 definition dir_right_goal : Π A B,
-    etype (goal B empty) →
-    etype (goal (A ∨ B) empty)
+    tEv (goal B empty) →
+    tEv (goal (A ∨ B) empty)
 ≔  λ A B nnb nab, nab (or_intro_2 A B (nne B nnb))
 
 definition clearhyp : Π A,
-    etype empty →
-    etype (hyp A empty)
+    tEv empty →
+    tEv (hyp A empty)
 ≔  λ A f _, f
 
 definition clear_hyp A HA s ≔  clearhyp A s HA
 
 definition cleargoal : Π A,
-    etype empty →
-    etype (goal A empty)
+    tEv empty →
+    tEv (goal A empty)
 ≔  λ A f _, f
 
 definition clear_goal A HA s ≔  cleargoal A s HA
 
-definition intro_quant_hyp : Π T (P : ekind (T ⇒ dottype)),
-    (Π y, etype (hyp (P y) empty)) →
-    etype (hyp (∃ T P) empty)
+definition intro_quant_hyp : Π T (P : kEv (T ⇒ Prop)),
+    (Π y, tEv (hyp (P y) empty)) →
+    tEv (hyp (∃ T P) empty)
 ≔  λ T P s ep, exists_elim T P false ep s
 
 definition intro_quant_goal : Π T P,
-    (Π y, etype (goal (P y) empty)) →
-    etype (goal (∀ T P) empty)
+    (Π y, tEv (goal (P y) empty)) →
+    tEv (goal (∀ T P) empty)
 ≔  λ T P s nfp, nfp (λ t, nne (P t) (s t))
 
 definition inst_quant_goal : Π T P t,
-    etype (goal (∃ T P) (goal (P t) empty)) →
-    etype (goal (∃ T P) empty)
+    tEv (goal (∃ T P) (goal (P t) empty)) →
+    tEv (goal (∃ T P) empty)
 ≔  λ T P t s nep, s nep (λ pt, nep (exists_intro T P t pt))
 
 definition inst_quant_hyp : Π T P t,
-    etype (hyp (∀ T (λ x, P x)) (hyp (P t) empty)) →
-    etype (hyp (∀ T (λ x, P x)) empty)
+    tEv (hyp (∀ T (λ x, P x)) (hyp (P t) empty)) →
+    tEv (hyp (∀ T (λ x, P x)) empty)
 ≔  λ T P t s h, s h (h t)
 
 definition rewrite_hyp : Π T a b P,
-   etype (hyp (eq T a b) (hyp (P b) empty)) →
-   etype (hyp (eq T a b) (hyp (P a) empty))
+   tEv (hyp (eq T a b) (hyp (P b) empty)) →
+   tEv (hyp (eq T a b) (hyp (P a) empty))
 ≔  λ T a b P s h i, s h (h P i)
 
 definition rewrite_goal : Π T a b P,
-   etype (hyp (eq T a b) (goal (P b) empty)) →
-   etype (hyp (eq T a b) (goal (P a) empty))
+   tEv (hyp (eq T a b) (goal (P b) empty)) →
+   tEv (hyp (eq T a b) (goal (P a) empty))
 ≔  λ T a b P s h i, s h (h (λ x, ¬ P x) i)
 
-definition iffeq : Π (A : Utype) (B : Utype),
-	   	   etype (hyp (eq dottype A B) empty) →
-		   etype (hyp (equiv A B) empty)
+definition iffeq : Π (A : Type) (B : Type),
+	   	   tEv (hyp (eq Prop A B) empty) →
+		   tEv (hyp (type_iff A B) empty)
 
 ≔  λ A B s eab, s (iff_eq A B eab)
 
