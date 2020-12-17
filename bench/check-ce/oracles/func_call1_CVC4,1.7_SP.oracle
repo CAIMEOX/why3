@@ -2,11 +2,11 @@ File "bench/check-ce/func_call1.mlw", line 14, characters 6-7:
 warning: unused variable w
 File "bench/check-ce/func_call1.mlw", line 7, characters 12-21:
 Goal Postcondition from verification condition g'vc.
-Prover result is: valid (0.01s, 1134 steps).
+Prover result is: valid (0.04s, 1134 steps).
 
 File "bench/check-ce/func_call1.mlw", line 8, characters 12-26:
 Goal Postcondition from verification condition g'vc.
-Prover result is: valid (0.02s, 901 steps).
+Prover result is: valid (0.01s, 901 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/func_call1.mlw", line 15, characters 11-16)
 <check-ce>Validating model:
@@ -96,37 +96,8 @@ Prover result is: valid (0.02s, 901 steps).
                     _ = 3
                 Line 12:
                   Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/func_call1.mlw", line 7, characters 12-21)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File func_call1.mlw:
-                Line 3:
-                  Constant z initialization
-                  (abstract) execution of any function
-                  result = 0
-                  Concrete execution of ref with args:
-                    contents = 0
-                  Concrete execution of ref'mk with args:
-                    contents = 0
-                Line 12:
-                  _ = ()
-                  Execution of main function f's body with env:
-                    z = {contents= 0}
-                    _ = ()
-                    zero = 0
-                    one = 1
-                Line 14:
-                  Abstract execution of g with args:
-                    x = 2
-                  z = {contents= 0}
-                  result = 0
-                Line 7:
-                  Execution got stuck, Assume postcondition of g with:
-                    z = {contents= 0}
-                    z = {contents= 0}
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: z z)
+              
 <check-ce>Check model 1 ("bench/check-ce/func_call1.mlw", line 15, characters 11-16)
 <check-ce>Validating model:
           File func_call1.mlw:
@@ -215,37 +186,8 @@ Prover result is: valid (0.02s, 901 steps).
                     _ = 3
                 Line 12:
                   Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/func_call1.mlw", line 8, characters 12-26)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File func_call1.mlw:
-                Line 3:
-                  Constant z initialization
-                  (abstract) execution of any function
-                  result = 0
-                  Concrete execution of ref with args:
-                    contents = 0
-                  Concrete execution of ref'mk with args:
-                    contents = 0
-                Line 12:
-                  _ = ()
-                  Execution of main function f's body with env:
-                    z = {contents= 2}
-                    _ = ()
-                    zero = 0
-                    one = 1
-                Line 14:
-                  Abstract execution of g with args:
-                    x = 2
-                  z = {contents= 2}
-                  result = 0
-                Line 8:
-                  Execution got stuck, Assume postcondition of g with:
-                    x = 2
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 2 ("bench/check-ce/func_call1.mlw", line 15, characters 11-16)
 <check-ce>Validating model:
           File func_call1.mlw:
@@ -334,47 +276,31 @@ Prover result is: valid (0.02s, 901 steps).
                     _ = 3
                 Line 12:
                   Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/func_call1.mlw", line 8, characters 12-26)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File func_call1.mlw:
-                Line 3:
-                  Constant z initialization
-                  (abstract) execution of any function
-                  result = 0
-                  Concrete execution of ref with args:
-                    contents = 0
-                  Concrete execution of ref'mk with args:
-                    contents = 0
-                Line 12:
-                  _ = ()
-                  Execution of main function f's body with env:
-                    z = {contents= 2}
-                    _ = ()
-                    zero = 0
-                    one = 1
-                Line 14:
-                  Abstract execution of g with args:
-                    x = 2
-                  z = {contents= 2}
-                  result = 0
-                Line 8:
-                  Execution got stuck, Assume postcondition of g with:
-                    x = 2
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Models:
-- Checked model 0 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
-- Checked model 1 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
-- Selected model 2 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
+- Checked model 0 (Concrete: bad model, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Abstract RAC terminated because cannot assume contract for variables with default values: z z)
+- Checked model 1 (Concrete: bad model, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+- Selected model 2 (Concrete: bad model, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Abstract RAC terminated because cannot assume contract for variables with default values: result)
 File "bench/check-ce/func_call1.mlw", line 15, characters 11-16:
 Goal Assertion from verification condition f'vc.
-Prover result is: unknown (unknown + incomplete) (0.04s, 6083 steps).
-Sorry, we don't have a good counterexample for you :(
-
+Prover result is: unknown (unknown + incomplete) (0.03s, 6083 steps).
+The following counterexample model could not be verified
+  (Abstract RAC terminated because cannot assume contract for variables with default values: result):
+File func_call1.mlw:
+  Line 7:
+    old z = 0 (0)
+    z = 2 (2)
+  Line 13:
+    z = 0 (0)
+  Line 14:
+    z = 2 (2)
+  Line 15:
+    z = 2 (2)
 

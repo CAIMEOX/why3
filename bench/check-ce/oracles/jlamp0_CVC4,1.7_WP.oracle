@@ -157,30 +157,8 @@
                 Line 12:
                   Property failure, Assertion with:
                     a = {contents= 3}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after )
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File jlamp0.mlw:
-                Line 6:
-                  a = {contents= 0}
-                Line 8:
-                  b = {contents= 3}
-                  Execution of main function p1's body with env:
-                    a = {contents= 0}
-                    b = {contents= 3}
-                    zero = 0
-                    one = 1
-                Line 11:
-                  Abstract execution of (!) with args:
-                    r = {contents= 3}
-                  result = 0
-              Unknown location:
-                  Execution got stuck, Assume postcondition of (!) with:
-                    r = {contents= 3}
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 2 ("bench/check-ce/jlamp0.mlw", line 12, characters 13-26)
 <check-ce>Validating model:
           File jlamp0.mlw:
@@ -262,36 +240,14 @@
                 Line 12:
                   Property failure, Assertion with:
                     a = {contents= 3}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after )
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File jlamp0.mlw:
-                Line 6:
-                  a = {contents= 0}
-                Line 8:
-                  b = {contents= 3}
-                  Execution of main function p1's body with env:
-                    a = {contents= 0}
-                    b = {contents= 3}
-                    zero = 0
-                    one = 1
-                Line 11:
-                  Abstract execution of (!) with args:
-                    r = {contents= 3}
-                  result = 0
-              Unknown location:
-                  Execution got stuck, Assume postcondition of (!) with:
-                    r = {contents= 3}
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Models:
 - Checked model 0 (Concrete: bad model, Abstract: bad model)
     Summary: Sorry, we don't have a good counterexample for you :(
-- Selected model 1 (Concrete: good model, Abstract: bad model)
+- Selected model 1 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
-- Checked model 2 (Concrete: good model, Abstract: bad model)
+- Checked model 2 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
 File "bench/check-ce/jlamp0.mlw", line 12, characters 13-26:
 Goal Assertion from verification condition p1'vc.
@@ -560,30 +516,8 @@ File jlamp0.mlw:
                 Line 10:
                   Property failure, Postcondition of p1 with:
                     a = {contents= 9}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after )
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File jlamp0.mlw:
-                Line 6:
-                  a = {contents= 7}
-                Line 8:
-                  b = {contents= 3}
-                  Execution of main function p1's body with env:
-                    a = {contents= 7}
-                    b = {contents= 3}
-                    zero = 0
-                    one = 1
-                Line 11:
-                  Abstract execution of (!) with args:
-                    r = {contents= 3}
-                  result = 0
-              Unknown location:
-                  Execution got stuck, Assume postcondition of (!) with:
-                    r = {contents= 3}
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 2 ("bench/check-ce/jlamp0.mlw", line 10, characters 15-29)
 <check-ce>Validating model:
           File jlamp0.mlw:
@@ -713,36 +647,14 @@ File jlamp0.mlw:
                 Line 10:
                   Property failure, Postcondition of p1 with:
                     a = {contents= 9}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after )
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File jlamp0.mlw:
-                Line 6:
-                  a = {contents= 7}
-                Line 8:
-                  b = {contents= 3}
-                  Execution of main function p1's body with env:
-                    a = {contents= 7}
-                    b = {contents= 3}
-                    zero = 0
-                    one = 1
-                Line 11:
-                  Abstract execution of (!) with args:
-                    r = {contents= 3}
-                  result = 0
-              Unknown location:
-                  Execution got stuck, Assume postcondition of (!) with:
-                    r = {contents= 3}
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Models:
 - Checked model 0 (Concrete: bad model, Abstract: bad model)
     Summary: Sorry, we don't have a good counterexample for you :(
-- Selected model 1 (Concrete: good model, Abstract: bad model)
+- Selected model 1 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
-- Checked model 2 (Concrete: good model, Abstract: bad model)
+- Checked model 2 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
 File "bench/check-ce/jlamp0.mlw", line 10, characters 15-29:
 Goal Postcondition from verification condition p1'vc.
@@ -1010,30 +922,8 @@ File jlamp0.mlw:
                 Line 10:
                   Property failure, Postcondition of p1 with:
                     a = {contents= 5}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after )
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File jlamp0.mlw:
-                Line 6:
-                  a = {contents= 2}
-                Line 8:
-                  b = {contents= 3}
-                  Execution of main function p1's body with env:
-                    a = {contents= 2}
-                    b = {contents= 3}
-                    zero = 0
-                    one = 1
-                Line 11:
-                  Abstract execution of (!) with args:
-                    r = {contents= 3}
-                  result = 0
-              Unknown location:
-                  Execution got stuck, Assume postcondition of (!) with:
-                    r = {contents= 3}
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 2 ("bench/check-ce/jlamp0.mlw", line 10, characters 15-29)
 <check-ce>Validating model:
           File jlamp0.mlw:
@@ -1134,36 +1024,14 @@ File jlamp0.mlw:
                 Line 10:
                   Property failure, Postcondition of p1 with:
                     a = {contents= 5}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after )
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File jlamp0.mlw:
-                Line 6:
-                  a = {contents= 2}
-                Line 8:
-                  b = {contents= 3}
-                  Execution of main function p1's body with env:
-                    a = {contents= 2}
-                    b = {contents= 3}
-                    zero = 0
-                    one = 1
-                Line 11:
-                  Abstract execution of (!) with args:
-                    r = {contents= 3}
-                  result = 0
-              Unknown location:
-                  Execution got stuck, Assume postcondition of (!) with:
-                    r = {contents= 3}
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Models:
 - Checked model 0 (Concrete: bad model, Abstract: bad model)
     Summary: Sorry, we don't have a good counterexample for you :(
-- Selected model 1 (Concrete: good model, Abstract: bad model)
+- Selected model 1 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
-- Checked model 2 (Concrete: good model, Abstract: bad model)
+- Checked model 2 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
 File "bench/check-ce/jlamp0.mlw", line 10, characters 15-29:
 Goal Postcondition from verification condition p1'vc.
@@ -1289,38 +1157,8 @@ File jlamp0.mlw:
                 Line 22:
                   Property failure, Loop invariant initialization with:
                     c = {contents= 1}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "WHY3DATA/stdlib/ref.mlw", line 20, characters 39-44)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File jlamp0.mlw:
-                Line 6:
-                  a = {contents= 0}
-                Line 15:
-                  Constant c initialization
-                  (abstract) execution of any function
-                  result = {contents= 0}
-                Line 17:
-                  _ = ()
-                  Execution of main function p2's body with env:
-                    a = {contents= 0}
-                    c = {contents= 0}
-                    _ = ()
-                    zero = 0
-                    one = 1
-                Line 20:
-                  Abstract execution of (:=) with args:
-                    r = {contents= 0}
-                    v = 1
-                  c = {contents= 0}
-                  result = ()
-              File ref.mlw:
-                Line 20:
-                  Execution got stuck, Assume postcondition of (:=) with:
-                    r = {contents= 0}
-                    v = 1
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: r)
+              
 <check-ce>Check model 1 ("bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
 <check-ce>Validating model:
           File jlamp0.mlw:
@@ -1514,7 +1352,7 @@ File jlamp0.mlw:
                   Property failure, Loop invariant initialization with:
                     c = {contents= 1}
 <check-ce>Models:
-- Selected model 0 (Concrete: good model, Abstract: bad model)
+- Selected model 0 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
 - Checked model 1 (Concrete: good model, Abstract: good model)
     Summary: The program does not comply to the verification goal
@@ -1522,7 +1360,7 @@ File jlamp0.mlw:
     Summary: The program does not comply to the verification goal
 File "bench/check-ce/jlamp0.mlw", line 22, characters 18-31:
 Goal Loop invariant init from verification condition p2'vc.
-Prover result is: unknown (unknown + incomplete) (0.04s, 6106 steps).
+Prover result is: unknown (unknown + incomplete) (0.05s, 6106 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -1557,7 +1395,7 @@ File jlamp0.mlw:
 
 File "bench/check-ce/jlamp0.mlw", line 23, characters 18-31:
 Goal Loop invariant init from verification condition p2'vc.
-Prover result is: valid (0.01s, 1180 steps).
+Prover result is: valid (0.02s, 1180 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/jlamp0.mlw", line 24, characters 16-18)
 <check-ce>Validating model:
@@ -1664,38 +1502,8 @@ Prover result is: valid (0.01s, 1180 steps).
                 Line 22:
                   Property failure, Loop invariant initialization with:
                     c = {contents= 1}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "WHY3DATA/stdlib/ref.mlw", line 20, characters 39-44)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File jlamp0.mlw:
-                Line 6:
-                  a = {contents= 0}
-                Line 15:
-                  Constant c initialization
-                  (abstract) execution of any function
-                  result = {contents= 0}
-                Line 17:
-                  _ = ()
-                  Execution of main function p2's body with env:
-                    a = {contents= 0}
-                    c = {contents= 0}
-                    _ = ()
-                    zero = 0
-                    one = 1
-                Line 20:
-                  Abstract execution of (:=) with args:
-                    r = {contents= 0}
-                    v = 1
-                  c = {contents= 0}
-                  result = ()
-              File ref.mlw:
-                Line 20:
-                  Execution got stuck, Assume postcondition of (:=) with:
-                    r = {contents= 0}
-                    v = 1
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: r)
+              
 <check-ce>Check model 1 ("bench/check-ce/jlamp0.mlw", line 24, characters 16-18)
 <check-ce>Validating model:
           File ref.mlw:
@@ -1971,7 +1779,7 @@ Prover result is: valid (0.01s, 1180 steps).
                   Property failure, Loop invariant initialization with:
                     c = {contents= 1}
 <check-ce>Models:
-- Selected model 0 (Concrete: good model, Abstract: bad model)
+- Selected model 0 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
 - Checked model 1 (Concrete: good model, Abstract: good model)
     Summary: The program does not comply to the verification goal
@@ -1979,7 +1787,7 @@ Prover result is: valid (0.01s, 1180 steps).
     Summary: The program does not comply to the verification goal
 File "bench/check-ce/jlamp0.mlw", line 24, characters 16-18:
 Goal Loop variant decrease from verification condition p2'vc.
-Prover result is: unknown (unknown + incomplete) (0.03s, 6493 steps).
+Prover result is: unknown (unknown + incomplete) (0.04s, 6493 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -2111,38 +1919,8 @@ File jlamp0.mlw:
                 Line 22:
                   Property failure, Loop invariant initialization with:
                     c = {contents= 1}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "WHY3DATA/stdlib/ref.mlw", line 20, characters 39-44)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File jlamp0.mlw:
-                Line 6:
-                  a = {contents= 0}
-                Line 15:
-                  Constant c initialization
-                  (abstract) execution of any function
-                  result = {contents= 0}
-                Line 17:
-                  _ = ()
-                  Execution of main function p2's body with env:
-                    a = {contents= 0}
-                    c = {contents= 0}
-                    _ = ()
-                    zero = 0
-                    one = 1
-                Line 20:
-                  Abstract execution of (:=) with args:
-                    r = {contents= 0}
-                    v = 1
-                  c = {contents= 0}
-                  result = ()
-              File ref.mlw:
-                Line 20:
-                  Execution got stuck, Assume postcondition of (:=) with:
-                    r = {contents= 0}
-                    v = 1
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: r)
+              
 <check-ce>Check model 1 ("bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
 <check-ce>Validating model:
           File ref.mlw:
@@ -2406,7 +2184,7 @@ File jlamp0.mlw:
                   Property failure, Loop invariant initialization with:
                     c = {contents= 1}
 <check-ce>Models:
-- Selected model 0 (Concrete: good model, Abstract: bad model)
+- Selected model 0 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
 - Checked model 1 (Concrete: good model, Abstract: good model)
     Summary: The program does not comply to the verification goal
@@ -2546,38 +2324,8 @@ File jlamp0.mlw:
                 Line 22:
                   Property failure, Loop invariant initialization with:
                     c = {contents= 1}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "WHY3DATA/stdlib/ref.mlw", line 20, characters 39-44)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File jlamp0.mlw:
-                Line 6:
-                  a = {contents= 0}
-                Line 15:
-                  Constant c initialization
-                  (abstract) execution of any function
-                  result = {contents= 0}
-                Line 17:
-                  _ = ()
-                  Execution of main function p2's body with env:
-                    a = {contents= 0}
-                    c = {contents= 0}
-                    _ = ()
-                    zero = 0
-                    one = 1
-                Line 20:
-                  Abstract execution of (:=) with args:
-                    r = {contents= 0}
-                    v = 1
-                  c = {contents= 0}
-                  result = ()
-              File ref.mlw:
-                Line 20:
-                  Execution got stuck, Assume postcondition of (:=) with:
-                    r = {contents= 0}
-                    v = 1
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: r)
+              
 <check-ce>Check model 1 ("bench/check-ce/jlamp0.mlw", line 23, characters 18-31)
 <check-ce>Validating model:
           File ref.mlw:
@@ -2841,7 +2589,7 @@ File jlamp0.mlw:
                   Property failure, Loop invariant initialization with:
                     c = {contents= 1}
 <check-ce>Models:
-- Selected model 0 (Concrete: good model, Abstract: bad model)
+- Selected model 0 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
 - Checked model 1 (Concrete: good model, Abstract: good model)
     Summary: The program does not comply to the verification goal
@@ -2973,38 +2721,8 @@ File jlamp0.mlw:
                 Line 22:
                   Property failure, Loop invariant initialization with:
                     c = {contents= 1}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "WHY3DATA/stdlib/ref.mlw", line 20, characters 39-44)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File jlamp0.mlw:
-                Line 6:
-                  a = {contents= 0}
-                Line 15:
-                  Constant c initialization
-                  (abstract) execution of any function
-                  result = {contents= 0}
-                Line 17:
-                  _ = ()
-                  Execution of main function p2's body with env:
-                    a = {contents= 0}
-                    c = {contents= 0}
-                    _ = ()
-                    zero = 0
-                    one = 1
-                Line 20:
-                  Abstract execution of (:=) with args:
-                    r = {contents= 0}
-                    v = 1
-                  c = {contents= 0}
-                  result = ()
-              File ref.mlw:
-                Line 20:
-                  Execution got stuck, Assume postcondition of (:=) with:
-                    r = {contents= 0}
-                    v = 1
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: r)
+              
 <check-ce>Check model 1 ("bench/check-ce/jlamp0.mlw", line 19, characters 15-28)
 <check-ce>Validating model:
           File ref.mlw:
@@ -3252,7 +2970,7 @@ File jlamp0.mlw:
                   Property failure, Loop invariant initialization with:
                     c = {contents= 1}
 <check-ce>Models:
-- Selected model 0 (Concrete: good model, Abstract: bad model)
+- Selected model 0 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
 - Checked model 1 (Concrete: good model, Abstract: good model)
     Summary: The program does not comply to the verification goal

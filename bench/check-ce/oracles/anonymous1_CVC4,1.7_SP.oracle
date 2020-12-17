@@ -34,26 +34,8 @@
                   Property failure, Assertion with:
                     x = 0
                     w = 2
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/anonymous1.mlw", line 5, characters 20-25)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File anonymous1.mlw:
-                Line 4:
-                  x = 0
-                  Execution of main function f's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 5:
-                  Abstract execution of h with args:
-                    y = 0
-                  result = 0
-                  Execution got stuck, Assume postcondition of h with:
-                    y = 0
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 1 ("bench/check-ce/anonymous1.mlw", line 6, characters 10-19)
 <check-ce>Validating model:
           File anonymous1.mlw:
@@ -90,26 +72,8 @@
                   Property failure, Assertion with:
                     x = 0
                     w = 2
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/anonymous1.mlw", line 5, characters 20-25)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File anonymous1.mlw:
-                Line 4:
-                  x = 0
-                  Execution of main function f's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 5:
-                  Abstract execution of h with args:
-                    y = 0
-                  result = 0
-                  Execution got stuck, Assume postcondition of h with:
-                    y = 0
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 2 ("bench/check-ce/anonymous1.mlw", line 6, characters 10-19)
 <check-ce>Validating model:
           File anonymous1.mlw:
@@ -146,36 +110,18 @@
                   Property failure, Assertion with:
                     x = 0
                     w = 2
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/anonymous1.mlw", line 5, characters 20-25)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File anonymous1.mlw:
-                Line 4:
-                  x = 0
-                  Execution of main function f's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 5:
-                  Abstract execution of h with args:
-                    y = 0
-                  result = 0
-                  Execution got stuck, Assume postcondition of h with:
-                    y = 0
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Models:
-- Selected model 0 (Concrete: good model, Abstract: bad model)
+- Selected model 0 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
-- Checked model 1 (Concrete: good model, Abstract: bad model)
+- Checked model 1 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
-- Checked model 2 (Concrete: good model, Abstract: bad model)
+- Checked model 2 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
 File "bench/check-ce/anonymous1.mlw", line 6, characters 10-19:
 Goal Assertion from verification condition f'vc.
-Prover result is: unknown (sat) (0.06s, 4720 steps).
+Prover result is: unknown (sat) (0.04s, 4720 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:

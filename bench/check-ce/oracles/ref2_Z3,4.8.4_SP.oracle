@@ -34,20 +34,8 @@
                     v = 2
                 Line 7:
                   Property failure, Assertion with:
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after )
-              File ref2.mlw:
-                Line 4:
-                  _ = ()
-                  Execution of main function f's body with env:
-                    _ = ()
-                Line 5:
-                  Abstract execution of ref with args:
-                    contents = 1
-                  result = {contents= 0}
-              Unknown location:
-                  Execution got stuck, Assume postcondition of ref with:
-                    contents = 1
-                    result = {contents= 0}
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 2 ("bench/check-ce/ref2.mlw", line 7, characters 11-16)
 <check-ce>Validating model:
           File ref2.mlw:
@@ -83,28 +71,16 @@
                     v = 2
                 Line 7:
                   Property failure, Assertion with:
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after )
-              File ref2.mlw:
-                Line 4:
-                  _ = ()
-                  Execution of main function f's body with env:
-                    _ = ()
-                Line 5:
-                  Abstract execution of ref with args:
-                    contents = 1
-                  result = {contents= 0}
-              Unknown location:
-                  Execution got stuck, Assume postcondition of ref with:
-                    contents = 1
-                    result = {contents= 0}
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Models:
-- Selected model 1 (Concrete: good model, Abstract: bad model)
+- Selected model 1 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
-- Checked model 2 (Concrete: good model, Abstract: bad model)
+- Checked model 2 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
 File "bench/check-ce/ref2.mlw", line 7, characters 11-16:
 Goal Assertion from verification condition f'vc.
-Prover result is: timeout (1.00s, 7833137 steps).
+Prover result is: timeout (1.00s, 8049185 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File ref2.mlw:

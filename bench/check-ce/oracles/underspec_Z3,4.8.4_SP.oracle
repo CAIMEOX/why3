@@ -1,6 +1,6 @@
 File "bench/check-ce/underspec.mlw", line 17, characters 27-33:
 Goal Loop invariant init from verification condition f'vc.
-Prover result is: valid (0.01s, 50 steps).
+Prover result is: valid (0.00s, 50 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/underspec.mlw", line 17, characters 27-33)
 <check-ce>Validating model:
@@ -71,36 +71,8 @@ Prover result is: valid (0.01s, 50 steps).
                     _ = 1
                 Line 13:
                   Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/underspec.mlw", line 17, characters 18-33)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File underspec.mlw:
-                Line 13:
-                  _ = ()
-                  Execution of main function f's body with env:
-                    _ = ()
-                    zero = 0
-                    one = 1
-                Line 14:
-                  Abstract execution of ref with args:
-                    contents = 0
-                  result = {contents= 0}
-                Line 15:
-                  Abstract execution of ref with args:
-                    contents = 0
-                  result = {contents= 0}
-                Line 16:
-                  Abstract execution of loop
-                  x1 = {contents= 0}
-                  x2 = {contents= 0}
-                  i = 2
-                Line 17:
-                  Execution got stuck, Invariant after last iteration with:
-                    x1 = {contents= 0}
-                    i = 2
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: x1)
+              
 <check-ce>Check model 1 ("bench/check-ce/underspec.mlw", line 17, characters 27-33)
 <check-ce>Validating model:
           File underspec.mlw:
@@ -350,15 +322,16 @@ Prover result is: valid (0.01s, 50 steps).
                     x1 = {contents= 0}
                     i = 1
 <check-ce>Models:
-- Checked model 0 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
+- Checked model 0 (Concrete: bad model, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Abstract RAC terminated because cannot assume contract for variables with default values: x1)
 - Selected model 1 (Concrete: bad model, Abstract: good model)
     Summary: The contracts of some function or loop are underspecified
 - Checked model 2 (Concrete: bad model, Abstract: good model)
     Summary: The contracts of some function or loop are underspecified
 File "bench/check-ce/underspec.mlw", line 17, characters 27-33:
 Goal Loop invariant preservation from verification condition f'vc.
-Prover result is: timeout (1.00s, 7931841 steps).
+Prover result is: timeout (1.00s, 7604463 steps).
 The contracts of some function or loop are underspecified, for example during
   the following execution:
 File int.mlw:
@@ -403,11 +376,11 @@ File underspec.mlw:
 
 File "bench/check-ce/underspec.mlw", line 17, characters 27-33:
 Goal Loop invariant preservation from verification condition f'vc.
-Prover result is: valid (0.01s, 1611 steps).
+Prover result is: valid (0.00s, 1611 steps).
 
 File "bench/check-ce/underspec.mlw", line 41, characters 14-23:
 Goal Postcondition from verification condition g'vc.
-Prover result is: valid (0.00s, 1545 steps).
+Prover result is: valid (0.01s, 1545 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/underspec.mlw", line 47, characters 13-18)
 <check-ce>Validating model:
@@ -472,38 +445,8 @@ Prover result is: valid (0.00s, 1545 steps).
                     _ = 1
                 Line 44:
                   Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/underspec.mlw", line 41, characters 14-23)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File underspec.mlw:
-                Line 37:
-                  Constant z initialization
-                  (abstract) execution of any function
-                  result = 0
-                  Concrete execution of ref with args:
-                    contents = 0
-                  Concrete execution of ref'mk with args:
-                    contents = 0
-                Line 44:
-                  _ = ()
-                  Execution of main function f's body with env:
-                    z = {contents= 0}
-                    _ = ()
-                    zero = 0
-                    one = 1
-                Line 46:
-                  Concrete execution of Tuple0 with args:
-                  Abstract execution of g with args:
-                    _ = ()
-                  z = {contents= 0}
-                  result = ()
-                Line 41:
-                  Execution got stuck, Assume postcondition of g with:
-                    z = {contents= 0}
-                    z = {contents= 0}
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: z z)
+              
 <check-ce>Check model 1 ("bench/check-ce/underspec.mlw", line 47, characters 13-18)
 <check-ce>Validating model:
           File underspec.mlw:
@@ -729,15 +672,16 @@ Prover result is: valid (0.00s, 1545 steps).
                   Property failure, Assertion with:
                     z = {contents= 2}
 <check-ce>Models:
-- Checked model 0 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
+- Checked model 0 (Concrete: bad model, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Abstract RAC terminated because cannot assume contract for variables with default values: z z)
 - Selected model 1 (Concrete: bad model, Abstract: good model)
     Summary: The contracts of some function or loop are underspecified
 - Checked model 2 (Concrete: bad model, Abstract: good model)
     Summary: The contracts of some function or loop are underspecified
 File "bench/check-ce/underspec.mlw", line 47, characters 13-18:
 Goal Assertion from verification condition f'vc.
-Prover result is: timeout (1.00s, 7913842 steps).
+Prover result is: timeout (1.00s, 6976012 steps).
 The contracts of some function or loop are underspecified, for example during
   the following execution:
 File int.mlw:

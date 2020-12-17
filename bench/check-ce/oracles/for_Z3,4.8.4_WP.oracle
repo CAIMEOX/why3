@@ -71,36 +71,8 @@ Prover result is: valid (0.01s, 50 steps).
                     _ = 1
                 Line 4:
                   Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/for.mlw", line 8, characters 16-31)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File for.mlw:
-                Line 4:
-                  _ = ()
-                  Execution of main function f's body with env:
-                    _ = ()
-                    zero = 0
-                    one = 1
-                Line 5:
-                  Abstract execution of ref with args:
-                    contents = 0
-                  result = {contents= 0}
-                Line 6:
-                  Abstract execution of ref with args:
-                    contents = 0
-                  result = {contents= 0}
-                Line 7:
-                  Abstract execution of loop
-                  x1 = {contents= 0}
-                  x2 = {contents= 0}
-                  i = 2
-                Line 8:
-                  Execution got stuck, Invariant after last iteration with:
-                    x1 = {contents= 0}
-                    i = 2
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: x1)
+              
 <check-ce>Check model 1 ("bench/check-ce/for.mlw", line 8, characters 25-31)
 <check-ce>Validating model:
           File for.mlw:
@@ -350,15 +322,16 @@ Prover result is: valid (0.01s, 50 steps).
                     x1 = {contents= 0}
                     i = 1
 <check-ce>Models:
-- Checked model 0 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
+- Checked model 0 (Concrete: bad model, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Abstract RAC terminated because cannot assume contract for variables with default values: x1)
 - Selected model 1 (Concrete: bad model, Abstract: good model)
     Summary: The contracts of some function or loop are underspecified
 - Checked model 2 (Concrete: bad model, Abstract: good model)
     Summary: The contracts of some function or loop are underspecified
 File "bench/check-ce/for.mlw", line 8, characters 25-31:
 Goal Loop invariant preservation from verification condition f'vc.
-Prover result is: timeout (1.00s, 7595562 steps).
+Prover result is: timeout (1.00s, 7926034 steps).
 The contracts of some function or loop are underspecified, for example during
   the following execution:
 File int.mlw:
@@ -403,5 +376,5 @@ File for.mlw:
 
 File "bench/check-ce/for.mlw", line 8, characters 25-31:
 Goal Loop invariant preservation from verification condition f'vc.
-Prover result is: valid (0.00s, 1611 steps).
+Prover result is: valid (0.01s, 1611 steps).
 

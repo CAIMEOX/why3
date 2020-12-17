@@ -4,7 +4,7 @@ Prover result is: valid (0.02s, 26 steps).
 
 File "bench/check-ce/func_call5.mlw", line 13, characters 10-14:
 Goal Precondition from verification condition f1'vc.
-Prover result is: valid (0.01s, 83 steps).
+Prover result is: valid (0.02s, 83 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/func_call5.mlw", line 14, characters 11-17)
 <check-ce>Validating model:
@@ -57,27 +57,8 @@ Prover result is: valid (0.01s, 83 steps).
                     contents = 1
                 Line 11:
                   Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/func_call5.mlw", line 8, characters 12-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File func_call5.mlw:
-                Line 11:
-                  x = 1
-                  Execution of main function f1's body with env:
-                    x = 1
-                    zero = 0
-                    one = 1
-                Line 13:
-                  Abstract execution of g1 with args:
-                    y = 1
-                  result = {contents= 0}
-                Line 8:
-                  Execution got stuck, Assume postcondition of g1 with:
-                    y = 1
-                    result = {contents= 0}
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 1 ("bench/check-ce/func_call5.mlw", line 14, characters 11-17)
 <check-ce>Validating model:
           File func_call5.mlw:
@@ -135,27 +116,8 @@ Prover result is: valid (0.01s, 83 steps).
                     contents = 1
                 Line 11:
                   Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/func_call5.mlw", line 8, characters 12-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File func_call5.mlw:
-                Line 11:
-                  x = 1
-                  Execution of main function f1's body with env:
-                    x = 1
-                    zero = 0
-                    one = 1
-                Line 13:
-                  Abstract execution of g1 with args:
-                    y = 1
-                  result = {contents= 0}
-                Line 8:
-                  Execution got stuck, Assume postcondition of g1 with:
-                    y = 1
-                    result = {contents= 0}
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 2 ("bench/check-ce/func_call5.mlw", line 14, characters 11-17)
 <check-ce>Validating model:
           File func_call5.mlw:
@@ -213,39 +175,34 @@ Prover result is: valid (0.01s, 83 steps).
                     contents = 1
                 Line 11:
                   Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/func_call5.mlw", line 8, characters 12-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File func_call5.mlw:
-                Line 11:
-                  x = 1
-                  Execution of main function f1's body with env:
-                    x = 1
-                    zero = 0
-                    one = 1
-                Line 13:
-                  Abstract execution of g1 with args:
-                    y = 1
-                  result = {contents= 0}
-                Line 8:
-                  Execution got stuck, Assume postcondition of g1 with:
-                    y = 1
-                    result = {contents= 0}
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Models:
-- Checked model 0 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
-- Checked model 1 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
-- Selected model 2 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
+- Checked model 0 (Concrete: bad model, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+- Checked model 1 (Concrete: bad model, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+- Selected model 2 (Concrete: bad model, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Abstract RAC terminated because cannot assume contract for variables with default values: result)
 File "bench/check-ce/func_call5.mlw", line 14, characters 11-17:
 Goal Assertion from verification condition f1'vc.
-Prover result is: timeout (1.00s, 6420307 steps).
-Sorry, we don't have a good counterexample for you :(
-
+Prover result is: timeout (1.00s, 7629250 steps).
+The following counterexample model could not be verified
+  (Abstract RAC terminated because cannot assume contract for variables with default values: result):
+File func_call5.mlw:
+  Line 8:
+    x = 1 (1)
+    z = 2 (2)
+  Line 11:
+    x = 1 (1)
+  Line 13:
+    z = 2 (2)
+  Line 14:
+    x = 1 (1)
+    z = 2 (2)
 
 <check-ce>Model 0 is empty
 <check-ce>Check model 1 ("bench/check-ce/func_call5.mlw", line 20, characters 11-17)
@@ -289,27 +246,8 @@ Sorry, we don't have a good counterexample for you :(
                   Property failure, Assertion with:
                     x = 2
                     z = {contents= 3}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/func_call5.mlw", line 16, characters 18-29)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File func_call5.mlw:
-                Line 18:
-                  x = 2
-                  Execution of main function f2's body with env:
-                    x = 2
-                    zero = 0
-                    one = 1
-                Line 19:
-                  Abstract execution of g2 with args:
-                    y = 2
-                  result = {contents= 0}
-                Line 16:
-                  Execution got stuck, Assume postcondition of g2 with:
-                    y = 2
-                    result = {contents= 0}
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 2 ("bench/check-ce/func_call5.mlw", line 20, characters 11-17)
 <check-ce>Validating model:
           File func_call5.mlw:
@@ -351,35 +289,16 @@ Sorry, we don't have a good counterexample for you :(
                   Property failure, Assertion with:
                     x = 2
                     z = {contents= 3}
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/func_call5.mlw", line 16, characters 18-29)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File func_call5.mlw:
-                Line 18:
-                  x = 2
-                  Execution of main function f2's body with env:
-                    x = 2
-                    zero = 0
-                    one = 1
-                Line 19:
-                  Abstract execution of g2 with args:
-                    y = 2
-                  result = {contents= 0}
-                Line 16:
-                  Execution got stuck, Assume postcondition of g2 with:
-                    y = 2
-                    result = {contents= 0}
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Models:
-- Selected model 1 (Concrete: good model, Abstract: bad model)
+- Selected model 1 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
-- Checked model 2 (Concrete: good model, Abstract: bad model)
+- Checked model 2 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
 File "bench/check-ce/func_call5.mlw", line 20, characters 11-17:
 Goal Assertion from verification condition f2'vc.
-Prover result is: timeout (1.00s, 7666733 steps).
+Prover result is: timeout (1.00s, 7119330 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:

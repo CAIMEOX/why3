@@ -50,28 +50,8 @@
               File multifile2.mlw:
                 Line 7:
                   Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/multifile1.mlw", line 10, characters 14-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File multifile2.mlw:
-                Line 7:
-                  x = 0
-                  Execution of main function f's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 9:
-                  Abstract execution of incr with args:
-                    x = 0
-                  result = 0
-              File multifile1.mlw:
-                Line 10:
-                  Execution got stuck, Assume postcondition of incr with:
-                    x = 0
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 1 ("bench/check-ce/multifile2.mlw", line 8, characters 12-26)
 <check-ce>Validating model:
           File multifile2.mlw:
@@ -125,28 +105,8 @@
               File multifile2.mlw:
                 Line 7:
                   Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/multifile1.mlw", line 10, characters 14-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File multifile2.mlw:
-                Line 7:
-                  x = 0
-                  Execution of main function f's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 9:
-                  Abstract execution of incr with args:
-                    x = 0
-                  result = 0
-              File multifile1.mlw:
-                Line 10:
-                  Execution got stuck, Assume postcondition of incr with:
-                    x = 0
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 2 ("bench/check-ce/multifile2.mlw", line 8, characters 12-26)
 <check-ce>Validating model:
           File multifile2.mlw:
@@ -200,40 +160,29 @@
               File multifile2.mlw:
                 Line 7:
                   Execution of main function terminated normally
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/multifile1.mlw", line 10, characters 14-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File multifile2.mlw:
-                Line 7:
-                  x = 0
-                  Execution of main function f's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 9:
-                  Abstract execution of incr with args:
-                    x = 0
-                  result = 0
-              File multifile1.mlw:
-                Line 10:
-                  Execution got stuck, Assume postcondition of incr with:
-                    x = 0
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Models:
-- Checked model 0 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
-- Checked model 1 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
-- Selected model 2 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
+- Checked model 0 (Concrete: bad model, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+- Checked model 1 (Concrete: bad model, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+- Selected model 2 (Concrete: bad model, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Abstract RAC terminated because cannot assume contract for variables with default values: result)
 File "bench/check-ce/multifile2.mlw", line 8, characters 12-26:
 Goal Postcondition from verification condition f'vc.
-Prover result is: unknown (sat) (0.02s, 866 steps).
-Sorry, we don't have a good counterexample for you :(
-
+Prover result is: unknown (sat) (0.01s, 866 steps).
+The following counterexample model could not be verified
+  (Abstract RAC terminated because cannot assume contract for variables with default values: result):
+File multifile2.mlw:
+  Line 7:
+    x = 0 (0)
+  Line 8:
+    result = 2 (2)
+    x = 0 (0)
 
 <check-ce>Check model 0 ("bench/check-ce/multifile2.mlw", line 13, characters 12-26)
 <check-ce>Validating model:
@@ -293,28 +242,8 @@ Sorry, we don't have a good counterexample for you :(
                   Property failure, Postcondition of g with:
                     x = 0
                     result = 1
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/multifile1.mlw", line 10, characters 14-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File multifile2.mlw:
-                Line 12:
-                  x = 0
-                  Execution of main function g's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 14:
-                  Abstract execution of incr with args:
-                    x = 0
-                  result = 0
-              File multifile1.mlw:
-                Line 10:
-                  Execution got stuck, Assume postcondition of incr with:
-                    x = 0
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 1 ("bench/check-ce/multifile2.mlw", line 13, characters 12-26)
 <check-ce>Validating model:
           File multifile1.mlw:
@@ -374,28 +303,8 @@ Sorry, we don't have a good counterexample for you :(
                   Property failure, Postcondition of g with:
                     x = 0
                     result = 1
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/multifile1.mlw", line 10, characters 14-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File multifile2.mlw:
-                Line 12:
-                  x = 0
-                  Execution of main function g's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 14:
-                  Abstract execution of incr with args:
-                    x = 0
-                  result = 0
-              File multifile1.mlw:
-                Line 10:
-                  Execution got stuck, Assume postcondition of incr with:
-                    x = 0
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 2 ("bench/check-ce/multifile2.mlw", line 13, characters 12-26)
 <check-ce>Validating model:
           File multifile1.mlw:
@@ -455,38 +364,18 @@ Sorry, we don't have a good counterexample for you :(
                   Property failure, Postcondition of g with:
                     x = 0
                     result = 1
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/multifile1.mlw", line 10, characters 14-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File multifile2.mlw:
-                Line 12:
-                  x = 0
-                  Execution of main function g's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 14:
-                  Abstract execution of incr with args:
-                    x = 0
-                  result = 0
-              File multifile1.mlw:
-                Line 10:
-                  Execution got stuck, Assume postcondition of incr with:
-                    x = 0
-                    result = 0
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Models:
-- Selected model 0 (Concrete: good model, Abstract: bad model)
+- Selected model 0 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
-- Checked model 1 (Concrete: good model, Abstract: bad model)
+- Checked model 1 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
-- Checked model 2 (Concrete: good model, Abstract: bad model)
+- Checked model 2 (Concrete: good model, Abstract: don't know)
     Summary: The program does not comply to the verification goal
 File "bench/check-ce/multifile2.mlw", line 13, characters 12-26:
 Goal Postcondition from verification condition g'vc.
-Prover result is: unknown (sat) (0.01s, 878 steps).
+Prover result is: unknown (sat) (0.00s, 878 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -548,50 +437,10 @@ File multifile2.mlw:
 <rac-values>Value imported for x at "bench/check-ce/multifile2.mlw", line 18, characters 7-8: 0
 <rac-values>No value for result at "bench/check-ce/multifile2.mlw", line 20, characters 2-12, taking default.
 <check-ce>Result of checking model 0:
-            - Concrete: bad model (Concrete RAC, with the counterexample model cannot continue after "bench/check-ce/multifile1.mlw", line 14, characters 14-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File multifile2.mlw:
-                Line 18:
-                  x = 0
-                  Execution of main function h's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 20:
-                  (abstract) execution of any function incr_val with args:
-                    x = 0
-                  result = 0
-              File multifile1.mlw:
-                Line 14:
-                  Execution got stuck, Assume postcondition of incr_val with:
-                    x = 0
-                    result = 0
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/multifile1.mlw", line 14, characters 14-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File multifile2.mlw:
-                Line 18:
-                  x = 0
-                  Execution of main function h's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 20:
-                  Abstract execution of incr_val with args:
-                    x = 0
-                  result = 0
-              File multifile1.mlw:
-                Line 14:
-                  Execution got stuck, Assume postcondition of incr_val with:
-                    x = 0
-                    result = 0
+            - Concrete: don't know (Concrete RAC terminated because cannot assume contract for variables with default values: result)
+              
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 1 ("bench/check-ce/multifile2.mlw", line 19, characters 12-26)
 <check-ce>Validating model:
           File multifile1.mlw:
@@ -611,50 +460,10 @@ File multifile2.mlw:
 <rac-values>Value imported for x at "bench/check-ce/multifile2.mlw", line 18, characters 7-8: 0
 <rac-values>No value for result at "bench/check-ce/multifile2.mlw", line 20, characters 2-12, taking default.
 <check-ce>Result of checking model 1:
-            - Concrete: bad model (Concrete RAC, with the counterexample model cannot continue after "bench/check-ce/multifile1.mlw", line 14, characters 14-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File multifile2.mlw:
-                Line 18:
-                  x = 0
-                  Execution of main function h's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 20:
-                  (abstract) execution of any function incr_val with args:
-                    x = 0
-                  result = 0
-              File multifile1.mlw:
-                Line 14:
-                  Execution got stuck, Assume postcondition of incr_val with:
-                    x = 0
-                    result = 0
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/multifile1.mlw", line 14, characters 14-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File multifile2.mlw:
-                Line 18:
-                  x = 0
-                  Execution of main function h's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 20:
-                  Abstract execution of incr_val with args:
-                    x = 0
-                  result = 0
-              File multifile1.mlw:
-                Line 14:
-                  Execution got stuck, Assume postcondition of incr_val with:
-                    x = 0
-                    result = 0
+            - Concrete: don't know (Concrete RAC terminated because cannot assume contract for variables with default values: result)
+              
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Check model 2 ("bench/check-ce/multifile2.mlw", line 19, characters 12-26)
 <check-ce>Validating model:
           File multifile1.mlw:
@@ -674,60 +483,33 @@ File multifile2.mlw:
 <rac-values>Value imported for x at "bench/check-ce/multifile2.mlw", line 18, characters 7-8: 0
 <rac-values>No value for result at "bench/check-ce/multifile2.mlw", line 20, characters 2-12, taking default.
 <check-ce>Result of checking model 2:
-            - Concrete: bad model (Concrete RAC, with the counterexample model cannot continue after "bench/check-ce/multifile1.mlw", line 14, characters 14-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File multifile2.mlw:
-                Line 18:
-                  x = 0
-                  Execution of main function h's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 20:
-                  (abstract) execution of any function incr_val with args:
-                    x = 0
-                  result = 0
-              File multifile1.mlw:
-                Line 14:
-                  Execution got stuck, Assume postcondition of incr_val with:
-                    x = 0
-                    result = 0
-            - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/multifile1.mlw", line 14, characters 14-24)
-              File int.mlw:
-                Line 13:
-                  Constant zero initialization
-                Line 14:
-                  Constant one initialization
-              File multifile2.mlw:
-                Line 18:
-                  x = 0
-                  Execution of main function h's body with env:
-                    x = 0
-                    zero = 0
-                    one = 1
-                Line 20:
-                  Abstract execution of incr_val with args:
-                    x = 0
-                  result = 0
-              File multifile1.mlw:
-                Line 14:
-                  Execution got stuck, Assume postcondition of incr_val with:
-                    x = 0
-                    result = 0
+            - Concrete: don't know (Concrete RAC terminated because cannot assume contract for variables with default values: result)
+              
+            - Abstract: don't know (Abstract RAC terminated because cannot assume contract for variables with default values: result)
+              
 <check-ce>Models:
-- Checked model 0 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
-- Checked model 1 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
-- Selected model 2 (Concrete: bad model, Abstract: bad model)
-    Summary: Sorry, we don't have a good counterexample for you :(
+- Checked model 0 (Concrete: don't know, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Concrete RAC terminated because cannot assume contract for variables with default values: result)
+- Checked model 1 (Concrete: don't know, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Concrete RAC terminated because cannot assume contract for variables with default values: result)
+- Selected model 2 (Concrete: don't know, Abstract: don't know)
+    Summary: The following counterexample model has not been verified
+    (Concrete RAC terminated because cannot assume contract for variables with default values: result)
 File "bench/check-ce/multifile2.mlw", line 19, characters 12-26:
 Goal Postcondition from verification condition h'vc.
 Prover result is: unknown (sat) (0.01s, 878 steps).
-Sorry, we don't have a good counterexample for you :(
-
+The following counterexample model could not be verified
+  (Concrete RAC terminated because cannot assume contract for variables with default values: result):
+File multifile1.mlw:
+  Line 14:
+    result = 1 (1)
+    x = 0 (0)
+File multifile2.mlw:
+  Line 18:
+    x = 0 (0)
+  Line 19:
+    result = 1 (1)
+    x = 0 (0)
 
