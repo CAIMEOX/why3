@@ -175,6 +175,7 @@ let get_field_name rs =
 (** Import a value from the prover model to an interpreter value. Raises [Exit] if the
     value cannot be imported. *)
 let rec import_model_value known th_known ity v =
+  let open Value in
   let ts, l1, l2 = ity_components ity in
   let subst = its_match_regs ts l1 l2 in
   let def = Pdecl.find_its_defn known ts in
@@ -186,12 +187,13 @@ let rec import_model_value known th_known ity v =
    *     let v = import_model_value known th_known rs_field.rs_cty.cty_result v in
    *     constr_value ity rs_constr [v]
    * | _ -> *)
-    match v with
+  let ty = ty_of_ity ity in
+  match v with
       | Integer s ->
           if ity_equal ity ity_int then
             int_value s.int_value
-          else if is_range_ty (ty_of_ity ity) then
-            range_value ity s.int_value
+          else if is_range_ty ty then
+            range_value ty s.int_value
           else
             kasprintf failwith "import_model_value: found type %a instead of int or range type"
               print_ity ity
@@ -212,7 +214,7 @@ let rec import_model_value known th_known ity v =
           let field_names, field_values = List.split r in
           let itys = List.map (fun f -> Mstr.find f field_itys) field_names in
           let fields = List.map2 (import_model_value known th_known) itys field_values in
-          constr_value ity rs fields
+          constr_value ty rs fields
       | Apply (s, vs) ->
           check_not_nonfree def;
           let matching_name rs = String.equal rs.rs_name.id_string s in
@@ -220,7 +222,7 @@ let rec import_model_value known th_known ity v =
           let itys = List.map (fun pv -> ity_full_inst subst pv.pv_ity)
               rs.rs_cty.cty_args in
           let vs = List.map2 (import_model_value known th_known) itys vs in
-          constr_value ity rs vs
+          constr_value ty rs vs
       | Proj (p, x) ->
           let is_proj id _ = id.id_string = p in
           let ls = try
@@ -234,7 +236,7 @@ let rec import_model_value known th_known ity v =
           let x_ty = Opt.get_exn (Failure "import_model_value: projection is predicate") ls.ls_value in
           let x = import_model_value known th_known (ity_of_ty x_ty) x in
           (* eprintf "MAKE PROJ ity=%a ls=%a x=%a:%a@." Pretty.print_ty ty_arg Pretty.print_ls ls print_value x Pretty.print_ty x_ty; *)
-          proj_value ity ls x
+          proj_value ty ls x
       | Array a ->
           let open Ty in
           assert (its_equal def.Pdecl.itd_its its_func);
@@ -248,8 +250,8 @@ let rec import_model_value known th_known ity v =
           let values = List.map (import_model_value known th_known value_ity) values in
           let mv = Mv.of_list (List.combine keys values) in
           let v0 = import_model_value known th_known value_ity a.arr_others in
-          purefun_value ~result_ity:ity ~arg_ity:key_ity mv v0
-      | Undefined -> undefined_value ity
+          purefun_value ~result_ty:ty ~arg_ty:(ty_of_ity key_ity) mv v0
+      | Undefined -> undefined_value ty
       | Decimal _ | Fraction _ | Float _ | Bitvector _ | Unparsed _ as v ->
           kasprintf failwith "import_model_value: not implemented for value %a"
             print_model_value v
@@ -519,7 +521,7 @@ let rec model_value v =
   let open Value in
   let id_name {id_string= name; id_attrs= attrs} =
     Ident.get_model_trace_string ~name ~attrs in
-  match v_desc v with
+  match value_desc v with
   | Vnum i -> Integer { int_value= i; int_verbatim= BigInt.to_string i }
   | Vstring s -> String s
   | Vbool b -> Boolean b

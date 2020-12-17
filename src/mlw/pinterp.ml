@@ -100,8 +100,8 @@ let mode_to_string m =
   | Faithful -> assert false
 
 module rec Value : sig
-  type value = {v_desc: value_desc; v_ty: ty; v_is_default: bool}
-  and value_desc =
+  type value
+  and value_desc = private
     | Vconstr of rsymbol * field list
     | Vnum of BigInt.t
     | Vreal of Big_real.real
@@ -115,10 +115,43 @@ module rec Value : sig
     | Vpurefun of ty (* keys *) * value Mv.t * value
     | Vterm of term (* ghost values *)
     | Vundefined
-  and field = Field of value ref
+  and field
+
   val compare_values : value -> value -> int
+
+  val value_ty : value -> ty
+  val value_desc : value -> value_desc
+  val value_is_default : value -> bool
+
+  val field : value -> field
+  val field_get : field -> value
+  val field_set : field -> value -> unit
+
+  (** non defensive API for building [value]s: there are no checks that
+      [ity] is compatible with the [value] being built *)
+  val int_value : BigInt.t -> value
+  val range_value : ty -> BigInt.t -> value
+  val bool_value : bool -> value
+  val string_value : string -> value
+  val float_value : ty -> big_float -> value
+  val float_mode_value : ty -> float_mode -> value
+  val real_value : Big_real.real -> value
+  val proj_value : ty -> lsymbol -> value -> value
+  val constr_value : ty -> rsymbol -> value list -> value
+  val purefun_value : result_ty:ty -> arg_ty:ty -> value Mv.t -> value -> value
+  val array_value : ty -> value array -> value
+  val fun_value : ty -> value Term.Mvs.t -> Term.vsymbol -> Expr.expr -> value
+  val term_value : ty -> term -> value
+  val unit_value : unit -> value
+  val undefined_value : ty -> value
+
+  val snapshot : value -> value
+
+  val print_value : Format.formatter -> value -> unit
+
+  val default_value_of_type : Env.env -> Pdecl.known_map -> ity -> value
 end = struct
-  type value = {v_desc: value_desc; v_ty: ty; v_is_default: bool}
+  type value = {value_desc: value_desc; value_ty: ty; value_is_default: bool}
   and value_desc =
     | Vconstr of rsymbol * field list
     | Vnum of BigInt.t
@@ -138,12 +171,12 @@ end = struct
   open Util
 
   let rec compare_values v1 v2 =
-    if v1.v_desc = Vundefined then
-      cannot_compute "undefined value of type %a cannot be compared" print_ty v1.v_ty;
-    if v2.v_desc = Vundefined then
-      cannot_compute "undefined value of type %a cannot be compared" print_ty v2.v_ty;
-    let v_ty v = v.v_ty and v_desc v = v.v_desc in
-    cmp [cmptr v_ty ty_compare; cmptr v_desc compare_desc] v1 v2
+    if v1.value_desc = Vundefined then
+      cannot_compute "undefined value of type %a cannot be compared" print_ty v1.value_ty;
+    if v2.value_desc = Vundefined then
+      cannot_compute "undefined value of type %a cannot be compared" print_ty v2.value_ty;
+    let value_ty v = v.value_ty and value_desc v = v.value_desc in
+    cmp [cmptr value_ty ty_compare; cmptr value_desc compare_desc] v1 v2
   and compare_desc d1 d2 =
     match d1, d2 with
     | Vproj (ls1, v1), Vproj (ls2, v2) ->
@@ -191,6 +224,135 @@ end = struct
           cmptr Array.to_list (cmp_lists [cmptr (fun x -> x) compare_values]);
         ] a1 a2
     | Vundefined, _ | _, Vundefined -> assert false
+
+
+  let value ?(is_default=false) ty desc =
+    {value_desc= desc; value_ty= ty; value_is_default= is_default}
+  let field v = Field (ref v)
+  let value_desc v = v.value_desc
+  let value_ty v = v.value_ty
+  let value_is_default v = v.value_is_default
+  let field_get (Field r) = r.contents
+  let field_set (Field r) v = r := v
+
+  let int_value n = value ty_int (Vnum n)
+  let range_value ty n = value ty (Vnum n)
+  let bool_value b = value ty_bool (Vbool b)
+  let string_value s = value ty_str (Vstring s)
+  let float_value ty f = value ty (Vfloat f)
+  let float_mode_value ty m = value ty (Vfloat_mode m)
+  let real_value r = value ty_real (Vreal r)
+  let proj_value ty ls v = value ty (Vproj (ls, v))
+  let constr_value ty rs vl = value ty (Vconstr (rs, List.map field vl))
+  let purefun_value ~result_ty ~arg_ty mv v =
+    value result_ty (Vpurefun (arg_ty, mv, v))
+  let array_value ty a = value ty (Varray a)
+  let term_value ty t = value ty (Vterm t)
+  let fun_value ty cl args e = value ty (Vfun (cl, args, e))
+  let unit_value () = value (ty_tuple []) (Vconstr (Expr.rs_void, []))
+  let undefined_value ty = value ty Vundefined
+
+  let rec snapshot v =
+    let value_desc = match v.value_desc with
+      | Vconstr (rs, fs) -> Vconstr (rs, List.map snapshot_field fs)
+      | Vfun (cl, vs, e) -> Vfun (Mvs.map snapshot cl, vs, e)
+      | Vpurefun (ty, mv, v) ->
+          let mv = Mv.(fold (fun k v -> add (snapshot k) (snapshot v)) mv empty) in
+          Vpurefun (ty, mv, snapshot v)
+      | Vproj (rs, v) -> Vproj (rs, snapshot v)
+      | Varray a -> Varray (Array.map snapshot a)
+      | Vfloat _ | Vstring _ | Vterm _ | Vbool _ | Vreal _
+      | Vfloat_mode _ | Vnum _ | Vundefined as vd -> vd in
+    {v with value_desc}
+
+  and snapshot_field f =
+    field (snapshot (field_get f))
+
+  let rec print_value fmt v =
+    match value_desc v with
+    | Vnum n ->
+        if BigInt.ge n BigInt.zero then
+          fprintf fmt "%s" (BigInt.to_string n)
+        else
+          fprintf fmt "(%s)" (BigInt.to_string n)
+    | Vbool b -> fprintf fmt "%b" b
+    | Vreal r -> Big_real.print_real fmt r
+    | Vfloat f ->
+        (* Getting "@" is intentional in mlmpfr library for bases higher than 10.
+           So, we keep this notation. *)
+        let hexadecimal = Mlmpfr_wrapper.get_formatted_str ~base:16 f in
+        let decimal = Mlmpfr_wrapper.get_formatted_str ~base:10 f in
+        fprintf fmt "%s (%s)" decimal hexadecimal
+    | Vfloat_mode m -> fprintf fmt "%s" (mode_to_string m)
+    | Vstring s -> Constant.print_string_def fmt s
+    | Vfun (mvs, vs, e) ->
+        fprintf fmt "(@[<v2>%tfun %a -> %a)@]"
+          (fun fmt ->
+             if not (Mvs.is_empty mvs) then
+               fprintf fmt "%a " (pp_bindings print_vs print_value) (Mvs.bindings mvs))
+          print_vs vs print_expr e
+    | Vproj (ls, v) ->
+        fprintf fmt "{%a => %a}" print_ls ls print_value v
+    | Vconstr (rs, vs) ->
+        if is_rs_tuple rs then
+          fprintf fmt "@[<hv1>(%a)@]" (Pp.print_list Pp.comma print_field) vs
+        else if Strings.has_suffix "'mk" rs.rs_name.id_string then
+          let print_field fmt (f, v) = fprintf fmt "@[%s=@ %a@]" f print_field v in
+          fprintf fmt "@[<hv1>{%a}@]" (Pp.print_list Pp.semi print_field)
+            (List.combine (List.map (fun pv -> pv.pv_vs.vs_name.id_string) rs.rs_cty.cty_args) vs)
+    | Varray a ->
+        fprintf fmt "@[[%a]@]"
+          (Pp.print_list Pp.semi print_value)
+          (Array.to_list a)
+    | Vpurefun (_, mv, v) ->
+        fprintf fmt "@[[|%a; _ -> %a|]@]" (pp_bindings ~delims:Pp.(nothing,nothing) print_value print_value)
+          (Mv.bindings mv) print_value v
+    | Vterm t ->
+        print_term fmt t
+    | Vundefined -> fprintf fmt "UNDEFINED"
+
+  and print_field fmt f = print_value fmt (field_get f)
+
+  let mark_default v = {v with value_is_default= true}
+
+  (* TODO Remove argument [env] after replacing Varray by model substitution *)
+  let rec default_value_of_type env known ity : value =
+    let ty = ty_of_ity ity in
+    mark_default @@ match ity.ity_node with
+      | Ityvar _ -> failwith "default_value_of_type: type variable"
+      | Ityapp (ts, _, _) when its_equal ts its_int -> range_value ty BigInt.zero
+      | Ityapp (ts, _, _) when its_equal ts its_real -> assert false (* TODO *)
+      | Ityapp (ts, _, _) when its_equal ts its_bool -> bool_value false
+      | Ityapp (ts, _, _) when its_equal ts its_str -> string_value ""
+      | Ityapp(ts,ityl1,_) when is_ts_tuple ts.its_ts ->
+          let vs = List.map (default_value_of_type env known) ityl1 in
+          constr_value ty (rs_tuple (List.length ityl1)) vs
+      | Ityapp (its, l1, l2)
+      | Ityreg {reg_its= its; reg_args= l1; reg_regs= l2} ->
+          let pm = Pmodule.read_module env ["array"] "Array" in
+          let array_its = Pmodule.ns_find_its pm.Pmodule.mod_export ["array"] in
+          if its_equal its array_its then
+            array_value ty (Array.init 0 (fun _ -> assert false))
+          else match Pdecl.find_its_defn known its with
+            | {Pdecl.itd_its= {its_def= Range r}} ->
+                let zero_in_range = BigInt.(le r.Number.ir_lower zero && le zero r.Number.ir_upper) in
+                let n = if zero_in_range then BigInt.zero else r.Number.ir_lower in
+                range_value ty n
+            | {Pdecl.itd_constructors= rs :: _} ->
+                let subst = its_match_regs its l1 l2 in
+                let ityl = List.map (fun pv -> pv.pv_ity) rs.rs_cty.cty_args in
+                let tyl = List.map (ity_full_inst subst) ityl in
+                let vs = List.map (default_value_of_type env known) tyl in
+                constr_value ty rs vs
+            | {Pdecl.itd_constructors= []} ->
+                (* if its.its_private then
+                *   (\* There is no constructor so we can just invent a Vconstr,
+                *      but we will have to axiomatize the corresponding term *\)
+                *   let itys = List.map (fun rs -> (Opt.get rs.rs_field).pv_ity) itd.Pdecl.itd_fields in
+                *   let fl = List.map (fun ity -> field (default_value_of_type env known ity)) itys in
+                *   value ty (Vconstr (None, fl))
+                * else *)
+                undefined_value ty
 end
 and Mv : Extmap.S with type key = Value.value =
   Extmap.Make (struct
@@ -198,91 +360,13 @@ and Mv : Extmap.S with type key = Value.value =
     let compare = Value.compare_values
   end)
 
-include Value
+open Value
 
-let value ?(is_default=false) ty desc =
-  {v_desc= desc; v_ty= ty; v_is_default= is_default}
-let field v = Field (ref v)
-let v_desc v = v.v_desc
-let v_ty v = v.v_ty
-let field_get (Field r) = r.contents
-let field_set (Field r) v = r := v
+let get_num_value v = match value_desc v with
+  | Vnum n -> n | _ -> failwith "get_num_value"
 
-let int_value ?is_default n = value ?is_default ty_int (Vnum n)
-let range_value ?is_default ity n = value ?is_default (ty_of_ity ity) (Vnum n)
-let string_value ?is_default s = value ?is_default ty_str (Vstring s)
-let bool_value ?is_default b = value ?is_default ty_bool (Vbool b)
-let proj_value ?is_default ity ls v =
-  value ?is_default (ty_of_ity ity) (Vproj (ls, v))
-let constr_value ?is_default ity rs vl =
-  value ?is_default (ty_of_ity ity) (Vconstr (rs, List.map field vl))
-let purefun_value ?is_default ~result_ity ~arg_ity mv v =
-  value ?is_default (ty_of_ity result_ity) (Vpurefun (ty_of_ity arg_ity, mv, v))
-let unit_value ?is_default () =
-  value ?is_default (ty_tuple []) (Vconstr (Expr.rs_void, []))
-let undefined_value ?is_default ity =
-  value ?is_default (ty_of_ity ity) Vundefined
-
-let rec print_value fmt v =
-  match v.v_desc with
-  | Vnum n ->
-      if BigInt.ge n BigInt.zero then
-        fprintf fmt "%s" (BigInt.to_string n)
-      else
-        fprintf fmt "(%s)" (BigInt.to_string n)
-  | Vbool b -> fprintf fmt "%b" b
-  | Vreal r -> Big_real.print_real fmt r
-  | Vfloat f ->
-      (* Getting "@" is intentional in mlmpfr library for bases higher than 10.
-         So, we keep this notation. *)
-      let hexadecimal = Mlmpfr_wrapper.get_formatted_str ~base:16 f in
-      let decimal = Mlmpfr_wrapper.get_formatted_str ~base:10 f in
-      fprintf fmt "%s (%s)" decimal hexadecimal
-  | Vfloat_mode m -> fprintf fmt "%s" (mode_to_string m)
-  | Vstring s -> Constant.print_string_def fmt s
-  | Vfun (mvs, vs, e) ->
-      fprintf fmt "(@[<v2>%tfun %a -> %a)@]"
-        (fun fmt ->
-           if not (Mvs.is_empty mvs) then
-             fprintf fmt "%a " (pp_bindings print_vs print_value) (Mvs.bindings mvs))
-        print_vs vs print_expr e
-  | Vproj (ls, v) ->
-      fprintf fmt "{%a => %a}" print_ls ls print_value v
-  | Vconstr (rs, vs) ->
-      if is_rs_tuple rs then
-        fprintf fmt "@[<hv1>(%a)@]" (Pp.print_list Pp.comma print_field) vs
-      else if Strings.has_suffix "'mk" rs.rs_name.id_string then
-        let print_field fmt (f, v) = fprintf fmt "@[%s=@ %a@]" f print_field v in
-        fprintf fmt "@[<hv1>{%a}@]" (Pp.print_list Pp.semi print_field)
-          (List.combine (List.map (fun pv -> pv.pv_vs.vs_name.id_string) rs.rs_cty.cty_args) vs)
-  | Varray a ->
-      fprintf fmt "@[[%a]@]"
-        (Pp.print_list Pp.semi print_value)
-        (Array.to_list a)
-  | Vpurefun (_, mv, v) ->
-      fprintf fmt "@[[|%a; _ -> %a|]@]" (pp_bindings ~delims:Pp.(nothing,nothing) print_value print_value)
-        (Mv.bindings mv) print_value v
-  | Vterm t ->
-      print_term fmt t
-  | Vundefined -> fprintf fmt "UNDEFINED"
-
-and print_field fmt f = print_value fmt (field_get f)
-
-let rec snapshot v =
-  let v_desc = match v.v_desc with
-    | Vconstr (rs, fs) -> Vconstr (rs, List.map snapshot_field fs)
-    | Vfun (cl, vs, e) -> Vfun (Mvs.map snapshot cl, vs, e)
-    | Vpurefun (ty, mv, v) ->
-        let mv = Mv.(fold (fun k v -> add (snapshot k) (snapshot v)) mv empty) in
-        Vpurefun (ty, mv, snapshot v)
-    | Vproj (rs, v) -> Vproj (rs, snapshot v)
-    | Varray a -> Varray (Array.map snapshot a)
-    | Vfloat _ | Vstring _ | Vterm _ | Vbool _ | Vreal _
-    | Vfloat_mode _ | Vnum _ | Vundefined as vd -> vd in
-  {v with v_desc}
-
-and snapshot_field f =
-  field (snapshot (field_get f))
+let get_array_value v = match value_desc v with
+  | Varray a -> a | _  -> failwith "get_array_value"
 
 let ls_undefined =
   let ty_a = ty_var (create_tvsymbol (id_fresh "a")) in
@@ -762,24 +846,24 @@ let multibind_pvs ?register l tl env =
 (* BUILTINS *)
 
 let big_int_of_const i = i.Number.il_int
-let big_int_of_value v = match v.v_desc with Vnum i -> i | _ -> raise NotNum
+let big_int_of_value v = match value_desc v with Vnum i -> i | _ -> raise NotNum
 
 let eval_int_op op ls l =
-  match List.map v_desc l with
+  match List.map value_desc l with
   | [Vnum i1; Vnum i2] -> (
       match op i1 i2 with
       | exception Division_by_zero -> None
-      | v -> Some (range_value ls.rs_cty.cty_result v) )
+      | v -> Some (range_value (ty_of_ity ls.rs_cty.cty_result) v) )
   | _ -> assert false
 
 let eval_int_uop op ls l =
-  let n = match List.map v_desc l with
+  let n = match List.map value_desc l with
     | [Vnum i1] -> op i1
     | _ -> assert false in
-  Some (range_value ls.rs_cty.cty_result n)
+  Some (range_value (ty_of_ity ls.rs_cty.cty_result) n)
 
 let eval_int_rel op _ l =
-  let b = match List.map v_desc l with
+  let b = match List.map value_desc l with
     | [Vnum i1; Vnum i2] -> op i1 i2
     | _ -> assert false in
   Some (bool_value b)
@@ -816,22 +900,25 @@ let eval_float :
   let ty_result = ty_app tys_result [] in
   use_float_format float_format ;
   try
-    let v_desc =
+    let v =
       let open Mlmpfr_wrapper in
-      match arity, List.map v_desc vs with
+      match arity, List.map value_desc vs with
       | Mode1, [Vfloat_mode mode; Vfloat f] ->
           (* Subnormalize used to simulate IEEE behavior *)
-          Vfloat (subnormalize ~rnd:mode (op mode f))
+          float_value ty_result (subnormalize ~rnd:mode (op mode f))
       | Mode2, [Vfloat_mode mode; Vfloat f1; Vfloat f2] ->
-          Vfloat (subnormalize ~rnd:mode (op mode f1 f2))
+          float_value ty_result (subnormalize ~rnd:mode (op mode f1 f2))
       | Mode3, [Vfloat_mode mode; Vfloat f1; Vfloat f2; Vfloat f3] ->
-          Vfloat (subnormalize ~rnd:mode (op mode f1 f2 f3))
-      | Mode_rel, [Vfloat f1; Vfloat f2] -> Vbool (op f1 f2)
-      | Mode_rel1, [Vfloat f] -> Vbool (op f)
+          float_value ty_result (subnormalize ~rnd:mode (op mode f1 f2 f3))
+      | Mode_rel, [Vfloat f1; Vfloat f2] -> bool_value (op f1 f2)
+      | Mode_rel1, [Vfloat f] -> bool_value (op f)
       | _ -> cannot_compute "arity error in float operation" in
-    Some (value ty_result v_desc)
+    Some v
   with Mlmpfr_wrapper.Not_Implemented ->
     cannot_compute "mlmpfr wrapper is not implemented"
+
+let zero_float ts prec _ _ =
+  Some (float_value (ty_app ts []) (Mlmpfr_wrapper.(make_zero ~prec Positive)))
 
 type 'a real_arity =
   | Modeconst : Big_real.real real_arity
@@ -842,13 +929,13 @@ type 'a real_arity =
 let eval_real : type a. a real_arity -> a -> rsymbol -> value list -> value option =
   fun ty op _ l ->
   try
-    let v_desc = match ty, List.map v_desc l with
-      | Mode1r, [Vreal r] -> Vreal (op r)
-      | Mode2r, [Vreal r1; Vreal r2] -> Vreal (op r1 r2)
-      | Mode_relr, [Vreal r1; Vreal r2] -> Vbool (op r1 r2)
-      | Modeconst, [] -> Vreal op
+    let v = match ty, List.map value_desc l with
+      | Mode1r, [Vreal r] -> real_value (op r)
+      | Mode2r, [Vreal r1; Vreal r2] -> real_value (op r1 r2)
+      | Mode_relr, [Vreal r1; Vreal r2] -> bool_value (op r1 r2)
+      | Modeconst, [] -> real_value op
       | _ -> cannot_compute "arity error in real operation" in
-    Some (value ty_real v_desc)
+    Some v
   with
   | Big_real.Undetermined ->
       (* Cannot decide interval comparison *)
@@ -902,7 +989,7 @@ let built_in_modules () =
   ] in
   let open Mlmpfr_wrapper in
   let float_module tyb ~prec m = builtin1t ["ieee_float"] m ("t", dummy_type) (fun ts -> [
-    "zeroF",           (fun _ _ -> Some (value (ty_app ts []) (Vfloat (make_zero ~prec Positive))));
+    "zeroF",           zero_float ts prec;
     "add",             eval_float ts tyb Mode2 (fun rnd -> add ~rnd ~prec);
     "sub",             eval_float ts tyb Mode2 (fun rnd -> sub ~rnd ~prec);
     "mul",             eval_float ts tyb Mode2 (fun rnd -> mul ~rnd ~prec);
@@ -926,8 +1013,8 @@ let built_in_modules () =
   ]) in
   [
     builtin ["bool"] "Bool" [
-      "True",          (fun _ _ -> Some (value ty_bool (Vbool true)));
-      "False",         (fun _ _ -> Some (value ty_bool (Vbool false)));
+      "True",          (fun _ _ -> Some (bool_value true));
+      "False",         (fun _ _ -> Some (bool_value false));
     ];
     builtin ["int"] "Int" int_ops;
     builtin ["int"] "MinMax" [
@@ -945,13 +1032,14 @@ let built_in_modules () =
     builtin ["mach"; "int"] "Byte" bounded_int_ops;
     builtin ["mach"; "int"] "Int31" bounded_int_ops;
     builtin ["mach"; "int"] "Int63" bounded_int_ops;
-    builtin1t ["ieee_float"] "RoundingMode" ("mode", dummy_type) (fun ts -> [
-      "RNE",           (fun _ _ -> Some (value (ty_app ts []) (Vfloat_mode To_Nearest)));
-      "RNA",           (fun _ _ -> Some (value (ty_app ts []) (Vfloat_mode Away_From_Zero)));
-      "RTP",           (fun _ _ -> Some (value (ty_app ts []) (Vfloat_mode Toward_Plus_Infinity)));
-      "RTN",           (fun _ _ -> Some (value (ty_app ts []) (Vfloat_mode Toward_Minus_Infinity)));
-      "RTZ",           (fun _ _ -> Some (value (ty_app ts []) (Vfloat_mode Toward_Zero)));
-    ]);
+    builtin1t ["ieee_float"] "RoundingMode" ("mode", dummy_type) (fun ts ->
+      let ty = ty_app ts [] in [
+        "RNE",           (fun _ _ -> Some (float_mode_value ty To_Nearest));
+        "RNA",           (fun _ _ -> Some (float_mode_value ty Away_From_Zero));
+        "RTP",           (fun _ _ -> Some (float_mode_value ty Toward_Plus_Infinity));
+        "RTN",           (fun _ _ -> Some (float_mode_value ty Toward_Minus_Infinity));
+        "RTZ",           (fun _ _ -> Some (float_mode_value ty Toward_Zero));
+      ]);
     builtin ["real"] "Real" [
       op_infix "=",    eval_real Mode_relr Big_real.eq;
       op_infix "<",    eval_real Mode_relr Big_real.lt;
@@ -973,33 +1061,34 @@ let built_in_modules () =
     ];
     builtin1t ["array"] "Array" ("array", dummy_type) (fun ts -> [
       "make", (fun _ args -> match args with
-          | [{v_desc= Vnum n}; def] -> (
+          | [num; def] -> (
               try
-                let n = BigInt.to_int n in
-                let ty = ty_app ts [def.v_ty] in
-                Some (value ty (Varray (Array.make n def)))
+                let n = BigInt.to_int (get_num_value num) in
+                let ty = ty_app ts [value_ty def] in
+                Some (array_value ty (Array.make n def))
               with e -> cannot_compute "array could not be made: %a" Exn_printer.exn_printer e )
           | _ -> assert false);
-      "empty", (fun _ args -> match args with
-          | [{v_desc= Vconstr(_, [])}] ->
+      "empty", (fun _ args -> match List.map value_desc args with
+          | [Vconstr(_, [])] ->
               (* we know by typing that the constructor
                   will be the Tuple0 constructor *)
               let ty = ty_app ts [ty_var (tv_of_string "a")] in
-              Some (value ty (Varray [||]))
+              Some (array_value ty [||])
           | _ -> assert false);
-      "length", (fun _ args -> match args with
-          | [{v_desc= Varray a}] ->
-              Some (value ty_int (Vnum (BigInt.of_int (Array.length a))))
+      "length", (fun _ args -> match List.map value_desc args with
+          | [Varray a] ->
+              Some (range_value ty_int (BigInt.of_int (Array.length a)))
           | _ -> assert false) ;
-      op_get "", (fun _ args -> match args with
-          | [{v_desc= Varray a}; {v_desc= Vnum i}] -> (
+      op_get "", (fun _ args -> match List.map value_desc args with
+          | [Varray a; Vnum i] -> (
               try Some a.(BigInt.to_int i) with e ->
                 cannot_compute "array element could not be retrieved: %a" Exn_printer.exn_printer e )
           | _ -> assert false);
       op_set "", (fun _ args -> match args with
-          | [{v_desc= Varray a}; {v_desc= Vnum i}; v] -> (
+          | [a; i; v] -> (
               try
-                a.(BigInt.to_int i) <- v;
+                let a = get_array_value a and i = BigInt.to_int (get_num_value i) in
+                a.(i) <- v;
                 Some (unit_value ())
               with e ->
                 cannot_compute "array element could not be set: %a" Exn_printer.exn_printer e )
@@ -1038,51 +1127,6 @@ let get_vs env vs =
 
 let get_pvs env pvs =
   get_vs env pvs.pv_vs
-
-(* DEFAULTS *)
-
-let is_array_its env its =
-  let pm = Pmodule.read_module env ["array"] "Array" in
-  let array_its = Pmodule.ns_find_its pm.Pmodule.mod_export ["array"] in
-  its_equal its array_its
-
-(* TODO Remove argument [env] after replacing Varray by model substitution *)
-let rec default_value_of_type env known ity : value =
-  let is_default = true in
-  let ty = ty_of_ity ity in
-  match ity.ity_node with
-  | Ityvar _ -> failwith "default_value_of_type: type variable"
-  | Ityapp (ts, _, _) when its_equal ts its_int -> value ~is_default ty (Vnum BigInt.zero)
-  | Ityapp (ts, _, _) when its_equal ts its_real -> assert false (* TODO *)
-  | Ityapp (ts, _, _) when its_equal ts its_bool -> value ~is_default ty (Vbool false)
-  | Ityapp (ts, _, _) when its_equal ts its_str -> value ~is_default ty (Vstring "")
-  | Ityapp(ts,ityl1,_) when is_ts_tuple ts.its_ts ->
-      let vs = List.map (default_value_of_type env known) ityl1 in
-      constr_value ~is_default ity (rs_tuple (List.length ityl1)) vs
-  | Ityapp (its, l1, l2)
-  | Ityreg {reg_its= its; reg_args= l1; reg_regs= l2} ->
-      if is_array_its env its then
-        value ~is_default ty (Varray (Array.init 0 (fun _ -> assert false)))
-      else match Pdecl.find_its_defn known its with
-        | {Pdecl.itd_its= {its_def= Range r}} ->
-            let zero_in_range = BigInt.(le r.Number.ir_lower zero && le zero r.Number.ir_upper) in
-            let n = if zero_in_range then BigInt.zero else r.Number.ir_lower in
-            range_value ~is_default ity n
-        | {Pdecl.itd_constructors= rs :: _} ->
-            let subst = its_match_regs its l1 l2 in
-            let ityl = List.map (fun pv -> pv.pv_ity) rs.rs_cty.cty_args in
-            let tyl = List.map (ity_full_inst subst) ityl in
-            let vs = List.map (default_value_of_type env known) tyl in
-            constr_value ~is_default ity rs vs
-        | {Pdecl.itd_constructors= []} ->
-            (* if its.its_private then
-             *   (\* There is no constructor so we can just invent a Vconstr,
-             *      but we will have to axiomatize the corresponding term *\)
-             *   let itys = List.map (fun rs -> (Opt.get rs.rs_field).pv_ity) itd.Pdecl.itd_fields in
-             *   let fl = List.map (fun ity -> field (default_value_of_type env known ity)) itys in
-             *   value ty (Vconstr (None, fl))
-             * else *)
-            value ~is_default ty Vundefined
 
 (* ROUTINE DEFINITIONS *)
 
@@ -1135,42 +1179,42 @@ let find_definition env (rs: rsymbol) =
 (** Convert a value into a term. The first component of the result are additional bindings
    from closures. *)
 let rec term_of_value ?(ty_mt=Mtv.empty) env vsenv v : (vsymbol * term) list * term =
-  let v_ty = ty_inst ty_mt v.v_ty in
-  match v.v_desc with
+  let ty = ty_inst ty_mt (value_ty v) in
+  match value_desc v with
   | Vundefined ->
       (* TODO Replace ls_undefined by fs_any_function when branch
        * fun-lits-noptree is merged:
-       * env, fs_app fs_any_function [t_tuple []] v_ty *)
-      vsenv, fs_app ls_undefined [] v_ty
+       * env, fs_app fs_any_function [t_tuple []] ty *)
+      vsenv, fs_app ls_undefined [] ty
   | Vnum i ->
-      if ty_equal v_ty ty_int || is_range_ty v_ty then
-        vsenv, t_const (Constant.int_const i) v_ty
+      if ty_equal ty ty_int || is_range_ty ty then
+        vsenv, t_const (Constant.int_const i) ty
       else
         kasprintf failwith "term_of_value: value type not int or range but %a"
-          print_ty v_ty
+          print_ty ty
   | Vstring s ->
-      ty_equal_check v_ty ty_str;
+      ty_equal_check ty ty_str;
       vsenv, t_const (Constant.ConstStr s) ty_str
   | Vbool b ->
-      ty_equal_check v_ty ty_bool;
+      ty_equal_check ty ty_bool;
       vsenv, if b then t_bool_true else t_bool_false
   | Vterm t ->
-      Opt.iter (ty_equal_check v_ty) t.t_ty;
+      Opt.iter (ty_equal_check ty) t.t_ty;
       vsenv, t
   | Vreal _ | Vfloat _ | Vfloat_mode _ -> (* TODO *)
       Format.kasprintf failwith "term_of_value: %a" print_value v
   | Vproj (ls, x) ->
       (* TERM: epsilon v. rs v = x *)
-      let vs = create_vsymbol (id_fresh "v") v_ty in
+      let vs = create_vsymbol (id_fresh "v") ty in
       let vsenv, t_x = term_of_value ~ty_mt env vsenv x in
-      let ty_x = ty_inst ty_mt x.v_ty in
+      let ty_x = ty_inst ty_mt (value_ty x) in
       let t = t_equ (fs_app ls [t_var vs] ty_x) t_x in
       vsenv, t_eps (t_close_bound vs t)
   | Vconstr (rs, fs) ->
       if rs_kind rs = RKfunc then
         let term_of_field vsenv f = term_of_value ~ty_mt env vsenv (field_get f) in
         let vsenv, fs = Lists.map_fold_left term_of_field vsenv fs in
-        vsenv, fs_app (ls_of_rs rs) fs v_ty
+        vsenv, fs_app (ls_of_rs rs) fs ty
       else (* TODO bench/ce/{record_one_field,record_inv}.mlw/CVC4/WP *)
         kasprintf failwith "Cannot construct term for constructor \
                             %a that is not a function" print_rs rs
@@ -1180,15 +1224,15 @@ let rec term_of_value ?(ty_mt=Mtv.empty) env vsenv v : (vsymbol * term) list * t
           (term_of_expr ~prop:false e) in
       (* Rebind values from closure *)
       let bind_cl vs v (mt, mv, vsenv) =
-        let vs' = create_vsymbol (id_clone vs.vs_name) v.v_ty in
-        let mt = ty_match mt vs.vs_ty v.v_ty in
+        let vs' = create_vsymbol (id_clone vs.vs_name) (value_ty v) in
+        let mt = ty_match mt vs.vs_ty (value_ty v) in
         let mv = Mvs.add vs (t_var vs') mv in
         let vsenv, t = term_of_value ~ty_mt env vsenv v in
         let vsenv = (vs', t) :: vsenv in
         mt, mv, vsenv in
       let mt, mv, vsenv = Mvs.fold bind_cl cl (Mtv.empty, Mvs.empty, vsenv) in
       (* Substitute argument type *)
-      let ty_arg = ty_app_arg ts_func 0 v_ty in
+      let ty_arg = ty_app_arg ts_func 0 ty in
       let vs_arg = create_vsymbol (id_clone arg.vs_name) ty_arg in
       let mv = Mvs.add arg (t_var vs_arg) mv in
       let mt = ty_match mt arg.vs_ty ty_arg in
@@ -1201,11 +1245,11 @@ let rec term_of_value ?(ty_mt=Mtv.empty) env vsenv v : (vsymbol * term) list * t
       let ts_array = Theory.ns_find_ts ns ["array"] in
       let ls_length = Theory.ns_find_ls ns ["length"] in
       let ls_get = Theory.ns_find_ls ns [op_get ""] in
-      let v = create_vsymbol (id_fresh "a") v_ty in
+      let v = create_vsymbol (id_fresh "a") ty in
       let t_eq_length = (* v.length = length arr *)
         t_equ (fs_app ls_length [t_var v] ty_int)
           (t_nat_const (Array.length arr)) in
-      let elt_ty = ty_app_arg ts_array 0 v_ty in
+      let elt_ty = ty_app_arg ts_array 0 ty in
       let rec loop vsenv sofar ix = (* v[ix] = arr.(ix) *)
         if ix = Array.length arr then vsenv, List.rev sofar else
           let vsenv, t_a_ix = term_of_value ~ty_mt env vsenv arr.(ix) in
@@ -1224,16 +1268,6 @@ let rec term_of_value ?(ty_mt=Mtv.empty) env vsenv v : (vsymbol * term) list * t
         vsenv, t in
       let vsenv, t = Mv.fold mk_case m (term_of_value ~ty_mt env vsenv def) in
       vsenv, t_lambda [vs_arg] [] t
-
-(* and try_fix_projection env vsenv v v_ty =
- *   let its, _, _ = ity_components (ity_of_ty v_ty) in
- *   let itd = Pdecl.find_its_defn env.mod_known its in
- *   let rs, rs_field = match itd.Pdecl.itd_constructors, itd.Pdecl.itd_fields with
- *     | [rs], [rs_field] -> rs, rs_field
- *     | _ -> failwith "term_of_value: complex vnum" in
- *   let v' = {v with v_ty= ty_of_ity rs_field.rs_cty.cty_result} in
- *   let vsenv, t_field = term_of_value env vsenv v' in
- *   vsenv, fs_app (ls_of_rs rs) [t_field] v.v_ty *)
 
 (* CONTRADICTION CONTEXT *)
 
@@ -1307,10 +1341,10 @@ let bind_value env vs v (task, ls_mt, ls_mv) =
   let ty, ty_mt, ls_mt =
     (* [ty_mt] is a type substitution for [v],
        [ls_mt] is a type substitution for the remaining task *)
-    if ty_closed v.v_ty then
-      v.v_ty, Mtv.empty, ty_match ls_mt vs.vs_ty v.v_ty
+    if ty_closed (value_ty v) then
+      value_ty v, Mtv.empty, ty_match ls_mt vs.vs_ty (value_ty v)
     else
-      vs.vs_ty, ty_match Mtv.empty v.v_ty vs.vs_ty, ls_mt in
+      vs.vs_ty, ty_match Mtv.empty (value_ty v) vs.vs_ty, ls_mt in
   let ls = create_fsymbol (id_clone vs.vs_name) [] ty in
   let ls_mv = Mvs.add vs (fs_app ls [] ty) ls_mv in
   let vsenv, t = term_of_value ~ty_mt env [] v in
@@ -1568,7 +1602,7 @@ exception RACStuck of env * Loc.position option
 
 let value_of_free_vars env t =
   let get_value get_value get_ty env x =
-    let def = undefined_value (ity_of_ty (get_ty x)) in
+    let def = undefined_value (get_ty x) in
     snapshot (Opt.get_def def (get_value x env))  in
   let mid = t_v_fold (fun mvs vs ->
     let get_ty vs = vs.vs_ty in
@@ -1593,14 +1627,14 @@ let check_assume_term ctx t =
 let free_vars_with_default_value env t =
   let sid1 =
     t_v_fold (fun sid vs ->
-        if (get_vs env vs).v_is_default then
+        if value_is_default (get_vs env vs) then
           Sid.add vs.vs_name sid
         else sid ) Sid.empty t in
   let sid2 =
     t_app_fold (fun sid ls tyl _ ->
         if tyl = [] then
           match Mrs.find_opt (restore_rs ls) env.rsenv with
-          | Some {v_is_default} -> Sid.add ls.ls_name sid
+          | Some v when value_is_default v -> Sid.add ls.ls_name sid
           | _ -> sid
         else sid) Sid.empty t in
   Sid.union sid1 sid2
@@ -1675,7 +1709,7 @@ let rec matching env (v : value) p =
       try matching env v p1 with NoMatch -> matching env v p2 )
   | Pas (p, vs) -> matching (bind_vs vs v env) v p
   | Papp (ls, pl) -> (
-      match v.v_desc with
+      match value_desc v with
       | Vconstr ({rs_logic= RLls ls2}, tl) ->
           if ls_equal ls ls2 then
             List.fold_left2 matching env (List.map field_get tl) pl
@@ -1688,12 +1722,12 @@ let rec matching env (v : value) p =
           if ls_equal ls ls2 then env else raise NoMatch
       | _ -> raise Undetermined )
 
-let is_true v = match v.v_desc with
+let is_true v = match value_desc v with
   | Vbool true | Vterm {t_node= Ttrue} -> true
   | Vterm t when t_equal t t_bool_true -> true
   | _ -> false
 
-let is_false v = match v.v_desc with
+let is_false v = match value_desc v with
   | Vbool false | Vterm {t_node= Tfalse} -> true
   | Vterm t when t_equal t t_bool_false -> true
   | _ -> false
@@ -1708,7 +1742,7 @@ let exec_pure ~loc env ls pvs =
     (* TODO (?) Add more builtin logical symbols *)
     let pv1, pv2 = match pvs with [pv1; pv2] -> pv1, pv2 | _ -> assert false in
     let v1 = Mvs.find pv1.pv_vs env.vsenv and v2 = Mvs.find pv2.pv_vs env.vsenv in
-    Normal (value ty_bool (Vbool (compare_values v1 v2 = 0)))
+    Normal (bool_value (compare_values v1 v2 = 0))
   else if ls_equal ls fs_func_app then
     failwith "Pure function application not yet implemented"
   else
@@ -1721,7 +1755,8 @@ let exec_pure ~loc env ls pvs =
         (* TODO A variable x binding the result of exec pure are used as (x = True) in
            subsequent terms, so we map true/false to True/False here. Is this reasonable? *)
         let t = fix_boolean_term t in
-        Normal (value (Opt.get_def ty_bool t.t_ty) (Vterm t))
+        let ty = Opt.get_def ty_bool t.t_ty in
+        Normal (term_value ty t)
     | None ->
         kasprintf failwith "No logic definition for %a" print_ls ls
 
@@ -1757,7 +1792,7 @@ let get_and_register_value env ?def ?ity vs loc =
 
 let rec set_fields fs1 fs2 =
   let set_field f1 f2 =
-    match (field_get f1).v_desc, (field_get f2).v_desc with
+    match value_desc (field_get f1), value_desc (field_get f2) with
     | Vconstr (rs1, fs1), Vconstr (rs2, fs2) ->
         assert (rs_equal rs1 rs2);
         set_fields fs1 fs2
@@ -1765,7 +1800,7 @@ let rec set_fields fs1 fs2 =
   List.iter2 set_field fs1 fs2
 
 let set_constr v1 v2 =
-  match v1.v_desc, v2.v_desc with
+  match value_desc v1, value_desc v2 with
    | Vconstr (rs1, fs1), Vconstr (rs2, fs2) ->
        assert (rs_equal rs1 rs2);
        set_fields fs1 fs2;
@@ -1800,20 +1835,20 @@ and eval_expr' env e =
         pvs.pv_vs.vs_name.id_string print_value v ;
       Normal v
   | Econst (Constant.ConstInt c) ->
-      Normal (value (ty_of_ity e.e_ity) (Vnum (big_int_of_const c)))
+      Normal (range_value (ty_of_ity e.e_ity) (big_int_of_const c))
   | Econst (Constant.ConstReal r) ->
       (* ConstReal can be float or real *)
       if ity_equal e.e_ity ity_real then
         let p, q = compute_fraction r.Number.rl_real in
         let sp, sq = BigInt.to_string p, BigInt.to_string q in
-        try Normal (value ty_real (Vreal (Big_real.real_from_fraction sp sq)))
+        try Normal (real_value (Big_real.real_from_fraction sp sq))
         with Mlmpfr_wrapper.Not_Implemented ->
           cannot_compute "mlmpfr wrapper is not implemented"
       else
         let c = Constant.ConstReal r in
         let s = Format.asprintf "%a" Constant.print_def c in
-        Normal (value ty_real (Vfloat (Mlmpfr_wrapper.make_from_str s)))
-  | Econst (Constant.ConstStr s) -> Normal (value ty_str (Vstring s))
+        Normal (float_value ty_real (Mlmpfr_wrapper.make_from_str s))
+  | Econst (Constant.ConstStr s) -> Normal (string_value s)
   | Eexec (ce, cty) -> begin
       (* TODO (When) do we have to check the contracts in cty? When ce <> Capp? *)
       (* check_terms (cntr_ctx "Exec precondition" env) cty.cty_pre; *)
@@ -1840,10 +1875,10 @@ and eval_expr' env e =
           | [arg] ->
               let match_free pv mt =
                 let v = Mvs.find pv.pv_vs env.vsenv in
-                ty_match mt pv.pv_vs.vs_ty v.v_ty in
+                ty_match mt pv.pv_vs.vs_ty (value_ty v) in
               let mt = Spv.fold match_free cty.cty_effect.eff_reads Mtv.empty in
               let ty = ty_inst mt (ty_of_ity e.e_ity) in
-              Normal (value ty (Vfun (cl, arg.pv_vs, e')))
+              Normal (fun_value ty cl arg.pv_vs e')
           | _ -> failwith "many args for exec fun" (* TODO *) )
       | Cany ->
          register_any_call env e.e_loc None Mvs.empty;
@@ -1861,14 +1896,14 @@ and eval_expr' env e =
       List.iter
         (fun (pvs, rs, value) ->
           let cstr, args =
-            match (get_pvs env pvs).v_desc with
+            match value_desc (get_pvs env pvs) with
             | Vconstr (cstr, args) -> cstr, args
             | _ -> assert false in
           let rec search_and_assign constr_args args =
             match constr_args, args with
-            | pv :: pvl, Field r :: vl ->
+            | pv :: pvl, f :: vl ->
                 if pv_equal pv (fd_of_rs rs) then
-                  r := get_pvs env value
+                  field_set f (get_pvs env value)
                 else
                   search_and_assign pvl vl
             | _ -> assert false in
@@ -2017,11 +2052,11 @@ and eval_expr' env e =
         (* assert1 *)
         if le a (suc b) then begin
           if env.rac.do_rac then begin
-            let env = bind_vs i.pv_vs (value ty_int (Vnum a)) env in
+            let env = bind_vs i.pv_vs (int_value a) env in
             check_terms (cntr_ctx "Loop invariant initialization" env) inv end;
           List.iter (assign_written_vars e.e_effect.eff_writes loc_or_dummy env)
             (Mvs.keys env.vsenv);
-          let def = value ty_int (Vnum (suc b)) in
+          let def = int_value (suc b) in
           let i_val = get_and_register_value ~def ~ity:i.pv_ity env i.pv_vs
               (Opt.get i.pv_vs.vs_name.id_loc) in
           let env = bind_vs i.pv_vs i_val env in
@@ -2037,7 +2072,7 @@ and eval_expr' env e =
             check_assume_terms ctx inv;
             match eval_expr env e1 with
             | Normal _ ->
-                let env = bind_vs i.pv_vs (value ty_int (Vnum (suc i_bi))) env in
+                let env = bind_vs i.pv_vs (int_value (suc i_bi)) env in
                 (* assert3 *)
                 if env.rac.do_rac then
                   check_terms (cntr_ctx "Loop invariant preservation" env) inv;
@@ -2071,7 +2106,7 @@ and eval_expr' env e =
         Debug.dprintf debug_trace_exec "[interp] for loop with index = %s@."
           (BigInt.to_string i) ;
         if le i b then
-          let env' = bind_vs pvs.pv_vs (value ty_int (Vnum i)) env in
+          let env' = bind_vs pvs.pv_vs (int_value i) env in
           match eval_expr env' e1 with
           | Normal _ ->
               if env.rac.do_rac then
@@ -2081,7 +2116,7 @@ and eval_expr' env e =
         else
           Normal (unit_value ()) in
       ( if env.rac.do_rac then
-          let env' = bind_vs pvs.pv_vs (value ty_int (Vnum a)) env in
+          let env' = bind_vs pvs.pv_vs (int_value a) env in
           check_terms (cntr_ctx "Loop invariant initialization" env') inv ) ;
       iter a
     with NotNum -> Irred e )
@@ -2123,7 +2158,7 @@ and eval_expr' env e =
   | Epure t ->
       Debug.dprintf debug_trace_exec "@[<h>%tEVAL EXPR: PURE %a@]@." pp_indent print_term t;
       let t = compute_term env t in
-      Normal (value (Opt.get t.t_ty) (Vterm t))
+      Normal (term_value (Opt.get t.t_ty) t)
   | Eabsurd ->
       Warning.emit "@[[Exec] unsupported expression: @[%a@]@]@."
         print_expr e ;
@@ -2185,20 +2220,20 @@ and exec_call ?(main_function=false) ?loc env rs arg_pvs ity_result =
         if rs_equal rs rs_func_app then begin
           check_pre_and_register_call Log.ExecConcrete;
           match arg_vs with
-          | [{v_desc= Vfun (cl, arg, e)}; value] ->
-              let env =
-                let vsenv = Mvs.union (fun _ _ v -> Some v) env.vsenv cl in
-                {env with vsenv} in
-              let env = bind_vs arg value env in
-              eval_expr env e
-          | [{v_desc= Vpurefun (_, bindings, default)}; value] ->
-              let v = try Mv.find value bindings with Not_found -> default in
-              Normal v
+          | [fv; value] -> (
+              match value_desc fv with
+              | Vfun (cl, arg, e) ->
+                  let vsenv = Mvs.union (fun _ _ v -> Some v) env.vsenv cl in
+                  let env = bind_vs arg value {env with vsenv} in
+                  eval_expr env e
+              | Vpurefun (_, bindings, def) ->
+                  Normal (Opt.get_def def (Mv.find_opt value bindings))
+              | _ -> assert false )
           | _ -> assert false
           end
         else
-          match rs, arg_vs with
-          | {rs_logic= RLls ls}, [{v_desc= Vproj (ls', v)}]
+          match rs, List.map value_desc arg_vs with
+          | {rs_logic= RLls ls}, [Vproj (ls', v)]
             when ls_equal ls ls' -> (* Projection of a projection value *)
               check_pre_and_register_call Log.ExecConcrete;
               Normal v
@@ -2232,15 +2267,14 @@ and exec_call ?(main_function=false) ?loc env rs arg_pvs ity_result =
                 check_pre_and_register_call Log.ExecConcrete;
                 Debug.dprintf debug_trace_exec "@[<hv2>%tEXEC CALL %a: CONSTRUCTOR@]@." pp_indent print_rs rs;
                 let mt = List.fold_left2 ty_match Mtv.empty
-                    (List.map (fun pv -> pv.pv_vs.vs_ty) rs.rs_cty.cty_args) (List.map v_ty arg_vs) in
+                    (List.map (fun pv -> pv.pv_vs.vs_ty) rs.rs_cty.cty_args) (List.map value_ty arg_vs) in
                 let ty = ty_inst mt (ty_of_ity ity_result) in
-                let fs = List.map field arg_vs in
-                Normal (value ty (Vconstr (rs, fs)))
+                Normal (constr_value ty rs arg_vs)
             | Projection _d -> (
                 check_pre_and_register_call Log.ExecConcrete;
                 Debug.dprintf debug_trace_exec "@[<hv2>%tEXEC CALL %a: PROJECTION@]@." pp_indent print_rs rs;
-                match rs.rs_field, arg_vs with
-                | Some pv, [{v_desc= Vconstr (cstr, args)}] ->
+                match rs.rs_field, List.map value_desc arg_vs with
+                | Some pv, [Vconstr (cstr, args)] ->
                     let rec search constr_args args =
                       match constr_args, args with
                       | pv2 :: pvl, v :: vl ->
@@ -2412,14 +2446,3 @@ let report_eval_result body fmt (res, vsenv, rsenv) =
 
 let report_cntr fmt (ctx, term) =
   report_cntr fmt (ctx, "has failed", term)
-
-(* Export constructors for values with [~origin:`Other]: *)
-let int_value = int_value ~is_default:false
-let range_value = range_value ~is_default:false
-let string_value = string_value ~is_default:false
-let bool_value = bool_value ~is_default:false
-let proj_value = proj_value ~is_default:false
-let constr_value = constr_value ~is_default:false
-let purefun_value = purefun_value ~is_default:false
-let unit_value = unit_value ~is_default:false ()
-let undefined_value = undefined_value ~is_default:false
