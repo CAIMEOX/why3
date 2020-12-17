@@ -47,29 +47,29 @@ module rec Value : sig
   val field_get : field -> value
   val field_set : field -> value -> unit
 
-  (** non defensive API for building [value]s: there are no checks that
-      [ity] is compatible with the [value] being built *)
-  val int_value : BigInt.t -> value
-  val range_value : Ty.ty -> BigInt.t -> value
-  val bool_value : bool -> value
-  val string_value : string -> value
-  val float_value : Ty.ty -> big_float -> value
-  val float_mode_value : Ty.ty -> float_mode -> value
-  val real_value : Big_real.real -> value
-  val proj_value : Ty.ty -> lsymbol -> value -> value
-  val constr_value : Ty.ty -> rsymbol -> value list -> value
-  val purefun_value : result_ty:Ty.ty -> arg_ty:Ty.ty -> value Mv.t -> value -> value
-  val array_value : Ty.ty -> value array -> value
-  val fun_value : Ty.ty -> value Term.Mvs.t -> Term.vsymbol -> Expr.expr -> value
-  val term_value : Ty.ty -> term -> value
-  val unit_value : unit -> value
-  val undefined_value : Ty.ty -> value
-
   val print_value : Format.formatter -> value -> unit
 end
 and Mv : Extmap.S with type key = Value.value
 
 open Value
+
+(** non defensive API for building [value]s: there are no checks that
+    [ity] is compatible with the [value] being built *)
+val int_value : BigInt.t -> value
+val range_value : Ty.ty -> BigInt.t -> value
+val bool_value : bool -> value
+val string_value : string -> value
+val float_value : Ty.ty -> big_float -> value
+val float_mode_value : Ty.ty -> float_mode -> value
+val real_value : Big_real.real -> value
+val proj_value : Ty.ty -> lsymbol -> value -> value
+val constr_value : Ty.ty -> rsymbol -> value list -> value
+val purefun_value : result_ty:Ty.ty -> arg_ty:Ty.ty -> value Mv.t -> value -> value
+val array_value : Ty.ty -> value array -> value
+val fun_value : Ty.ty -> value Term.Mvs.t -> Term.vsymbol -> Expr.expr -> value
+val term_value : Ty.ty -> term -> value
+val unit_value : unit -> value
+val undefined_value : Ty.ty -> value
 
 (** {2 Interpreter log} *)
 

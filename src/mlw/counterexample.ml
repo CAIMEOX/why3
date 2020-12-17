@@ -175,7 +175,6 @@ let get_field_name rs =
 (** Import a value from the prover model to an interpreter value. Raises [Exit] if the
     value cannot be imported. *)
 let rec import_model_value known th_known ity v =
-  let open Value in
   let ts, l1, l2 = ity_components ity in
   let subst = its_match_regs ts l1 l2 in
   let def = Pdecl.find_its_defn known ts in
