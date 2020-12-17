@@ -100,8 +100,7 @@ let mode_to_string m =
   | Faithful -> assert false
 
 module rec Value : sig
-  type origin = [`Computation | `Default | `Other]
-  type value = {v_desc: value_desc; v_ty: ty; v_origin: origin}
+  type value = {v_desc: value_desc; v_ty: ty; v_is_default: bool}
   and value_desc =
     | Vconstr of rsymbol * field list
     | Vnum of BigInt.t
@@ -119,8 +118,7 @@ module rec Value : sig
   and field = Field of value ref
   val compare_values : value -> value -> int
 end = struct
-  type origin = [`Computation | `Default | `Other]
-  type value = {v_desc: value_desc; v_ty: ty; v_origin: origin}
+  type value = {v_desc: value_desc; v_ty: ty; v_is_default: bool}
   and value_desc =
     | Vconstr of rsymbol * field list
     | Vnum of BigInt.t
@@ -202,28 +200,28 @@ and Mv : Extmap.S with type key = Value.value =
 
 include Value
 
-let value ?(origin:origin=`Computation) ty desc =
-  {v_desc= desc; v_ty= ty; v_origin= origin}
+let value ?(is_default=false) ty desc =
+  {v_desc= desc; v_ty= ty; v_is_default= is_default}
 let field v = Field (ref v)
 let v_desc v = v.v_desc
 let v_ty v = v.v_ty
 let field_get (Field r) = r.contents
 let field_set (Field r) v = r := v
 
-let int_value ?origin n = value ?origin ty_int (Vnum n)
-let range_value ?origin ity n = value ?origin (ty_of_ity ity) (Vnum n)
-let string_value ?origin s = value ?origin ty_str (Vstring s)
-let bool_value ?origin b = value ?origin ty_bool (Vbool b)
-let proj_value ?origin ity ls v =
-  value ?origin (ty_of_ity ity) (Vproj (ls, v))
-let constr_value ?origin ity rs vl =
-  value ?origin (ty_of_ity ity) (Vconstr (rs, List.map field vl))
-let purefun_value ?origin ~result_ity ~arg_ity mv v =
-  value ?origin (ty_of_ity result_ity) (Vpurefun (ty_of_ity arg_ity, mv, v))
-let unit_value ?origin () =
-  value ?origin (ty_tuple []) (Vconstr (Expr.rs_void, []))
-let undefined_value ?origin ity =
-  value ?origin (ty_of_ity ity) Vundefined
+let int_value ?is_default n = value ?is_default ty_int (Vnum n)
+let range_value ?is_default ity n = value ?is_default (ty_of_ity ity) (Vnum n)
+let string_value ?is_default s = value ?is_default ty_str (Vstring s)
+let bool_value ?is_default b = value ?is_default ty_bool (Vbool b)
+let proj_value ?is_default ity ls v =
+  value ?is_default (ty_of_ity ity) (Vproj (ls, v))
+let constr_value ?is_default ity rs vl =
+  value ?is_default (ty_of_ity ity) (Vconstr (rs, List.map field vl))
+let purefun_value ?is_default ~result_ity ~arg_ity mv v =
+  value ?is_default (ty_of_ity result_ity) (Vpurefun (ty_of_ity arg_ity, mv, v))
+let unit_value ?is_default () =
+  value ?is_default (ty_tuple []) (Vconstr (Expr.rs_void, []))
+let undefined_value ?is_default ity =
+  value ?is_default (ty_of_ity ity) Vundefined
 
 let rec print_value fmt v =
   match v.v_desc with
@@ -778,13 +776,13 @@ let eval_int_uop op ls l =
   let n = match List.map v_desc l with
     | [Vnum i1] -> op i1
     | _ -> assert false in
-  Some (range_value ~origin:`Computation ls.rs_cty.cty_result n)
+  Some (range_value ls.rs_cty.cty_result n)
 
 let eval_int_rel op _ l =
   let b = match List.map v_desc l with
     | [Vnum i1; Vnum i2] -> op i1 i2
     | _ -> assert false in
-  Some (bool_value ~origin:`Computation b)
+  Some (bool_value b)
 
 (* This initialize Mpfr for float32 behavior *)
 let initialize_float32 () =
@@ -831,7 +829,7 @@ let eval_float :
       | Mode_rel, [Vfloat f1; Vfloat f2] -> Vbool (op f1 f2)
       | Mode_rel1, [Vfloat f] -> Vbool (op f)
       | _ -> cannot_compute "arity error in float operation" in
-    Some (value ~origin:`Computation ty_result v_desc)
+    Some (value ty_result v_desc)
   with Mlmpfr_wrapper.Not_Implemented ->
     cannot_compute "mlmpfr wrapper is not implemented"
 
@@ -850,7 +848,7 @@ let eval_real : type a. a real_arity -> a -> rsymbol -> value list -> value opti
       | Mode_relr, [Vreal r1; Vreal r2] -> Vbool (op r1 r2)
       | Modeconst, [] -> Vreal op
       | _ -> cannot_compute "arity error in real operation" in
-    Some (value ~origin:`Computation ty_real v_desc)
+    Some (value ty_real v_desc)
   with
   | Big_real.Undetermined ->
       (* Cannot decide interval comparison *)
@@ -1050,32 +1048,32 @@ let is_array_its env its =
 
 (* TODO Remove argument [env] after replacing Varray by model substitution *)
 let rec default_value_of_type env known ity : value =
-  let origin = `Default in
+  let is_default = true in
   let ty = ty_of_ity ity in
   match ity.ity_node with
   | Ityvar _ -> failwith "default_value_of_type: type variable"
-  | Ityapp (ts, _, _) when its_equal ts its_int -> value ~origin ty (Vnum BigInt.zero)
+  | Ityapp (ts, _, _) when its_equal ts its_int -> value ~is_default ty (Vnum BigInt.zero)
   | Ityapp (ts, _, _) when its_equal ts its_real -> assert false (* TODO *)
-  | Ityapp (ts, _, _) when its_equal ts its_bool -> value ~origin ty (Vbool false)
-  | Ityapp (ts, _, _) when its_equal ts its_str -> value ~origin ty (Vstring "")
+  | Ityapp (ts, _, _) when its_equal ts its_bool -> value ~is_default ty (Vbool false)
+  | Ityapp (ts, _, _) when its_equal ts its_str -> value ~is_default ty (Vstring "")
   | Ityapp(ts,ityl1,_) when is_ts_tuple ts.its_ts ->
       let vs = List.map (default_value_of_type env known) ityl1 in
-      constr_value ~origin ity (rs_tuple (List.length ityl1)) vs
+      constr_value ~is_default ity (rs_tuple (List.length ityl1)) vs
   | Ityapp (its, l1, l2)
   | Ityreg {reg_its= its; reg_args= l1; reg_regs= l2} ->
       if is_array_its env its then
-        value ~origin ty (Varray (Array.init 0 (fun _ -> assert false)))
+        value ~is_default ty (Varray (Array.init 0 (fun _ -> assert false)))
       else match Pdecl.find_its_defn known its with
         | {Pdecl.itd_its= {its_def= Range r}} ->
             let zero_in_range = BigInt.(le r.Number.ir_lower zero && le zero r.Number.ir_upper) in
             let n = if zero_in_range then BigInt.zero else r.Number.ir_lower in
-            range_value ~origin ity n
+            range_value ~is_default ity n
         | {Pdecl.itd_constructors= rs :: _} ->
             let subst = its_match_regs its l1 l2 in
             let ityl = List.map (fun pv -> pv.pv_ity) rs.rs_cty.cty_args in
             let tyl = List.map (ity_full_inst subst) ityl in
             let vs = List.map (default_value_of_type env known) tyl in
-            constr_value ~origin ity rs vs
+            constr_value ~is_default ity rs vs
         | {Pdecl.itd_constructors= []} ->
             (* if its.its_private then
              *   (\* There is no constructor so we can just invent a Vconstr,
@@ -1084,7 +1082,7 @@ let rec default_value_of_type env known ity : value =
              *   let fl = List.map (fun ity -> field (default_value_of_type env known ity)) itys in
              *   value ty (Vconstr (None, fl))
              * else *)
-            value ~origin ty Vundefined
+            value ~is_default ty Vundefined
 
 (* ROUTINE DEFINITIONS *)
 
@@ -1595,14 +1593,14 @@ let check_assume_term ctx t =
 let free_vars_with_default_value env t =
   let sid1 =
     t_v_fold (fun sid vs ->
-        if (get_vs env vs).v_origin = `Default then
+        if (get_vs env vs).v_is_default then
           Sid.add vs.vs_name sid
         else sid ) Sid.empty t in
   let sid2 =
     t_app_fold (fun sid ls tyl _ ->
         if tyl = [] then
           match Mrs.find_opt (restore_rs ls) env.rsenv with
-          | Some {v_origin= `Default} -> Sid.add ls.ls_name sid
+          | Some {v_is_default} -> Sid.add ls.ls_name sid
           | _ -> sid
         else sid) Sid.empty t in
   Sid.union sid1 sid2
@@ -2416,13 +2414,12 @@ let report_cntr fmt (ctx, term) =
   report_cntr fmt (ctx, "has failed", term)
 
 (* Export constructors for values with [~origin:`Other]: *)
-let origin = `Other
-let int_value = int_value ~origin
-let range_value = range_value ~origin
-let string_value = string_value ~origin
-let bool_value = bool_value ~origin
-let proj_value = proj_value ~origin
-let constr_value = constr_value ~origin
-let purefun_value = purefun_value ~origin
-let unit_value = unit_value ~origin ()
-let undefined_value = undefined_value ~origin
+let int_value = int_value ~is_default:false
+let range_value = range_value ~is_default:false
+let string_value = string_value ~is_default:false
+let bool_value = bool_value ~is_default:false
+let proj_value = proj_value ~is_default:false
+let constr_value = constr_value ~is_default:false
+let purefun_value = purefun_value ~is_default:false
+let unit_value = unit_value ~is_default:false ()
+let undefined_value = undefined_value ~is_default:false
