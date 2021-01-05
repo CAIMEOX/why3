@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<file format="whyml" proved="true">
+<path name=".."/><path name="test_rewrite2.mlw"/>
+<theory name="Monoid" proved="true">
+ <goal name="test1" proved="true">
+ <transf name="rewrite" proved="true" arg1="id_left">
+  <goal name="test1.0" proved="true">
+  <transf name="trivial_ccert" proved="true" >
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="test2" proved="true">
+ <transf name="introduce_premises" proved="true" >
+  <goal name="test2.0" proved="true">
+  <transf name="rewrite" proved="true" arg1="assoc">
+   <goal name="test2.0.0" proved="true">
+   <transf name="rewrite" proved="true" arg1="H">
+    <goal name="test2.0.0.0" proved="true">
+    <transf name="rewrite" proved="true" arg1="&lt;-" arg2="assoc">
+     <goal name="test2.0.0.0.0" proved="true">
+     <transf name="trivial_ccert" proved="true" >
+     </transf>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+<theory name="Group" proved="true">
+ <goal name="inv_right" proved="true">
+ <transf name="assert_ccert" arg1="(forall a b c. o c a = o c b -&gt; a = b)">
+  <goal name="inv_right.0">
+  </goal>
+  <goal name="inv_right.1">
+  </goal>
+ </transf>
+ <transf name="introduce_premises" proved="true" >
+  <goal name="inv_right.0" proved="true">
+  <transf name="assert_ccert" arg1="(forall a b c. o c a = o c b -&gt; a = b)">
+   <goal name="inv_right.0.0">
+   </goal>
+   <goal name="inv_right.0.1">
+   <transf name="rewrite" arg1="H" arg2="with" arg3="e,y">
+    <goal name="inv_right.0.1.0">
+    </goal>
+    <goal name="inv_right.0.1.1" expl="rewrite premises">
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  <transf name="rewrite" proved="true" arg1="&lt;-" arg2="id_left">
+   <goal name="inv_right.0.0" proved="true">
+   <transf name="rewrite" proved="true" arg1="&lt;-" arg2="inv_left" arg3="with" arg4="(i y)">
+    <goal name="inv_right.0.0.0" proved="true">
+    <transf name="rewrite" proved="true" arg1="assoc">
+     <goal name="inv_right.0.0.0.0" proved="true">
+     <transf name="assert_ccert" proved="true" arg1="(o (i y) (o y (i y)) = i y)">
+      <goal name="inv_right.0.0.0.0.0" proved="true">
+      <transf name="rewrite" proved="true" arg1="&lt;-" arg2="assoc">
+       <goal name="inv_right.0.0.0.0.0.0" proved="true">
+       <transf name="rewrite" proved="true" arg1="inv_left">
+        <goal name="inv_right.0.0.0.0.0.0.0" proved="true">
+        <transf name="rewrite" proved="true" arg1="id_left">
+         <goal name="inv_right.0.0.0.0.0.0.0.0" proved="true">
+         <transf name="trivial_ccert" proved="true" >
+         </transf>
+         </goal>
+        </transf>
+        </goal>
+       </transf>
+       </goal>
+      </transf>
+      </goal>
+      <goal name="inv_right.0.0.0.0.1" proved="true">
+      <transf name="rewrite" proved="true" arg1="H">
+       <goal name="inv_right.0.0.0.0.1.0" proved="true">
+       <transf name="trivial_ccert" proved="true" >
+       </transf>
+       </goal>
+      </transf>
+      </goal>
+     </transf>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>

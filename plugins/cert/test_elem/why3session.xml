@@ -26,10 +26,6 @@
  </transf>
  </goal>
  <goal name="G2">
- <transf name="split_goal_full_ccert" >
-  <goal name="G2.0">
-  </goal>
- </transf>
  </goal>
  <goal name="G3">
  </goal>
