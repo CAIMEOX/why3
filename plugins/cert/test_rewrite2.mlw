@@ -1,0 +1,36 @@
+
+module Monoid
+
+type t
+
+function o t t : t
+
+constant e : t
+
+axiom assoc : forall x y z. o (o x y) z = o x (o y z)
+
+axiom id_left : forall x. o e x = x
+
+axiom id_right : forall x. o x e = x
+
+goal test1 : o e e = e
+
+goal test2 : forall a b. o a b = o b a -> forall x . o (o x a) b = o (o x b) a
+
+end
+
+
+
+
+
+module Group
+
+clone Monoid with axiom .
+
+function i t : t
+
+axiom inv_left : forall x. o (i x) x = e
+
+goal inv_right : forall y. o y (i y) = e
+
+end
