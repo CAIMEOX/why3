@@ -51,7 +51,7 @@ goal rename : c -> c
 goal intros : forall x. p x -> d -> p x
 goal clear : a -> d -> a -> a -> d
 
-(* Testing complex transformations *)
+(* Testing blast *)
 goal blast_simp : not ((not c) /\ (not not c))
 goal blast_and : (a /\ b) /\ (a /\ a /\ a /\ b)
 goal blast_and_hole : (b /\ a) /\ ( (a /\ a) /\ c)
@@ -62,6 +62,8 @@ goal blast_big_big : ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
      		       	        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a)))) /\
 			 ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
 			        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))))
+
+(* Testing rewrite *)
 goal rew_goal  : (c <-> a) -> (d \/ c)
 goal rew_hyp : (c <-> d) -> c -> d
 goal rew_inv_hyp : (d <-> c) -> c -> d
