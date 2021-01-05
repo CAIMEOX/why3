@@ -177,13 +177,16 @@ let crename pr1 : ctrans = Trans.store (fun task ->
   [ta], c)
 
 
-(* Closes task when if hypotheses contain false or if the goal is true *)
+(* Closes task if hypotheses contain false or if the goal is true or reflexivity of equality *)
 let close : ctrans = Trans.store (fun task ->
   let trans = Trans.fold_decl (fun d acc -> match d.d_node, acc with
     | _, Some _ -> acc
     | Dprop (k, pr, t), _ ->
         begin match k, t.t_node with
         | Pgoal, Ttrue | Paxiom, Tfalse -> Some pr
+        | Pgoal, Tapp (e, [e1; e2])
+            when ls_equal e ps_equ &&
+                 t_equal e1 e2 -> Some pr
         | _ -> acc
         end
     | _ -> acc) None in
