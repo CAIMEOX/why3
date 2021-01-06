@@ -97,7 +97,12 @@ let eq = CTfvar id_eq
 let id_true = fs_bool_true.ls_name
 let id_false = fs_bool_false.ls_name
 
-let interp_var_type =
+let interp_type =
+  let name ts = ts.ts_name in
+  let l = List.map name [ts_int; ts_real; ts_str] in
+  Sid.of_list l
+
+let interp_var =
   let l = [ id_true, ctbool;
             id_false, ctbool;
             id_eq, CTarrow (ctint, CTarrow (ctint, ctprop))
@@ -285,7 +290,8 @@ and prpv fmt = function
   | ct -> fprintf fmt "(%a)" pcte ct
 
 type ctask =
-  { sigma : ctype Mid.t;
+  { types : Sid.t;
+    sigma : ctype Mid.t;
     gamma_delta : (cterm * bool) Mid.t
   }
 (* We will denote a ctask <sigma; gamma_delta> by <Σ | Γ ⊢ Δ> where:
@@ -325,7 +331,7 @@ let infer_type cta t =
       assert (cty_equal ty2 ctprop);
       ctprop
   | CTint _ -> ctint in
-  let sigma_interp = Mid.set_union cta.sigma interp_var_type in
+  let sigma_interp = Mid.set_union cta.sigma interp_var in
   infer_type sigma_interp t
 
 
@@ -345,20 +351,32 @@ let find_ident s h cta =
       verif_failed s
 
 let ctask_empty =
-  { sigma = Mid.empty;
+  { types = Sid.empty;
+    sigma = Mid.empty;
     gamma_delta = Mid.empty }
 
 let ctask_union ct1 ct2 =
-  { sigma = Mid.set_union ct1.sigma ct2.sigma;
+  { types = Sid.union ct1.types ct2.types;
+    sigma = Mid.set_union ct1.sigma ct2.sigma;
     gamma_delta = Mid.set_union ct1.gamma_delta ct2.gamma_delta }
 
 let lift_mid_cta f cta =
-  { sigma = cta.sigma;
+  { types = cta.types;
+    sigma = cta.sigma;
     gamma_delta = f (cta.gamma_delta) }
+
+(* Make sure to not add interpreted types to the abstract types *)
+let add_type i cta =
+  { types = if Sid.mem i interp_type
+            then cta.types
+            else Sid.add i cta.types;
+    sigma = cta.sigma;
+    gamma_delta = cta.gamma_delta }
 
 (* Make sure to not add interpreted variables to the signature *)
 let add_var i cty cta =
-  { sigma = if Mid.mem i interp_var_type
+  { types = cta.types;
+    sigma = if Mid.mem i interp_var
             then cta.sigma
             else Mid.add i cty cta.sigma;
     gamma_delta = cta.gamma_delta }
@@ -479,6 +497,8 @@ and abstract_term_rec bv_lvl lvl t =
 
 let abstract_decl_acc acc decl =
   match decl.d_node with
+  | Dtype tys ->
+      add_type tys.ts_name acc
   | Dprop (k, pr, t) ->
       let ct = abstract_term t in
       add pr.pr_name (ct, k = Pgoal) acc
