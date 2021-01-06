@@ -1,6 +1,10 @@
-predicate a
-predicate b
-predicate c
+type t
+
+constant e : t
+
+predicate a t
+(* predicate b *)
+(* predicate c *)
 (* predicate p int *)
 
 (* goal G1 : (exists x. p x) -> a *)
@@ -12,6 +16,8 @@ predicate c
 (* goal G2 : not not a *)
 
 (* predicate p (x : bool) (y : bool) *)
-axiom a : a <-> b
 (* goal G : forall x y. p x y -> p true false *)
-goal G : a
+
+axiom A : a e
+
+goal G : a e
