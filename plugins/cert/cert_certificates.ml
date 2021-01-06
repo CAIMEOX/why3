@@ -419,8 +419,10 @@ let split_hyp_goal cta =
 let set_goal : ctask -> cterm -> ctask = fun cta ->
   let gamma, delta = split_hyp_goal cta.gamma_delta in
   let gpr, _ = Mid.choose gamma in
-  fun ct -> { sigma = cta.sigma;
-              gamma_delta = Mid.add gpr (ct, true) delta }
+  fun ct ->
+  { types = cta.types;
+    sigma = cta.sigma;
+    gamma_delta = Mid.add gpr (ct, true) delta }
 
 
 (** Compile chain.

@@ -2,10 +2,12 @@
 <!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
-<file format="whyml">
+<file format="whyml" proved="true">
 <path name=".."/><path name="test_debug.mlw"/>
-<theory name="Top">
- <goal name="G">
+<theory name="Top" proved="true">
+ <goal name="G" proved="true">
+ <transf name="assumption_lcert" proved="true" >
+ </transf>
  <transf name="rewrite_ccert" arg1="A">
   <goal name="G.0">
   </goal>
