@@ -21,18 +21,22 @@ let simplify_task (cta : ctask) : ctask_simple =
     gd = Mid.bindings cta.gamma_delta
          |> List.map encode_neg }
 
-let print_task fmt {s; gd} =
-  fprintf fmt "@[<3>(Π ";
-  pp_print_list ~pp_sep:pp_print_space
-    (fun fmt (id, cty) ->
-      fprintf fmt "(%a : kEv %a)"
-        prid id
-        prtyparen cty) fmt s;
+let rec print_task fmt task =
+  fprintf fmt "tEv (@[<hv>%a@])"
+    print_s task
+
+and print_s fmt {s; gd} =
+  match s with
+  | [] -> print_gd fmt gd
+  | (id, cty)::t -> fprintf fmt "∀ %a (λ %a,@ %a)"
+                      prtyparen cty
+                      prid id
+                      print_s {s=t; gd}
+
+and print_gd fmt gd =
   let _, terms = List.split gd in
   let tp = terms @ [CTfalse] in
-  fprintf fmt ",@]@  tEv (@[<hv>";
-  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇨@ ") prdisj fmt tp;
-  fprintf fmt ")@])"
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇨@ ") prdisj fmt tp
 
 let print_certif print_next fmt c =
   let rstr pos = if pos then "_goal" else "_hyp" in
@@ -117,7 +121,7 @@ let print_certif print_next fmt c =
         prhyp i1 prhyp i2 pc c
         prhyp i
   | EClear (pos, t, i, c) ->
-      fprintf fmt "clear%s %a %a (@ \
+      fprintf fmt "clear%s %a %a (@,\
                    @[<hv>%a@])"
         (rstr pos)
         prpv t
