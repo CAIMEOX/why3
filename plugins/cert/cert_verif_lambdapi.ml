@@ -12,26 +12,41 @@ open Cert_certificates
    As an intermediate data structure we use lists to fix the order
  *)
 type ctask_simple =
-  { s  : (ident * ctype) list;
+  { t  : ident list;
+    s  : (ident * ctype) list;
     gd : (ident * cterm) list }
 
 let simplify_task (cta : ctask) : ctask_simple =
   let encode_neg (k, (ct, pos)) = k, if pos then CTnot ct else ct in
-  { s = Mid.bindings cta.sigma;
+  { t = Sid.elements cta.types;
+    s = Mid.bindings cta.sigma;
     gd = Mid.bindings cta.gamma_delta
          |> List.map encode_neg }
 
 let rec print_task fmt task =
+  print_t task.t fmt print_ts task
+
+and print_t t fmt = match t with
+  | [] -> fprintf fmt "%a"
+  | _ -> fprintf fmt "(@[<v>Π @[%a@],@ \
+                      %a)@]"
+           (pp_print_list ~pp_sep:pp_print_space prkind) t
+
+and prkind fmt id =
+  fprintf fmt "(%a : Kind)"
+    prid id
+
+and print_ts fmt task =
   fprintf fmt "tEv (@[<hv>%a@])"
     print_s task
 
-and print_s fmt {s; gd} =
+and print_s fmt {t; s; gd} =
   match s with
   | [] -> print_gd fmt gd
-  | (id, cty)::t -> fprintf fmt "∀ %a (λ %a,@ %a)"
+  | (id, cty)::s -> fprintf fmt "∀ %a (λ %a,@ %a)"
                       prtyparen cty
                       prid id
-                      print_s {s=t; gd}
+                      print_s {t; s; gd}
 
 and print_gd fmt gd =
   let _, terms = List.split gd in
@@ -189,12 +204,12 @@ let print fmt init res (task_ids, certif) =
       (print_list prhyp) hyp_ids in
   (* The term that has the correct type. *)
   let p_term fmt () =
-    let {s; gd} = init in
+    let {t; s; gd} = init in
     let fv_ids, _ = List.split s in
     let hyp_ids, _ = List.split gd in
     fprintf fmt "@[<2>@<1>%s %a@ %a@]"
       "λ"
-      (print_list prid) (task_ids @ fv_ids)
+      (print_list prid) (t @ task_ids @ fv_ids)
       (print_list prhyp) hyp_ids;
     fprintf fmt ",@ ";
     print_certif print_applied_task fmt certif in
