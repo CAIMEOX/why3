@@ -19,9 +19,9 @@ let verif_failed s = raise (Certif_verification_failed s)
 type cquant = CTforall | CTexists | CTlambda
 
 type ctype =
-  | CTyvar of tvsymbol
-  | CTyapp of tysymbol * ctype list
-  | CTarrow of ctype * ctype
+  | CTyvar of tvsymbol (* type variable *)
+  | CTyapp of tysymbol * ctype list (* (possibly) applied type constant *)
+  | CTarrow of ctype * ctype (* arrow type *)
 
 let ts_prop = create_tysymbol (id_fresh "prop") [] NoDef
 let ctprop = CTyapp (ts_prop, [])
