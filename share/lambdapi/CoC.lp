@@ -24,7 +24,9 @@ rule kEv (kkPi $x $y) ↪  Π (w : kEv $x), kEv ($y w)
 // Derive first-order logic connectives
 
 definition arrow A B ≔  kkPi A (λ _, B)
-set infix right 14 "⇒" ≔  arrow
+
+definition rarrow A B ≔  tkPi A (λ _, B)
+set infix right 14 "⇒" ≔  rarrow
 
 set declared "∀"
 definition ∀ ≔  ktPi
@@ -62,15 +64,16 @@ set infix right 14 "⇔" ≔  type_iff
 
 symbol iff_eq : Π (A : Type) (B : Type),
        	        tEv (type_iff A B) →
-		tEv (eq Prop A B)
+		tEv (∀ (arrow Prop Prop)
+		     (λ P, P A  ⇨ P B))
 
 // Integers
 
-constant symbol Nat : Kind
+constant symbol Nat : Type
 
-constant symbol zero : kEv Nat
+constant symbol zero : tEv Nat
 
-constant symbol succ : kEv Nat → kEv Nat
+constant symbol succ : tEv Nat → tEv Nat
 
 definition one ≔  succ zero
 
@@ -83,10 +86,10 @@ definition infixspeq ≔  eq Nat
 
 // Booleans
 
-constant symbol Bool : Kind
+constant symbol Bool : Type
 
-constant symbol True : kEv Bool
-constant symbol False : kEv Bool
+constant symbol True : tEv Bool
+constant symbol False : tEv Bool
 
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
@@ -314,13 +317,13 @@ definition cleargoal : Π A,
 
 definition clear_goal A HA s ≔  cleargoal A s HA
 
-definition intro_quant_hyp : Π T (P : kEv (T ⇒ Prop)),
-    (Π y, tEv (hyp (P y) empty)) →
+definition intro_quant_hyp : Π (T : Type) (P : kEv (T ⇒ Prop)),
+    (Π (y : tEv T), tEv (hyp (P y) empty)) →
     tEv (hyp (∃ T P) empty)
 ≔  λ T P s ep, exists_elim T P false ep s
 
 definition intro_quant_goal : Π T P,
-    (Π y, tEv (goal (P y) empty)) →
+    (Π (y : tEv T), tEv (goal (P y) empty)) →
     tEv (goal (∀ T P) empty)
 ≔  λ T P s nfp, nfp (λ t, nne (P t) (s t))
 
@@ -355,3 +358,18 @@ definition iffeq : Π (A : Type) (B : Type),
 
 
 
+definition to_verify :
+  tEv (ktPi Prop (λ unit,
+       ktPi Prop (λ t,
+       ∀ (t ⇒ t ⇒ t) (λ o,
+       ∀ t (λ e,
+       ∀ (t ⇒ t) (λ i,
+       ∀ t (λ y,
+       ∀ t (λ x, ∀ t (λ x1, ∀ t (λ x2, infixspeq (o (o x x1) x2) (o x (o x1 x2))))) ⇨
+       ∀ t (λ x, infixspeq (o e x) x) ⇨
+       ∀ t (λ x, infixspeq (o x e) x) ⇨
+       ∀ t (λ x, infixspeq (o (i x) x) e) ⇨
+       ¬ (infixspeq (i y) (i y)) ⇨
+       false)))))))
+≔  λ unit t o e i y Hassoc Hidusleft Hidusright Hinvusleft Hh,
+   eqrefl t (i y) Hh
