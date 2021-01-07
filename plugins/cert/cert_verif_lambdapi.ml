@@ -30,7 +30,7 @@ and print_t t fmt = match t with
   | [] -> fprintf fmt "%a"
   | _ -> fprintf fmt "(@[<v>Π @[%a@],@ \
                       %a)@]"
-           (pp_print_list ~pp_sep:pp_print_space prkind) t
+           (print_list prkind) t
 
 and prkind fmt id =
   fprintf fmt "(%a : Kind)"
@@ -196,11 +196,11 @@ let print fmt init res (task_ids, certif) =
   let print_applied_task =
     let map = Mid.of_list (List.combine task_ids res) in
     fun fmt task_id ->
-    let {s; gd} = Mid.find task_id map in
+    let {t; s; gd} = Mid.find task_id map in
     let fv_ids, _ = List.split s in
     let hyp_ids, _ = List.split gd in
     fprintf fmt "@[%a %a@]"
-      (print_list prid) (task_id :: fv_ids)
+      (print_list prid) (task_id :: t @ fv_ids)
       (print_list prhyp) hyp_ids in
   (* The term that has the correct type. *)
   let p_term fmt () =
