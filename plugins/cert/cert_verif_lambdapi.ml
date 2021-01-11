@@ -43,10 +43,17 @@ and print_ts fmt task =
 and print_s fmt {t; s; gd} =
   match s with
   | [] -> print_gd fmt gd
-  | (id, cty)::s -> fprintf fmt "∀ %a (λ %a,@ %a)"
-                      prtyparen cty
-                      prid id
-                      print_s {t; s; gd}
+  | (id, cty)::s ->
+      let pred = is_predicate cty in
+      fprintf fmt "%a %a (λ %a,@ %a)"
+        prquant pred
+        (pred_typaren pred) cty
+        prid id
+        print_s {t; s; gd}
+
+and prquant fmt pred =
+  if pred then fprintf fmt "ktPi"
+  else fprintf fmt "∀"
 
 and print_gd fmt gd =
   let _, terms = List.split gd in
@@ -164,24 +171,26 @@ let print_certif print_next fmt c =
         prhyp i1
   | EInstQuant _ -> assert false
   | ERewrite (pos, is_eq, cty, t1, t2, ctxt, i1, i2, c) ->
+      let pr_next fmt i1 =
+        fprintf fmt "%a %a %a (λ %a %a,@ \
+                     @[<hv>%a@])@ \
+                     %a@ \
+                     %a"
+          prpv t1 prpv t2 prpv ctxt
+          prhyp i1 prhyp i2 pc c
+          prhyp i1
+          prhyp i2 in
       if is_eq
-      then fprintf fmt "rewrite%s %a %a %a %a (λ %a %a,@ \
-                        @[<hv>%a@])@ \
-                        %a@ \
-                        %a"
-             (rstr pos)
-             prtyparen cty prpv t1 prpv t2 prpv ctxt
-             prhyp i1 prhyp i2 pc c
-             prhyp i1
-             prhyp i2
-      else let ideq = id_register (id_fresh "iff_rewrite") in
-           let crew = ERewrite (pos, true, cty, t1, t2, ctxt, ideq, i2, c) in
-           fprintf fmt "iffeq %a %a (λ %a,@ \
-                        @[<hv>%a@])@ \
-                        %a"
-           prpv t1 prpv t2
-           prhyp ideq pc crew
-           prhyp i1
+      then fprintf fmt "rewrite%s %a %a"
+             (rstr pos) prtyparen cty pr_next i1
+      else
+        let ni1 = id_register (id_fresh "iff_rewrite") in
+        fprintf fmt "iffeq %a %a (λ %a,@ \
+                     @[<hv>rewrite_fmla%s %a@])@ \
+                     %a"
+          prpv t1 prpv t2 prhyp ni1
+          (rstr pos) pr_next ni1
+          prhyp i1
   in
   pc fmt c
 
@@ -209,7 +218,7 @@ let print fmt init res (task_ids, certif) =
     let hyp_ids, _ = List.split gd in
     fprintf fmt "@[<2>@<1>%s %a@ %a@]"
       "λ"
-      (print_list prid) (t @ task_ids @ fv_ids)
+      (print_list prid) (task_ids @ t @ fv_ids)
       (print_list prhyp) hyp_ids;
     fprintf fmt ",@ ";
     print_certif print_applied_task fmt certif in
