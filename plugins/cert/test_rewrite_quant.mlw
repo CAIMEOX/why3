@@ -1,0 +1,5 @@
+use int.Int
+
+axiom H : forall i. i + 1 = 1 + i
+
+goal G : forall x. x + 1 = 1 + x
