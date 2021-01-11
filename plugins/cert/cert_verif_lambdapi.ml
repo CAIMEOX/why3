@@ -23,24 +23,12 @@ let simplify_task (cta : ctask) : ctask_simple =
     gd = Mid.bindings cta.gamma_delta
          |> List.map encode_neg }
 
-let rec print_task fmt task =
-  print_t task.t fmt print_ts task
-
-and print_t t fmt = match t with
-  | [] -> fprintf fmt "%a"
-  | _ -> fprintf fmt "(@[<v>Π @[%a@],@ \
-                      %a)@]"
-           (print_list prkind) t
-
-and prkind fmt id =
-  fprintf fmt "(%a : Kind)"
-    prid id
-
-and print_ts fmt task =
+let rec print_task fmt {t; s; gd} =
+  let s = List.map (fun id -> id, ctprop) t @ s in
   fprintf fmt "tEv (@[<hv>%a@])"
-    print_s task
+    print_s {t = []; s; gd}
 
-and print_s fmt {t; s; gd} =
+and print_s fmt {s; gd} =
   match s with
   | [] -> print_gd fmt gd
   | (id, cty)::s ->
@@ -49,7 +37,7 @@ and print_s fmt {t; s; gd} =
         prquant pred
         (pred_typaren pred) cty
         prid id
-        print_s {t; s; gd}
+        print_s {t = []; s; gd}
 
 and prquant fmt pred =
   if pred then fprintf fmt "ktPi"
@@ -63,7 +51,8 @@ and print_gd fmt gd =
 let print_certif print_next fmt c =
   let rstr pos = if pos then "_goal" else "_hyp" in
   let rec pc fmt = function
-  | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _ | EFoldIff _ | EEqSym _ | EEqTrans _ ->
+  | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _
+  | EFoldIff _ | EEqSym _ | EEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/Eq/Let left"
   | EHole task_id ->
       print_next fmt task_id
