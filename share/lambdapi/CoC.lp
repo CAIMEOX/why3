@@ -23,15 +23,14 @@ rule kEv (kkPi $x $y) ↪  Π (w : kEv $x), kEv ($y w)
 
 // Derive first-order logic connectives
 
-definition arrow A B ≔  kkPi A (λ _, B)
-
-definition rarrow A B ≔  tkPi A (λ _, B)
-set infix right 14 "⇒" ≔  rarrow
+definition t_prop A B ≔  tkPi A (λ _, B)
+definition t_type A B ≔  ttPi A (λ _, B)
+set infix right 14 "⇒" ≔  t_type
 
 set declared "∀"
-definition ∀ ≔  ktPi
+definition ∀ ≔  ttPi
 
-definition forall ≔  ∀ Prop
+definition forall ≔  ktPi Prop
 
 definition false ≔  forall (λ C, C)
 
@@ -52,11 +51,9 @@ definition type_or  A B ≔  forall (λ C, (A ⇨ C) ⇨ (B ⇨ C) ⇨ C)
 set infix right 16 "∨" ≔  type_or
 
 set declared "∃"
-definition ∃ T P ≔  forall (λ C, ∀ T (λ x, P x ⇨ C) ⇨  C)
+definition ∃ T P ≔  forall (λ C, ttPi T (λ x, P x ⇨ C) ⇨  C)
 
-definition exists ≔  ∃ Prop
-
-definition eq T x y ≔  ∀ (T ⇒ Prop)
+definition eq T x y ≔  ktPi (t_prop T Prop)
                        (λ P, P x ⇨ P y)
 
 definition type_iff A B ≔  (A ⇨ B) ∧ (B ⇨ A)
@@ -64,8 +61,8 @@ set infix right 14 "⇔" ≔  type_iff
 
 symbol iff_eq : Π (A : Type) (B : Type),
        	        tEv (type_iff A B) →
-		tEv (∀ (arrow Prop Prop)
-		     (λ P, P A  ⇨ P B))
+		tEv (ktPi (kkPi Prop (λ _, Prop))
+		     (λ P, P A ⇨ P B))
 
 // Integers
 
@@ -317,7 +314,7 @@ definition cleargoal : Π A,
 
 definition clear_goal A HA s ≔  cleargoal A s HA
 
-definition intro_quant_hyp : Π (T : Type) (P : kEv (T ⇒ Prop)),
+definition intro_quant_hyp : Π (T : Type) (P : kEv (t_prop T Prop)),
     (Π (y : tEv T), tEv (hyp (P y) empty)) →
     tEv (hyp (∃ T P) empty)
 ≔  λ T P s ep, exists_elim T P false ep s
@@ -347,29 +344,29 @@ definition rewrite_goal : Π T a b P,
    tEv (hyp (eq T a b) (goal (P a) empty))
 ≔  λ T a b P s h i, s h (h (λ x, ¬ P x) i)
 
-definition iffeq : Π (A : Type) (B : Type),
-	   	   tEv (hyp (eq Prop A B) empty) →
-		   tEv (hyp (type_iff A B) empty)
+// definition iffeq : Π (A : Type) (B : Type),
+// 	   	   tEv (hyp (eq Prop A B) empty) →
+// 		   tEv (hyp (type_iff A B) empty)
 
-≔  λ A B s eab, s (iff_eq A B eab)
+// ≔  λ A B s eab, s (iff_eq A B eab)
 
 
 // To verify
 
 
 
-definition to_verify :
-  tEv (ktPi Prop (λ unit,
-       ktPi Prop (λ t,
-       ∀ (t ⇒ t ⇒ t) (λ o,
-       ∀ t (λ e,
-       ∀ (t ⇒ t) (λ i,
-       ∀ t (λ y,
-       ∀ t (λ x, ∀ t (λ x1, ∀ t (λ x2, infixspeq (o (o x x1) x2) (o x (o x1 x2))))) ⇨
-       ∀ t (λ x, infixspeq (o e x) x) ⇨
-       ∀ t (λ x, infixspeq (o x e) x) ⇨
-       ∀ t (λ x, infixspeq (o (i x) x) e) ⇨
-       ¬ (infixspeq (i y) (i y)) ⇨
-       false)))))))
-≔  λ unit t o e i y Hassoc Hidusleft Hidusright Hinvusleft Hh,
-   eqrefl t (i y) Hh
+// definition to_verify :
+//   tEv (ktPi Prop (λ unit,
+//        ktPi Prop (λ t,
+//        ∀ (t ⇒ t ⇒ t) (λ o,
+//        ∀ t (λ e,
+//        ∀ (t ⇒ t) (λ i,
+//        ∀ t (λ y,
+//        ∀ t (λ x, ∀ t (λ x1, ∀ t (λ x2, eq t (o (o x x1) x2) (o x (o x1 x2))))) ⇨
+//        ∀ t (λ x, eq t (o e x) x) ⇨
+//        ∀ t (λ x, eq t (o x e) x) ⇨
+//        ∀ t (λ x, eq t (o (i x) x) e) ⇨
+//        ¬ (eq t (i y) (i y)) ⇨
+//        false)))))))
+// ≔  λ unit t o e i y Hassoc Hidusleft Hidusright Hinvusleft Hh,
+//    eqrefl t (i y) Hh
