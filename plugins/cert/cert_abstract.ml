@@ -38,6 +38,11 @@ let rec cty_equal l1 l2 = match l1, l2 with
       cty_equal f1 f2 && cty_equal a1 a2
   | (CTyvar _ | CTyapp _ | CTarrow _), _ -> false
 
+let rec is_predicate = function
+  | CTarrow (_, ct) -> is_predicate ct
+  | CTyapp (ts, []) when ts_equal ts ts_prop -> true
+  | _ -> false
+
 (* Pretty printing of ctype (compatible with lambdapi) *)
 
 let san =
@@ -55,30 +60,40 @@ let prhyp fmt i = fprintf fmt "%s" (id_unique hip i)
 
 let prpr fmt pr = prhyp fmt pr.pr_name
 
-let rec prty fmt ty = match ty with
+let rec pred_ty pred fmt ty = match ty with
   | CTyapp (ts, l) when l <> [] ->
       fprintf fmt "@[<2>%a@ %a@]"
         prts ts
-        (print_list prtyparen) l
+        (print_list (pred_typaren pred)) l
   | CTarrow (t1, t2) ->
-      fprintf fmt "@[%a ⇒@ %a@]"
-        prtyparen t1
-        prty t2
-  | _ -> prtyparen fmt ty
+      fprintf fmt "@[%a %a@ %a@]"
+        (pred_typaren pred) t1
+        prarrow pred
+        (pred_ty pred) t2
+  | _ -> pred_typaren pred fmt ty
 
-and prtyparen fmt = function
+and pred_typaren pred fmt = function
   | CTyvar _ -> fprintf fmt "Nat"
   (* TODO handle polymorphic symbols *)
   (* Pretty.print_tv fmt v *)
   | CTyapp (ts, []) -> prts fmt ts
-  | cty -> fprintf fmt "(%a)" prty cty
+  | cty -> fprintf fmt "(%a)" (pred_ty pred) cty
 
 and prts fmt ts =
   if ts_equal ts ts_bool then fprintf fmt "Bool"
   else if ts_equal ts ts_int then fprintf fmt "Nat"
-  else if ts_equal ts ts_prop then fprintf fmt "Prop"
+  else if ts_equal ts ts_prop then fprintf fmt "DType"
   else Pretty.print_ts fmt ts
 
+and prarrow fmt pred =
+  if pred then fprintf fmt "⇀"
+  else fprintf fmt "⇁"
+
+let prty fmt ty =
+  pred_ty (is_predicate ty) fmt ty
+
+let prtyparen fmt ty =
+  pred_typaren (is_predicate ty) fmt ty
 
 
 type cterm =
