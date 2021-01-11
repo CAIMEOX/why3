@@ -34,7 +34,7 @@ let left_c where            = cchecker (cdir false where)
 (* let pose_c name t           = cchecker (pose name t) *)
 let rename_c pr1            = cchecker (crename pr1)
 let revert_c ls             = cchecker (revert ls)
-let rewrite_c rev g where   = cchecker (rewrite g rev where)
+let rewrite_c rev g where wt= cchecker (rewrite g rev wt where)
 let right_c where           = cchecker (cdir true where)
 let split_c any every where = cchecker (split_logic any every where)
 let split_all_full_c        = cchecker split_all_full
@@ -62,7 +62,7 @@ let left_l where            = lchecker (cdir false where)
 (* let pose_l name t           = lchecker (pose name t) *)
 let rename_l pr1            = lchecker (crename pr1)
 let revert_l ls             = lchecker (revert ls)
-let rewrite_l rev g where   = lchecker (rewrite g rev where)
+let rewrite_l rev g where wt= lchecker (rewrite g rev wt where)
 let right_l where           = lchecker (cdir true where)
 let split_l any every where = lchecker (split_logic any every where)
 let split_all_full_l        = lchecker split_all_full
@@ -134,7 +134,7 @@ let register_caml : unit =
     "revert_ccert" (Tlsymbol (Ttrans_l)) revert_c;
 
   wrap_and_register ~desc:"A OCaml certified version of transformation rewrite"
-    "rewrite_ccert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l)))))) rewrite_c;
+    "rewrite_ccert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Topt ("with", Ttermlist (Ttrans_l)))))))) rewrite_c;
 
   wrap_and_register ~desc:"A OCaml certified version of coq tactic [right]"
     "right_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) right_c;
@@ -228,7 +228,7 @@ let register_lambdapi : unit =
     revert_l;
 
   wrap_and_register ~desc:"A Lambdapi certified version of transformation rewrite"
-    "rewrite_lcert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Ttrans_l)))))) rewrite_l;
+    "rewrite_lcert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Topt ("with", Ttermlist (Ttrans_l)))))))) rewrite_l;
 
   wrap_and_register ~desc:"A Lambdapi certified version of coq tactic [right]"
     "right_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
