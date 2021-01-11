@@ -6,6 +6,8 @@
 <path name=".."/><path name="test_debug.mlw"/>
 <theory name="Top" proved="true">
  <goal name="G" proved="true">
+ <transf name="assumption_ccert" proved="true" >
+ </transf>
  <transf name="assumption_lcert" proved="true" >
  </transf>
  <transf name="rewrite_ccert" arg1="A">

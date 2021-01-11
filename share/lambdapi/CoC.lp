@@ -7,8 +7,8 @@ constant symbol Kind : TYPE
 symbol tEv : Type → TYPE
 symbol kEv : Kind → TYPE
 
-constant symbol Prop : Kind
-rule kEv Prop ↪ Type
+constant symbol DType : Kind
+rule kEv DType ↪ Type
 
 symbol ttPi : Π (x : Type), (tEv x → Type) → Type
 symbol tkPi : Π (x : Type), (tEv x → Kind) → Kind
@@ -23,13 +23,16 @@ rule kEv (kkPi $x $y) ↪  Π (w : kEv $x), kEv ($y w)
 
 // Derive first-order logic connectives
 
-definition arrow A B ≔  kkPi A (λ _, B)
-set infix right 14 "⇒" ≔  arrow
+definition t_kind A B ≔  tkPi A (λ _, B)
+set infix right 14 "⇀" ≔  t_kind
+
+definition t_type A B ≔  ttPi A (λ _, B)
+set infix right 14 "⇁" ≔  t_type
 
 set declared "∀"
-definition ∀ ≔  ktPi
+definition ∀ ≔  ttPi
 
-definition forall ≔  ∀ Prop
+definition forall ≔  ktPi DType
 
 definition false ≔  forall (λ C, C)
 
@@ -50,27 +53,30 @@ definition type_or  A B ≔  forall (λ C, (A ⇨ C) ⇨ (B ⇨ C) ⇨ C)
 set infix right 16 "∨" ≔  type_or
 
 set declared "∃"
-definition ∃ T P ≔  forall (λ C, ∀ T (λ x, P x ⇨ C) ⇨  C)
+definition ∃ T P ≔  forall (λ C, ttPi T (λ x, P x ⇨ C) ⇨  C)
 
-definition exists ≔  ∃ Prop
-
-definition eq T x y ≔  ∀ (T ⇒ Prop)
+definition eq T x y ≔  ktPi (T ⇀ DType)
                        (λ P, P x ⇨ P y)
+
+definition eq_fmla A B ≔  ktPi (kkPi DType (λ _, DType))
+		               (λ P, P A ⇨ P B)
 
 definition type_iff A B ≔  (A ⇨ B) ∧ (B ⇨ A)
 set infix right 14 "⇔" ≔  type_iff
 
 symbol iff_eq : Π (A : Type) (B : Type),
        	        tEv (type_iff A B) →
-		tEv (eq Prop A B)
+		tEv (eq_fmla A B)
+
+
 
 // Integers
 
-constant symbol Nat : Kind
+constant symbol Nat : Type
 
-constant symbol zero : kEv Nat
+constant symbol zero : tEv Nat
 
-constant symbol succ : kEv Nat → kEv Nat
+constant symbol succ : tEv Nat → tEv Nat
 
 definition one ≔  succ zero
 
@@ -83,10 +89,10 @@ definition infixspeq ≔  eq Nat
 
 // Booleans
 
-constant symbol Bool : Kind
+constant symbol Bool : Type
 
-constant symbol True : kEv Bool
-constant symbol False : kEv Bool
+constant symbol True : tEv Bool
+constant symbol False : tEv Bool
 
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
@@ -110,7 +116,7 @@ definition nni : Π A, tEv A → tEv (¬ ¬ A)
 definition contra : Π A B, (tEv A → tEv B) → tEv (¬ B) → tEv (¬ A)
 ≔  λ A B p nb a, nb (p a)
 
-symbol em : Π A, tEv (A ∨ ¬ A)
+symbol em : tEv (forall (λ A, A ∨ ¬ A))
 
 definition nne : Π A, tEv (¬ ¬ A) → tEv A
 ≔  λ A nna, em A A (λ a, a) (λ na, nna na A)
@@ -314,13 +320,13 @@ definition cleargoal : Π A,
 
 definition clear_goal A HA s ≔  cleargoal A s HA
 
-definition intro_quant_hyp : Π T (P : kEv (T ⇒ Prop)),
-    (Π y, tEv (hyp (P y) empty)) →
+definition intro_quant_hyp : Π (T : Type) (P : kEv (T ⇀ DType)),
+    (Π (y : tEv T), tEv (hyp (P y) empty)) →
     tEv (hyp (∃ T P) empty)
 ≔  λ T P s ep, exists_elim T P false ep s
 
 definition intro_quant_goal : Π T P,
-    (Π y, tEv (goal (P y) empty)) →
+    (Π (y : tEv T), tEv (goal (P y) empty)) →
     tEv (goal (∀ T P) empty)
 ≔  λ T P s nfp, nfp (λ t, nne (P t) (s t))
 
@@ -344,14 +350,42 @@ definition rewrite_goal : Π T a b P,
    tEv (hyp (eq T a b) (goal (P a) empty))
 ≔  λ T a b P s h i, s h (h (λ x, ¬ P x) i)
 
-definition iffeq : Π (A : Type) (B : Type),
-	   	   tEv (hyp (eq Prop A B) empty) →
-		   tEv (hyp (type_iff A B) empty)
+definition rewrite_fmla_hyp : Π A B P,
+   tEv (hyp (eq_fmla A B) (hyp (P B) empty)) →
+   tEv (hyp (eq_fmla A B) (hyp (P A) empty))
+≔  λ A B P s h i, s h (h P i)
 
+definition rewrite_fmla_goal : Π A B P,
+   tEv (hyp (eq_fmla A B) (goal (P B) empty)) →
+   tEv (hyp (eq_fmla A B) (goal (P A) empty))
+≔  λ A B P s h i, s h (h (λ x, ¬ P x) i)
+
+definition iffeq : Π (A : Type) (B : Type),
+	   	   tEv (hyp (eq_fmla A B) empty) →
+		   tEv (hyp (type_iff A B) empty)
 ≔  λ A B s eab, s (iff_eq A B eab)
 
 
 // To verify
 
+// symbol induction :
+//   tEv (ktPi (Nat ⇀ DType) (λ P,
+//        P zero ⇨
+//        (∀ Nat (λ n, P n ⇨ P (succ n))) ⇨
+//        ∀ Nat (λ n, P n)))
 
-
+// definition to_verify :
+//   tEv (ktPi DType (λ unit,
+//        ktPi DType (λ t,
+//        ∀ (t ⇁ t ⇁ t) (λ o,
+//        ∀ t (λ e,
+//        ∀ (t ⇁ t) (λ i,
+//        ∀ t (λ y,
+//        ∀ t (λ x, ∀ t (λ x1, ∀ t (λ x2, eq t (o (o x x1) x2) (o x (o x1 x2))))) ⇨
+//        ∀ t (λ x, eq t (o e x) x) ⇨
+//        ∀ t (λ x, eq t (o x e) x) ⇨
+//        ∀ t (λ x, eq t (o (i x) x) e) ⇨
+//        ¬ (eq t (i y) (i y)) ⇨
+//        false)))))))
+// ≔  λ unit t o e i y Hassoc Hidusleft Hidusright Hinvusleft Hh,
+//    eqrefl t (i y) Hh
