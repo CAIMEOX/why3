@@ -18,6 +18,16 @@ val intros: Term.term ->
    - the term without premises/let-binding and forall variables at head.
 *)
 
+val matching_with_terms :  trans_name:string ->
+  Term.Mvs.key list ->
+  Term.Svs.t ->
+  Term.term ->
+  Term.term -> Term.term list option -> Ty.ty Ty.Mtv.t * Term.term Term.Mvs.t
+
+val generate_new_subgoals : subst_ty:Ty.ty Ty.Mtv.t ->
+  subst:Term.term Term.Mvs.t ->
+  (Term.Mvs.key * Term.term) list -> Term.term list -> Term.term list
+
 val rewrite_list: bool -> bool -> Decl.prsymbol list ->
   Decl.prsymbol option -> Task.task list Trans.trans
 (* [rewrite_list with_terms rev opt hl h1]
