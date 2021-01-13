@@ -503,19 +503,58 @@ let inst t_inst where : ctrans = Trans.store (fun task ->
   [ta], c)
 
 (* Rewrite with a certificate *)
+(* - If f1 is unifiable to t with substitution s then return s.f2 and replace every
+     occurrences of s.f1 with s.f2 in the rest of the term
+   - Else call recursively on subterms of t *)
+(* If a substitution s is found then new premises are computed as e -> s.e *)
+let replace_subst lp lv llet f1 f2 withed_terms t =
+  (* is_replaced is common to the whole execution of replace_subst. Once an
+     occurence is found, it changes to Some (s) so that only one instanciation
+     is rewritten during execution *)
+  let rec replace is_replaced f1 f2 t : _ * Term.term =
+    match is_replaced with
+    | Some(subst_ty,subst) ->
+        is_replaced, t_replace (t_ty_subst subst_ty subst f1) (t_ty_subst subst_ty subst f2) t
+    | None ->
+      begin
+        (* Generate the list of variables that are here from let bindings *)
+        let llet_svs =
+          List.fold_left (fun acc (v, _) -> Svs.add v acc)
+            Svs.empty llet
+        in
+        (* Catch any error from first_order_matching or with_terms. *)
+        match Apply.matching_with_terms ~trans_name:"rewrite" lv llet_svs f1 t (Some withed_terms) with
+        | exception _e ->
+            Term.t_map_fold
+                (fun is_replaced t -> replace is_replaced f1 f2 t)
+                is_replaced t
+        | subst_ty, subst ->
+              let sf1 = t_ty_subst subst_ty subst f1 in
+              if (Term.t_equal sf1 t) then
+                Some (subst_ty, subst), t_ty_subst subst_ty subst f2
+              else
+                t_map_fold (fun is_replaced t -> replace is_replaced f1 f2 t)
+                  is_replaced t
+      end
+  in
+  let is_replaced, t =
+    replace None f1 f2 t
+  in
+  match is_replaced with
+  | None -> raise (Arg_trans "rewrite: no term matching the given pattern")
+  | Some(subst_ty,subst) ->
+      let new_goals = Apply.generate_new_subgoals ~subst ~subst_ty llet lp in
+      subst, new_goals, t
 
-let rec intro_premises acc t = match t.t_node with
-  | Tbinop (Timplies, f1, f2) -> intro_premises (f1::acc) f2
-  | _ -> acc, t
 
-let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
+let rewrite_in rev with_terms prh pri task = (* rewrites <h> in <i> with direction <rev> *)
   let nprh = pr_clone prh in
   let found_eq =
     (* Used to find the equality we are rewriting on *)
     Trans.fold_decl (fun d acc ->
       match d.d_node with
-      | Dprop (Paxiom, pr, t) when pr_equal pr prh ->
-          let lp, f = intro_premises [] t in
+      | Dprop (Paxiom, pr, trew) when pr_equal pr prh ->
+          let lp, lv, llet, f = Apply.intros trew in
           let revert, t1, t2 = (match f.t_node with
           | Tapp (ls, [t1; t2]) when ls_equal ls ps_equ ->
               (* Support to rewrite from the right *)
@@ -528,7 +567,7 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
               then (fun c -> c), t1, t2
               else iffsym_hyp nprh, t2, t1
           | _ -> raise (Arg_bad_hypothesis ("rewrite", f))) in
-          Some (lp, revert, t1, t2)
+          Some (lp, lv, llet, revert, t1, t2, trew)
       | _ -> acc)
       None
   in
@@ -536,19 +575,19 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
   let lp_new found_eq =
     match found_eq with
     | None -> raise (Args_wrapper.Arg_error "Did not find rewrite hypothesis")
-    | Some (lp, revert, t1, t2) ->
+    | Some (lp, lv, llet, revert, t1, t2, trew) ->
       Trans.fold_decl (fun d acc ->
         match d.d_node with
         | Dprop (p, pr, t) when pr_equal pr pri ->
-            let new_term = t_replace t1 t2 t in
-            Some (lp, revert, create_prop_decl p pr new_term)
+            let subst, lp, new_term = replace_subst lp lv llet t1 t2 with_terms t in
+            Some (subst, trew, revert, lp, create_prop_decl p pr new_term)
         | _ -> acc) None in
   (* Pass the premises as new goals. Replace the former toberewritten
      hypothesis to the new rewritten one *)
   let recreate_tasks lp_new =
     match lp_new with
     | None -> raise (Arg_trans "recreate_tasks")
-    | Some (lp, revert, new_decl) ->
+    | Some (subst, trew, revert, lp, new_decl) ->
         let trans_rewriting =
           Trans.decl (fun decl -> match decl.d_node with
           | Dprop (_, pr, _) when pr_equal pr pri -> [new_decl]
@@ -566,13 +605,24 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
           lambda (List n) (fun l ->
               let s = Stream.of_list l in
               let hole () = Hole (Stream.next s) in
-              let apply _ c =
+              let apply c =
                 Unfold (nprh, Split (nprh,
                 Clear (pr, Swap (nprh, rename nprh pr (hole ()))),
                 c)) in
+              let rec apply_rew trew c = match trew.t_node with
+                | Tbinop (Timplies, _, t2) ->
+                    let c = apply_rew t2 c in
+                    apply c
+                | Tquant (Tforall, fq) ->
+                    let vsl, _, fs = t_open_quant fq in
+                    let c = apply_rew fs c in
+                    let v = List.hd vsl in
+                    let tv = Mvs.find v subst in
+                    InstQuant (nprh, nprh, tv, c)
+                | _ -> c in
               let rew_cert = Rewrite (nprh, pri, Clear (nprh, hole ())) in
               Duplicate (prh, nprh,
-              List.fold_right apply lp (revert rew_cert))) in
+              apply_rew trew (revert rew_cert))) in
 
         Trans.store (fun task ->
             Trans.apply (Trans.par (trans_rewriting :: list_par)) task,
@@ -583,9 +633,10 @@ let rewrite_in rev prh pri task = (* rewrites <h> in <i> with direction <rev> *)
   (* Composing previous functions *)
   Trans.apply (Trans.bind (Trans.bind found_eq lp_new) recreate_tasks) task
 
-let rewrite g rev where : ctrans = Trans.store (fun task ->
+let rewrite g rev with_terms where : ctrans = Trans.store (fun task ->
   let h1 = default_goal task where in
-  rewrite_in (not rev) g h1 task)
+  let wt = match with_terms with Some wt -> wt | None -> [] in
+  rewrite_in (not rev) wt g h1 task)
 
 let exfalso : ctrans = Trans.store (fun task ->
   let h = create_prsymbol (gen_ident "H") in
