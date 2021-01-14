@@ -3,3 +3,9 @@ use int.Int
 axiom H : forall i. i + 1 = 1 + i
 
 goal G : forall x. x + 1 = 1 + x
+
+axiom H2 : forall x y. x + y = y + x
+
+goal G2 : forall x. x + 1 = 1 + x
+
+
