@@ -610,22 +610,22 @@ let rewrite_in rev with_terms prh pri task = (* rewrites <h> in <i> with directi
                 Clear (pr, Swap (nprh, rename nprh pr (hole ()))),
                 c)) in
               let vs = Stream.of_list lv in
-              let inst _ c =
+              let instantiate _ f () =
                 let v = Stream.next vs in
                 let tv = Mvs.find v subst in
-                InstQuant (nprh, nprh, tv, c) in
-              let rec apply_rew trew c = match trew.t_node with
+                InstQuant (nprh, nprh, tv, f ()) in
+              let rec app_inst trew c = match trew.t_node with
                 | Tbinop (Timplies, _, t2) ->
-                    let c = apply_rew t2 c in
+                    let c = app_inst t2 c in
                     apply c
                 | Tquant (Tforall, fq) ->
                     let vsl, _, fs = t_open_quant fq in
-                    let c = apply_rew fs c in
-                    List.fold_right inst vsl c
+                    let f () = app_inst fs c in
+                    List.fold_right instantiate vsl f ()
                 | _ -> c in
               let rew_cert = Rewrite (nprh, pri, Clear (nprh, hole ())) in
               Duplicate (prh, nprh,
-              apply_rew trew (revert rew_cert))) in
+              app_inst trew (revert rew_cert))) in
 
         Trans.store (fun task ->
             Trans.apply (Trans.par (trans_rewriting :: list_par)) task,
