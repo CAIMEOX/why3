@@ -19,6 +19,20 @@
   </goal>
  </transf>
  </goal>
+ <goal name="G2">
+ <transf name="intro_ccert" >
+  <goal name="G2.0">
+  <transf name="rewrite_ccert" arg1="H2">
+   <goal name="G2.0.0">
+   </goal>
+  </transf>
+  <transf name="rewrite_lcert" arg1="H2">
+   <goal name="G2.0.0">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
 </theory>
 </file>
 </why3session>
