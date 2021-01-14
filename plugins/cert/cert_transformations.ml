@@ -580,14 +580,14 @@ let rewrite_in rev with_terms prh pri task = (* rewrites <h> in <i> with directi
         match d.d_node with
         | Dprop (p, pr, t) when pr_equal pr pri ->
             let subst, lp, new_term = replace_subst lp lv llet t1 t2 with_terms t in
-            Some (subst, trew, revert, lp, create_prop_decl p pr new_term)
+            Some (subst, trew, revert, lp, lv, create_prop_decl p pr new_term)
         | _ -> acc) None in
   (* Pass the premises as new goals. Replace the former toberewritten
      hypothesis to the new rewritten one *)
   let recreate_tasks lp_new =
     match lp_new with
     | None -> raise (Arg_trans "recreate_tasks")
-    | Some (subst, trew, revert, lp, new_decl) ->
+    | Some (subst, trew, revert, lp, lv, new_decl) ->
         let trans_rewriting =
           Trans.decl (fun decl -> match decl.d_node with
           | Dprop (_, pr, _) when pr_equal pr pri -> [new_decl]
@@ -609,6 +609,11 @@ let rewrite_in rev with_terms prh pri task = (* rewrites <h> in <i> with directi
                 Unfold (nprh, Split (nprh,
                 Clear (pr, Swap (nprh, rename nprh pr (hole ()))),
                 c)) in
+              let vs = Stream.of_list lv in
+              let inst _ c =
+                let v = Stream.next vs in
+                let tv = Mvs.find v subst in
+                InstQuant (nprh, nprh, tv, c) in
               let rec apply_rew trew c = match trew.t_node with
                 | Tbinop (Timplies, _, t2) ->
                     let c = apply_rew t2 c in
@@ -616,9 +621,7 @@ let rewrite_in rev with_terms prh pri task = (* rewrites <h> in <i> with directi
                 | Tquant (Tforall, fq) ->
                     let vsl, _, fs = t_open_quant fq in
                     let c = apply_rew fs c in
-                    let v = List.hd vsl in
-                    let tv = Mvs.find v subst in
-                    InstQuant (nprh, nprh, tv, c)
+                    List.fold_right inst vsl c
                 | _ -> c in
               let rew_cert = Rewrite (nprh, pri, Clear (nprh, hole ())) in
               Duplicate (prh, nprh,
