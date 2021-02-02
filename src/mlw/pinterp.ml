@@ -2330,17 +2330,19 @@ and exec_call_abstract ?loc ?rs_name env cty arg_pvs ity_result =
    *)
   let loc_or_dummy = Opt.get_def Loc.dummy_position loc in
   (* assert1 is already done above *)
-  let res = match cty.cty_post with
-    | p :: _ -> let (vs,_) = open_post p in
-                id_clone vs.vs_name
-    | _ -> id_fresh "result" in
-  let res = create_vsymbol res (ty_of_ity ity_result) in
   let vars_map = Mpv.of_list (List.combine cty.cty_args arg_pvs) in
   let asgn_wrt = assign_written_vars ~vars_map
                    cty.cty_effect.eff_writes loc_or_dummy env in
   List.iter asgn_wrt (Mvs.keys env.vsenv);
-  let res_v = get_and_register_value ~ity:ity_result env res
-                loc_or_dummy in
+  let res_v =
+    match rs_name with
+    | Some id ->
+        let name = asprintf "%a'result" Ident.print_decoded id.id_string in
+        let res = create_vsymbol (id_fresh name) (ty_of_ity ity_result) in
+        get_and_register_value ~ity:ity_result env res loc_or_dummy
+    | _ ->
+        default_value_of_type env.env env.pmodule.Pmodule.mod_known ity_result
+  in
   (* assert2 *)
   let msg = "Assume postcondition" in
   let msg = match rs_name with
