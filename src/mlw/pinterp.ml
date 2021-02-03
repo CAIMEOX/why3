@@ -2335,14 +2335,12 @@ and exec_call_abstract ?loc ?rs_name env cty arg_pvs ity_result =
                    cty.cty_effect.eff_writes loc_or_dummy env in
   List.iter asgn_wrt (Mvs.keys env.vsenv);
   let res_v =
-    match rs_name with
-    | Some id ->
-        let name = asprintf "%a'result" Ident.print_decoded id.id_string in
-        let res = create_vsymbol (id_fresh name) (ty_of_ity ity_result) in
-        get_and_register_value ~ity:ity_result env res loc_or_dummy
-    | _ ->
-        default_value_of_type env.env env.pmodule.Pmodule.mod_known ity_result
-  in
+    let pid = result_id ?loc ~ql:cty.cty_post () in
+    let pid = match rs_name with
+      | None -> pid
+      | Some id -> {pid with pre_name= sprintf "%s'%s" id.id_string pid.pre_name} in
+    let res = create_vsymbol pid (ty_of_ity ity_result) in
+    get_and_register_value ~ity:ity_result env res loc_or_dummy in
   (* assert2 *)
   let msg = "Assume postcondition" in
   let msg = match rs_name with
