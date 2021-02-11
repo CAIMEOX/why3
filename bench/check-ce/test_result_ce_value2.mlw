@@ -4,8 +4,9 @@ val id (x: int) : int
   ensures { result >= x }
 
 let test (x:int) =
-  let a = id x in
+  let a [@model_result_call_loc:8:4:8:bench/check-ce/test_result_ce_value2.mlw] =
+    id x in
   let b = id x + 1 in
   let c = id 2 in
   let d = id 3 + 4 in
-  assert { a+b+c+d <> 42 } 
+  assert { a + b + c + d <> 42 }
