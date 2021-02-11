@@ -1,8 +1,8 @@
-type t
+(* type t *)
 
-constant e : t
+(* constant e : t *)
 
-predicate a t
+(* predicate a t *)
 (* predicate b *)
 (* predicate c *)
 (* predicate p int *)
@@ -18,6 +18,19 @@ predicate a t
 (* predicate p (x : bool) (y : bool) *)
 (* goal G : forall x y. p x y -> p true false *)
 
-axiom A : a e
 
-goal G : a e
+
+predicate a
+predicate b
+
+axiom A : a
+
+(* goal G : a /\ b *)
+
+goal G : a \/ b
+
+
+
+(* axiom A : a e *)
+
+(* goal G : a e *)
