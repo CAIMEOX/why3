@@ -72,13 +72,30 @@ symbol iff_eq : Π (A : Type) (B : Type),
 
 // Integers
 
-constant symbol Nat : Type
+constant symbol Int : Type
 
-constant symbol zero : tEv Nat
+constant symbol zero : tEv Int
 
-constant symbol succ : tEv Nat → tEv Nat
+constant symbol T0 : tEv Int -> tEv Int
+constant symbol Tp1 : tEv Int -> tEv Int
+constant symbol Tm1 : tEv Int -> tEv Int
 
-definition one ≔  succ zero
+rule T0 zero ↪  zero
+
+
+
+symbol int_induction :
+  tEv (ktPi (Int ⇀ DType) (λ P,
+       P zero ⇨
+       (∀ Int (λ n, P n ⇨ P (T0 n))) ⇨
+       (∀ Int (λ n, P n ⇨ P (Tp1 n))) ⇨
+       (∀ Int (λ n, P n ⇨ P (Tm1 n))) ⇨
+       ∀ Int (λ n, P n)))
+
+
+constant symbol succ : tEv Int → tEv Int
+
+definition one ≔  Tp1 zero
 
 set builtin "0"  ≔  zero
 set builtin "+1" ≔  succ
@@ -367,12 +384,6 @@ definition iffeq : Π (A : Type) (B : Type),
 
 
 // To verify
-
-// symbol induction :
-//   tEv (ktPi (Nat ⇀ DType) (λ P,
-//        P zero ⇨
-//        (∀ Nat (λ n, P n ⇨ P (succ n))) ⇨
-//        ∀ Nat (λ n, P n)))
 
 // definition to_verify :
 //   tEv (ktPi DType (λ unit,
