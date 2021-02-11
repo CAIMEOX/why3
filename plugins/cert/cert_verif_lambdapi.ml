@@ -46,7 +46,7 @@ and prquant fmt pred =
 and print_gd fmt gd =
   let _, terms = List.split gd in
   let tp = terms @ [CTfalse] in
-  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇨@ ") prdisj fmt tp
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ↝@ ") prdisj fmt tp
 
 let print_certif print_next fmt c =
   let rstr pos = if pos then "_goal" else "_hyp" in
@@ -212,9 +212,9 @@ let print fmt init res (task_ids, certif) =
     fprintf fmt ",@ ";
     print_certif print_applied_task fmt certif in
 
-  fprintf fmt "@[<v>definition to_verify :@   \
+  fprintf fmt "@[<v>symbol to_verify :@   \
                @[<v>%a@]@ \
-               @<3>%s@[<v>%a@]@]@."
+               @<3>%s@[<v>%a@]@];@."
     p_type ()
     "≔  "
     p_term ();
