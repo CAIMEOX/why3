@@ -443,17 +443,17 @@ let get_model_elements m =
 let get_model_term_loc m = m.vc_term_loc
 let get_model_term_attrs m = m.vc_term_attrs
 
-let get_model_element model name loc =
-  let aux me =
-    me.me_name.men_name = name &&
-    Opt.equal Loc.equal me.me_location (Some loc) in
-  List.find_opt aux (get_model_elements model)
+let search_model_element m p =
+  let exception Found of model_element in
+  let find me = if p me then raise (Found me) in
+  match Mstr.iter (fun _ -> Mint.iter (fun _ -> List.iter find)) m.model_files
+  with exception Found me -> Some me | () -> None
 
-let get_model_element_value model name loc =
-  let aux me =
+let get_model_element m name loc =
+  let p me =
     me.me_name.men_name = name &&
     Opt.equal Loc.equal me.me_location (Some loc) in
-  List.find_opt aux (get_model_elements model)
+  search_model_element m p
 
 let get_model_element_by_id model id =
   match id.id_loc with
@@ -461,11 +461,18 @@ let get_model_element_by_id model id =
   | Some loc ->
       let name = id.id_string in
       let name = Ident.get_model_trace_string ~name ~attrs:id.id_attrs in
-      get_model_element_value model name loc
+      get_model_element model name loc
 
 let get_model_element_by_loc model loc =
-  let aux me = Opt.equal Loc.equal me.me_location (Some loc) in
-  List.find_opt aux (get_model_elements model)
+  let p me = Opt.equal Loc.equal me.me_location (Some loc) in
+  search_model_element model p
+
+let get_model_element_call_result model loc =
+  let p me =
+    let oloc = Ident.get_model_result_call_loc me.me_name.men_attrs in
+    Opt.equal Loc.equal oloc (Some loc) in
+  search_model_element model p
+
 
 (*
 ***************************************************************

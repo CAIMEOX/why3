@@ -151,6 +151,7 @@ val get_model_term_attrs : model -> Ident.Sattr.t
 val get_model_element : model -> string -> Loc.position -> model_element option
 val get_model_element_by_id : model -> Ident.ident -> model_element option
 val get_model_element_by_loc : model -> Loc.position -> model_element option
+val get_model_element_call_result : model -> Loc.position -> model_element option
 
 (** {2 Printing the model} *)
 
