@@ -2,15 +2,33 @@
 <!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
-<file format="whyml" proved="true">
+<file format="whyml">
 <path name=".."/><path name="test_debug.mlw"/>
-<theory name="Top" proved="true">
- <goal name="G" proved="true">
- <transf name="assumption_ccert" proved="true" >
+<theory name="Top">
+ <goal name="G">
+ <transf name="assumption_lcert" >
+  <goal name="G.0">
+  </goal>
  </transf>
- <transf name="assumption_lcert" proved="true" >
+ <transf name="intro_lcert" >
+  <goal name="G.0">
+  <transf name="assumption_lcert" >
+   <goal name="G.0.0">
+   </goal>
+  </transf>
+  </goal>
  </transf>
  <transf name="rewrite_ccert" arg1="A">
+  <goal name="G.0">
+  </goal>
+ </transf>
+ <transf name="right_lcert" >
+  <goal name="G.0">
+  </goal>
+ </transf>
+ <transf name="split_goal_full_lcert" >
+  <goal name="G.0">
+  </goal>
   <goal name="G.0">
   </goal>
  </transf>
