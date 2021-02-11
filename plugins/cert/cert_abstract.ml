@@ -248,7 +248,7 @@ let rec pcte fmt = function
 
 and prarr fmt = function
   | CTbinop (Timplies, ct1, ct2) ->
-      fprintf fmt "%a ⇨ %a"
+      fprintf fmt "%a ↝ %a"
         prdisj ct1
         prarr ct2
   | CTbinop (Tiff, ct1, ct2) ->
