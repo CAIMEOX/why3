@@ -258,18 +258,19 @@ let rec import_model_value known th_known ity v =
             print_model_value v
 
 let get_model_value m known th_known =
-  fun ?name ?loc ity : Value.value option ->
-  match loc with
-  | None -> None
-  | Some l ->
-     let ome = match name with
-       | None -> get_model_element_by_loc m l
-       | Some s -> get_model_element m s l in
-     match ome with
-     | None -> None
-     | Some me ->
-         try Some (import_model_value known th_known ity me.me_value)
-         with Exit -> None
+  let import ity me =
+    try Some (import_model_value known th_known ity me.me_value)
+    with Exit -> None in
+  let for_variable ?loc id ity =
+    let name =
+      Ident.get_model_trace_string ~name:id.id_string ~attrs:id.id_attrs in
+    let loc = if loc <> None then loc else id.id_loc in
+    match loc with
+    | Some loc -> Opt.bind (get_model_element m name loc) (import ity)
+    | None -> None in
+  let for_result loc ity =
+    Opt.bind (get_model_element_call_result m loc) (import ity) in
+  {for_variable; for_result}
 
 (** Check and select solver counterexample models *)
 

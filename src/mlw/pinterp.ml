@@ -704,23 +704,29 @@ end
 (*                              RAC configuration                             *)
 (******************************************************************************)
 
-type import_value = ?name:string -> ?loc:Loc.position -> ity -> value option
+type get_value = {
+  for_variable: ?loc:Loc.position -> ident -> ity -> value option;
+  for_result: Loc.position -> ity -> value option;
+}
 
 type rac_config = {
   do_rac              : bool;
   rac_abstract        : bool;
   skip_cannot_compute : bool; (* skip if it cannot compute, when possible *)
   rac_reduce          : rac_reduce_config;
-  get_value           : import_value;
+  get_value           : get_value;
   log_uc              : Log.log_uc;
 }
 
-let default_get_value ?name:_ ?loc:_ _ = None
+let default_import_value = {
+  for_variable= (fun ?loc:_ _ _ -> None);
+  for_result= (fun _ _ -> None);
+}
 
 let rac_config ~do_rac ~abstract:rac_abstract
       ?(skip_cannot_compute=true)
       ?reduce:rac_reduce
-      ?(get_value=default_get_value) () =
+      ?(get_value=default_import_value) () =
   let rac_reduce = match rac_reduce with
     | Some r -> r
     | None -> rac_reduce_config () in
@@ -1495,9 +1501,6 @@ let task_of_term ?(vsenv=[]) env t =
 let bind_univ_quant_vars = false
 let bind_univ_quant_vars_default = false
 
-let string_or_model_trace id =
-  Ident.get_model_trace_string ~name:id.id_string ~attrs:id.id_attrs
-
 (* Get the value of a vsymbol with env.rac.get_value or a default value *)
 let get_value_for_quant_var env vs =
   match vs.vs_name.id_loc with
@@ -1505,8 +1508,8 @@ let get_value_for_quant_var env vs =
   | Some loc ->
       let value =
         if bind_univ_quant_vars then
-          let name = string_or_model_trace vs.vs_name in
-          let v = env.rac.get_value ~name ~loc (ity_of_ty vs.vs_ty) in
+          let v =
+            env.rac.get_value.for_variable vs.vs_name (ity_of_ty vs.vs_ty) in
           (Opt.iter (fun v ->
                Debug.dprintf debug_rac_values
                  "Bind all-quantified variable %a to %a@."
@@ -1870,24 +1873,52 @@ let print_result fmt = function
 (*            GET AND REGISTER VALUES FOR VARIABLES AND CALL RESULTS          *)
 (******************************************************************************)
 
-let get_and_register_value env ?def ?ity vs loc =
-  let ity = match ity with None -> ity_of_ty vs.vs_ty | Some ity -> ity in
-  let name = string_or_model_trace vs.vs_name in
-  let value = match env.rac.get_value ~name ~loc ity with
-    | Some v ->
-       Debug.dprintf debug_rac_values
-         "@[<hv2>Value imported for %a at %a:@ @[%a@]@]@."
-         print_decoded name print_loc' loc print_value v; v
-    | None ->
-       let v = match def with
-         | None -> default_value_of_type env.env env.pmodule.Pmodule.mod_known ity
-         | Some v -> v in
-       Debug.dprintf debug_rac_values
-         "@[<h>No value for %s at %a, taking default%t.@]@." name print_loc' loc
-         (fun fmt -> if def <> None then fprintf fmt " %a" print_value v);
-       v in
-  register_used_value env (Some loc) vs.vs_name value;
+(** A value generator with a string as a description. *)
+type value_gen = string * (unit -> value option)
+
+(** [get_value gens] returns for a list of generators [gen] the description and
+    value for the first generator whose returned option is inhabitated. *)
+let get_value : value_gen list -> string * value =
+  let aux (s, gen) = match gen () with Some v -> Some (s, v) | None -> None in
+  Lists.first aux
+
+(** Generator for a default value *)
+let gen_default def : value_gen =
+  "default", fun () ->
+    def
+
+(** Generator for the type default value *)
+let gen_type_default env ity : value_gen =
+  "type default", fun () ->
+    Some (default_value_of_type env.env env.pmodule.Pmodule.mod_known ity)
+
+let get_and_register_aux env ~ctx_desc ~reg_id oloc gens =
+  let desc, value = try get_value gens with Not_found ->
+    cannot_compute "Missing value for %s" ctx_desc
+      (Pp.print_option_or_default "NO LOC" Pretty.print_loc') oloc in
+  Debug.dprintf debug_rac_values "@[<h>Value %s for %a at %a: %a@]@."
+    desc print_decoded ctx_desc
+    (Pp.print_option_or_default "NO LOC" Pretty.print_loc') oloc print_value value;
+  register_used_value env oloc reg_id value;
   value
+
+let get_and_register_variable_value ?def env id ?loc ity =
+  let gen_variable_value : value_gen =
+    "imported", fun () ->
+      env.rac.get_value.for_variable ?loc id ity in
+  let ctx_desc = asprintf "variable %a" print_decoded id.id_string in
+  let gens = [gen_variable_value; gen_default def; gen_type_default env ity] in
+  let loc = if loc <> None then loc else id.id_loc in
+  get_and_register_aux env ~ctx_desc ~reg_id:id loc gens
+
+let get_and_register_result_value ?def env loc ity =
+  let ctx_desc = asprintf "return value of call" in
+  let gen_result_value : value_gen =
+    "imported", fun () ->
+      env.rac.get_value.for_result loc ity in
+  let gens = [gen_result_value; gen_default def; gen_type_default env ity] in
+  let reg_id = id_register (id_fresh "result") in
+  get_and_register_aux env ~ctx_desc ~reg_id (Some loc) gens
 
 (******************************************************************************)
 (*                              SIDE EFFECTS                                  *)
@@ -1916,7 +1947,8 @@ let assign_written_vars ?(vars_map=Mpv.empty) wrt loc env vs =
       pp_indent print_pv pv
       (Pp.print_option print_loc') pv.pv_vs.vs_name.id_loc;
     let pv = Mpv.find_def pv pv vars_map in
-    let value = get_and_register_value ~ity:pv.pv_ity env pv.pv_vs loc in
+    let value =
+      get_and_register_variable_value env pv.pv_vs.vs_name ~loc pv.pv_ity in
     set_constr (get_vs env vs) value )
 
 (******************************************************************************)
@@ -2176,8 +2208,8 @@ and eval_expr' env e =
           List.iter (assign_written_vars e.e_effect.eff_writes loc_or_dummy env)
             (Mvs.keys env.vsenv);
           let def = value ty_int (Vnum (suc b)) in
-          let i_val = get_and_register_value ~def ~ity:i.pv_ity env i.pv_vs
-              (Opt.get i.pv_vs.vs_name.id_loc) in
+          let i_val =
+            get_and_register_variable_value env ~def i.pv_vs.vs_name i.pv_ity in
           let env = bind_vs i.pv_vs i_val env in
           let i_bi = big_int_of_value i_val in
           if not (le a i_bi && le i_bi (suc b)) then begin
@@ -2441,25 +2473,21 @@ and exec_call_abstract ?loc ?rs_name env cty arg_pvs ity_result =
      (postcondition does not hold with the values obtained
      from the counterexample)
    *)
-  let loc_or_dummy = Opt.get_def Loc.dummy_position loc in
+  let loc = match loc with
+    | Some loc -> loc
+    | None -> cannot_compute "Abstract call without location" in
   (* assert1 is already done above *)
   let vars_map = Mpv.of_list (List.combine cty.cty_args arg_pvs) in
   let asgn_wrt = assign_written_vars ~vars_map
-                   cty.cty_effect.eff_writes loc_or_dummy env in
+                   cty.cty_effect.eff_writes loc env in
   List.iter asgn_wrt (Mvs.keys env.vsenv);
-  let res_v =
-    let pid = result_id ?loc ~ql:cty.cty_post () in
-    let pid = match rs_name with
-      | None -> pid
-      | Some id -> {pid with pre_name= sprintf "%s'%s" id.id_string pid.pre_name} in
-    let res = create_vsymbol pid (ty_of_ity ity_result) in
-    get_and_register_value ~ity:ity_result env res loc_or_dummy in
+  let res_v = get_and_register_result_value env loc ity_result in
   (* assert2 *)
   let msg = "Assume postcondition" in
   let msg = match rs_name with
     | None -> cntr_desc_str msg "anonymous function"
     | Some name -> cntr_desc msg name in
-  let ctx = cntr_ctx msg ?trigger_loc:loc env in
+  let ctx = cntr_ctx msg ~trigger_loc:loc env in
   check_assume_posts ctx res_v cty.cty_post;
   Normal res_v
 
@@ -2471,8 +2499,7 @@ let init_real (emin, emax, prec) = Big_real.init emin emax prec
 
 let bind_globals ?rs_main mod_known env =
   let get_value env id opt_e ity =
-    let name = string_or_model_trace id in
-    match env.rac.get_value ~name ?loc:id.id_loc ity with
+    match env.rac.get_value.for_variable id ity with
     | Some v -> register_used_value env id.id_loc id v; v
     | None ->
        match opt_e with
@@ -2530,14 +2557,12 @@ let eval_global_fundef rac env pmodule locals e =
 let eval_rs rac env pm rs =
   let open Pmodule in
   let get_value (pv: pvsymbol) =
-    let id = pv.pv_vs.vs_name in
-    let name = string_or_model_trace id in
-    match rac.get_value ~name ?loc:id.id_loc pv.pv_ity with
+    match rac.get_value.for_variable pv.pv_vs.vs_name pv.pv_ity with
     | Some v ->
        Debug.dprintf debug_rac_values
          "@[<h>Value imported for %a at %a: %a@]@."
-         print_decoded name
-         (Pp.print_option_or_default "NOLOC" print_loc') id.id_loc
+         print_pv pv
+         (Pp.print_option_or_default "NOLOC" print_loc') pv.pv_vs.vs_name.id_loc
          print_value v;
        v
     | None ->

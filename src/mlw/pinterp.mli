@@ -148,7 +148,12 @@ val rac_reduce_config_lit :
   Whyconf.config -> Env.env -> ?trans:string -> ?prover:string -> ?try_negate:bool ->
   unit -> rac_reduce_config
 
-type import_value = ?name:string -> ?loc:Loc.position -> ity -> value option
+(** An oracle that provides values for variables and call results at a specific
+    position. *)
+type get_value = {
+  for_variable: ?loc:Loc.position -> ident -> ity -> value option;
+  for_result: Loc.position -> ity -> value option;
+}
 
 type rac_config = private {
   do_rac : bool;
@@ -159,7 +164,7 @@ type rac_config = private {
   (** continue when term cannot be checked *)
   rac_reduce : rac_reduce_config;
   (** configuration for reducing terms *)
-  get_value : import_value;
+  get_value : get_value;
   (** import values when they are needed *)
   log_uc : Log.log_uc;
   (** log *)
@@ -170,7 +175,7 @@ val rac_config :
   abstract:bool ->
   ?skip_cannot_compute:bool ->
   ?reduce:rac_reduce_config ->
-  ?get_value:(?name:string -> ?loc:Loc.position -> ity -> value option) ->
+  ?get_value:get_value ->
   unit -> rac_config
 
 (** {2 Interpreter environment and results} *)
