@@ -20,7 +20,9 @@ theory Test
   
   (* meta model_projection function a'int *)
   
-  goal f2'vc : let result = True in false
+  goal f2'vc :
+    forall result:bool.
+     result = True -> (let result1 = result in result1 = False)
   
   goal f3'vc : forall b:a. let _result = b in a'int b = 42
   
@@ -286,7 +288,9 @@ Task 1: theory Task
           
           (* meta model_projection function a'int1 *)
           
-          goal f2'vc : let result = True in false
+          goal f2'vc :
+            forall result:bool.
+             result = True -> (let result1 = result in result1 = False)
 end
 
 Task 2: theory Task

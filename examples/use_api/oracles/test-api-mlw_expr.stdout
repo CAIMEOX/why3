@@ -212,7 +212,12 @@ Task 1: theory Task
           
           (* use ref.Ref1 *)
           
-          goal f'vc : 42 >= 0
+          goal f'vc :
+            forall result:int.
+             let result1 = Ref'mk result in
+             result = 42 ->
+             (forall result2:int.
+               result2 = result -> (let result3 = result2 in result3 >= 0))
 end
 
-On task 1, alt-ergo answers Valid (0.0xs, 0 steps)
+On task 1, alt-ergo answers Valid (0.0xs, 5 steps)
