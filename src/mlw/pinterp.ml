@@ -385,6 +385,7 @@ module type Log = sig
 
   type log_entry_desc = private
     | Val_assumed of (ident * value)
+    | Res_assumed of (ident option * value)
     | Const_init of ident
     | Exec_call of (rsymbol option * value Mvs.t  * exec_kind)
     | Exec_pure of (lsymbol * exec_kind)
@@ -404,6 +405,7 @@ module type Log = sig
   type log_uc
 
   val log_val : log_uc -> ident -> value -> Loc.position option -> unit
+  val log_res : log_uc -> ident option -> value -> Loc.position -> unit
   val log_const : log_uc -> ident -> Loc.position option -> unit
   val log_call : log_uc -> rsymbol option -> value Mvs.t ->
                  exec_kind -> Loc.position option -> unit
@@ -431,6 +433,7 @@ module Log : Log = struct
 
   type log_entry_desc =
     | Val_assumed of (ident * value)
+    | Res_assumed of (ident option * value)
     | Const_init of ident
     | Exec_call of (rsymbol option * value Mvs.t  * exec_kind)
     | Exec_pure of (lsymbol * exec_kind)
@@ -461,6 +464,9 @@ module Log : Log = struct
 
   let log_val log_uc id v loc =
     log_entry log_uc (Val_assumed (id,v)) loc
+
+  let log_res log_uc oid v loc =
+    log_entry log_uc (Res_assumed (oid,v)) (Some loc)
 
   let log_const log_uc id loc =
     log_entry log_uc (Const_init id) loc
@@ -523,6 +529,11 @@ module Log : Log = struct
     match e.log_desc with
     | Val_assumed (id, v) ->
         fprintf fmt "@[<h2>%a = %a@]" print_decoded id.id_string print_value v;
+    | Res_assumed (None,v) ->
+        fprintf fmt "@[<h2>result = %a@]" print_value v
+    | Res_assumed (Some id,v) ->
+        fprintf fmt "@[<h2>%a'result = %a@]" Ident.print_decoded id.id_string
+          print_value v
     | Const_init id ->
         fprintf fmt "@[<h2>Constant %a initialization@]" print_decoded id.id_string;
     | Exec_call (None, mvs, k) ->
@@ -585,6 +596,16 @@ module Log : Log = struct
             fprintf fmt "@[@[<hv1>{%a;@ %a;@ %a@]}@]"
               (print_json_field "kind" print_json) (string "VAL_ASSUMED")
               (print_json_field "vs" print_json)
+              (string "%a" print_decoded id.id_string)
+              (print_json_field "value" print_value) v
+        | Res_assumed (None, v) ->
+            fprintf fmt "@[@[<hv1>{%a;@ %a@]}@]"
+              (print_json_field "kind" print_json) (string "RES_ASSUMED")
+              (print_json_field "value" print_value) v
+        | Res_assumed (Some id, v) ->
+            fprintf fmt "@[@[<hv1>{%a;@ %a;@ %a@]}@]"
+              (print_json_field "kind" print_json) (string "RES_ASSUMED")
+              (print_json_field "rs" print_json)
               (string "%a" print_decoded id.id_string)
               (print_json_field "value" print_value) v
         | Const_init id ->
@@ -652,7 +673,7 @@ module Log : Log = struct
     else
       let entry_log = List.filter (fun le ->
             match le.log_desc with
-            | Val_assumed _ | Const_init _ | Exec_main _ -> true
+            | Val_assumed _ | Res_assumed _ | Const_init _ | Exec_main _ -> true
             | Exec_call _ | Exec_pure _ | Exec_any _
                  when verb_lvl > 1 -> true
             | Iter_loop _ when verb_lvl > 2 -> true
@@ -747,6 +768,9 @@ let default_env env rac pmodule =
 
 let register_used_value env loc id value =
   Log.log_val env.rac.log_uc id (snapshot value) loc
+
+let register_res_value env loc oid value =
+  Log.log_res env.rac.log_uc oid (snapshot value) loc
 
 let register_const_init env loc id =
   Log.log_const env.rac.log_uc id loc
@@ -1892,33 +1916,35 @@ let gen_type_default env ity : value_gen =
   "type default", fun () ->
     Some (default_value_of_type env.env env.pmodule.Pmodule.mod_known ity)
 
-let get_and_register_aux env ~ctx_desc ~reg_id oloc gens =
+(** Get a value from a list of generators and print debugging messages or fail,
+    if no value is generated. *)
+let get_value' ctx_desc oloc gens =
   let desc, value = try get_value gens with Not_found ->
     cannot_compute "Missing value for %s" ctx_desc
       (Pp.print_option_or_default "NO LOC" Pretty.print_loc') oloc in
   Debug.dprintf debug_rac_values "@[<h>Value %s for %a at %a: %a@]@."
     desc print_decoded ctx_desc
     (Pp.print_option_or_default "NO LOC" Pretty.print_loc') oloc print_value value;
-  register_used_value env oloc reg_id value;
   value
 
 let get_and_register_variable_value ?def env id ?loc ity =
   let gen_variable_value : value_gen =
-    "imported", fun () ->
-      env.rac.get_value.for_variable ?loc id ity in
+    "from model", fun () -> env.rac.get_value.for_variable ?loc id ity in
   let ctx_desc = asprintf "variable %a" print_decoded id.id_string in
+  let oloc = if loc <> None then loc else id.id_loc in
   let gens = [gen_variable_value; gen_default def; gen_type_default env ity] in
-  let loc = if loc <> None then loc else id.id_loc in
-  get_and_register_aux env ~ctx_desc ~reg_id:id loc gens
+  let value = get_value' ctx_desc oloc gens in
+  register_used_value env oloc id value;
+  value
 
-let get_and_register_result_value ?def env loc ity =
+let get_and_register_result_value ?def ?rs_name env loc ity =
   let ctx_desc = asprintf "return value of call" in
   let gen_result_value : value_gen =
-    "imported", fun () ->
-      env.rac.get_value.for_result loc ity in
+    "from model", fun () -> env.rac.get_value.for_result loc ity in
   let gens = [gen_result_value; gen_default def; gen_type_default env ity] in
-  let reg_id = id_register (id_fresh "result") in
-  get_and_register_aux env ~ctx_desc ~reg_id (Some loc) gens
+  let value = get_value' ctx_desc (Some loc) gens in
+  register_res_value env loc rs_name value;
+  value
 
 (******************************************************************************)
 (*                              SIDE EFFECTS                                  *)
@@ -2481,7 +2507,7 @@ and exec_call_abstract ?loc ?rs_name env cty arg_pvs ity_result =
   let asgn_wrt = assign_written_vars ~vars_map
                    cty.cty_effect.eff_writes loc env in
   List.iter asgn_wrt (Mvs.keys env.vsenv);
-  let res_v = get_and_register_result_value env loc ity_result in
+  let res_v = get_and_register_result_value ?rs_name env loc ity_result in
   (* assert2 *)
   let msg = "Assume postcondition" in
   let msg = match rs_name with

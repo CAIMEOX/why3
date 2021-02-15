@@ -564,9 +564,9 @@ let model_of_exec_log ~original_model log =
   let me loc id value =
     let name = asprintf "%a" print_decoded id.id_string in
     let men_name = get_model_trace_string ~name ~attrs:id.id_attrs in
-    let men_kind = match search_model_element_for_id original_model id with
-      | me -> me.me_name.men_kind
-      | exception Not_found -> Other in
+    let men_kind =
+      let me = search_model_element_for_id original_model id in
+      me.me_name.men_kind in
     let me_name = { men_name; men_kind; men_attrs= id.id_attrs } in
     let me_value = model_value value in
     {me_name; me_value; me_location= Some loc; me_term= None} in
