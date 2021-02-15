@@ -258,18 +258,13 @@ let rec import_model_value known th_known ity v =
             print_model_value v
 
 let get_model_value m known th_known =
-  let import ity me =
-    try Some (import_model_value known th_known ity me.me_value)
-    with Exit -> None in
+  let import ity me = import_model_value known th_known ity me.me_value in
   let for_variable ?loc id ity =
-    let name =
-      Ident.get_model_trace_string ~name:id.id_string ~attrs:id.id_attrs in
-    let loc = if loc <> None then loc else id.id_loc in
-    match loc with
-    | Some loc -> Opt.bind (get_model_element m name loc) (import ity)
-    | None -> None in
+    try Some (import ity (search_model_element_for_id m ?loc id))
+    with Not_found | Exit -> None in
   let for_result loc ity =
-    Opt.bind (get_model_element_call_result m loc) (import ity) in
+    try Some (import ity (search_model_element_call_result m loc))
+    with Not_found | Exit -> None in
   {for_variable; for_result}
 
 (** Check and select solver counterexample models *)
@@ -569,9 +564,9 @@ let model_of_exec_log ~original_model log =
   let me loc id value =
     let name = asprintf "%a" print_decoded id.id_string in
     let men_name = get_model_trace_string ~name ~attrs:id.id_attrs in
-    let men_kind = match get_model_element_by_id original_model id with
-      | Some me -> me.me_name.men_kind
-      | None -> Other in
+    let men_kind = match search_model_element_for_id original_model id with
+      | me -> me.me_name.men_kind
+      | exception Not_found -> Other in
     let me_name = { men_name; men_kind; men_attrs= id.id_attrs } in
     let me_value = model_value value in
     {me_name; me_value; me_location= Some loc; me_term= None} in
