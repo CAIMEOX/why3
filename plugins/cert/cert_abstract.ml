@@ -551,22 +551,30 @@ type 'certif ctransformation = (task list * 'certif) Trans.trans
 
 (** Create a certified transformation from a transformation with a certificate *)
 
-type 'certif debug =
-  ('certif -> unit) option *
-  (ctask -> ctask list -> unit) option
+(* type 'certif debug =
+ *   ('certif -> unit) option *
+ *   (ctask -> ctask list -> unit) option *)
 
 let checker_ctrans
-      (debug : 'certif debug )
+      debg
+      (* (debug : 'certif debug ) *)
       (make_core : ctask -> ctask list -> 'certif -> 'core_certif)
       (checker : 'core_certif -> ctask -> ctask list -> unit)
       (ctr : 'certif ctransformation)
       (init_t : task) =
-  let dbg_cert, dbg_cta = debug in
+  (* let dbg_cert, dbg_cta = debug in *)
+  let t1 = Sys.time () in
   let res_t, certif = Trans.apply ctr init_t in
-  Opt.iter (fun eprcertif -> eprcertif certif) dbg_cert;
+  let t2 = Sys.time () in
+  (* Opt.iter (fun eprcertif -> eprcertif certif) dbg_cert; *)
   let init_ct = abstract_task init_t in
   let res_ct = List.map abstract_task res_t in
-  Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_cta;
+  (* Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_cta; *)
   let core_certif = make_core init_ct res_ct certif in
   checker core_certif init_ct res_ct;
+  let t3 = Sys.time() in
+  if debg then eprintf "@[<v>temps de transfo : %f@ \
+                        temps de checker : %f@ @]@."
+                 (t2-.t1)
+                 (t3-.t2);
   res_t
