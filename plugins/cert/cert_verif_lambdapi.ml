@@ -220,7 +220,7 @@ let checker_lambdapi certif init res =
     print fmt init res certif;
     close_out oc;
     let preamble = Filename.(concat Config.datadir (concat "lambdapi" "preamble.lp")) in
-    let _ = Sys.command ("lambdapi install " ^ preamble) in
-    let ret = Sys.command ("lambdapi check --map-dir check:/tmp/ " ^ check_cert) in
+    let _ = Sys.command ("lambdapi install --verbose 0 " ^ preamble) in
+    let ret = Sys.command ("lambdapi check --verbose 0 --map-dir check:/tmp/ " ^ check_cert) in
     if ret <> 0 then verif_failed "Not verified by Lambdapi"
   with e -> raise (Trans.TransFailure ("Cert_verif_lambdapi.checker_lambdapi", e))
