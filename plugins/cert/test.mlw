@@ -13,33 +13,33 @@ predicate p (x : bool)
 (** Elementary rules **)
 
 
-goal assumption : a
-goal intro_imp : c -> c
-goal intro_exists : (exists x. p x) -> a
-goal intro_forall : forall x : bool. p x -> a
-goal left_goal : a \/ c
-goal right_goal : c \/ a
-goal split_goal_and : a /\ b
-goal split_hyp_or : c \/ d -> d \/ c
+(* goal assumption : a *)
+(* goal intro_imp : c -> c *)
+(* goal intro_exists : (exists x. p x) -> a *)
+(* goal intro_forall : forall x : bool. p x -> a *)
+(* goal left_goal : a \/ c *)
+(* goal right_goal : c \/ a *)
+(* goal split_goal_and : a /\ b *)
+(* goal split_hyp_or : c \/ d -> d \/ c *)
 goal case : (a /\ c) \/ (a /\ not c)
-goal split_goal_imp : d -> d
-goal split_goal_iff : d <-> d
-goal swap_neg_neg_hyp : not a -> false
-goal exfalso : false -> not a
-goal swap_neg_neg_goal : not d -> not d
-goal swap_neg_goal : false -> d
-goal split_hyp_imp : (a -> d) -> d
-goal split_hyp_iff : (d <-> a) -> d
-goal swap_neg_hyp : not d -> d -> false
-goal trivial_hyp : false -> d
-goal trivial_goal : true
-goal assert1 : (a -> b -> c) -> (c -> d) -> d
-goal revert : (forall x. p x) -> forall x. p x
-goal inst_hyp : (forall x. p x) -> p true
-goal inst_goal : p true -> exists x : bool. p x
+(* goal split_goal_imp : d -> d *)
+(* goal split_goal_iff : d <-> d *)
+(* goal swap_neg_neg_hyp : not a -> false *)
+(* goal exfalso : false -> not a *)
+(* goal swap_neg_neg_goal : not d -> not d *)
+(* goal swap_neg_goal : false -> d *)
+(* goal split_hyp_imp : (a -> d) -> d *)
+(* goal split_hyp_iff : (d <-> a) -> d *)
+(* goal swap_neg_hyp : not d -> d -> false *)
+(* goal trivial_hyp : false -> d *)
+(* goal trivial_goal : true *)
+(* goal assert1 : (a -> b -> c) -> (c -> d) -> d *)
+(* goal revert : (forall x. p x) -> forall x. p x *)
+(* goal inst_hyp : (forall x. p x) -> p true *)
+(* goal inst_goal : p true -> exists x : bool. p x *)
 
 
-goal rename : c -> c
+(* goal rename : c -> c *)
 
 (* 'pose' transformation : in progress *)
 (* goal pose : a *)
@@ -48,32 +48,32 @@ goal rename : c -> c
 (** Transformations obtained by composition **)
 
 
-goal intros : forall x. p x -> d -> p x
-goal clear : a -> d -> a -> a -> d
+(* goal intros : forall x. p x -> d -> p x *)
+(* goal clear : a -> d -> a -> a -> d *)
 
-(* Testing blast *)
-goal blast_simp : not ((not c) /\ (not not c))
-goal blast_and : (a /\ b) /\ (a /\ a /\ a /\ b)
-goal blast_and_hole : (b /\ a) /\ ( (a /\ a) /\ c)
-goal blast_or : (a \/ c) /\ (d \/ b)
-goal blast_or_hole : a /\ (c \/ d)
-goal blast_big : (a /\ (d \/ c) ) \/ (((a /\ b) /\ ((b /\ (d \/ e \/ a)) \/d)) \/ (a /\ c))
-goal blast_big_big : ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
-     		       	        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a)))) /\
-			 ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
-			        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))))
+(* (\* Testing blast *\) *)
+(* goal blast_simp : not ((not c) /\ (not not c)) *)
+(* goal blast_and : (a /\ b) /\ (a /\ a /\ a /\ b) *)
+(* goal blast_and_hole : (b /\ a) /\ ( (a /\ a) /\ c) *)
+(* goal blast_or : (a \/ c) /\ (d \/ b) *)
+(* goal blast_or_hole : a /\ (c \/ d) *)
+(* goal blast_big : (a /\ (d \/ c) ) \/ (((a /\ b) /\ ((b /\ (d \/ e \/ a)) \/d)) \/ (a /\ c)) *)
+(* goal blast_big_big : ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\ *)
+(*      		       	        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a)))) /\ *)
+(* 			 ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\ *)
+(* 			        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a)))) *)
 
-(* Testing rewrite *)
-goal rew_goal  : (c <-> a) -> (d \/ c)
-goal rew_hyp : (c <-> d) -> c -> d
-goal rew_inv_hyp : (d <-> c) -> c -> d
-goal rew_prem_hyp : (a -> b -> c <-> d) -> c -> d
-goal rew_inv_prem_hyp : (a -> b -> d <-> c) -> c -> d
-goal rew_forall_hyp : forall x. (forall u. p u <-> a) -> (p x <-> p x)
-
-
-(* Drinker's paradox example *)
-goal drinker : exists x : bool. p x -> (forall y. p y)
+(* (\* Testing rewrite *\) *)
+(* goal rew_goal  : (c <-> a) -> (d \/ c) *)
+(* goal rew_hyp : (c <-> d) -> c -> d *)
+(* goal rew_inv_hyp : (d <-> c) -> c -> d *)
+(* goal rew_prem_hyp : (a -> b -> c <-> d) -> c -> d *)
+(* goal rew_inv_prem_hyp : (a -> b -> d <-> c) -> c -> d *)
+(* goal rew_forall_hyp : forall x. (forall u. p u <-> a) -> (p x <-> p x) *)
 
 
-goal contra_hyps : (c /\ (not c \/ d) /\ (not d \/ e) /\ (not e \/ f) /\ not f) -> false
+(* (\* Drinker's paradox example *\) *)
+(* goal drinker : exists x : bool. p x -> (forall y. p y) *)
+
+
+(* goal contra_hyps : (c /\ (not c \/ d) /\ (not d \/ e) /\ (not e \/ f) /\ not f) -> false *)
