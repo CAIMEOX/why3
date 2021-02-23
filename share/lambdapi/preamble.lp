@@ -371,5 +371,3 @@ symbol iffeq : Π (A : Type) (B : Type),
 	   	   tEv (hyp (eq_fmla A B) empty) →
 		   tEv (hyp (A ⇔ B) empty)
 ≔  λ A B s eab, s (iff_eq A B eab);
-
-// To verify

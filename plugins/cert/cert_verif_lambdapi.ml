@@ -202,7 +202,8 @@ let print fmt init res (task_ids, certif) =
     fprintf fmt ",@ ";
     print_certif print_applied_task fmt certif in
 
-  fprintf fmt "@[<v>symbol to_verify :@   \
+  fprintf fmt "@[<v>require open cert_lambdapi.preamble;@ @ \
+               symbol to_verify :@   \
                @[<v>%a@]@ \
                @<3>%s@[<v>%a@]@];@."
     p_type ()
@@ -213,15 +214,13 @@ let print fmt init res (task_ids, certif) =
 
 let checker_lambdapi certif init res =
   try
-    let oc = open_out "/tmp/check_line.lp" in
+    let check_cert = "/tmp/check_cert.lp" in
+    let oc = open_out check_cert in
     let fmt = formatter_of_out_channel oc in
     print fmt init res certif;
     close_out oc;
-    let coc = Filename.(concat Config.datadir (concat "lambdapi" "CoC.lp")) in
-    let pkg_conf = Filename.(concat Config.datadir (concat "lambdapi" "lambdapi.pkg")) in
-    Sys.command ("cat " ^ coc ^ " > /tmp/check_all.lp") |> ignore;
-    Sys.command "cat /tmp/check_line.lp >> /tmp/check_all.lp" |> ignore;
-    Sys.command ("cp " ^ pkg_conf ^ " /tmp/lambdapi.pkg") |> ignore;
-    let ret = Sys.command "lambdapi check /tmp/check_all.lp 2> /dev/null 1> /dev/null" in
+    let preamble = Filename.(concat Config.datadir (concat "lambdapi" "preamble.lp")) in
+    let _ = Sys.command ("lambdapi install " ^ preamble) in
+    let ret = Sys.command ("lambdapi check --map-dir check:/tmp/ " ^ check_cert) in
     if ret <> 0 then verif_failed "Not verified by Lambdapi"
   with e -> raise (Trans.TransFailure ("Cert_verif_lambdapi.checker_lambdapi", e))
