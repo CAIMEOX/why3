@@ -49,7 +49,7 @@ let env : Env.env = Env.create_env (Whyconf.loadpath main)
 let alt_ergo_driver : Driver.driver =
   try
     Printexc.record_backtrace true;
-    Whyconf.load_driver main env alt_ergo.Whyconf.driver []
+    Whyconf.load_driver main env alt_ergo
   with e ->
     let s = Printexc.get_backtrace () in
     eprintf "Failed to load driver for alt-ergo: %a@.%s@."
@@ -312,35 +312,45 @@ let why3_parse_theories theories =
      List.iter (fun i -> why3_prove i) subs
     ) theories
 
-let why3_execute modules =
+let why3_execute_one m rs =
+  let open Expr in
+  let open Pinterp in
+  let e_unit = e_exec (c_app (rs_tuple 0) [] [] (Ity.ity_tuple [])) in
+  let (let_defn,pv) = let_var (Ident.id_fresh "o") e_unit in
+  let e_rs_unit = e_exec (c_app rs [pv] [] rs.rs_cty.Ity.cty_result) in
+  let expr = e_let let_defn e_rs_unit in
   let result =
-    let mods =
-      Wstdlib.Mstr.fold
-	(fun _k m acc ->
-         let th = m.Pmodule.mod_theory in
-         let modname = th.Theory.th_name.Ident.id_string in
-         try
-           let rs = Pmodule.ns_find_rs m.Pmodule.mod_export ["main"]
-           in
-           let result = Pp.sprintf "%a" (Pinterp.eval_global_symbol env m) rs in
-           let loc =
-             Opt.get_def Loc.dummy_position th.Theory.th_name.Ident.id_loc
-           in
-           (loc, modname ^ ".main() returns " ^ result)
-           :: acc
-         with Not_found -> acc)
-	modules []
-    in
-    match mods with
-    | [] -> Error "No main function found"
-    | _ ->
-       let s =
-	 List.sort
-           (fun (l1,_) (l2,_) -> Loc.compare l2 l1)
-           mods
-       in
-       (Result (List.rev_map snd s) )
-  in
+    try
+      let reduce = rac_reduce_config_lit config env ~trans:"compute_in_goal" () in
+      let rac_config = rac_config ~do_rac:false ~abstract:false ~reduce () in
+      let res = eval_global_fundef rac_config env m [] expr in
+      asprintf "returns %a" (report_eval_result expr) res
+    with
+    | Contr (ctx, term) ->
+        asprintf "has failed: %a" report_cntr_body (ctx, term)
+    | CannotCompute r ->
+        asprintf "cannot compute (%s)" r.reason
+    | RACStuck (_, l) ->
+        asprintf "got stuck at %a"
+          (Pp.print_option_or_default "unknown location" Pretty.print_loc') l in
+  let {Theory.th_name = th} = m.Pmodule.mod_theory in
+  let mod_name = th.Ident.id_string in
+  let mod_loc = Opt.get_def Loc.dummy_position th.Ident.id_loc in
+  (mod_loc, mod_name ^ ".main " ^ result)
+
+let why3_execute modules =
+  let mods =
+    Wstdlib.Mstr.fold (fun _ m acc ->
+        match Pmodule.ns_find_rs m.Pmodule.mod_export ["main"] with
+        | rs -> why3_execute_one m rs :: acc
+        | exception Not_found -> acc)
+      modules [] in
+  let result =
+    if mods = [] then
+      Error "No main function found"
+    else
+      let s = List.sort (fun (l1,_) (l2,_) -> Loc.compare l2 l1) mods in
+      Result (List.rev_map snd s) in
   W.send result
 
 

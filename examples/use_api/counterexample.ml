@@ -104,7 +104,7 @@ let env : Env.env = Env.create_env (Whyconf.loadpath main)
 (* loading the Cvc4 driver *)
 let cvc4_driver : Driver.driver =
   try
-    Whyconf.load_driver main env cvc4.Whyconf.driver []
+    Whyconf.load_driver main env cvc4
   with e ->
     eprintf "Failed to load driver for Cvc4: %a@."
       Exn_printer.exn_printer e;
@@ -120,9 +120,12 @@ let result1 : Call_provers.prover_result =
 (* BEGIN{ce_callprover} *)
 (* prints Cvc4 answer *)
 let () = printf "@[On task 1, Cvc4 answers %a@."
-  (Call_provers.print_prover_result ~json_model:false) result1
+    (Call_provers.print_prover_result ?json:None) result1
 
-let () = printf "Model is %a@."
-    (Model_parser.print_model_json ?me_name_trans:None ?vc_line_trans:None)
-    result1.Call_provers.pr_model
+let () = printf "Model is %t@."
+    (fun fmt ->
+       match result1.Call_provers.pr_models with
+       | [(_,m)] -> (* TODO select_model *)
+           Model_parser.print_model_json ?me_name_trans:None ?vc_line_trans:None fmt m
+       | _ -> fprintf fmt "unavailable")
 (* END{ce_callprover} *)

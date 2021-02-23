@@ -347,39 +347,30 @@ let provers : Whyconf.config_prover Whyconf.Mprover.t =
   Whyconf.get_provers config
 
 let alt_ergo : Whyconf.config_prover =
-  let fp = Whyconf.parse_filter_prover "Alt-Ergo" in
-  (** all provers that have the name "Alt-Ergo" *)
+  let fp = Whyconf.parse_filter_prover "Alt-Ergo,2.3.0" in
   let provers = Whyconf.filter_provers config fp in
   if Whyconf.Mprover.is_empty provers then begin
-    eprintf "Prover Alt-Ergo not installed or not configured@.";
+    eprintf "Prover Alt-Ergo 2.3.0 not installed or not configured@.";
     exit 1
   end else
     snd (Whyconf.Mprover.max_binding provers)
 
 let alt_ergo_driver : Driver.driver =
   try
-    Whyconf.load_driver main env alt_ergo.Whyconf.driver []
+    Whyconf.load_driver main env alt_ergo
   with e ->
     eprintf "Failed to load driver for alt-ergo: %a@."
       Exn_printer.exn_printer e;
     exit 1
 
 let () =
-  let _ =
-    List.fold_left
-      (fun i t ->
-       let r =
-         Call_provers.wait_on_call
-           (Driver.prove_task ~limit:Call_provers.empty_limit
-                              ~command:alt_ergo.Whyconf.command
-                              alt_ergo_driver t)
-       in
-       printf "@[On task %d, alt-ergo answers %a@."
-              i (Call_provers.print_prover_result ~json_model:false) r;
-       i+1
-      )
-      1 my_tasks
-  in ()
+  List.iteri (fun i t ->
+      let call = Driver.prove_task ~limit:Call_provers.empty_limit
+          ~command:alt_ergo.Whyconf.command alt_ergo_driver t in
+      let r = Call_provers.wait_on_call call in
+      printf "@[On task %d, alt-ergo answers %a@." (succ i)
+        (Call_provers.print_prover_result ?json:None) r)
+    my_tasks
 (* END{checkingvcs} *)
 
 (*

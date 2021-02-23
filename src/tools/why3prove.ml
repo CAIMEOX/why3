@@ -28,7 +28,19 @@ let opt_theory = ref None
 let opt_trans = ref []
 let opt_metas = ref []
 (* Option for printing counterexamples with JSON formatting *)
-let opt_json = ref false
+let opt_json : [< `All | `Values ] option ref = ref None
+let opt_check_ce_model = ref false
+let opt_print_original_model = ref false
+let opt_print_derived_model = ref false
+let opt_rac_prover = ref None
+let opt_rac_try_negate = ref false
+let opt_ce_check_verbosity = ref None
+
+let () = (* Instead of additional command line parameters *)
+  if Opt.get_def "" (Sys.getenv_opt "WHY3PRINTORIGINALMODEL") = "yes" then
+    opt_print_original_model := true;
+  if Opt.get_def "" (Sys.getenv_opt "WHY3PRINTDERIVEDMODEL") = "yes" then
+    opt_print_derived_model := true
 
 let add_opt_file x =
   let tlist = Queue.create () in
@@ -90,6 +102,7 @@ let opt_parser = ref None
 let opt_prover = ref None
 let opt_output = ref None
 let opt_timelimit = ref None
+let opt_stepslimit = ref None
 let opt_memlimit = ref None
 let opt_command = ref None
 let opt_task = ref None
@@ -109,6 +122,8 @@ let option_list =
     "<format> select input format (default: \"why\")";
     Key ('t', "timelimit"), Hnd1 (AInt, fun i -> opt_timelimit := Some i),
     "<sec> set the prover's time limit (default=10, no limit=0)";
+    Key ('s', "stepslimit"), Hnd1 (AInt, fun i -> opt_stepslimit := Some i),
+    "<steps> set the prover's step limit (default: no limit)";
     Key ('m', "memlimit"), Hnd1 (AInt, fun i -> opt_memlimit := Some i),
     "<MiB> set the prover's memory limit (default: no limit)";
     Key ('a', "apply-transform"), Hnd1 (AString, add_opt_trans),
@@ -119,8 +134,6 @@ let option_list =
     "<file> specify a prover's driver (conflicts with -P)";
     Key ('o', "output"), Hnd1 (AString, fun s -> opt_output := Some s),
     "<dir> print the selected goals to separate files in <dir>";
-    KLong "json", Hnd0 (fun () -> opt_json := true),
-    " print counterexamples in JSON format";
     KLong "print-theory", Hnd0 (fun () -> opt_print_theory := true),
     " print selected theories";
     KLong "print-namespace", Hnd0 (fun () -> opt_print_namespace := true),
@@ -129,7 +142,25 @@ let option_list =
       "parse_only" (KLong "parse-only") " stop after parsing";
     Debug.Args.desc_shortcut
       "type_only" (KLong "type-only") " stop after type checking";
-    Termcode.opt_extra_expl_prefix
+    Termcode.opt_extra_expl_prefix;
+    KLong "check-ce", Hnd0 (fun () -> opt_check_ce_model := true),
+    " check counterexamples using runtime assertion checking\n\
+     (RAC)";
+    KLong "rac-prover", Hnd1 (AString, fun s -> opt_rac_prover := Some s),
+    "<prover> use <prover> to check assertions in RAC when term\n\
+     reduction is insufficient, with optional, comma-\n\
+     separated time and memory limit (e.g. 'cvc4,2,1000')";
+    KLong "rac-try-negate", Hnd0 (fun () -> opt_rac_try_negate := true),
+    " try checking the negated term using the RAC prover when\n\
+     the prover is defined and didn't give a result";
+    Key ('v',"verbosity"), Hnd1(AInt, fun i -> opt_ce_check_verbosity := Some i),
+    "<lvl> verbosity level for interpretation log of counterexam-\n\
+     ple solver model";
+    KLong "json", Hnd0 (fun () -> opt_json := Some `All),
+    " print output in JSON format";
+    KLong "json-model-values", Hnd0 (fun () -> opt_json := Some `Values),
+    " print values of prover model in JSON format (back-\n\
+     wards compatiblity with --json)";
   ]
 
 let config, _, env =
@@ -160,6 +191,10 @@ let () = try
       eprintf "Option '-t'/'--timelimit' requires a prover.@.";
       exit 1
     end;
+    if !opt_stepslimit <> None then begin
+      eprintf "Option '-t'/'--stepslimit' requires a prover.@.";
+      exit 1
+    end;
     if !opt_memlimit <> None then begin
       eprintf "Option '-m'/'--memlimit' requires a prover.@.";
       exit 1
@@ -176,8 +211,8 @@ let () = try
   | Some s ->
     let filter_prover = Whyconf.parse_filter_prover s in
     let prover = Whyconf.filter_one_prover config filter_prover in
-    opt_command :=
-      Some (String.concat " " (prover.command :: prover.extra_options));
+    let with_steps = !opt_stepslimit <> None in
+    opt_command := Some (Whyconf.get_complete_command prover ~with_steps);
     opt_driver := Some (prover.driver, prover.extra_drivers)
   | None ->
       ()
@@ -200,6 +235,8 @@ let timelimit = match !opt_timelimit with
   | None -> 10
   | Some i when i <= 0 -> 0
   | Some i -> i
+
+let stepslimit = Opt.get_def 0 !opt_stepslimit
 
 let memlimit = match !opt_memlimit with
   | None -> 0
@@ -225,22 +262,87 @@ let output_task drv fname _tname th task dir =
   Driver.print_task drv (formatter_of_out_channel cout) task;
   close_out cout
 
+let print_result ?json fmt (fname, loc, goal_name, expls, res, ce) =
+  match json with
+  | Some `All ->
+    let open Json_base in
+    let print_loc fmt (loc, fname) =
+      match loc with
+      | None -> fprintf fmt "{%a}" (print_json_field "filename" print_json) (String fname)
+      | Some loc -> Pretty.print_json_loc fmt loc in
+    let print_term fmt (loc, fname, goal_name, expls) =
+      fprintf fmt "@[@[<hv1>{%a;@ %a;@ %a@]}@]"
+        (print_json_field "loc" print_loc) (loc, fname)
+        (print_json_field "goal_name" print_json) (String goal_name)
+        (print_json_field "explanations" print_json) (List (List.map (fun s -> String s) expls)) in
+    fprintf fmt "@[@[<hv1>{%a;@ %a@]}@]"
+      (print_json_field "term" print_term) (loc, fname, goal_name, expls)
+      (print_json_field "prover-result" (Call_provers.print_prover_result ~json:true)) res
+  | None | Some `Values as json ->
+    ( match loc with
+      | None -> fprintf fmt "File %s:@\n" fname
+      | Some loc -> Loc.report_position fmt loc );
+    ( if expls = [] then
+        fprintf fmt "@[<hov>Verification@ condition@ @{<bold>%s@}.@]" goal_name
+      else
+        let expls = String.capitalize_ascii (String.concat ", " expls) in
+        fprintf fmt
+          "@[<hov>Goal@ @{<bold>%s@}@ from@ verification@ condition@ @{<bold>%s@}.@]"
+          expls goal_name );
+    fprintf fmt "@\n@[<hov2>Prover result is: %a.@]"
+      (Call_provers.print_prover_result ~json:false) res;
+    (match ce with
+     | Some ce ->
+        Counterexample.print_counterexample ?verb_lvl:!opt_ce_check_verbosity
+          ~check_ce:!opt_check_ce_model ?json fmt ce
+     | None -> ());
+    fprintf fmt "@\n"
+
 let unproved = ref false
 
-let do_task drv fname tname (th : Theory.theory) (task : Task.task) =
+let do_task env drv fname tname (th : Theory.theory) (task : Task.task) =
+  let open Call_provers in
   let limit =
-    { Call_provers.empty_limit with
-      Call_provers.limit_time = timelimit;
-                   limit_mem = memlimit } in
+    { limit_time = timelimit;
+      limit_mem = memlimit;
+      limit_steps = stepslimit } in
   match !opt_output, !opt_command with
     | None, Some command ->
-        let call =
-          Driver.prove_task ~command ~limit drv task in
-        let res = Call_provers.wait_on_call call in
-        printf "%s %s %s: %a@." fname tname
-          (task_goal task).Decl.pr_name.Ident.id_string
-          (Call_provers.print_prover_result ~json_model:!opt_json) res;
-        if res.Call_provers.pr_answer <> Call_provers.Valid then unproved := true
+        let call = Driver.prove_task ~command ~limit drv task in
+        let res = wait_on_call call in
+        let ce =
+          if res.pr_models <> [] then
+            match Pmodule.restore_module th with
+            | pm ->
+               let reduce_config =
+                 Pinterp.rac_reduce_config_lit config env
+                   ~trans:"compute_in_goal" ?prover:!opt_rac_prover
+                   ~try_negate:!opt_rac_try_negate () in
+               Counterexample.select_model ~reduce_config
+                 ~check:!opt_check_ce_model ?verb_lvl:!opt_ce_check_verbosity
+                 env pm res.pr_models
+            | exception Not_found -> None
+          else None in
+        let t = task_goal_fmla task in
+        let expls = Termcode.get_expls_fmla t in
+        let goal_name = (task_goal task).Decl.pr_name.Ident.id_string in
+        printf "%a@." (print_result ?json:!opt_json)
+          (fname, t.Term.t_loc, goal_name, expls, res, ce);
+        let print_model fmt m =
+          let print_attrs = Debug.(test_flag (lookup_flag "print_model_attrs"))  in
+          if !opt_json = None then Model_parser.print_model_human fmt m ~print_attrs
+          else Model_parser.print_model (* json values *) fmt m ~print_attrs in
+        let print_other_models (m, ce_summary) =
+          match ce_summary with
+            | Counterexample.(NCCE log | SWCE log | NCCE_SWCE log) ->
+                if !opt_print_original_model then
+                  printf "@[<v>Original model:@\n%a@]@\n@." print_model m;
+                if !opt_print_derived_model then
+                  printf "@[<v>Derived model:@\n%a@]@\n@." print_model
+                    (Counterexample.model_of_exec_log ~original_model:m log)
+            | _ -> () in
+        Opt.iter print_other_models ce;
+        if res.pr_answer <> Valid then unproved := true
     | None, None ->
         Driver.print_task drv std_formatter task
     | Some dir, _ -> output_task drv fname tname th task dir
@@ -256,7 +358,7 @@ let do_tasks env drv fname tname th task =
       List.rev_append (Trans.apply tr task) acc) [] tasks)
   in
   let tasks = List.fold_left apply [task] trans in
-  List.iter (do_task drv fname tname th) tasks
+  List.iter (do_task env drv fname tname th) tasks
 
 let do_theory env drv fname tname th glist elist =
   if !opt_print_theory then
@@ -341,7 +443,10 @@ let do_input env drv = function
 
 let () =
   try
-    let load (f,ef) = load_driver (Whyconf.get_main config) env f ef in
+    if Util.terminal_has_color then (
+      set_formatter_tag_functions Util.ansi_color_tags;
+      set_mark_tags true );
+    let load (f,ef) = load_driver_raw (Whyconf.get_main config) env f ef in
     let drv = Opt.map load !opt_driver in
     Queue.iter (do_input env drv) opt_queue;
     if !unproved then exit 2

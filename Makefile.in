@@ -156,8 +156,8 @@ EXTPKGS = menhirLib @SEQLIB@ @RELIB@ unix num dynlink @ZIPLIB@ @WHY3LIB@ @INFERP
 EXTCMA	= $(addsuffix .cmo,$(EXTOBJS)) $(addsuffix .cma,$(EXTLIBS))
 EXTCMXA = $(addsuffix .cmx,$(EXTOBJS)) $(addsuffix .cmxa,$(EXTLIBS))
 
-INSTALLED_LIB_EXTS = a cma cmx cmi cmxa cmxs
-COMPILED_LIB_EXTS = $(INSTALLED_LIB_EXTS) o cmo cmt cmti annot dep conflicts
+INSTALLED_LIB_EXTS = a cma cmx cmi cmxa cmxs cmt cmti
+COMPILED_LIB_EXTS = $(INSTALLED_LIB_EXTS) o cmo annot dep conflicts
 
 TOTARGET = > "$@" || (RV=$$?; rm -f "$@"; exit $${RV})
 
@@ -213,6 +213,7 @@ LIBGENERATED = src/util/config.ml \
 	       src/util/rc.ml src/util/lexlib.ml src/util/mysexplib.ml \
 	       src/util/json_parser.mli src/util/json_parser.ml \
 	       src/util/json_lexer.ml src/util/mlmpfr_wrapper.ml \
+	       src/util/dynlink_wrapper.ml \
 	       src/parser/lexer.ml \
 	       src/parser/parser.mli src/parser/parser.ml \
 	       src/parser/parser_messages.ml \
@@ -226,7 +227,7 @@ LIB_UTIL = mysexplib config bigInt mlmpfr_wrapper util opt lists strings \
 	   pp extmap extset exthtbl weakhtbl diffmap \
 	   hashcons wstdlib exn_printer getopt \
 	   json_base json_parser json_lexer \
-	   debug loc lexlib print_tree \
+	   debug loc lexlib print_tree dynlink_wrapper \
 	   cmdline warning sysutil rc plugin bigInt number constant vector pqueue
 
 ifeq (@enable_re@,no)
@@ -240,7 +241,7 @@ LIB_DRIVER = prove_client call_provers driver_ast driver_parser driver_lexer dri
 		whyconf autodetection smtv2_model_defs collect_data_model sexp smtv2_model_parser
 
 LIB_MLW = ity expr pdecl eval_match typeinv vc pmodule dexpr big_real \
-          pinterp
+          pinterp counterexample
 
 ifeq (@enable_infer@,yes)
 LIB_INFER = o2oterm domain infer_why3 quant_domain union_find disjunctive_term_domain uf_domain infer_cfg infer_loop
@@ -307,6 +308,14 @@ $(LIBDEP) $(LIBCMO) $(LIBCMX): INCLUDES += $(LIBINCLUDES)
 $(LIBCMX): OFLAGS += -for-pack Why3
 
 $(LIBDEP): $(LIBGENERATED)
+
+ifeq (@new_dynlink@,yes)
+src/util/dynlink_wrapper.ml: src/util/dynlink_new.ml Makefile
+	cp $< $@
+else
+src/util/dynlink_wrapper.ml: src/util/dynlink_old.ml Makefile
+	cp $< $@
+endif
 
 # Mlmpfr
 
@@ -542,8 +551,10 @@ lib/plugins/hypothesis_selection.cmxs: EXTINCLUDES += -I @OCAMLGRAPHLIB@
 lib/plugins/hypothesis_selection.cmo:  EXTINCLUDES += -I @OCAMLGRAPHLIB@
 lib/plugins/hypothesis_selection.cmxs: EXTLIBS += graph.cmxa
 lib/plugins/hypothesis_selection.cmo:  EXTOBJS += graph.cmo
-lib/plugins/hypothesis_selection.cmxs: EXTPKGS += ocamlgraph
-lib/plugins/hypothesis_selection.cmo:  EXTPKGS += ocamlgraph
+ifeq (@enable_ocamlfind@,yes)
+lib/plugins/hypothesis_selection.cmxs: FLAGS += -package ocamlgraph -dontlink "$(EXTPKGS)" -linkpkg
+lib/plugins/hypothesis_selection.cmo:  FLAGS += -package ocamlgraph -dontlink "$(EXTPKGS)" -linkpkg
+endif
 endif
 
 PLUGMODULES = $(addprefix plugins/parser/, $(PLUG_PARSER)) \
@@ -1623,7 +1634,7 @@ else
  JS_MAPS=
 endif
 
-TRYWHY3_FILES = alt_ergo_worker bindings trywhy3 why3_worker worker_proto
+TRYWHY3_FILES = alt_ergo_worker bindings shortener trywhy3 why3_worker worker_proto
 
 TRYWHY3MODULES = $(addprefix src/trywhy3/, $(TRYWHY3_FILES))
 
@@ -1720,7 +1731,7 @@ trywhy3: src/trywhy3/trywhy3.js src/trywhy3/why3_worker.js src/trywhy3/alt_ergo_
 src/trywhy3/trywhy3.js: src/trywhy3/trywhy3.byte
 	js_of_ocaml $(JSOO_DEBUG) $<
 
-src/trywhy3/trywhy3.byte: $(addprefix src/trywhy3/, bindings.cmo worker_proto.cmo trywhy3.cmo)
+src/trywhy3/trywhy3.byte: $(addprefix src/trywhy3/, bindings.cmo worker_proto.cmo shortener.cmo trywhy3.cmo)
 	$(OCAMLFIND) ocamlc -o $@ -package js_of_ocaml -linkpkg $^
 
 src/trywhy3/why3_worker.js: src/trywhy3/why3_worker.byte src/trywhy3/trywhy3.conf src/trywhy3/try_alt_ergo.drv
@@ -1732,7 +1743,7 @@ src/trywhy3/why3_worker.js: src/trywhy3/why3_worker.byte src/trywhy3/trywhy3.con
 
 src/trywhy3/why3_worker.byte: $(WHY3CMA) lib/plugins/python.cmo lib/plugins/microc.cmo \
 		$(addprefix src/trywhy3/, bindings.cmo worker_proto.cmo why3_worker.cmo)
-	$(OCAMLFIND) ocamlc $(BFLAGS) -package js_of_ocaml -o $@ $(BLINKFLAGS) $^
+	$(OCAMLFIND) ocamlc $(filter-out -thread,$(BFLAGS)) -package js_of_ocaml -o $@ -linkpkg $^
 
 src/trywhy3/alt_ergo_worker.js: src/trywhy3/alt_ergo_worker.byte
 	js_of_ocaml $(JSOO_DEBUG) +dynlink.js +toplevel.js $<
@@ -1780,10 +1791,10 @@ src/ide/why3_js.cmo: src/ide/why3_js.ml lib/why3/why3.cma
 	$(JSOCAMLCW) $(BFLAGS) -c $<
 
 src/ide/why3_js.byte: lib/why3/why3.cma src/ide/why3_js.cmo
-	$(JSOCAMLCW) $(BFLAGS) -o $@ -linkpkg $(BLINKFLAGS) $^
+	$(JSOCAMLCW) $(filter-out -thread,$(BFLAGS)) -o $@ -linkpkg $(BLINKFLAGS) $^
 
 src/ide/why3_js.js: src/ide/why3_js.byte
-	js_of_ocaml +nat.js +dynlink.js +toplevel.js $<
+	js_of_ocaml +dynlink.js +toplevel.js $<
 
 web_ide: src/ide/why3_js.js
 
@@ -1803,16 +1814,21 @@ bench:: bin/why3.@OCAMLBEST@ bin/why3config.$(SHAREDBEST) plugins $(TOOLS) \
 	@echo "=== Check API examples ==="
 	$(MAKE) bench-api
 	@echo "=== Check examples ==="
-	bash bench/bench ".@OCAMLBEST@"
+	bash bench/bench -suffix ".@OCAMLBEST@"
 	@echo "=== Check parsing messages ==="
 	bench/parsing-bench
-	@echo ""
-	@echo "=== Checking extraction ==="
-	$(MAKE) test-ocaml-extraction
 
-APITESTS=logic transform clone mlw_tree mlw_tree1 mlw_expr create_session counterexample
+APITESTS=logic transform clone mlw_tree mlw_expr create_session counterexample
+
+ifeq (@enable_infer@,yes)
+	APITESTS += mlw_tree_infer_invs
+endif
 
 bench-api: $(addprefix test-api-, $(APITESTS))
+
+clean::
+	rm -rf bench/infer/*.out
+	rm -rf bench/check-ce/*.out
 
 ###############
 # test targets
@@ -1847,28 +1863,38 @@ test-api-%: test-api-%.@OCAMLBEST@
 #	ocaml -I lib/why3 $(INCLUDES) $(BLINKFLAGS) $? examples/test_shape.ml
 
 
-test-ocaml-extraction: bin/why3.opt bin/why3extract.cmxs
-	@echo "driver ocaml64"
-	@bin/why3.opt extract -D ocaml64 -L tests \
-	  test_extraction.TestExtraction -o tests/test-extraction/test.ml
-ifeq (@enable_zarith@,yes)
-	@$(OCAMLOPT) @BIGINTINCLUDE@ -I tests/test-extraction/ zarith.cmxa \
-	  tests/test-extraction/test.ml tests/test-extraction/main.ml \
-          -o tests/test-extraction/a.out
-	@tests/test-extraction/a.out
-endif
-
 ################
 # documentation
 ################
 
-.PHONY: doc
+.PHONY: doc predoc
 
-ifeq (@enable_doc@,yes)
+doc/generated/drivers-all.dot: drivers/*.drv drivers/*.gen
+	doc/drv_depgraph $^ > $@
 
-doc: doc/html/index.html
+doc/generated/drivers-%.dot: doc/generated/drivers-all.dot
+	ccomps -X $(NODE) $< > $@
 
-include doc.Makefile
+doc/generated/drivers-smt.dot: NODE = smt-libv2.gen
+doc/generated/drivers-tptp.dot: NODE = tptp.gen
+doc/generated/drivers-coq.dot: NODE = coq-common.gen
+doc/generated/drivers-isabelle.dot: NODE = isabelle-common.gen
+doc/generated/drivers-pvs.dot: NODE = pvs-common.gen
+
+DRVDOT = $(patsubst %,doc/generated/drivers-%.dot, smt tptp coq isabelle pvs)
+
+DOC = index zebibliography genindex \
+  foreword starting whyml api install manpages syntaxref vcgen \
+  input_formats exec itp technical changes
+
+DOCRST = $(DOC:%=doc/%.rst) doc/manual.bib
+
+LIBDOT = $(patsubst %,doc/generated/library-%.dot, int array)
+
+doc/generated/library-%.dot: stdlib/%.mlw
+	bin/why3 pp --output=dep $< | tred > $@
+
+predoc: $(DRVDOT) $(LIBDOT)
 
 update-doc-png:
 	export UBUNTU_MENUPROXY=0; \
@@ -1876,6 +1902,10 @@ update-doc-png:
 	export WHY3LOADPATH=stdlib; \
 	export GTK_THEME=Adwaita; \
 	sed -n -e 's/^.. %EXECUTE \(.*\)/\1/p' $(DOCRST) | $(SHELL) -e
+
+ifeq (@enable_doc@,yes)
+
+doc: doc/html/index.html
 
 TESTSAPIDOC = $(addsuffix .ml, $(addprefix examples/use_api/, $(APITESTS)))
 
@@ -1908,7 +1938,7 @@ endif
 
 clean::
 	rm -rf doc/html doc/latex; \
-	rm -rf doc/generated/drivers-*.dot
+	rm -rf doc/generated/*.dot
 
 else
 
@@ -1936,7 +1966,7 @@ MODULESTODOC = \
 	transform/args_wrapper \
 	session/session_itp session/controller_itp \
 	session/itp_communication session/itp_server \
-	mlw/ity mlw/expr mlw/pdecl mlw/pmodule mlw/vc
+	mlw/counterexample mlw/pinterp mlw/ity mlw/expr mlw/pdecl mlw/pmodule mlw/vc
 
 MODULESMLTODOC = parser/ptree
 
@@ -2073,10 +2103,6 @@ clean::
 	$(SHOW) 'Ocamlopt $<'
 	$(HIDE)$(OCAMLOPT) -c $(OFLAGS) $<
 
-# src/tools/why3pretty.cmx: %.cmx: %.ml
-# 	$(SHOW) 'Ocamlopt $<'
-# 	$(HIDE)$(OCAMLOPT) -c $(OFLAGS) $<
-
 %.cmx: %.ml
 	$(SHOW) 'Ocamlopt $<'
 	$(HIDE)$(OCAMLOPT) -c $(OFLAGS) $(CMIHACK) $<
@@ -2107,7 +2133,7 @@ src/parser/parser.ml src/parser/parser.mli: $(PARSERS)
 
 plugins/cfg/cfg_parser.ml plugins/cfg/cfg_parser.mli: src/parser/parser_common.mly plugins/cfg/cfg_parser.mly
 	$(SHOW) 'Menhir $^'
-	$(HIDE)$(MENHIR) --table --explain --base plugins/cfg/cfg_parser \
+	$(HIDE)$(MENHIR) --table --explain --strict --base plugins/cfg/cfg_parser \
 		--external-tokens Cfg_tokens $^
 
 

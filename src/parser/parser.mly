@@ -41,6 +41,7 @@
 %start <Pmodule.pmodule Wstdlib.Mstr.t> mlw_file
 %start <Ptree.mlw_file> mlw_file_parsing_only
 %start <Ptree.term> term_eof
+%start <Ptree.expr> expr_eof
 %start <Ptree.decl> decl_eof
 %start <Ptree.qualid> qualid_eof
 %start <Ptree.qualid list> qualid_comma_list_eof
@@ -55,10 +56,12 @@
 term_eof:
 | term EOF { $1 }
 
+expr_eof:
+| seq_expr EOF { $1 }
+
 decl_eof:
 | pure_decl EOF { $1 }
 | prog_decl EOF { $1 }
-
 
 (* Parsing of a list of qualified identifiers for the ITP *)
 
@@ -118,6 +121,13 @@ module_decl:
       add_record_projections d
     }
 | use_clone { () }
+
+module_decl_parsing_only:
+| scope_head_parsing_only module_decl_parsing_only* END
+    { let loc,import,qid = $1 in (Dscope(loc,import,qid,$2))}
+| IMPORT uqualid { (Dimport $2) }
+| d = pure_decl | d = prog_decl | d = meta_decl { d }
+| use_clone_parsing_only { $1 }
 
 (* Do not open inside another module *)
 

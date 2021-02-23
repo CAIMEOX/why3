@@ -37,9 +37,8 @@ let print_status fmt st =
   | Undone            -> fprintf fmt "Undone"
   | Scheduled         -> fprintf fmt "Scheduled"
   | Running           -> fprintf fmt "Running"
-  | Done r            ->
-      fprintf fmt "Done(%a)"
-        (Call_provers.print_prover_result ~json_model:false) r
+  | Done r            -> fprintf fmt "Done(@[<h>%a@])"
+                           (Call_provers.print_prover_result ~json:false) r
   | Interrupted       -> fprintf fmt "Interrupted"
   | Detached          -> fprintf fmt "Detached"
   | InternalFailure e ->
@@ -118,7 +117,7 @@ let load_drivers c =
   let provers = Whyconf.get_provers config in
   let main = Whyconf.get_main config in
   Whyconf.Mprover.iter (fun _ p ->
-      let d = Whyconf.load_driver main env p.Whyconf.driver [] in
+      let d = Whyconf.load_driver main env p in
       Whyconf.Hprover.add c.controller_provers p.Whyconf.prover (p,d))
     provers
 
@@ -297,7 +296,7 @@ type sched_pa_rec =
     spa_limit    : Call_provers.resource_limit;
     spa_pr_scr   : string option;
     spa_callback : (proof_attempt_status -> unit);
-    spa_ores     : Call_provers.prover_result option;
+    spa_ores     : Call_provers.prover_result option
   }
 
 let scheduled_proof_attempts : sched_pa_rec Queue.t = Queue.create ()
@@ -422,10 +421,8 @@ let build_prover_call spa =
     let inplace = config_pr.Whyconf.in_place in
     let interactive = config_pr.Whyconf.interactive in
     try
-      let call =
-        Driver.prove_task ?old:spa.spa_pr_scr ~inplace ~command
-                        ~limit ~interactive driver task
-      in
+      let call = Driver.prove_task ?old:spa.spa_pr_scr ~inplace ~command
+          ~limit ~interactive driver task in
       let pa =
         { tp_session  = c.controller_session;
           tp_id       = spa.spa_id;
@@ -1082,25 +1079,25 @@ type report =
 let print_report fmt (r: report) =
   match r with
   | Result (new_r, old_r) ->
-    Format.fprintf fmt "new_result = %a, old_result = %a@."
-      (Call_provers.print_prover_result ~json_model:false) new_r
-      (Call_provers.print_prover_result ~json_model:false) old_r
+    Format.fprintf fmt "new_result = %a, old_result = %a"
+      (Call_provers.print_prover_result ~json:false) new_r
+      (Call_provers.print_prover_result ~json:false) old_r
   | CallFailed e ->
-    Format.fprintf fmt "Callfailed %a@." Exn_printer.exn_printer e
+    Format.fprintf fmt "Callfailed %a" Exn_printer.exn_printer e
   | Replay_interrupted ->
-    Format.fprintf fmt "Interrupted@."
+    Format.fprintf fmt "Interrupted"
   | Prover_not_installed ->
-    Format.fprintf fmt "Prover not installed@."
+    Format.fprintf fmt "Prover not installed"
   | Edited_file_absent _ ->
-    Format.fprintf fmt "No edited file@."
+    Format.fprintf fmt "No edited file"
   | No_former_result new_r ->
-    Format.fprintf fmt "new_result = %a, no former result@."
-      (Call_provers.print_prover_result ~json_model:false) new_r
+    Format.fprintf fmt "new_result = %a, no former result"
+      (Call_provers.print_prover_result ~json:false) new_r
 
 (* TODO to be removed when we have a better way to print *)
 let replay_print fmt (lr: (proofNodeID * Whyconf.prover * Call_provers.resource_limit * report) list) =
   let pp_elem fmt (id, pr, rl, report) =
-    fprintf fmt "ProofNodeID: %d, Prover: %a, Timelimit?: %d, Result: %a@."
+    fprintf fmt "ProofNodeID: %d, Prover: %a, Timelimit?: %d, Result: @[<h>%a@]"
       (Obj.magic id) Whyconf.print_prover pr
       rl.Call_provers.limit_time print_report report
   in
@@ -1280,8 +1277,8 @@ let bisect_proof_attempt ~callback_tr ~callback_pa ~notification ~removed c pa_i
                                    Exn_printer.exn_printer exn
                   | Done res ->
                      assert (res.Call_provers.pr_answer = Call_provers.Valid);
-                     Debug.dprintf debug "Bisecting: %a.@."
-                       (Call_provers.print_prover_result ~json_model:false) res
+                     Debug.dprintf debug "@[<h>Bisecting: %a.@]@."
+                       (Call_provers.print_prover_result ~json:false) res
                   end
                 in
                 schedule_proof_attempt ?save_to:None c pn prover ~limit ~callback ~notification

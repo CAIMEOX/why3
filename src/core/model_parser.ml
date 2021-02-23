@@ -48,6 +48,7 @@ type model_value =
   | Record of model_record
   | Proj of model_proj
   | Apply of string * model_value list
+  | Undefined
   | Unparsed of string
 
 and arr_index = {arr_index_key: model_value; arr_index_value: model_value}
@@ -146,7 +147,10 @@ let binary_of_bv bv =
   let p = String.make (bv.bv_length-String.length b) '0' in
   Printf.sprintf "#b%s%s" p b
 
-let convert_float_value ?(force_binary_bv=false) f =
+let debug_force_binary_floats = Debug.register_flag "model_force_binary_floats"
+    ~desc:"Print all floats using bitvectors in JSON output for models"
+
+let convert_float_value f =
   match f with
   | Plus_infinity ->
       let m = Mstr.add "cons" (Json_base.String "Plus_infinity") Mstr.empty in
@@ -163,7 +167,7 @@ let convert_float_value ?(force_binary_bv=false) f =
   | Not_a_number ->
       let m = Mstr.add "cons" (Json_base.String "Not_a_number") Mstr.empty in
       Json_base.Record m
-  | Float_number {binary= {sign; exp; mant}} when force_binary_bv ->
+  | Float_number {binary= {sign; exp; mant}} when Debug.test_flag debug_force_binary_floats ->
       let m = Mstr.add "cons" (Json_base.String "Float_value") Mstr.empty in
       let m = Mstr.add "sign" (Json_base.String (binary_of_bv sign)) m in
       let m = Mstr.add "exponent" (Json_base.String (binary_of_bv exp)) m in
@@ -231,6 +235,9 @@ let rec convert_model_value value : Json_base.json =
       Json_base.Record m
   | Record r -> convert_record r
   | Proj p -> convert_proj p
+  | Undefined ->
+      let m = Mstr.add "type" (Json_base.String "Undefined") Mstr.empty in
+      Json_base.Record m
 
 and convert_array a =
   let m_others =
@@ -291,6 +298,14 @@ let print_float_human fmt f =
   | Float_number {binary= {sign; exp; mant}} ->
       fprintf fmt "float_bits(%s,%s,%s)" sign.bv_verbatim exp.bv_verbatim mant.bv_verbatim
 
+let print_integer fmt (i: BigInt.t) =
+  pp_print_string fmt (BigInt.to_string i);
+  if BigInt.(gt (abs i) (of_int 9)) then
+    (* Print hex representation only when it isn't redundant *)
+    fprintf fmt " (%t0X%a)"
+      (fun fmt -> if BigInt.sign i < 0 then pp_print_string fmt "-")
+      (Number.print_in_base 16 None) (BigInt.abs i)
+
 let rec print_array_human fmt (arr : model_array) =
   let print_others fmt v =
     fprintf fmt "@[others =>@ %a@]" print_model_value_human v in
@@ -309,7 +324,7 @@ and print_record_human fmt r =
       (* Special pretty printing for record with only one element *)
       fprintf fmt "%a" print_model_value_human value
   | _ ->
-      fprintf fmt "@[%a@]"
+      fprintf fmt "@[<hv1>%a@]"
         (Pp.print_list_delim ~start:Pp.lbrace ~stop:Pp.rbrace ~sep:Pp.semi
            (fun fmt (f, v) ->
              fprintf fmt "@[%s =@ %a@]" f print_model_value_human v))
@@ -329,7 +344,7 @@ and print_bv fmt (bv : model_bv) =
 and print_model_value_human fmt (v : model_value) =
   match v with
   | String s -> Constant.print_string_def fmt s
-  | Integer i -> fprintf fmt "%s (%s)" (BigInt.to_string i.int_value) i.int_verbatim
+  | Integer i -> print_integer fmt i.int_value
   | Decimal d -> fprintf fmt "%s.%s" (BigInt.to_string d.dec_int) (BigInt.to_string d.dec_frac)
   | Fraction f -> fprintf fmt "%s/%s" (BigInt.to_string f.frac_nom) (BigInt.to_string f.frac_den)
   | Float f -> print_float_human fmt f
@@ -343,6 +358,7 @@ and print_model_value_human fmt (v : model_value) =
   | Record r -> print_record_human fmt r
   | Proj p -> print_proj_human fmt p
   | Bitvector s -> print_bv fmt s
+  | Undefined -> fprintf fmt "UNDEFINED"
   | Unparsed s -> fprintf fmt "%s" s
 
 (*
@@ -401,10 +417,23 @@ let create_model_element_name name attrs : model_element_name =
 type model_file = model_element list Mint.t
 type model_files = model_file Mstr.t
 
-type model =
-  { model_files: model_files
-  ; vc_term_loc: Loc.position option
-  ; vc_term_attrs: Sattr.t }
+type model = {
+  model_files: model_files;
+  vc_term_loc: Loc.position option;
+  vc_term_attrs: Sattr.t;
+}
+
+let map_filter_model_files f =
+  let f_list elts =
+    match Lists.map_filter f elts with
+    | [] -> None | l -> Some l in
+  let f_files mf =
+    let mf = Mint.map_filter f_list mf in
+    if Mint.is_empty mf then None else Some mf in
+  Mstr.map_filter f_files
+
+let map_filter_model_elements f m =
+  {m with model_files= map_filter_model_files f m.model_files}
 
 let empty_model_file = Mint.empty
 let empty_model_files = Mstr.empty
@@ -413,11 +442,38 @@ let is_model_empty m = Mstr.is_empty m.model_files
 let empty_model =
   {vc_term_loc=None; vc_term_attrs=Sattr.empty; model_files=empty_model_files}
 
+let set_model_files model model_files =
+  { model with model_files }
+
 let get_model_elements m =
   List.(concat (concat (map Mint.values (Mstr.values m.model_files))))
 
-type model_parser = printer_mapping -> string -> model
-type raw_model_parser = printer_mapping -> string -> model_element list
+let get_model_term_loc m = m.vc_term_loc
+let get_model_term_attrs m = m.vc_term_attrs
+
+let get_model_element model name loc =
+  let aux me =
+    me.me_name.men_name = name &&
+    Opt.equal Loc.equal me.me_location (Some loc) in
+  List.find_opt aux (get_model_elements model)
+
+let get_model_element_value model name loc =
+  let aux me =
+    me.me_name.men_name = name &&
+    Opt.equal Loc.equal me.me_location (Some loc) in
+  List.find_opt aux (get_model_elements model)
+
+let get_model_element_by_id model id =
+  match id.id_loc with
+  | None -> None
+  | Some loc ->
+      let name = id.id_string in
+      let name = Ident.get_model_trace_string ~name ~attrs:id.id_attrs in
+      get_model_element_value model name loc
+
+let get_model_element_by_loc model loc =
+  let aux me = Opt.equal Loc.equal me.me_location (Some loc) in
+  List.find_opt aux (get_model_elements model)
 
 (*
 ***************************************************************
@@ -442,41 +498,59 @@ let fix_loc_kind ~at_loc name =
 let cmp_attrs a1 a2 =
   String.compare a1.attr_string a2.attr_string
 
-let print_model_element ~at_loc ~print_attrs ~print_model_value ~me_name_trans fmt m_element =
+let print_model_element ?(print_locs=false) ~at_loc ~print_attrs ~print_model_value ~me_name_trans fmt m_element =
   match m_element.me_name.men_kind with
   | Error_message -> fprintf fmt "%s" m_element.me_name.men_name
   | _ ->
       let m_element = {m_element with me_name=fix_loc_kind ~at_loc m_element.me_name} in
-      fprintf fmt "@[<hv2>@[<hov2>%s%t =@]@ %a@]"
-        (me_name_trans m_element.me_name)
+      fprintf fmt "@[<hv2>@[<hov2>%s%t%t =@]@ %a@]" (me_name_trans m_element.me_name)
         (fun fmt ->
            if print_attrs then
-             fprintf fmt ",@ [%a]"
-               (Pp.print_list Pp.comma Pretty.print_attr)
+             fprintf fmt " %a" Pp.(print_list space Pretty.print_attr)
                (List.sort cmp_attrs (Sattr.elements m_element.me_name.men_attrs)))
+        (fun fmt ->
+           if print_locs then fprintf fmt " (%a)"
+               (Pp.print_option_or_default "NO LOC "Pretty.print_loc) m_element.me_location)
         print_model_value m_element.me_value
 
-let print_model_elements ~at_loc ~print_attrs ?(sep = Pp.newline)
+let similar_model_element_names me_nm1 me_nm2 =
+  (* TODO Add an efficient version of symmetric difference to extset *)
+  let symm_diff = Sattr.diff (Sattr.union me_nm1.men_attrs me_nm2.men_attrs)
+                    (Sattr.inter me_nm1.men_attrs me_nm2.men_attrs) in
+  Ident.get_model_trace_string ~name:me_nm1.men_name ~attrs:me_nm1.men_attrs
+  = Ident.get_model_trace_string ~name:me_nm2.men_name ~attrs:me_nm2.men_attrs
+  && Sattr.for_all (fun x ->
+         not (Strings.has_prefix "at" x.attr_string)) symm_diff
+
+(* TODO optimize *)
+let rec filter_duplicated l =
+  let exist_similar a l = List.exists (fun x ->
+    similar_model_element_names a.me_name x.me_name) l in
+  match l with
+  | [] | [_] -> l
+  | me :: l when exist_similar me l -> filter_duplicated l
+  | me :: l -> me :: filter_duplicated l
+
+let print_model_elements ~filter_similar ~at_loc ~print_attrs ?(sep = Pp.newline)
     ~print_model_value ~me_name_trans fmt m_elements =
+  let m_elements =
+    if filter_similar then filter_duplicated m_elements else m_elements in
   fprintf fmt "@[%a@]"
     (Pp.print_list sep
-       (print_model_element ~at_loc ~print_attrs ~print_model_value
+       (print_model_element ?print_locs:None ~at_loc ~print_attrs ~print_model_value
           ~me_name_trans))
     m_elements
 
-let print_model_file ~print_attrs ~print_model_value ~me_name_trans fmt filename model_file =
+let print_model_file ~filter_similar ~print_attrs ~print_model_value ~me_name_trans fmt (filename, model_file) =
   (* Relativize does not work on nighly bench: using basename instead. It
      hides the local paths. *)
   let filename = Filename.basename filename in
-  fprintf fmt "@[<v 0>File %s:@\n" filename ;
-  Mint.iter
-    (fun line m_elements ->
-      fprintf fmt "  @[<v 2>Line %d:@\n" line ;
-      print_model_elements ~at_loc:(filename, line) ~print_attrs
-        ~print_model_value ~me_name_trans fmt m_elements ;
-      fprintf fmt "@]@\n")
-    model_file ;
-  fprintf fmt "@]"
+  let pp fmt (line, m_elements) =
+    fprintf fmt "  @[<v 2>Line %d:@ %a@]" line
+      (print_model_elements ~filter_similar ?sep:None ~at_loc:(filename, line) ~print_attrs
+         ~print_model_value ~me_name_trans) m_elements in
+  fprintf fmt "@[<v 0>File %s:@ %a@]" filename
+    Pp.(print_list space pp) (Mint.bindings model_file)
 
 let why_name_trans {men_kind; men_name} =
   match men_kind with
@@ -484,7 +558,7 @@ let why_name_trans {men_kind; men_name} =
   | Old -> "old "^men_name
   | At l -> men_name^" at "^l
   (* | Loop_before -> "[before loop] "^men_name *)
-  | Loop_previous_iteration -> "[previous iteration] "^men_name
+  | Loop_previous_iteration -> "[before iteration] "^men_name
   | Loop_current_iteration -> "[current iteration] "^men_name
   | _ -> men_name
 
@@ -494,16 +568,16 @@ let json_name_trans {men_kind; men_name} =
   | Old -> "old "^men_name
   | _ -> men_name
 
-let print_model ~print_attrs ?(me_name_trans = why_name_trans)
+let print_model ~filter_similar ~print_attrs ?(me_name_trans = why_name_trans)
     ~print_model_value fmt model =
-  Mstr.iter (print_model_file ~print_attrs ~print_model_value ~me_name_trans fmt)
-    model.model_files
+  Pp.print_list Pp.newline (print_model_file ~filter_similar ~print_attrs ~print_model_value ~me_name_trans)
+    fmt (Mstr.bindings model.model_files)
 
-let print_model_human ?(me_name_trans = why_name_trans) fmt model =
-  print_model ~me_name_trans ~print_model_value:print_model_value_human fmt model
+let print_model_human ?(filter_similar = true) ?(me_name_trans = why_name_trans) fmt model =
+  print_model ~filter_similar ~me_name_trans ~print_model_value:print_model_value_human fmt model
 
-let print_model ?(me_name_trans = why_name_trans) ~print_attrs fmt model =
-  print_model ~print_attrs ~me_name_trans ~print_model_value fmt model
+let print_model ?(filter_similar = true) ?(me_name_trans = why_name_trans) ~print_attrs fmt model =
+  print_model ~filter_similar ~print_attrs ~me_name_trans ~print_model_value fmt model
 
 let get_model_file model filename =
   Mstr.find_def empty_model_file filename model
@@ -553,7 +627,7 @@ let interleave_line ~filename ~print_attrs start_comment end_comment
     let model_elements = Mint.find line_number model_file in
     let cntexmp_line =
       asprintf "@[<h 0>%s%s%a%s@]" (get_padding line) start_comment
-        (print_model_elements ~sep:Pp.semi ~at_loc:(filename, line_number)
+        (print_model_elements ~filter_similar:true ~sep:Pp.semi ~at_loc:(filename, line_number)
            ~print_attrs ~print_model_value:print_model_value_human ~me_name_trans)
         model_elements end_comment in
     (* We need to know how many lines will be taken by the counterexample. This
@@ -653,7 +727,7 @@ let print_model_element_json me_name_to_str fmt me =
     | Other -> fprintf fmt "%a" Json_base.string "other"
     | Loop_before -> fprintf fmt "%a" Json_base.string "before_loop"
     | Loop_previous_iteration ->
-        fprintf fmt "%a" Json_base.string "previous_iteration"
+        fprintf fmt "%a" Json_base.string "before_iteration"
     | Loop_current_iteration ->
         fprintf fmt "%a" Json_base.string "current_iteration" in
   let print_name fmt = Json_base.string fmt (me_name_to_str me.me_name) in
@@ -664,6 +738,7 @@ let print_model_element_json me_name_to_str fmt me =
       ("value", print_value) ; ("kind", print_kind) ]
 
 let print_model_elements_json me_name_to_str fmt model_elements =
+  let model_elements = filter_duplicated model_elements in
   Json_base.list (print_model_element_json me_name_to_str) fmt model_elements
 
 let print_model_elements_on_lines_json model me_name_to_str vc_line_trans fmt
@@ -752,31 +827,20 @@ let add_to_model ?vc_term_attrs model_element model =
       let filename, line_number, _, _ = Loc.get pos in
       let model_file = get_model_file model filename in
       let elements = get_elements model_file line_number in
-      let el = model_element.me_name in
-      (* This removes elements that are duplicated *)
-      let found_elements =
-        List.find_all
-          (fun x ->
-            let xme = x.me_name in
-            Ident.get_model_trace_string ~name:xme.men_name ~attrs:xme.men_attrs
-            = Ident.get_model_trace_string ~name:el.men_name ~attrs:el.men_attrs
-            &&
-            (* TODO Add an efficient version of symmetric difference to extset *)
-            let symm_diff =
-              Sattr.diff
-                (Sattr.union x.me_name.men_attrs el.men_attrs)
-                (Sattr.inter x.me_name.men_attrs el.men_attrs) in
-            Sattr.for_all
-              (fun x -> not (Strings.has_prefix "at" x.attr_string))
-              symm_diff)
-          elements in
       let model_element =
         match vc_term_attrs with
         | Some vc_term_attrs ->
             fix_kind (filename, line_number) vc_term_attrs model_element
         | None -> model_element in
-      let elements =
-        if found_elements <> [] then elements else model_element :: elements in
+      let el = model_element.me_name in
+      (* This removes elements that are duplicated *)
+      let found_elements =
+        List.exists (fun x ->
+            similar_model_element_names x.me_name el
+            && pos = Opt.get_def Loc.dummy_position x.me_location)
+          elements in
+      let elements = if found_elements then elements
+                     else model_element :: elements in
       let model_file = Mint.add line_number elements model_file in
       Mstr.add filename model_file model
 
@@ -798,7 +862,7 @@ let rec replace_projection (const_function : string -> string) =
   let const_function s = try const_function s with Not_found -> s in
   function
   | Integer _ | Decimal _ | Fraction _ | Float _ | Boolean _ | Bitvector _
-  | String _ | Unparsed _ as mv -> mv
+  | String _ | Undefined | Unparsed _ as mv -> mv
   | Record fs ->
       let aux (f, mv) = const_function f, replace_projection const_function mv in
       Record (List.map aux fs)
@@ -894,7 +958,7 @@ let build_model_rec pm (elts: model_element list) : model_files =
     Sattr.fold add_written_loc me.me_name.men_attrs model in
   List.fold_left add_model_elt Mstr.empty (Lists.map_filter process_me elts)
 
-let handle_contradictory_vc pm model_files =
+let handle_contradictory_vc vc_term_loc model_files =
   (* The VC is contradictory if the location of the term that triggers VC
      was collected, model_files is not empty, and there are no model elements
      in this location.
@@ -904,7 +968,7 @@ let handle_contradictory_vc pm model_files =
     (* If the counterexample model was not collected, then model_files
        is empty and this does not mean that VC is contradictory. *)
     model_files
-  else match pm.Printer.vc_term_loc with
+  else match vc_term_loc with
     | None -> model_files
     | Some pos ->
         let filename, line_number, _, _ = Loc.get pos in
@@ -925,10 +989,70 @@ let handle_contradictory_vc pm model_files =
             add_to_model me model_files
         | _ -> model_files
 
-let build_model pm raw_model =
-  let model_files = build_model_rec pm raw_model in
-  let model_files = handle_contradictory_vc pm model_files in
-  { model_files; vc_term_loc= pm.Printer.vc_term_loc; vc_term_attrs= pm.Printer.vc_term_attrs }
+(*
+***************************************************************
+** Model cleaning
+***************************************************************
+*)
+
+let opt_bind_any os f =
+  f (Lists.map_filter (fun x -> x) os)
+
+let opt_bind_all os f =
+  if List.for_all Opt.inhabited os then
+    f (List.map Opt.get os)
+  else None
+
+class clean = object (self)
+  method element me =
+    if me.me_name.men_kind = Error_message then
+      (* Keep unparsed values for error messages *)
+      Some me
+    else
+      Opt.bind (self#value me.me_value) @@ fun me_value ->
+      Some {me with me_value}
+  method value v = match v with
+    | Unparsed s    -> self#unparsed s | String v      -> self#string v
+    | Integer v     -> self#integer v  | Decimal v     -> self#decimal v
+    | Fraction v    -> self#fraction v | Float v       -> self#float v
+    | Boolean v     -> self#boolean v  | Bitvector v   -> self#bitvector v
+    | Proj (p, v)   -> self#proj p v   | Apply (s, vs) -> self#apply s vs
+    | Array a       -> self#array a    | Record fs     -> self#record fs
+    | Undefined     -> self#undefined
+  method unparsed _ = None
+  method string v = Some (String v)
+  method integer v = Some (Integer v)
+  method decimal v = Some (Decimal v)
+  method fraction v = Some (Fraction v)
+  method float v = Some (Float v)
+  method boolean v = Some (Boolean v)
+  method bitvector v = Some (Bitvector v)
+  method proj p v =
+    Opt.bind (self#value v) @@ fun v ->
+    Some (Proj (p, v))
+  method apply s vs =
+    opt_bind_all (List.map self#value vs) @@ fun vs ->
+    Some (Apply (s, vs))
+  method array a =
+    let clean_arr_index ix =
+      Opt.bind (self#value ix.arr_index_key) @@ fun key ->
+      Opt.bind (self#value ix.arr_index_value) @@ fun value ->
+      Some {arr_index_key= key; arr_index_value= value} in
+    Opt.bind (self#value a.arr_others) @@ fun others ->
+    opt_bind_any (List.map clean_arr_index a.arr_indices) @@ fun indices ->
+    Some (Array {arr_others= others; arr_indices= indices})
+  method record fs =
+    let clean_field (f, v) =
+      Opt.bind (self#value v) @@ fun v ->
+      Some (f, v) in
+    opt_bind_all (List.map clean_field fs) @@ fun fs ->
+    Some (Record fs)
+  method undefined = Some Undefined
+end
+
+let clean = ref (new clean)
+
+let customize_clean c = clean := (c :> clean)
 
 (*
 ***************************************************************
@@ -977,21 +1101,30 @@ let model_for_positions_and_decls model ~positions =
 ***************************************************************
 *)
 
+type model_parser = printer_mapping -> string -> model
+type raw_model_parser = printer_mapping -> string -> model_element list
+
+let model_parser (raw: raw_model_parser) : model_parser =
+  fun ({Printer.vc_term_loc; vc_term_attrs} as pm) str ->
+  raw pm str |> (* For example, Smtv2_model_parser.parse for "smtv2" *)
+  build_model_rec pm |>
+  map_filter_model_files !clean#element |>
+  handle_contradictory_vc pm.Printer.vc_term_loc |>
+  fun model_files -> { model_files; vc_term_loc; vc_term_attrs }
+
 exception KnownModelParser of string
 exception UnknownModelParser of string
 
-type reg_model_parser = Pp.formatted * raw_model_parser
+type reg_model_parser = Pp.formatted * model_parser
 
 let model_parsers : reg_model_parser Hstr.t = Hstr.create 17
 
 let register_model_parser ~desc s p =
   if Hstr.mem model_parsers s then raise (KnownModelParser s) ;
-  Hstr.replace model_parsers s (desc, p)
+  Hstr.replace model_parsers s (desc, model_parser p)
 
-let lookup_model_parser s pm input =
-  let _, raw_model_parser = Hstr.find_exn model_parsers (UnknownModelParser s) s in
-  let raw_model = raw_model_parser pm input in (* For example, Smtv2_model_parser.parse for "smtv2" *)
-  build_model pm raw_model
+let lookup_model_parser s =
+  snd (Hstr.find_exn model_parsers (UnknownModelParser s) s)
 
 let list_model_parsers () =
   Hstr.fold (fun k (desc, _) acc -> (k, desc) :: acc) model_parsers []

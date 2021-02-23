@@ -138,7 +138,7 @@ let alt_ergo : Whyconf.config_prover =
 
 let alt_ergo_driver : Driver.driver =
   try
-    Whyconf.load_driver main env alt_ergo.Whyconf.driver []
+    Whyconf.load_driver main env alt_ergo
   with e ->
     eprintf "Failed to load driver for alt-ergo: %a@."
       Exn_printer.exn_printer e;
@@ -155,7 +155,7 @@ let () =
                               alt_ergo_driver t)
        in
        printf "@[On task %d, alt-ergo answers %a@."
-              i (Call_provers.print_prover_result ~json_model:false) r;
+              i (Call_provers.print_prover_result ?json:None) r;
        i+1
       )
       1 my_tasks

@@ -997,25 +997,17 @@ let provers_page c (notebook:GPack.notebook) =
       (fun w -> ignore(notebook#append_page ~tab_label:label#coerce w)) ()
   in
   let page_pack = page#pack ~fill:true ~expand:true ?from:None ?padding:None in
-  let hbox = GPack.hbox ~packing:page_pack () in
-  let hbox_pack = hbox#pack ~fill:true ~expand:true ?from:None ?padding:None in
   let scrollview =
-  try
     GBin.scrolled_window ~hpolicy:`NEVER ~vpolicy:`AUTOMATIC
-      ~packing:hbox_pack ()
-  with Gtk.Error _ -> assert false
-  in let () = scrollview#set_shadow_type `OUT in
-  let vbox = GPack.vbox ~packing:scrollview#add_with_viewport () in
-  let vbox_pack = vbox#pack ~fill:true ~expand:true ?from:None ?padding:None in
-  let hbox = GPack.hbox ~packing:vbox_pack () in
-  let hbox_pack = hbox#pack ~fill:true ~expand:true ?from:None ?padding:None in
-  (* show/hide provers *)
+      ~packing:page_pack () in
+  let () = scrollview#set_shadow_type `OUT in
   let frame =
-    GBin.frame ~label:"Provers visible in the context menu" ~packing:hbox_pack ()
-  in
+    GBin.frame ~label:"Provers visible in the context menu"
+      ~packing:scrollview#add_with_viewport () in
   let provers_box =
     GPack.button_box `VERTICAL ~border_width:5 ~spacing:5
       ~packing:frame#add () in
+  provers_box#set_homogeneous true;
   let hidden_provers = Hashtbl.create 7 in
   Mprover.iter
     (fun _ p ->
@@ -1034,34 +1026,7 @@ let provers_page c (notebook:GPack.notebook) =
               Hashtbl.fold
               (fun l h acc -> if !h then l::acc else acc) hidden_provers [])
       in ())
-    (Whyconf.get_provers c.config);
-  (* default prover *)
-(*
-  let frame2 =
-    GBin.frame ~label:"Default prover" ~packing:hbox_pack () in
-  let provers_box =
-    GPack.button_box `VERTICAL ~border_width:5 ~spacing:5
-      ~packing:frame2#add () in
-  let group =
-    let b =
-      GButton.radio_button ~label:"(none)" ~packing:provers_box#add
-                           ~active:(c.config.default_prover = "") () in
-    let (_ : GtkSignal.id) =
-      b#connect#toggled ~callback:(fun () -> c.config.default_prover <- "") in
-    b#group in
-  Mprover.iter
-    (fun _ p ->
-      let name = prover_parseable_format p.prover in
-      let label = Pp.string_of_wnl print_prover p.prover in
-      let b =
-        GButton.radio_button ~label ~group ~packing:provers_box#add
-                             ~active:(name = c.config.default_prover) () in
-      let (_ : GtkSignal.id) =
-        b#connect#toggled ~callback:(fun () -> c.config.default_prover <- name)
-      in ())
     (Whyconf.get_provers c.config)
- *)
-  ()
 
 (* Page "Uninstalled provers" *)
 
@@ -1114,7 +1079,7 @@ let colors_frame c (notebook:GPack.notebook) =
   let label = GMisc.label ~text:"Colors" () in
   let page = GPack.vbox ~homogeneous:false ~packing:
       (fun w -> ignore(notebook#append_page ~tab_label:label#coerce w)) () in
-  let page_pack = page#pack ?fill:None ~expand:true ?from:None ?padding:None in
+  let page_pack = page#pack ?from:None ?expand:None ?fill:None ?padding:None in
   let frame = GBin.frame ~label:"Choosing colors" ~packing:page_pack () in
   let box = GPack.vbox ~border_width:5 ~packing:frame#add () in
   let box_pack = box#pack ?fill:None ?expand:None ?from:None ?padding:None in
@@ -1146,9 +1111,7 @@ let colors_frame c (notebook:GPack.notebook) =
             | _ -> false
           ) in
     () in
-  List.iter add_choice editable_colors;
-  let _ = GPack.vbox ~packing:page_pack () in
-  ()
+  List.iter add_choice editable_colors
 
 let editors_page c (notebook:GPack.notebook) =
   let label = GMisc.label ~text:"Editors" () in
@@ -1157,11 +1120,9 @@ let editors_page c (notebook:GPack.notebook) =
       (fun w -> ignore(notebook#append_page ~tab_label:label#coerce w)) ()
   in
   let page_pack = page#pack ~fill:true ~expand:true ?from:None ?padding:None in
-  let hbox = GPack.hbox ~packing:page_pack () in
-  let hbox_pack = hbox#pack ~fill:true ~expand:true ?from:None ?padding:None in
   let scrollview =
     GBin.scrolled_window ~hpolicy:`NEVER ~vpolicy:`AUTOMATIC
-      ~packing:hbox_pack ()
+      ~packing:page_pack ()
   in
   let vbox = GPack.vbox ~packing:scrollview#add_with_viewport () in
   let vbox_pack = vbox#pack ?fill:None ?expand:None ?from:None ?padding:None in
@@ -1248,7 +1209,9 @@ let preferences ~parent (c : t) =
     ~title:"Why3: preferences" ()
   in
   let vbox = dialog#vbox in
-  let notebook = GPack.notebook ~packing:vbox#add () in
+  let vbox_pack =
+    vbox#pack ?from:None ~expand:true ~fill:true ?padding:None in
+  let notebook = GPack.notebook ~packing:vbox_pack () in
   (* page "general settings" **)
   general_settings c notebook;
   (* page "appearance" **)
@@ -1316,46 +1279,38 @@ let uninstalled_prover_dialog ~parent ~callback c unknown =
                  ~title:"Why3: Uninstalled prover" ()
   in
   let vbox = dialog#vbox in
-  let vbox_pack = vbox#pack ~fill:true ~expand:true ?from:None ?padding:None in
-  let hbox = GPack.hbox ~packing:vbox_pack () in
-  let hbox_pack = hbox#pack ~fill:true ~expand:true ?from:None ?padding:None in
   let height = parent#misc#allocation.Gtk.height * 3 / 4 in
   let scrollview =
     GBin.scrolled_window ~hpolicy:`NEVER ~vpolicy:`AUTOMATIC ~height
-      ~packing:hbox_pack ()
+      ~packing:vbox#add ()
   in
   let () = scrollview#set_shadow_type `OUT in
-  let vbox = GPack.vbox ~packing:scrollview#add_with_viewport () in
+  let vbox = GPack.vbox ~spacing:5 ~packing:scrollview#add_with_viewport () in
+  let vbox_pack =
+    vbox#pack ?fill:None ?expand:None ?from:None ?padding:None
+  in
   (* header *)
-  let hb = GPack.hbox ~packing:vbox#add () in
+  let hb = GPack.hbox ~packing:vbox_pack () in
   let _ = GMisc.image ~stock:`DIALOG_WARNING ~packing:hb#add () in
   let (_:GMisc.label) =
     let text =
       Pp.sprintf "The prover %a is not installed"
         Whyconf.print_prover unknown
     in
-    GMisc.label ~ypad:20 ~text ~xalign:0.5 ~packing:hb#add ()
+    GMisc.label ~ypad:10 ~text ~xalign:0.5 ~packing:hb#add ()
   in
   let (_:GMisc.label) =
     let text =
-      "WARNING: this policy will not be taken into account immediately \
-        but only if you replay again the proofs."
+      "WARNING: This policy will not be taken into account immediately \
+       but only if you replay again the proofs. Do not forget to save \
+       preferences to preserve this policy for future sessions."
     in
-    GMisc.label ~text ~line_wrap:true ~packing:vbox#add ()
-  in
-  let (_:GMisc.label) =
-    let text =
-      "WARNING: do not forget to save preferences to keep this policy in future sessions"
-    in
-    GMisc.label ~text ~line_wrap:true ~packing:vbox#add ()
+    GMisc.label ~ypad:5 ~text ~line_wrap:true ~packing:vbox_pack ()
   in
   (* choices *)
-  let vbox_pack =
-    vbox#pack ~fill:true ~expand:true ?from:None ?padding:None
-  in
   let label = "Please select a policy for associated proof attempts" in
   let policy_frame = GBin.frame ~label ~packing:vbox_pack () in
-  let choice = ref 1 in
+  let choice = ref 0 in
   let prover_choosed = ref None in
   let set_prover prover () = prover_choosed := Some prover in
   let box =
@@ -1381,11 +1336,12 @@ let uninstalled_prover_dialog ~parent ~callback c unknown =
   let first = ref None in
   let alternatives_section acc label alternatives =
     if alternatives <> [] then
-      let frame = GBin.frame ~label ~packing:vbox#add () in
+      let frame = GBin.frame ~label ~packing:vbox_pack () in
       let box =
         GPack.button_box `VERTICAL ~border_width:5 ~spacing:5
           ~packing:frame#add ()
       in
+      box#set_homogeneous true;
       let iter_alter prover =
         let choice_button =
           let label = Pp.string_of_wnl print_prover prover in
@@ -1414,11 +1370,16 @@ let uninstalled_prover_dialog ~parent ~callback c unknown =
   let show_provers () = List.iter (fun b -> b#set_sensitive true) boxes in
   if versions<>[] || names<>[] then
     begin
-      choice_keep#set_active false;
       choice1#set_active true;
+      choice := 1;
     end
   else
     hide_provers();
+  if boxes = [] then
+    begin
+      choice1#misc#set_sensitive false;
+      choice2#misc#set_sensitive false;
+    end;
   ignore (choice_keep#connect#toggled
             ~callback:(fun () -> choice := 0; hide_provers ()));
   ignore (choice1#connect#toggled
@@ -1428,7 +1389,7 @@ let uninstalled_prover_dialog ~parent ~callback c unknown =
   ignore (choice3#connect#toggled
             ~callback:(fun () -> choice := 3; hide_provers ()));
   dialog#add_button "Ok" `CLOSE ;
-  ignore (dialog#run ());
+  if dialog#run () = `DELETE_EVENT then choice := 0;
   dialog#destroy ();
   let policy =
     match !choice, !prover_choosed with
