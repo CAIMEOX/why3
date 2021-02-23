@@ -90,8 +90,7 @@ let print_certif print_next fmt c =
         prhyp i
   | EUnfoldIff (pos, t1, t2, i, c) ->
       fprintf fmt "unfold_iff%s %a %a (λ %a,@ \
-                   @[<hv>%a@])@ \
-                   %a"
+                   @[<hv>%a@]) %a"
         (rstr pos)
         prpv t1
         prpv t2
@@ -99,8 +98,7 @@ let print_certif print_next fmt c =
         prhyp i
   | EUnfoldArr (pos, t1, t2, i, c) ->
       fprintf fmt "unfold_arr%s %a %a (λ %a,@ \
-                   @[<hv>%a@])@ \
-                   %a"
+                   @[<hv>%a@]) %a"
         (rstr pos)
         prpv t1
         prpv t2
@@ -108,24 +106,21 @@ let print_certif print_next fmt c =
         prhyp i
   | ESwapNeg (pos, t, i, c) ->
       fprintf fmt "swap_neg%s %a (λ %a,@ \
-                   @[<hv>%a@])@ \
-                   %a"
+                   @[<hv>%a@]) %a"
         (rstr pos)
         prpv t
         prhyp i pc c
         prhyp i
   | ESwap (pos, t, i, c) ->
       fprintf fmt "swap%s %a (λ %a,@ \
-                   @[<hv>%a@])@ \
-                   %a"
+                   @[<hv>%a@]) %a"
         (rstr pos)
         prpv t
         prhyp i pc c
         prhyp i
   | EDestruct (pos, t1, t2, i, i1, i2, c) ->
       fprintf fmt "destruct%s %a %a (λ %a %a,@ \
-                   @[<hv>%a@])@ \
-                   %a"
+                   @[<hv>%a@]) %a"
         (rstr pos)
         prpv t1
         prpv t2
@@ -140,8 +135,7 @@ let print_certif print_next fmt c =
         pc c
   | EIntroQuant (pos, (CTquant (_, cty, _) as p), i, y, c) ->
       fprintf fmt "intro_quant%s %a %a (λ %a %a,@ \
-                   @[<hv>%a@])@ \
-                   %a"
+                   @[<hv>%a@]) %a"
         (rstr pos)
         prtyparen cty
         prpv p
@@ -150,8 +144,7 @@ let print_certif print_next fmt c =
   | EIntroQuant _ -> assert false
   | EInstQuant (pos, (CTquant (_, cty, _) as p), i1, i2, t, c) ->
       fprintf fmt "inst_quant%s %a %a %a (λ %a %a,@ \
-                   @[<hv>%a@])@ \
-                   %a"
+                   @[<hv>%a@]) %a"
         (rstr pos)
         prtyparen cty
         prpv p
@@ -162,9 +155,7 @@ let print_certif print_next fmt c =
   | ERewrite (pos, is_eq, cty, t1, t2, ctxt, i1, i2, c) ->
       let pr_next fmt i1 =
         fprintf fmt "%a %a %a (λ %a %a,@ \
-                     @[<hv>%a@])@ \
-                     %a@ \
-                     %a"
+                     @[<hv>%a@]) %a %a"
           prpv t1 prpv t2 prpv ctxt
           prhyp i1 prhyp i2 pc c
           prhyp i1
@@ -175,8 +166,7 @@ let print_certif print_next fmt c =
       else
         let ni1 = id_register (id_fresh "iff_rewrite") in
         fprintf fmt "iffeq %a %a (λ %a,@ \
-                     @[<hv>rewrite_fmla%s %a@])@ \
-                     %a"
+                     @[<hv>rewrite_fmla%s %a@]) %a"
           prpv t1 prpv t2 prhyp ni1
           (rstr pos) pr_next ni1
           prhyp i1
