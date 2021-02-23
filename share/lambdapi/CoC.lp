@@ -20,11 +20,11 @@ rule tEv (ktPi $x $y) ↪  Π (w : kEv $x), tEv ($y w);
 rule kEv (tkPi $x $y) ↪  Π (w : tEv $x), kEv ($y w);
 rule kEv (kkPi $x $y) ↪  Π (w : kEv $x), kEv ($y w);
 
-symbol t_kind A B ≔  tkPi A (λ _, B);
-set infix right 14 "⇀" ≔  t_kind;
+symbol ⇀ A B ≔  tkPi A (λ _, B);
+set notation ⇀ infix right 14;
 
-symbol t_type A B ≔  ttPi A (λ _, B);
-set infix right 14 "⇁" ≔  t_type;
+symbol ⇁ A B ≔  ttPi A (λ _, B);
+set notation ⇁ infix right 14;
 
 symbol ∀ ≔  ttPi;
 
@@ -32,21 +32,21 @@ symbol forall ≔  ktPi DType;
 
 symbol false ≔  forall (λ C, C);
 
-symbol type_imp A B ≔  ttPi A (λ _, B);
-set infix right 14 "↝" ≔  type_imp;
+symbol ↝ A B ≔  ttPi A (λ _, B);
+set notation ↝ infix right 14;
 
 symbol true ≔  false ↝ false;
 
 symbol tt : tEv true ≔  λ x, x;
 
-symbol type_neg A ≔  A ↝ false;
-set prefix      20 "¬" ≔  type_neg;
+symbol ¬ A ≔  A ↝ false;
+set notation ¬ prefix 20;
 
-symbol type_and A B ≔  forall (λ C, (A ↝ B ↝ C) ↝ C);
-set infix right 18 "∧" ≔  type_and;
+symbol ∧ A B ≔  forall (λ C, (A ↝ B ↝ C) ↝ C);
+set notation ∧ infix right 18;
 
-symbol type_or  A B ≔  forall (λ C, (A ↝ C) ↝ (B ↝ C) ↝ C);
-set infix right 16 "∨" ≔  type_or;
+symbol ∨ A B ≔  forall (λ C, (A ↝ C) ↝ (B ↝ C) ↝ C);
+set notation ∨ infix right 16;
 
 symbol ∃ T P ≔  forall (λ C, ttPi T (λ x, P x ↝ C) ↝  C);
 
@@ -56,11 +56,11 @@ symbol eq T (x y : tEv T) ≔  ktPi (T ⇀ DType)
 symbol eq_fmla A B ≔  ktPi (kkPi DType (λ _, DType))
 		           (λ P, P A ↝ P B);
 
-symbol type_iff A B ≔  (A ↝ B) ∧ (B ↝ A);
-set infix right 14 "⇔" ≔  type_iff;
+symbol ⇔ A B ≔  (A ↝ B) ∧ (B ↝ A);
+set notation ⇔ infix right 14;
 
 symbol iff_eq : Π (A : Type) (B : Type),
-       	        tEv (type_iff A B) →
+       	        tEv (A ⇔  B) →
 		tEv (eq_fmla A B);
 
 
@@ -369,24 +369,7 @@ symbol rewrite_fmla_goal : Π A B P,
 
 symbol iffeq : Π (A : Type) (B : Type),
 	   	   tEv (hyp (eq_fmla A B) empty) →
-		   tEv (hyp (type_iff A B) empty)
+		   tEv (hyp (A ⇔ B) empty)
 ≔  λ A B s eab, s (iff_eq A B eab);
 
-
 // To verify
-
-// symbol to_verify :
-//   tEv (ktPi DType (λ unit,
-//        ktPi DType (λ t,
-//        ∀ (t ⇁ t ⇁ t) (λ o,
-//        ∀ t (λ e,
-//        ∀ (t ⇁ t) (λ i,
-//        ∀ t (λ y,
-//        ∀ t (λ x, ∀ t (λ x1, ∀ t (λ x2, eq t (o (o x x1) x2) (o x (o x1 x2))))) ↝
-//        ∀ t (λ x, eq t (o e x) x) ↝
-//        ∀ t (λ x, eq t (o x e) x) ↝
-//        ∀ t (λ x, eq t (o (i x) x) e) ↝
-//        ¬ (eq t (i y) (i y)) ↝
-//        false)))))))
-// ≔  λ unit t o e i y Hassoc Hidusleft Hidusright Hinvusleft Hh,
-//    eqrefl t (i y) Hh;
