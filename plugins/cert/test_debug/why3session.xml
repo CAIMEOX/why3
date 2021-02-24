@@ -6,30 +6,10 @@
 <path name=".."/><path name="test_debug.mlw"/>
 <theory name="Top">
  <goal name="G">
- <transf name="assumption_lcert" >
+ <transf name="split_ccert" >
   <goal name="G.0">
   </goal>
- </transf>
- <transf name="intro_lcert" >
-  <goal name="G.0">
-  <transf name="assumption_lcert" >
-   <goal name="G.0.0">
-   </goal>
-  </transf>
-  </goal>
- </transf>
- <transf name="rewrite_ccert" arg1="A">
-  <goal name="G.0">
-  </goal>
- </transf>
- <transf name="right_lcert" >
-  <goal name="G.0">
-  </goal>
- </transf>
- <transf name="split_goal_full_lcert" >
-  <goal name="G.0">
-  </goal>
-  <goal name="G.0">
+  <goal name="G.1">
   </goal>
  </transf>
  </goal>

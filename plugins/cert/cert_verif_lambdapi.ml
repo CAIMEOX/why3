@@ -170,6 +170,7 @@ let print_certif print_next fmt c =
           prpv t1 prpv t2 prhyp ni1
           (rstr pos) pr_next ni1
           prhyp i1
+  | EInduction _ -> assert false
   in
   pc fmt c
 
