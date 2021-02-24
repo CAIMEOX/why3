@@ -18,16 +18,11 @@
 (* predicate p (x : bool) (y : bool) *)
 (* goal G : forall x y. p x y -> p true false *)
 
+use int.Int
 
-
-predicate a
-predicate b
-
-axiom A : a
+goal G : 1 > 2 /\ 3 >= 4
 
 (* goal G : a /\ b *)
-
-goal G : a \/ b
 
 
 
