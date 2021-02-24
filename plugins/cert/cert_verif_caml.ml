@@ -122,6 +122,7 @@ let rec ccheck c cta =
         | _ -> verif_failed "Non-rewritable proposition" in
       let cta = rewrite_ctask cta i2 a b ctxt in
       ccheck c cta
+  | EInduction _ -> assert false
 
 let checker_caml (vs, certif) init_ct res_ct =
   try let map_cert = ccheck certif init_ct in
