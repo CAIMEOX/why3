@@ -81,17 +81,20 @@ symbol positive_rec :
         ∀ positive (λ n, P n)));
 
 
-symbol N : Type;
+symbol Z : Type;
+symbol Z0 : tEv Z;
+symbol Zpos : tEv positive → tEv positive;
+symbol Zneg : tEv positive → tEv positive;
 
-// constant symbol succ : tEv Int → tEv Int
+symbol zero ≔  Z0;
+symbol one ≔  Zpos xH;
+symbol succ : tEv Z → tEv Z;
 
-// symbol one ≔  Tp1 zero
-
-// set builtin "0"  ≔  zero
-// set builtin "+1" ≔  succ
+set builtin "0"  ≔  zero;
+set builtin "+1" ≔  succ;
 
 
-symbol infixspeq ≔  eq N;
+symbol infixspeq ≔  eq Z;
 
 
 // Booleans
