@@ -34,6 +34,7 @@ let opt_print_derived_model = ref false
 let opt_rac_prover = ref None
 let opt_rac_try_negate = ref false
 let opt_ce_check_verbosity = ref None
+let opt_limit_goal = ref None
 
 let () = (* Instead of additional command line parameters *)
   if Opt.get_def "" (Sys.getenv_opt "WHY3PRINTORIGINALMODEL") = "yes" then
@@ -160,6 +161,9 @@ let option_list =
     KLong "json-model-values", Hnd0 (fun () -> opt_json := Some `Values),
     " print values of prover model in JSON format (back-\n\
      wards compatiblity with --json)";
+    KLong "limit-goal", Hnd1 (AString, fun s -> opt_limit_goal := Some s),
+    "<line>[:<expl>] only prove goals in the given line (and with\n\
+     the given explanation)";
   ]
 
 let config, env =
@@ -242,6 +246,17 @@ let memlimit = match !opt_memlimit with
   | Some i when i <= 0 -> 0
   | Some i -> i
 
+let limit_goal = match !opt_limit_goal with
+  | None -> None
+  | Some s ->
+      try match Strings.bounded_split ':' s 2 with
+        | [line] -> Some (int_of_string line, None)
+        | [line; name] -> Some (int_of_string line, Some name)
+        | _ -> assert false
+      with Failure _ ->
+        eprintf "Not a valid goal limit: %S" s;
+        exit 1
+
 let print_th_namespace fmt th =
   Pretty.print_namespace fmt th.th_name.Ident.id_string th
 
@@ -299,7 +314,22 @@ let print_result ?json fmt (fname, loc, goal_name, expls, res, ce) =
 
 let unproved = ref false
 
+let really_do_task (task: task) =
+  match limit_goal with
+  | None -> true
+  | Some (line, opt_name) ->
+      let t = task_goal_fmla task in
+      match t.Term.t_loc with
+      | None -> false
+      | Some loc ->
+          let _, line', _, _ = Loc.get loc in
+          line' = line && match opt_name with
+          | None -> true | Some name ->
+              let expls = String.concat " " (Termcode.get_expls_fmla t) in
+              String.(equal (lowercase_ascii name) (lowercase_ascii expls))
+
 let do_task env drv fname tname (th : Theory.theory) (task : Task.task) =
+  if really_do_task task then
   let open Call_provers in
   let limit =
     { limit_time = timelimit;
