@@ -20,27 +20,27 @@ type cquant = CTforall | CTexists | CTlambda
 
 type ctype =
   | CTyvar of tvsymbol (* type variable *)
+  | CTprop
   | CTyapp of tysymbol * ctype list (* (possibly) applied type constant *)
   | CTarrow of ctype * ctype (* arrow type *)
 
-let ts_prop = create_tysymbol (id_fresh "prop") [] NoDef
-let ctprop = CTyapp (ts_prop, [])
 let ctbool = CTyapp (ts_bool, [])
 let ctint = CTyapp (ts_int, [])
 
 (** Utility functions on ctype *)
 
 let rec cty_equal l1 l2 = match l1, l2 with
+  | CTprop, CTprop -> true
   | CTyvar v1, CTyvar v2 -> Ty.tv_equal v1 v2
   | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
       ts_equal ty1 ty2 && List.for_all2 cty_equal l1 l2
   | CTarrow (f1, a1), CTarrow (f2, a2) ->
       cty_equal f1 f2 && cty_equal a1 a2
-  | (CTyvar _ | CTyapp _ | CTarrow _), _ -> false
+  | (CTyvar _ | CTyapp _ | CTarrow _ | CTprop), _ -> false
 
 let rec is_predicate = function
+  | CTprop -> true
   | CTarrow (_, ct) -> is_predicate ct
-  | CTyapp (ts, []) when ts_equal ts ts_prop -> true
   | _ -> false
 
 (* Pretty printing of ctype (compatible with lambdapi) *)
@@ -73,16 +73,16 @@ let rec pred_ty pred fmt ty = match ty with
   | _ -> pred_typaren pred fmt ty
 
 and pred_typaren pred fmt = function
-  | CTyvar _ -> fprintf fmt "Nat"
+  | CTyvar _ -> fprintf fmt "Z"
   (* TODO handle polymorphic symbols *)
   (* Pretty.print_tv fmt v *)
+  | CTprop -> fprintf fmt "DType"
   | CTyapp (ts, []) -> prts fmt ts
   | cty -> fprintf fmt "(%a)" (pred_ty pred) cty
 
 and prts fmt ts =
   if ts_equal ts ts_bool then fprintf fmt "Bool"
   else if ts_equal ts ts_int then fprintf fmt "Z"
-  else if ts_equal ts ts_prop then fprintf fmt "DType"
   else Pretty.print_ts fmt ts
 
 and prarrow fmt pred =
@@ -120,7 +120,7 @@ let interp_type =
 let interp_var =
   let l = [ id_true, ctbool;
             id_false, ctbool;
-            id_eq, CTarrow (ctint, CTarrow (ctint, ctprop))
+            id_eq, CTarrow (ctint, CTarrow (ctint, CTprop))
           ] in
   Mid.of_list l
 
@@ -326,10 +326,10 @@ let infer_type cta t =
   let rec infer_type sigma t = match t with
   | CTfvar v -> Mid.find v sigma
   | CTbvar _ -> assert false
-  | CTtrue | CTfalse -> ctprop
+  | CTtrue | CTfalse -> CTprop
   | CTnot t -> let ty = infer_type sigma t in
-               assert (cty_equal ty ctprop);
-               ctprop
+               assert (cty_equal ty CTprop);
+               CTprop
   | CTquant (_, ty1, t) ->
       let ni = id_register (id_fresh "type_ident") in
       let sigma = Mid.add ni ty1 sigma in
@@ -342,9 +342,9 @@ let infer_type cta t =
       | _ -> assert false end
   | CTbinop (_, t1, t2) ->
       let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
-      assert (cty_equal ty1 ctprop);
-      assert (cty_equal ty2 ctprop);
-      ctprop
+      assert (cty_equal ty1 CTprop);
+      assert (cty_equal ty2 CTprop);
+      CTprop
   | CTint _ -> ctint in
   let sigma_interp = Mid.set_union cta.sigma interp_var in
   infer_type sigma_interp t
@@ -444,7 +444,7 @@ let abstract_quant = function
   | Texists -> CTexists
 
 let rec abstract_otype = function
-  | None -> ctprop
+  | None -> CTprop
   | Some ty -> abstract_type ty
 
 and abstract_type { ty_node } =

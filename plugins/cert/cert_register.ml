@@ -3,6 +3,7 @@ open Why3
 open Cert_abstract
 open Cert_certificates
 open Cert_split
+open Cert_induction
 open Cert_transformations
 open Cert_verif_caml
 open Cert_verif_lambdapi
@@ -15,8 +16,10 @@ let cert_dbg = Some eprcertif, None
 let cta_dbg = None, Some eplcta
 let all_dbg = Some eprcertif, Some eplcta
 
-let cchecker trans = Trans.store (checker_ctrans cta_dbg make_core checker_caml trans)
+let cchecker trans = Trans.store (checker_ctrans no_dbg make_core checker_caml trans)
 let lchecker trans = Trans.store (checker_ctrans no_dbg make_core checker_lambdapi trans)
+
+let induction_c x bound env = cchecker (induction x bound env)
 
 let print_c any every where = cchecker (tprint any every where)
 let assert_c t              = cchecker (cassert t)
@@ -79,6 +82,13 @@ let trivial_l               = lchecker trivial
 let register_caml : unit =
   let open Args_wrapper in
   let open Trans in
+  wrap_and_register
+    ~desc:"induction <term1> [from] <term2>@ \
+           performs@ a@ strong@ induction@ on@ the@ integer@ <term1>@ \
+           starting@ from@ the@ integer@ <term2>.@ <term2>@ is@ optional@ \
+           and@ defaults@ to@ 0."
+    "induction"
+    (Tterm (Topt ("from", Tterm Tenvtrans_l))) induction_c;
 
   wrap_and_register ~desc:"print given term to debug"
     "print_ccert" (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))

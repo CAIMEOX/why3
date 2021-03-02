@@ -24,7 +24,7 @@ let simplify_task (cta : ctask) : ctask_simple =
          |> List.map encode_neg }
 
 let rec print_task fmt {t; s; gd} =
-  let s = List.map (fun id -> id, ctprop) t @ s in
+  let s = List.map (fun id -> id, CTprop) t @ s in
   fprintf fmt "tEv (@[<hv>%a@])"
     print_s {t = []; s; gd}
 
