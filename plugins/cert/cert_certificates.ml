@@ -4,6 +4,7 @@ open Term
 open Ident
 open Format
 
+open Cert_syntax
 open Cert_abstract
 
 (** We equip each transformation application with a certificate indicating

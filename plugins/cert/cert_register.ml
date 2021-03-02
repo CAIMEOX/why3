@@ -1,8 +1,11 @@
 open Why3
+open Task
 
+open Cert_syntax
 open Cert_abstract
 open Cert_certificates
 open Cert_split
+open Cert_induction
 open Cert_transformations
 open Cert_verif_caml
 open Cert_verif_lambdapi
@@ -15,8 +18,44 @@ let cert_dbg = Some eprcertif, None
 let cta_dbg = None, Some eplcta
 let all_dbg = Some eprcertif, Some eplcta
 
-let cchecker trans = Trans.store (checker_ctrans cta_dbg make_core checker_caml trans)
-let lchecker trans = Trans.store (checker_ctrans no_dbg make_core checker_lambdapi trans)
+(** Create a certified transformation from a transformation with a certificate *)
+
+type 'certif debug =
+  ('certif -> unit) option *
+  (ctask -> ctask list -> unit) option
+
+let checker_ctrans
+      (debug : 'certif debug )
+      (* is_lp *)
+      (checker : 'core_certif -> ctask -> ctask list -> unit)
+      (ctr : 'certif ctransformation)
+      (init_t : task) =
+  let dbg_cert, dbg_cta = debug in
+  (* let t1 = Unix.times () in *)
+  let res_t, certif = Trans.apply ctr init_t in
+  (* let t2 = Unix.times () in *)
+  Opt.iter (fun eprcertif -> eprcertif certif) dbg_cert;
+  let init_ct = abstract_task init_t in
+  let res_ct = List.map abstract_task res_t in
+  Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_cta;
+  let core_certif = make_core init_ct res_ct certif in
+  checker core_certif init_ct res_ct;
+  (* let t3 = Unix.times () in *)
+  (* let syst = if is_lp then "Lambdapi" else "OCaml" in *)
+  (* eprintf "@[<v>temps de la transformation : %f@ \
+   *          temps de la transformation (fils) : %f@ \
+   *          temps du %s-checker : %f@ \
+   *          temps du %s-checker (fils): %f@ @]"
+   *          (t2.Unix.tms_utime-.t1.Unix.tms_utime +. t2.Unix.tms_stime -. t1.Unix.tms_stime)
+   *          (t2.Unix.tms_cutime-.t1.Unix.tms_cutime +. t2.Unix.tms_cstime -. t1.Unix.tms_cstime)
+   *          syst (t3.Unix.tms_utime-.t2.Unix.tms_utime +. t3.Unix.tms_stime -. t2.Unix.tms_stime)
+   *          syst (t3.Unix.tms_cutime-.t2.Unix.tms_cutime +. t3.Unix.tms_cstime -. t2.Unix.tms_cstime); *)
+  res_t
+
+let cchecker trans = Trans.store (checker_ctrans no_dbg checker_caml trans)
+let lchecker trans = Trans.store (checker_ctrans no_dbg checker_lambdapi trans)
+
+let induction_c x bound env = cchecker (induction x bound env)
 
 let print_c any every where = cchecker (tprint any every where)
 let assert_c t              = cchecker (cassert t)
@@ -79,6 +118,13 @@ let trivial_l               = lchecker trivial
 let register_caml : unit =
   let open Args_wrapper in
   let open Trans in
+  wrap_and_register
+    ~desc:"induction <term1> [from] <term2>@ \
+           performs@ a@ strong@ induction@ on@ the@ integer@ <term1>@ \
+           starting@ from@ the@ integer@ <term2>.@ <term2>@ is@ optional@ \
+           and@ defaults@ to@ 0."
+    "induction"
+    (Tterm (Topt ("from", Tterm Tenvtrans_l))) induction_c;
 
   wrap_and_register ~desc:"print given term to debug"
     "print_ccert" (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
