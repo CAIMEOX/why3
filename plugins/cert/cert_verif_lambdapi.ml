@@ -2,7 +2,7 @@ open Why3
 open Ident
 open Format
 
-open Cert_abstract
+open Cert_syntax
 open Cert_certificates
 
 (* We represent a ctask

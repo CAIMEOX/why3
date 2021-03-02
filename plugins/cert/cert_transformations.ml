@@ -6,7 +6,6 @@ open Term
 open Ident
 open Generic_arg_trans_utils
 
-
 open Cert_certificates
 
 
@@ -105,33 +104,10 @@ let update_opt o1 o2 = match o1 with
   | None -> o2
 
 (* To debug *)
-open Format
-let rec print_ast fmt t = match t.t_node with
-  | Tvar _ -> fprintf fmt "Tvar"
-  | Tconst _ -> fprintf fmt "Tconst"
-  | Tapp (l, ts) ->
-      fprintf fmt "(%a %a)"
-        Cert_abstract.prid (l.ls_name)
-        (pp_print_list print_ast) ts
-  | Tif _ -> fprintf fmt "Tif"
-  | Tlet _ -> fprintf fmt "Tlet"
-  | Tcase _ -> fprintf fmt "Tcase"
-  | Teps _ -> fprintf fmt "Teps"
-  | Tquant (_, t) -> let _, _, t = t_open_quant t in
-                     fprintf fmt "Tquant (Q, %a)"
-                       print_ast t
-  | Tbinop (_, t1, t2) ->
-      fprintf fmt "%a BOP %a"
-        print_ast t1
-        print_ast t2
-  | Tnot t -> fprintf fmt "Tnot (%a)" print_ast t
-  | Ttrue -> fprintf fmt "Ttrue"
-  | Tfalse -> fprintf fmt "Tfalse"
-
 let tprint_tg target =
   Trans.decl_acc (target, hole ()) update_tg_c (fun d (tg, _) -> match d.d_node with
       | Dprop (_, pr, t) when match_tg tg pr ->
-          Format.eprintf "%a : %a@." Cert_abstract.prhyp (pr.pr_name) print_ast t;
+          Format.eprintf "%a : %a@." Pretty.print_pr pr Pretty.print_term t;
           [d], None
       | _ -> [d], None)
 
