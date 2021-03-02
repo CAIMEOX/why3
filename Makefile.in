@@ -537,7 +537,7 @@ PLUG_CFG = cfg_parser cfg_lexer cfg_paths cfg_main
 ifeq (@enable_stackify@,yes)
 PLUG_CFG += stackify cfg_stackify
 endif
-PLUG_CERT = cert_abstract cert_certificates cert_verif_caml cert_verif_lambdapi cert_transformations cert_split cert_register
+PLUG_CERT = cert_syntax cert_abstract cert_certificates cert_verif_caml cert_verif_lambdapi cert_transformations cert_induction cert_split cert_register
 PLUG_CMIONLY = tptp/tptp_ast python/py_ast microc/mc_ast cfg/cfg_ast
 
 PLUGINS = genequlin dimacs tptp python microc cfg cert
