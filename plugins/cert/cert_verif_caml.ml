@@ -3,6 +3,7 @@ open Why3
 open Ident
 open Term (* only for binop *)
 
+open Cert_syntax
 open Cert_abstract
 open Cert_certificates
 
