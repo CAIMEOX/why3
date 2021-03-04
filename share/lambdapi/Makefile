@@ -5,8 +5,8 @@ OBJ = $(SRC:.lp=.lpo)
 
 all: $(OBJ)
 
-install: $(OBJ) lambdapi.pkg
-	lambdapi install lambdapi.pkg $(OBJ) $(SRC)
+install: clean all lambdapi.pkg
+	lambdapi install  lambdapi.pkg $(OBJ) $(SRC)
 
 uninstall:
 	lambdapi uninstall lambdapi.pkg
@@ -18,3 +18,5 @@ clean:
 
 .lp.lpo:
 	lambdapi check --gen-obj $<
+
+.PHONY: all install uninstall clean

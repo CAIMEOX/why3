@@ -8,10 +8,6 @@
  <goal name="G">
  <transf name="intro_ccert" >
   <goal name="G.0">
-  <transf name="blast_ccert" >
-   <goal name="G.0.0">
-   </goal>
-  </transf>
   <transf name="rewrite_ccert" arg1="x">
    <goal name="G.0.0">
    </goal>
