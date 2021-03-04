@@ -4,12 +4,11 @@ open Ident
 open Term (* only for binop *)
 
 open Cert_syntax
-open Cert_abstract
 open Cert_certificates
 
 
-(** This is the main verification function : <check_certif> replays the certificate on a ctask *)
-
+(** This is the main verification function : <check_certif> replays the
+   certificate on a ctask *)
 let union : ctask Mid.t -> ctask Mid.t -> ctask Mid.t =
   let merge_no_conflicts id cta1 cta2 =
     if ctask_equal cta1 cta2
@@ -27,7 +26,8 @@ let union : ctask Mid.t -> ctask Mid.t -> ctask Mid.t =
 
 let rec ccheck c cta =
   match c with
-  | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _ | EFoldIff _ | EEqSym _ | EEqTrans _ ->
+  | ELet _ | EConstruct _ | EDuplicate _
+  | EFoldArr _ | EFoldIff _ | EEqSym _ | EEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/Eq/Let left"
   | EHole i -> Mid.singleton i cta
   | EAxiom (_, i1, i2) ->
@@ -50,6 +50,7 @@ let rec ccheck c cta =
           Mid.empty
       | _ -> verif_failed "Non eqrefl hypothesis" end
   | EAssert (i, a, c1, c2) ->
+      infers_into cta a CTprop;
       let cta1 = add i (a, true) cta in
       let cta2 = add i (a, false) cta in
       union (ccheck c1 cta1) (ccheck c2 cta2)
@@ -116,6 +117,15 @@ let rec ccheck c cta =
       | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
       end
   | ERewrite (_, is_eq, _, _, _, ctxt, i1, i2, c) ->
+      let rewrite_ctask (cta : ctask) i a b ctxt =
+        let ta = instantiate ctxt a in
+        let tb = instantiate ctxt b in
+        let rewrite_decl j (t, pos) =
+          if id_equal j i && ct_equal t ta
+          then tb, pos
+          else t, pos in
+        lift_mid_cta (Mid.mapi rewrite_decl) cta in
+
       let t, pos = find_ident "inst_quant" i1 cta in
       let a, b = match t, pos, is_eq with
         | CTbinop (Tiff, a, b), false, false -> a, b
@@ -133,5 +143,6 @@ let checker_caml (vs, certif) init_ct res_ct =
           let res_ct' = Mid.values map_cert in
           print_ctasks "/tmp/from_trans.log" res_ct;
           print_ctasks "/tmp/from_cert.log" res_ct';
-          verif_failed "Replaying certif gives different result, log available" end
+          verif_failed "Replaying certif gives different result, log available"
+        end
   with e -> raise (Trans.TransFailure ("Cert_verif_caml.checker_caml", e))
