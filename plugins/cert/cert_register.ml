@@ -123,7 +123,7 @@ let register_caml : unit =
            performs@ a@ strong@ induction@ on@ the@ integer@ <term1>@ \
            starting@ from@ the@ integer@ <term2>.@ <term2>@ is@ optional@ \
            and@ defaults@ to@ 0."
-    "induction"
+    "induction_ccert"
     (Tterm (Topt ("from", Tterm Tenvtrans_l))) induction_c;
 
   wrap_and_register ~desc:"print given term to debug"
