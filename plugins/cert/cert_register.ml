@@ -1,5 +1,6 @@
 open Why3
 open Task
+open Ident
 
 open Cert_syntax
 open Cert_abstract
@@ -27,9 +28,19 @@ type 'certif debug =
 let checker_ctrans
       (debug : 'certif debug )
       (* is_lp *)
-      (checker : 'core_certif -> ctask -> ctask list -> unit)
+      (checker : Env.env -> 'core_certif -> ctask -> ctask list -> unit)
       (ctr : 'certif ctransformation)
+      (env : Env.env option)
       (init_t : task) =
+  let module Envm = struct
+      let interp_type, interp_var = match env with
+          | None -> Sid.empty, Mid.empty
+          | Some env -> interp_type_var env
+    end in
+  let module A = Abstract (Envm) in
+  let module E = Elab (Envm) in
+  let open A in let open E in
+
   let dbg_cert, dbg_cta = debug in
   (* let t1 = Unix.times () in *)
   let res_t, certif = Trans.apply ctr init_t in
@@ -39,7 +50,7 @@ let checker_ctrans
   let res_ct = List.map abstract_task res_t in
   Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_cta;
   let core_certif = make_core init_ct res_ct certif in
-  checker core_certif init_ct res_ct;
+  checker (match env with Some e -> e  | None -> assert false) core_certif init_ct res_ct;
   (* let t3 = Unix.times () in *)
   (* let syst = if is_lp then "Lambdapi" else "OCaml" in *)
   (* eprintf "@[<v>temps de la transformation : %f@ \
@@ -52,8 +63,9 @@ let checker_ctrans
    *          syst (t3.Unix.tms_cutime-.t2.Unix.tms_cutime +. t3.Unix.tms_cstime -. t2.Unix.tms_cstime); *)
   res_t
 
-let cchecker trans = Trans.store (checker_ctrans no_dbg checker_caml trans)
-let lchecker trans = Trans.store (checker_ctrans no_dbg checker_lambdapi trans)
+
+let cchecker trans = Trans.store (checker_ctrans no_dbg checker_caml trans None)
+let lchecker trans = Trans.store (checker_ctrans no_dbg checker_lambdapi trans None)
 
 let induction_c x bound env = cchecker (induction x bound env)
 

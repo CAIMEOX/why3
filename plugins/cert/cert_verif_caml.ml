@@ -4,11 +4,12 @@ open Ident
 open Term (* only for binop *)
 
 open Cert_syntax
-open Cert_abstract
 open Cert_certificates
 
 
 (** This is the main verification function : <check_certif> replays the certificate on a ctask *)
+module Verif_caml (E : Envm) = struct
+open E
 
 let union : ctask Mid.t -> ctask Mid.t -> ctask Mid.t =
   let merge_no_conflicts id cta1 cta2 =
@@ -50,6 +51,7 @@ let rec ccheck c cta =
           Mid.empty
       | _ -> verif_failed "Non eqrefl hypothesis" end
   | EAssert (i, a, c1, c2) ->
+      infers_into interp_var cta a CTprop;
       let cta1 = add i (a, true) cta in
       let cta2 = add i (a, false) cta in
       union (ccheck c1 cta1) (ccheck c2 cta2)
@@ -103,19 +105,28 @@ let rec ccheck c cta =
           if Mid.mem y cta.sigma || mem y t
           then verif_failed "non-free variable"
           else let cta = add i (ct_open t (CTfvar y), pos) cta
-                         |> add_var y cty in
+                         |> add_var Mid.empty y cty in
                ccheck c cta
       | _ -> verif_failed "Nothing to introduce" end
   | EInstQuant (_, _, i, j, t_inst, c) ->
       let t, pos = find_ident "inst_quant" i cta in
       begin match t, pos with
       | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true ->
-          infers_into cta t_inst ty;
+          infers_into interp_var cta t_inst ty;
           let cta = add j (ct_open t t_inst, pos) cta in
           ccheck c cta
       | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
       end
   | ERewrite (_, is_eq, _, _, _, ctxt, i1, i2, c) ->
+      let rewrite_ctask (cta : ctask) i a b ctxt =
+        let ta = instantiate ctxt a in
+        let tb = instantiate ctxt b in
+        let rewrite_decl j (t, pos) =
+          if id_equal j i && ct_equal t ta
+          then tb, pos
+          else t, pos in
+        lift_mid_cta (Mid.mapi rewrite_decl) cta in
+
       let t, pos = find_ident "inst_quant" i1 cta in
       let a, b = match t, pos, is_eq with
         | CTbinop (Tiff, a, b), false, false -> a, b
@@ -135,3 +146,4 @@ let checker_caml (vs, certif) init_ct res_ct =
           print_ctasks "/tmp/from_cert.log" res_ct';
           verif_failed "Replaying certif gives different result, log available" end
   with e -> raise (Trans.TransFailure ("Cert_verif_caml.checker_caml", e))
+end
