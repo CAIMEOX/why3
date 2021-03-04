@@ -220,8 +220,9 @@ let checker_lambdapi certif init res =
     let fmt = formatter_of_out_channel oc in
     print fmt init res certif;
     close_out oc;
-    let lp_folder = Filename.(concat Config.datadir "lambdapi") in
-    let _ = Sys.command ("make install -s -C  " ^ lp_folder) in
-    let ret = Sys.command ("lambdapi check --verbose 0 --map-dir check:/tmp/ " ^ check_cert) in
+    (* let lp_folder = Filename.(concat Config.datadir "lambdapi") in *)
+    let quiet = ">/dev/null 2>&1" in
+    (* let _ = Sys.command ("make install -C  " ^ lp_folder ^ quiet) in *)
+    let ret = Sys.command ("lambdapi check --map-dir check:/tmp/ " ^ check_cert ^ quiet) in
     if ret <> 0 then verif_failed "Not verified by Lambdapi"
   with e -> raise (Trans.TransFailure ("Cert_verif_lambdapi.checker_lambdapi", e))
