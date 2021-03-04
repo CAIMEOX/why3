@@ -24,7 +24,9 @@ type 'certif debug =
   ('certif -> unit) option *
   (ctask -> ctask list -> unit) option
 
+
 let checker_ctrans
+      ?env
       (debug : 'certif debug )
       (* is_lp *)
       (checker : 'core_certif -> ctask -> ctask list -> unit)
@@ -35,6 +37,7 @@ let checker_ctrans
   let res_t, certif = Trans.apply ctr init_t in
   (* let t2 = Unix.times () in *)
   Opt.iter (fun eprcertif -> eprcertif certif) dbg_cert;
+  let abstract_task = abstract_task env in
   let init_ct = abstract_task init_t in
   let res_ct = List.map abstract_task res_t in
   Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_cta;
@@ -52,10 +55,11 @@ let checker_ctrans
    *          syst (t3.Unix.tms_cutime-.t2.Unix.tms_cutime +. t3.Unix.tms_cstime -. t2.Unix.tms_cstime); *)
   res_t
 
-let cchecker trans = Trans.store (checker_ctrans no_dbg checker_caml trans)
-let lchecker trans = Trans.store (checker_ctrans no_dbg checker_lambdapi trans)
 
-let induction_c x bound env = cchecker (induction x bound env)
+let cchecker ?env trans = Trans.store (checker_ctrans ?env no_dbg checker_caml trans)
+let lchecker ?env trans = Trans.store (checker_ctrans ?env no_dbg checker_lambdapi trans)
+
+let induction_c x bound env = cchecker ~env:env (induction x bound env)
 
 let print_c any every where = cchecker (tprint any every where)
 let assert_c t              = cchecker (cassert t)

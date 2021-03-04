@@ -95,7 +95,7 @@ type ('i, 't) cert =
   (* In the 2 previous rules <ctxt> stands for the context obtained by taking the
      formula contained in <i₂> and replacing each occurrence of <t₁> by a hole. *)
   | Induction of 'i * 'i * 'i * 'i * 't * ('i, 't) cert * ('i, 't) cert
-  (* Induction (G, Hᵢ, Hᵣ, i, t, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[i]) ≜
+(* Induction (G, Hᵢ, Hᵣ, i, t, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[i]) ≜
                            c₁ ⇓ (Γ, H : i ≤ a ⊢ Δ, G : ctxt[i])
                        and c₂ ⇓ (Γ, H : i > a, Hᵢ: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[i])
                        and i does not appear in Γ or Δ *)
@@ -125,9 +125,9 @@ let iffsym_hyp i c =
   let i1 = pr_clone i in
   let i2 = pr_clone i in
   Unfold (i,
-  Destruct (i, i1, i2,
-  Construct (i2, i1, i,
-  Fold (i, c))))
+          Destruct (i, i1, i2,
+                    Construct (i2, i1, i,
+                               Fold (i, c))))
 (* iffsym_hyp i c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ ↔ t₁ ⊢ Δ) *)
 
 type vcert = (prsymbol, term) cert
@@ -262,12 +262,12 @@ type ('i, 't) ecert =
   (* ERewrite (false, false, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
                                                        c ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
   | EInduction of 'i * 'i * 'i * 'i * 't * 't * ('i, 't) ecert * ('i, 't) ecert
-  (* EInduction (G, Hᵢ, Hᵣ, i, t, ctxt, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[i]) ≜
+(* EInduction (G, Hᵢ, Hᵣ, i, t, ctxt, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[i]) ≜
                                              c₁ ⇓ (Γ, H : i ≤ a ⊢ Δ, G : ctxt[i])
                                          and c₂ ⇓ (Γ, H : i > a, Hᵢ: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[i])
                                          and i does not appear in Γ or Δ *)
 
-  (* In the induction and rewrite rules <ctxt> stands for the context obtained by taking the
+(* In the induction and rewrite rules <ctxt> stands for the context obtained by taking the
      formula contained in <i₂> and replacing each occurrence of <t₁> by a hole. *)
 
 
@@ -335,13 +335,13 @@ let propagate_cert fc fi ft = function
   | EqTrans (i1, i2, i3, c) -> EqTrans (fi i1, fi i2, fi i3, fc c)
   | Assert (i, a, c1, c2) ->
       let f1 = fc c1 in let f2 = fc c2 in
-      Assert (fi i, ft a, f1, f2)
+                        Assert (fi i, ft a, f1, f2)
   | Let (x, i, c) -> Let (ft x, fi i, fc c)
   | Unfold (i, c) -> Unfold (fi i, fc c)
   | Fold (i, c) -> Fold (fi i, fc c)
   | Split (i, c1, c2) ->
       let f1 = fc c1 in let f2 = fc c2 in
-      Split (fi i, f1, f2)
+                        Split (fi i, f1, f2)
   | Destruct (i, j1, j2, c) -> Destruct (fi i, fi j1, fi j2, fc c)
   | Construct (i1, i2, j, c) -> Construct (fi i1, fi i2, fi j, fc c)
   | Swap (i, c) -> Swap (fi i, fc c)
@@ -395,7 +395,7 @@ let propagate_ecert fc fi ft = function
   | EHole _ as c -> c
   | EAssert (i, a, c1, c2) ->
       let f1 = fc c1 in let f2 = fc c2 in
-      EAssert (fi i, ft a, f1, f2)
+                        EAssert (fi i, ft a, f1, f2)
   | ELet (x, y, c) -> ELet (ft x, ft y, fc c)
   | EAxiom (a, i1, i2) -> EAxiom (ft a, fi i1, fi i2)
   | ETrivial (pos, i) -> ETrivial (pos, fi i)
@@ -405,7 +405,7 @@ let propagate_ecert fc fi ft = function
       EEqTrans (cty, ft t1, ft t2, ft t3, fi i1, fi i2, fi i3, fc c)
   | ESplit (pos, a, b, i, c1, c2) ->
       let f1 = fc c1 in let f2 = fc c2 in
-      ESplit (pos, ft a, ft b, fi i, f1, f2)
+                        ESplit (pos, ft a, ft b, fi i, f1, f2)
   | EUnfoldIff (pos, a, b, i, c) -> EUnfoldIff (pos, ft a, ft b, fi i, fc c)
   | EUnfoldArr (pos, a, b, i, c) -> EUnfoldArr (pos, ft a, ft b, fi i, fc c)
   | EFoldIff (pos, a, b, i, c) -> EFoldIff (pos, ft a, ft b, fi i, fc c)
@@ -437,8 +437,7 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
   let gamma, delta = split_hyp_goal cta.gamma_delta in
   let gpr, _ = Mid.choose gamma in
   fun ct ->
-  { types = cta.types;
-    sigma = cta.sigma;
+  { cta with
     gamma_delta = Mid.add gpr (ct, true) delta }
 
 
@@ -461,86 +460,68 @@ let set_goal : ctask -> cterm -> ctask = fun cta ->
        Few constructors and many parameters to ease formal verification of
        checkers.
 
-*)
+ *)
 
 let rec abstract_cert c =
   propagate_cert abstract_cert (fun pr -> pr.pr_name) abstract_term c
 
 exception Elaboration_failed
 
-let rec replace_cterm tl tr t =
-  if ct_equal t tl
-  then tr
-  else ct_map (replace_cterm tl tr) t
-
-let instantiate f a = match f with
-  | CTquant (CTlambda, _, f) -> ct_open f a
-  | _ -> assert false
-
-let rewrite_ctask (cta : ctask) i a b ctxt =
-  let ta = instantiate ctxt a in
-  let tb = instantiate ctxt b in
-  let rewrite_decl j (t, pos) =
-    if id_equal j i && ct_equal t ta
-    then tb, pos
-    else t, pos in
-  lift_mid_cta (Mid.mapi rewrite_decl) cta
-
 let elaborate (init_ct : ctask) c =
   let rec elab (cta : ctask) c =
-  match c with
-  | Nc -> eprintf "No certificates@.";
-          raise Elaboration_failed
-  | Hole i -> EHole i
-  | Axiom (i1, i2) ->
-      let t1, pos1 = find_ident "Axiom" i1 cta in
-      let t2, pos2 = find_ident "Axiom" i2 cta in
-      assert (pos1 <> pos2 && ct_equal t1 t2);
-      let i1, i2 = if pos2 then i1, i2 else i2, i1 in
-      EAxiom (t1, i1, i2)
-  | Trivial i ->
-      let t, pos = find_ident "Trivial" i cta in
-      begin match t, pos with
-      | CTapp (CTapp (e, t1), t2), _ when ct_equal t1 t2 && ct_equal e eq ->
-          let cty = infer_type cta t1 in
-          EEqRefl (cty, t1, i)
-      | CTfalse, false | CTtrue, true ->
-          ETrivial (pos, i)
-      | _ -> eprintf "not an equality or not same terms in eqrefl";
-             raise Elaboration_failed end
-  | EqSym (i, c) ->
-      let t, pos = find_ident "EqSym" i cta in
-      begin match t with
-      | CTapp (CTapp (e, t1), t2) when ct_equal e eq ->
-          let cty = infer_type cta t1 in
-          let rev_eq = CTapp (CTapp (eq, t2), t1) in
-          let cta = add i (rev_eq, pos) cta in
-          EEqSym (pos, cty, t1, t2, i, elab cta c)
-      | _ -> eprintf "not an equality"; raise Elaboration_failed end
-  | EqTrans (i1, i2, i3, c) ->
-      let t1, pos1 = find_ident "EqTrans" i1 cta in
-      let t2, pos2 = find_ident "EqTrans" i2 cta in
-      begin match t1, t2, pos1, pos2 with
-      | CTapp (CTapp (e1, t11), t12), CTapp (CTapp (e2, t21), t22), false, false
-        when ct_equal t12 t21 && ct_equal e1 eq && ct_equal e2 eq ->
-          let cty = infer_type cta t11 in
-          let new_eq = CTapp (CTapp (eq, t11), t22) in
-          let cta = add i3 (new_eq, false) cta in
-          EEqTrans (cty, t11, t12, t22, i1, i2, i3, elab cta c)
-      | _ -> eprintf "wrong hyps form in eqtrans";
-             raise Elaboration_failed end
-  | Assert (i, a, c1, c2) ->
-      let cta1 = add i (a, true) cta in
-      let cta2 = add i (a, false) cta in
-      let c1 = elab cta1 c1 in
-      let c2 = elab cta2 c2 in
-      EAssert (i, a, c1, c2)
-  | Let (x, i, c) ->
-      let y, _ = find_ident "Let" i cta in
-      ELet (x, y, elab cta c)
-  | Unfold (i, c) ->
-      let t, pos = find_ident "Unfold" i cta in
-      begin match t with
+    match c with
+    | Nc -> eprintf "No certificates@.";
+            raise Elaboration_failed
+    | Hole i -> EHole i
+    | Axiom (i1, i2) ->
+        let t1, pos1 = find_ident "Axiom" i1 cta in
+        let t2, pos2 = find_ident "Axiom" i2 cta in
+        assert (pos1 <> pos2 && ct_equal t1 t2);
+        let i1, i2 = if pos2 then i1, i2 else i2, i1 in
+        EAxiom (t1, i1, i2)
+    | Trivial i ->
+        let t, pos = find_ident "Trivial" i cta in
+        begin match t, pos with
+        | CTapp (CTapp (e, t1), t2), _ when ct_equal t1 t2 && ct_equal e eq ->
+            let cty = infer_type cta t1 in
+            EEqRefl (cty, t1, i)
+        | CTfalse, false | CTtrue, true ->
+            ETrivial (pos, i)
+        | _ -> eprintf "not an equality or not same terms in eqrefl";
+               raise Elaboration_failed end
+    | EqSym (i, c) ->
+        let t, pos = find_ident "EqSym" i cta in
+        begin match t with
+        | CTapp (CTapp (e, t1), t2) when ct_equal e eq ->
+            let cty = infer_type cta t1 in
+            let rev_eq = CTapp (CTapp (eq, t2), t1) in
+            let cta = add i (rev_eq, pos) cta in
+            EEqSym (pos, cty, t1, t2, i, elab cta c)
+        | _ -> eprintf "not an equality"; raise Elaboration_failed end
+    | EqTrans (i1, i2, i3, c) ->
+        let t1, pos1 = find_ident "EqTrans" i1 cta in
+        let t2, pos2 = find_ident "EqTrans" i2 cta in
+        begin match t1, t2, pos1, pos2 with
+        | CTapp (CTapp (e1, t11), t12), CTapp (CTapp (e2, t21), t22), false, false
+            when ct_equal t12 t21 && ct_equal e1 eq && ct_equal e2 eq ->
+            let cty = infer_type cta t11 in
+            let new_eq = CTapp (CTapp (eq, t11), t22) in
+            let cta = add i3 (new_eq, false) cta in
+            EEqTrans (cty, t11, t12, t22, i1, i2, i3, elab cta c)
+        | _ -> eprintf "wrong hyps form in eqtrans";
+               raise Elaboration_failed end
+    | Assert (i, a, c1, c2) ->
+        let cta1 = add i (a, true) cta in
+        let cta2 = add i (a, false) cta in
+        let c1 = elab cta1 c1 in
+        let c2 = elab cta2 c2 in
+        EAssert (i, a, c1, c2)
+    | Let (x, i, c) ->
+        let y, _ = find_ident "Let" i cta in
+        ELet (x, y, elab cta c)
+    | Unfold (i, c) ->
+        let t, pos = find_ident "Unfold" i cta in
+        begin match t with
         | CTbinop (Tiff, t1, t2) ->
             let unfolded_iff = CTbinop (Tand, CTbinop (Timplies, t1, t2),
                                         CTbinop (Timplies, t2, t1)), pos in
@@ -552,9 +533,9 @@ let elaborate (init_ct : ctask) c =
             EUnfoldArr (pos, t1, t2, i, elab cta c)
         | _ -> eprintf "Nothing to unfold : @[%a@]@." pcte t;
                raise Elaboration_failed end
-  | Fold (i, c) ->
-      let t, pos = find_ident "Fold" i cta in
-      begin match t with
+    | Fold (i, c) ->
+        let t, pos = find_ident "Fold" i cta in
+        begin match t with
         | CTbinop (Tand, CTbinop (Timplies, t1, t2),
                    CTbinop (Timplies, t2', t1'))
             when ct_equal t1 t1' && ct_equal t2 t2' ->
@@ -566,97 +547,97 @@ let elaborate (init_ct : ctask) c =
             EFoldArr (pos, t1, t2, i, elab cta c)
         | _ -> eprintf "Nothing to fold : @[%a@]@." pcte t;
                raise Elaboration_failed end
-  | Split (i, c1, c2) ->
-      let t, pos = find_ident "Split" i cta in
-      let t1, t2 = match t, pos with
-        | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false -> t1, t2
-        | _ -> eprintf "Not splittable@.";
-               raise Elaboration_failed in
-      let cta1 = add i (t1, pos) cta in
-      let cta2 = add i (t2, pos) cta in
-      let c1 = elab cta1 c1 in
-      let c2 = elab cta2 c2 in
-      ESplit (pos, t1, t2, i, c1, c2)
-  | Destruct (i, i1, i2, c) ->
-      let t, pos = find_ident "Destruct" i cta in
-      let t1, t2 = match t, pos with
-        | CTbinop (Tand, t1, t2), false | CTbinop (Tor, t1, t2), true -> t1, t2
-        | _ -> eprintf "Nothing to destruct@.";
-               raise Elaboration_failed in
-      let cta = remove i cta
-                |> add i1 (t1, pos)
-                |> add i2 (t2, pos) in
-      EDestruct (pos, t1, t2, i, i1, i2, elab cta c)
-  | Construct (i1, i2, i, c) ->
-      let t1, pos1 = find_ident "Construct1" i1 cta in
-      let t2, pos2 = find_ident "Construct2" i2 cta in
-      assert (pos1 = pos2);
-      let t = if pos1
-              then CTbinop (Tor, t1, t2)
-              else CTbinop (Tand, t1, t2) in
-      let cta = remove i1 cta
-                |> remove i2
-                |> add i (t, pos1) in
-      EConstruct (pos1, t1, t2, i1, i2, i, elab cta c)
-  | Swap (i, c) ->
-      let t, pos = find_ident "Swap" i cta in
-      let neg, underlying_t, neg_t = match t with
-        | CTnot t -> true, t, t
-        | _ -> false, t, CTnot t in
-      let cta = add i (neg_t, not pos) cta in
-      let pack = pos, underlying_t, i, elab cta c in
-      if neg
-      then ESwapNeg pack
-      else ESwap pack
-  | Clear (i, c) ->
-      let t, pos = find_ident "Clear" i cta in
-      let cta = remove i cta in
-      EClear (pos, t, i, elab cta c)
-  | Duplicate (i1, i2, c) ->
-      let t, pos = find_ident "Duplicate" i1 cta in
-      let cta = add i2 (t, pos) cta in
-      EDuplicate (pos, t, i1, i2, elab cta c)
-  | IntroQuant (i, y, c) ->
-      let t, pos = find_ident "IntroQuant" i cta in
-      let t, ty = match t, pos with
-        | CTquant (CTforall, ty, t), true | CTquant (CTexists, ty, t), false -> t, ty
-        | _ -> eprintf "Nothing to introduce@.";
-               raise Elaboration_failed in
-      let cta = add i (ct_open t (CTfvar y), pos) cta
-                |> add_var y ty in
-      EIntroQuant (pos, CTquant (CTlambda, ty, t), i, y, elab cta c)
-  | InstQuant (i1, i2, t_inst, c) ->
-      let t, pos = find_ident "InstQuant" i1 cta in
-      let t, ty = match t, pos with
-        | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true -> t, ty
-        | _ -> eprintf "trying to instantiate a non-quantified hypothesis@.";
-               raise Elaboration_failed in
-      let cta = add i2 (ct_open t t_inst, pos) cta in
-      EInstQuant (pos, CTquant (CTlambda, ty, t), i1, i2, t_inst, elab cta c)
-  | Rewrite (i1, i2, c) ->
-      let rew_hyp, _ = find_ident "Finding rewrite hypothesis" i1 cta in
-      let a, b, is_eq = match rew_hyp with
-        | CTbinop (Tiff, a, b) -> a, b, false
-        | CTapp (CTapp (f, a), b) when ct_equal f eq -> a, b, true
-        | _ -> eprintf "Rewrite hypothesis is badly-formed : %a@." pcte rew_hyp;
-               raise Elaboration_failed in
-      let t, pos = find_ident "Finding to be rewritten goal" i2 cta in
-      let id = id_register (id_fresh "ctxt_var") in
-      let v = CTfvar id in
-      let cty = infer_type cta a in
-      let ctxt = CTquant (CTlambda, cty, ct_close id (replace_cterm a v t)) in
-      let cta = add i2 (instantiate ctxt b, pos) cta in
-      ERewrite (pos, is_eq, cty, a, b, ctxt, i1, i2, elab cta c)
-  | Induction (g, hi, hr, i, a, c1, c2) ->
-      let t, _ = find_ident "induction" g cta in
-      let id = id_register (id_fresh "ctxt_var") in
-      let v = CTfvar id in
-      let ctxt = CTquant (CTlambda, ctint, ct_close id (replace_cterm (CTfvar i) v t)) in
-      let todo _ = assert false in
-      let cta1 = add hi (todo "i leq a", false) cta in
-      let cta2 = add hi (todo "i gt a", false) cta
-                 |> add hr (todo "forall n : int. n < i -> replace_cterm i n t") in
-      EInduction (g, hi, hr, i, a, ctxt, elab cta1 c1, elab cta2 c2)
+    | Split (i, c1, c2) ->
+        let t, pos = find_ident "Split" i cta in
+        let t1, t2 = match t, pos with
+          | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false -> t1, t2
+          | _ -> eprintf "Not splittable@.";
+                 raise Elaboration_failed in
+        let cta1 = add i (t1, pos) cta in
+        let cta2 = add i (t2, pos) cta in
+        let c1 = elab cta1 c1 in
+        let c2 = elab cta2 c2 in
+        ESplit (pos, t1, t2, i, c1, c2)
+    | Destruct (i, i1, i2, c) ->
+        let t, pos = find_ident "Destruct" i cta in
+        let t1, t2 = match t, pos with
+          | CTbinop (Tand, t1, t2), false | CTbinop (Tor, t1, t2), true -> t1, t2
+          | _ -> eprintf "Nothing to destruct@.";
+                 raise Elaboration_failed in
+        let cta = remove i cta
+                  |> add i1 (t1, pos)
+                  |> add i2 (t2, pos) in
+        EDestruct (pos, t1, t2, i, i1, i2, elab cta c)
+    | Construct (i1, i2, i, c) ->
+        let t1, pos1 = find_ident "Construct1" i1 cta in
+        let t2, pos2 = find_ident "Construct2" i2 cta in
+        assert (pos1 = pos2);
+        let t = if pos1
+                then CTbinop (Tor, t1, t2)
+                else CTbinop (Tand, t1, t2) in
+        let cta = remove i1 cta
+                  |> remove i2
+                  |> add i (t, pos1) in
+        EConstruct (pos1, t1, t2, i1, i2, i, elab cta c)
+    | Swap (i, c) ->
+        let t, pos = find_ident "Swap" i cta in
+        let neg, underlying_t, neg_t = match t with
+          | CTnot t -> true, t, t
+          | _ -> false, t, CTnot t in
+        let cta = add i (neg_t, not pos) cta in
+        let pack = pos, underlying_t, i, elab cta c in
+        if neg
+        then ESwapNeg pack
+        else ESwap pack
+    | Clear (i, c) ->
+        let t, pos = find_ident "Clear" i cta in
+        let cta = remove i cta in
+        EClear (pos, t, i, elab cta c)
+    | Duplicate (i1, i2, c) ->
+        let t, pos = find_ident "Duplicate" i1 cta in
+        let cta = add i2 (t, pos) cta in
+        EDuplicate (pos, t, i1, i2, elab cta c)
+    | IntroQuant (i, y, c) ->
+        let t, pos = find_ident "IntroQuant" i cta in
+        let t, ty = match t, pos with
+          | CTquant (CTforall, ty, t), true | CTquant (CTexists, ty, t), false -> t, ty
+          | _ -> eprintf "Nothing to introduce@.";
+                 raise Elaboration_failed in
+        let cta = add i (ct_open t (CTfvar y), pos) cta
+                  |> add_var y ty in
+        EIntroQuant (pos, CTquant (CTlambda, ty, t), i, y, elab cta c)
+    | InstQuant (i1, i2, t_inst, c) ->
+        let t, pos = find_ident "InstQuant" i1 cta in
+        let t, ty = match t, pos with
+          | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true -> t, ty
+          | _ -> eprintf "trying to instantiate a non-quantified hypothesis@.";
+                 raise Elaboration_failed in
+        let cta = add i2 (ct_open t t_inst, pos) cta in
+        EInstQuant (pos, CTquant (CTlambda, ty, t), i1, i2, t_inst, elab cta c)
+    | Rewrite (i1, i2, c) ->
+        let rew_hyp, _ = find_ident "Finding rewrite hypothesis" i1 cta in
+        let a, b, is_eq = match rew_hyp with
+          | CTbinop (Tiff, a, b) -> a, b, false
+          | CTapp (CTapp (f, a), b) when ct_equal f eq -> a, b, true
+          | _ -> eprintf "Rewrite hypothesis is badly-formed : %a@." pcte rew_hyp;
+                 raise Elaboration_failed in
+        let t, pos = find_ident "Finding to be rewritten goal" i2 cta in
+        let id = id_register (id_fresh "ctxt_var") in
+        let v = CTfvar id in
+        let cty = infer_type cta a in
+        let ctxt = CTquant (CTlambda, cty, ct_close id (replace_cterm a v t)) in
+        let cta = add i2 (instantiate ctxt b, pos) cta in
+        ERewrite (pos, is_eq, cty, a, b, ctxt, i1, i2, elab cta c)
+    | Induction (g, hi, hr, i, a, c1, c2) ->
+        let t, _ = find_ident "induction" g cta in
+        let id = id_register (id_fresh "ctxt_var") in
+        let v = CTfvar id in
+        let ctxt = CTquant (CTlambda, ctint, ct_close id (replace_cterm (CTfvar i) v t)) in
+        let todo _ = assert false in
+        let cta1 = add hi (todo "i leq a", false) cta in
+        let cta2 = add hi (todo "i gt a", false) cta
+                   |> add hr (todo "forall n : int. n < i -> replace_cterm i n t") in
+        EInduction (g, hi, hr, i, a, ctxt, elab cta1 c1, elab cta2 c2)
   in
   elab init_ct c
 
@@ -721,7 +702,7 @@ let rec trim_certif c =
       (* We want to close a task of the form <Γ, h : a = b ⊢ Δ, g : b = a> *)
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq, b), CTbvar 0)) in
       let c_closed = ERewrite (not pos, true, cty, a, b, ctxt, h, g,
-                     EEqRefl (cty, b, g)) in
+                               EEqRefl (cty, b, g)) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
       erename pos pre i j @@
         EAssert (i, post, c1, c2)
@@ -752,3 +733,4 @@ let make_core (init_ct : ctask) (_ : ctask list) (v, c : visible_cert) : heavy_e
      |> elaborate init_ct
      |> trim_certif
      |> eliminate_let Mid.empty
+

@@ -9,105 +9,8 @@ open Format
 
 open Cert_syntax
 
+
 (** Abstracting a Why3 <task> into a <ctask> : extract only the logical core *)
-let ctint = CTyapp (ts_int, [])
-
-let interp_type =
-  let name ts = ts.ts_name in
-  let l = List.map name [ts_int; ts_real; ts_str] in
-  Sid.of_list l
-
-let interp_var =
-  let l = [ id_true, ctbool;
-            id_false, ctbool;
-            id_eq, CTarrow (ctint, CTarrow (ctint, CTprop))
-          ] in
-  Mid.of_list l
-
-(** Utility functions on ctask *)
-
-let find_ident s h cta =
-  match Mid.find_opt h cta.gamma_delta with
-  | Some x -> x
-  | None ->
-      let s = asprintf "%s : Can't find ident %a in the task" s prhyp h in
-      verif_failed s
-
-let ctask_empty =
-  { types = Sid.empty;
-    sigma = Mid.empty;
-    gamma_delta = Mid.empty }
-
-let ctask_union ct1 ct2 =
-  { types = Sid.union ct1.types ct2.types;
-    sigma = Mid.set_union ct1.sigma ct2.sigma;
-    gamma_delta = Mid.set_union ct1.gamma_delta ct2.gamma_delta }
-
-let lift_mid_cta f cta =
-  { types = cta.types;
-    sigma = cta.sigma;
-    gamma_delta = f (cta.gamma_delta) }
-
-(* Make sure to not add interpreted types to the abstract types *)
-let add_type i cta =
-  { types = if Sid.mem i interp_type
-            then cta.types
-            else Sid.add i cta.types;
-    sigma = cta.sigma;
-    gamma_delta = cta.gamma_delta }
-
-(* Make sure to not add interpreted variables to the signature *)
-let add_var i cty cta =
-  { types = cta.types;
-    sigma = if Mid.mem i interp_var
-            then cta.sigma
-            else Mid.add i cty cta.sigma;
-    gamma_delta = cta.gamma_delta }
-
-let remove i cta = lift_mid_cta (Mid.remove i) cta
-
-let add i ct cta = lift_mid_cta (Mid.add i ct) cta
-
-let ctask_equal cta1 cta2 =
-  Mid.equal cty_equal cta1.sigma cta2.sigma &&
-  let cterm_pos_equal (t1, p1) (t2, p2) =
-    ct_equal t1 t2 && p1 = p2 in
-  Mid.equal cterm_pos_equal cta1.gamma_delta cta2.gamma_delta
-
-(* Typing algorithm *)
-
-let infer_type cta t =
-  let rec infer_type sigma t = match t with
-  | CTfvar v -> Mid.find v sigma
-  | CTbvar _ -> assert false
-  | CTtrue | CTfalse -> CTprop
-  | CTnot t -> let ty = infer_type sigma t in
-               assert (cty_equal ty CTprop);
-               CTprop
-  | CTquant (_, ty1, t) ->
-      let ni = id_register (id_fresh "type_ident") in
-      let sigma = Mid.add ni ty1 sigma in
-      let t = ct_open t (CTfvar ni) in
-      let ty2 = infer_type sigma t in
-      CTarrow (ty1, ty2)
-  | CTapp (t1, t2) ->
-      begin match infer_type sigma t1, infer_type sigma t2 with
-      | CTarrow (ty1, ty2), ty3 when cty_equal ty1 ty3 -> ty2
-      | _ -> assert false end
-  | CTbinop (_, t1, t2) ->
-      let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
-      assert (cty_equal ty1 CTprop);
-      assert (cty_equal ty2 CTprop);
-      CTprop
-  | CTint _ -> ctint in
-  let sigma_interp = Mid.set_union cta.sigma interp_var in
-  infer_type sigma_interp t
-
-
-let infers_into cta t ty =
-  try assert (cty_equal (infer_type cta t) ty)
-  with e -> eprintf "wrong type for %a@." pcte t;
-            raise e
 
 
 let abstract_quant = function
@@ -211,5 +114,39 @@ let rec abstract_task_acc acc = function
       abstract_task_acc new_acc task_prev
   | None -> acc
 
-let abstract_task task =
-  abstract_task_acc ctask_empty task
+(** Env *)
+
+let types_sigma_interp env =
+  match env with
+  | None -> Sid.empty, Mid.empty
+  | Some env ->
+      let interp_type = ref [] in
+      let interp_var = ref [] in
+
+      let _ =
+        let add ts = interp_type := ts.ts_name :: !interp_type in
+        List.iter add [ts_int; ts_real; ts_str] in
+
+      let _ =
+        let add (id, cty) = interp_var := (id, cty) :: !interp_var in
+        List.iter add [ id_true, ctbool;
+                        id_false, ctbool;
+                        id_eq, CTarrow (ctint, CTarrow (ctint, CTprop))];
+        try  let th = Env.read_theory env ["int"] "Int" in
+             let le_int = Theory.ns_find_ls th.Theory.th_export
+                            [Ident.op_infix "<="] in
+             let lt_int = Theory.ns_find_ls th.Theory.th_export
+                            [Ident.op_infix "<"] in
+             List.iter add
+               [le_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop));
+                lt_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop))]
+        with _ -> () in
+
+      let interp_type = Sid.of_list !interp_type in
+      let interp_var = Mid.of_list !interp_var in
+      interp_type, interp_var
+
+let abstract_task env =
+  let types_interp, sigma_interp = types_sigma_interp env  in
+  fun task ->
+  abstract_task_acc (ctask_new types_interp sigma_interp) task

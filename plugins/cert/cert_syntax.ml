@@ -24,6 +24,7 @@ type ctype =
   | CTarrow of ctype * ctype (* arrow type *)
 
 let ctbool = CTyapp (ts_bool, [])
+let ctint = CTyapp (ts_int, [])
 
 (** Utility functions on ctype *)
 
@@ -219,6 +220,15 @@ let rec mem_cont x ctn cont = match ctn with
 
 let mem x t = mem_cont x t (fun x -> x)
 
+let rec replace_cterm tl tr t =
+  if ct_equal t tl
+  then tr
+  else ct_map (replace_cterm tl tr) t
+
+let instantiate f a = match f with
+  | CTquant (CTlambda, _, f) -> ct_open f a
+  | _ -> assert false
+
 (* Pretty printing of terms (compatible with lambdapi) *)
 
 let rec pcte fmt = function
@@ -290,7 +300,9 @@ and prpv fmt = function
   | ct -> fprintf fmt "(%a)" pcte ct
 
 type ctask =
-  { types : Sid.t;
+  { types_interp : Sid.t;
+    types : Sid.t;
+    sigma_interp : ctype Mid.t;
     sigma : ctype Mid.t;
     gamma_delta : (cterm * bool) Mid.t
   }
@@ -335,6 +347,91 @@ let print_ctasks filename lcta =
   plcta fmt lcta;
   close_out oc
 
+
+(** Utility functions on ctask *)
+
+let find_ident s h cta =
+  match Mid.find_opt h cta.gamma_delta with
+  | Some x -> x
+  | None ->
+      let s = asprintf "%s : Can't find ident %a in the task" s prhyp h in
+      verif_failed s
+
+let ctask_new types_interp sigma_interp =
+  { types_interp;
+    types = Sid.empty;
+    sigma_interp;
+    sigma = Mid.empty;
+    gamma_delta = Mid.empty }
+
+let ctask_union ct1 ct2 =
+  { ct1 with
+    types = Sid.union ct1.types ct2.types;
+    sigma = Mid.set_union ct1.sigma ct2.sigma;
+    gamma_delta = Mid.set_union ct1.gamma_delta ct2.gamma_delta }
+
+let lift_mid_cta f cta =
+  { cta with
+    gamma_delta = f (cta.gamma_delta) }
+
+(* Make sure to not add interpreted types to the abstract types *)
+let add_type i cta =
+  { cta with
+    types = if Sid.mem i cta.types_interp
+            then cta.types
+            else Sid.add i cta.types  }
+
+(* Make sure to not add interpreted variables to the signature *)
+let add_var i cty cta =
+  { cta with
+    sigma = if Mid.mem i cta.sigma_interp
+            then cta.sigma
+            else Mid.add i cty cta.sigma  }
+
+let remove i cta = lift_mid_cta (Mid.remove i) cta
+
+let add i ct cta = lift_mid_cta (Mid.add i ct) cta
+
+let ctask_equal cta1 cta2 =
+  Mid.equal cty_equal cta1.sigma cta2.sigma &&
+    let cterm_pos_equal (t1, p1) (t2, p2) =
+      ct_equal t1 t2 && p1 = p2 in
+    Mid.equal cterm_pos_equal cta1.gamma_delta cta2.gamma_delta
+
+(* Typing algorithm *)
+
+let infer_type cta t =
+  let rec infer_type sigma t = match t with
+    | CTfvar v -> Mid.find v sigma
+    | CTbvar _ -> assert false
+    | CTtrue | CTfalse -> CTprop
+    | CTnot t -> let ty = infer_type sigma t in
+                 assert (cty_equal ty CTprop);
+                 CTprop
+    | CTquant (_, ty1, t) ->
+        let ni = id_register (id_fresh "type_ident") in
+        let sigma = Mid.add ni ty1 sigma in
+        let t = ct_open t (CTfvar ni) in
+        let ty2 = infer_type sigma t in
+        CTarrow (ty1, ty2)
+    | CTapp (t1, t2) ->
+        begin match infer_type sigma t1, infer_type sigma t2 with
+        | CTarrow (ty1, ty2), ty3 when cty_equal ty1 ty3 -> ty2
+        | _ -> assert false end
+    | CTbinop (_, t1, t2) ->
+        let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
+        assert (cty_equal ty1 CTprop);
+        assert (cty_equal ty2 CTprop);
+        CTprop
+    | CTint _ -> ctint in
+  let sigma_interp = Mid.set_union cta.sigma cta.sigma_interp in
+  infer_type sigma_interp t
+
+
+let infers_into cta t ty =
+  try assert (cty_equal (infer_type cta t) ty)
+  with e -> eprintf "wrong type for %a@." pcte t;
+            raise e
 
 (** We equip existing transformations with a certificate <certif> *)
 
