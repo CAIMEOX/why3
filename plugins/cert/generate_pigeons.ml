@@ -28,17 +28,15 @@ let pigeons n =
 let print_bool fmt b =
   if not b then fprintf fmt "not "
 
-let print_pb n where =
-  let out = open_out where in
-  let fmt = formatter_of_out_channel out in
+let print_pb fmt n =
   for i = 1 to n+1 do
     for j = 1 to n do
-      fprintf fmt "val constant p_%d_%d : bool\n" i j
+      fprintf fmt "val constant p_%d_%d : bool@ " i j
     done
   done;
-  fprintf fmt "\ngoal pigeons : not (\n%a\n)"
+  fprintf fmt "@ goal pigeons : not (@ %a@ )"
     (pp_print_list
-       ~pp_sep:(fun fmt _ -> fprintf fmt " /\\ \n")
+       ~pp_sep:(fun fmt _ -> fprintf fmt " /\\@ ")
        (fun fmt cl ->
          fprintf fmt "(%a)"
            (pp_print_list
@@ -49,8 +47,13 @@ let print_pb n where =
        )
     )
 
-    (pigeons n);
-  fprintf fmt "@."
+    (pigeons n)
 
 
-
+let _ =
+  let n = Sys.argv.(1) |> int_of_string in
+  let fn = sprintf "pigeon%d.mlw" n in
+  let out = open_out fn in
+  let fmt = formatter_of_out_channel out in
+  fprintf fmt "@[<v>%a@]@."
+    print_pb n

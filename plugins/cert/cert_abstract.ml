@@ -12,16 +12,11 @@ open Cert_syntax
 
 (** Abstracting a Why3 <task> into a <ctask> : extract only the logical core *)
 
-
 let abstract_quant = function
   | Tforall -> CTforall
   | Texists -> CTexists
 
-let rec abstract_otype = function
-  | None -> CTprop
-  | Some ty -> abstract_type ty
-
-and abstract_type { ty_node } =
+let rec abstract_type { ty_node } =
   match ty_node with
   | Tyvar v -> CTyvar v
   | Tyapp (ts, lts) ->
@@ -31,6 +26,10 @@ and abstract_type { ty_node } =
              | _ -> assert false in
            CTarrow (abstract_type l1, abstract_type l2)
       else CTyapp (ts, List.map abstract_type lts)
+
+let rec abstract_otype = function
+  | None -> CTprop
+  | Some ty -> abstract_type ty
 
 let type_lsymbol ls =
   List.fold_right (fun t acc -> CTarrow (abstract_type t, acc))
@@ -114,7 +113,7 @@ let rec abstract_task_acc acc = function
       abstract_task_acc new_acc task_prev
   | None -> acc
 
-(** Env *)
+(** The interpreted symbols are saved as part of the task *)
 
 let types_sigma_interp env =
   let interp_type = ref [] in
@@ -122,7 +121,7 @@ let types_sigma_interp env =
 
   let _ =
     let add ts = interp_type := ts.ts_name :: !interp_type in
-    List.iter add [ts_int; ts_real; ts_str; ts_bool] in
+    List.iter add [ts_int; ts_real; ts_bool] in
 
   let _ =
     let add (id, cty) = interp_var := (id, cty) :: !interp_var in

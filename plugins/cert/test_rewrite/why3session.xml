@@ -6,16 +6,12 @@
 <path name=".."/><path name="test_rewrite.mlw"/>
 <theory name="Top">
  <goal name="G">
- <transf name="intro_ccert" >
+ <transf name="rewrite_ccert" arg1="x">
   <goal name="G.0">
-  <transf name="rewrite_ccert" arg1="x">
-   <goal name="G.0.0">
-   </goal>
-  </transf>
-  <transf name="rewrite_lcert" arg1="x">
-   <goal name="G.0.0">
-   </goal>
-  </transf>
+  </goal>
+ </transf>
+ <transf name="rewrite_lcert" arg1="x">
+  <goal name="G.0">
   </goal>
  </transf>
  </goal>

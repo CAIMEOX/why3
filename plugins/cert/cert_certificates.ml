@@ -12,12 +12,13 @@ open Cert_abstract
 
 type ('i, 't) cert =
   (* 'i is used to designate an hypothesis, 't is used for terms *)
-  (* Replaying a certif <cert> against a ctask <cta> will be denoted <cert ⇓ cta>.
-     For more details, take a look at the OCaml implementation <Cert_verif_caml.ccheck>. *)
+  (* Replaying a certif cert against a ctask cta will be denoted <cert ⇓ cta>.
+     For more details, take a look at the OCaml implementation
+     <Cert_verif_caml.ccheck>. *)
   | Nc
   (* Makes verification fail : use it as a placeholder *)
   | Hole of ident
-  (* Hole ct ⇓ (Γ ⊢ Δ) stands iff <ct> refers to <Γ ⊢ Δ> *)
+  (* Hole ct ⇓ (Γ ⊢ Δ) stands iff ct refers to <Γ ⊢ Δ> *)
   | Assert of 'i * 't * ('i, 't) cert * ('i, 't) cert
   (* Assert (i, t, c₁, c₂) ⇓ (Σ | Γ ⊢ Δ) ≜
                         c₁ ⇓ (Σ | Γ ⊢ Δ, i : t)
@@ -25,7 +26,7 @@ type ('i, 't) cert =
                     and Σ ⊩ t : prop *)
   | Let of 't * 'i * ('i, 't) cert
   (* Let (x, i, c) ⇓ t ≜  c ⇓ t[x ← i(t)] *)
-  (* Meaning : <x> can be used in <c> as the formula identified by <i> in task <t> *)
+  (* Meaning : x can be used in c as the formula identified by i in task t *)
   | Axiom of 'i * 'i
   (* Axiom (i1, i2) ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
   (* Axiom (i1, i2) ⇓ (Γ, i2 : t ⊢ Δ, i1 : t) stands *)
@@ -92,8 +93,8 @@ type ('i, 't) cert =
                        c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
   (* Rewrite (i₁, i₂, c) ⇓ (Γ, H : t₁ = t₂, i₁ : ctxt[t₁] ⊢ Δ) ≜
                        c ⇓ (Γ, H : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
-  (* In the 2 previous rules <ctxt> stands for the context obtained by taking the
-     formula contained in <i₂> and replacing each occurrence of <t₁> by a hole. *)
+  (* In the 2 previous rules ctxt stands for the context obtained by taking the
+     formula contained in i₂ and replacing each occurrence of t₁ by a hole. *)
   | Induction of 'i * 'i * 'i * 'i * 't * ('i, 't) cert * ('i, 't) cert
 (* Induction (G, Hᵢ, Hᵣ, i, t, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[i]) ≜
                            c₁ ⇓ (Γ, H : i ≤ a ⊢ Δ, G : ctxt[i])
@@ -171,7 +172,7 @@ type ctrans = visible_cert ctransformation
 type ('i, 't) ecert =
   (* 'i is used to designate an hypothesis, 't is used for terms *)
   | EHole of ident
-  (* EHole ct ⇓ (Γ ⊢ Δ) stands iff <ct> refers to <Γ ⊢ Δ> *)
+  (* EHole ct ⇓ (Γ ⊢ Δ) stands iff ct refers to <Γ ⊢ Δ> *)
   | EAssert of 'i * 't * ('i, 't) ecert * ('i, 't) ecert
   (* EAssert (i, t, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜
                          c₁ ⇓ (Γ ⊢ Δ, i : t)
@@ -267,15 +268,16 @@ type ('i, 't) ecert =
                                          and c₂ ⇓ (Γ, H : i > a, Hᵢ: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[i])
                                          and i does not appear in Γ or Δ *)
 
-(* In the induction and rewrite rules <ctxt> stands for the context obtained by taking the
-     formula contained in <i₂> and replacing each occurrence of <t₁> by a hole. *)
+(* In the induction and rewrite rules ctxt stands for the context obtained by
+   taking the formula contained in i₂ and replacing each occurrence of t₁ by a
+   hole. *)
 
 
 type heavy_ecert = ident list * (ident, cterm) ecert
 (* removing Construct, Duplicate, EqSym and EqTrans) *)
 type trimmed_ecert = ident list * (ident, cterm) ecert
 (* removing Let *)
-type kernel_ecert = ident list * (ident, cterm) ecert 
+type kernel_ecert = ident list * (ident, cterm) ecert
 
 let rec print_certif filename cert =
   let oc = open_out filename in
@@ -733,4 +735,3 @@ let make_core (init_ct : ctask) (_ : ctask list) (v, c : visible_cert) : heavy_e
      |> elaborate init_ct
      |> trim_certif
      |> eliminate_let Mid.empty
-
