@@ -322,18 +322,30 @@ let po p fmt = function
   | None -> fprintf fmt "None"
   | Some x -> fprintf fmt "%a" p x
 
+let prt fmt sid =
+  Sid.iter (fun i -> fprintf fmt "%a@ " prid i) sid
+
 let prs fmt mid =
-  Mid.iter (fun x ty -> fprintf fmt "%a : %a\n" prid x prty ty) mid
+  Mid.iter (fun x ty -> fprintf fmt "%a : %a@ " prid x prty ty) mid
 
 let prpos fmt = function
   | true  -> fprintf fmt "GOAL| "
   | false -> fprintf fmt "HYP | "
 
 let prgd fmt mid =
-  Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a\n" prpos pos prhyp h pcte cte) mid
+  Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a@ " prpos pos prhyp h pcte cte) mid
 
 let pcta fmt cta =
-  fprintf fmt "%a\n%a\n" prs cta.sigma prgd cta.gamma_delta
+  fprintf fmt "@[<v>TYPES INTERP:%a@ \
+               TYPES:%a@ \
+               SIGMA INTERP:%a@ \
+               SIGMA:%a@ \
+               %a@]@."
+    prt cta.types_interp
+    prt cta.types
+    prs cta.sigma_interp
+    prs cta.sigma
+    prgd cta.gamma_delta
 
 let plcta =
   pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "========\n") pcta
@@ -358,17 +370,11 @@ let find_ident s h cta =
       verif_failed s
 
 let ctask_new types_interp sigma_interp =
-  { types_interp;
+  { types_interp = types_interp;
     types = Sid.empty;
-    sigma_interp;
+    sigma_interp = sigma_interp;
     sigma = Mid.empty;
     gamma_delta = Mid.empty }
-
-let ctask_union ct1 ct2 =
-  { ct1 with
-    types = Sid.union ct1.types ct2.types;
-    sigma = Mid.set_union ct1.sigma ct2.sigma;
-    gamma_delta = Mid.set_union ct1.gamma_delta ct2.gamma_delta }
 
 let lift_mid_cta f cta =
   { cta with
@@ -408,12 +414,16 @@ let infer_type cta t =
     | CTnot t -> let ty = infer_type sigma t in
                  assert (cty_equal ty CTprop);
                  CTprop
-    | CTquant (_, ty1, t) ->
+    | CTquant (quant, ty1, t) ->
         let ni = id_register (id_fresh "type_ident") in
         let sigma = Mid.add ni ty1 sigma in
         let t = ct_open t (CTfvar ni) in
         let ty2 = infer_type sigma t in
-        CTarrow (ty1, ty2)
+        begin match quant with
+        | CTlambda -> CTarrow (ty1, ty2)
+        | CTforall | CTexists ->
+            assert (cty_equal ty2 CTprop);
+            CTprop end
     | CTapp (t1, t2) ->
         begin match infer_type sigma t1, infer_type sigma t2 with
         | CTarrow (ty1, ty2), ty3 when cty_equal ty1 ty3 -> ty2
@@ -430,7 +440,8 @@ let infer_type cta t =
 
 let infers_into cta t ty =
   try assert (cty_equal (infer_type cta t) ty)
-  with e -> eprintf "wrong type for %a@." pcte t;
+  with e -> eprintf "@[<v>wrong type for: %a@ \
+                     expected: %a@]@." pcte t prty ty;
             raise e
 
 (** We equip existing transformations with a certificate <certif> *)
