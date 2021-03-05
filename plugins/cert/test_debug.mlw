@@ -18,9 +18,9 @@
 (* predicate p (x : bool) (y : bool) *)
 (* goal G : forall x y. p x y -> p true false *)
 
-use int.Int
+(* use int.Int *)
 
-goal G : 1 > 2 /\ 3 >= 4
+(* goal G : 1 > 2 /\ 3 >= 4 *)
 
 (* goal G : a /\ b *)
 
@@ -29,3 +29,8 @@ goal G : 1 > 2 /\ 3 >= 4
 (* axiom A : a e *)
 
 (* goal G : a e *)
+
+
+predicate p (x : bool)
+
+goal inst_goal : p true -> exists x : bool. p x

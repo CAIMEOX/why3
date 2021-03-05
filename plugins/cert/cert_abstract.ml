@@ -117,34 +117,33 @@ let rec abstract_task_acc acc = function
 (** Env *)
 
 let types_sigma_interp env =
-  match env with
-  | None -> Sid.empty, Mid.empty
-  | Some env ->
-      let interp_type = ref [] in
-      let interp_var = ref [] in
+  let interp_type = ref [] in
+  let interp_var = ref [] in
 
-      let _ =
-        let add ts = interp_type := ts.ts_name :: !interp_type in
-        List.iter add [ts_int; ts_real; ts_str] in
+  let _ =
+    let add ts = interp_type := ts.ts_name :: !interp_type in
+    List.iter add [ts_int; ts_real; ts_str; ts_bool] in
 
-      let _ =
-        let add (id, cty) = interp_var := (id, cty) :: !interp_var in
-        List.iter add [ id_true, ctbool;
-                        id_false, ctbool;
-                        id_eq, CTarrow (ctint, CTarrow (ctint, CTprop))];
-        try  let th = Env.read_theory env ["int"] "Int" in
-             let le_int = Theory.ns_find_ls th.Theory.th_export
-                            [Ident.op_infix "<="] in
-             let lt_int = Theory.ns_find_ls th.Theory.th_export
-                            [Ident.op_infix "<"] in
-             List.iter add
-               [le_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop));
-                lt_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop))]
-        with _ -> () in
+  let _ =
+    let add (id, cty) = interp_var := (id, cty) :: !interp_var in
+    List.iter add [ id_true, ctbool;
+                    id_false, ctbool;
+                    id_eq, CTarrow (ctint, CTarrow (ctint, CTprop))];
 
-      let interp_type = Sid.of_list !interp_type in
-      let interp_var = Mid.of_list !interp_var in
-      interp_type, interp_var
+    try let env = Opt.get env in
+        let th = Env.read_theory env ["int"] "Int" in
+        let le_int = Theory.ns_find_ls th.Theory.th_export
+                       [Ident.op_infix "<="] in
+        let lt_int = Theory.ns_find_ls th.Theory.th_export
+                       [Ident.op_infix "<"] in
+        List.iter add
+          [le_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop));
+           lt_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop))]
+    with _ -> () in
+
+  let interp_type = Sid.of_list !interp_type in
+  let interp_var = Mid.of_list !interp_var in
+  interp_type, interp_var
 
 let abstract_task env =
   let types_interp, sigma_interp = types_sigma_interp env  in
