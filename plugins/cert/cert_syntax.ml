@@ -7,24 +7,26 @@ open Ty
 open Format
 
 (** Utility **)
+
 let print_list pre = pp_print_list ~pp_sep:pp_print_space pre
 
 exception Certif_verification_failed of string
 let verif_failed s = raise (Certif_verification_failed s)
 
-(** To certify transformations, we will represent Why3 tasks by the type <ctask>
-    and we equip transformations with a certificate <certif> *)
+(** To certify transformations, we will represent Why3 tasks by ctask, its terms
+   by cterm and type those terms with ctype *)
 
 type cquant = CTforall | CTexists | CTlambda
 
 type ctype =
   | CTyvar of tvsymbol (* type variable *)
-  | CTprop
+  | CTprop (* type of formulas *)
   | CTyapp of tysymbol * ctype list (* (possibly) applied type constant *)
   | CTarrow of ctype * ctype (* arrow type *)
 
-let ctbool = CTyapp (ts_bool, [])
 let ctint = CTyapp (ts_int, [])
+let ctint = CTyapp (ts_real, [])
+let ctbool = CTyapp (ts_bool, [])
 
 (** Utility functions on ctype *)
 
@@ -42,7 +44,7 @@ let rec is_predicate = function
   | CTarrow (_, ct) -> is_predicate ct
   | _ -> false
 
-(* Pretty printing of ctype (compatible with lambdapi) *)
+(** Pretty printing of ctype (compatible with lambdapi) *)
 
 let san =
   let lower_h c = if c = 'H' then "h" else char_to_alnum c in
@@ -93,7 +95,6 @@ let prty fmt ty =
 
 let prtyparen fmt ty =
   pred_typaren (is_predicate ty) fmt ty
-
 
 type cterm =
   | CTbvar of int (* bound variables use De Bruijn indices *)
@@ -229,7 +230,7 @@ let instantiate f a = match f with
   | CTquant (CTlambda, _, f) -> ct_open f a
   | _ -> assert false
 
-(* Pretty printing of terms (compatible with lambdapi) *)
+(** Pretty printing of terms (compatible with lambdapi) *)
 
 let rec pcte fmt = function
   | CTquant (CTlambda, _, t) ->
@@ -299,14 +300,8 @@ and prpv fmt = function
   | CTtrue -> fprintf fmt "true"
   | ct -> fprintf fmt "(%a)" pcte ct
 
-type ctask =
-  { types_interp : Sid.t;
-    types : Sid.t;
-    sigma_interp : ctype Mid.t;
-    sigma : ctype Mid.t;
-    gamma_delta : (cterm * bool) Mid.t
-  }
-(* We will denote a ctask <sigma; gamma_delta> by <Σ | Γ ⊢ Δ> where:
+(* TODO : update this
+   We will denote a ctask <sigma; gamma_delta> by <Σ | Γ ⊢ Δ> where:
    • <Σ> contains all the signature declarations <x : ty>
      where <x> is mapped to <ty> in <sigma>
    • <Γ> contains all the declarations <H : P>
@@ -316,37 +311,61 @@ type ctask =
 
    We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ>
 *)
-(* Pretty printing of ctask *)
+type ctask =
+  { types_interp : Sid.t;
+    types : Sid.t;
+    sigma_interp : ctype Mid.t;
+    sigma : ctype Mid.t;
+    gamma_delta : (cterm * bool) Mid.t
+  }
+
+(** Pretty printing of ctask *)
 
 let po p fmt = function
   | None -> fprintf fmt "None"
   | Some x -> fprintf fmt "%a" p x
 
+let prt fmt sid =
+  Sid.iter (fun i -> fprintf fmt "%a@ " prid i) sid
+
 let prs fmt mid =
-  Mid.iter (fun x ty -> fprintf fmt "%a : %a\n" prid x prty ty) mid
+  Mid.iter (fun x ty -> fprintf fmt "%a : %a@ " prid x prty ty) mid
 
 let prpos fmt = function
   | true  -> fprintf fmt "GOAL| "
   | false -> fprintf fmt "HYP | "
 
 let prgd fmt mid =
-  Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a\n" prpos pos prhyp h pcte cte) mid
+  Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a@ " prpos pos prhyp h pcte cte) mid
 
 let pcta fmt cta =
-  fprintf fmt "%a\n%a\n" prs cta.sigma prgd cta.gamma_delta
+  fprintf fmt "@[<v>TYPES INTERP:%a@ \
+               TYPES:%a@ \
+               SIGMA INTERP:%a@ \
+               SIGMA:%a@ \
+               %a@]@."
+    prt cta.types_interp
+    prt cta.types
+    prs cta.sigma_interp
+    prs cta.sigma
+    prgd cta.gamma_delta
 
 let plcta =
-  pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "========\n") pcta
+  pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "========@ ") pcta
 
 let eplcta cta lcta =
-  eprintf "INIT :\n%a==========\nRES :\n%a\n@." pcta cta plcta lcta
+  eprintf "@[<v>INIT :@ \
+           %a==========@ \
+           RES :@
+           %a@]@."
+    pcta cta
+    plcta lcta
 
 let print_ctasks filename lcta =
   let oc = open_out filename in
   let fmt = formatter_of_out_channel oc in
   plcta fmt lcta;
   close_out oc
-
 
 (** Utility functions on ctask *)
 
@@ -358,17 +377,11 @@ let find_ident s h cta =
       verif_failed s
 
 let ctask_new types_interp sigma_interp =
-  { types_interp;
+  { types_interp = types_interp;
     types = Sid.empty;
-    sigma_interp;
+    sigma_interp = sigma_interp;
     sigma = Mid.empty;
     gamma_delta = Mid.empty }
-
-let ctask_union ct1 ct2 =
-  { ct1 with
-    types = Sid.union ct1.types ct2.types;
-    sigma = Mid.set_union ct1.sigma ct2.sigma;
-    gamma_delta = Mid.set_union ct1.gamma_delta ct2.gamma_delta }
 
 let lift_mid_cta f cta =
   { cta with
@@ -408,12 +421,16 @@ let infer_type cta t =
     | CTnot t -> let ty = infer_type sigma t in
                  assert (cty_equal ty CTprop);
                  CTprop
-    | CTquant (_, ty1, t) ->
+    | CTquant (quant, ty1, t) ->
         let ni = id_register (id_fresh "type_ident") in
         let sigma = Mid.add ni ty1 sigma in
         let t = ct_open t (CTfvar ni) in
         let ty2 = infer_type sigma t in
-        CTarrow (ty1, ty2)
+        begin match quant with
+        | CTlambda -> CTarrow (ty1, ty2)
+        | CTforall | CTexists ->
+            assert (cty_equal ty2 CTprop);
+            CTprop end
     | CTapp (t1, t2) ->
         begin match infer_type sigma t1, infer_type sigma t2 with
         | CTarrow (ty1, ty2), ty3 when cty_equal ty1 ty3 -> ty2
@@ -430,10 +447,11 @@ let infer_type cta t =
 
 let infers_into cta t ty =
   try assert (cty_equal (infer_type cta t) ty)
-  with e -> eprintf "wrong type for %a@." pcte t;
+  with e -> eprintf "@[<v>wrong type for: %a@ \
+                     expected: %a@]@." pcte t prty ty;
             raise e
 
-(** We equip existing transformations with a certificate <certif> *)
+(** We instrument existing transformations to produce a certificate *)
 
 type 'certif ctransformation = (task list * 'certif) Trans.trans
 
