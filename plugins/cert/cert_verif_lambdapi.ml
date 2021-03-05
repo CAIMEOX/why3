@@ -213,7 +213,7 @@ let print fmt init res (task_ids, certif) =
   forget_all ip;
   forget_all hip
 
-let checker_lambdapi _ certif init res =
+let checker_lambdapi certif init res =
   try
     let check_cert = "/tmp/check_cert.lp" in
     let oc = open_out check_cert in

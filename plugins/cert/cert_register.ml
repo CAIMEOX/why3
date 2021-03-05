@@ -1,6 +1,5 @@
 open Why3
 open Task
-open Ident
 
 open Cert_syntax
 open Cert_abstract
@@ -25,32 +24,25 @@ type 'certif debug =
   ('certif -> unit) option *
   (ctask -> ctask list -> unit) option
 
+
 let checker_ctrans
+      ?env
       (debug : 'certif debug )
       (* is_lp *)
-      (checker : Env.env -> 'core_certif -> ctask -> ctask list -> unit)
+      (checker : 'core_certif -> ctask -> ctask list -> unit)
       (ctr : 'certif ctransformation)
-      (env : Env.env option)
       (init_t : task) =
-  let module Envm = struct
-      let interp_type, interp_var = match env with
-          | None -> Sid.empty, Mid.empty
-          | Some env -> interp_type_var env
-    end in
-  let module A = Abstract (Envm) in
-  let module E = Elab (Envm) in
-  let open A in let open E in
-
   let dbg_cert, dbg_cta = debug in
   (* let t1 = Unix.times () in *)
   let res_t, certif = Trans.apply ctr init_t in
   (* let t2 = Unix.times () in *)
   Opt.iter (fun eprcertif -> eprcertif certif) dbg_cert;
+  let abstract_task = abstract_task env in
   let init_ct = abstract_task init_t in
   let res_ct = List.map abstract_task res_t in
   Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_cta;
   let core_certif = make_core init_ct res_ct certif in
-  checker (match env with Some e -> e  | None -> assert false) core_certif init_ct res_ct;
+  checker core_certif init_ct res_ct;
   (* let t3 = Unix.times () in *)
   (* let syst = if is_lp then "Lambdapi" else "OCaml" in *)
   (* eprintf "@[<v>temps de la transformation : %f@ \
@@ -64,10 +56,10 @@ let checker_ctrans
   res_t
 
 
-let cchecker trans = Trans.store (checker_ctrans no_dbg checker_caml trans None)
-let lchecker trans = Trans.store (checker_ctrans no_dbg checker_lambdapi trans None)
+let cchecker ?env trans = Trans.store (checker_ctrans ?env no_dbg checker_caml trans)
+let lchecker ?env trans = Trans.store (checker_ctrans ?env no_dbg checker_lambdapi trans)
 
-let induction_c x bound env = cchecker (induction x bound env)
+let induction_c x bound env = cchecker ~env:env (induction x bound env)
 
 let print_c any every where = cchecker (tprint any every where)
 let assert_c t              = cchecker (cassert t)
