@@ -18,8 +18,7 @@ API calls
 
 (* BEGIN{buildenv} *)
 open Why3
-let config : Whyconf.config =
-  Whyconf.(load_default_config_if_needed (read_config None))
+let config : Whyconf.config = Whyconf.init_config None
 let main : Whyconf.main = Whyconf.get_main config
 let env : Env.env = Env.create_env (Whyconf.loadpath main)
 (* END{buildenv} *)
@@ -138,7 +137,7 @@ let alt_ergo : Whyconf.config_prover =
 
 let alt_ergo_driver : Driver.driver =
   try
-    Whyconf.load_driver main env alt_ergo.Whyconf.driver []
+    Whyconf.load_driver main env alt_ergo
   with e ->
     eprintf "Failed to load driver for alt-ergo: %a@."
       Exn_printer.exn_printer e;
@@ -155,7 +154,7 @@ let () =
                               alt_ergo_driver t)
        in
        printf "@[On task %d, alt-ergo answers %a@."
-              i (Call_provers.print_prover_result ~json_model:false) r;
+              i (Call_provers.print_prover_result ?json:None) r;
        i+1
       )
       1 my_tasks

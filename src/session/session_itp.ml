@@ -358,6 +358,10 @@ let get_proof_parent (s : session) (id : proofNodeID) =
 let get_trans_parent (s : session) (id : transID) =
   (get_transfNode s id).transf_parent
 
+let rec find_th s id = match get_proof_parent s id with
+  | Theory th -> th
+  | Trans id -> find_th s (get_trans_parent s id)
+
 let goal_is_detached s pn =
   try let (_:Task.task) = get_task s pn in false
   with Not_found -> true
@@ -540,10 +544,10 @@ open Format
 open Ident
 
 let print_proof_attempt fmt pa =
-  fprintf fmt "%a tl=%d %a"
+  fprintf fmt "@[<h>%a tl=%d %a@]"
           Whyconf.print_prover pa.prover
           pa.limit.Call_provers.limit_time
-          (Pp.print_option (Call_provers.print_prover_result ~json_model:false))
+          (Pp.print_option (Call_provers.print_prover_result ~json:false))
           pa.proof_state
 
 let rec print_proof_node s (fmt: Format.formatter) p =
@@ -1006,7 +1010,7 @@ let default_unknown_result =
        Call_provers.pr_output = "";
        Call_provers.pr_status = Unix.WEXITED 0;
        Call_provers.pr_steps = -1;
-       Call_provers.pr_model = Model_parser.empty_model;
+       Call_provers.pr_models = [];
      }
 
 let load_result a (path,acc) r =
@@ -1050,7 +1054,7 @@ let load_result a (path,acc) r =
        Call_provers.pr_output = "";
        Call_provers.pr_status = Unix.WEXITED 0;
        Call_provers.pr_steps = steps;
-       Call_provers.pr_model = Model_parser.empty_model;
+       Call_provers.pr_models = [];
        }
      in (path,Some res)
   | "undone" | "unedited" -> (path,acc)
@@ -1396,33 +1400,26 @@ let read_xml_and_shapes gs xml_fn compressed_fn =
     raise (ShapesFileError ("cannot open shapes file for reading: " ^ msg))
 end
 
-module ReadShapesNoCompress = ReadShapes(Compress.Compress_none)
-module ReadShapesCompress = ReadShapes(Compress.Compress_z)
-
 let read_file_session_and_shapes gs dir xml_filename =
   let compressed_shape_filename =
-      Filename.concat dir compressed_shape_filename
-    in
-    if Sys.file_exists compressed_shape_filename then
-      if Compress.compression_supported then
-        ReadShapesCompress.read_xml_and_shapes gs
-          xml_filename compressed_shape_filename
-      else
-        begin
-          Warning.emit "[Warning] could not read goal shapes because \
-                        Why3 was not compiled with compress support@.";
-          Xml.from_file xml_filename, None
-        end
+    Filename.concat dir compressed_shape_filename in
+  if Sys.file_exists compressed_shape_filename then
+    if Compress.compression_supported then
+      let module RS = ReadShapes(Compress.Compress_z) in
+      RS.read_xml_and_shapes gs xml_filename compressed_shape_filename
     else
-      let shape_filename = Filename.concat dir shape_filename in
-      if Sys.file_exists shape_filename then
-        ReadShapesNoCompress.read_xml_and_shapes gs
-          xml_filename shape_filename
-      else
-        begin
-          Warning.emit "[Warning] could not find goal shapes file@.";
-          Xml.from_file xml_filename, None
-        end
+      let () =
+        Warning.emit "[Warning] could not read goal shapes because \
+                      Why3 was not compiled with compress support@." in
+      Xml.from_file xml_filename, None
+  else
+    let shape_filename = Filename.concat dir shape_filename in
+    if Sys.file_exists shape_filename then
+      let module RS = ReadShapes(Compress.Compress_none) in
+      RS.read_xml_and_shapes gs xml_filename shape_filename
+    else
+      let () = Warning.emit "[Warning] could not find goal shapes file@." in
+      Xml.from_file xml_filename, None
 
 let build_session ?sum_shape_version (s : session) xml : unit =
   match xml.Xml.name with

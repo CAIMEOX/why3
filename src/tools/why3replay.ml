@@ -60,10 +60,7 @@ let set_opt_smoke = function
   | Some _ -> assert false
   | None -> opt_smoke := SD_Top
 
-let usage_msg = Format.sprintf
-  "Usage: %s [options] <dir>\n\
-   Replay the session stored in the given directory.\n"
-  (Filename.basename Sys.argv.(0))
+let usage_msg = "<dir>\nReplay the session stored in the given directory."
 
 let option_list =
   let open Getopt in
@@ -88,7 +85,7 @@ let option_list =
 
 let add_file f = Queue.push f files
 
-let config, _, env =
+let config, env =
   Whyconf.Args.initialize option_list add_file usage_msg
 
 module C = Controller_itp.Make(Unix_scheduler.Unix_scheduler)
@@ -100,7 +97,7 @@ let () =
       if Debug.test_flag debug then
         Printf.eprintf "Progress: %d/%d/%d                       \r%!" w s r)
 
-let print_result = Call_provers.print_prover_result ~json_model:false
+let print_result = Call_provers.print_prover_result ~json:false
 
 module S = Session_itp
 
@@ -146,22 +143,22 @@ let print_report ses (id,p,l,r) =
      begin
        match r with
        | C.Result(new_res,old_res) ->
-          printf "%a instead of %a (timelimit=%d, memlimit=%d, steplimit=%d)@."
+          printf "@[<h>%a instead of %a (timelimit=%d, memlimit=%d, steplimit=%d)@]@."
                  print_result new_res print_result old_res
                  l.Call_provers.limit_time
                  l.Call_provers.limit_mem
                  l.Call_provers.limit_steps
        | C.No_former_result new_res ->
-          printf "no former result available, new result is: %a@."
+          printf "@[<h>no former result available, new result is: %a@]@."
                  print_result new_res
        | C.CallFailed msg ->
-          printf "internal failure '%a'@." Exn_printer.exn_printer msg;
+          printf "@[<h>internal failure '%a'@]@." Exn_printer.exn_printer msg;
        | C.Replay_interrupted ->
-          printf "replay interrupted@."
+          printf "@[<h>replay interrupted@]@."
        | C.Edited_file_absent f ->
-          printf "proof script absent (%s)@." f
+          printf "@[<h>proof script absent (%s)@]@." f
        | C.Prover_not_installed ->
-          printf "not installed@."
+          printf "@[<h>not installed@]@."
      end
   | _ ->
      let res =
@@ -170,8 +167,7 @@ let print_report ses (id,p,l,r) =
        | C.No_former_result new_res -> new_res
        | _ -> assert false
      in
-     printf "result is: %a -> Smoke detected!@."
-                 print_result res
+     printf "result is: %a -> Smoke detected!@." print_result res
 
 
 let same_result r1 r2 =

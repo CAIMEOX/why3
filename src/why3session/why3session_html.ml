@@ -235,8 +235,8 @@ struct
 
   let print_proof_status fmt = function
     | None -> fprintf fmt "No result"
-    | Some res -> fprintf fmt "Done: %a"
-                    (Call_provers.print_prover_result ~json_model:true) res
+    | Some res -> fprintf fmt "@[<h>Done: %a@]"
+                    (Call_provers.print_prover_result ~json:false) res
 
   let print_proof_attempt s fmt pa =
     let pa = get_proof_attempt_node s pa in
@@ -283,7 +283,7 @@ end
 
 
 let run () =
-  let _,_,_ = Whyconf.Args.complete_initialization () in
+  let _,_ = Whyconf.Args.complete_initialization () in
   match !opt_style with
     | Table -> iter_files (run_file Table.print_session)
     | SimpleTree -> iter_files (run_file Simple.print_session)

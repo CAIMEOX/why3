@@ -1,0 +1,26 @@
+
+use int.Int
+use ref.Ref
+let f () =
+  let ref x1 = 0 in
+  let ref x2 = 0 in
+  for i = 0 to 1 do
+    invariant { i > 0 -> x1 = 1 }
+    if i = 0 then
+      x1 <- x1 + 1
+    else
+      x2 <- x2 + 1
+  done
+
+
+(*
+counterexamle: `x1 = -1`, `i = 0` at the beggining of the loop.
+
+The execution of `f` with the counterexample:
+- terminates normally if executed concretly;
+- terminates in error if executed abstractly (invariant preservation
+  fails)
+
+It is a real counterexample due to underspecification (weak loop
+invariant).
+*)

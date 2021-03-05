@@ -37,6 +37,7 @@ type model_value =
   | Record of model_record
   | Proj of model_proj
   | Apply of string * model_value list
+  | Undefined
   | Unparsed of string
 
 and arr_index = {arr_index_key: model_value; arr_index_value: model_value}
@@ -73,6 +74,8 @@ val float_of_binary : model_float_binary -> model_float
 
 val print_model_value : Format.formatter -> model_value -> unit
 
+val debug_force_binary_floats : Debug.flag
+(** Print all floats using bitvectors in JSON output for models *)
 
 (*
 ***************************************************************
@@ -132,14 +135,27 @@ val create_model_element :
 
 type model
 
+val map_filter_model_elements :
+  (model_element -> model_element option) -> model -> model
+
 val is_model_empty : model -> bool
 val empty_model : model
+val set_model_files : model -> model_element list Wstdlib.Mint.t Wstdlib.Mstr.t -> model
 
 (** {2 Querying the model} *)
 
-val get_model_elements: model -> model_element list
+val get_model_elements : model -> model_element list
+val get_model_term_loc : model -> Loc.position option
+val get_model_term_attrs : model -> Ident.Sattr.t
+
+val get_model_element : model -> string -> Loc.position -> model_element option
+val get_model_element_by_id : model -> Ident.ident -> model_element option
+val get_model_element_by_loc : model -> Loc.position -> model_element option
+
+(** {2 Printing the model} *)
 
 val print_model :
+  ?filter_similar:bool ->
   ?me_name_trans:(model_element_name -> string) ->
   print_attrs:bool ->
   Format.formatter ->
@@ -156,6 +172,7 @@ val print_model :
 *)
 
 val print_model_human :
+  ?filter_similar:bool ->
   ?me_name_trans:(model_element_name -> string) ->
   Format.formatter ->
   model ->
@@ -274,14 +291,44 @@ val model_for_positions_and_decls : model ->
 
 (*
 ***************************************************************
+**  Cleaning the model
+***************************************************************
+*)
+
+(** Method clean#model cleans a model from unparsed values and handles contradictory VCs
+   ("the check fails with all inputs"). *)
+class clean : object
+  method model : model -> model
+  method element : model_element -> model_element option
+  method value : model_value -> model_value option
+  method unparsed : string -> model_value option
+  method integer : model_int -> model_value option
+  method string : string -> model_value option
+  method decimal : model_dec -> model_value option
+  method fraction : model_frac -> model_value option
+  method float : model_float -> model_value option
+  method boolean : bool -> model_value option
+  method bitvector : model_bv -> model_value option
+  method proj : string -> model_value -> model_value option
+  method apply : string -> model_value list -> model_value option
+  method array : model_array -> model_value option
+  method record : model_record -> model_value option
+  method undefined : model_value option
+end
+
+val customize_clean : #clean -> unit
+(** Customize the class used to clean the values in the model. *)
+
+(*
+***************************************************************
 ** Registering model parser
 ***************************************************************
 *)
 
 type model_parser = Printer.printer_mapping -> string -> model
-(** Parses the input string into model elements, estabilishes
-    a mapping between these elements and mapping from printer
-    and builds model data structure.*)
+(** Parses the input string into model elements, estabilishes a mapping between these
+   elements and mapping from printer and builds model data structure. The model still has
+   to be cleaned using [clean]. *)
 
 type raw_model_parser = Printer.printer_mapping -> string -> model_element list
 

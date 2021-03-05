@@ -26,9 +26,8 @@ open Why3
 
 (* access to the Why configuration *)
 
-(* reads the config file *)
-let config : Whyconf.config =
-  Whyconf.(load_default_config_if_needed (read_config None))
+(* reads the default config file *)
+let config = Whyconf.init_config None
 (* the [main] section of the config file *)
 let main : Whyconf.main = Whyconf.get_main config
 (* all the provers detected, from the config file *)
@@ -43,7 +42,7 @@ let provers =
   Whyconf.Mprover.fold
     (fun _ p acc ->
       try
-        let d = Whyconf.load_driver main env p.Whyconf.driver [] in
+        let d = Whyconf.load_driver main env p in
         (p,d)::acc
       with e ->
         let p = p.Whyconf.prover in

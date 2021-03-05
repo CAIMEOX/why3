@@ -1,0 +1,130 @@
+#!/bin/bash
+set -euo pipefail
+
+dir=`dirname $0`
+
+updateoracle=false
+forceupdateoracle=false
+files=""
+success=true
+suffix=""
+
+while test $# != 0; do
+case "$1" in
+  "-suffix")
+      suffix="$2"
+      shift 2;;
+  "-update-oracle")
+      updateoracle=true
+      shift 1;;
+  "-force-update-oracle")
+      forceupdateoracle=true
+      shift 1;;
+  "-"*)
+      printf "unknown option: %s\n" "$1"
+      printf "usage: check-ce-bench [-update-oracle] [-suffix <suffix>] <files>\n"
+      printf "  <files> must be given without the '.mlw' suffix\n"
+      printf "  if <files> empty, use all files from directory 'ce'\n"
+      exit 2;;
+  *)
+      files="$files $1"
+      shift 1;;
+esac
+done
+
+if test "$files" = "" ; then
+    files="$dir/check-ce/*.mlw"
+fi
+
+failed=""
+
+whydata=$(bin/why3"$suffix" --print-datadir)
+whylib=$(bin/why3"$suffix" --print-libdir)
+
+colorize() {
+    if command -v pygmentize &> /dev/null; then
+        pygmentize -ldiff
+    else
+        cat
+    fi
+}
+
+# types for which the current bench is non deterministic
+nondet_types=""
+
+remove_solver_details () {
+    sed 's/[0-9]\+\.[0-9]\+s//g' \
+  | sed 's/[0-9]\+ steps//g' \
+  | sed 's/Prover result is: Timeout.*$\|Unknown (\(unknown\|incomplete\|unknown + \(incomplete\|interrupted\)\)).*$\|Out of memory\.$\|Step limit exceeded.*$/Prover result is: Unknown or time\/memory\/step limit./'
+}
+
+# $1 = prover, $2 = dir, $3 = filename, $4 = true for WP; false for SP, $5 = steps
+run () {
+    printf "  $2 ($1)... "
+    file_path="$2/$3"
+    if $4; then
+        f="${file_path}_$1_WP"
+        oracle_file="$2/oracles/$3_$1_WP.oracle"
+        wp_sp=""
+        echo "Weakest Precondition" > "$f.out"
+        printf "Weakest Precondition  ${file_path} ($1)... "
+    else
+        f="${file_path}_$1_SP"
+        oracle_file="$2/oracles/$3_$1_SP.oracle"
+        wp_sp=" --debug=vc_sp"
+        echo "Strongest Postcondition" > "$f.out"
+        printf "Strongest Postcondition  ${file_path} ($1)... "
+    fi
+    prover="$1,counterexamples"
+    steps=$5
+    # Call why3 prove to create CE (and accept return value of 2 for unproven goals)
+    ($dir/../bin/why3"$suffix" prove --apply-transform=split_vc \
+       --prover="$prover" --stepslimit=$steps --check-ce --verbosity=5 \
+       --library="$2" "${file_path}.mlw" --debug=check-ce,rac-values \
+       || [ $? -eq 2 ]) 2>&1 \
+     | sed -e "s|$whydata|WHY3DATA|g" -e "s|$whylib|WHY3LIB|g" \
+     > "$f.out"
+    str_out=$(cat "$f.out"|remove_solver_details)
+    if [ -e "$oracle_file" ]; then
+        str_oracle=$(cat "$oracle_file"|remove_solver_details)
+    else
+        str_oracle=""
+    fi
+    if [ "$str_oracle" = "$str_out" ] ; then
+        echo "ok"
+    else
+	if $updateoracle; then
+	    echo "Updating oracle"
+	    mv "$f.out" "${oracle_file}"
+	else
+	    echo "FAILED!"
+	    echo "diff is the following:"
+	    echo "$f"
+	    diff -u <(echo "$str_oracle") <(echo "$str_out")|colorize
+	    failed="$failed$f\n"
+	    success=false
+	fi
+    fi
+    if $forceupdateoracle; then
+	echo "Forcing update oracle for ${file_path}, prover $1"
+        mv "$f.out" "${oracle_file}"
+    fi
+}
+
+for file in $files; do
+    filedir=`dirname $file`
+    filebase=`basename $file .mlw`
+    printf "Running provers on $filedir/$filebase.mlw\n";
+    run CVC4,1.7 $filedir $filebase true   150000
+    run CVC4,1.7 $filedir $filebase false  150000
+    run Z3,4.8.4 $filedir $filebase true  7500000
+    run Z3,4.8.4 $filedir $filebase false 7500000
+done
+
+if [ "$success" = true ]; then
+    echo "Check-ce bench: success"
+    exit 0
+else
+    printf "\nCheck-ce bench: failed\n$failed\n"
+    exit 1
+fi

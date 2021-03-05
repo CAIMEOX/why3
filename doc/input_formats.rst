@@ -319,69 +319,83 @@ program function of the following form, introduced by keywords ``let cfg``:
     var *y*:sub:`1`: *u*:sub:`1`;
     ...
     var *y*:sub:`k`: *u*:sub:`k`;
-    { *instructions* }
-    *L*:sub:`1` { *instructions*:sub:`1` }
+    { *instructions*;*terminator* }
+    *L*:sub:`1` { *instructions*:sub:`1`;*terminator*:sub:`1` }
     ...
-    *L*:sub:`j` { *instructions*:sub:`j` }
+    *L*:sub:`j` { *instructions*:sub:`j`;*terminator*:sub:`j` }
+
 
 It defines a program function *f*, with the usual syntax for
 its contract. The difference is the body, which is made of a sequence
-of declarations of mutable variables with their types, an initial block
-of instructions, and a sequence of other blocks of instructions, each
-block being denoted by a label (:math:`L_1 \ldots L_j` above). The
-instructions are semi-colon separated sequences of either regular
-WhyML expressions of type ``unit`` (apart from the last one in the
-sequence, when returning a value), or CFG-specific instructions below:
+of declarations of mutable variables with their types, an initial block,
+composed of a zero or more instructions followed by a terminator, and a
+sequence of other blocks, each denoted by a label (:math:`L_1 \ldots L_j` above).
+The instructions are semi-colon separated sequences of regular
+WhyML expressions of type ``unit``, excluding ``return`` or ``absurd``
+expressions or code invariants:
+
+- a code invariant: :samp:`invariant {I} \\{ {t} }` where *I* is a
+  name and *t* a predicate. It is similar to an assert expression,
+  meaning that *t* must hold when execution reaches this statement.
+  Additionally, it acts as a cut in the generation of VC, similarly
+  to a loop invariant. See example below.
+
+Each block is ended by one of the following terminators:
 
 - a ``goto`` statement: :samp:`goto {L}` where *L* is one of the labels of the
   other blocks. It instructs to continue execution at the
   given block.
-
-- a code invariant: :samp:`invariant {I} \\{ {t} }` where *I* is a
-  name and *t*
-  a predicate. It is similar to an assert expression, meaning that *t*
-  must hold when execution reaches this statement. Additionally, it
-  acts as a cut in the generation of VC, similarly to a loop
-  invariant. See example below.
 
 - a ``switch`` statement, of the form
 
   .. parsed-literal::
 
      switch (*e*)
-     | *pat*:sub:`1` -> *instructions*:sub:`1`
+     | *pat*:sub:`1` -> *terminator*:sub:`1`
      ...
-     | *pat*:sub:`k` -> *instructions*:sub:`k`
+     | *pat*:sub:`k` -> *terminator*:sub:`k`
      end
 
-  It is similar to a ``match ... with ... end`` expression, except that
-  the branches may recursively contain CFG instructions.
+- a ``return`` statement: :samp:`return *expr*`
+- an ``absurd`` statement: indicating that this block should be unreachable.
 
 The extension of syntax is described by the following rules.
 
 .. productionlist:: CFG
     file: `module`*
     module: "module" `:ident` `decl`* "end"
-    decl: "let" "cfg" `cfg_fundef` ("with" `cfg_fundef`)*
+    decl: "let" "cfg" `cfg_fundef`
+    : | "let" "rec" "cfg" `cfg_fundef` ("with" `cfg_fundef`)*
+    : | "scope" `:ident` `decl`* "end"
     cfg_fundef: `:ident` `:binder`+ : `:type` `:spec` "=" `vardecl`* "{" `block` "}" `labelblock`*
     vardecl: "var" `:ident`* ":" `:type` ";" | "ghost" "var" `:ident`* ":" `:type` ";"
-    block: `instruction` (";" `instruction`)*
+    block: (`instruction` ";")* `terminator`
     labelblock: `:ident` "{" `block` "}"
     instruction: `:expr`
-    : | "goto" `:ident`
     : | "invariant" `:ident` "{" `:term` "}"
+    terminator:
+    : | "return" `:expr`
+    : | "absurd"
+    : | "goto" `:ident`
     : | "switch" "(" `:expr` ")" `switch_case`* "end"
-    switch_case: "|" `:pattern` "->" `block`
+    switch_case: "|" `:pattern` "->" `:terminator`
 
 
 
 An example
 ~~~~~~~~~~
 
-The following example is inspired from the documentation of the ANSI C
-Specification Language (See :cite:`baudin18acsl`, section 2.4.2 Loop
-invariants, Example 2.27). It aims at computing the maximum value of
-an array of integers.
+The following example is directly inspired from the documentation of
+the ANSI C Specification Language (See :cite:`baudin18acsl`, Section
+2.4.2 Loop invariants, Example 2.27). It is itself inspired from the
+first example of Knuth's MIX language, for which formal proofs were
+first investigated by J.-C. Filliâtre in 2007
+(:cite:`filliatre07mix`), and also revisited by T.-M.-T. Nguyen in her
+PhD thesis in 2012 (:cite:`nguyen12phd`, Section 9.5 Translation from
+a CFG to Why, page 115).
+
+This example aims at computing the maximum value of
+an array of integers. Its code in C is given below.
 
 .. code-block:: C
 
@@ -439,7 +453,7 @@ label ``L2`` to node ``do``.
     i <- i + 1;
     switch (i < length a)
     | True  -> goto L2
-    | False -> (m, ind)
+    | False -> return (m, ind)
     end
   }
   L2 {

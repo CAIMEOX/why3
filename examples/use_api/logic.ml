@@ -78,9 +78,8 @@ let () = printf "@[task 2 created:@\n%a@]@." Pretty.print_task task2
 (* To call a prover, we need to access the Why configuration *)
 
 (* BEGIN{getconf} *)
-(* reads the config file *)
-let config : Whyconf.config =
-  Whyconf.(load_default_config_if_needed (read_config None))
+(* reads the default config file *)
+let config : Whyconf.config = Whyconf.init_config None
 (* the [main] section of the config file *)
 let main : Whyconf.main = Whyconf.get_main config
 (* all the provers detected, from the config file *)
@@ -126,7 +125,7 @@ let env : Env.env = Env.create_env (Whyconf.loadpath main)
 (* loading the Alt-Ergo driver *)
 let alt_ergo_driver : Driver.driver =
   try
-    Whyconf.load_driver main env alt_ergo.Whyconf.driver []
+    Whyconf.load_driver main env alt_ergo
   with e ->
     eprintf "Failed to load driver for alt-ergo: %a@."
       Exn_printer.exn_printer e;
@@ -143,7 +142,7 @@ let result1 : Call_provers.prover_result =
 
 (* prints Alt-Ergo answer *)
 let () = printf "@[On task 1, Alt-Ergo answers %a@."
-  (Call_provers.print_prover_result ~json_model:false) result1
+    (Call_provers.print_prover_result ?json:None) result1
 (* END{callprover} *)
 
 (* BEGIN{calltimelimit} *)
@@ -153,7 +152,7 @@ let result2 : Call_provers.prover_result =
     ~limit:{Call_provers.empty_limit with Call_provers.limit_time = 10}
     alt_ergo_driver task2)
 
-let () = printf "@[On task 2, alt-ergo answers %a in %5.2f seconds@."
+let () = printf "@[On task 2, Alt-Ergo answers %a in %5.2f seconds@."
   Call_provers.print_prover_answer result1.Call_provers.pr_answer
   result1.Call_provers.pr_time
 (* END{calltimelimit} *)
@@ -198,8 +197,8 @@ let result3 =
                        ~command:alt_ergo.Whyconf.command
     alt_ergo_driver task3)
 
-let () = printf "@[On task 3, alt-ergo answers %a@."
-  (Call_provers.print_prover_result ~json_model:false) result3
+let () = printf "@[On task 3, Alt-Ergo answers %a@."
+  (Call_provers.print_prover_result ?json:None) result3
 
 (* quantifiers: let's build "forall x:int. x*x >= 0" *)
 (* BEGIN{quantfmla1} *)
@@ -236,8 +235,8 @@ let result4 =
                        ~command:alt_ergo.Whyconf.command
     alt_ergo_driver task4)
 
-let () = printf "@[On task 4, alt-ergo answers %a@."
-  (Call_provers.print_prover_result ~json_model:false) result4
+let () = printf "@[On task 4, Alt-Ergo answers %a@."
+  (Call_provers.print_prover_result ?json:None) result4
 
 (* build a theory with all these goals *)
 

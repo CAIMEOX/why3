@@ -240,6 +240,8 @@ rule token = parse
       { LTGT }
   | "="
       { EQUAL }
+  | "=>"
+      { EQUALARROW }
   | "-"
       { MINUS }
   | "["
@@ -252,6 +254,10 @@ rule token = parse
       { RIGHTPAR_QUOTE s }
   | ")" ('_' alpha suffix core_suffix* as s)
       { RIGHTPAR_USCORE s }
+  | "[|"
+      { LEFTSQBAR }
+  | "|]"
+      { BARRIGHTSQ }
   | op_char_pref op_char_4* quote* as s
       { OPPREF s }
   | op_char_1234* op_char_1 op_char_1234* quote* as s
@@ -263,7 +269,12 @@ rule token = parse
   | op_char_4+ as s
       { OP4 s }
   | "\""
-      { STRING (Lexlib.string lexbuf) }
+      { let start_p = lexbuf.Lexing.lex_start_p in
+        let start_pos = lexbuf.Lexing.lex_start_pos in
+        let s = Lexlib.string lexbuf in
+        lexbuf.Lexing.lex_start_p <- start_p;
+        lexbuf.Lexing.lex_start_pos <- start_pos;
+        STRING s }
   | eof
       { EOF }
   | _ as c
@@ -312,6 +323,9 @@ rule token = parse
 
   let parse_term lb =
     build_parsing_function Parser.Incremental.term_eof lb
+
+  let parse_expr lb =
+    build_parsing_function Parser.Incremental.expr_eof lb
 
   let parse_decl lb = build_parsing_function Parser.Incremental.decl_eof lb
 

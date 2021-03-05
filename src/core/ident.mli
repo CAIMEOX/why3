@@ -100,7 +100,7 @@ val id_user : ?attrs:Sattr.t -> string -> Loc.position -> preid
 val id_attr : ident -> Sattr.t -> preid
 
 (** create a duplicate pre-ident *)
-val id_clone : ?attrs:Sattr.t -> ident -> preid
+val id_clone : ?loc:Loc.position -> ?attrs:Sattr.t -> ident -> preid
 
 (** create a derived pre-ident (inherit attributes and location) *)
 val id_derive : ?attrs:Sattr.t -> string -> ident -> preid
@@ -168,6 +168,7 @@ val id_unique_attr :
 
 val proxy_attr: attribute
 val useraxiom_attr: attribute
+val funlit: attribute
 
 (** {2 Attributes for handling counterexamples} *)
 

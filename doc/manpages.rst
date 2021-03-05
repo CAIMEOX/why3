@@ -69,7 +69,7 @@ particular, option :option:`--help` displays the usage and options.
 
 .. option:: --extra-config=<file>
 
-   Read additional configuration from the given file.
+   Read additional configuration from the given file. See :numref:`sec.whyconffile`.
 
 .. option:: --list-debug-flags
 
@@ -124,63 +124,97 @@ The ``config`` Command
 .. program:: why3 config
 
 Why3 must be configured to access external provers. Typically, this is
-done by running the :program:`why3 config` command. This must be done each time a
-new prover is installed.
+done by running :why3:tool:`why3 config detect`. This command must be run
+every time a new prover is installed.
 
-The provers that Why3 attempts to detect are described in the readable
+The provers known by Why3 are described in the
 configuration file :file:`provers-detection-data.conf` of the Why3 data
 directory (e.g., :file:`/usr/local/share/why3`). Advanced users may try to modify
 this file to add support for detection of other provers. (In that case,
 please consider submitting a new prover configuration on the bug
 tracking system.)
 
-The result of provers detection is stored in the user's configuration
-file (see :numref:`sec.whyconffile`). This file is also
-human-readable, and advanced users may modify it in order to experiment
-with different ways of calling provers, e.g., different versions of the same
-prover, or with different options.
-The :why3:tool:`config` command also detects the :index:`plugins <plugin>` installed in the Why3
-plugins directory (e.g., :file:`/usr/local/lib/why3/plugins`).
+The result of prover detection is stored in the user's configuration file
+(see :numref:`sec.whyconffile`). Only the version of the provers is
+stored; the actual configuration of the provers, shortcuts, strategies,
+and editors, are regenerated at each startup of a Why3. This
+configuration can be inspected with the command :why3:tool:`why3 config
+show`.
 
-If the user's configuration file is already present, :why3:tool:`config` will
-only reset unset variables to default value, but will not try to detect
-provers and plugins. Options :option:`--detect-provers` and
-:option:`--detect-plugins` can be used in that case.
-If a supported prover is installed under a name that is not
-automatically recognized by :why3:tool:`config`, the :option:`--add-prover` option
-can be used to add a specified binary to the configuration.
+If a supported prover is not automatically recognized by :why3:tool:`why3
+config detect`, the command :why3:tool:`why3 config add-prover` can be
+used to add it.
 
-Options
-~~~~~~~
+The available subcommands are as follows:
 
-.. option:: --detect-provers
+:why3:tool:`config add-prover`
+   Manually register a prover.
 
-   Force detection of provers, when the configuration file already exists.
+:why3:tool:`config detect`
+   Automatically detect installed provers.
 
-.. option:: --detect-plugins
+:why3:tool:`config list-supported-provers`
+   List the names of all supported provers.
 
-   Force detection of plugins, when the configuration file already exists.
+:why3:tool:`config show`
+   Show the expanded version of the configuration file.
 
-.. option:: --detect
+Only the first two commands modify the configuration file.
 
-   Imply both :option:`--detect-provers` and :option:`--detect-plugins`.
-   Also reset the loadpath.
+.. why3:tool:: config add-prover
 
-.. option:: --add-prover=<id>,<shortcut>,<file>
+Command ``add-prover``
+~~~~~~~~~~~~~~~~~~~~~~
 
-   Check the executable program ``<file>`` against the provers of family
-   ``<id>``, and register it as ``<shortcut>``.
+This commands adds a prover to the configuration. It is invoked as follows.
 
-   Example: to add an Alt-Ergo
-   executable :file:`/home/me/bin/alt-ergo-trunk`, one can type
+::
 
-   ::
+   why3 config add-prover <name> <file> [<shortcut>]
 
-      why3 config --add-prover=alt-ergo,new-ae,/home/me/bin/alt-ergo-trunk
+Argument *name* is the name of the prover, as listed by
+command :why3:tool:`why3 config list-supported-provers` and as found in
+file :file:`provers-detection-data.conf`.
 
-.. option:: --list-prover-families
+If the argument *shortcut* is present, it is used as the shortcut for
+invoking the prover.
 
-   List families of provers, as used by option :option:`--add-prover`.
+For example, to add an Alt-Ergo
+executable :file:`/home/me/bin/alt-ergo-trunk` with shortcut ``new-ae``,
+one can type
+
+::
+
+   why3 config add-prover Alt-Ergo /home/me/bin/alt-ergo-trunk new-ae
+
+Manually added provers are stored in the configuration file under
+``[manual_binary]`` sections as well as ``[detected_binary]`` ones.
+
+.. why3:tool:: config detect
+
+Command ``detect``
+~~~~~~~~~~~~~~~~~~
+
+This command automatically detects the installed provers that are
+supported by Why3. It also creates a configuration file if none exists.
+
+Automatically detected provers are stored in the configuration file under
+``[detected_binary]`` sections.
+
+.. why3:tool:: config list-supported-provers
+
+Command ``list-supported-provers``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This command lists the names of all supported provers, as used for
+command :why3:tool:`why3 config add-prover`.
+
+.. why3:tool:: config show
+
+Command ``show``
+~~~~~~~~~~~~~~~~
+
+This command shows the expanded version of the configuration file.
 
 .. why3:tool:: prove
 .. _sec.why3prove:
@@ -235,6 +269,10 @@ The :why3:tool:`prove` command executes the following steps:
    generated task and print the results. If option :option:`--driver` is
    given, print each generated task using the format specified in the
    selected driver.
+
+#. Derive a validated counterexample using runtime-assertion checking, if option
+   :option:`--check-ce` is given and the selected prover generated a
+   counterexample, .
 
 Prover Results
 ~~~~~~~~~~~~~~
@@ -295,16 +333,79 @@ Options
    explanations. The option can be used several times to specify
    several prefixes.
 
-Getting Potential Counterexamples
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. option:: --check-ce
 
-This feature is presented in details in :numref:`sec.idece`, which should
-be read first.
+   Validate the counterexample using runtime-assertion checking. Only applicable
+   when the prover selected by :option:`--prover` is configured to generate a
+   counterexample.
 
-Counterexamples are also displayed by the :why3:tool:`prove` command when
-one selects a prover with the ``counterexamples`` alternative. The
-output is currently done in a JSON syntax (this may change in the
-future).
+.. option:: --rac-prover=<p>
+
+   Use prover *p* for the runtime-assertion checking during the validation of
+   counterexamples, when term reduction is insufficient (which is always tried
+   first). The prover *p* is the name or shortcut of a prover, with optional,
+   comma-separated time limit and memory limit, e.g. ``cvc4,2,1000``.
+
+.. option:: --rac-try-negate
+
+   Try to decide the validity of an assertion by negating the assertion and the
+   prover answer (if any), when a prover is defined for RAC using
+   :option:`--rac-prover` but unable to decide the validity of the un-negated
+   assertion.
+
+Generating potential counterexamples
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When the selected prover has alternative `counterexample`, the prover is
+instructed to generate a model, and Why3 elaborates the model into a potential
+counterexample. The potential counterexample associates source locations and
+variables to values. The generation and display of potential counterexamples is
+presented in details in :numref:`sec.idece`.
+
+Generating validated counterexamples
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A validated counterexample can be requested using option :option:`--check-ce`.
+The validated counterexample is derived by executing the relevant function using
+runtime assertion checking (RAC) [#ce-split]_. The potential counterexample
+serves as an oracle for values that are not or cannot be computed in the RAC
+execution (e.g., arguments to the relevant function or ``any``-expressions).
+
+The validated counterexample is a trace of the RAC execution, with one of the
+following qualifications:
+
+*The program does not comply to the verification goal:*
+
+   The validated counterexample is the trace of an execution that resulted in
+   the violation of an assertion.
+
+*The contracts of some function or loop are underspecified:*
+
+   The validated counterexample is the trace of an abstract execution, which
+   resulted in the violation of an assertion. In an abstract execution, function
+   calls and loops are not executed. Their results and assignments are instead
+   chosen according to the contracts (function postcondition or loop invariants)
+   by picking them from the potential counterexample.
+
+*The program does not comply to the verification goal, or the contracts of some loop or function are too weak:*
+
+   Either of the above cases.
+
+*Sorry, we don't have a good counterexample for you :(*
+
+   The RAC execution did not violate any assertions. The execution trace does not
+   constitute a validated counterexample, and the potential counterexample is invalid, so
+   no counterexample is shown.
+
+*The counterexample model could not be verified:*
+
+   The validated counterexample could not be derived because RAC execution was incomplete.
+   The potential counterexample is instead shown with a warning.
+
+.. [#ce-split] The relevant function is generally only defined, when the
+   counterexample is not generated for the VC of the complete program, for
+   example by applying a split transformation using
+   ``--apply-transform=split_vc``.
 
 .. why3:tool:: ide
 .. _sec.ideref:
@@ -1392,26 +1493,75 @@ The ``execute`` Command
 
 .. program:: why3 execute
 
-Why3 can symbolically execute programs written using the WhyML language
-(extension :file:`.mlw`).
+Why3 can execute expressions in the context of a WhyML program (extension
+:file:`.mlw`).
 
 ::
 
-   why3 execute [options] file module.ident
+   why3 execute [options] <file> <expr>
 
-The first argument is the file where to read the code to execute. The
-second argument is a qualified identifier which denote a program
-function from that file. The latter function must have only `()` as
-argument.
 
-There are no specific options apart from the options common to all
-Why3 commands.
+`file` is a WhyML file, and `expr` is a WhyML expression. Using option
+``--use=<M>`` the definitions from module `M` are added to the context for
+executing `expr`. For example, the following command executes ``Mod1.f 42``
+defined in ``myfile.mlw``:
+
+::
+
+   why3 execute myfile.mlw --use=Mod1 'f 42'
 
 Upon completion of the execution, the value of the result is displayed
 on the standard input. Additionally, values of the global mutable
 variables modified by that function are displayed too.
 
 See more details and examples of use in :numref:`sec.execute`.
+
+Runtime assertion checking (RAC)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The execution can be instructed using option :option:`--rac` to check the
+validity of the program annotations that are encountered during the execution.
+This includes the validation of assertions, function contracts, and loop
+invariants [#no-function-invars]_.
+
+There are two strategies to check the validity of an annotation: First, the term
+is reduced using the Why3 transformation ``compute_in_goal``. The annotation is
+valid when the result of the reduction is `true` and invalid when the result is
+`false`. When the transformation cannot reduce the term to a trivial term, and
+when a RAC prover is given using option :option:`--rac-prover`, the prover is
+used to verify the term.
+
+When a program annotation is found to be wrong during the execution, the
+execution stops and reports the contradiction. Normally, the execution continues
+when an annotation cannot be checked (when the term can neither be reduced nor
+proven), but fails when option `--rac-fail-cannot-check` is given.
+
+Options
+~~~~~~~
+
+.. option:: --use=<Mod>
+
+   Add the definitions from `Mod` to the execution context.
+
+.. option:: --rac
+
+   Check the validity of program annotations encountered during the execution.
+
+.. option:: --rac-prover=<p>
+
+   Same option as for :why3:tool:`prove`.
+
+.. option:: --rac-try-negate
+
+   Same option as for :why3:tool:`prove`.
+
+.. option:: --rac-fail-cannot-reduce
+
+   Instruct the RAC execution to fail when an annotation cannot be checked.
+   Normally the execution continues normally when an annotation cannot be
+   checked.
+
+.. [#no-function-invars] RAC for function invariants aren't supported yet.
 
 .. why3:tool:: extract
 .. _sec.why3extract:
