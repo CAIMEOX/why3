@@ -300,7 +300,9 @@ and prpv fmt = function
   | ct -> fprintf fmt "(%a)" pcte ct
 
 type ctask =
-  { types : Sid.t;
+  { types_interp : Sid.t;
+    types : Sid.t;
+    sigma_interp : ctype Mid.t;
     sigma : ctype Mid.t;
     gamma_delta : (cterm * bool) Mid.t
   }
@@ -355,36 +357,36 @@ let find_ident s h cta =
       let s = asprintf "%s : Can't find ident %a in the task" s prhyp h in
       verif_failed s
 
-let ctask_empty =
-  { types = Sid.empty;
+let ctask_new types_interp sigma_interp =
+  { types_interp;
+    types = Sid.empty;
+    sigma_interp;
     sigma = Mid.empty;
     gamma_delta = Mid.empty }
 
 let ctask_union ct1 ct2 =
-  { types = Sid.union ct1.types ct2.types;
+  { ct1 with
+    types = Sid.union ct1.types ct2.types;
     sigma = Mid.set_union ct1.sigma ct2.sigma;
     gamma_delta = Mid.set_union ct1.gamma_delta ct2.gamma_delta }
 
 let lift_mid_cta f cta =
-  { types = cta.types;
-    sigma = cta.sigma;
+  { cta with
     gamma_delta = f (cta.gamma_delta) }
 
 (* Make sure to not add interpreted types to the abstract types *)
-let add_type interp_type i cta =
-  { types = if Sid.mem i interp_type
+let add_type i cta =
+  { cta with
+    types = if Sid.mem i cta.types_interp
             then cta.types
-            else Sid.add i cta.types;
-    sigma = cta.sigma;
-    gamma_delta = cta.gamma_delta }
+            else Sid.add i cta.types  }
 
 (* Make sure to not add interpreted variables to the signature *)
-let add_var interp_var i cty cta =
-  { types = cta.types;
-    sigma = if Mid.mem i interp_var
+let add_var i cty cta =
+  { cta with
+    sigma = if Mid.mem i cta.sigma_interp
             then cta.sigma
-            else Mid.add i cty cta.sigma;
-    gamma_delta = cta.gamma_delta }
+            else Mid.add i cty cta.sigma  }
 
 let remove i cta = lift_mid_cta (Mid.remove i) cta
 
@@ -398,7 +400,7 @@ let ctask_equal cta1 cta2 =
 
 (* Typing algorithm *)
 
-let infer_type interp_var cta t =
+let infer_type cta t =
   let rec infer_type sigma t = match t with
     | CTfvar v -> Mid.find v sigma
     | CTbvar _ -> assert false
@@ -422,50 +424,16 @@ let infer_type interp_var cta t =
         assert (cty_equal ty2 CTprop);
         CTprop
     | CTint _ -> ctint in
-  let sigma_interp = Mid.set_union cta.sigma interp_var in
+  let sigma_interp = Mid.set_union cta.sigma cta.sigma_interp in
   infer_type sigma_interp t
 
 
-let infers_into interp_type cta t ty =
-  try assert (cty_equal (infer_type interp_type cta t) ty)
+let infers_into cta t ty =
+  try assert (cty_equal (infer_type cta t) ty)
   with e -> eprintf "wrong type for %a@." pcte t;
             raise e
 
 (** We equip existing transformations with a certificate <certif> *)
 
 type 'certif ctransformation = (task list * 'certif) Trans.trans
-
-(** Env *)
-
-let interp_type_var env =
-  let interp_type = ref [] in
-  let interp_var = ref [] in
-
-  let _ =
-    let add ts = interp_type := ts.ts_name :: !interp_type in
-    List.iter add [ts_int; ts_real; ts_str] in
-
-  let _ =
-    let add (id, cty) = interp_var := (id, cty) :: !interp_var in
-    List.iter add [ id_true, ctbool;
-                    id_false, ctbool;
-                    id_eq, CTarrow (ctint, CTarrow (ctint, CTprop))];
-    try  let th = Env.read_theory env ["int"] "Int" in
-         let le_int = Theory.ns_find_ls th.Theory.th_export
-                        [Ident.op_infix "<="] in
-         let lt_int = Theory.ns_find_ls th.Theory.th_export
-                        [Ident.op_infix "<"] in
-         List.iter add [le_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop));
-                        lt_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop))]
-    with _ -> () in
-
-  let interp_type = Sid.of_list !interp_type in
-  let interp_var = Mid.of_list !interp_var in
-  interp_type, interp_var
-
-module type Envm = sig
-  val interp_type : Sid.t
-  val interp_var : ctype Mid.t
-end
-
 
