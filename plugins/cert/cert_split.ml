@@ -170,18 +170,18 @@ type 'a split_ret = {
 
 let print_ret_err { conj; cp; cn; disj; dn; dp; bwd; fwd; side; cpos; cneg } =
   Format.fprintf Format.err_formatter
-    "@[<h>\
-     conj  : @[%a@]@\n\
-     cp    : @[%a@]@\n\
-     cn    : @[%a@]@\n\
-     disj  : @[%a@]@\n\
-     dn    : @[%a@]@\n\
-     dp    : @[%a@]@\n\
-     bwd   : @[%a@]@\n\
-     fwd   : @[%a@]@\n\
-     side  : @[%a@]@\n\
-     cpos  : %b@\n\
-     cneg  : %b@\n@]@."
+    "@[<v>\
+     conj  : @[%a@]@ \
+     cp    : @[%a@]@ \
+     cn    : @[%a@]@ \
+     disj  : @[%a@]@ \
+     dn    : @[%a@]@ \
+     dp    : @[%a@]@ \
+     bwd   : @[%a@]@ \
+     fwd   : @[%a@]@ \
+     side  : @[%a@]@ \
+     cpos  : %b@ \
+     cneg  : %b@ @]@."
     (M.print_mon " /\\ ") conj
     prcertif cp
     prcertif cn

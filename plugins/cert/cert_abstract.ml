@@ -12,16 +12,11 @@ open Cert_syntax
 
 (** Abstracting a Why3 <task> into a <ctask> : extract only the logical core *)
 
-
 let abstract_quant = function
   | Tforall -> CTforall
   | Texists -> CTexists
 
-let rec abstract_otype = function
-  | None -> CTprop
-  | Some ty -> abstract_type ty
-
-and abstract_type { ty_node } =
+let rec abstract_type { ty_node } =
   match ty_node with
   | Tyvar v -> CTyvar v
   | Tyapp (ts, lts) ->
@@ -31,6 +26,10 @@ and abstract_type { ty_node } =
              | _ -> assert false in
            CTarrow (abstract_type l1, abstract_type l2)
       else CTyapp (ts, List.map abstract_type lts)
+
+let rec abstract_otype = function
+  | None -> CTprop
+  | Some ty -> abstract_type ty
 
 let type_lsymbol ls =
   List.fold_right (fun t acc -> CTarrow (abstract_type t, acc))
@@ -114,37 +113,36 @@ let rec abstract_task_acc acc = function
       abstract_task_acc new_acc task_prev
   | None -> acc
 
-(** Env *)
+(** The interpreted symbols are saved as part of the task *)
 
 let types_sigma_interp env =
-  match env with
-  | None -> Sid.empty, Mid.empty
-  | Some env ->
-      let interp_type = ref [] in
-      let interp_var = ref [] in
+  let interp_type = ref [] in
+  let interp_var = ref [] in
 
-      let _ =
-        let add ts = interp_type := ts.ts_name :: !interp_type in
-        List.iter add [ts_int; ts_real; ts_str] in
+  let _ =
+    let add ts = interp_type := ts.ts_name :: !interp_type in
+    List.iter add [ts_int; ts_real; ts_bool] in
 
-      let _ =
-        let add (id, cty) = interp_var := (id, cty) :: !interp_var in
-        List.iter add [ id_true, ctbool;
-                        id_false, ctbool;
-                        id_eq, CTarrow (ctint, CTarrow (ctint, CTprop))];
-        try  let th = Env.read_theory env ["int"] "Int" in
-             let le_int = Theory.ns_find_ls th.Theory.th_export
-                            [Ident.op_infix "<="] in
-             let lt_int = Theory.ns_find_ls th.Theory.th_export
-                            [Ident.op_infix "<"] in
-             List.iter add
-               [le_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop));
-                lt_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop))]
-        with _ -> () in
+  let _ =
+    let add (id, cty) = interp_var := (id, cty) :: !interp_var in
+    List.iter add [ id_true, ctbool;
+                    id_false, ctbool;
+                    id_eq, CTarrow (ctint, CTarrow (ctint, CTprop))];
 
-      let interp_type = Sid.of_list !interp_type in
-      let interp_var = Mid.of_list !interp_var in
-      interp_type, interp_var
+    try let env = Opt.get env in
+        let th = Env.read_theory env ["int"] "Int" in
+        let le_int = Theory.ns_find_ls th.Theory.th_export
+                       [Ident.op_infix "<="] in
+        let lt_int = Theory.ns_find_ls th.Theory.th_export
+                       [Ident.op_infix "<"] in
+        List.iter add
+          [le_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop));
+           lt_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop))]
+    with _ -> () in
+
+  let interp_type = Sid.of_list !interp_type in
+  let interp_var = Mid.of_list !interp_var in
+  interp_type, interp_var
 
 let abstract_task env =
   let types_interp, sigma_interp = types_sigma_interp env  in

@@ -6,10 +6,12 @@
 <path name=".."/><path name="test_debug.mlw"/>
 <theory name="Top">
  <goal name="G">
- <transf name="split_ccert" >
+ <transf name="left_ccert" >
   <goal name="G.0">
   </goal>
-  <goal name="G.1">
+ </transf>
+ <transf name="left_lcert" >
+  <goal name="G.0">
   </goal>
  </transf>
  </goal>

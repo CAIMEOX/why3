@@ -6,24 +6,24 @@ open Term (* only for binop *)
 open Cert_syntax
 open Cert_certificates
 
-
-(** This is the main verification function : <check_certif> replays the
-   certificate on a ctask *)
+(* To collect tasks with their names *)
 let union : ctask Mid.t -> ctask Mid.t -> ctask Mid.t =
   let merge_no_conflicts id cta1 cta2 =
     if ctask_equal cta1 cta2
     then Some cta1
     else (* Important : gives an error and not None *)
       let open Format in
-      eprintf "Conflict on ident : %a\n\
-               task 1 : %a\n\
-               task 2 : %a@."
+      eprintf "@[<v>Conflict on ident : %a@ \
+               task 1 : %a@ \
+               task 2 : %a@]@."
         prhyp id
         pcta cta1
         pcta cta2;
       verif_failed "Conflict of ident, see stderr" in
   Mid.union merge_no_conflicts
 
+(* This is the main verification function : <ccheck> replays the certificate on
+   a ctask *)
 let rec ccheck c cta =
   match c with
   | ELet _ | EConstruct _ | EDuplicate _
