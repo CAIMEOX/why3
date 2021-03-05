@@ -31,6 +31,9 @@
 (* goal G : a e *)
 
 
-predicate p (x : bool)
+use int.Int
+predicate a
+goal G : a \/ a
+(* predicate p (x : bool) *)
 
-goal inst_goal : p true -> exists x : bool. p x
+(* goal inst_goal : p true -> exists x : bool. p x *)

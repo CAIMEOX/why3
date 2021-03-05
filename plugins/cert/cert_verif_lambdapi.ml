@@ -6,9 +6,9 @@ open Cert_syntax
 open Cert_certificates
 
 (* We represent a ctask
-   x₁ : ty₁,.., xᵢ : tyᵢ | H₁ : A₁,.., Hⱼ : Aⱼ ⊢ G₁ : B₁, ..., Gₖ : Bₖ
+    ι₁ : n₁, .., ιₕ : nₕ | x₁ : ty₁,.., xᵢ : tyᵢ | H₁ : A₁,.., Hⱼ : Aⱼ ⊢ G₁ : B₁, ..., Gₖ : Bₖ
    by the formula
-   ∀ x₁ : ty₁, ... ∀ xᵢ: tyᵢ, A₁ → ... → Aⱼ → ¬B₁ → ... → ¬Bₖ → ⊥
+   ∀ ι₁, .. ∀ ιₕ, ∀ x₁ : ty₁, ... ∀ xᵢ: tyᵢ, A₁ → ... → Aⱼ → ¬B₁ → ... → ¬Bₖ → ⊥
    As an intermediate data structure we use lists to fix the order
  *)
 type ctask_simple =
