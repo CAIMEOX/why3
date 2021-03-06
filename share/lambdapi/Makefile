@@ -6,7 +6,7 @@ OBJ = $(SRC:.lp=.lpo)
 all: $(OBJ)
 
 install: clean all lambdapi.pkg
-	lambdapi install  lambdapi.pkg $(OBJ) $(SRC)
+	lambdapi install lambdapi.pkg $(OBJ) $(SRC)
 
 uninstall:
 	lambdapi uninstall lambdapi.pkg
