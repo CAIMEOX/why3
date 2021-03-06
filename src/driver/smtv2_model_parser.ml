@@ -186,12 +186,26 @@ module FromSexp = struct
     | List (Atom "=" :: _) -> ()
     | sexp -> error sexp "apply_eq"
 
+  let prover_name name =
+    if Strings.has_prefix "@" name then
+      let left = String.index name '_' + 1 in
+      let right = String.rindex name '_' in
+      let ty = String.sub name left (right - left) in
+      Some (try Strings.(remove_prefix "(" (remove_suffix ")" ty)) with _ -> ty)
+    else match String.split_on_char '!' name with
+      | [ty;_;_] -> Some ty
+      | _ -> None
+
+  let var name =
+    match prover_name name with
+    | Some ty -> Prover_var (ty, name)
+    | None -> Var name
+
   let rec term sexp =
     try Sval (value sexp) with _ ->
-    try Var (name sexp) with _ ->
+    try var (name sexp) with _ ->
     try Array (array sexp) with _ ->
     try ite sexp with _ ->
-    try apply_eq sexp; Sval (Unparsed "apply_eq") with _ ->
     try let_term sexp with _ ->
     try as_array sexp with _ ->
     try Apply (application sexp) with _ ->
@@ -203,7 +217,7 @@ module FromSexp = struct
     try Fraction (model_fraction sexp) with _ ->
     try Bitvector (model_bv sexp) with _ ->
     try Boolean (bool sexp) with _ ->
-    try ignore (boolean_expression sexp); Unparsed "boolean_expression" with _ ->
+    (* try ignore (boolean_expression sexp); Unparsed "boolean_expression" with _ -> *)
     try String (string sexp) with _ ->
     try Float (model_float sexp) with _ ->
       error sexp "value"
@@ -218,11 +232,8 @@ module FromSexp = struct
     | sexp -> error sexp "boolean_expression"
 
   and ite = function
-    | List [Atom "ite"; eq; t1; t2] ->
-        let t1 = term t1 and t2 = term t2 in
-        ( match pair_equal eq with
-          | Some (t1', t2') -> Ite (t1', t2', t1, t2)
-          | None -> Sval (Unparsed "ite") )
+    | List [Atom "ite"; t1; t2; t3] ->
+        Ite (term t1, term t2, term t3)
     | sexp -> error sexp "ite"
 
   and pair_equal = function
@@ -235,8 +246,11 @@ module FromSexp = struct
     | sexp -> error sexp "let"
 
   and let_term = function
-    | List [Atom "let"; ll; t] ->
-        substitute (list let_ ll) (term t)
+    | List [Atom "let"; List bs; t] ->
+        let aux = function
+          | List [Atom s; t] -> s, term t
+          | sexp -> error sexp "binding" in
+        Let (List.map aux bs, term t)
     | sexp -> error sexp "let_term"
 
   and as_array = function
@@ -265,9 +279,9 @@ module FromSexp = struct
 
   let decl = function
     | List [Atom "define-fun"; Atom n; al; iret; t] ->
-        ignore (ireturn_type iret);
+        let iret = ireturn_type iret in
         let al = list arg al and t = term t in
-        Some (n, Function (al, make_local al t))
+        Some (n, Function (al, iret, t))
     | _ -> None
 
   let model = function
@@ -314,7 +328,7 @@ let parse_sexps str =
   try
     Sexp.read_list lexbuf
   with Sexp.Error ->
-    let msg = Format.sprintf "Cannot parse as S-expression at character %d" 
+    let msg = Format.sprintf "Cannot parse as S-expression at character %d"
         (Lexing.lexeme_start lexbuf) in
     raise (Smtv2_model_parsing_error msg)
 
@@ -336,7 +350,11 @@ let parse pm input =
     let model_string = get_model_string input in
     let sexps = parse_sexps model_string in
     let defs = model_of_sexps sexps in
-    Collect_data_model.create_list pm defs
+    let mvs = Collect_data_model.create_list pm defs in
+    Mstr.values
+      (Mstr.mapi (fun name value ->
+           let attrs = Mstr.find_def Ident.Sattr.empty name pm.Printer.set_str in
+           Model_parser.create_model_element ~name ~value ~attrs) mvs)
   with Not_found -> []
 
 let () = Model_parser.register_model_parser "smtv2" parse
