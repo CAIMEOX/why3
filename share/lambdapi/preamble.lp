@@ -21,10 +21,10 @@ rule kEv (tkPi $x $y) ↪  Π (w : tEv $x), kEv ($y w);
 rule kEv (kkPi $x $y) ↪  Π (w : kEv $x), kEv ($y w);
 
 symbol ⇀ A B ≔  tkPi A (λ _, B);
-set notation ⇀ infix right 14;
+notation ⇀ infix right 14;
 
 symbol ⇁ A B ≔  ttPi A (λ _, B);
-set notation ⇁ infix right 14;
+notation ⇁ infix right 14;
 
 symbol ∀ ≔  ttPi;
 
@@ -33,20 +33,20 @@ symbol forall ≔  ktPi DType;
 symbol false ≔  forall (λ C, C);
 
 symbol ↝ A B ≔  ttPi A (λ _, B);
-set notation ↝ infix right 14;
+notation ↝ infix right 14;
 
 symbol true ≔  false ↝ false;
 
 symbol tt : tEv true ≔  λ x, x;
 
 symbol ¬ A ≔  A ↝ false;
-set notation ¬ prefix 20;
+notation ¬ prefix 20;
 
 symbol ∧ A B ≔  forall (λ C, (A ↝ B ↝ C) ↝ C);
-set notation ∧ infix right 18;
+notation ∧ infix right 18;
 
 symbol ∨ A B ≔  forall (λ C, (A ↝ C) ↝ (B ↝ C) ↝ C);
-set notation ∨ infix right 16;
+notation ∨ infix right 16;
 
 symbol ∃ T P ≔  forall (λ C, ttPi T (λ x, P x ↝ C) ↝  C);
 
@@ -57,7 +57,7 @@ symbol eq_fmla A B ≔  ktPi (kkPi DType (λ _, DType))
 		           (λ P, P A ↝ P B);
 
 symbol ⇔ A B ≔  (A ↝ B) ∧ (B ↝ A);
-set notation ⇔ infix right 14;
+notation ⇔ infix right 14;
 
 symbol iff_eq : Π (A : Type) (B : Type),
        	        tEv (A ⇔  B) →
@@ -90,8 +90,8 @@ symbol zero ≔  Z0;
 symbol one ≔  Zpos xH;
 symbol succ : tEv Z → tEv Z;
 
-set builtin "0"  ≔  zero;
-set builtin "+1" ≔  succ;
+builtin "0"  ≔  zero;
+builtin "+1" ≔  succ;
 
 
 symbol infixspeq ≔  eq Z;

@@ -130,14 +130,22 @@ let types_sigma_interp env =
                     id_eq, CTarrow (ctint, CTarrow (ctint, CTprop))];
 
     try let env = Opt.get env in
-        let th = Env.read_theory env ["int"] "Int" in
-        let le_int = Theory.ns_find_ls th.Theory.th_export
-                       [Ident.op_infix "<="] in
-        let lt_int = Theory.ns_find_ls th.Theory.th_export
-                       [Ident.op_infix "<"] in
+        let th_int = Env.read_theory env ["int"] "Int" in
+        let le_int = ns_find_ls th_int.th_export [op_infix "<="] in
+        let ge_int = ns_find_ls th_int.th_export [op_infix ">="] in
+        let lt_int = ns_find_ls th_int.th_export [op_infix "<"] in
+        let gt_int = ns_find_ls th_int.th_export [op_infix ">"] in
+        let pl_int = ns_find_ls th_int.th_export [op_infix "+"] in
+        let mn_int = ns_find_ls th_int.th_export [op_infix "-"] in
+
         List.iter add
-          [le_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop));
-           lt_int.ls_name, CTarrow (ctint, CTarrow (ctint, CTprop))]
+          [le_int.ls_name, type_lsymbol le_int;
+           ge_int.ls_name, type_lsymbol ge_int;
+           lt_int.ls_name, type_lsymbol lt_int;
+           gt_int.ls_name, type_lsymbol gt_int;
+           pl_int.ls_name, type_lsymbol pl_int;
+           mn_int.ls_name, type_lsymbol mn_int;
+          ]
     with _ -> () in
 
   let interp_type = Sid.of_list !interp_type in
