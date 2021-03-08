@@ -224,9 +224,9 @@ let induction x bound env =
   (* Loading of needed symbols from int theory *)
   let th = Env.read_theory env ["int"] "Int" in
   let le_int = Theory.ns_find_ls th.Theory.th_export
-    [Ident.op_infix "<="] in
+                 [Ident.op_infix "<="] in
   let lt_int = Theory.ns_find_ls th.Theory.th_export
-    [Ident.op_infix "<"] in
+                 [Ident.op_infix "<"] in
 
   (* Symbol associated to term x *)
   let lsx =
@@ -236,71 +236,61 @@ let induction x bound env =
   in
 
   (* Transformation used for the init case *)
-  let init_trans = Trans.decl (fun d -> match d.d_node with
-    | Dprop (Pgoal, pr, t) ->
-        let nt = Term.t_app_infer le_int [x; bound] in
-        let d = create_goal ~expl:base_case_expl pr t in
-        let pr_init =
-          create_prop_decl Paxiom (Decl.create_prsymbol (gen_ident "Init")) nt in
-        [pr_init; d]
-    | _ -> [d]) None in
+  let init_trans =
+    Trans.decl_acc None Opt.update (fun d id ->
+        match d.d_node with
+        | Dprop (Pgoal, pr, t) ->
+            let nt = Term.t_app_infer le_int [x; bound] in
+            let d = create_goal ~expl:base_case_expl pr t in
+            let pr_init = Decl.create_prsymbol (gen_ident "Init") in
+            let decl_init = create_prop_decl Paxiom pr_init nt in
+            [decl_init; d], Some pr_init
+        | _ -> [d], None) in
 
   (* Transformation used for the recursive case *)
   let rec_trans =
     let x_is_passed = ref false in
     let delta' = ref [] in
-    Trans.decl (fun d -> match d.d_node with
-    | Dparam ls when (Term.ls_equal lsx ls) ->
-        (x_is_passed := true; [d])
-    | Dprop (Pgoal, pr, t) ->
-        if not (!x_is_passed) then
-          raise (Arg_trans "induction")
-        else
-          let t_delta' =
-            revert_chosen_decls_list (Sls.add lsx Sls.empty) !delta' d t in
-          let n = Term.create_vsymbol (Ident.id_fresh "n") Ty.ty_int in
-          (* t_delta' = forall n, n < x -> t_delta'[x <- n] *)
-          let t_delta' =
-            t_forall_close [n] []
-              (t_implies (Term.t_app_infer lt_int [t_var n; x]) (t_replace x (t_var n) t_delta'))
-          in
-
-          (* x_gt_bound = bound < x *)
-          let x_gt_bound_t = t_app_infer lt_int [bound; x] in
-          let x_gt_bound =
-            create_prop_decl Paxiom (Decl.create_prsymbol (gen_ident "Init")) x_gt_bound_t in
-          let rec_pr = create_prsymbol (gen_ident "Hrec") in
-          let hrec = create_prop_decl Paxiom rec_pr t_delta' in
-          let d = create_goal ~expl:rec_case_expl pr t in
-          [x_gt_bound; hrec; d]
-    | Dprop (_p, _pr, _t) ->
-        if !x_is_passed then
-          begin
-            delta' := d :: !delta';
-            (* d [x <- x] *)
+    Trans.decl (fun d ->
+        match d.d_node with
+        | Dparam ls ->
+            if !x_is_passed then delta' :=  d::!delta';
+            if Term.ls_equal lsx ls then x_is_passed := true;
             [d]
-          end
-        else
-          [d]
-    | Dind _ | Dlogic _ | Dtype _ | Ddata _ ->
-      if !x_is_passed then
-        raise (Arg_trans "induction Dlogic")
-      (* TODO we need to add Dlogic and Dind here. The problem is that we cannot
-         easily put them into the recursive hypothesis. So, for now, we do not
-         allow them. If x does not occur in the Dlogic/Dind, a workaround is to
-         use the "sort" tactic.
-      *)
-      else
-        [d]
-    | Dparam _ls ->
-      if !x_is_passed then
-        begin
-          delta' := d :: !delta';
-          [d]
-        end
-      else
-        [d]
-    ) None in
-  let trans = Trans.par [init_trans; rec_trans] in
-  Trans.store (fun task -> Trans.apply trans task, nc)
+        | Dprop (Pgoal, pr, t) ->
+            if not (!x_is_passed) then raise (Arg_trans "induction")
+            else
+              let t_delta' =
+                revert_chosen_decls_list (Sls.add lsx Sls.empty) !delta' d t in
+              let n = Term.create_vsymbol (Ident.id_fresh "n") Ty.ty_int in
+              (* t_delta' = forall n, n < x -> t_delta'[x <- n] *)
+              let t_delta' =
+                t_forall_close [n] []
+                  (t_implies (Term.t_app_infer lt_int [t_var n; x])
+                     (t_replace x (t_var n) t_delta')) in
+              (* x_gt_bound = bound < x *)
+              let x_gt_bound_t = t_app_infer lt_int [bound; x] in
+              let pr_init = Decl.create_prsymbol (gen_ident "Init") in
+              let x_gt_bound = create_prop_decl Paxiom pr_init x_gt_bound_t in
+              let pr_rec = create_prsymbol (gen_ident "Hrec") in
+              let hrec = create_prop_decl Paxiom pr_rec t_delta' in
+              let d = create_goal ~expl:rec_case_expl pr t in
+              [x_gt_bound; hrec; d]
+        | Dprop (_p, _pr, _t) ->
+            if !x_is_passed then delta' := d :: !delta';
+            [d]
+        | Dind _ | Dlogic _ | Dtype _ | Ddata _ ->
+            (* TODO we need to add Dlogic and Dind here. The problem is that we
+               cannot easily put them into the recursive hypothesis. So, for
+               now, we do not allow them. If x does not occur in the
+               Dlogic/Dind, a workaround is to use the "sort" tactic.  *)
+            if !x_is_passed
+            then raise (Arg_trans "induction Dlogic")
+            else [d]
+      ) None in
+
+  Trans.store (fun task ->
+      let ti, _ = init_trans task in
+      let tr = Trans.apply rec_trans task in
+      [ti; tr], nc)
 
