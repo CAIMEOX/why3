@@ -209,6 +209,16 @@ let revert_chosen_decls_list s (l: decl list) (g: decl) (t: term) =
   let s = collect_lsymbol s g in
   fst (List.fold_left revert_chosen_decls (t, s) l)
 
+type ind_acc = {
+    x_is_passed : bool;
+    delta' : decl list;
+    g : prsymbol option;
+    hi1 : prsymbol option;
+    hi2 : prsymbol option;
+    hr : prsymbol option;
+    x : term option
+  }
+
 let induction x bound env =
   (* Default bound is 0 if not given *)
   let bound =
@@ -235,33 +245,42 @@ let induction x bound env =
     | _ -> raise (Arg_trans "induction")
   in
 
+  let acc_init = {
+      delta' = [];
+      x_is_passed = false;
+      g = None;
+      hi1 = None;
+      hi2 = None;
+      hr = None;
+      x = Some x } in
+
   (* Transformation used for the init case *)
   let init_trans =
-    Trans.decl_acc None Cert_transformations.update_opt (fun d id ->
+    Trans.decl_acc acc_init (fun _ acc -> acc) (fun d acc ->
         match d.d_node with
         | Dprop (Pgoal, pr, t) ->
             let nt = Term.t_app_infer le_int [x; bound] in
             let d = create_goal ~expl:base_case_expl pr t in
             let pr_init = Decl.create_prsymbol (gen_ident "Init") in
             let decl_init = create_prop_decl Paxiom pr_init nt in
-            [decl_init; d], Some pr_init
-        | _ -> [d], None) in
+            [decl_init; d], {acc with hi1 = Some pr_init}
+        | _ -> [d], acc) in
 
   (* Transformation used for the recursive case *)
-  let rec_trans =
-    let x_is_passed = ref false in
-    let delta' = ref [] in
-    Trans.decl (fun d ->
+  let rec_trans acc =
+    Trans.decl_acc acc (fun _ acc -> acc) (fun d acc ->
         match d.d_node with
         | Dparam ls ->
-            if !x_is_passed then delta' :=  d::!delta';
-            if Term.ls_equal lsx ls then x_is_passed := true;
-            [d]
+            [d], { acc with
+                   x_is_passed = acc.x_is_passed || Term.ls_equal lsx ls;
+                   delta' = if acc.x_is_passed
+                            then d :: acc.delta'
+                            else acc.delta' }
         | Dprop (Pgoal, pr, t) ->
-            if not (!x_is_passed) then raise (Arg_trans "induction")
+            if not (acc.x_is_passed) then raise (Arg_trans "induction")
             else
               let t_delta' =
-                revert_chosen_decls_list (Sls.add lsx Sls.empty) !delta' d t in
+                revert_chosen_decls_list (Sls.add lsx Sls.empty) acc.delta' d t in
               let n = Term.create_vsymbol (Ident.id_fresh "n") Ty.ty_int in
               (* t_delta' = forall n, n < x -> t_delta'[x <- n] *)
               let t_delta' =
@@ -275,22 +294,30 @@ let induction x bound env =
               let pr_rec = create_prsymbol (gen_ident "Hrec") in
               let hrec = create_prop_decl Paxiom pr_rec t_delta' in
               let d = create_goal ~expl:rec_case_expl pr t in
-              [x_gt_bound; hrec; d]
-        | Dprop (_p, _pr, _t) ->
-            if !x_is_passed then delta' := d :: !delta';
-            [d]
+              [x_gt_bound; hrec; d], { acc with g = Some pr;
+                                       hi2 = Some pr_init;
+                                       hr = Some pr_rec }
+
+        | Dprop (_, _, _) ->
+            [d], { acc with delta' = if acc.x_is_passed then d :: acc.delta'
+                                     else acc.delta' }
         | Dind _ | Dlogic _ | Dtype _ | Ddata _ ->
             (* TODO we need to add Dlogic and Dind here. The problem is that we
                cannot easily put them into the recursive hypothesis. So, for
                now, we do not allow them. If x does not occur in the
                Dlogic/Dind, a workaround is to use the "sort" tactic.  *)
-            if !x_is_passed
+            if acc.x_is_passed
             then raise (Arg_trans "induction Dlogic")
-            else [d]
-      ) None in
+            else [d], acc
+      )  in
 
   Trans.store (fun task ->
-      let ti, _ = init_trans task in
-      let tr = Trans.apply rec_trans task in
-      [ti; tr], nc)
+      let ti, acc = init_trans task in
+      let tr, acc = rec_trans acc task in
+      let open Opt in
+      let g = get acc.g and hi1 = get acc.hi1 and hr = get acc.hr and
+          hi2 = get acc.hi2 and x = get acc.x in
+      let c = lambda two (fun j1 j2 ->
+                  Induction (g, hi1, hi2, hr, x, bound, Hole j1, Hole j2)) in
+      [ti; tr], c)
 

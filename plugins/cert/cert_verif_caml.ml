@@ -127,7 +127,7 @@ let rec ccheck c cta =
       assert (ct_equal t (instantiate_safe cta ctxt a));
       let cta =  add i2 (instantiate ctxt b, pos) cta in
       ccheck c cta
-  | EInduction (g, hi, hr, idi, a, ctxt, c1, c2) ->
+  | EInduction (g, hi1, hi2, hr, idi, a, ctxt, c1, c2) ->
       let le = CTfvar (cta.get_ident le_str) in
       let gt = CTfvar (cta.get_ident gt_str) in
       let lt = CTfvar (cta.get_ident lt_str) in
@@ -146,10 +146,10 @@ let rec ccheck c cta =
       infers_into cta a ctint;
       assert (ct_equal t (instantiate_safe cta ctxt i));
       assert (not (has_ident_cta idi cta) && pos);
-      let cta1 = add hi (CTapp (CTapp (le, i), a), false) cta in
+      let cta1 = add hi1 (CTapp (CTapp (le, i), a), false) cta in
       let idn = id_register (id_fresh "ctxt_var") in
       let n = CTfvar idn in
-      let cta2 = add hi (CTapp (CTapp (gt, i), a), false) cta
+      let cta2 = add hi2 (CTapp (CTapp (gt, i), a), false) cta
                  |> add hr (CTquant (CTforall, ctint, ct_close idn (
                             CTbinop (Timplies, CTapp (CTapp (lt, n), i),
                                      instantiate ctxt n))), false) in
