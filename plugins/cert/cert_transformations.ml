@@ -100,10 +100,6 @@ let update_tg_c (tg, c1) co =
   | _, Some c2 -> assert (is_hole c1); Nowhere, c2
   | _, None -> tg, c1
 
-let update_opt o1 o2 = match o1 with
-  | Some _ -> o1
-  | None -> o2
-
 (* To debug *)
 let tprint_tg target =
   Trans.decl_acc (target, hole ()) update_tg_c (fun d (tg, _) ->
