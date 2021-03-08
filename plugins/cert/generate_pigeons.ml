@@ -31,7 +31,7 @@ let print_bool fmt b =
 let print_pb fmt n =
   for i = 1 to n+1 do
     for j = 1 to n do
-      fprintf fmt "val constant p_%d_%d : bool@ " i j
+      fprintf fmt "predicate p_%d_%d@ " i j
     done
   done;
   fprintf fmt "@ goal pigeons : not (@ %a@ )"
