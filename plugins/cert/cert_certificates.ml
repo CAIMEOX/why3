@@ -670,7 +670,7 @@ let elaborate (init_ct : ctask) c =
         let v = CTfvar id in
         let cty = infer_type cta a in
         let ctxt = CTquant (CTlambda, cty, ct_close id (replace_cterm a v t)) in
-        let cta = add i2 (instantiate ctxt b, pos) cta in
+        let cta = add i2 (replace_cterm a b t, pos) cta in
         ERewrite (pos, is_eq, cty, a, b, ctxt, i1, i2, elab cta c)
     | Induction (g, hi, hr, idi, a, c1, c2) ->
         let le = CTfvar (cta.get_ident le_str) in

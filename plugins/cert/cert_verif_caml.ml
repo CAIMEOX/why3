@@ -119,51 +119,41 @@ let rec ccheck c cta =
       | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
       end
   | ERewrite (_, is_eq, _, _, _, ctxt, i1, i2, c) ->
-      (* use ctxt to prove correctness *)
-      let rewrite_ctask (cta : ctask) i a b ctxt =
-        let ta = instantiate ctxt a in
-        let tb = instantiate ctxt b in
-        let rewrite_decl j (t, pos) =
-          if id_equal j i && ct_equal t ta
-          then tb, pos
-          else t, pos in
-        lift_mid_cta (Mid.mapi rewrite_decl) cta in
-
-      let t, pos = find_ident "inst_quant" i1 cta in
-      let a, b = match t, pos, is_eq with
-        | CTbinop (Tiff, a, b), false, false -> a, b
-        | CTapp (CTapp (f, a), b), false, true when ct_equal f eq -> a, b
+      let a, b = match find_ident "rew" i1 cta, is_eq with
+        | (CTbinop (Tiff, a, b), false), false -> a, b
+        | (CTapp (CTapp (f, a), b), false), true when ct_equal f eq -> a, b
         | _ -> verif_failed "Non-rewritable proposition" in
-      let cta = rewrite_ctask cta i2 a b ctxt in
+      let t, pos = find_ident "rew" i2 cta in
+      assert (ct_equal t (instantiate_safe cta ctxt a));
+      let cta =  add i2 (instantiate ctxt b, pos) cta in
       ccheck c cta
-    | EInduction (g, hi, hr, idi, a, ctxt, c1, c2) ->
-        let le = CTfvar (cta.get_ident le_str) in
-        let gt = CTfvar (cta.get_ident gt_str) in
-        let lt = CTfvar (cta.get_ident lt_str) in
-        let t, pos = find_ident "induction" g cta in
-        let i = CTfvar idi in
-        let has_ident_cta i cta =
-          let rec found_ident_term i t = match t with
-            | CTfvar i' when id_equal i i' -> raise Found
-            | _ -> ct_map (found_ident_term i) t in
-          try Mid.map (fun (t, _) -> found_ident_term i t)
-                (remove g cta).gamma_delta |> ignore; false
-          with Found -> true in
-        infers_into cta i ctint; (* check that we preserve typing *)
-        infers_into cta a ctint;
-        (* check that we are in the case of application*)
-        assert (ct_equal t (instantiate ctxt i) && pos);
-        assert (not (has_ident_cta idi cta));
-        let cta1 = add hi (CTapp (CTapp (le, i), a), false) cta in
-        let idn = id_register (id_fresh "ctxt_var") in
-        let n = CTfvar idn in
-        let cta2 = add hi (CTapp (CTapp (gt, i), a), false) cta
-                   |> add hr (CTquant (CTforall, ctint, ct_close idn (
-                              CTbinop (Timplies, CTapp (CTapp (lt, n), i),
-                              instantiate ctxt n))), false) in
-        (* <instantiate ctxt n> instead of <replace_cterm i n t>
-           is necessary to prove correctness *)
-        union (ccheck c1 cta1) (ccheck c2 cta2)
+  | EInduction (g, hi, hr, idi, a, ctxt, c1, c2) ->
+      let le = CTfvar (cta.get_ident le_str) in
+      let gt = CTfvar (cta.get_ident gt_str) in
+      let lt = CTfvar (cta.get_ident lt_str) in
+      let t, pos = find_ident "induction" g cta in
+      let i = CTfvar idi in
+      let has_ident_cta i cta =
+        let rec found_ident_term i t = match t with
+          | CTfvar i' when id_equal i i' -> raise Found
+          | _ -> ct_map (found_ident_term i) t in
+        try Mid.map (fun (t, _) -> found_ident_term i t)
+              (remove g cta).gamma_delta |> ignore; false
+        with Found -> true in
+      (* check that we are in the case of application and that we preserve
+         typing *)
+      infers_into cta i ctint;
+      infers_into cta a ctint;
+      assert (ct_equal t (instantiate_safe cta ctxt i));
+      assert (not (has_ident_cta idi cta) && pos);
+      let cta1 = add hi (CTapp (CTapp (le, i), a), false) cta in
+      let idn = id_register (id_fresh "ctxt_var") in
+      let n = CTfvar idn in
+      let cta2 = add hi (CTapp (CTapp (gt, i), a), false) cta
+                 |> add hr (CTquant (CTforall, ctint, ct_close idn (
+                            CTbinop (Timplies, CTapp (CTapp (lt, n), i),
+                                     instantiate ctxt n))), false) in
+      union (ccheck c1 cta1) (ccheck c2 cta2)
 
 let checker_caml (vs, certif) init_ct res_ct =
   try let map_cert = ccheck certif init_ct in
