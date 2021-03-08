@@ -18,12 +18,11 @@ let cert_dbg = Some eprcertif, None
 let cta_dbg = None, Some eplcta
 let all_dbg = Some eprcertif, Some eplcta
 
-(** Create a certified transformation from a transformation with a certificate *)
-
 type 'certif debug =
   ('certif -> unit) option *
   (ctask -> ctask list -> unit) option
 
+(** Get a certified transformation from a transformation with a certificate *)
 
 let checker_ctrans
       ?env
@@ -56,8 +55,10 @@ let checker_ctrans
   res_t
 
 
-let cchecker ?env trans = Trans.store (checker_ctrans ?env no_dbg checker_caml trans)
-let lchecker ?env trans = Trans.store (checker_ctrans ?env no_dbg checker_lambdapi trans)
+let cchecker ?env trans =
+  Trans.store (checker_ctrans ?env no_dbg checker_caml trans)
+let lchecker ?env trans =
+  Trans.store (checker_ctrans ?env no_dbg checker_lambdapi trans)
 
 let induction_c x bound env = cchecker ~env:env (induction x bound env)
 
@@ -130,10 +131,9 @@ let register_caml : unit =
     "induction_ccert"
     (Tterm (Topt ("from", Tterm Tenvtrans_l))) induction_c;
 
-  wrap_and_register ~desc:"print given term to debug"
-    "print_ccert" (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
+  wrap_and_register ~desc:"print given term to debug" "print_ccert"
+    (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
     print_c;
-
 
   wrap_and_register ~desc:"A OCaml certified version of transformation assert"
     "assert_ccert" (Tformula Ttrans_l) assert_c;
@@ -142,56 +142,63 @@ let register_caml : unit =
     ~desc:"A OCaml certified version of coq tactic [assumption]";
 
   register_transform_l "blast_ccert" blast_c
-    ~desc:"A OCaml certified transformation that decomposes structurally logical formulas";
+    ~desc:"A OCaml certified transformation that decomposes structurally \
+           logical formulas";
 
-  wrap_and_register ~desc:"A OCaml certified version of transformation case"
-    "case_ccert" (Tformula Ttrans_l) case_c;
+  wrap_and_register "case_ccert" (Tformula Ttrans_l) case_c
+    ~desc:"A OCaml certified version of transformation case";
 
-  wrap_and_register ~desc:"A OCaml certified version of (simplified) coq tactic [clear]"
-    "clear_ccert" (Tprlist Ttrans_l) clear_c;
+  wrap_and_register  "clear_ccert" (Tprlist Ttrans_l) clear_c
+    ~desc:"A OCaml certified version of (simplified) coq tactic [clear]";
+
 
   register_transform_l "contradict_ccert" contradict_c
-    ~desc:"A OCaml certified transformation that closes some contradictory goals";
+    ~desc:"A OCaml certified transformation that closes some contradictory \
+           goals";
 
-  wrap_and_register ~desc:"A OCaml certified transformation to destruct a logical constructor"
-    "destruct_all_ccert" (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
-    destruct_all_c;
+  wrap_and_register "destruct_all_ccert"
+    (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
+    destruct_all_c
+    ~desc:"A OCaml certified transformation to destruct a logical constructor";
 
   register_transform_l "exfalso_ccert" exfalso_c
     ~desc:"A OCaml certified version of coq tactic [exfalso]";
 
-  wrap_and_register ~desc:"A OCaml certified version of transformation instantiate"
-    "instantiate_ccert" (Tterm (Topt ("in", Tprsymbol Ttrans_l)))
-    instantiate_c;
+  wrap_and_register "instantiate_ccert"
+    (Tterm (Topt ("in", Tprsymbol Ttrans_l))) instantiate_c
+    ~desc:"A OCaml certified version of transformation instantiate";
 
-  wrap_and_register ~desc:"A OCaml certified version of (simplified) coq tactic [intro]"
-    "intro_ccert" (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
-    intro_c;
+  wrap_and_register "intro_ccert"
+    (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
+    intro_c
+    ~desc:"A OCaml certified version of (simplified) coq tactic [intro]";
 
   register_transform_l "intros_ccert" intros_c
     ~desc:"A OCaml certified version of coq tactic [intros]";
 
-  wrap_and_register ~desc:"A OCaml certified version of coq tactic [left]"
-    "left_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) left_c;
+  wrap_and_register "left_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) left_c
+    ~desc:"A OCaml certified version of coq tactic [left]";
 
-  (* wrap_and_register ~desc:"A OCaml certified version of (simplified) coq tactic [pose]"
-   *   "pose_ccert" (Tstring (Tformula Ttrans_l)) pose_c; *)
+  (* wrap_and_register "pose_ccert" (Tstring (Tformula Ttrans_l)) pose_c
+   *   ~desc:"A OCaml certified version of (simplified) coq tactic [pose]"; *)
 
-  wrap_and_register ~desc:"A OCaml certified transformation to rename an hypothesis"
-    "rename_ccert" (Tprsymbol (Ttrans_l)) rename_c;
+  wrap_and_register "rename_ccert" (Tprsymbol (Ttrans_l)) rename_c
+    ~desc:"A OCaml certified transformation to rename an hypothesis";
 
-  wrap_and_register ~desc:"A OCaml certified transformation to generalize a variable"
-    "revert_ccert" (Tlsymbol (Ttrans_l)) revert_c;
+  wrap_and_register "revert_ccert" (Tlsymbol (Ttrans_l)) revert_c
+    ~desc:"A OCaml certified transformation to generalize a variable";
 
-  wrap_and_register ~desc:"A OCaml certified version of transformation rewrite"
-    "rewrite_ccert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Topt ("with", Ttermlist (Ttrans_l)))))))) rewrite_c;
+  wrap_and_register "rewrite_ccert"
+    (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol
+    (Topt ("with", Ttermlist (Ttrans_l)))))))) rewrite_c
+    ~desc:"A OCaml certified version of transformation rewrite";
 
-  wrap_and_register ~desc:"A OCaml certified version of coq tactic [right]"
-    "right_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) right_c;
+  wrap_and_register"right_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) right_c
+    ~desc:"A OCaml certified version of coq tactic [right]";
 
-  wrap_and_register ~desc:"A OCaml certified version of (simplified) coq tactic [split]"
-    "split_ccert" (Toptbool ("any", (Toptbool ("all", ((Topt ("in", Tprsymbol (Ttrans_l))))))))
-    split_c;
+  wrap_and_register "split_ccert" (Toptbool ("any", (Toptbool ("all",
+    Topt ("in", Tprsymbol Ttrans_l))))) split_c
+    ~desc:"A OCaml certified version of (simplified) coq tactic [split]";
 
   register_transform_l "split_all_full_ccert" split_all_full_c
     ~desc:"The OCaml certified version of split_all_full";
@@ -211,9 +218,9 @@ let register_caml : unit =
   register_transform_l "split_premise_right_ccert" split_premise_right_c
     ~desc:"The OCaml certified version of split_premise_right";
 
-  wrap_and_register ~desc:"A OCaml certified transformation that negates \
-                           and swaps an hypothesis from the context to the goal"
-    "swap_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) swap_c;
+  wrap_and_register "swap_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) swap_c
+    ~desc:"A OCaml certified transformation that negates and swaps an \
+           hypothesis from the context to the goal";
 
   register_transform_l "trivial_ccert" trivial_c
     ~desc:"A OCaml certified version of (simplified) coq tactic [trivial]"
@@ -223,70 +230,68 @@ let register_lambdapi : unit =
   let open Args_wrapper in
   let open Trans in
 
-  wrap_and_register ~desc:"A Lambdapi certified version of transformation assert"
-    "assert_lcert" (Tformula Ttrans_l)
-    assert_l;
+  wrap_and_register "assert_lcert" (Tformula Ttrans_l) assert_l
+    ~desc:"A Lambdapi certified version of transformation assert";
 
   register_transform_l "assumption_lcert" assumption_l
     ~desc:"A Lambdapi certified version of coq tactic [assumption]";
 
   register_transform_l "blast_lcert" blast_l
-    ~desc:"A Lambdapi certified transformation that decomposes structurally logical formulas";
+    ~desc:"A Lambdapi certified transformation that decomposes structurally \
+           logical formulas";
 
-  wrap_and_register ~desc:"A Lambdapi certified version of transformation case"
-    "case_lcert" (Tformula Ttrans_l)
-    case_l;
+  wrap_and_register "case_lcert" (Tformula Ttrans_l) case_l
+    ~desc:"A Lambdapi certified version of transformation case";
 
-  wrap_and_register ~desc:"A Lambdapi certified version of (simplified) coq tactic [clear]"
-    "clear_lcert" (Tprlist Ttrans_l)
-    clear_l;
+  wrap_and_register "clear_lcert" (Tprlist Ttrans_l) clear_l
+    ~desc:"A Lambdapi certified version of (simplified) coq tactic [clear]";
 
   register_transform_l "contradict_lcert" contradict_l
-    ~desc:"A Lambdapi certified transformation that closes some contradictory goals";
+    ~desc:"A Lambdapi certified transformation that closes some contradictory \
+           goals";
 
-  wrap_and_register ~desc:"A Lambdapi certified transformation to destruct a logical constructor"
-    "destruct_all_lcert" (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
-    destruct_all_l;
+  wrap_and_register "destruct_all_lcert"
+    (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
+    destruct_all_l ~desc:"A Lambdapi certified transformation to destruct a \
+                          logical constructor";
 
   register_transform_l "exfalso_lcert" exfalso_l
     ~desc:"A Lambdapi certified version of coq tactic [exfalso]";
 
-  wrap_and_register ~desc:"A Lambdapi certified version of transformation instantiate"
-    "instantiate_lcert" (Tterm (Topt ("in", Tprsymbol Ttrans_l)))
-    instantiate_l;
+  wrap_and_register "instantiate_lcert"
+    (Tterm (Topt ("in", Tprsymbol Ttrans_l))) instantiate_l
+    ~desc:"A Lambdapi certified version of transformation instantiate";
 
-  wrap_and_register ~desc:"A Lambdapi certified version of (simplified) coq tactic [intro]"
-    "intro_lcert" (Toptbool ("any", (Toptbool ("all", ((Topt ("in", Tprsymbol (Ttrans_l))))))))
-    intro_l;
+  wrap_and_register "intro_lcert" (Toptbool ("any", (Toptbool ("all",
+    Topt ("in", Tprsymbol Ttrans_l))))) intro_l
+    ~desc:"A Lambdapi certified version of (simplified) coq tactic [intro]";
 
   register_transform_l "intros_lcert" intros_l
     ~desc:"A Lambdapi certified version of coq tactic [intros]";
 
-  wrap_and_register ~desc:"A Lambdapi certified version of coq tactic [left]"
-    "left_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
-    left_l;
+  wrap_and_register "left_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+    left_l  ~desc:"A Lambdapi certified version of coq tactic [left]";
 
-  (* wrap_and_register ~desc:"A Lambdapi certified version of (simplified) coq tactic [pose]"
-   *   "pose_lcert" (Tstring (Tformula Ttrans_l))
-   *   pose_l; *)
+  (* wrap_and_register "pose_lcert" (Tstring (Tformula Ttrans_l)) pose_l
+   *  ~desc:"A Lambdapi certified version of (simplified) coq tactic [pose]"; *)
 
-  wrap_and_register ~desc:"A Lambdapi certified transformation to rename an hypothesis"
-    "rename_lcert" (Tprsymbol (Ttrans_l)) rename_l;
+  wrap_and_register "rename_lcert" (Tprsymbol (Ttrans_l)) rename_l
+    ~desc:"A Lambdapi certified transformation to rename an hypothesis";
 
-  wrap_and_register ~desc:"A Lambdapi certified transformation to generalize a variable"
-    "revert_lcert" (Tlsymbol (Ttrans_l))
-    revert_l;
+  wrap_and_register "revert_lcert" (Tlsymbol (Ttrans_l)) revert_l
+    ~desc:"A Lambdapi certified transformation to generalize a variable";
 
-  wrap_and_register ~desc:"A Lambdapi certified version of transformation rewrite"
-    "rewrite_lcert" (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Topt ("with", Ttermlist (Ttrans_l)))))))) rewrite_l;
+  wrap_and_register "rewrite_lcert" (Toptbool ("<-", (Tprsymbol (
+    Topt ("in", Tprsymbol (Topt ("with", Ttermlist (Ttrans_l)))))))) rewrite_l
+    ~desc:"A Lambdapi certified version of transformation rewrite";
 
-  wrap_and_register ~desc:"A Lambdapi certified version of coq tactic [right]"
-    "right_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
-    right_l;
+  wrap_and_register "right_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+    right_l ~desc:"A Lambdapi certified version of coq tactic [right]";
 
-  wrap_and_register ~desc:"A Lambdapi certified version of (simplified) coq tactic [split]"
-    "split_lcert" (Toptbool ("any", (Toptbool ("all", ((Topt ("in", Tprsymbol (Ttrans_l))))))))
-    split_l;
+  wrap_and_register "split_lcert"
+    (Toptbool ("any", (Toptbool ("all", Topt ("in", Tprsymbol Ttrans_l)))))
+    split_l
+    ~desc:"A Lambdapi certified version of (simplified) coq tactic [split]";
 
   register_transform_l "split_all_full_lcert" split_all_full_l
     ~desc:"The Lambdapi certified version of split_all_full";
@@ -306,10 +311,9 @@ let register_lambdapi : unit =
   register_transform_l "split_premise_right_lcert" split_premise_right_l
     ~desc:"The Lambdapi certified version of split_premise_right";
 
-  wrap_and_register ~desc:"A OCaml certified transformation that negates \
-                           and swaps an hypothesis from the context to the goal"
-    "swap_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
-    swap_l;
+  wrap_and_register "swap_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
+    swap_l ~desc:"A OCaml certified transformation that negates and swaps an \
+                  hypothesis from the context to the goal";
 
   register_transform_l "trivial_lcert" trivial_l
     ~desc:"A Lambdapi certified version of (simplified) coq tactic [trivial]"

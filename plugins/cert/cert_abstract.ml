@@ -75,13 +75,13 @@ and abstract_term_rec bv_lvl lvl t =
   | Tnot t -> CTnot (abstract t)
   | Tconst (Constant.ConstInt i) -> CTint i.Number.il_int
   | Tconst _ ->
-      let s = asprintf "Cert_abstract.abstract_term Tconst : %a"
+      let s = asprintf "Does not handle Tconst yet : %a"
                 Pretty.print_term t in
       invalid_arg s
-  | Tif _ -> invalid_arg "Cert_abstract.abstract_term Tif"
-  | Tlet _ -> invalid_arg "Cert_abstract.abstract_term Tlet"
-  | Tcase _ -> invalid_arg "Cert_abstract.abstract_term Tcase"
-  | Teps _ -> invalid_arg "Cert_abstract.abstract_term Teps"
+  | Tif _ -> invalid_arg "Does not handle Tif yet"
+  | Tlet _ -> invalid_arg "Does not handle Tlet yet"
+  | Tcase _ -> invalid_arg "Does not handle Tcase yet"
+  | Teps _ -> invalid_arg "Does not handle Teps yet"
 
 let abstract_decl_acc acc decl =
   match decl.d_node with
