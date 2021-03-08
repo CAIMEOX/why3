@@ -101,14 +101,13 @@ type ('i, 't) cert =
      c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
   (* Rewrite (i₁, i₂, c) ⇓ (Γ, H : t₁ = t₂, i₁ : ctxt[t₁] ⊢ Δ) ≜
      c ⇓ (Γ, H : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
-  | Induction of 'i * 'i * 'i * 'i * 't * ('i, 't) cert * ('i, 't) cert
-(* Induction (G, Hᵢ, Hᵣ, i, t, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[i]) ≜
-   c₁ ⇓ (Γ, H : i ≤ a ⊢ Δ, G : ctxt[i])
-   and c₂ ⇓ (Γ, H : i > a, Hᵢ: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[i])
+  | Induction of 'i * 'i * 'i * 'i * 't * 't * ('i, 't) cert * ('i, 't) cert
+(* Induction (G, Hi₁, Hi₂, Hr, x, a, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
+   c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
+   and c₂ ⇓ (Γ, Hi₂ : i > a, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
    and i does not appear in Γ or Δ *)
-(* In the induction and rewrite rules ctxt stands for the context obtained by
-   taking the formula contained in i₂ and replacing each occurrence of t₁ by a
-   hole. *)
+(* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
+   stands for this context where the holes have been replaced with t *)
 
 let eqrefl i = Trivial i
 (* eqrefl i ⇓ (Γ ⊢ Δ, i : t = t) stands *)
@@ -286,15 +285,13 @@ type ('i, 't) ecert =
   (* ERewrite (false, false, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
-  | EInduction of 'i * 'i * 'i * 'i * 't * 't * ('i, 't) ecert * ('i, 't) ecert
-(* EInduction (G, Hᵢ, Hᵣ, i, t, ctxt, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[i]) ≜
-   c₁ ⇓ (Γ, H : i ≤ a ⊢ Δ, G : ctxt[i])
-   and c₂ ⇓ (Γ, H : i > a, Hᵢ: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[i])
+  | EInduction of 'i * 'i * 'i * 'i * 'i * 't * 't * ('i, 't) ecert * ('i, 't) ecert
+(* EInduction (G, Hi₁, Hi₂, Hr, x, a, ctxt, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
+   c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
+   and c₂ ⇓ (Γ, Hi₂ : i > a, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
    and i does not appear in Γ or Δ *)
-
-(* In the induction and rewrite rules ctxt stands for the context obtained by
-   taking the formula contained in i₂ and replacing each occurrence of t₁ by a
-   hole. *)
+(* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
+   stands for this context where the holes have been replaced with t *)
 
 
 type heavy_ecert = ident list * (ident, cterm) ecert
@@ -342,9 +339,9 @@ and prcit : type i t. (formatter -> i -> unit) ->
   | InstQuant (i, j, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)"
                                 pri i pri j prt t prc c
   | Rewrite (i, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" pri i pri h prc c
-  | Induction (i1, i2, i3, n, t, c1, c2) ->
-      fprintf fmt "Induction (%a, %a, %a, %a, %a,@ %a,@ %a)"
-        pri i1 pri i2 pri i3 pri n prt t prc c1 prc c2
+  | Induction (i1, i2, i3, i4, x, a, c1, c2) ->
+      fprintf fmt "Induction (%a, %a, %a, %a, %a, %a,@ %a,@ %a)"
+        pri i1 pri i2 pri i3 pri i4 prt x prt a prc c1 prc c2
 
 and prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
 and prcertif fmt (v, c) = fprintf fmt "@[<v>[%a],@ @[%a@]@]"
@@ -382,8 +379,8 @@ let propagate_cert fc fi ft = function
   | IntroQuant (i, y, c) -> IntroQuant (fi i, y, fc c)
   | InstQuant (i, j, t, c) -> InstQuant (fi i, fi j, ft t, fc c)
   | Rewrite (i, h, c) -> Rewrite (fi i, fi h, fc c)
-  | Induction (i1, i2, i3, n, t, c1, c2) ->
-      Induction (fi i1, fi i2, fi i3, fi n, ft t, fc c1, fc c2)
+  | Induction (i1, i2, i3, i4, n, t, c1, c2) ->
+      Induction (fi i1, fi i2, fi i3, fi i4, ft n, ft t, fc c1, fc c2)
 
 let rec fill map = function
   | Hole x -> Mid.find x map
@@ -458,8 +455,8 @@ let propagate_ecert fc fi ft = function
       EInstQuant (pos, ft p, fi i, fi j, ft t, fc c)
   | ERewrite (pos, is_eq, cty, a, b, ctxt, i, h, c) ->
       ERewrite (pos, is_eq, cty, ft a, ft b, ft ctxt, fi i, fi h, fc c)
-  | EInduction (i1, i2, i3, n, t, ctxt, c1, c2) ->
-      EInduction (fi i1, fi i2, fi i3, fi n, ft t, ft ctxt, fc c1, fc c2)
+  | EInduction (i1, i2, i3, i4, n, t, ctxt, c1, c2) ->
+      EInduction (fi i1, fi i2, fi i3, fi i4, fi n, ft t, ft ctxt, fc c1, fc c2)
 
 
 (* Separates hypotheses and goals *)
@@ -672,21 +669,24 @@ let elaborate (init_ct : ctask) c =
         let ctxt = CTquant (CTlambda, cty, ct_close id (replace_cterm a v t)) in
         let cta = add i2 (replace_cterm a b t, pos) cta in
         ERewrite (pos, is_eq, cty, a, b, ctxt, i1, i2, elab cta c)
-    | Induction (g, hi, hr, idi, a, c1, c2) ->
+    | Induction (g, hi1, hi2, hr, x, a, c1, c2) ->
         let le = CTfvar (cta.get_ident le_str) in
         let gt = CTfvar (cta.get_ident gt_str) in
         let lt = CTfvar (cta.get_ident lt_str) in
         let t, _ = find_ident "induction" g cta in
-        let i = CTfvar idi in
-        let ctxt = CTquant (CTlambda, ctint, ct_close idi t) in
-        let cta1 = add hi (CTapp (CTapp (le, i), a), false) cta in
+        let i_x = match x with
+          | CTfvar i_x -> i_x
+          | _ -> raise Elaboration_failed in
+        let cx = CTfvar i_x in
+        let ctxt = CTquant (CTlambda, ctint, ct_close i_x t) in
+        let cta1 = add hi1 (CTapp (CTapp (le, cx), a), false) cta in
         let idn = id_register (id_fresh "ctxt_var") in
         let n = CTfvar idn in
-        let cta2 = add hi (CTapp (CTapp (gt, i), a), false) cta
+        let cta2 = add hi2 (CTapp (CTapp (gt, cx), a), false) cta
                    |> add hr (CTquant (CTforall, ctint, ct_close idn (
-                              CTbinop (Timplies, CTapp (CTapp (lt, n), i),
-                                       replace_cterm i n t))), false) in
-        EInduction (g, hi, hr, idi, a, ctxt, elab cta1 c1, elab cta2 c2)
+                              CTbinop (Timplies, CTapp (CTapp (lt, n), a),
+                                       replace_cterm x n t))), false) in
+        EInduction (g, hi1, hi2, hr, i_x, a, ctxt, elab cta1 c1, elab cta2 c2)
   in
   elab init_ct c
 
