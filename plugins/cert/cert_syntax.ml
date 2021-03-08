@@ -233,10 +233,6 @@ let rec replace_cterm tl tr t =
   then tr
   else ct_map (replace_cterm tl tr) t
 
-let instantiate f a = match f with
-  | CTquant (CTlambda, _, f) -> ct_open f a
-  | _ -> assert false
-
 (** Pretty printing of terms (compatible with lambdapi) *)
 
 let rec pcte fmt = function
@@ -423,6 +419,11 @@ let ctask_equal cta1 cta2 =
       ct_equal t1 t2 && p1 = p2 in
     Mid.equal cterm_pos_equal cta1.gamma_delta cta2.gamma_delta
 
+let instantiate f a =
+  match f with
+  | CTquant (CTlambda, ty', f) -> ct_open f a
+  | _ -> assert false
+
 (* Typing algorithm *)
 
 let infer_type cta t =
@@ -456,6 +457,8 @@ let infer_type cta t =
   let sigma_interp = Mid.set_union cta.sigma cta.sigma_interp in
   infer_type sigma_interp t
 
+let well_typed cta t =
+  ignore (infer_type cta t)
 
 let infers_into cta t ty =
   try assert (cty_equal (infer_type cta t) ty)
@@ -463,7 +466,17 @@ let infers_into cta t ty =
                      expected: %a@]@." pcte t prty ty;
             raise e
 
+let instantiate_safe cta f a =
+  well_typed cta f;
+  let ty = infer_type cta a in
+  match f with
+  | CTquant (CTlambda, ty', f) when cty_equal ty ty' ->
+      ct_open f a
+  | _ -> assert false
+
+
 (** We instrument existing transformations to produce a certificate *)
 
 type 'certif ctransformation = (task list * 'certif) Trans.trans
+
 
