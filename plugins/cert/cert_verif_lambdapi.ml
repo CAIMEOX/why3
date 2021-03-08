@@ -6,9 +6,15 @@ open Cert_syntax
 open Cert_certificates
 
 (* We represent a ctask
-    ι₁ : n₁, .., ιₕ : nₕ | x₁ : ty₁,.., xᵢ : tyᵢ | H₁ : A₁,.., Hⱼ : Aⱼ ⊢ G₁ : B₁, ..., Gₖ : Bₖ
+    ι₁ : n₁, .., ιₕ : nₕ  |
+    x₁ : ty₁,.., xᵢ : tyᵢ |
+    H₁ : A₁,.., Hⱼ : Aⱼ   ⊢
+    G₁ : B₁, ..., Gₖ : Bₖ
    by the formula
-   ∀ ι₁, .. ∀ ιₕ, ∀ x₁ : ty₁, ... ∀ xᵢ: tyᵢ, A₁ → ... → Aⱼ → ¬B₁ → ... → ¬Bₖ → ⊥
+   ∀ ι₁, .. ∀ ιₕ,
+   ∀ x₁ : ty₁, ... ∀ xᵢ: tyᵢ,
+   A₁ → ... → Aⱼ →
+   ¬B₁ → ... → ¬Bₖ → ⊥
    As an intermediate data structure we use lists to fix the order
  *)
 type ctask_simple =
@@ -223,6 +229,7 @@ let checker_lambdapi certif init res =
     (* let lp_folder = Filename.(concat Config.datadir "lambdapi") in *)
     let quiet = ">/dev/null 2>&1" in
     (* let _ = Sys.command ("make install -C  " ^ lp_folder ^ quiet) in *)
-    let ret = Sys.command ("lambdapi check --map-dir check:/tmp/ " ^ check_cert ^ quiet) in
+    let ret = Sys.command ("lambdapi check --map-dir check:/tmp/ "
+                           ^ check_cert ^ quiet) in
     if ret <> 0 then verif_failed "Not verified by Lambdapi"
-  with e -> raise (Trans.TransFailure ("Cert_verif_lambdapi.checker_lambdapi", e))
+  with e -> raise (Trans.TransFailure ("checker_lambdapi", e))

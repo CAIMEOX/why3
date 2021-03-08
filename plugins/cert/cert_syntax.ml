@@ -343,8 +343,11 @@ let prpos fmt = function
   | true  -> fprintf fmt "GOAL| "
   | false -> fprintf fmt "HYP | "
 
+let prprop fmt h (cte, pos) =
+  fprintf fmt "%a%a : %a@ " prpos pos prhyp h pcte cte
+
 let prgd fmt mid =
-  Mid.iter (fun h (cte, pos) -> fprintf fmt "%a%a : %a@ " prpos pos prhyp h pcte cte) mid
+  Mid.iter (prprop fmt) mid
 
 let pcta fmt cta =
   fprintf fmt "@[<v>TYPES INTERP:%a@ \
