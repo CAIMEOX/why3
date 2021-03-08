@@ -27,7 +27,7 @@ let rec abstract_type { ty_node } =
            CTarrow (abstract_type l1, abstract_type l2)
       else CTyapp (ts, List.map abstract_type lts)
 
-let rec abstract_otype = function
+let abstract_otype = function
   | None -> CTprop
   | Some ty -> abstract_type ty
 
@@ -118,6 +118,7 @@ let rec abstract_task_acc acc = function
 let types_sigma_interp env =
   let interp_type = ref [] in
   let interp_var = ref [] in
+  let str_id = ref [] in
 
   let _ =
     let add ts = interp_type := ts.ts_name :: !interp_type in
@@ -131,28 +132,34 @@ let types_sigma_interp env =
 
     try let env = Opt.get env in
         let th_int = Env.read_theory env ["int"] "Int" in
-        let le_int = ns_find_ls th_int.th_export [op_infix "<="] in
-        let ge_int = ns_find_ls th_int.th_export [op_infix ">="] in
-        let lt_int = ns_find_ls th_int.th_export [op_infix "<"] in
-        let gt_int = ns_find_ls th_int.th_export [op_infix ">"] in
-        let pl_int = ns_find_ls th_int.th_export [op_infix "+"] in
-        let mn_int = ns_find_ls th_int.th_export [op_infix "-"] in
+        let le = ns_find_ls th_int.th_export [le_str] in
+        let ge = ns_find_ls th_int.th_export [ge_str] in
+        let lt = ns_find_ls th_int.th_export [lt_str] in
+        let gt = ns_find_ls th_int.th_export [gt_str] in
+        let pl = ns_find_ls th_int.th_export [pl_str] in
+        let mn = ns_find_ls th_int.th_export [mn_str] in
 
+        let add (str, id, cty) = add (id, cty);
+                                 str_id := [str, id] in
         List.iter add
-          [le_int.ls_name, type_lsymbol le_int;
-           ge_int.ls_name, type_lsymbol ge_int;
-           lt_int.ls_name, type_lsymbol lt_int;
-           gt_int.ls_name, type_lsymbol gt_int;
-           pl_int.ls_name, type_lsymbol pl_int;
-           mn_int.ls_name, type_lsymbol mn_int;
+          [le_str, le.ls_name, type_lsymbol le;
+           ge_str, ge.ls_name, type_lsymbol ge;
+           lt_str, lt.ls_name, type_lsymbol lt;
+           gt_str, gt.ls_name, type_lsymbol gt;
+           pl_str, pl.ls_name, type_lsymbol pl;
+           mn_str, mn.ls_name, type_lsymbol mn;
           ]
     with _ -> () in
 
   let interp_type = Sid.of_list !interp_type in
   let interp_var = Mid.of_list !interp_var in
-  interp_type, interp_var
+  let get_ident =
+    let open Wstdlib in let open Mstr in
+    let tbl = of_list !str_id in
+    fun str -> find str tbl in
+  get_ident, interp_type, interp_var
 
 let abstract_task env =
-  let types_interp, sigma_interp = types_sigma_interp env  in
+  let get_ident, types_interp, sigma_interp = types_sigma_interp env  in
   fun task ->
-  abstract_task_acc (ctask_new types_interp sigma_interp) task
+  abstract_task_acc (ctask_new get_ident types_interp sigma_interp) task
