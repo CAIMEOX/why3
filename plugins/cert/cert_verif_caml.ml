@@ -133,7 +133,20 @@ let rec ccheck c cta =
         | _ -> verif_failed "Non-rewritable proposition" in
       let cta = rewrite_ctask cta i2 a b ctxt in
       ccheck c cta
-  | EInduction _ -> assert false
+    | EInduction (g, hi, hr, idi, a, ctxt, c1, c2) ->
+        let le = CTfvar (cta.get_ident le_str) in
+        let gt = CTfvar (cta.get_ident gt_str) in
+        let lt = CTfvar (cta.get_ident lt_str) in
+        let t, _ = find_ident "induction" g cta in
+        let i = CTfvar idi in
+        let cta1 = add hi (CTapp (CTapp (le, i), a), false) cta in
+        let idn = id_register (id_fresh "ctxt_var") in
+        let n = CTfvar idn in
+        let cta2 = add hi (CTapp (CTapp (gt, i), a), false) cta
+                   |> add hr (CTquant (CTforall, ctint, ct_close idn (
+                              CTbinop (Timplies, CTapp (CTapp (lt, n), i),
+                              replace_cterm i n t))), false) in
+        union (ccheck c1 cta1) (ccheck c2 cta2)
 
 let checker_caml (vs, certif) init_ct res_ct =
   try let map_cert = ccheck certif init_ct in
@@ -145,4 +158,4 @@ let checker_caml (vs, certif) init_ct res_ct =
           print_ctasks "/tmp/from_cert.log" res_ct';
           verif_failed "Replaying certif gives different result, log available"
         end
-  with e -> raise (Trans.TransFailure ("Cert_verif_caml.checker_caml", e))
+  with e -> raise (Trans.TransFailure ("checker_caml", e))
