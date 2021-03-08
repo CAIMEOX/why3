@@ -635,10 +635,14 @@ let elaborate (init_ct : ctask) c =
         let id = id_register (id_fresh "ctxt_var") in
         let v = CTfvar id in
         let ctxt = CTquant (CTlambda, ctint, ct_close id (replace_cterm (CTfvar i) v t)) in
-        let todo _ = assert false in
-        let cta1 = add hi (todo "i leq a", false) cta in
-        let cta2 = add hi (todo "i gt a", false) cta
-                   |> add hr (todo "forall n : int. n < i -> replace_cterm i n t") in
+        let le = CTfvar (cta.get_ident le_str) in
+        let gt = CTfvar (cta.get_ident gt_str) in
+        let lt = CTfvar (cta.get_ident lt_str) in
+        let cta1 = add hi (CTapp (CTapp (le, CTfvar i), a), false) cta in
+        let cta2 = add hi (CTapp (CTapp (gt, CTfvar i), a), false) cta
+                   |> add hr (CTquant (CTforall, ctint, ct_close id (
+                              CTbinop (Timplies, CTapp (CTapp (lt, v), CTfvar i),
+                              replace_cterm (CTfvar i) v t))), false) in
         EInduction (g, hi, hr, i, a, ctxt, elab cta1 c1, elab cta2 c2)
   in
   elab init_ct c

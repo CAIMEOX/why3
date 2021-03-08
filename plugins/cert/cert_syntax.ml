@@ -25,7 +25,7 @@ type ctype =
   | CTarrow of ctype * ctype (* arrow type *)
 
 let ctint = CTyapp (ts_int, [])
-let ctint = CTyapp (ts_real, [])
+let ctreal = CTyapp (ts_real, [])
 let ctbool = CTyapp (ts_bool, [])
 
 (** Utility functions on ctype *)
@@ -111,6 +111,13 @@ let id_eq = ps_equ.ls_name
 let eq = CTfvar id_eq
 let id_true = fs_bool_true.ls_name
 let id_false = fs_bool_false.ls_name
+
+let le_str = op_infix "<="
+let ge_str = op_infix ">="
+let lt_str = op_infix "<"
+let gt_str = op_infix ">"
+let pl_str = op_infix "+"
+let mn_str = op_infix "-"
 
 (** Utility functions on cterm *)
 
@@ -312,7 +319,8 @@ and prpv fmt = function
    We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ>
 *)
 type ctask =
-  { types_interp : Sid.t;
+  { get_ident : string -> ident;
+    types_interp : Sid.t;
     types : Sid.t;
     sigma_interp : ctype Mid.t;
     sigma : ctype Mid.t;
@@ -356,7 +364,7 @@ let plcta =
 let eplcta cta lcta =
   eprintf "@[<v>INIT :@ \
            %a==========@ \
-           RES :@
+           RES :@ \
            %a@]@."
     pcta cta
     plcta lcta
@@ -376,10 +384,11 @@ let find_ident s h cta =
       let s = asprintf "%s : Can't find ident %a in the task" s prhyp h in
       verif_failed s
 
-let ctask_new types_interp sigma_interp =
-  { types_interp = types_interp;
+let ctask_new get_ident types_interp sigma_interp =
+  { get_ident;
+    types_interp;
     types = Sid.empty;
-    sigma_interp = sigma_interp;
+    sigma_interp;
     sigma = Mid.empty;
     gamma_delta = Mid.empty }
 

@@ -102,6 +102,7 @@ why3.conf
 /share/Makefile.config
 /share/drivers
 /share/stdlib
+/share/lambdapi/preamble.lpo
 
 # /src/
 /src/config.sh
