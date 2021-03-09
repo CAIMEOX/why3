@@ -104,7 +104,7 @@ type ('i, 't) cert =
   | Induction of 'i * 'i * 'i * 'i * 't * 't * ('i, 't) cert * ('i, 't) cert
 (* Induction (G, Hi₁, Hi₂, Hr, x, a, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
    c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
-   and c₂ ⇓ (Γ, Hi₂ : i > a, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
+   and c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
    and i does not appear in Γ or Δ *)
 (* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
    stands for this context where the holes have been replaced with t *)
@@ -288,7 +288,7 @@ type ('i, 't) ecert =
   | EInduction of 'i * 'i * 'i * 'i * 'i * 't * 't * ('i, 't) ecert * ('i, 't) ecert
 (* EInduction (G, Hi₁, Hi₂, Hr, x, a, ctxt, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
    c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
-   and c₂ ⇓ (Γ, Hi₂ : i > a, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
+   and c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
    and i does not appear in Γ or Δ *)
 (* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
    stands for this context where the holes have been replaced with t *)
@@ -671,7 +671,6 @@ let elaborate (init_ct : ctask) c =
         ERewrite (pos, is_eq, cty, a, b, ctxt, i1, i2, elab cta c)
     | Induction (g, hi1, hi2, hr, x, a, c1, c2) ->
         let le = CTfvar (cta.get_ident le_str) in
-        let gt = CTfvar (cta.get_ident gt_str) in
         let lt = CTfvar (cta.get_ident lt_str) in
         let t, _ = find_ident "induction" g cta in
         let i_x = match x with
@@ -682,7 +681,7 @@ let elaborate (init_ct : ctask) c =
         let cta1 = add hi1 (CTapp (CTapp (le, cx), a), false) cta in
         let idn = id_register (id_fresh "ctxt_var") in
         let n = CTfvar idn in
-        let cta2 = add hi2 (CTapp (CTapp (gt, cx), a), false) cta
+        let cta2 = add hi2 (CTapp (CTapp (lt, a), cx), false) cta
                    |> add hr (CTquant (CTforall, ctint, ct_close idn (
                               CTbinop (Timplies, CTapp (CTapp (lt, n), a),
                                        replace_cterm x n t))), false) in
