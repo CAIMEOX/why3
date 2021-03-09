@@ -127,12 +127,11 @@ let rec ccheck c cta =
       assert (ct_equal t (instantiate_safe cta ctxt a));
       let cta =  add i2 (instantiate ctxt b, pos) cta in
       ccheck c cta
-  | EInduction (g, hi1, hi2, hr, idi, a, ctxt, c1, c2) ->
+  | EInduction (g, hi1, hi2, hr, ix, a, ctxt, c1, c2) ->
       let le = CTfvar (cta.get_ident le_str) in
-      let gt = CTfvar (cta.get_ident gt_str) in
       let lt = CTfvar (cta.get_ident lt_str) in
       let t, pos = find_ident "induction" g cta in
-      let i = CTfvar idi in
+      let x = CTfvar ix in
       let has_ident_cta i cta =
         let rec found_ident_term i t = match t with
           | CTfvar i' when id_equal i i' -> raise Found
@@ -142,16 +141,16 @@ let rec ccheck c cta =
         with Found -> true in
       (* check that we are in the case of application and that we preserve
          typing *)
-      infers_into cta i ctint;
+      infers_into cta x ctint;
       infers_into cta a ctint;
-      assert (ct_equal t (instantiate_safe cta ctxt i));
-      assert (not (has_ident_cta idi cta) && pos);
-      let cta1 = add hi1 (CTapp (CTapp (le, i), a), false) cta in
+      assert (ct_equal t (instantiate_safe cta ctxt x));
+      assert (not (has_ident_cta ix cta) && pos);
+      let cta1 = add hi1 (CTapp (CTapp (le, x), a), false) cta in
       let idn = id_register (id_fresh "ctxt_var") in
       let n = CTfvar idn in
-      let cta2 = add hi2 (CTapp (CTapp (gt, i), a), false) cta
+      let cta2 = add hi2 (CTapp (CTapp (lt, a), x), false) cta
                  |> add hr (CTquant (CTforall, ctint, ct_close idn (
-                            CTbinop (Timplies, CTapp (CTapp (lt, n), i),
+                            CTbinop (Timplies, CTapp (CTapp (lt, n), x),
                                      instantiate ctxt n))), false) in
       union (ccheck c1 cta1) (ccheck c2 cta2)
 

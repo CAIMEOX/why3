@@ -20,7 +20,7 @@ let rec_case_expl = "recursive case"
 
    From task [delta, x: int, delta'(x) |- G(x)], variable x and term bound, builds the tasks:
    [delta, x: int, x <= bound, delta'(x) |- G(x)] and
-   [delta, x: int, x > bound, (forall n, n < x -> delta'(n) -> G(n)), delta'(x) |- G(x)]
+   [delta, x: int, bound < x, (forall n, n < x -> delta'(n) -> G(n)), delta'(x) |- G(x)]
 
    x cannot occur in delta as it can only appear after its declaration (by
    construction of the task). Also, G is not part of delta'.
@@ -210,13 +210,12 @@ let revert_chosen_decls_list s (l: decl list) (g: decl) (t: term) =
   fst (List.fold_left revert_chosen_decls (t, s) l)
 
 type ind_acc = {
-    x_is_passed : bool;
+    x_passed : bool;
     delta' : decl list;
     g : prsymbol option;
     hi1 : prsymbol option;
     hi2 : prsymbol option;
     hr : prsymbol option;
-    x : term option
   }
 
 let induction x bound env =
@@ -247,12 +246,11 @@ let induction x bound env =
 
   let acc_init = {
       delta' = [];
-      x_is_passed = false;
+      x_passed = false;
       g = None;
       hi1 = None;
       hi2 = None;
-      hr = None;
-      x = Some x } in
+      hr = None } in
 
   (* Transformation used for the init case *)
   let init_trans =
@@ -271,13 +269,12 @@ let induction x bound env =
     Trans.decl_acc acc (fun _ acc -> acc) (fun d acc ->
         match d.d_node with
         | Dparam ls ->
-            [d], { acc with
-                   x_is_passed = acc.x_is_passed || Term.ls_equal lsx ls;
-                   delta' = if acc.x_is_passed
-                            then d :: acc.delta'
-                            else acc.delta' }
+            [d], { acc with x_passed = acc.x_passed || Term.ls_equal lsx ls;
+                            delta' = if acc.x_passed
+                                     then d :: acc.delta'
+                                     else acc.delta' }
         | Dprop (Pgoal, pr, t) ->
-            if not (acc.x_is_passed) then raise (Arg_trans "induction")
+            if not (acc.x_passed) then raise (Arg_trans "induction")
             else
               let t_delta' =
                 revert_chosen_decls_list (Sls.add lsx Sls.empty) acc.delta' d t in
@@ -295,18 +292,17 @@ let induction x bound env =
               let hrec = create_prop_decl Paxiom pr_rec t_delta' in
               let d = create_goal ~expl:rec_case_expl pr t in
               [x_gt_bound; hrec; d], { acc with g = Some pr;
-                                       hi2 = Some pr_init;
-                                       hr = Some pr_rec }
-
+                                                hi2 = Some pr_init;
+                                                hr = Some pr_rec }
         | Dprop (_, _, _) ->
-            [d], { acc with delta' = if acc.x_is_passed then d :: acc.delta'
+            [d], { acc with delta' = if acc.x_passed then d :: acc.delta'
                                      else acc.delta' }
         | Dind _ | Dlogic _ | Dtype _ | Ddata _ ->
             (* TODO we need to add Dlogic and Dind here. The problem is that we
                cannot easily put them into the recursive hypothesis. So, for
                now, we do not allow them. If x does not occur in the
                Dlogic/Dind, a workaround is to use the "sort" tactic.  *)
-            if acc.x_is_passed
+            if acc.x_passed
             then raise (Arg_trans "induction Dlogic")
             else [d], acc
       )  in
@@ -315,8 +311,8 @@ let induction x bound env =
       let ti, acc = init_trans task in
       let tr, acc = rec_trans acc task in
       let open Opt in
-      let g = get acc.g and hi1 = get acc.hi1 and hr = get acc.hr and
-          hi2 = get acc.hi2 and x = get acc.x in
+      let g = get acc.g and hi1 = get acc.hi1 and
+          hi2 = get acc.hi2 and hr = get acc.hr in
       let c = lambda two (fun j1 j2 ->
                   Induction (g, hi1, hi2, hr, x, bound, Hole j1, Hole j2)) in
       [ti; tr], c)

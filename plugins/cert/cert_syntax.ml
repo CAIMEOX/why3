@@ -346,10 +346,10 @@ let prgd fmt mid =
   Mid.iter (prprop fmt) mid
 
 let pcta fmt cta =
-  fprintf fmt "@[<v>TYPES INTERP:%a@ \
-               TYPES:%a@ \
-               SIGMA INTERP:%a@ \
-               SIGMA:%a@ \
+  fprintf fmt "@[<v>TYPES INTERP:@ %a@ \
+               TYPES:@ %a@ \
+               SIGMA INTERP:@ %a@ \
+               SIGMA:@ %a@ \
                %a@]@."
     prt cta.types_interp
     prt cta.types
@@ -358,7 +358,7 @@ let pcta fmt cta =
     prgd cta.gamma_delta
 
 let plcta =
-  pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "========@ ") pcta
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "========@ ") pcta
 
 let eplcta cta lcta =
   eprintf "@[<v>INIT :@ \
@@ -371,7 +371,9 @@ let eplcta cta lcta =
 let print_ctasks filename lcta =
   let oc = open_out filename in
   let fmt = formatter_of_out_channel oc in
-  plcta fmt lcta;
+  fprintf fmt "@[<v>RESULTING TASKS:@ @ \
+               %a@]@."
+    plcta lcta;
   close_out oc
 
 (** Utility functions on ctask *)
@@ -421,7 +423,7 @@ let ctask_equal cta1 cta2 =
 
 let instantiate f a =
   match f with
-  | CTquant (CTlambda, ty', f) -> ct_open f a
+  | CTquant (CTlambda, _, f) -> ct_open f a
   | _ -> assert false
 
 (* Typing algorithm *)

@@ -139,8 +139,9 @@ let types_sigma_interp env =
         let pl = ns_find_ls th_int.th_export [pl_str] in
         let mn = ns_find_ls th_int.th_export [mn_str] in
 
-        let add (str, id, cty) = add (id, cty);
-                                 str_id := [str, id] in
+        let add (str, id, cty) =
+          add (id, cty);
+          str_id := (str, id) :: !str_id in
         List.iter add
           [le_str, le.ls_name, type_lsymbol le;
            ge_str, ge.ls_name, type_lsymbol ge;
@@ -156,7 +157,15 @@ let types_sigma_interp env =
   let get_ident =
     let open Wstdlib in let open Mstr in
     let tbl = of_list !str_id in
-    fun str -> find str tbl in
+    fun str -> try find str tbl with e ->
+                 let pre fmt (str, id) =
+                   fprintf fmt "(%s, %s)"
+                     str (id_unique Pretty.sprinter id) in
+                 eprintf "@[<v>STR SEARCHED:%s@ \
+                          STR-ID CORRESP:%a@ @]@."
+                   str
+                   (print_list pre) !str_id;
+                 raise e in
   get_ident, interp_type, interp_var
 
 let abstract_task env =
