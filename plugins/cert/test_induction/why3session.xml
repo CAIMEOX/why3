@@ -29,6 +29,18 @@
   </goal>
  </transf>
  </goal>
+ <goal name="G1">
+ <transf name="introduce_premises" >
+  <goal name="G1.0">
+  <transf name="induction" arg1="i">
+   <goal name="G1.0.0" expl="base case">
+   </goal>
+   <goal name="G1.0.1" expl="recursive case">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
 </theory>
 </file>
 </why3session>

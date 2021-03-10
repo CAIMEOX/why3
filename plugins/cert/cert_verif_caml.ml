@@ -7,16 +7,18 @@ open Cert_syntax
 open Cert_certificates
 
 (* To collect tasks with their names *)
-let union : ctask Mid.t -> ctask Mid.t -> ctask Mid.t =
+let union estr =
   let merge_no_conflicts id cta1 cta2 =
     if ctask_equal cta1 cta2
     then Some cta1
     else (* Important : gives an error and not None *)
       let open Format in
-      eprintf "@[<v>Conflict on ident : %a@ \
-               task 1 : %a@ \
-               task 2 : %a@]@."
+      eprintf "@[<v>Conflict on ident: %a@ \
+               Shown when checking: %s@ \
+               task 1: %a@ \
+               task 2: %a@]@."
         prhyp id
+        estr
         pcta cta1
         pcta cta2;
       verif_failed "Conflict of ident, see stderr" in
@@ -37,7 +39,13 @@ let rec ccheck c cta =
       let t2, pos2 = find_ident "axiom2" i2 cta in
       if not pos1 && pos2
       then if ct_equal t1 t2 then Mid.empty
-           else verif_failed "The hypothesis and goal given do not match"
+           else begin
+               Format.eprintf "@[<v>t1: %a@ \
+                               t2: %a@]@."
+                 pcte t1
+                 pcte t2;
+               verif_failed "The hypothesis and goal given do not match"
+             end
       else verif_failed "Terms have wrong positivities in the task"
   | ETrivial (_, i) ->
       let t, pos = find_ident "trivial" i cta in
@@ -55,14 +63,14 @@ let rec ccheck c cta =
       infers_into cta a CTprop;
       let cta1 = add i (a, true) cta in
       let cta2 = add i (a, false) cta in
-      union (ccheck c1 cta1) (ccheck c2 cta2)
+      union "assert" (ccheck c1 cta1) (ccheck c2 cta2)
   | ESplit (_, _, _, i, c1, c2) ->
       let t, pos = find_ident "split" i cta in
       begin match t, pos with
       | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false ->
           let cta1 = add i (t1, pos) cta in
           let cta2 = add i (t2, pos) cta in
-          union (ccheck c1 cta1) (ccheck c2 cta2)
+          union "split" (ccheck c1 cta1) (ccheck c2 cta2)
       | _ -> verif_failed "Not splittable" end
   | EUnfoldIff (_, _, _, i, c) ->
       let t, pos = find_ident "unfold" i cta in
@@ -152,7 +160,7 @@ let rec ccheck c cta =
                  |> add hr (CTquant (CTforall, ctint, ct_close idn (
                             CTbinop (Timplies, CTapp (CTapp (lt, n), x),
                                      instantiate ctxt n))), false) in
-      union (ccheck c1 cta1) (ccheck c2 cta2)
+      union "induction" (ccheck c1 cta1) (ccheck c2 cta2)
 
 let checker_caml (vs, certif) init_ct res_ct =
   try let map_cert = ccheck certif init_ct in
