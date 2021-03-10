@@ -6,10 +6,10 @@ open Cert_abstract
 open Cert_certificates
 open Cert_split
 open Cert_induction
-open Cert_transformations
+open Cert_trans_core
+open Cert_rewrite
 open Cert_verif_caml
 open Cert_verif_lambdapi
-
 
 (** Certified transformations *)
 
