@@ -310,6 +310,6 @@ let induction x bound env =
       let c = revert_cert g rev
               |>> lambda two (fun j1 j2 ->
                       Induction (g, hi1, hi2, hr, x, bound, Hole j1, Hole j2))
-              |>> intro_cert g rev in
+              ||> thunk (intro_cert g rev) in
       [ti; tr], c)
 

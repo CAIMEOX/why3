@@ -177,9 +177,9 @@ let print_certif print_next fmt c =
           (rstr pos) pr_next ni1
           prhyp i1
   | EInduction (g, hi1, hi2, hr, ix, a, ctxt, c1, c2) ->
-      fprintf fmt "strong_induction %a %a \
-                   (λ %a %a %a, %a) \
-                   (λ %a %a %a %a, %a) \
+      fprintf fmt "strong_induction %a %a@ \
+                   @[<hv 3>(λ %a %a %a,@ %a)@]@ \
+                   @[<hv 3>(λ %a %a %a %a,@ %a)@]@ \
                    %a %a"
         prpv a prpv ctxt
         prid ix prhyp hi1 prhyp g pc c1
@@ -218,7 +218,7 @@ let print fmt init res (task_ids, certif) =
     print_certif print_applied_task fmt certif in
 
   fprintf fmt "@[<v>require open cert_lambdapi.preamble;@ @ \
-               symbol to_verify :@   \
+               symbol to_verify :@ \
                @[<v>%a@]@ \
                @<3>%s@[<v>%a@]@];@."
     p_type ()
