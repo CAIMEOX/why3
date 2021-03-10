@@ -109,6 +109,16 @@ type ('i, 't) cert =
 (* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
    stands for this context where the holes have been replaced with t *)
 
+type vcert = (prsymbol, term) cert
+
+type visible_cert = ident list * (prsymbol, term) cert
+
+
+let llet pr (cont : term -> vcert) =
+  let ls = create_psymbol (id_fresh "Let") [] in
+  let t = t_app ls [] None in
+  Let (t, pr, cont t)
+
 let eqrefl i = Trivial i
 (* eqrefl i ⇓ (Γ ⊢ Δ, i : t = t) stands *)
 
@@ -139,18 +149,12 @@ let iffsym_hyp i c =
                                Fold (i, c))))
 (* iffsym_hyp i c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ ↔ t₁ ⊢ Δ) *)
 
-type vcert = (prsymbol, term) cert
-
-type visible_cert = ident list * (prsymbol, term) cert
-
 let nc = [], Nc
 
 type 'a args =
   | Z : vcert args
   | Succ : 'a args -> (ident -> 'a) args
   | List : int -> (ident list -> vcert) args
-
-
 
 let rec new_idents n =
   if n = 0 then [] else
@@ -459,23 +463,6 @@ let propagate_ecert fc fi ft = function
       EInduction (fi i1, fi i2, fi i3, fi i4, fi n, ft t, ft ctxt, fc c1, fc c2)
 
 
-(* Separates hypotheses and goals *)
-let split_hyp_goal cta =
-  let open Mid in
-  fold (fun h (ct, pos) (gamma, delta) ->
-      if pos then gamma, add h (ct, pos) delta
-      else add h (ct, pos) gamma, delta)
-    cta (empty, empty)
-
-(* Creates a new ctask with the same hypotheses but sets the goal with the
-   second argument *)
-let set_goal : ctask -> cterm -> ctask = fun cta ->
-  let gamma, delta = split_hyp_goal cta.gamma_delta in
-  let gpr, _ = Mid.choose gamma in
-  fun ct ->
-  { cta with
-    gamma_delta = Mid.add gpr (ct, true) delta }
-
 
 (** Compile chain.
     1. visible_cert
@@ -764,10 +751,10 @@ let rec trim_certif c =
 let rec eliminate_let m c =
   match c with
   | ELet (x, y, c) ->
-      let x = match x with
+      let ix = match x with
         | CTfvar id -> id
         | _ -> assert false in
-      let m = Mid.add x y m in
+      let m = Mid.add ix y m in
       eliminate_let m c
   | EAssert (i, a, c1, c2) ->
       let c1 = eliminate_let m c1 in

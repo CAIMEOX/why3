@@ -3,3 +3,7 @@ use int.Int
 predicate p int
 
 goal G :  forall i. p i
+
+predicate q int
+
+goal G1 : forall i. q i -> p i
