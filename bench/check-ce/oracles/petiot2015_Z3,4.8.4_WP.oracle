@@ -1,22 +1,22 @@
 File "bench/check-ce/petiot2015.mlw", line 16, characters 18-35:
 Goal Variant decrease from verification condition max_rgf'vc.
-Prover result is: Valid (0.01s, 256 steps).
+Prover result is: Valid (0.03s, 256 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 16, characters 18-35:
 Goal Precondition from verification condition max_rgf'vc.
-Prover result is: Valid (0.01s, 9669 steps).
+Prover result is: Valid (0.02s, 9669 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 16, characters 18-35:
 Goal Precondition from verification condition max_rgf'vc.
-Prover result is: Valid (0.02s, 9864 steps).
+Prover result is: Valid (0.00s, 9864 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 14, characters 38-47:
 Goal Postcondition from verification condition max_rgf'vc.
-Prover result is: Valid (0.02s, 11859 steps).
+Prover result is: Valid (0.01s, 11859 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 24, characters 18-28:
 Goal Loop invariant init from verification condition g'vc.
-Prover result is: Valid (0.02s, 260 steps).
+Prover result is: Valid (0.01s, 260 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 25, characters 43-60:
 Goal Loop invariant init from verification condition g'vc.
@@ -30,32 +30,46 @@ Prover result is: Valid (0.01s, 10920 steps).
 <check-ce>Validating model:
           File petiot2015.mlw:
             Line 23:
-              k [@introduced] = {"type": "Integer", "val": "0"}
+              k = {"type": "Integer", "val": "0"}
             Line 24:
               the check fails with all inputs
 <check-ce>Interpreting concretly
-<rac-values>Missing value for parameter a, continue with default value [].
-<rac-values>Missing value for parameter i, continue with default value 0.
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 18, characters 9-10: []
+<rac-values>Type default value for parameter i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 0
 <check-ce>Interpreting abstractly
-<rac-values>Missing value for parameter a, continue with default value [].
-<rac-values>Missing value for parameter i, continue with default value 0.
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 18, characters 9-10: []
+<rac-values>Type default value for parameter i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 0
 <check-ce>Result of checking model 0:
             - Concrete: bad model (Concrete RAC, with the counterexample model cannot continue after "bench/check-ce/petiot2015.mlw", line 19, characters 15-33)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
+                  zero = 0
                 Line 14:
                   Constant one initialization
+                  one = 1
               File int.mlw:
                 Line 258:
                   Constant min_int32 initialization
+                  min_int32 = (-2147483648)
                 Line 259:
                   Constant max_int32 initialization
+                  max_int32 = 2147483647
               File petiot2015.mlw:
                 Line 18:
                   a = []
                   i = 0
-                  Execution of main function g's body with env:
+                  a = []
+                  i = 0
+                  Execution of main function `g` with env:
                     a = []
                     i = 0
                     zero = 0
@@ -63,25 +77,31 @@ Prover result is: Valid (0.01s, 10920 steps).
                     min_int32 = (-2147483648)
                     max_int32 = 2147483647
                 Line 19:
-                  Execution got stuck, Precondition of g with:
+                  Execution got stuck, Precondition of `g` with:
                     a = []
                     i = 0
             - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/petiot2015.mlw", line 19, characters 15-33)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
+                  zero = 0
                 Line 14:
                   Constant one initialization
+                  one = 1
               File int.mlw:
                 Line 258:
                   Constant min_int32 initialization
+                  min_int32 = (-2147483648)
                 Line 259:
                   Constant max_int32 initialization
+                  max_int32 = 2147483647
               File petiot2015.mlw:
                 Line 18:
                   a = []
                   i = 0
-                  Execution of main function g's body with env:
+                  a = []
+                  i = 0
+                  Execution of main function `g` with env:
                     a = []
                     i = 0
                     zero = 0
@@ -89,65 +109,79 @@ Prover result is: Valid (0.01s, 10920 steps).
                     min_int32 = (-2147483648)
                     max_int32 = 2147483647
                 Line 19:
-                  Execution got stuck, Precondition of g with:
+                  Execution got stuck, Precondition of `g` with:
                     a = []
                     i = 0
 <check-ce>Check model 1 ("bench/check-ce/petiot2015.mlw", line 24, characters 18-28)
 <check-ce>Validating model:
           File petiot2015.mlw:
             Line 18:
-              i [@introduced] = {"type": "Integer", "val": "176"}
+              i = {"type": "Integer", "val": "176"}
             Line 23:
-              k [@introduced] = {"type": "Integer", "val": "177"}
+              k = {"type": "Integer", "val": "177"}
             Line 24:
-              k_vc_constant [@introduced] [@model_trace:k] =
-                {"type": "Integer", "val": "177"}
+              k_vc_constant = {"type": "Integer", "val": "177"}
 <check-ce>Interpreting concretly
-<rac-values>Missing value for parameter a, continue with default value [].
-<rac-values>Value imported for i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 176
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 18, characters 9-10: []
+<rac-values>Value from model for parameter i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 176
 <check-ce>Interpreting abstractly
-<rac-values>Missing value for parameter a, continue with default value [].
-<rac-values>Value imported for i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 176
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 18, characters 9-10: []
+<rac-values>Value from model for parameter i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 176
 <check-ce>Result of checking model 1:
-            - Concrete: don't know (Concrete RAC terminated because Precondition of g cannot be evaluated)
+            - Concrete: don't know (Concrete RAC terminated because Precondition of `g` cannot be evaluated)
               
-            - Abstract: don't know (Abstract RAC terminated because Precondition of g cannot be evaluated)
+            - Abstract: don't know (Abstract RAC terminated because Precondition of `g` cannot be evaluated)
               
 <check-ce>Check model 2 ("bench/check-ce/petiot2015.mlw", line 24, characters 18-28)
 <check-ce>Validating model:
           File petiot2015.mlw:
             Line 18:
-              i [@introduced] = {"type": "Integer", "val": "1"}
+              i = {"type": "Integer", "val": "1"}
             Line 23:
-              k [@introduced] = {"type": "Integer", "val": "2"}
+              k = {"type": "Integer", "val": "2"}
             Line 24:
-              k_vc_constant [@introduced] [@model_trace:k] =
-                {"type": "Integer", "val": "2"}
+              k_vc_constant = {"type": "Integer", "val": "2"}
 <check-ce>Interpreting concretly
-<rac-values>Missing value for parameter a, continue with default value [].
-<rac-values>Value imported for i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 1
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 18, characters 9-10: []
+<rac-values>Value from model for parameter i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 1
 <check-ce>Interpreting abstractly
-<rac-values>Missing value for parameter a, continue with default value [].
-<rac-values>Value imported for i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 1
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 18, characters 9-10: []
+<rac-values>Value from model for parameter i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 1
 <check-ce>Result of checking model 2:
-            - Concrete: don't know (Concrete RAC terminated because Precondition of g cannot be evaluated)
+            - Concrete: don't know (Concrete RAC terminated because Precondition of `g` cannot be evaluated)
               
-            - Abstract: don't know (Abstract RAC terminated because Precondition of g cannot be evaluated)
+            - Abstract: don't know (Abstract RAC terminated because Precondition of `g` cannot be evaluated)
               
 <check-ce>Models:
 - Checked model 0 (Concrete: bad model, Abstract: bad model)
     Summary: Sorry, we don't have a good counterexample for you :(
 - Checked model 1 (Concrete: don't know, Abstract: don't know)
     Summary: The following counterexample model has not been verified
-    (Concrete RAC terminated because Precondition of g cannot be evaluated)
+    (Concrete RAC terminated because Precondition of `g` cannot be evaluated)
 - Selected model 2 (Concrete: don't know, Abstract: don't know)
     Summary: The following counterexample model has not been verified
-    (Concrete RAC terminated because Precondition of g cannot be evaluated)
+    (Concrete RAC terminated because Precondition of `g` cannot be evaluated)
 File "bench/check-ce/petiot2015.mlw", line 24, characters 18-28:
 Goal Loop invariant preservation from verification condition g'vc.
-Prover result is: Unknown (unknown) (0.06s, 134903 steps).
+Prover result is: Unknown (unknown) (0.05s, 134903 steps).
 The following counterexample model could not be verified
-  (Concrete RAC terminated because Precondition of g cannot be evaluated):
+  (Concrete RAC terminated because Precondition of `g` cannot be evaluated):
 File petiot2015.mlw:
   Line 18:
     i = 1
@@ -160,30 +194,44 @@ File petiot2015.mlw:
 <check-ce>Validating model:
           File petiot2015.mlw:
             Line 25:
-              j [@introduced] = {"type": "Integer", "val": "0"}
+              j = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
-<rac-values>Missing value for parameter a, continue with default value [].
-<rac-values>Missing value for parameter i, continue with default value 0.
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 18, characters 9-10: []
+<rac-values>Type default value for parameter i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 0
 <check-ce>Interpreting abstractly
-<rac-values>Missing value for parameter a, continue with default value [].
-<rac-values>Missing value for parameter i, continue with default value 0.
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 18, characters 9-10: []
+<rac-values>Type default value for parameter i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 0
 <check-ce>Result of checking model 0:
             - Concrete: bad model (Concrete RAC, with the counterexample model cannot continue after "bench/check-ce/petiot2015.mlw", line 19, characters 15-33)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
+                  zero = 0
                 Line 14:
                   Constant one initialization
+                  one = 1
               File int.mlw:
                 Line 258:
                   Constant min_int32 initialization
+                  min_int32 = (-2147483648)
                 Line 259:
                   Constant max_int32 initialization
+                  max_int32 = 2147483647
               File petiot2015.mlw:
                 Line 18:
                   a = []
                   i = 0
-                  Execution of main function g's body with env:
+                  a = []
+                  i = 0
+                  Execution of main function `g` with env:
                     a = []
                     i = 0
                     zero = 0
@@ -191,25 +239,31 @@ File petiot2015.mlw:
                     min_int32 = (-2147483648)
                     max_int32 = 2147483647
                 Line 19:
-                  Execution got stuck, Precondition of g with:
+                  Execution got stuck, Precondition of `g` with:
                     a = []
                     i = 0
             - Abstract: bad model (Abstract RAC, with the counterexample model cannot continue after "bench/check-ce/petiot2015.mlw", line 19, characters 15-33)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
+                  zero = 0
                 Line 14:
                   Constant one initialization
+                  one = 1
               File int.mlw:
                 Line 258:
                   Constant min_int32 initialization
+                  min_int32 = (-2147483648)
                 Line 259:
                   Constant max_int32 initialization
+                  max_int32 = 2147483647
               File petiot2015.mlw:
                 Line 18:
                   a = []
                   i = 0
-                  Execution of main function g's body with env:
+                  a = []
+                  i = 0
+                  Execution of main function `g` with env:
                     a = []
                     i = 0
                     zero = 0
@@ -217,63 +271,79 @@ File petiot2015.mlw:
                     min_int32 = (-2147483648)
                     max_int32 = 2147483647
                 Line 19:
-                  Execution got stuck, Precondition of g with:
+                  Execution got stuck, Precondition of `g` with:
                     a = []
                     i = 0
 <check-ce>Check model 1 ("bench/check-ce/petiot2015.mlw", line 25, characters 43-60)
 <check-ce>Validating model:
           File petiot2015.mlw:
             Line 18:
-              i [@introduced] = {"type": "Integer", "val": "401"}
+              i = {"type": "Integer", "val": "401"}
             Line 23:
-              k [@introduced] = {"type": "Integer", "val": "402"}
+              k = {"type": "Integer", "val": "402"}
             Line 25:
-              j [@introduced] = {"type": "Integer", "val": "1"}
+              j = {"type": "Integer", "val": "1"}
 <check-ce>Interpreting concretly
-<rac-values>Missing value for parameter a, continue with default value [].
-<rac-values>Value imported for i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 401
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 18, characters 9-10: []
+<rac-values>Value from model for parameter i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 401
 <check-ce>Interpreting abstractly
-<rac-values>Missing value for parameter a, continue with default value [].
-<rac-values>Value imported for i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 401
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 18, characters 9-10: []
+<rac-values>Value from model for parameter i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 401
 <check-ce>Result of checking model 1:
-            - Concrete: don't know (Concrete RAC terminated because Precondition of g cannot be evaluated)
+            - Concrete: don't know (Concrete RAC terminated because Precondition of `g` cannot be evaluated)
               
-            - Abstract: don't know (Abstract RAC terminated because Precondition of g cannot be evaluated)
+            - Abstract: don't know (Abstract RAC terminated because Precondition of `g` cannot be evaluated)
               
 <check-ce>Check model 2 ("bench/check-ce/petiot2015.mlw", line 25, characters 43-60)
 <check-ce>Validating model:
           File petiot2015.mlw:
             Line 18:
-              i [@introduced] = {"type": "Integer", "val": "1"}
+              i = {"type": "Integer", "val": "1"}
             Line 23:
-              k [@introduced] = {"type": "Integer", "val": "2"}
+              k = {"type": "Integer", "val": "2"}
             Line 25:
-              j [@introduced] = {"type": "Integer", "val": "1"}
+              j = {"type": "Integer", "val": "1"}
 <check-ce>Interpreting concretly
-<rac-values>Missing value for parameter a, continue with default value [].
-<rac-values>Value imported for i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 1
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 18, characters 9-10: []
+<rac-values>Value from model for parameter i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 1
 <check-ce>Interpreting abstractly
-<rac-values>Missing value for parameter a, continue with default value [].
-<rac-values>Value imported for i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 1
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 18, characters 9-10: []
+<rac-values>Value from model for parameter i at "bench/check-ce/petiot2015.mlw", line 18, characters 24-25: 1
 <check-ce>Result of checking model 2:
-            - Concrete: don't know (Concrete RAC terminated because Precondition of g cannot be evaluated)
+            - Concrete: don't know (Concrete RAC terminated because Precondition of `g` cannot be evaluated)
               
-            - Abstract: don't know (Abstract RAC terminated because Precondition of g cannot be evaluated)
+            - Abstract: don't know (Abstract RAC terminated because Precondition of `g` cannot be evaluated)
               
 <check-ce>Models:
 - Checked model 0 (Concrete: bad model, Abstract: bad model)
     Summary: Sorry, we don't have a good counterexample for you :(
 - Checked model 1 (Concrete: don't know, Abstract: don't know)
     Summary: The following counterexample model has not been verified
-    (Concrete RAC terminated because Precondition of g cannot be evaluated)
+    (Concrete RAC terminated because Precondition of `g` cannot be evaluated)
 - Selected model 2 (Concrete: don't know, Abstract: don't know)
     Summary: The following counterexample model has not been verified
-    (Concrete RAC terminated because Precondition of g cannot be evaluated)
+    (Concrete RAC terminated because Precondition of `g` cannot be evaluated)
 File "bench/check-ce/petiot2015.mlw", line 25, characters 43-60:
 Goal Loop invariant preservation from verification condition g'vc.
-Prover result is: Unknown (unknown) (0.07s, 146256 steps).
+Prover result is: Unknown (unknown) (0.06s, 146256 steps).
 The following counterexample model could not be verified
-  (Concrete RAC terminated because Precondition of g cannot be evaluated):
+  (Concrete RAC terminated because Precondition of `g` cannot be evaluated):
 File petiot2015.mlw:
   Line 18:
     i = 1
@@ -284,11 +354,11 @@ File petiot2015.mlw:
 
 File "bench/check-ce/petiot2015.mlw", line 21, characters 39-56:
 Goal Postcondition from verification condition g'vc.
-Prover result is: Valid (0.00s, 11683 steps).
+Prover result is: Valid (0.01s, 11683 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 22, characters 14-31:
 Goal Postcondition from verification condition g'vc.
-Prover result is: Valid (0.01s, 11571 steps).
+Prover result is: Valid (0.00s, 11571 steps).
 
 File bench/check-ce/petiot2015.mlw:
 Goal Out of loop bounds from verification condition g'vc.
@@ -304,11 +374,11 @@ Prover result is: Valid (0.01s, 10889 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 40, characters 9-13:
 Goal Index in array bounds from verification condition f'vc.
-Prover result is: Valid (0.02s, 10885 steps).
+Prover result is: Valid (0.01s, 10885 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 32, characters 14-31:
 Goal Postcondition from verification condition f'vc.
-Prover result is: Valid (0.01s, 191 steps).
+Prover result is: Valid (0.00s, 191 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 34, characters 6-105:
 Goal Postcondition from verification condition f'vc.
@@ -320,7 +390,7 @@ Prover result is: Valid (0.01s, 11072 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 44, characters 4-20:
 Goal Index in array bounds from verification condition f'vc.
-Prover result is: Valid (0.02s, 11072 steps).
+Prover result is: Valid (0.01s, 11072 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 45, characters 4-9:
 Goal Precondition from verification condition f'vc.
@@ -330,9 +400,7 @@ Prover result is: Valid (0.01s, 11373 steps).
 <check-ce>Validating model:
           File petiot2015.mlw:
             Line 37:
-              i [@field:0:contents] [@introduced]
-                [@loop:bench/check-ce/petiot2015.mlw:37:4:144]
-                [@mlw:reference_var] =
+              i =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -341,56 +409,68 @@ Prover result is: Valid (0.01s, 11373 steps).
             Line 45:
               the check fails with all inputs
 <check-ce>Interpreting concretly
-<rac-values>Missing value for parameter a1, continue with default value [].
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 29, characters 9-10: []
 <check-ce>Interpreting abstractly
-<rac-values>Missing value for parameter a1, continue with default value [].
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 29, characters 9-10: []
 <check-ce>Result of checking model 0:
-            - Concrete: don't know (Concrete RAC terminated because Precondition of f cannot be evaluated)
+            - Concrete: don't know (Concrete RAC terminated because Precondition of `f` cannot be evaluated)
               
-            - Abstract: don't know (Abstract RAC terminated because Precondition of f cannot be evaluated)
+            - Abstract: don't know (Abstract RAC terminated because Precondition of `f` cannot be evaluated)
               
 <check-ce>Check model 1 ("bench/check-ce/petiot2015.mlw", line 45, characters 4-9)
 <check-ce>Validating model:
           File petiot2015.mlw:
             Line 37:
-              i [@field:0:contents] [@introduced]
-                [@loop:bench/check-ce/petiot2015.mlw:37:4:144]
-                [@mlw:reference_var] =
+              i =
                 {"type": "Record",
                  "val":
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "176"}}]}}
             Line 45:
-              i_vc_constant [@field:0:contents] [@introduced]
-                [@loop:bench/check-ce/petiot2015.mlw:37:4:144]
-                [@mlw:reference_var] [@model_trace:i] =
+              i_vc_constant =
                 {"type": "Record",
                  "val":
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "176"}}]}}
 <check-ce>Interpreting concretly
-<rac-values>Missing value for parameter a1, continue with default value [].
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 29, characters 9-10: []
 <check-ce>Interpreting abstractly
-<rac-values>Missing value for parameter a1, continue with default value [].
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 29, characters 9-10: []
 <check-ce>Result of checking model 1:
-            - Concrete: don't know (Concrete RAC terminated because Precondition of f cannot be evaluated)
+            - Concrete: don't know (Concrete RAC terminated because Precondition of `f` cannot be evaluated)
               
-            - Abstract: don't know (Abstract RAC terminated because Precondition of f cannot be evaluated)
+            - Abstract: don't know (Abstract RAC terminated because Precondition of `f` cannot be evaluated)
               
 <check-ce>Models:
 - Checked model 0 (Concrete: don't know, Abstract: don't know)
     Summary: The following counterexample model has not been verified
-    (Concrete RAC terminated because Precondition of f cannot be evaluated)
+    (Concrete RAC terminated because Precondition of `f` cannot be evaluated)
 - Selected model 1 (Concrete: don't know, Abstract: don't know)
     Summary: The following counterexample model has not been verified
-    (Concrete RAC terminated because Precondition of f cannot be evaluated)
+    (Concrete RAC terminated because Precondition of `f` cannot be evaluated)
 File "bench/check-ce/petiot2015.mlw", line 45, characters 4-9:
 Goal Precondition from verification condition f'vc.
-Prover result is: Step limit exceeded (1.21s).
+Prover result is: Step limit exceeded (1.37s).
 The following counterexample model could not be verified
-  (Concrete RAC terminated because Precondition of f cannot be evaluated):
+  (Concrete RAC terminated because Precondition of `f` cannot be evaluated):
 File petiot2015.mlw:
   Line 37:
     i = 176 (0XB0)
@@ -401,51 +481,65 @@ File petiot2015.mlw:
 <check-ce>Validating model:
           File petiot2015.mlw:
             Line 46:
-              j [@introduced] = {"type": "Integer", "val": "0"}
+              j = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
-<rac-values>Missing value for parameter a1, continue with default value [].
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 29, characters 9-10: []
 <check-ce>Interpreting abstractly
-<rac-values>Missing value for parameter a1, continue with default value [].
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 29, characters 9-10: []
 <check-ce>Result of checking model 0:
-            - Concrete: don't know (Concrete RAC terminated because Precondition of f cannot be evaluated)
+            - Concrete: don't know (Concrete RAC terminated because Precondition of `f` cannot be evaluated)
               
-            - Abstract: don't know (Abstract RAC terminated because Precondition of f cannot be evaluated)
+            - Abstract: don't know (Abstract RAC terminated because Precondition of `f` cannot be evaluated)
               
 <check-ce>Check model 1 ("bench/check-ce/petiot2015.mlw", line 46, characters 37-54)
 <check-ce>Validating model:
           File petiot2015.mlw:
             Line 37:
-              i [@field:0:contents] [@introduced]
-                [@loop:bench/check-ce/petiot2015.mlw:37:4:144]
-                [@mlw:reference_var] =
+              i =
                 {"type": "Record",
                  "val":
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "401"}}]}}
             Line 46:
-              j [@introduced] = {"type": "Integer", "val": "0"}
+              j = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
-<rac-values>Missing value for parameter a1, continue with default value [].
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 29, characters 9-10: []
 <check-ce>Interpreting abstractly
-<rac-values>Missing value for parameter a1, continue with default value [].
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 29, characters 9-10: []
 <check-ce>Result of checking model 1:
-            - Concrete: don't know (Concrete RAC terminated because Precondition of f cannot be evaluated)
+            - Concrete: don't know (Concrete RAC terminated because Precondition of `f` cannot be evaluated)
               
-            - Abstract: don't know (Abstract RAC terminated because Precondition of f cannot be evaluated)
+            - Abstract: don't know (Abstract RAC terminated because Precondition of `f` cannot be evaluated)
               
 <check-ce>Models:
 - Checked model 0 (Concrete: don't know, Abstract: don't know)
     Summary: The following counterexample model has not been verified
-    (Concrete RAC terminated because Precondition of f cannot be evaluated)
+    (Concrete RAC terminated because Precondition of `f` cannot be evaluated)
 - Selected model 1 (Concrete: don't know, Abstract: don't know)
     Summary: The following counterexample model has not been verified
-    (Concrete RAC terminated because Precondition of f cannot be evaluated)
+    (Concrete RAC terminated because Precondition of `f` cannot be evaluated)
 File "bench/check-ce/petiot2015.mlw", line 46, characters 37-54:
 Goal Assertion from verification condition f'vc.
-Prover result is: Step limit exceeded (1.22s).
+Prover result is: Step limit exceeded (1.30s).
 The following counterexample model could not be verified
-  (Concrete RAC terminated because Precondition of f cannot be evaluated):
+  (Concrete RAC terminated because Precondition of `f` cannot be evaluated):
 File petiot2015.mlw:
   Line 37:
     i = 401 (0X191)
@@ -454,19 +548,27 @@ File petiot2015.mlw:
 
 File "bench/check-ce/petiot2015.mlw", line 32, characters 14-31:
 Goal Postcondition from verification condition f'vc.
-Prover result is: Valid (0.00s, 164 steps).
+Prover result is: Valid (0.01s, 164 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/petiot2015.mlw", line 34, characters 6-105)
 <check-ce>Validating model:
           
 <check-ce>Interpreting concretly
-<rac-values>Missing value for parameter a1, continue with default value [].
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 29, characters 9-10: []
 <check-ce>Interpreting abstractly
-<rac-values>Missing value for parameter a1, continue with default value [].
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 29, characters 9-10: []
 <check-ce>Result of checking model 0:
-            - Concrete: don't know (Concrete RAC terminated because Precondition of f cannot be evaluated)
+            - Concrete: don't know (Concrete RAC terminated because Precondition of `f` cannot be evaluated)
               
-            - Abstract: don't know (Abstract RAC terminated because Precondition of f cannot be evaluated)
+            - Abstract: don't know (Abstract RAC terminated because Precondition of `f` cannot be evaluated)
               
 <check-ce>Check model 1 ("bench/check-ce/petiot2015.mlw", line 34, characters 6-105)
 <check-ce>Validating model:
@@ -474,35 +576,41 @@ Prover result is: Valid (0.00s, 164 steps).
             Line 34:
               the check fails with all inputs
             Line 37:
-              i [@field:0:contents] [@introduced]
-                [@loop:bench/check-ce/petiot2015.mlw:37:4:144]
-                [@mlw:reference_var] =
+              i =
                 {"type": "Record",
                  "val":
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "55"}}]}}
 <check-ce>Interpreting concretly
-<rac-values>Missing value for parameter a1, continue with default value [].
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 29, characters 9-10: []
 <check-ce>Interpreting abstractly
-<rac-values>Missing value for parameter a1, continue with default value [].
+<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>RHS evaluated for global min_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 258, characters 15-24: (-2147483648)
+<rac-values>RHS evaluated for global max_int32 at "WHY3DATA/stdlib/mach/int.mlw", line 259, characters 15-24: 2147483647
+<rac-values>Type default value for parameter a at "bench/check-ce/petiot2015.mlw", line 29, characters 9-10: []
 <check-ce>Result of checking model 1:
-            - Concrete: don't know (Concrete RAC terminated because Precondition of f cannot be evaluated)
+            - Concrete: don't know (Concrete RAC terminated because Precondition of `f` cannot be evaluated)
               
-            - Abstract: don't know (Abstract RAC terminated because Precondition of f cannot be evaluated)
+            - Abstract: don't know (Abstract RAC terminated because Precondition of `f` cannot be evaluated)
               
 <check-ce>Models:
 - Checked model 0 (Concrete: don't know, Abstract: don't know)
     Summary: The following counterexample model has not been verified
-    (Concrete RAC terminated because Precondition of f cannot be evaluated)
+    (Concrete RAC terminated because Precondition of `f` cannot be evaluated)
 - Selected model 1 (Concrete: don't know, Abstract: don't know)
     Summary: The following counterexample model has not been verified
-    (Concrete RAC terminated because Precondition of f cannot be evaluated)
+    (Concrete RAC terminated because Precondition of `f` cannot be evaluated)
 File "bench/check-ce/petiot2015.mlw", line 34, characters 6-105:
 Goal Postcondition from verification condition f'vc.
-Prover result is: Step limit exceeded (1.47s).
+Prover result is: Step limit exceeded (1.45s).
 The following counterexample model could not be verified
-  (Concrete RAC terminated because Precondition of f cannot be evaluated):
+  (Concrete RAC terminated because Precondition of `f` cannot be evaluated):
 File petiot2015.mlw:
   Line 34:
     the check fails with all inputs
@@ -527,7 +635,7 @@ Prover result is: Valid (0.01s, 125 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 44, characters 12-16:
 Goal Index in array bounds from verification condition f'vc.
-Prover result is: Valid (0.02s, 10945 steps).
+Prover result is: Valid (0.01s, 10945 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 44, characters 4-20:
 Goal Index in array bounds from verification condition f'vc.
@@ -535,7 +643,7 @@ Prover result is: Valid (0.01s, 10945 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 45, characters 4-9:
 Goal Precondition from verification condition f'vc.
-Prover result is: Valid (0.02s, 11222 steps).
+Prover result is: Valid (0.00s, 11222 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 45, characters 4-9:
 Goal Precondition from verification condition f'vc.
@@ -543,7 +651,7 @@ Prover result is: Valid (0.01s, 487 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 46, characters 37-54:
 Goal Assertion from verification condition f'vc.
-Prover result is: Valid (0.02s, 11229 steps).
+Prover result is: Valid (0.01s, 11229 steps).
 
 File "bench/check-ce/petiot2015.mlw", line 32, characters 14-31:
 Goal Postcondition from verification condition f'vc.
