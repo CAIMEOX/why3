@@ -6,6 +6,7 @@ open Generic_arg_trans_utils
 open Args_wrapper
 
 open Cert_certificates
+open Cert_trans_utils
 
 (** Explanation *)
 
@@ -75,21 +76,20 @@ let revert ?tr g d : Term.term =
        let g = t_replace (t_app_infer ls []) (t_var new_var) g in
        t_forall_close [new_var] [] g
      with
-     | _ -> raise (Arg_trans ("revert: cannot revert:" ^ ls.ls_name.Ident.id_string)))
+     | _ -> raise (Arg_trans ("revert: cannot revert:" ^
+                                ls.ls_name.Ident.id_string)))
   (* TODO extend this *)
   | Dlogic _ ->
-    raise (Arg_trans "revert: cannot revert logic decls")
+      raise (Arg_trans "revert: cannot revert logic decls")
   | Dind _ ->
-    raise (Arg_trans "revert: cannot revert induction decls")
+      raise (Arg_trans "revert: cannot revert induction decls")
   | Dprop (k, pr, t) when k <> Pgoal ->
       let t = match tr with
-      | None -> t
-      | Some tr ->
-          begin match tr (Tsprsymbol pr) with
-          | None -> t
-          | Some attr -> t_attr_add attr t
-          end
-      in
+        | None -> t
+        | Some tr ->
+            match tr (Tsprsymbol pr) with
+            | None -> t
+            | Some attr -> t_attr_add attr t in
       Term.t_implies t g
   | Dprop (Pgoal, _, _) -> raise (Arg_trans "revert: cannot revert goal")
   | _ -> raise (Arg_trans "revert: please report")
@@ -145,11 +145,7 @@ let collect_lsymbol s (d: decl) =
    used in the declaration d.  *)
 let depends dep d =
   let new_set = collect_lsymbol Sls.empty d in
-  (* not (Sls.disjoint dep new_set) *)
-  if Sls.equal (Sls.inter dep new_set) Sls.empty then
-    false
-  else
-    true
+  not (Sls.disjoint dep new_set)
 
 (* TODO Do a transformation as a fold that reverts automatically dependencies
    but that could be used elsewhere instead of all those adhoc functions. *)
@@ -157,11 +153,11 @@ let revert_tr ?tr prlist lslist =
   fold_map (fun d ((acc, dep), task) ->
     match d.d_node with
     | Dparam ls when
-        depends dep d || List.exists (fun ls1 -> ls_equal ls ls1) lslist ->
+        depends dep d || List.exists (ls_equal ls) lslist ->
         ((d :: acc, Sls.add ls dep), task)
     | Dprop (k, pr1, _) when
         k != Pgoal
-          && (depends dep d || List.exists (fun pr -> pr_equal pr pr1) prlist)
+          && (depends dep d || List.exists (pr_equal pr1) prlist)
       ->
         ((d :: acc, dep), task)
     | Dprop (k, pr1, g) when k = Pgoal ->
@@ -193,25 +189,23 @@ let revert_tr_symbol ?tr symbol_list =
 (* s is a set of variables, g is a term. If d contains one of the elements of s
    then all variables of d are added to s and the declaration is prepended to g.
 *)
-let revert_chosen_decls (g, s) (d: decl) =
+let revert_chosen_decl (g, s, acc) (d: decl) =
   let d_set = collect_lsymbol Sls.empty d in
-  let interp = Sls.inter s d_set in
-  if Sls.equal interp Sls.empty then
-     (g, s)
-  else
-     (revert g d, Sls.union s d_set)
+  if Sls.disjoint s d_set then g, s, acc
+  else revert g d, Sls.union s d_set, d::acc
 
 (* Build a term that generalizes all the declarations that were given in l and
    that contains at least one of the variables in the set s. Actually, only
    revert what is necessary to build a correct term. *)
-let revert_chosen_decls_list s (l: decl list) (g: decl) (t: term) =
-  (* The goal is a special case, we collect its variable independantly *)
+let revert_chosen_decls s (l: decl list) (g: decl) (t: term) =
+  (* The goal is a special case, we collect its variable independently *)
   let s = collect_lsymbol s g in
-  fst (List.fold_left revert_chosen_decls (t, s) l)
+  List.fold_left revert_chosen_decl (t, s, []) l
 
 type ind_acc = {
     x_passed : bool;
-    delta' : decl list;
+    ds : decl list;
+    reverted : decl list;
     g : prsymbol option;
     hi1 : prsymbol option;
     hi2 : prsymbol option;
@@ -245,7 +239,8 @@ let induction x bound env =
   in
 
   let acc_init = {
-      delta' = [];
+      ds = [];
+      reverted = [];
       x_passed = false;
       g = None;
       hi1 = None;
@@ -269,34 +264,33 @@ let induction x bound env =
     Trans.decl_acc acc (fun _ acc -> acc) (fun d acc ->
         match d.d_node with
         | Dparam ls ->
-            [d], { acc with x_passed = acc.x_passed || Term.ls_equal lsx ls;
-                            delta' = if acc.x_passed
-                                     then d :: acc.delta'
-                                     else acc.delta' }
+            [d],
+            { acc with x_passed = acc.x_passed || Term.ls_equal lsx ls;
+                       ds = if acc.x_passed then d::acc.ds else acc.ds}
         | Dprop (Pgoal, pr, t) ->
             if not (acc.x_passed) then raise (Arg_trans "induction")
             else
-              let t_delta' =
-                revert_chosen_decls_list (Sls.add lsx Sls.empty) acc.delta' d t in
+              let t_ds, _, reverted =
+                revert_chosen_decls (Sls.singleton lsx) acc.ds d t in
               let n = Term.create_vsymbol (Ident.id_fresh "n") Ty.ty_int in
-              (* t_delta' = forall n, n < x -> t_delta'[x <- n] *)
-              let t_delta' =
+              (* t_ds = forall n, n < x -> t_ds[x <- n] *)
+              let t_ds =
                 t_forall_close [n] []
                   (t_implies (Term.t_app_infer lt_int [t_var n; x])
-                     (t_replace x (t_var n) t_delta')) in
+                     (t_replace x (t_var n) t_ds)) in
               (* x_gt_bound = bound < x *)
               let x_gt_bound_t = t_app_infer lt_int [bound; x] in
               let pr_init = Decl.create_prsymbol (gen_ident "Init") in
               let x_gt_bound = create_prop_decl Paxiom pr_init x_gt_bound_t in
               let pr_rec = create_prsymbol (gen_ident "Hrec") in
-              let hrec = create_prop_decl Paxiom pr_rec t_delta' in
+              let hrec = create_prop_decl Paxiom pr_rec t_ds in
               let d = create_goal ~expl:rec_case_expl pr t in
-              [x_gt_bound; hrec; d], { acc with g = Some pr;
-                                                hi2 = Some pr_init;
-                                                hr = Some pr_rec }
+              [x_gt_bound; hrec; d],
+              { acc with g = Some pr; hi2 = Some pr_init;
+                         hr = Some pr_rec; reverted }
         | Dprop (_, _, _) ->
-            [d], { acc with delta' = if acc.x_passed then d :: acc.delta'
-                                     else acc.delta' }
+            [d], { acc with ds = if acc.x_passed then d :: acc.ds
+                                     else acc.ds }
         | Dind _ | Dlogic _ | Dtype _ | Ddata _ ->
             (* TODO we need to add Dlogic and Dind here. The problem is that we
                cannot easily put them into the recursive hypothesis. So, for
@@ -311,9 +305,11 @@ let induction x bound env =
       let ti, acc = init_trans task in
       let tr, acc = rec_trans acc task in
       let open Opt in
-      let g = get acc.g and hi1 = get acc.hi1 and
-          hi2 = get acc.hi2 and hr = get acc.hr in
-      let c = lambda two (fun j1 j2 ->
-                  Induction (g, hi1, hi2, hr, x, bound, Hole j1, Hole j2)) in
+      let g = get acc.g and hi1 = get acc.hi1 and hi2 = get acc.hi2 and
+          hr = get acc.hr and rev = acc.reverted in
+      let c = revert_cert g rev
+              |>> lambda two (fun j1 j2 ->
+                      Induction (g, hi1, hi2, hr, x, bound, Hole j1, Hole j2))
+              ||> thunk (intro_cert g rev) in
       [ti; tr], c)
 

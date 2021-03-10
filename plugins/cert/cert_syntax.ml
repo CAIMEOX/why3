@@ -378,6 +378,12 @@ let print_ctasks filename lcta =
 
 (** Utility functions on ctask *)
 
+let ctask_equal cta1 cta2 =
+  Mid.equal cty_equal cta1.sigma cta2.sigma &&
+    let cterm_pos_equal (t1, p1) (t2, p2) =
+      ct_equal t1 t2 && p1 = p2 in
+    Mid.equal cterm_pos_equal cta1.gamma_delta cta2.gamma_delta
+
 let find_ident s h cta =
   match Mid.find_opt h cta.gamma_delta with
   | Some x -> x
@@ -415,11 +421,24 @@ let remove i cta = lift_mid_cta (Mid.remove i) cta
 
 let add i ct cta = lift_mid_cta (Mid.add i ct) cta
 
-let ctask_equal cta1 cta2 =
-  Mid.equal cty_equal cta1.sigma cta2.sigma &&
-    let cterm_pos_equal (t1, p1) (t2, p2) =
-      ct_equal t1 t2 && p1 = p2 in
-    Mid.equal cterm_pos_equal cta1.gamma_delta cta2.gamma_delta
+
+(* Separates hypotheses and goals *)
+let split_hyp_goal cta =
+  let open Mid in
+  fold (fun h (ct, pos) (gamma, delta) ->
+      if pos then gamma, add h (ct, pos) delta
+      else add h (ct, pos) gamma, delta)
+    cta (empty, empty)
+
+(* Creates a new ctask with the same hypotheses but sets the goal with the
+   second argument *)
+let set_goal : ctask -> cterm -> ctask = fun cta ->
+  let gamma, delta = split_hyp_goal cta.gamma_delta in
+  let gpr, _ = Mid.choose gamma in
+  fun ct ->
+  { cta with
+    gamma_delta = Mid.add gpr (ct, true) delta }
+
 
 let instantiate f a =
   match f with
