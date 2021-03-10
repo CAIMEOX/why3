@@ -1,6 +1,6 @@
 File "bench/check-ce/multifile1.mlw", line 6, characters 14-24:
 Goal Postcondition from verification condition decr'vc.
-Prover result is: Valid (0.01s, 285 steps).
+Prover result is: Valid (0.02s, 285 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/multifile1.mlw", line 10, characters 14-24)
 <check-ce>Validating model:
@@ -12,16 +12,16 @@ Prover result is: Valid (0.01s, 285 steps).
             Line 10:
               x_vc_constant = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
-<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter x at "bench/check-ce/multifile1.mlw", line 9, characters 12-13: 2
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/multifile1.mlw", line 9, characters 12-13: 2
 <check-ce>Interpreting abstractly
-<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter x at "bench/check-ce/multifile1.mlw", line 9, characters 12-13: 2
-<rac-values>Type default value for variable result at "bench/check-ce/multifile1.mlw", line 11, characters 4-10: 0
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/multifile1.mlw", line 9, characters 12-13: 2
+<rac-values>Type default value for variable `result` at "bench/check-ce/multifile1.mlw", line 11, characters 4-10 at "bench/check-ce/multifile1.mlw", line 11, characters 4-10: 0
 <check-ce>Result of checking model 0:
-            - Concrete: bad model (Concrete RAC does not confirm the counter-example, no contradiction during execution)
+            - Concrete: NORMAL (Concrete RAC does not confirm the counter-example, no contradiction during execution)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -58,7 +58,7 @@ Prover result is: Valid (0.01s, 285 steps).
                     _ = 2
                 Line 9:
                   Execution of main function terminated normally
-            - Abstract: good model (Abstract RAC confirms the counter-example)
+            - Abstract: FAILURE (Abstract RAC confirms the counter-example)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -82,7 +82,7 @@ Prover result is: Valid (0.01s, 285 steps).
                     _ = 0
                     _ = 2
                 Line 10:
-                  Property failure, Postcondition of `incr` with:
+                  Property failure, postcondition of `incr` with:
                     x = 2
                     result = 2
 <check-ce>Check model 1 ("bench/check-ce/multifile1.mlw", line 10, characters 14-24)
@@ -95,16 +95,16 @@ Prover result is: Valid (0.01s, 285 steps).
             Line 10:
               x_vc_constant = {"type": "Integer", "val": "2"}
 <check-ce>Interpreting concretly
-<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter x at "bench/check-ce/multifile1.mlw", line 9, characters 12-13: 2
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/multifile1.mlw", line 9, characters 12-13: 2
 <check-ce>Interpreting abstractly
-<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter x at "bench/check-ce/multifile1.mlw", line 9, characters 12-13: 2
-<rac-values>Type default value for variable result at "bench/check-ce/multifile1.mlw", line 11, characters 4-10: 0
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/multifile1.mlw", line 9, characters 12-13: 2
+<rac-values>Type default value for variable `result` at "bench/check-ce/multifile1.mlw", line 11, characters 4-10 at "bench/check-ce/multifile1.mlw", line 11, characters 4-10: 0
 <check-ce>Result of checking model 1:
-            - Concrete: bad model (Concrete RAC does not confirm the counter-example, no contradiction during execution)
+            - Concrete: NORMAL (Concrete RAC does not confirm the counter-example, no contradiction during execution)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -141,7 +141,7 @@ Prover result is: Valid (0.01s, 285 steps).
                     _ = 2
                 Line 9:
                   Execution of main function terminated normally
-            - Abstract: good model (Abstract RAC confirms the counter-example)
+            - Abstract: FAILURE (Abstract RAC confirms the counter-example)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -165,7 +165,7 @@ Prover result is: Valid (0.01s, 285 steps).
                     _ = 0
                     _ = 2
                 Line 10:
-                  Property failure, Postcondition of `incr` with:
+                  Property failure, postcondition of `incr` with:
                     x = 2
                     result = 2
 <check-ce>Check model 2 ("bench/check-ce/multifile1.mlw", line 10, characters 14-24)
@@ -178,16 +178,16 @@ Prover result is: Valid (0.01s, 285 steps).
             Line 10:
               x_vc_constant = {"type": "Integer", "val": "2"}
 <check-ce>Interpreting concretly
-<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter x at "bench/check-ce/multifile1.mlw", line 9, characters 12-13: 2
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/multifile1.mlw", line 9, characters 12-13: 2
 <check-ce>Interpreting abstractly
-<rac-values>RHS evaluated for global zero at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global one at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter x at "bench/check-ce/multifile1.mlw", line 9, characters 12-13: 2
-<rac-values>Type default value for variable result at "bench/check-ce/multifile1.mlw", line 11, characters 4-10: 0
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/multifile1.mlw", line 9, characters 12-13: 2
+<rac-values>Type default value for variable `result` at "bench/check-ce/multifile1.mlw", line 11, characters 4-10 at "bench/check-ce/multifile1.mlw", line 11, characters 4-10: 0
 <check-ce>Result of checking model 2:
-            - Concrete: bad model (Concrete RAC does not confirm the counter-example, no contradiction during execution)
+            - Concrete: NORMAL (Concrete RAC does not confirm the counter-example, no contradiction during execution)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -224,7 +224,7 @@ Prover result is: Valid (0.01s, 285 steps).
                     _ = 2
                 Line 9:
                   Execution of main function terminated normally
-            - Abstract: good model (Abstract RAC confirms the counter-example)
+            - Abstract: FAILURE (Abstract RAC confirms the counter-example)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -248,16 +248,19 @@ Prover result is: Valid (0.01s, 285 steps).
                     _ = 0
                     _ = 2
                 Line 10:
-                  Property failure, Postcondition of `incr` with:
+                  Property failure, postcondition of `incr` with:
                     x = 2
                     result = 2
-<check-ce>Models:
-- Selected model 0 (Concrete: bad model, Abstract: good model)
-    Summary: The contracts of some function or loop are underspecified
-- Checked model 1 (Concrete: bad model, Abstract: good model)
-    Summary: The contracts of some function or loop are underspecified
-- Checked model 2 (Concrete: bad model, Abstract: good model)
-    Summary: The contracts of some function or loop are underspecified
+<check-ce-summary>Results:
+- Selected model 0: SW
+  concrete: NORMAL, Concrete RAC does not confirm the counter-example, no contradiction during execution
+  abstract: FAILURE, Abstract RAC confirms the counter-example
+- Checked model 1: SW
+  concrete: NORMAL, Concrete RAC does not confirm the counter-example, no contradiction during execution
+  abstract: FAILURE, Abstract RAC confirms the counter-example
+- Checked model 2: SW
+  concrete: NORMAL, Concrete RAC does not confirm the counter-example, no contradiction during execution
+  abstract: FAILURE, Abstract RAC confirms the counter-example
 File "bench/check-ce/multifile1.mlw", line 10, characters 14-24:
 Goal Postcondition from verification condition incr'vc.
 Prover result is: Unknown (sat) (0.03s, 4860 steps).
@@ -286,7 +289,7 @@ File multifile1.mlw:
       _ = 0
       _ = 2
   Line 10:
-    Property failure, Postcondition of `incr` with:
+    Property failure, postcondition of `incr` with:
       x = 2
       result = 2
 

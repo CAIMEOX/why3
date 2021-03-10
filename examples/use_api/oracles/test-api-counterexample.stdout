@@ -18,13 +18,13 @@ Model is {"myfile.my_ext":
                "value": {"type": "Boolean", "val": true},
                "kind": "other"}],
             "42":
-             [{"name": "my_A",
-               "attrs": ["model_trace:my_A"],
-               "value": {"type": "Boolean", "val": true},
-               "kind": "other"},
-              {"name": "my_B",
+             [{"name": "my_B",
                "attrs": ["model_trace:my_B"],
                "value": {"type": "Boolean", "val": false},
+               "kind": "other"},
+              {"name": "my_A",
+               "attrs": ["model_trace:my_A"],
+               "value": {"type": "Boolean", "val": true},
                "kind": "other"}]},
           "myfile.my_ext2":
            {"101":
