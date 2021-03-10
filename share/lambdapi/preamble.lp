@@ -93,6 +93,12 @@ symbol succ : tEv Z → tEv Z;
 builtin "0"  ≔  zero;
 builtin "+1" ≔  succ;
 
+symbol infixspls : tEv Z → tEv Z → Type;
+symbol infixspgt : tEv Z → tEv Z → Type;
+symbol infixsplseq : tEv Z → tEv Z → Type;
+symbol infixspgteq : tEv Z → tEv Z → Type;
+symbol infixsppl : tEv Z → tEv Z → tEv Z;
+symbol infixspmn : tEv Z → tEv Z → tEv Z;
 
 symbol infixspeq ≔  eq Z;
 
@@ -374,3 +380,8 @@ symbol iffeq : Π (A : Type) (B : Type),
 	   	   tEv (hyp (eq_fmla A B) empty) →
 		   tEv (hyp (A ⇔ B) empty)
 ≔  λ A B s eab, s (iff_eq A B eab);
+
+symbol strong_induction : Π a P,
+   (Π x, tEv (hyp (infixsplseq x a) (goal (P x) empty))) →
+   (Π x, tEv (hyp (infixspls a x) (hyp (∀ Z (λ n, infixspls n x ↝ P n)) (goal (P x) empty)))) →
+   Π x, tEv (goal (P x) empty);

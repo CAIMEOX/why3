@@ -61,6 +61,7 @@ let lchecker ?env trans =
   Trans.store (checker_ctrans ?env no_dbg checker_lambdapi trans)
 
 let induction_c x bound env = cchecker ~env:env (induction x bound env)
+let induction_l x bound env = lchecker ~env:env (induction x bound env)
 
 let print_c any every where = cchecker (tprint any every where)
 let assert_c t              = cchecker (cassert t)
@@ -229,6 +230,14 @@ let register_caml : unit =
 let register_lambdapi : unit =
   let open Args_wrapper in
   let open Trans in
+
+  wrap_and_register
+    ~desc:"induction <term1> [from] <term2>@ \
+           performs@ a@ strong@ induction@ on@ the@ integer@ <term1>@ \
+           starting@ from@ the@ integer@ <term2>.@ <term2>@ is@ optional@ \
+           and@ defaults@ to@ 0."
+    "induction_lcert"
+    (Tterm (Topt ("from", Tterm Tenvtrans_l))) induction_l;
 
   wrap_and_register "assert_lcert" (Tformula Ttrans_l) assert_l
     ~desc:"A Lambdapi certified version of transformation assert";

@@ -1,0 +1,5 @@
+use int.Int
+
+predicate p int
+
+goal G :  forall i. p i
