@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<file format="whyml">
+<path name=".."/><path name="test_induction.mlw"/>
+<theory name="Top">
+ <goal name="G">
+ <transf name="introduce_premises" >
+  <goal name="G.0">
+  <transf name="induction" arg1="i">
+   <goal name="G.0.0" expl="base case">
+   </goal>
+   <goal name="G.0.1" expl="recursive case">
+   </goal>
+  </transf>
+  <transf name="induction_ccert" arg1="i">
+   <goal name="G.0.0" expl="base case">
+   </goal>
+   <goal name="G.0.1" expl="recursive case">
+   </goal>
+  </transf>
+  <transf name="induction_lcert" arg1="i">
+   <goal name="G.0.0" expl="base case">
+   </goal>
+   <goal name="G.0.1" expl="recursive case">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>
