@@ -176,7 +176,15 @@ let print_certif print_next fmt c =
           prpv t1 prpv t2 prhyp ni1
           (rstr pos) pr_next ni1
           prhyp i1
-  | EInduction _ -> assert false
+  | EInduction (g, hi1, hi2, hr, ix, a, ctxt, c1, c2) ->
+      fprintf fmt "strong_induction %a %a \
+                   (λ %a %a %a, %a) \
+                   (λ %a %a %a %a, %a) \
+                   %a %a"
+        prpv a prpv ctxt
+        prid ix prhyp hi1 prhyp g pc c1
+        prid ix prhyp hi2 prhyp hr prhyp g pc c2
+        prid ix prhyp g
   in
   pc fmt c
 
