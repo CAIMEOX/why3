@@ -1,8 +1,8 @@
-type t
+(* type t *)
 
-constant e : t
+(* constant e : t *)
 
-predicate a t
+(* predicate a t *)
 (* predicate b *)
 (* predicate c *)
 (* predicate p int *)
@@ -18,6 +18,22 @@ predicate a t
 (* predicate p (x : bool) (y : bool) *)
 (* goal G : forall x y. p x y -> p true false *)
 
-axiom A : a e
+(* use int.Int *)
 
-goal G : a e
+(* goal G : 1 > 2 /\ 3 >= 4 *)
+
+(* goal G : a /\ b *)
+
+
+
+(* axiom A : a e *)
+
+(* goal G : a e *)
+
+
+use int.Int
+predicate a
+goal G : a \/ a
+(* predicate p (x : bool) *)
+
+(* goal inst_goal : p true -> exists x : bool. p x *)

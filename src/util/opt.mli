@@ -19,6 +19,8 @@ val get_exn : exn -> 'a option -> 'a
 
 val get_def : 'a -> 'a option -> 'a
 
+val update : 'a option -> 'a option -> 'a option
+
 val map : ('a -> 'b) -> 'a option -> 'b option
 
 val iter : ('a -> unit) -> 'a option -> unit

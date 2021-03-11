@@ -19,6 +19,8 @@ let get_exn exn = function None -> raise exn | Some x -> x
 
 let get_def d = function None -> d | Some x -> x
 
+let update o1 o2 = match o2 with None -> o1 | _ -> o2
+
 let map f = function None -> None | Some x -> Some (f x)
 
 let apply d f x = match f with None -> d | Some f -> f x
