@@ -711,9 +711,9 @@ let rec trim_certif c =
       erename pos t1 i1 i1' @@
         erename pos t2 i2 i2' @@
           EAssert (i, cut, c1, c2)
-  | EFoldArr (pos, t1, t2, i, c) | EFoldIff (pos, t1, t2, i, c) ->
+  | EFoldArr (pos, t1, t2, i, c') | EFoldIff (pos, t1, t2, i, c') ->
       let is_arr = match c with EFoldArr _ -> true | _ -> false in
-      let c = trim_certif c in
+      let c = trim_certif c' in
       let j = id_register (id_fresh "fold_temp") in
       let pre, post = if is_arr
                       then CTbinop (Tor, CTnot t1, t2),
