@@ -385,3 +385,4 @@ symbol strong_induction : Π a P,
    (Π x, tEv (hyp (infixsplseq x a) (goal (P x) empty))) →
    (Π x, tEv (hyp (infixspls a x) (hyp (∀ Z (λ n, infixspls n x ↝ P n)) (goal (P x) empty)))) →
    Π x, tEv (goal (P x) empty);
+
