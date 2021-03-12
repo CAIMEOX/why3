@@ -30,7 +30,8 @@ let ctbool = CTyapp (ts_bool, [])
 
 (** Utility functions on ctype *)
 
-let rec cty_equal l1 l2 = match l1, l2 with
+(* Syntactic equality *)
+let rec cty_equal ty1 ty2 = match ty1, ty2 with
   | CTprop, CTprop -> true
   | CTyvar v1, CTyvar v2 -> Ty.tv_equal v1 v2
   | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
@@ -38,6 +39,40 @@ let rec cty_equal l1 l2 = match l1, l2 with
   | CTarrow (f1, a1), CTarrow (f2, a2) ->
       cty_equal f1 f2 && cty_equal a1 a2
   | (CTyvar _ | CTyapp _ | CTarrow _ | CTprop), _ -> false
+
+(* Equality modulo α-conversion *)
+let rec cty_same map ty1 ty2 = match ty1, ty2 with
+  | CTprop, CTprop -> true, map
+  | CTyvar v1, CTyvar v2 ->
+      begin match Mtv.find_opt v1 map with
+      | None -> true, Mtv.add v1 v2 map
+      | Some v2' -> Ty.tv_equal v2' v2, map end
+  | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
+      let b, map = for_all2_cty_equal map l1 l2 in
+      ts_equal ty1 ty2 && b, map
+  | CTarrow (f1, a1), CTarrow (f2, a2) ->
+      for_all2_cty_equal map [f1; a1] [f2; a2]
+  | (CTyvar _ | CTyapp _ | CTarrow _ | CTprop), _ -> false, map
+
+and for_all2_cty_equal map l1 l2 = match l1, l2 with
+  | [], [] -> true, map
+  | h1::t1, h2::t2 ->
+      let b, map = cty_same map h1 h2 in
+      if b then for_all2_cty_equal map t1 t2
+      else false, map
+  | _ -> false, map
+
+let cty_same ty1 ty2 = cty_same Mtv.empty ty1 ty2 |> fst
+
+(* Warning: beware variable capture *)
+let rec cty_ty_subst subst = function
+  | CTyvar tv' when Mtv.mem tv' subst -> Mtv.find tv' subst
+  | CTarrow (cty1, cty2) ->
+      CTarrow (cty_ty_subst subst cty1, cty_ty_subst subst cty2)
+  | CTyapp (ts, l) ->
+      CTyapp (ts, List.map (cty_ty_subst subst) l)
+  | (CTyvar _ | CTprop) as cty -> cty
+
 
 let rec is_predicate = function
   | CTprop -> true
@@ -103,6 +138,8 @@ type cterm =
   | CTapp of cterm * cterm (* binary application *)
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
   | CTquant of cquant * ctype * cterm (* quantifier binding *)
+  | CTqtype of tvsymbol * cterm
+  (* type quantifier binding, they are assumed to only be in prenex form *)
   | CTnot of cterm
   | CTtrue
   | CTfalse
@@ -124,43 +161,48 @@ let mn_str = op_infix "-"
 let ct_map f ct = match ct with
   | CTbvar _ | CTfvar _ | CTint _ | CTtrue | CTfalse -> ct
   | CTquant (q, cty, ct) -> CTquant (q, cty, f ct)
+  | CTqtype (i, ct) -> CTqtype (i, f ct)
   | CTapp (ct1, ct2) -> CTapp (f ct1, f ct2)
   | CTbinop (op, ct1, ct2) ->  CTbinop (op, f ct1, f ct2)
   | CTnot ct -> CTnot (f ct)
 
-let rec ct_equal t1 t2 = match t1, t2 with
+(* Warning: beware variable capture *)
+let rec ct_ty_subst subst = function
+  | CTquant (q, qcty, ct) ->
+      CTquant (q, cty_ty_subst subst qcty,
+               ct_ty_subst subst ct)
+  | ct -> ct_map (ct_ty_subst subst) ct
+
+let rec ct_equal subst1 subst2 t1 t2 =
+  let ct_eq = ct_equal subst1 subst2 in
+  match t1, t2 with
   | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
   | CTfvar i1, CTfvar i2 -> id_equal i1 i2
   | CTapp (tl1, tr1), CTapp (tl2, tr2) ->
-      ct_equal tl1 tl2 && ct_equal tr1 tr2
+      ct_eq tl1 tl2 && ct_eq tr1 tr2
   | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
-      op1 = op2 && ct_equal tl1 tl2 && ct_equal tr1 tr2
+      op1 = op2 && ct_eq tl1 tl2 && ct_eq tr1 tr2
   | CTquant (q1, ty1, t1), CTquant (q2, ty2, t2) when q1 = q2 ->
-      cty_equal ty1 ty2 && ct_equal t1 t2
+      let ty1 = cty_ty_subst subst1 ty1 in
+      let ty2 = cty_ty_subst subst2 ty2 in
+      cty_equal ty1 ty2 && ct_eq t1 t2
+  | CTqtype (tv1, t1), CTqtype (tv2, t2) ->
+      let tv = create_tvsymbol (id_fresh "cteq") in
+      let subst1 = Mtv.add tv1 (CTyvar tv) subst1 in
+      let subst2 = Mtv.add tv2 (CTyvar tv) subst2 in
+      ct_equal subst1 subst2 t1 t2
   | CTtrue, CTtrue | CTfalse, CTfalse -> true
-  | CTnot t1, CTnot t2 -> ct_equal t1 t2
+  | CTnot t1, CTnot t2 -> ct_eq t1 t2
   | CTint i1, CTint i2 -> BigInt.eq i1 i2
   | (CTbvar _ | CTfvar _ | CTapp _ | CTbinop _ | CTquant _
-     | CTtrue | CTfalse | CTnot _ | CTint _), _ -> false
+     | CTqtype _ | CTtrue | CTfalse | CTnot _ | CTint _), _ -> false
+
+let ct_equal = ct_equal Mtv.empty Mtv.empty
 
 (* Bound variable substitution *)
 let rec ct_bv_subst k u ctn = match ctn with
   | CTbvar i -> if i = k then u else ctn
-  | CTint _ | CTfvar _ -> ctn
-  | CTapp (ct1, ct2) ->
-      let nt1 = ct_bv_subst k u ct1 in
-      let nt2 = ct_bv_subst k u ct2 in
-      CTapp (nt1, nt2)
-  | CTbinop (op, ct1, ct2) ->
-      let nt1 = ct_bv_subst k u ct1 in
-      let nt2 = ct_bv_subst k u ct2 in
-      CTbinop (op, nt1, nt2)
-  | CTquant (q, cty, ct) ->
-      let nct = ct_bv_subst (k+1) u ct in
-      CTquant (q, cty, nct)
-  | CTnot ct -> CTnot (ct_bv_subst k u ct)
-  | CTtrue -> CTtrue
-  | CTfalse -> CTfalse
+  | _ -> ct_map (ct_bv_subst k u) ctn
 
 let ct_open t u = ct_bv_subst 0 u t
 
@@ -172,45 +214,25 @@ let locally_closed =
     | CTapp (ct1, ct2)
     | CTbinop (_, ct1, ct2) -> term ct1 && term ct2
     | CTquant (_, _, t) -> term (ct_open t (CTfvar di))
+    | CTqtype (_, ct)
     | CTnot ct -> term ct
     | CTint _ | CTfvar _ | CTtrue | CTfalse -> true
   in
   term
 
-(* Free variable substitution *)
+(* Free variable substitution (u should be locally closed) *)
 let rec ct_fv_subst z u ctn = match ctn with
   | CTfvar x -> if id_equal z x then u else ctn
-  | CTapp (ct1, ct2) ->
-      let nt1 = ct_fv_subst z u ct1 in
-      let nt2 = ct_fv_subst z u ct2 in
-      CTapp (nt1, nt2)
-  | CTbinop (op, ct1, ct2) ->
-      let nt1 = ct_fv_subst z u ct1 in
-      let nt2 = ct_fv_subst z u ct2 in
-      CTbinop (op, nt1, nt2)
-  | CTquant (q, cty, ct) ->
-      let nct = ct_fv_subst z u ct in
-      CTquant (q, cty, nct)
-  | CTnot ct -> CTnot (ct_fv_subst z u ct)
-  | CTint _ | CTbvar _ | CTtrue | CTfalse -> ctn
+  | _ -> ct_map (ct_fv_subst z u) ctn
 
 let ct_subst (m : cterm Mid.t) ct =
   Mid.fold ct_fv_subst m ct
 
 (* Variable closing *)
 let rec ct_fv_close x k ct = match ct with
-  | CTint _ | CTbvar _ | CTtrue | CTfalse-> ct
   | CTfvar y -> if id_equal x y then CTbvar k else ct
-  | CTnot ct -> CTnot (ct_fv_close x k ct)
-  | CTapp (ct1, ct2) ->
-      let nt1 = ct_fv_close x k ct1 in
-      let nt2 = ct_fv_close x k ct2 in
-      CTapp (nt1, nt2)
-  | CTbinop (op, ct1, ct2) ->
-      let nt1 = ct_fv_close x k ct1 in
-      let nt2 = ct_fv_close x k ct2 in
-      CTbinop (op, nt1, nt2)
   | CTquant (q, cty, ct) -> CTquant (q, cty, ct_fv_close x (k+1) ct)
+  | _ -> ct_map (ct_fv_close x k) ct
 
 let ct_close x t = ct_fv_close x 0 t
 
@@ -223,6 +245,7 @@ let rec mem_cont x ctn cont = match ctn with
       mem_cont x ct2 (fun m2 ->
           cont (m1 || m2)))
   | CTquant (_, _, ct)
+  | CTqtype (_, ct)
   | CTnot ct -> mem_cont x ct cont
   | CTint _ | CTbvar _ | CTtrue | CTfalse -> cont false
 
@@ -379,7 +402,7 @@ let print_ctasks filename lcta =
 (** Utility functions on ctask *)
 
 let ctask_equal cta1 cta2 =
-  Mid.equal cty_equal cta1.sigma cta2.sigma &&
+  Mid.equal cty_same cta1.sigma cta2.sigma &&
     let cterm_pos_equal (t1, p1) (t2, p2) =
       ct_equal t1 t2 && p1 = p2 in
     Mid.equal cterm_pos_equal cta1.gamma_delta cta2.gamma_delta
@@ -447,6 +470,11 @@ let instantiate f a =
 
 (* Typing algorithm *)
 
+
+let unify susbt ty1 ty2 =
+  assert false (* TODO: w algo *)
+
+
 let infer_type cta t =
   let rec infer_type sigma t = match t with
     | CTfvar v -> Mid.find v sigma
@@ -467,16 +495,19 @@ let infer_type cta t =
             CTprop end
     | CTapp (t1, t2) ->
         begin match infer_type sigma t1, infer_type sigma t2 with
-        | CTarrow (ty1, ty2), ty3 when cty_equal ty1 ty3 -> ty2
+        | CTarrow (ty1, ty2), ty3 ->
+            let subst = unify Mtv.empty ty1 ty3 in
+            cty_ty_subst subst ty2
         | _ -> assert false end
     | CTbinop (_, t1, t2) ->
         let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
         assert (cty_equal ty1 CTprop);
         assert (cty_equal ty2 CTprop);
         CTprop
+    | CTqtype (_, ct) -> infer_type sigma ct
     | CTint _ -> ctint in
-  let sigma_interp = Mid.set_union cta.sigma cta.sigma_interp in
-  infer_type sigma_interp t
+  let sigma_plus_interp = Mid.set_union cta.sigma cta.sigma_interp in
+  infer_type sigma_plus_interp t
 
 let well_typed cta t =
   ignore (infer_type cta t)
