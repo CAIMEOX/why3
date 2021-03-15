@@ -287,7 +287,7 @@ let induction x bound env =
               let d = create_goal ~expl:rec_case_expl pr t in
               [x_gt_bound; hrec; d],
               { acc with g = Some pr; hi2 = Some pr_init;
-                         hr = Some pr_rec; reverted }
+                         hr = Some pr_rec; reverted = List.rev reverted }
         | Dprop (_, _, _) ->
             [d], { acc with ds = if acc.x_passed then d :: acc.ds
                                      else acc.ds }

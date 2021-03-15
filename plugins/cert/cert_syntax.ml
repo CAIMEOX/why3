@@ -117,7 +117,9 @@ let ge_str = op_infix ">="
 let lt_str = op_infix "<"
 let gt_str = op_infix ">"
 let pl_str = op_infix "+"
-let mn_str = op_infix "-"
+let ml_str = op_infix "*"
+let pre_mn_str = op_infix "-"
+let inf_mn_str = op_prefix "-"
 
 (** Utility functions on cterm *)
 
