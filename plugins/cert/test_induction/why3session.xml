@@ -44,6 +44,12 @@
    <goal name="G1.0.1" expl="recursive case">
    </goal>
   </transf>
+  <transf name="induction_ccert" arg1="i" arg2="from" arg3="2">
+   <goal name="G1.0.0" expl="base case">
+   </goal>
+   <goal name="G1.0.1" expl="recursive case">
+   </goal>
+  </transf>
   <transf name="induction_lcert" arg1="i">
    <goal name="G1.0.0" expl="base case">
    </goal>

@@ -145,7 +145,9 @@ let types_sigma_interp env =
         let lt = ns_find_ls th_int.th_export [lt_str] in
         let gt = ns_find_ls th_int.th_export [gt_str] in
         let pl = ns_find_ls th_int.th_export [pl_str] in
-        let mn = ns_find_ls th_int.th_export [mn_str] in
+        let ml = ns_find_ls th_int.th_export [ml_str] in
+        let pmn = ns_find_ls th_int.th_export [pre_mn_str] in
+        let imn = ns_find_ls th_int.th_export [inf_mn_str] in
 
         let add (str, id, cty) =
           add (id, cty);
@@ -156,7 +158,9 @@ let types_sigma_interp env =
            lt_str, lt.ls_name, type_lsymbol lt;
            gt_str, gt.ls_name, type_lsymbol gt;
            pl_str, pl.ls_name, type_lsymbol pl;
-           mn_str, mn.ls_name, type_lsymbol mn;
+           ml_str, ml.ls_name, type_lsymbol ml;
+           pre_mn_str, pmn.ls_name, type_lsymbol pmn;
+           inf_mn_str, imn.ls_name, type_lsymbol imn;
           ]
     with _ -> () in
 
