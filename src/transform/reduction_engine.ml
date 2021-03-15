@@ -692,11 +692,74 @@ let rec extract_first n acc l =
       extract_first (n-1) (x::acc) r
     | [] -> assert false
 
+(** Return the strict bounds [i1, vs, i2] if [t1] is [i1 < v] and [t2] is [v <
+   i2]. If the terms [t1] or [t2] are disjunctions with equalities ([i < v \/ i
+    = v]), then the predecesor or successors are returned as [i1] or [i2]. *)
+let bounds t1 t2 =
+  let strict order = function
+    | {t_node= Tapp (op, [t1; t2])}
+      when op.ls_name.Ident.id_string = Ident.op_infix "<"
+        && Ty.(ty_equal ty_int (t_type t1) && ty_equal (t_type t1) (t_type t2))
+      -> ( match order t1 t2 with
+           | {t_node= Tconst (Constant.ConstInt {Number.il_int= i})},
+             {t_node= Tvar vs} when Ty.ty_equal vs.vs_ty Ty.ty_int -> i, vs
+           | _ -> raise Exit )
+    | _ -> raise Exit in
+  let equality order = function
+    | {t_node= Tapp (op, [t1; t2])}
+      when op.ls_name.Ident.id_string = Ident.op_infix "="
+        && Ty.(ty_equal ty_int (t_type t1) && ty_equal (t_type t1) (t_type t2))
+      -> ( match order t1 t2 with
+           | {t_node= Tconst (Constant.ConstInt {Number.il_int= i})},
+             {t_node= Tvar vs} when Ty.ty_equal vs.vs_ty Ty.ty_int -> i, vs
+           | _ -> raise Exit )
+    | _ -> raise Exit in
+  let bound order f t =
+    try strict order t with Exit ->
+    match t.t_node with
+    | Tbinop (Tor, t1, t2) ->
+        let i, vs = strict order t1 and i', vs' = equality order t2 in
+        if (BigInt.eq i i' && vs_equal vs vs') then f i, vs
+        else raise Exit
+    | _ -> raise Exit in
+  let a, vs  = bound (fun t1 t2 -> t1, t2) BigInt.pred t1 in
+  let b, vs' = bound (fun t1 t2 -> t2, t1) BigInt.succ t2 in
+  if vs_equal vs vs && vs_equal vs vs' then
+    if BigInt.le a b then a, vs, b else b, vs, a
+  else raise Exit
+
+(** Detect a bounded quantification and reduce by conjunction:
+          forall i. a < i < b. t(i) --> f(a+1) /\ ... f(b-1)
+
+    TODO:
+    - expand to bounded quantifications on range values
+    - compatiblity with reverse direction (forall i. b > i > a -> t)
+    - detect SPARK-style [forall i. if a < i /\ i < b then t else true] *)
+let reduce_bounded_quant t sigma st rem = match st, rem with
+  | Term {t_node= Tbinop (Tand, t1, t2)} :: st,
+    (Kbinop Timplies, _) :: (Kquant (Tforall, [vs'], _), _) :: rem ->
+      let a, vs, b = bounds t1 t2 in
+      if not (vs_equal vs vs' && BigInt.(le (min b a) (of_int 10))) then
+        raise Exit;
+      if BigInt.(ge a (pred b)) then
+        {value_stack= Term t_true :: st; cont_stack= rem}
+      else
+        let rec loop rem i =
+          if BigInt.eq i a then rem else
+            let t_i = t_const (Constant.int_const i) Ty.ty_int in
+            let rem = if BigInt.(eq (add_int 1 a) i) then rem
+              else (Kbinop Tand, t_true) :: rem in
+            let rem = (Keval (t, Mvs.add vs t_i sigma), t_true) :: rem in
+            loop rem (BigInt.pred i) in
+        {value_stack= st; cont_stack= loop rem (BigInt.pred b)}
+  | _ -> raise Exit
 
 let rec reduce engine c =
   match c.value_stack, c.cont_stack with
   | _, [] -> assert false
-  | st, (Keval (t,sigma),orig) :: rem -> reduce_eval engine st t ~orig sigma rem
+  | st, (Keval (t,sigma),orig) :: rem -> (
+      try reduce_bounded_quant t sigma st rem with Exit ->
+        reduce_eval engine st t ~orig sigma rem )
   | [], (Kif _, _) :: _ -> assert false
   | v :: st, (Kif(t2,t3,sigma), orig) :: rem ->
     begin
@@ -1295,8 +1358,8 @@ let normalize ?step_limit ~limit engine sigma t0 =
       if n = limit then
         begin
           let t1 = reconstruct c in
-          Warning.emit "reduction of term %a takes more than %d steps, aborted at %a.@."
-            Pretty.print_term t0 limit Pretty.print_term t1;
+          (* Warning.emit "reduction of term %a takes more than %d steps, aborted at %a.@."
+           *   Pretty.print_term t0 limit Pretty.print_term t1; *)
           t1
         end
       else begin
