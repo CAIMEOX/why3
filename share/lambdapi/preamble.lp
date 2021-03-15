@@ -83,8 +83,8 @@ symbol positive_rec :
 
 symbol Z : Type;
 symbol Z0 : tEv Z;
-symbol Zpos : tEv positive → tEv positive;
-symbol Zneg : tEv positive → tEv positive;
+symbol Zpos : tEv positive → tEv Z;
+symbol Zneg : tEv positive → tEv Z;
 
 symbol zero ≔  Z0;
 symbol one ≔  Zpos xH;
@@ -97,10 +97,12 @@ symbol infixspls : tEv Z → tEv Z → Type;
 symbol infixspgt : tEv Z → tEv Z → Type;
 symbol infixsplseq : tEv Z → tEv Z → Type;
 symbol infixspgteq : tEv Z → tEv Z → Type;
+
 symbol infixsppl : tEv Z → tEv Z → tEv Z;
 symbol infixspas : tEv Z → tEv Z → tEv Z;
 symbol infixspmn : tEv Z → tEv Z → tEv Z;
-symbol prefixspmn : tEv Z → tEv Z → tEv Z;
+
+symbol prefixspmn : tEv Z → tEv Z;
 
 symbol infixspeq ≔  eq Z;
 
