@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2021 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -27,6 +27,8 @@ val map_filter : ('a -> 'b option) -> 'a list -> 'b list
 val equal : ('a -> 'b -> bool) -> 'a list -> 'b list -> bool
 
 val compare : ('a -> 'a -> int) -> 'a list -> 'a list -> int
+
+val eqlength_and_for_all2 : ('a -> 'b -> bool) -> 'a list -> 'b list -> bool
 
 val cons : ('a -> 'b) -> 'b list -> 'a -> 'b list
 
