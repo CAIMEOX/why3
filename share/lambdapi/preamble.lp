@@ -98,7 +98,9 @@ symbol infixspgt : tEv Z → tEv Z → Type;
 symbol infixsplseq : tEv Z → tEv Z → Type;
 symbol infixspgteq : tEv Z → tEv Z → Type;
 symbol infixsppl : tEv Z → tEv Z → tEv Z;
+symbol infixspas : tEv Z → tEv Z → tEv Z;
 symbol infixspmn : tEv Z → tEv Z → tEv Z;
+symbol prefixspmn : tEv Z → tEv Z → tEv Z;
 
 symbol infixspeq ≔  eq Z;
 
