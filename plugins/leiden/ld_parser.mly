@@ -9,30 +9,20 @@
 (*                                                                  *)
 (********************************************************************)
 
-val token: Lexing.lexbuf -> Parser.token
+%{
 
-val parse_term : Lexing.lexbuf -> Ptree.term
+  open Why3
+  open Ld_ast
 
-val parse_expr : Lexing.lexbuf -> Ptree.expr
+  let floc s e = Loc.extract (s,e)
 
-val parse_decl : Lexing.lexbuf -> Ptree.decl
+%}
 
-val parse_term_list: Lexing.lexbuf -> Ptree.term list
+%start ldfile
+%type <Ld_ast.ldfile> ldfile
 
-val parse_qualid: Lexing.lexbuf -> Ptree.qualid
+%%
 
-val parse_list_qualid: Lexing.lexbuf -> Ptree.qualid list
-
-val parse_list_ident: Lexing.lexbuf -> Ptree.ident list
-
-val parse_mlw_file: Lexing.lexbuf -> Ptree.mlw_file
-
-val read_channel: Env.env -> Env.pathname -> string -> in_channel ->
-  Pmodule.mlw_file
-
-(* Name of the registered format for whyml *)
-val whyml_format: Env.fformat
-
-(*
-val parse_program_file : Ptree.incremental -> Lexing.lexbuf -> unit
-*)
+ldfile:
+  | ASSERT LEFTBRC term RIGHTBRC EOF { () }
+;

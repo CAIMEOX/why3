@@ -202,6 +202,11 @@ pvsbin/
 /plugins/cfg/cfg_parser.mli
 /plugins/cfg/cfg_parser.conflicts
 
+# /plugins/leiden/
+/plugins/leiden/ld_parser.ml
+/plugins/leiden/ld_parser.mli
+/plugins/leiden/ld_parser.conflicts
+
 # /drivers
 /drivers/coq-realizations.aux
 /drivers/pvs-realizations.aux

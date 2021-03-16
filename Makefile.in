@@ -512,7 +512,8 @@ PLUGGENERATED = plugins/tptp/tptp_lexer.ml \
 		plugins/microc/mc_parser.ml plugins/microc/mc_parser.mli \
 		plugins/cfg/cfg_lexer.ml \
 		plugins/cfg/cfg_parser.ml plugins/cfg/cfg_parser.mli \
-		plugins/parser/dimacs.ml
+		plugins/parser/dimacs.ml \
+		plugins/leiden/ld_parser.ml plugins/leiden/ld_parser.mli
 
 PLUG_PARSER = genequlin dimacs
 PLUG_PRINTER =
@@ -521,13 +522,15 @@ PLUG_TPTP = tptp_ast tptp_parser tptp_typing tptp_lexer tptp_printer
 PLUG_PYTHON = py_ast py_parser py_lexer py_main
 PLUG_MICROC = mc_ast mc_parser mc_lexer mc_printer mc_main
 PLUG_CFG = cfg_ast cfg_tokens cfg_parser cfg_lexer cfg_main
+PLUG_LD = ld_ast ld_parser ld_main
 
-PLUGINS = genequlin dimacs tptp python microc cfg
+PLUGINS = genequlin dimacs tptp python microc cfg leiden
 
 TPTPMODULES = $(addprefix plugins/tptp/, $(PLUG_TPTP))
 PYTHONMODULES = $(addprefix plugins/python/, $(PLUG_PYTHON))
 MICROCMODULES = $(addprefix plugins/microc/, $(PLUG_MICROC))
 CFGMODULES = $(addprefix plugins/cfg/, $(PLUG_CFG))
+LDMODULES = $(addprefix plugins/leiden/, $(PLUG_LD))
 
 TPTPCMO = $(addsuffix .cmo, $(TPTPMODULES))
 TPTPCMX = $(addsuffix .cmx, $(TPTPMODULES))
@@ -556,13 +559,13 @@ PLUGMODULES = $(addprefix plugins/parser/, $(PLUG_PARSER)) \
 	      $(addprefix plugins/printer/, $(PLUG_PRINTER)) \
 	      $(addprefix plugins/transform/, $(PLUG_TRANSFORM)) \
 	      $(TPTPMODULES) $(PYTHONMODULES) $(MICROCMODULES) \
-	      $(CFGMODULES)
+	      $(CFGMODULES) $(LDMODULES)
 
 PLUGDEP = $(addsuffix .dep, $(PLUGMODULES))
 PLUGCMO = $(addsuffix .cmo, $(PLUGMODULES))
 PLUGCMX = $(addsuffix .cmx, $(PLUGMODULES))
 
-PLUGDIRS = parser printer transform tptp python microc cfg
+PLUGDIRS = parser printer transform tptp python microc cfg leiden
 PLUGINCLUDES = $(addprefix -I plugins/, $(PLUGDIRS))
 
 $(PLUGDEP) $(PLUGCMO) $(PLUGCMX): INCLUDES += $(PLUGINCLUDES)
@@ -600,6 +603,8 @@ lib/plugins/microc.cmxs: $(MICROCCMX)
 lib/plugins/microc.cmo: $(MICROCCMO)
 lib/plugins/cfg.cmxs: $(addsuffix .cmx, $(CFGMODULES))
 lib/plugins/cfg.cmo: $(addsuffix .cmo, $(CFGMODULES))
+lib/plugins/leiden.cmxs: $(addsuffix .cmx, $(LDMODULES))
+lib/plugins/leiden.cmo: $(addsuffix .cmo, $(LDMODULES))
 
 # depend and clean targets
 
@@ -2134,6 +2139,11 @@ plugins/cfg/cfg_parser.ml plugins/cfg/cfg_parser.mli: src/parser/parser_common.m
 	$(SHOW) 'Menhir $^'
 	$(HIDE)$(MENHIR) --table --explain --strict --base plugins/cfg/cfg_parser \
 		--external-tokens Cfg_tokens $^
+
+plugins/leiden/ld_parser.ml plugins/leiden/ld_parser.mli: src/parser/parser_common.mly plugins/leiden/ld_parser.mly
+	$(SHOW) 'Menhir $^'
+	$(HIDE)$(MENHIR) --table --explain --unused-tokens --base plugins/leiden/ld_parser \
+                 --external-tokens Why3.Parser $^
 
 
 %.dep: %.ml %.mli
