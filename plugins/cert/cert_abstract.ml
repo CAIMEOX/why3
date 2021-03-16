@@ -38,22 +38,17 @@ let type_lsymbol ls =
 let rec abstract_term t =
   abstract_term_rec Mid.empty 0 t
 
+(* level <lvl> is the number of binders above in the whole term *)
+(* <bv_lvl> is mapping bound variables to their respective level *)
 and abstract_term_rec bv_lvl lvl t =
   let abstract = abstract_term_rec bv_lvl lvl in
-  (* level <lvl> is the number of forall above in the whole term *)
-  (* <bv_lvl> is mapping bound variables to their respective level *)
-  let cterm_node_sig_from_id id  = match Mid.find_opt id bv_lvl with
-    | None -> CTfvar id
-    | Some lvl_id ->
-        (* a variable should not be above its definition *)
-        assert (lvl_id <= lvl);
-        CTbvar (lvl - lvl_id) in
   match t.t_node with
+  | Tvar v -> get_lvl bv_lvl lvl v.vs_name
   | Ttrue  -> CTtrue
   | Tfalse -> CTfalse
-  | Tvar v -> cterm_node_sig_from_id v.vs_name
+  | Tnot t -> CTnot (abstract t)
   | Tapp (ls, lt) ->
-      let cts = cterm_node_sig_from_id ls.ls_name in
+      let cts = get_lvl bv_lvl lvl ls.ls_name in
       let ctapp ct t = CTapp (ct, abstract t) in
       List.fold_left ctapp cts lt
   | Tbinop (op, t1, t2) ->
@@ -62,26 +57,39 @@ and abstract_term_rec bv_lvl lvl t =
       CTbinop (op, ct1, ct2)
   | Tquant (q, tq) ->
       let lvs, _, t_open = t_open_quant tq in
-      let ids_lvl = List.mapi (fun i vs -> vs.vs_name, lvl + i + 1) lvs in
-      let bv_lvl = List.fold_left (fun m (ids, lvl) -> Mid.add ids lvl m)
-                     bv_lvl ids_lvl in
-      let lvl = lvl + List.length lvs in
-      let ctn_open = abstract_term_rec bv_lvl lvl t_open in
       let q = abstract_quant q in
-      let ctquant vs ct = let cty = abstract_type vs.vs_ty in
-                          CTquant (q, cty, ct) in
-      let ct_closed = List.fold_right ctquant lvs ctn_open in
-      ct_closed
-  | Tnot t -> CTnot (abstract t)
+      close bv_lvl lvl q lvs t_open
+  | Teps tb ->
+      let vs, t_open = t_open_bound tb in
+      close bv_lvl lvl CTlambda [vs] t_open
+  | Tif (b, t1, t2) ->
+      let b = abstract b and t1 = abstract t1 and t2 = abstract t2 in
+      CTbinop (Tand, CTbinop (Timplies, b, t1),
+               CTbinop (Timplies, CTnot b, t2))
   | Tconst (Constant.ConstInt i) -> CTint i.Number.il_int
   | Tconst _ ->
       let s = asprintf "Does not handle Tconst yet : %a"
                 Pretty.print_term t in
       invalid_arg s
-  | Tif _ -> invalid_arg "Does not handle Tif yet"
   | Tlet _ -> invalid_arg "Does not handle Tlet yet"
   | Tcase _ -> invalid_arg "Does not handle Tcase yet"
-  | Teps _ -> invalid_arg "Does not handle Teps yet"
+
+and get_lvl bv_lvl lvl id  = match Mid.find_opt id bv_lvl with
+    | None -> CTfvar id
+    | Some lvl_id ->
+        (* a variable should not appear before its declaration *)
+        assert (lvl_id <= lvl);
+        CTbvar (lvl - lvl_id)
+
+and close bv_lvl lvl q lvs t_open =
+  let ids_lvl = List.mapi (fun i vs -> vs.vs_name, lvl + i + 1) lvs in
+  let bv_lvl = List.fold_left (fun m (ids, lvl) -> Mid.add ids lvl m)
+                 bv_lvl ids_lvl in
+  let lvl = lvl + List.length lvs in
+  let ctn_open = abstract_term_rec bv_lvl lvl t_open in
+  let ctquant vs ct = let cty = abstract_type vs.vs_ty in
+                      CTquant (q, cty, ct) in
+  List.fold_right ctquant lvs ctn_open
 
 let abstract_decl_acc acc decl =
   match decl.d_node with
