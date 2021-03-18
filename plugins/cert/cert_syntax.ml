@@ -61,6 +61,7 @@ let prhyp fmt i = fprintf fmt "%s" (id_unique hip i)
 
 let prpr fmt pr = prhyp fmt pr.pr_name
 
+(* pred functions know if we are printing the type of a predicate or not *)
 let rec pred_ty pred fmt ty = match ty with
   | CTyapp (ts, l) when l <> [] ->
       fprintf fmt "@[<2>%a@ %a@]"
@@ -90,9 +91,11 @@ and prarrow fmt pred =
   if pred then fprintf fmt "⇀"
   else fprintf fmt "⇁"
 
+(* Prints a type without outside parentheses *)
 let prty fmt ty =
   pred_ty (is_predicate ty) fmt ty
 
+(* Prints a type with outside parentheses if needed *)
 let prtyparen fmt ty =
   pred_typaren (is_predicate ty) fmt ty
 
@@ -449,14 +452,16 @@ let instantiate f a =
 
 (* Typing algorithm *)
 
+
 let infer_type cta t =
   let rec infer_type sigma t = match t with
     | CTfvar v -> Mid.find v sigma
-    | CTbvar _ -> assert false
+    | CTbvar _ -> failwith "unbound variable"
     | CTtrue | CTfalse -> CTprop
     | CTnot t -> let ty = infer_type sigma t in
-                 assert (cty_equal ty CTprop);
-                 CTprop
+                 begin try assert (cty_equal ty CTprop);
+                     CTprop
+                 with _ -> failwith "not should apply on prop" end
     | CTquant (quant, ty1, t) ->
         let ni = id_register (id_fresh "type_ident") in
         let sigma = Mid.add ni ty1 sigma in
@@ -465,17 +470,29 @@ let infer_type cta t =
         begin match quant with
         | CTlambda -> CTarrow (ty1, ty2)
         | CTforall | CTexists ->
-            assert (cty_equal ty2 CTprop);
-            CTprop end
+            try assert (cty_equal ty2 CTprop);
+                CTprop
+            with _ -> failwith "quantification on non prop" end
     | CTapp (t1, t2) ->
         begin match infer_type sigma t1, infer_type sigma t2 with
-        | CTarrow (ty1, ty2), ty3 when cty_equal ty1 ty3 -> ty2
-        | _ -> assert false end
+        | CTarrow (ty1, ty2), ty3 ->
+            if cty_equal ty1 ty3 then ty2
+            else begin eprintf "@[<v>try to apply ty1 -> ty2 to ty3@ \
+                                ty1 : %a@ \
+                                ty2 : %a@ \
+                                ty3 : %a@]@."
+                         prty ty1
+                         prty ty2
+                         prty ty3;
+                       assert false end
+        | _ -> failwith "can't apply non functions"
+        end
     | CTbinop (_, t1, t2) ->
         let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
-        assert (cty_equal ty1 CTprop);
-        assert (cty_equal ty2 CTprop);
-        CTprop
+        begin try assert (cty_equal ty1 CTprop);
+                  assert (cty_equal ty2 CTprop);
+                  CTprop
+              with _ -> failwith "binop on non prop" end
     | CTint _ -> ctint in
   let sigma_interp = Mid.set_union cta.sigma cta.sigma_interp in
   infer_type sigma_interp t
