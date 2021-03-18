@@ -207,6 +207,9 @@ let ct_equal = ct_equal Mtv.empty Mtv.empty
 (* Bound variable substitution *)
 let rec ct_bv_subst k u ctn = match ctn with
   | CTbvar i -> if i = k then u else ctn
+  | CTquant (q, cty, ct) ->
+      let nct = ct_bv_subst (k+1) u ct in
+      CTquant (q, cty, nct)
   | _ -> ct_map (ct_bv_subst k u) ctn
 
 let ct_open t u = ct_bv_subst 0 u t

@@ -1,9 +1,24 @@
 use int.Int
 
 predicate p int
-
-goal G :  forall i. p i
-
 predicate q int
+predicate r int
+constant i : int
+constant x : int
 
-goal G1 : forall i. q i -> p i
+goal G :  p i
+
+axiom H1 : q i
+
+goal G1 : p i
+
+axiom H2 : r x
+
+goal G2 : p i
+
+axiom H3 : q i -> r x
+
+goal G3 : p i
+
+
+
