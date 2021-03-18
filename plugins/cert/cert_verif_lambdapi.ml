@@ -57,7 +57,7 @@ and print_gd fmt gd =
 let print_certif print_next fmt c =
   let rstr pos = if pos then "_goal" else "_hyp" in
   let rec pc fmt = function
-  | ELet _ | EConstruct _ | EDuplicate _ | EFoldArr _
+  | EConstruct _ | EDuplicate _ | EFoldArr _
   | EFoldIff _ | EEqSym _ | EEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/Eq/Let left"
   | EHole task_id ->

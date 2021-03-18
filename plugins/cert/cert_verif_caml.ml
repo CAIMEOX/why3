@@ -30,7 +30,7 @@ exception Found
    a ctask *)
 let rec ccheck c cta =
   match c with
-  | ELet _ | EConstruct _ | EDuplicate _
+  | EConstruct _ | EDuplicate _
   | EFoldArr _ | EFoldIff _ | EEqSym _ | EEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/Eq/Let left"
   | EHole i -> Mid.singleton i cta
