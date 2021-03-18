@@ -189,8 +189,6 @@ type ('i, 't) ecert =
   (* EAssert (i, t, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜
      c₁ ⇓ (Γ ⊢ Δ, i : t)
      and c₂ ⇓ (Γ, i : t ⊢ Δ) *)
-  | ELet of 't * 't * ('i, 't) ecert (* not kernel *)
-  (* ELet (x, y, c) ⇓ t ≜  c ⇓ t[x ←  y] *)
   | EAxiom of 't * 'i * 'i
   (* EAxiom (t, i1, i2) ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
   (* Notice that there is only one rule. *)
@@ -299,9 +297,7 @@ type ('i, 't) ecert =
 
 
 type heavy_ecert = ident list * (ident, cterm) ecert
-(* removing Construct, Duplicate, EqSym and EqTrans) *)
-type trimmed_ecert = ident list * (ident, cterm) ecert
-(* removing Let *)
+(* removing Let, Construct, Duplicate, EqSym and EqTrans *)
 type kernel_ecert = ident list * (ident, cterm) ecert
 
 let rec print_certif filename cert =
@@ -430,7 +426,6 @@ let propagate_ecert fc fi ft = function
   | EAssert (i, a, c1, c2) ->
       let f1 = fc c1 in let f2 = fc c2 in
                         EAssert (fi i, ft a, f1, f2)
-  | ELet (x, y, c) -> ELet (ft x, ft y, fc c)
   | EAxiom (a, i1, i2) -> EAxiom (ft a, fi i1, fi i2)
   | ETrivial (pos, i) -> ETrivial (pos, fi i)
   | EEqRefl (cty, t, i) -> EEqRefl (cty, ft t, fi i)
@@ -474,15 +469,14 @@ let propagate_ecert fc fi ft = function
     3. heavy_ecert
        The result of the elaboration and as such contains many additional
        information such as the current formula and whether the focus is on a
-       goal or on an hypothesis.
-    4. trimmed_ecert
+       goal or on an hypothesis. Knowing those additional informations,
+       Let-variables can be substituted
+    4. kernel_ecert
+       The certificates used by checkers.
        Same as before except that rules that are derivable with core rules when
        given additional information are replaced (Duplicate, Construct).
-    5. kernel_ecert
-       The certificates used by checkers.
        Few constructors and many parameters to ease formal verification of
        checkers.
-
  *)
 
 let rec abstract_cert c =
@@ -491,7 +485,10 @@ let rec abstract_cert c =
 exception Elaboration_failed
 
 let elaborate (init_ct : ctask) c =
-  let rec elab (cta : ctask) c =
+  let rec elaborate map (cta : ctask) c =
+    (* the map argument registers Let-defined variables and is used
+       to substitute user-provided terms that appear in certificates *)
+    let elab = elaborate map in
     match c with
     | Nc -> eprintf "No certificates@.";
             raise Elaboration_failed
@@ -535,6 +532,7 @@ let elaborate (init_ct : ctask) c =
         | _ -> eprintf "wrong hyps form in eqtrans";
                raise Elaboration_failed end
     | Assert (i, a, c1, c2) ->
+        let a = ct_subst map a in
         let cta1 = add i (a, true) cta in
         let cta2 = add i (a, false) cta in
         let c1 = elab cta1 c1 in
@@ -542,7 +540,11 @@ let elaborate (init_ct : ctask) c =
         EAssert (i, a, c1, c2)
     | Let (x, i, c) ->
         let y, _ = find_ident "Let" i cta in
-        ELet (x, y, elab cta c)
+        let ix = match x with
+          | CTfvar id -> id
+          | _ -> assert false in
+        let map = Mid.add ix y map in
+        elaborate map cta c
     | Unfold (i, c) ->
         let t, pos = find_ident "Unfold" i cta in
         begin match t with
@@ -657,6 +659,7 @@ let elaborate (init_ct : ctask) c =
         let cta = add i2 (replace_cterm a b t, pos) cta in
         ERewrite (pos, is_eq, cty, a, b, ctxt, i1, i2, elab cta c)
     | Induction (g, hi1, hi2, hr, x, a, c1, c2) ->
+        let a = ct_subst map a in
         let le = CTfvar (cta.get_ident le_str) in
         let lt = CTfvar (cta.get_ident lt_str) in
         let t, _ = find_ident "induction" g cta in
@@ -674,7 +677,7 @@ let elaborate (init_ct : ctask) c =
                                        replace_cterm x n t))), false) in
         EInduction (g, hi1, hi2, hr, i_x, a, ctxt, elab cta1 c1, elab cta2 c2)
   in
-  elab init_ct c
+  elaborate Mid.empty init_ct c
 
 let eaxiom pos t i1 i2 =
   if pos then EAxiom (t, i1, i2)
@@ -748,24 +751,8 @@ let rec trim_certif c =
         ERewrite (false, true, cty, t2, t3, ctxt, i2, i3, c)
   | _ -> propagate_ecert trim_certif (fun t -> t) (fun i -> i) c
 
-let rec eliminate_let m c =
-  match c with
-  | ELet (x, y, c) ->
-      let ix = match x with
-        | CTfvar id -> id
-        | _ -> assert false in
-      let m = Mid.add ix y m in
-      eliminate_let m c
-  | EAssert (i, a, c1, c2) ->
-      let c1 = eliminate_let m c1 in
-      let c2 = eliminate_let m c2 in
-      let a = ct_subst m a in
-      EAssert (i, a, c1, c2)
-  | _ -> propagate_ecert (eliminate_let m) (fun t -> t) (fun i -> i) c
-
 let make_core (init_ct : ctask) (_ : ctask list)
       (v, c : visible_cert) : heavy_ecert =
   v, abstract_cert c
      |> elaborate init_ct
      |> trim_certif
-     |> eliminate_let Mid.empty
