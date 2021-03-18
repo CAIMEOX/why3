@@ -111,13 +111,14 @@ let revert_cert pr decls =
             | Dparam ls ->
                 let pr' = pr_clone pr in
                 llet pr (fun g ->
-                    let ix = id_fresh ls.ls_name.id_string in
-                    let x = create_vsymbol ix (Opt.get ls.ls_value) in
-                    let vx = t_var x in
-                    let g = t_replace (t_app_infer ls []) vx g in
-                    let closed_t = t_forall_close [x] [] g in
+                    let tx = t_app_infer ls [] in
+                    let ix' = id_fresh ls.ls_name.id_string in
+                    let x' = create_vsymbol ix' (Opt.get ls.ls_value) in
+                    let closed_t map =
+                      let g = t_replace tx (t_var x') (Mid.find g map) in
+                      t_forall_close [x'] [] g in
                     Assert (pr', closed_t, Clear (pr, rename pr' pr (rc tail)),
-                            InstQuant (pr', pr', vx, Axiom (pr', pr))))
+                            InstQuant (pr', pr', tx, Axiom (pr', pr))))
             | _ -> assert false in
       rc decls)
 
