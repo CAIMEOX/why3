@@ -96,17 +96,16 @@ let abstract_decl_acc acc decl =
   | Dtype tys ->
       add_type tys.ts_name acc
   | Dprop (k, pr, t) ->
-      let ct = abstract_term t in
-      add pr.pr_name (ct, k = Pgoal) acc
+      add pr.pr_name (t, k = Pgoal) acc
   | Dparam ls ->
       let cty = type_lsymbol ls in
       add_var ls.ls_name cty acc
   | Dlogic l ->
       List.fold_left (fun cta (ls, ax) ->
           let cty = type_lsymbol ls in
-          let ct = abstract_term (ls_defn_axiom ax) in
+          let t = ls_defn_axiom ax in
           add_var ls.ls_name cty cta
-          |> add ls.ls_name (ct, false))
+          |> add ls.ls_name (t, false))
         acc l
   | _ -> acc
 
@@ -126,7 +125,7 @@ let rec abstract_task_acc acc = function
 let types_sigma_interp env =
   let interp_type = ref [] in
   let interp_var = ref [] in
-  let str_id = ref [] in
+  let str_ls = ref [] in
 
   let _ =
     let add ts = interp_type := ts.ts_name :: !interp_type in
@@ -149,38 +148,42 @@ let types_sigma_interp env =
         let pmn = ns_find_ls th_int.th_export [pre_mn_str] in
         let imn = ns_find_ls th_int.th_export [inf_mn_str] in
 
-        let add (str, id, cty) =
-          add (id, cty);
-          str_id := (str, id) :: !str_id in
+        let add (str, ls, cty) =
+          add (ls.ls_name, cty);
+          str_ls := (str, ls) :: !str_ls in
         List.iter add
-          [le_str, le.ls_name, type_lsymbol le;
-           ge_str, ge.ls_name, type_lsymbol ge;
-           lt_str, lt.ls_name, type_lsymbol lt;
-           gt_str, gt.ls_name, type_lsymbol gt;
-           pl_str, pl.ls_name, type_lsymbol pl;
-           ml_str, ml.ls_name, type_lsymbol ml;
-           pre_mn_str, pmn.ls_name, type_lsymbol pmn;
-           inf_mn_str, imn.ls_name, type_lsymbol imn;
+          [le_str, le, type_lsymbol le;
+           ge_str, ge, type_lsymbol ge;
+           lt_str, lt, type_lsymbol lt;
+           gt_str, gt, type_lsymbol gt;
+           pl_str, pl, type_lsymbol pl;
+           ml_str, ml, type_lsymbol ml;
+           pre_mn_str, pmn, type_lsymbol pmn;
+           inf_mn_str, imn, type_lsymbol imn;
           ]
     with _ -> () in
 
   let interp_type = Sid.of_list !interp_type in
   let interp_var = Mid.of_list !interp_var in
-  let get_ident =
+  let get_ls =
     let open Wstdlib in let open Mstr in
-    let tbl = of_list !str_id in
+    let tbl = of_list !str_ls in
     fun str -> try find str tbl with e ->
-                 let pre fmt (str, id) =
-                   fprintf fmt "(%s, %s)"
-                     str (id_unique Pretty.sprinter id) in
+                 let pre fmt (str, ls) =
+                   fprintf fmt "(%s, %a)"
+                     str Pretty.print_ls ls in
                  eprintf "@[<v>STR SEARCHED:%s@ \
                           STR-ID CORRESP:%a@ @]@."
                    str
-                   (print_list pre) !str_id;
+                   (print_list pre) !str_ls;
                  raise e in
-  get_ident, interp_type, interp_var
+  get_ls, interp_type, interp_var
+
+let abstract_terms_task cta =
+  { cta with gamma_delta = Mid.map (fun (t, pos) -> abstract_term t, pos)
+                             cta.gamma_delta }
 
 let abstract_task env =
-  let get_ident, types_interp, sigma_interp = types_sigma_interp env  in
+  let get_ls, types_interp, sigma_interp = types_sigma_interp env  in
   fun task ->
-  abstract_task_acc (ctask_new get_ident types_interp sigma_interp) task
+  abstract_task_acc (ctask_new get_ls types_interp sigma_interp) task

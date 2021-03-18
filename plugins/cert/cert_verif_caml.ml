@@ -107,17 +107,28 @@ let rec ccheck c cta =
   | EClear (_, _, i, c) ->
       let cta = remove i cta in
       ccheck c cta
-  | EIntroQuant (_, _, i, y, c) ->
+  | EIntroQuant (_, _, _, i, y, c) ->
       let t, pos = find_ident "intro_quant" i cta in
-      begin match t, pos with
-      | CTquant (CTforall, cty, t), true | CTquant (CTexists, cty, t), false ->
-          if Mid.mem y cta.sigma || mem y t
-          then verif_failed "non-free variable"
+      begin match t, pos, y with
+      | CTquant (CTforall, cty, t), true, CTfvar y
+      | CTquant (CTexists, cty, t), false, CTfvar y ->
+          if (* TODO : check that y does not appear in cta, maybe with:
+                Mid.mem y cta.sigma || *)
+            mem y t
+          then begin
+              Format.eprintf "@[<v>TASK@ %a@ \
+                       i : %a@ \
+                       y : %a@]@."
+                pcta cta
+                prhyp i
+                prid y;
+              verif_failed "non-free variable"
+            end
           else let cta = add i (ct_open t (CTfvar y), pos) cta
                          |> add_var y cty in
                ccheck c cta
       | _ -> verif_failed "Nothing to introduce" end
-  | EInstQuant (_, _, i, j, t_inst, c) ->
+  | EInstQuant (_, _, _, i, j, t_inst, c) ->
       let t, pos = find_ident "inst_quant" i cta in
       begin match t, pos with
       | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true ->
@@ -135,12 +146,12 @@ let rec ccheck c cta =
       assert (ct_equal t (instantiate_safe cta ctxt a));
       let cta =  add i2 (instantiate ctxt b, pos) cta in
       ccheck c cta
-  | EInduction (g, hi1, hi2, hr, ix, a, ctxt, c1, c2) ->
-      let le = CTfvar (cta.get_ident le_str) in
-      let lt = CTfvar (cta.get_ident lt_str) in
+  | EInduction (g, hi1, hi2, hr, x, a, ctxt, c1, c2) ->
+      let le = CTfvar (cta.get_ls le_str).ls_name in
+      let lt = CTfvar (cta.get_ls lt_str).ls_name in
       let t, pos = find_ident "induction" g cta in
-      let x = CTfvar ix in
-      let has_ident_cta i cta =
+      let has_term_cta x cta =
+        let i = match x with CTfvar ix -> ix | _ -> assert false in
         let rec found_ident_term i t = match t with
           | CTfvar i' when id_equal i i' -> raise Found
           | _ -> ct_map (found_ident_term i) t in
@@ -152,7 +163,7 @@ let rec ccheck c cta =
       infers_into cta x ctint;
       infers_into cta a ctint;
       assert (ct_equal t (instantiate_safe cta ctxt x));
-      assert (not (has_ident_cta ix cta) && pos);
+      assert (not (has_term_cta x cta) && pos);
       let cta1 = add hi1 (CTapp (CTapp (le, x), a), false) cta in
       let idn = id_register (id_fresh "ctxt_var") in
       let n = CTfvar idn in
