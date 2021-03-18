@@ -115,7 +115,7 @@ type visible_cert = ident list * (prsymbol, term) cert
 
 
 let llet pr (cont : term -> vcert) =
-  let ls = create_psymbol (id_fresh "Let") [] in
+  let ls = create_psymbol (id_fresh "Let_var") [] in
   let t = t_app ls [] None in
   Let (t, pr, cont t)
 
