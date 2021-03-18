@@ -19,14 +19,14 @@ type ('i, 't) cert =
   (* Makes verification fail : use it as a placeholder *)
   | Hole of ident
   (* Hole ct ⇓ (Γ ⊢ Δ) stands iff ct refers to <Γ ⊢ Δ> *)
-  | Assert of 'i * 't * ('i, 't) cert * ('i, 't) cert
+  | Assert of 'i * ('t Mid.t -> 't) * ('i, 't) cert * ('i, 't) cert
   (* Assert (i, t, c₁, c₂) ⇓ (Σ | Γ ⊢ Δ) ≜
          c₁ ⇓ (Σ | Γ ⊢ Δ, i : t)
      and c₂ ⇓ (Σ | Γ, i : t ⊢ Δ)
      and Σ ⊩ t : prop *)
   | Let of 't * 'i * ('i, 't) cert
-  (* Let (x, i, c) ⇓ t ≜  c ⇓ t[x ← i(t)] *)
-  (* Meaning : x can be used in c as the formula identified by i in task t *)
+  (* Let (x, i, c) ⇓ t ≜  c[x → i(t)] ⇓ t *)
+  (* Meaning : in c, x is mapped to the formula identified by i in task t *)
   | Axiom of 'i * 'i
   (* Axiom (i1, i2) ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
   (* Axiom (i1, i2) ⇓ (Γ, i2 : t ⊢ Δ, i1 : t) stands *)
@@ -101,7 +101,8 @@ type ('i, 't) cert =
      c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
   (* Rewrite (i₁, i₂, c) ⇓ (Γ, H : t₁ = t₂, i₁ : ctxt[t₁] ⊢ Δ) ≜
      c ⇓ (Γ, H : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
-  | Induction of 'i * 'i * 'i * 'i * 't * 't * ('i, 't) cert * ('i, 't) cert
+  | Induction of 'i * 'i * 'i * 'i * 't* ('t Mid.t -> 't)
+                 * ('i, 't) cert * ('i, 't) cert
 (* Induction (G, Hi₁, Hi₂, Hr, x, a, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
    c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
    and c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
@@ -110,8 +111,7 @@ type ('i, 't) cert =
    stands for this context where the holes have been replaced with t *)
 
 type vcert = (prsymbol, term) cert
-
-type visible_cert = ident list * (prsymbol, term) cert
+type visible_cert = ident list * vcert
 
 
 let llet pr (cont : term -> vcert) =
@@ -123,7 +123,7 @@ let eqrefl i = Trivial i
 (* eqrefl i ⇓ (Γ ⊢ Δ, i : t = t) stands *)
 
 let create_eqrefl i t c =
-  Assert (i, CTapp (CTapp (eq, t), t), eqrefl i, c)
+  Assert (i, (fun _ -> CTapp (CTapp (eq, t), t)), eqrefl i, c)
 (* create_eqrefl i t c ⇓ (Γ ⊢ Δ) ≜  c ⇓ (Γ, i : t = t ⊢ Δ) *)
 
 let rename i1 i2 c =
@@ -295,10 +295,8 @@ type ('i, 't) ecert =
 (* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
    stands for this context where the holes have been replaced with t *)
 
-
-type heavy_ecert = ident list * (ident, cterm) ecert
-(* removing Let, Construct, Duplicate, EqSym and EqTrans *)
-type kernel_ecert = ident list * (ident, cterm) ecert
+type kcert = (ident, cterm) ecert
+type kernel_ecert = ident list * kcert
 
 let rec print_certif filename cert =
   let oc = open_out filename in
@@ -314,8 +312,8 @@ and prcit : type i t. (formatter -> i -> unit) ->
   | Nc -> fprintf fmt "No_certif"
   | Hole ct -> fprintf fmt "Hole %a" prid ct
   | Assert (i, a, c1, c2) ->
-      fprintf fmt "Assert (@[%a, %a,@ @[<4>%a@],@ @[<4>%a@])@]"
-        pri i prt a prc c1 prc c2
+      fprintf fmt "Assert (@[%a, <fun>,@ @[<4>%a@],@ @[<4>%a@])@]"
+        pri i prc c1 prc c2
   | Let (x, i, c) -> fprintf fmt "Let (%a, %a,@ %a)" prt x pri i prc c
   | Axiom (i1, i2) -> fprintf fmt "Axiom (%a, %a)" pri i1 pri i2
   | Trivial i -> fprintf fmt "Trivial %a" pri i
@@ -340,8 +338,8 @@ and prcit : type i t. (formatter -> i -> unit) ->
                                 pri i pri j prt t prc c
   | Rewrite (i, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" pri i pri h prc c
   | Induction (i1, i2, i3, i4, x, a, c1, c2) ->
-      fprintf fmt "Induction (%a, %a, %a, %a, %a, %a,@ %a,@ %a)"
-        pri i1 pri i2 pri i3 pri i4 prt x prt a prc c1 prc c2
+      fprintf fmt "Induction (%a, %a, %a, %a, %a, <fun>,@ %a,@ %a)"
+        pri i1 pri i2 pri i3 pri i4 prt x prc c1 prc c2
 
 and prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
 and prcertif fmt (v, c) = fprintf fmt "@[<v>[%a],@ @[%a@]@]"
@@ -356,16 +354,17 @@ let eprcertif c = eprintf "%a@." prcertif c
 (** Utility functions on certificates *)
 
 (* Use propagate to define recursive functions on elements of type cert *)
-let propagate_cert fc fi ft = function
+let propagate_cert fc fi = function
   | (Hole _ | Nc)  as c -> c
   | Axiom (h, g) -> Axiom (fi h, fi g)
   | Trivial i -> Trivial (fi i)
   | EqSym (i, c) -> EqSym (fi i, fc c)
   | EqTrans (i1, i2, i3, c) -> EqTrans (fi i1, fi i2, fi i3, fc c)
   | Assert (i, a, c1, c2) ->
-      let f1 = fc c1 in let f2 = fc c2 in
-                        Assert (fi i, ft a, f1, f2)
-  | Let (x, i, c) -> Let (ft x, fi i, fc c)
+      let f1 = fc c1 in
+      let f2 = fc c2 in
+      Assert (fi i, a, f1, f2)
+  | Let (x, i, c) -> Let (x, fi i, fc c)
   | Unfold (i, c) -> Unfold (fi i, fc c)
   | Fold (i, c) -> Fold (fi i, fc c)
   | Split (i, c1, c2) ->
@@ -377,14 +376,16 @@ let propagate_cert fc fi ft = function
   | Clear (i, c) -> Clear (fi i, fc c)
   | Duplicate (i1, i2, c) -> Duplicate (fi i1, fi i2, fc c)
   | IntroQuant (i, y, c) -> IntroQuant (fi i, y, fc c)
-  | InstQuant (i, j, t, c) -> InstQuant (fi i, fi j, ft t, fc c)
+  | InstQuant (i, j, t, c) -> InstQuant (fi i, fi j, t, fc c)
   | Rewrite (i, h, c) -> Rewrite (fi i, fi h, fc c)
   | Induction (i1, i2, i3, i4, n, t, c1, c2) ->
-      Induction (fi i1, fi i2, fi i3, fi i4, ft n, ft t, fc c1, fc c2)
+      Induction (fi i1, fi i2, fi i3, fi i4, n, t, fc c1, fc c2)
+
+let rec pr_name_cert c = propagate_cert pr_name_cert (fun pr -> pr.pr_name) c
 
 let rec fill map = function
   | Hole x -> Mid.find x map
-  | c -> propagate_cert (fill map) (fun t -> t) (fun t -> t) c
+  | c -> propagate_cert (fill map) (fun t -> t) c
 
 let thunk (ids, c) () =
   let nids = new_idents (List.length ids) in
@@ -479,13 +480,10 @@ let propagate_ecert fc fi ft = function
        checkers.
  *)
 
-let rec abstract_cert c =
-  propagate_cert abstract_cert (fun pr -> pr.pr_name) abstract_term c
-
 exception Elaboration_failed
 
 let elaborate (init_ct : ctask) c =
-  let rec elaborate map (cta : ctask) c =
+  let rec elaborate (map : term Mid.t) (cta : ctask) c =
     (* the map argument registers Let-defined variables and is used
        to substitute user-provided terms that appear in certificates *)
     let elab = elaborate map in
@@ -532,7 +530,7 @@ let elaborate (init_ct : ctask) c =
         | _ -> eprintf "wrong hyps form in eqtrans";
                raise Elaboration_failed end
     | Assert (i, a, c1, c2) ->
-        let a = ct_subst map a in
+        let a = abstract_term (a map) in
         let cta1 = add i (a, true) cta in
         let cta2 = add i (a, false) cta in
         let c1 = elab cta1 c1 in
@@ -540,8 +538,8 @@ let elaborate (init_ct : ctask) c =
         EAssert (i, a, c1, c2)
     | Let (x, i, c) ->
         let y, _ = find_ident "Let" i cta in
-        let ix = match x with
-          | CTfvar id -> id
+        let ix = match x.t_node with
+          | Tapp (ls, []) -> ls.ls_name
           | _ -> assert false in
         let map = Mid.add ix y map in
         elaborate map cta c
@@ -659,7 +657,7 @@ let elaborate (init_ct : ctask) c =
         let cta = add i2 (replace_cterm a b t, pos) cta in
         ERewrite (pos, is_eq, cty, a, b, ctxt, i1, i2, elab cta c)
     | Induction (g, hi1, hi2, hr, x, a, c1, c2) ->
-        let a = ct_subst map a in
+        let a = a map in
         let le = CTfvar (cta.get_ident le_str) in
         let lt = CTfvar (cta.get_ident lt_str) in
         let t, _ = find_ident "induction" g cta in
@@ -752,7 +750,7 @@ let rec trim_certif c =
   | _ -> propagate_ecert trim_certif (fun t -> t) (fun i -> i) c
 
 let make_core (init_ct : ctask) (_ : ctask list)
-      (v, c : visible_cert) : heavy_ecert =
-  v, abstract_cert c
+      (v, c : visible_cert) =
+  v, pr_name_cert c
      |> elaborate init_ct
      |> trim_certif
