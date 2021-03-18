@@ -474,7 +474,7 @@ let propagate_ecert fc fi ft = function
     3. heavy_ecert
        The result of the elaboration and as such contains many additional
        information such as the current formula and whether the focus is on a
-       goal or on a hypothesis.
+       goal or on an hypothesis.
     4. trimmed_ecert
        Same as before except that rules that are derivable with core rules when
        given additional information are replaced (Duplicate, Construct).
