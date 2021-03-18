@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2020   --   Inria - CNRS - Paris-Sud University  *)
+(*  Copyright 2010-2021 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -50,6 +50,10 @@ let rec compare cmp l1 l2 = match l1,l2 with
   | _,  [] ->  1
   | a1::l1, a2::l2 ->
       let c = cmp a1 a2 in if c = 0 then compare cmp l1 l2 else c
+
+let rec eqlength_and_for_all2 p l1 l2 = match l1, l2 with
+  | a1::l1, a2::l2 -> p a1 a2 && eqlength_and_for_all2 p l1 l2
+  | _ -> false
 
 let map_join_left map join = function
   | x :: xl -> List.fold_left (fun acc x -> join acc (map x)) (map x) xl

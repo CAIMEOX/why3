@@ -81,34 +81,38 @@ symbol positive_rec :
         ∀ positive (λ n, P n)));
 
 
-symbol Z : Type;
-symbol Z0 : tEv Z;
-symbol Zpos : tEv positive → tEv positive;
-symbol Zneg : tEv positive → tEv positive;
+symbol int : Type;
+symbol Z0 : tEv int;
+symbol Zpos : tEv positive → tEv int;
+symbol Zneg : tEv positive → tEv int;
 
 symbol zero ≔  Z0;
 symbol one ≔  Zpos xH;
-symbol succ : tEv Z → tEv Z;
+symbol succ : tEv int → tEv int;
 
 builtin "0"  ≔  zero;
 builtin "+1" ≔  succ;
 
-symbol infixspls : tEv Z → tEv Z → Type;
-symbol infixspgt : tEv Z → tEv Z → Type;
-symbol infixsplseq : tEv Z → tEv Z → Type;
-symbol infixspgteq : tEv Z → tEv Z → Type;
-symbol infixsppl : tEv Z → tEv Z → tEv Z;
-symbol infixspmn : tEv Z → tEv Z → tEv Z;
+symbol infixspls : tEv int → tEv int → Type;
+symbol infixspgt : tEv int → tEv int → Type;
+symbol infixsplseq : tEv int → tEv int → Type;
+symbol infixspgteq : tEv int → tEv int → Type;
 
-symbol infixspeq ≔  eq Z;
+symbol infixsppl : tEv int → tEv int → tEv int;
+symbol infixspas : tEv int → tEv int → tEv int;
+symbol infixspmn : tEv int → tEv int → tEv int;
+
+symbol prefixspmn : tEv int → tEv int;
+
+symbol infixspeq ≔  eq int;
 
 
 // Booleans
 
-symbol Bool : Type;
+symbol bool : Type;
 
-symbol True : tEv Bool;
-symbol False : tEv Bool;
+symbol True : tEv bool;
+symbol False : tEv bool;
 
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
@@ -383,6 +387,6 @@ symbol iffeq : Π (A : Type) (B : Type),
 
 symbol strong_induction : Π a P,
    (Π x, tEv (hyp (infixsplseq x a) (goal (P x) empty))) →
-   (Π x, tEv (hyp (infixspls a x) (hyp (∀ Z (λ n, infixspls n x ↝ P n)) (goal (P x) empty)))) →
+   (Π x, tEv (hyp (infixspls a x) (hyp (∀ int (λ n, infixspls n x ↝ P n)) (goal (P x) empty)))) →
    Π x, tEv (goal (P x) empty);
 

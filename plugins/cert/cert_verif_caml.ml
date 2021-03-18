@@ -60,7 +60,7 @@ let rec ccheck c cta =
           Mid.empty
       | _ -> verif_failed "Non eqrefl hypothesis" end
   | EAssert (i, a, c1, c2) ->
-      infers_into cta a CTprop;
+      infers_into ~e_str:"EAssert" cta a CTprop;
       let cta1 = add i (a, true) cta in
       let cta2 = add i (a, false) cta in
       union "assert" (ccheck c1 cta1) (ccheck c2 cta2)

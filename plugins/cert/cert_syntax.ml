@@ -48,17 +48,17 @@ let rec cty_same map ty1 ty2 = match ty1, ty2 with
       | None -> true, Mtv.add v1 v2 map
       | Some v2' -> Ty.tv_equal v2' v2, map end
   | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
-      let b, map = for_all2_cty_equal map l1 l2 in
+      let b, map = for_all2_cty_same map l1 l2 in
       ts_equal ty1 ty2 && b, map
   | CTarrow (f1, a1), CTarrow (f2, a2) ->
-      for_all2_cty_equal map [f1; a1] [f2; a2]
+      for_all2_cty_same map [f1; a1] [f2; a2]
   | (CTyvar _ | CTyapp _ | CTarrow _ | CTprop), _ -> false, map
 
-and for_all2_cty_equal map l1 l2 = match l1, l2 with
+and for_all2_cty_same map l1 l2 = match l1, l2 with
   | [], [] -> true, map
   | h1::t1, h2::t2 ->
       let b, map = cty_same map h1 h2 in
-      if b then for_all2_cty_equal map t1 t2
+      if b then for_all2_cty_same map t1 t2
       else false, map
   | _ -> false, map
 
@@ -96,10 +96,11 @@ let prhyp fmt i = fprintf fmt "%s" (id_unique hip i)
 
 let prpr fmt pr = prhyp fmt pr.pr_name
 
+(* pred functions know if we are printing the type of a predicate or not *)
 let rec pred_ty pred fmt ty = match ty with
   | CTyapp (ts, l) when l <> [] ->
       fprintf fmt "@[<2>%a@ %a@]"
-        prts ts
+        Pretty.print_ts ts
         (print_list (pred_typaren pred)) l
   | CTarrow (t1, t2) ->
       fprintf fmt "@[%a %a@ %a@]"
@@ -109,25 +110,20 @@ let rec pred_ty pred fmt ty = match ty with
   | _ -> pred_typaren pred fmt ty
 
 and pred_typaren pred fmt = function
-  | CTyvar _ -> fprintf fmt "Z"
-  (* TODO handle polymorphic symbols *)
-  (* Pretty.print_tv fmt v *)
+  | CTyvar v -> Pretty.print_tv fmt v
   | CTprop -> fprintf fmt "DType"
-  | CTyapp (ts, []) -> prts fmt ts
+  | CTyapp (ts, []) -> Pretty.print_ts fmt ts
   | cty -> fprintf fmt "(%a)" (pred_ty pred) cty
-
-and prts fmt ts =
-  if ts_equal ts ts_bool then fprintf fmt "Bool"
-  else if ts_equal ts ts_int then fprintf fmt "Z"
-  else Pretty.print_ts fmt ts
 
 and prarrow fmt pred =
   if pred then fprintf fmt "⇀"
   else fprintf fmt "⇁"
 
+(* Prints a type without outside parentheses *)
 let prty fmt ty =
   pred_ty (is_predicate ty) fmt ty
 
+(* Prints a type with outside parentheses if needed *)
 let prtyparen fmt ty =
   pred_typaren (is_predicate ty) fmt ty
 
@@ -154,7 +150,9 @@ let ge_str = op_infix ">="
 let lt_str = op_infix "<"
 let gt_str = op_infix ">"
 let pl_str = op_infix "+"
-let mn_str = op_infix "-"
+let ml_str = op_infix "*"
+let pre_mn_str = op_infix "-"
+let inf_mn_str = op_prefix "-"
 
 (** Utility functions on cterm *)
 
@@ -470,19 +468,39 @@ let instantiate f a =
 
 (* Typing algorithm *)
 
+let rec type_matching subst ty1 ty2 = match ty1, ty2 with
+  | CTprop, CTprop -> subst
+  | CTyvar v, _ ->
+      begin match Mtv.find_opt v subst with
+      | None -> Mtv.add v ty2 subst
+      | Some ty2' -> assert (cty_equal ty2 ty2'); subst end
+  | CTyapp (ts1, l1), CTyapp (ts2, l2) ->
+      assert (ts_equal ts1 ts2);
+      for_all2_type_matching subst l1 l2
+  | CTarrow (f1, a1), CTarrow (f2, a2) ->
+      for_all2_type_matching subst [f1; a1] [f2; a2]
+  | (CTyapp _ | CTarrow _ | CTprop), _ ->
+      assert false
 
-let unify susbt ty1 ty2 =
-  assert false (* TODO: w algo *)
+and for_all2_type_matching subst l1 l2 = match l1, l2 with
+  | [], [] -> subst
+  | h1::t1, h2::t2 ->
+      let subst = type_matching subst h1 h2 in
+      for_all2_type_matching subst t1 t2
+  | _ -> assert false
 
 
 let infer_type cta t =
   let rec infer_type sigma t = match t with
-    | CTfvar v -> Mid.find v sigma
-    | CTbvar _ -> assert false
+    | CTfvar v -> begin match Mid.find_opt v sigma with
+                  | Some ty -> ty
+                  | None -> failwith "Can't find variable in sigma" end
+    | CTbvar _ -> failwith "unbound variable"
     | CTtrue | CTfalse -> CTprop
     | CTnot t -> let ty = infer_type sigma t in
-                 assert (cty_equal ty CTprop);
-                 CTprop
+                 begin try assert (cty_equal ty CTprop);
+                     CTprop
+                 with _ -> failwith "not should apply on prop" end
     | CTquant (quant, ty1, t) ->
         let ni = id_register (id_fresh "type_ident") in
         let sigma = Mid.add ni ty1 sigma in
@@ -491,20 +509,23 @@ let infer_type cta t =
         begin match quant with
         | CTlambda -> CTarrow (ty1, ty2)
         | CTforall | CTexists ->
-            assert (cty_equal ty2 CTprop);
-            CTprop end
+            try assert (cty_equal ty2 CTprop);
+                CTprop
+            with _ -> failwith "quantification on non prop" end
+    | CTqtype (_, ct) -> infer_type sigma ct
     | CTapp (t1, t2) ->
         begin match infer_type sigma t1, infer_type sigma t2 with
         | CTarrow (ty1, ty2), ty3 ->
-            let subst = unify Mtv.empty ty1 ty3 in
+            let subst = type_matching Mtv.empty ty1 ty3 in
             cty_ty_subst subst ty2
-        | _ -> assert false end
+        | _ -> failwith "can't apply non functions"
+        end
     | CTbinop (_, t1, t2) ->
         let ty1, ty2 = infer_type sigma t1, infer_type sigma t2 in
-        assert (cty_equal ty1 CTprop);
-        assert (cty_equal ty2 CTprop);
-        CTprop
-    | CTqtype (_, ct) -> infer_type sigma ct
+        begin try assert (cty_equal ty1 CTprop);
+                  assert (cty_equal ty2 CTprop);
+                  CTprop
+              with _ -> failwith "binop on non prop" end
     | CTint _ -> ctint in
   let sigma_plus_interp = Mid.set_union cta.sigma cta.sigma_interp in
   infer_type sigma_plus_interp t
@@ -512,10 +533,11 @@ let infer_type cta t =
 let well_typed cta t =
   ignore (infer_type cta t)
 
-let infers_into cta t ty =
+let infers_into ?e_str:(s="") cta t ty =
   try assert (cty_equal (infer_type cta t) ty)
-  with e -> eprintf "@[<v>wrong type for: %a@ \
-                     expected: %a@]@." pcte t prty ty;
+  with e -> 
+    eprintf "@[<v>Checking %s: wrong type for %a@ \
+             expected: %a@]@." s pcte t prty ty;
             raise e
 
 let instantiate_safe cta f a =
