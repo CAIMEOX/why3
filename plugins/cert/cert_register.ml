@@ -19,18 +19,15 @@ let cert_dbg = Some eprcertif, None
 let cta_dbg = None, Some eplcta
 let all_dbg = Some eprcertif, Some eplcta
 
-type 'certif debug =
-  ('certif -> unit) option *
-  (ctask -> ctask list -> unit) option
-
 (** Get a certified transformation from a transformation with a certificate *)
 
 let checker_ctrans
       ?env
-      (debug : 'certif debug )
+      (debug :   (visible_cert -> unit) option *
+                 (kernel_ctask -> kernel_ctask list -> unit) option )
       (* is_lp *)
-      (checker : 'core_certif -> ctask -> ctask list -> unit)
-      (ctr : 'certif ctransformation)
+      (checker : kernel_ecert -> kernel_ctask -> kernel_ctask list -> unit)
+      (ctr : visible_cert ctransformation)
       (init_t : task) =
   try
     let dbg_cert, dbg_cta = debug in
@@ -41,9 +38,11 @@ let checker_ctrans
     let abstract_task = abstract_task env in
     let init_ct = abstract_task init_t in
     let res_ct = List.map abstract_task res_t in
+    let kernel_certif = make_kernel_cert init_ct res_t certif in
+    let init_ct = abstract_terms_task init_ct in
+    let res_ct = List.map abstract_terms_task res_ct in
     Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_cta;
-    let core_certif = make_core init_ct res_ct certif in
-    checker core_certif init_ct res_ct;
+    checker kernel_certif init_ct res_ct;
     (* let t3 = Unix.times () in *)
     (* let syst = if is_lp then "Lambdapi" else "OCaml" in *)
     (* eprintf "@[<v>temps de la transformation : %f@ \

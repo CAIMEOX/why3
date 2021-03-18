@@ -208,7 +208,7 @@ let neg_decompose_tg target =
                   [[create_prop_decl Pgoal pr t_false]],
                   Some (lambda one (fun i ->
                             Clear (pr,
-                            Assert (pr, t_false,
+                            Assert (pr, thunk t_false,
                                     Hole i,
                                     Trivial pr))))
               | Pgoal, Tfalse ->
@@ -293,7 +293,7 @@ let intro_tg target =
                           |> t_quant q in
                   [create_param_decl ls; create_prop_decl k pr f],
                   Some (lambda one (fun i ->
-                            IntroQuant (pr, ls.ls_name, Hole i)))
+                            IntroQuant (pr, t_app ls [] ls.ls_value, Hole i)))
               | [] -> assert false
               end
           | _ -> [d], None end
@@ -346,7 +346,7 @@ let cassert t : ctrans =
       let h = create_prsymbol (gen_ident "H") in
       let prg = task_goal task in
       Trans.apply (assert_h_t h t) task,
-      lambda two (fun i j -> Assert (h, t, Clear (prg, Hole i), Hole j)))
+      lambda two (fun i j -> Assert (h, thunk t, Clear (prg, Hole i), Hole j)))
 
 (* Instantiate with certificate *)
 
@@ -387,7 +387,7 @@ let exfalso : ctrans =
             | _ -> [decl]) None in
       let g = task_goal task in
       [Trans.apply trans task],
-      lambda one (fun i -> Assert (h, t_false, Clear (g, Hole i), Trivial h)))
+      lambda one (fun i -> Assert (h, thunk t_false, Clear (g, Hole i), Trivial h)))
 
 let case t : ctrans = Trans.store (fun task ->
   let h = create_prsymbol (gen_ident "H") in
@@ -399,7 +399,7 @@ let case t : ctrans = Trans.store (fun task ->
               [create_prop_decl Paxiom h (t_not t); decl] ]
         | _ -> [[decl]]) None in
   Trans.apply trans task,
-  lambda two (fun i j->  Assert (h, t_not t, Swap (h, Hole i), Hole j)))
+  lambda two (fun i j->  Assert (h, thunk (t_not t), Swap (h, Hole i), Hole j)))
 
 (* if formula <f> designed by <where> is a premise, dismiss the old
  goal and put <not f> in its place *)
@@ -443,7 +443,7 @@ let revert ls : ctrans =
       let prinst = create_prsymbol (gen_ident "Hinst") in
       [task],
       lambda one (fun i ->
-          Assert (gpr, close_t,
+          Assert (gpr, thunk close_t,
           Clear (idg, Hole i),
           InstQuant (gpr, prinst, x, Axiom (prinst, idg)))))
 
