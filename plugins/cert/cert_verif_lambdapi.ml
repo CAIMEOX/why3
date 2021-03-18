@@ -223,9 +223,8 @@ let print fmt init res (task_ids, certif) =
                @<3>%s@[<v>%a@]@];@."
     p_type ()
     "≔  "
-    p_term ();
-  forget_all ip;
-  forget_all hip
+    p_term ()
+
 
 let checker_lambdapi certif init res =
   try
