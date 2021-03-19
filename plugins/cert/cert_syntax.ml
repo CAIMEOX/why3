@@ -141,7 +141,7 @@ type cterm =
   | CTapp of cterm * cterm (* binary application *)
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
   | CTquant of cquant * ctype * cterm (* quantifier binding *)
-  | CTqtype of tvsymbol * cterm
+  | CTqtype of tvsymbol list * cterm
   (* type quantifier binding, they are assumed to only be in prenex form *)
   | CTnot of cterm
   | CTtrue
@@ -191,11 +191,18 @@ let rec ct_equal subst1 subst2 t1 t2 =
       let ty1 = cty_ty_subst subst1 ty1 in
       let ty2 = cty_ty_subst subst2 ty2 in
       cty_equal ty1 ty2 && ct_eq t1 t2
-  | CTqtype (tv1, t1), CTqtype (tv2, t2) ->
-      let tv = create_tvsymbol (id_fresh "cteq") in
-      let subst1 = Mtv.add tv1 (CTyvar tv) subst1 in
-      let subst2 = Mtv.add tv2 (CTyvar tv) subst2 in
-      ct_equal subst1 subst2 t1 t2
+  | CTqtype (l1, t1), CTqtype (l2, t2) ->
+      let rec find_subst subst1 subst2 l1 l2 = match l1, l2 with
+        | tv1::l1, tv2::l2 ->
+            let tv = create_tvsymbol (id_fresh "cteq") in
+            let subst1 = Mtv.add tv1 (CTyvar tv) subst1 in
+            let subst2 = Mtv.add tv2 (CTyvar tv) subst2 in
+            find_subst subst1 subst2 l1 l2
+        | [], [] -> subst1, subst2
+        | _ -> raise Not_found in
+      begin try let subst1, subst2 = find_subst subst1 subst2 l1 l2 in
+                ct_equal subst1 subst2 t1 t2
+      with Not_found -> false end
   | CTtrue, CTtrue | CTfalse, CTfalse -> true
   | CTnot t1, CTnot t2 -> ct_eq t1 t2
   | CTint i1, CTint i2 -> BigInt.eq i1 i2
@@ -410,7 +417,7 @@ let print_ctasks filename lcta =
     plcta lcta;
   close_out oc
 
-(** Utility functions on ctask *)
+(** Utility functions on ctask (used notably in caml checker) *)
 
 let ctask_equal cta1 cta2 =
   Mid.equal cty_same cta1.sigma cta2.sigma &&
@@ -434,22 +441,17 @@ let ctask_new get_ls types_interp sigma_interp =
     gamma_delta = Mid.empty }
 
 let lift_mid_cta f cta =
-  { cta with
-    gamma_delta = f (cta.gamma_delta) }
+  { cta with gamma_delta = f (cta.gamma_delta) }
 
 (* Make sure to not add interpreted types to the abstract types *)
 let add_type i cta =
-  { cta with
-    types = if Sid.mem i cta.types_interp
-            then cta.types
-            else Sid.add i cta.types  }
+  if Sid.mem i cta.types_interp then cta
+  else { cta with types = Sid.add i cta.types }
 
 (* Make sure to not add interpreted variables to the signature *)
 let add_var i cty cta =
-  { cta with
-    sigma = if Mid.mem i cta.sigma_interp
-            then cta.sigma
-            else Mid.add i cty cta.sigma  }
+  if Mid.mem i cta.sigma_interp then cta
+  else { cta with sigma = Mid.add i cty cta.sigma  }
 
 let remove i cta = lift_mid_cta (Mid.remove i) cta
 
