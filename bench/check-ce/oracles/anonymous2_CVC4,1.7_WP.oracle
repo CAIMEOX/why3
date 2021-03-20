@@ -11,7 +11,7 @@
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 9:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -103,7 +103,7 @@
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 9:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -210,7 +210,7 @@
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 9:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -316,7 +316,7 @@
   abstract: FAILURE, Abstract RAC confirms the counter-example
 File "bench/check-ce/anonymous2.mlw", line 9, characters 11-16:
 Goal Assertion from verification condition f'vc.
-Prover result is: Unknown (unknown + incomplete) (0.04s, 6026 steps).
+Prover result is: Unknown (unknown + incomplete) (0.05s, 6026 steps).
 The contracts of some function or loop are underspecified, for example during
   the following execution:
 File int.mlw:

@@ -133,7 +133,7 @@ Prover result is: Valid (0.01s, 24 steps).
 <check-ce>Validating model:
           File func_call1.mlw:
             Line 7:
-              z =
+              old z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -160,7 +160,7 @@ Prover result is: Valid (0.01s, 24 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "2"}}]}}
             Line 15:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -279,7 +279,7 @@ Prover result is: Valid (0.01s, 24 steps).
   abstract: FAILURE, Abstract RAC confirms the counter-example
 File "bench/check-ce/func_call1.mlw", line 15, characters 11-16:
 Goal Assertion from verification condition f'vc.
-Prover result is: Step limit exceeded (0.73s).
+Prover result is: Step limit exceeded (0.75s).
 The contracts of some function or loop are underspecified, for example during
   the following execution:
 File int.mlw:

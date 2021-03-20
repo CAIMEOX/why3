@@ -65,7 +65,7 @@
               x = {"type": "Integer", "val": "0"}
             Line 8:
               result = {"type": "Integer", "val": "2"}
-              x_vc_constant = {"type": "Integer", "val": "0"}
+              x = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
 <rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
 <rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
@@ -126,7 +126,7 @@
               x = {"type": "Integer", "val": "0"}
             Line 8:
               result = {"type": "Integer", "val": "2"}
-              x_vc_constant = {"type": "Integer", "val": "0"}
+              x = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
 <rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
 <rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
@@ -192,7 +192,7 @@
   abstract: UNKNOWN, Abstract RAC terminated because missing value for variable `result` at "bench/check-ce/multifile2.mlw", line 9, characters 2-8
 File "bench/check-ce/multifile2.mlw", line 8, characters 12-26:
 Goal Postcondition from verification condition f'vc.
-Prover result is: Unknown (sat) (0.01s, 866 steps).
+Prover result is: Unknown (sat) (0.02s, 866 steps).
 The following counterexample model could not be verified
   (Concrete RAC does not confirm the counter-example, no contradiction during execution, Abstract RAC terminated because missing value for variable `result` at "bench/check-ce/multifile2.mlw", line 9, characters 2-8):
 File multifile2.mlw:
@@ -279,7 +279,7 @@ File multifile2.mlw:
                 x = {"type": "Integer", "val": "0"}
               Line 13:
                 result = {"type": "Integer", "val": "1"}
-                x_vc_constant = {"type": "Integer", "val": "0"}
+                x = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
 <rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
 <rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
@@ -346,7 +346,7 @@ File multifile2.mlw:
                 x = {"type": "Integer", "val": "0"}
               Line 13:
                 result = {"type": "Integer", "val": "1"}
-                x_vc_constant = {"type": "Integer", "val": "0"}
+                x = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
 <rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
 <rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
@@ -414,7 +414,7 @@ File multifile2.mlw:
   abstract: UNKNOWN, Abstract RAC terminated because missing value for variable `result` at "bench/check-ce/multifile2.mlw", line 14, characters 2-8
 File "bench/check-ce/multifile2.mlw", line 13, characters 12-26:
 Goal Postcondition from verification condition g'vc.
-Prover result is: Unknown (sat) (0.01s, 878 steps).
+Prover result is: Unknown (sat) (0.00s, 878 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -496,7 +496,7 @@ File multifile2.mlw:
                 x = {"type": "Integer", "val": "0"}
               Line 19:
                 result = {"type": "Integer", "val": "1"}
-                x_vc_constant = {"type": "Integer", "val": "0"}
+                x = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
 <rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
 <rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
@@ -521,7 +521,7 @@ File multifile2.mlw:
                 x = {"type": "Integer", "val": "0"}
               Line 19:
                 result = {"type": "Integer", "val": "1"}
-                x_vc_constant = {"type": "Integer", "val": "0"}
+                x = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
 <rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
 <rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1

@@ -42,7 +42,7 @@
 <check-ce>Validating model:
           File func_call4.mlw:
             Line 7:
-              z =
+              old z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -167,7 +167,7 @@
   abstract: FAILURE, Abstract RAC confirms the counter-example
 File "bench/check-ce/func_call4.mlw", line 9, characters 34-39:
 Goal Assertion from verification condition f'vc.
-Prover result is: Step limit exceeded (0.75s).
+Prover result is: Step limit exceeded (0.79s).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:

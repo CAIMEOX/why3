@@ -1,16 +1,16 @@
 File "bench/check-ce/for1.mlw", line 7, characters 18-24:
 Goal Loop invariant init from verification condition f'vc.
-Prover result is: Valid (0.05s, 878 steps).
+Prover result is: Valid (0.04s, 878 steps).
 
 File "bench/check-ce/for1.mlw", line 7, characters 18-24:
 Goal Loop invariant preservation from verification condition f'vc.
-Prover result is: Valid (0.01s, 1191 steps).
+Prover result is: Valid (0.02s, 1191 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/for1.mlw", line 4, characters 12-22)
 <check-ce>Validating model:
           File for1.mlw:
             Line 4:
-              x_vc_constant =
+              x =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -115,7 +115,7 @@ Prover result is: Valid (0.01s, 1191 steps).
 <check-ce>Validating model:
           File for1.mlw:
             Line 4:
-              x_vc_constant =
+              x =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -220,7 +220,7 @@ Prover result is: Valid (0.01s, 1191 steps).
 <check-ce>Validating model:
           File for1.mlw:
             Line 4:
-              x_vc_constant =
+              x =
                 {"type": "Record",
                  "val":
                   {"Field":

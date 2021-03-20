@@ -1,6 +1,6 @@
 File "bench/check-ce/func_call5.mlw", line 8, characters 12-24:
 Goal Postcondition from verification condition g1'vc.
-Prover result is: Valid (0.04s, 899 steps).
+Prover result is: Valid (0.01s, 899 steps).
 
 File "bench/check-ce/func_call5.mlw", line 13, characters 10-14:
 Goal Precondition from verification condition f1'vc.
@@ -27,8 +27,8 @@ Prover result is: Valid (0.02s, 1094 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 14:
-              x_vc_constant = {"type": "Integer", "val": "0"}
-              z_vc_constant =
+              x = {"type": "Integer", "val": "0"}
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -102,8 +102,8 @@ Prover result is: Valid (0.02s, 1094 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "2"}}]}}
             Line 14:
-              x_vc_constant = {"type": "Integer", "val": "1"}
-              z_vc_constant =
+              x = {"type": "Integer", "val": "1"}
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -167,8 +167,8 @@ Prover result is: Valid (0.02s, 1094 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "2"}}]}}
             Line 14:
-              x_vc_constant = {"type": "Integer", "val": "1"}
-              z_vc_constant =
+              x = {"type": "Integer", "val": "1"}
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -223,20 +223,20 @@ Prover result is: Valid (0.02s, 1094 steps).
   abstract: UNKNOWN, Abstract RAC terminated because missing value for variable `result` at "bench/check-ce/func_call5.mlw", line 13, characters 10-14
 File "bench/check-ce/func_call5.mlw", line 14, characters 11-17:
 Goal Assertion from verification condition f1'vc.
-Prover result is: Unknown (unknown + incomplete) (0.04s, 6212 steps).
+Prover result is: Unknown (unknown + incomplete) (0.03s, 6212 steps).
 The following counterexample model could not be verified
   (Concrete RAC does not confirm the counter-example, no contradiction during execution, Abstract RAC terminated because missing value for variable `result` at "bench/check-ce/func_call5.mlw", line 13, characters 10-14):
 File func_call5.mlw:
   Line 8:
     x = 1
-    z = 2
+    z = {contents = 2}
   Line 11:
     x = 1
   Line 13:
-    z = 2
+    z = {contents = 2}
   Line 14:
     x = 1
-    z = 2
+    z = {contents = 2}
 
 <check-ce>Check model 0 ("bench/check-ce/func_call5.mlw", line 20, characters 11-17)
 <check-ce>Validating model:
@@ -244,7 +244,7 @@ File func_call5.mlw:
             Line 18:
               x = {"type": "Integer", "val": "0"}
             Line 20:
-              x_vc_constant = {"type": "Integer", "val": "0"}
+              x = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
 <rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
 <rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
@@ -317,7 +317,7 @@ File func_call5.mlw:
             Line 18:
               x = {"type": "Integer", "val": "0"}
             Line 20:
-              x_vc_constant = {"type": "Integer", "val": "0"}
+              x = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
 <rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
 <rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
@@ -390,7 +390,7 @@ File func_call5.mlw:
             Line 18:
               x = {"type": "Integer", "val": "0"}
             Line 20:
-              x_vc_constant = {"type": "Integer", "val": "0"}
+              x = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
 <rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
 <rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
@@ -469,7 +469,7 @@ File func_call5.mlw:
   abstract: FAILURE, Abstract RAC confirms the counter-example
 File "bench/check-ce/func_call5.mlw", line 20, characters 11-17:
 Goal Assertion from verification condition f2'vc.
-Prover result is: Unknown (unknown + incomplete) (0.03s, 5935 steps).
+Prover result is: Unknown (unknown + incomplete) (0.04s, 5935 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:

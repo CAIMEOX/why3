@@ -1,6 +1,6 @@
 File "bench/check-ce/for.mlw", line 8, characters 25-31:
 Goal Loop invariant init from verification condition f'vc.
-Prover result is: Valid (0.02s, 50 steps).
+Prover result is: Valid (0.00s, 50 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/for.mlw", line 8, characters 25-31)
 <check-ce>Validating model:
@@ -87,14 +87,14 @@ Prover result is: Valid (0.02s, 50 steps).
           File for.mlw:
             Line 7:
               i = {"type": "Integer", "val": "0"}
-              x1 =
+              [before iteration] x1 =
                 {"type": "Record",
                  "val":
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "-1"}}]}}
             Line 8:
-              x1_vc_constant =
+              x1 =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -186,17 +186,17 @@ Prover result is: Valid (0.02s, 50 steps).
   abstract: UNKNOWN, Abstract RAC terminated because missing value for variable `x2` at "bench/check-ce/for.mlw", line 7, characters 2-125
 File "bench/check-ce/for.mlw", line 8, characters 25-31:
 Goal Loop invariant preservation from verification condition f'vc.
-Prover result is: Step limit exceeded (0.87s).
+Prover result is: Step limit exceeded (1.19s).
 The following counterexample model could not be verified
   (Concrete RAC does not confirm the counter-example, no contradiction during execution, Abstract RAC terminated because missing value for variable `x2` at "bench/check-ce/for.mlw", line 7, characters 2-125):
 File for.mlw:
   Line 7:
-    [current iteration] i = 0
-    [before iteration] x1 = -1
+    i = 0
+    [before iteration] x1 = {contents = -1}
   Line 8:
-    [current iteration] x1 = 0
+    x1 = {contents = 0}
   Line 10:
-    [current iteration] x1 = 0
+    x1 = {contents = 0}
 
 File "bench/check-ce/for.mlw", line 8, characters 25-31:
 Goal Loop invariant preservation from verification condition f'vc.

@@ -2,17 +2,17 @@ File "bench/check-ce/func_call1.mlw", line 14, characters 6-7:
 warning: unused variable w
 File "bench/check-ce/func_call1.mlw", line 7, characters 12-21:
 Goal Postcondition from verification condition g'vc.
-Prover result is: Valid (0.05s, 1134 steps).
+Prover result is: Valid (0.02s, 1134 steps).
 
 File "bench/check-ce/func_call1.mlw", line 8, characters 12-26:
 Goal Postcondition from verification condition g'vc.
-Prover result is: Valid (0.02s, 901 steps).
+Prover result is: Valid (0.01s, 901 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/func_call1.mlw", line 15, characters 11-16)
 <check-ce>Validating model:
           File func_call1.mlw:
             Line 7:
-              z =
+              old z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -39,7 +39,7 @@ Prover result is: Valid (0.02s, 901 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 15:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -151,7 +151,7 @@ Prover result is: Valid (0.02s, 901 steps).
 <check-ce>Validating model:
           File func_call1.mlw:
             Line 7:
-              z =
+              old z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -178,7 +178,7 @@ Prover result is: Valid (0.02s, 901 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "2"}}]}}
             Line 15:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -292,7 +292,7 @@ Prover result is: Valid (0.02s, 901 steps).
 <check-ce>Validating model:
           File func_call1.mlw:
             Line 7:
-              z =
+              old z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -319,7 +319,7 @@ Prover result is: Valid (0.02s, 901 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "2"}}]}}
             Line 15:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":

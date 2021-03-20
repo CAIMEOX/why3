@@ -5,8 +5,8 @@
               a = {"type": "Integer", "val": "-2"}
               b = {"type": "Integer", "val": "-2"}
             Line 15:
-              a_vc_constant = {"type": "Integer", "val": "0"}
-              b_vc_constant = {"type": "Integer", "val": "0"}
+              a = {"type": "Integer", "val": "0"}
+              b = {"type": "Integer", "val": "0"}
 <check-ce>Interpreting concretly
 <rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
 <rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
@@ -71,8 +71,8 @@
               a = {"type": "Integer", "val": "2"}
               b = {"type": "Integer", "val": "2"}
             Line 15:
-              a_vc_constant = {"type": "Integer", "val": "2"}
-              b_vc_constant = {"type": "Integer", "val": "2"}
+              a = {"type": "Integer", "val": "2"}
+              b = {"type": "Integer", "val": "2"}
 <check-ce>Interpreting concretly
 <rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
 <rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
@@ -131,8 +131,8 @@
               a = {"type": "Integer", "val": "2"}
               b = {"type": "Integer", "val": "2"}
             Line 15:
-              a_vc_constant = {"type": "Integer", "val": "2"}
-              b_vc_constant = {"type": "Integer", "val": "2"}
+              a = {"type": "Integer", "val": "2"}
+              b = {"type": "Integer", "val": "2"}
 <check-ce>Interpreting concretly
 <rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
 <rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
@@ -196,7 +196,7 @@
   abstract: NORMAL, Abstract RAC does not confirm the counter-example, no contradiction during execution
 File "bench/check-ce/falseCE.mlw", line 15, characters 13-23:
 Goal Assertion from verification condition rsa'vc.
-Prover result is: Unknown (unknown + incomplete) (0.08s, 15056 steps).
+Prover result is: Unknown (unknown + incomplete) (0.05s, 15056 steps).
 Sorry, we don't have a good counterexample for you :(
 
 

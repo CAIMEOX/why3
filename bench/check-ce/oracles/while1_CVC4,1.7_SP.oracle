@@ -1,6 +1,6 @@
 File "bench/check-ce/while1.mlw", line 10, characters 18-24:
 Goal Loop invariant init from verification condition f'vc.
-Prover result is: Valid (0.05s, 859 steps).
+Prover result is: Valid (0.04s, 859 steps).
 
 File "bench/check-ce/while1.mlw", line 9, characters 16-21:
 Goal Loop variant decrease from verification condition f'vc.
@@ -14,7 +14,7 @@ Prover result is: Valid (0.02s, 1193 steps).
 <check-ce>Validating model:
           File while1.mlw:
             Line 5:
-              x_vc_constant =
+              x =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -185,7 +185,7 @@ Prover result is: Valid (0.02s, 1193 steps).
 <check-ce>Validating model:
           File while1.mlw:
             Line 5:
-              x_vc_constant =
+              x =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -347,7 +347,7 @@ Prover result is: Valid (0.02s, 1193 steps).
 <check-ce>Validating model:
           File while1.mlw:
             Line 5:
-              x_vc_constant =
+              x =
                 {"type": "Record",
                  "val":
                   {"Field":

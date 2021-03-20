@@ -1,6 +1,6 @@
 File "bench/check-ce/underspec.mlw", line 17, characters 27-33:
 Goal Loop invariant init from verification condition f'vc.
-Prover result is: Valid (0.03s, 50 steps).
+Prover result is: Valid (0.02s, 50 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/underspec.mlw", line 17, characters 27-33)
 <check-ce>Validating model:
@@ -87,14 +87,14 @@ Prover result is: Valid (0.03s, 50 steps).
           File underspec.mlw:
             Line 16:
               i = {"type": "Integer", "val": "0"}
-              x1 =
+              [before iteration] x1 =
                 {"type": "Record",
                  "val":
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "-1"}}]}}
             Line 17:
-              x1_vc_constant =
+              x1 =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -186,17 +186,17 @@ Prover result is: Valid (0.03s, 50 steps).
   abstract: UNKNOWN, Abstract RAC terminated because missing value for variable `x2` at "bench/check-ce/underspec.mlw", line 16, characters 4-139
 File "bench/check-ce/underspec.mlw", line 17, characters 27-33:
 Goal Loop invariant preservation from verification condition f'vc.
-Prover result is: Step limit exceeded (0.87s).
+Prover result is: Step limit exceeded (0.91s).
 The following counterexample model could not be verified
   (Concrete RAC does not confirm the counter-example, no contradiction during execution, Abstract RAC terminated because missing value for variable `x2` at "bench/check-ce/underspec.mlw", line 16, characters 4-139):
 File underspec.mlw:
   Line 16:
-    [current iteration] i = 0
-    [before iteration] x1 = -1
+    i = 0
+    [before iteration] x1 = {contents = -1}
   Line 17:
-    [current iteration] x1 = 0
+    x1 = {contents = 0}
   Line 19:
-    [current iteration] x1 = 0
+    x1 = {contents = 0}
 
 File "bench/check-ce/underspec.mlw", line 17, characters 27-33:
 Goal Loop invariant preservation from verification condition f'vc.
@@ -288,7 +288,7 @@ Prover result is: Valid (0.01s, 1545 steps).
 <check-ce>Validating model:
           File underspec.mlw:
             Line 41:
-              z =
+              old z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -315,7 +315,7 @@ Prover result is: Valid (0.01s, 1545 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "2"}}]}}
             Line 47:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -425,7 +425,7 @@ Prover result is: Valid (0.01s, 1545 steps).
   abstract: FAILURE, Abstract RAC confirms the counter-example
 File "bench/check-ce/underspec.mlw", line 47, characters 13-18:
 Goal Assertion from verification condition f'vc.
-Prover result is: Step limit exceeded (0.72s).
+Prover result is: Step limit exceeded (0.76s).
 The contracts of some function or loop are underspecified, for example during
   the following execution:
 File int.mlw:

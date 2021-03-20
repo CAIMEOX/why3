@@ -40,21 +40,20 @@ File loop_ce.mlw:
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "5"}}]}}
   Line 13:
-    [current iteration] a [@field:0:contents] [@introduced]
-      [@mlw:reference_var] [@model_trace:a] =
+    a [@field:0:contents] [@introduced] [@mlw:reference_var]
+      [@model_trace:a] =
       {"type": "Record",
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "1"}}]}}
-    [current iteration] b [@field:0:contents] [@introduced]
-      [@mlw:reference_var] [@model_trace:b] =
+    b [@field:0:contents] [@introduced] [@mlw:reference_var]
+      [@model_trace:b] =
       {"type": "Record",
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "6"}}]}}
   Line 14:
-    [current iteration] b [@field:0:contents] [@introduced]
-      [@mlw:reference_var] =
+    b [@field:0:contents] [@introduced] [@mlw:reference_var] =
       {"type": "Record",
        "val":
         {"Field":

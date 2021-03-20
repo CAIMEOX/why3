@@ -12,7 +12,7 @@ Prover result is: Valid (0.01s, 901 steps).
 <check-ce>Validating model:
           File func_call1.mlw:
             Line 7:
-              z =
+              old z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -39,7 +39,7 @@ Prover result is: Valid (0.01s, 901 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 15:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -151,7 +151,7 @@ Prover result is: Valid (0.01s, 901 steps).
 <check-ce>Validating model:
           File func_call1.mlw:
             Line 7:
-              z =
+              old z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -178,7 +178,7 @@ Prover result is: Valid (0.01s, 901 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "2"}}]}}
             Line 15:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -292,7 +292,7 @@ Prover result is: Valid (0.01s, 901 steps).
 <check-ce>Validating model:
           File func_call1.mlw:
             Line 7:
-              z =
+              old z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -319,7 +319,7 @@ Prover result is: Valid (0.01s, 901 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "2"}}]}}
             Line 15:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":

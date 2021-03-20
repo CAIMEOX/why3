@@ -23,7 +23,7 @@
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 12:
-              a_vc_constant =
+              a =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -115,7 +115,7 @@
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "3"}}]}}
             Line 12:
-              a_vc_constant =
+              a =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -248,7 +248,7 @@
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "3"}}]}}
             Line 12:
-              a_vc_constant =
+              a =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -440,7 +440,7 @@ File jlamp0.mlw:
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
-              a_vc_constant =
+              a =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -545,7 +545,7 @@ File jlamp0.mlw:
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "9"}}]}}
-              a_vc_constant =
+              a =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -751,7 +751,7 @@ File jlamp0.mlw:
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "9"}}]}}
-              a_vc_constant =
+              a =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -945,7 +945,7 @@ File jlamp0.mlw:
   abstract: FAILURE, Abstract RAC confirms the counter-example
 File "bench/check-ce/jlamp0.mlw", line 10, characters 15-29:
 Goal Postcondition from verification condition p1'vc.
-Prover result is: Unknown (unknown + incomplete) (0.04s, 6467 steps).
+Prover result is: Unknown (unknown + incomplete) (0.03s, 6467 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -1052,7 +1052,7 @@ File jlamp0.mlw:
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
-              a_vc_constant =
+              a =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -1150,7 +1150,7 @@ File jlamp0.mlw:
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "5"}}]}}
-              a_vc_constant =
+              a =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -1311,7 +1311,7 @@ File jlamp0.mlw:
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "5"}}]}}
-              a_vc_constant =
+              a =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -1539,7 +1539,7 @@ File jlamp0.mlw:
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 22:
-              c_vc_constant =
+              c =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -1622,7 +1622,7 @@ File jlamp0.mlw:
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "1"}}]}}
             Line 22:
-              c_vc_constant =
+              c =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -1740,7 +1740,7 @@ File jlamp0.mlw:
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "1"}}]}}
             Line 22:
-              c_vc_constant =
+              c =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -1919,13 +1919,13 @@ Prover result is: Valid (0.02s, 1180 steps).
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "0"}}]}}
               Line 21:
-                a =
+                [before iteration] a =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "0"}}]}}
-                c =
+                [before iteration] c =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -1938,7 +1938,7 @@ Prover result is: Valid (0.02s, 1180 steps).
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "0"}}]}}
-                c_vc_constant =
+                c =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -2043,13 +2043,13 @@ Prover result is: Valid (0.02s, 1180 steps).
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "1"}}]}}
               Line 21:
-                a =
+                [before iteration] a =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "3"}}]}}
-                c =
+                [before iteration] c =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -2062,7 +2062,7 @@ Prover result is: Valid (0.02s, 1180 steps).
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "4"}}]}}
-                c_vc_constant =
+                c =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -2202,13 +2202,13 @@ Prover result is: Valid (0.02s, 1180 steps).
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "1"}}]}}
               Line 21:
-                a =
+                [before iteration] a =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "3"}}]}}
-                c =
+                [before iteration] c =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -2221,7 +2221,7 @@ Prover result is: Valid (0.02s, 1180 steps).
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "4"}}]}}
-                c_vc_constant =
+                c =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -2347,7 +2347,7 @@ Prover result is: Valid (0.02s, 1180 steps).
   abstract: STUCK, Invalid assumption, abstract RAC found a contradiction for loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31, which doesn't match the VC goal
 File "bench/check-ce/jlamp0.mlw", line 24, characters 16-18:
 Goal Loop variant decrease from verification condition p2'vc.
-Prover result is: Unknown (unknown + incomplete) (0.03s, 6471 steps).
+Prover result is: Unknown (unknown + incomplete) (0.04s, 6471 steps).
 Sorry, we don't have a good counterexample for you :(
 
 
@@ -2377,20 +2377,20 @@ Sorry, we don't have a good counterexample for you :(
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "0"}}]}}
               Line 21:
-                a =
+                [before iteration] a =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "0"}}]}}
-                c =
+                [before iteration] c =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "0"}}]}}
               Line 22:
-                c_vc_constant =
+                c =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -2495,20 +2495,20 @@ Sorry, we don't have a good counterexample for you :(
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "1"}}]}}
               Line 21:
-                a =
+                [before iteration] a =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "3"}}]}}
-                c =
+                [before iteration] c =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "10"}}]}}
               Line 22:
-                c_vc_constant =
+                c =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -2648,20 +2648,20 @@ Sorry, we don't have a good counterexample for you :(
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "1"}}]}}
               Line 21:
-                a =
+                [before iteration] a =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "3"}}]}}
-                c =
+                [before iteration] c =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "10"}}]}}
               Line 22:
-                c_vc_constant =
+                c =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -2817,20 +2817,20 @@ Sorry, we don't have a good counterexample for you :(
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "0"}}]}}
               Line 21:
-                a =
+                [before iteration] a =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "0"}}]}}
-                c =
+                [before iteration] c =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "0"}}]}}
               Line 23:
-                a_vc_constant =
+                a =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -2935,20 +2935,20 @@ Sorry, we don't have a good counterexample for you :(
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "1"}}]}}
               Line 21:
-                a =
+                [before iteration] a =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "3"}}]}}
-                c =
+                [before iteration] c =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "8"}}]}}
               Line 23:
-                a_vc_constant =
+                a =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -3088,20 +3088,20 @@ Sorry, we don't have a good counterexample for you :(
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "1"}}]}}
               Line 21:
-                a =
+                [before iteration] a =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "3"}}]}}
-                c =
+                [before iteration] c =
                   {"type": "Record",
                    "val":
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "8"}}]}}
               Line 23:
-                a_vc_constant =
+                a =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -3256,7 +3256,7 @@ Sorry, we don't have a good counterexample for you :(
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "0"}}]}}
-                a_vc_constant =
+                a =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -3366,7 +3366,7 @@ Sorry, we don't have a good counterexample for you :(
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "3"}}]}}
-                a_vc_constant =
+                a =
                   {"type": "Record",
                    "val":
                     {"Field":
@@ -3511,7 +3511,7 @@ Sorry, we don't have a good counterexample for you :(
                     {"Field":
                       [{"field": "contents",
                         "value": {"type": "Integer", "val": "3"}}]}}
-                a_vc_constant =
+                a =
                   {"type": "Record",
                    "val":
                     {"Field":

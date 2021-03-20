@@ -40,7 +40,7 @@
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 9:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -143,7 +143,7 @@
   abstract: FAILURE, Abstract RAC confirms the counter-example
 File "bench/check-ce/anonymous2.mlw", line 9, characters 11-16:
 Goal Assertion from verification condition f'vc.
-Prover result is: Step limit exceeded (0.79s).
+Prover result is: Step limit exceeded (0.77s).
 The contracts of some function or loop are underspecified, for example during
   the following execution:
 File int.mlw:

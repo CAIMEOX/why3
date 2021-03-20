@@ -40,7 +40,7 @@
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 9:
-              z_vc_constant =
+              z =
                 {"type": "Record",
                  "val":
                   {"Field":

@@ -306,13 +306,13 @@ File record_one_field.mlw:
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "0"}}]}}
-    [current iteration] x [@introduced] [@model_trace:x] =
+    x [@introduced] [@model_trace:x] =
       {"type": "Record",
        "val":
         {"Field":
           [{"field": "contents", "value": {"type": "Integer", "val": "0"}}]}}
   Line 58:
-    [current iteration] x [@introduced] =
+    x [@introduced] =
       {"type": "Record",
        "val":
         {"Field":

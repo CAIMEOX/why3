@@ -1,6 +1,6 @@
 File "bench/check-ce/while1.mlw", line 10, characters 18-24:
 Goal Loop invariant init from verification condition f'vc.
-Prover result is: Valid (0.03s, 24 steps).
+Prover result is: Valid (0.01s, 24 steps).
 
 File "bench/check-ce/while1.mlw", line 9, characters 16-21:
 Goal Loop variant decrease from verification condition f'vc.
@@ -8,7 +8,7 @@ Prover result is: Valid (0.01s, 1775 steps).
 
 File "bench/check-ce/while1.mlw", line 10, characters 18-24:
 Goal Loop invariant preservation from verification condition f'vc.
-Prover result is: Valid (0.01s, 1646 steps).
+Prover result is: Valid (0.00s, 1646 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/while1.mlw", line 5, characters 12-22)
 <check-ce>Validating model:
@@ -119,7 +119,7 @@ Prover result is: Valid (0.01s, 1646 steps).
 <check-ce>Validating model:
           File while1.mlw:
             Line 5:
-              x_vc_constant =
+              x =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -286,7 +286,7 @@ Prover result is: Valid (0.01s, 1646 steps).
   abstract: FAILURE, Abstract RAC confirms the counter-example
 File "bench/check-ce/while1.mlw", line 5, characters 12-22:
 Goal Postcondition from verification condition f'vc.
-Prover result is: Step limit exceeded (0.93s).
+Prover result is: Step limit exceeded (0.92s).
 The contracts of some function or loop are underspecified, for example during
   the following execution:
 File int.mlw:

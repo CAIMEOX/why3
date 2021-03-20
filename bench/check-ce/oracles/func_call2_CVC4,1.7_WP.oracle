@@ -22,7 +22,7 @@ Prover result is: Valid (0.02s, 1137 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 8:
-              x_vc_constant = {"type": "Integer", "val": "0"}
+              x = {"type": "Integer", "val": "0"}
             Line 9:
               z =
                 {"type": "Record",
@@ -129,7 +129,7 @@ Prover result is: Valid (0.02s, 1137 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 8:
-              x_vc_constant = {"type": "Integer", "val": "0"}
+              x = {"type": "Integer", "val": "0"}
             Line 9:
               z =
                 {"type": "Record",
@@ -236,7 +236,7 @@ Prover result is: Valid (0.02s, 1137 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
             Line 8:
-              x_vc_constant = {"type": "Integer", "val": "0"}
+              x = {"type": "Integer", "val": "0"}
             Line 9:
               z =
                 {"type": "Record",

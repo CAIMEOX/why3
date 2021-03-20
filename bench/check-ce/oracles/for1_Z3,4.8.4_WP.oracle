@@ -4,7 +4,7 @@ Prover result is: Valid (0.01s, 25 steps).
 
 File "bench/check-ce/for1.mlw", line 7, characters 18-24:
 Goal Loop invariant preservation from verification condition f'vc.
-Prover result is: Valid (0.01s, 1593 steps).
+Prover result is: Valid (0.00s, 1593 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/for1.mlw", line 4, characters 12-22)
 <check-ce>Validating model:
@@ -110,7 +110,7 @@ Prover result is: Valid (0.01s, 1593 steps).
 <check-ce>Validating model:
           File for1.mlw:
             Line 4:
-              x_vc_constant =
+              x =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -220,7 +220,7 @@ Prover result is: Valid (0.01s, 1593 steps).
   abstract: FAILURE, Abstract RAC confirms the counter-example
 File "bench/check-ce/for1.mlw", line 4, characters 12-22:
 Goal Postcondition from verification condition f'vc.
-Prover result is: Step limit exceeded (0.91s).
+Prover result is: Step limit exceeded (0.92s).
 The contracts of some function or loop are underspecified, for example during
   the following execution:
 File int.mlw:
@@ -256,5 +256,5 @@ File for1.mlw:
 
 File "bench/check-ce/for1.mlw", line 4, characters 12-22:
 Goal Postcondition from verification condition f'vc.
-Prover result is: Valid (0.00s, 51 steps).
+Prover result is: Valid (0.01s, 51 steps).
 

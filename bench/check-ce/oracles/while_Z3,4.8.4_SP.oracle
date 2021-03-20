@@ -1,10 +1,10 @@
 File "bench/check-ce/while.mlw", line 10, characters 25-32:
 Goal Loop invariant init from verification condition f'vc.
-Prover result is: Valid (0.02s, 96 steps).
+Prover result is: Valid (0.03s, 96 steps).
 
 File "bench/check-ce/while.mlw", line 9, characters 14-19:
 Goal Loop variant decrease from verification condition f'vc.
-Prover result is: Valid (0.01s, 1788 steps).
+Prover result is: Valid (0.02s, 1788 steps).
 
 <check-ce>Check model 0 ("bench/check-ce/while.mlw", line 10, characters 25-32)
 <check-ce>Validating model:
@@ -33,7 +33,7 @@ Prover result is: Valid (0.01s, 1788 steps).
 <check-ce>Validating model:
           File while.mlw:
             Line 8:
-              i =
+              [before iteration] i =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -45,14 +45,14 @@ Prover result is: Valid (0.01s, 1788 steps).
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "0"}}]}}
-              x1 =
+              [before iteration] x1 =
                 {"type": "Record",
                  "val":
                   {"Field":
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "-2"}}]}}
             Line 10:
-              x1_vc_constant =
+              x1 =
                 {"type": "Record",
                  "val":
                   {"Field":
@@ -92,26 +92,26 @@ Prover result is: Valid (0.01s, 1788 steps).
   abstract: UNKNOWN, Abstract RAC terminated because missing value for parameter `z`
 File "bench/check-ce/while.mlw", line 10, characters 25-32:
 Goal Loop invariant preservation from verification condition f'vc.
-Prover result is: Step limit exceeded (0.93s).
+Prover result is: Step limit exceeded (1.04s).
 The following counterexample model could not be verified
   (Concrete RAC terminated because missing value for parameter `z`, Abstract RAC terminated because missing value for parameter `z`):
 File while.mlw:
   Line 8:
-    [before iteration] i = 0
-    [current iteration] i = 0
-    [before iteration] x1 = -2
+    [before iteration] i = {contents = 0}
+    i = {contents = 0}
+    [before iteration] x1 = {contents = -2}
   Line 10:
-    [current iteration] x1 = -1
+    x1 = {contents = -1}
   Line 12:
-    [current iteration] x1 = -1
+    x1 = {contents = -1}
   Line 15:
-    [current iteration] i = 1
+    i = {contents = 1}
 
 File "bench/check-ce/while.mlw", line 9, characters 14-19:
 Goal Loop variant decrease from verification condition f'vc.
-Prover result is: Valid (0.00s, 1785 steps).
+Prover result is: Valid (0.01s, 1785 steps).
 
 File "bench/check-ce/while.mlw", line 10, characters 25-32:
 Goal Loop invariant preservation from verification condition f'vc.
-Prover result is: Valid (0.01s, 1720 steps).
+Prover result is: Valid (0.00s, 1720 steps).
 
