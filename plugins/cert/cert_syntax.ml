@@ -345,13 +345,13 @@ and prpv fmt = function
 
    We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ>
 *)
-type ctask =
+type ('t, 'ty) ctask =
   { get_ident : string -> ident;
     types_interp : Sid.t;
     types : Sid.t;
-    sigma_interp : ctype Mid.t;
-    sigma : ctype Mid.t;
-    gamma_delta : (cterm * bool) Mid.t
+    sigma_interp : 'ty Mid.t;
+    sigma : 'ty Mid.t;
+    gamma_delta : ('t * bool) Mid.t
   }
 
 (** Pretty printing of ctask *)
@@ -463,7 +463,7 @@ let split_hyp_goal cta =
 
 (* Creates a new ctask with the same hypotheses but sets the goal with the
    second argument *)
-let set_goal : ctask -> cterm -> ctask = fun cta ->
+let set_goal cta =
   let gamma, delta = split_hyp_goal cta.gamma_delta in
   let gpr, _ = Mid.choose gamma in
   fun ct ->
