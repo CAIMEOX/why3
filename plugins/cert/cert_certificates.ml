@@ -275,20 +275,25 @@ type ('i, 't, 'ty) ecert =
   (* EInstQuant (true, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x) ≜
      c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p t)
      and Σ ⊩ t : τ *)
-  | ERewrite of bool * bool * 'ty * 't * 't * 't * 'i * 'i * ('i, 't, 'ty) ecert
-  (* ERewrite (true, true, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
+  | ERewrite of bool * 't option * 'ty * 't * 't * 't * 'i * 'i
+                * ('i, 't, 'ty) ecert
+  (* ERewrite (true, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
      c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
-  (* ERewrite (false, true, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
+  (* ERewrite (false, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
-  (* ERewrite (true, false, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
+  (* ERewrite (true, _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
      c ⇓ (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
-  (* ERewrite (false, false, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
+  (* ERewrite (false, _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
-  | EInduction of 'i * 'i * 'i * 'i * 't * 't * 't * ('i, 't, 'ty) ecert * ('i, 't, 'ty) ecert
+  (* Second argument is None when working with an equality, and Some ls when
+     working with an equivalence. The lsymbol ls is used to bind the ctxt (which
+     is not possible in Why3) *)
+  | EInduction of 'i * 'i * 'i * 'i * 't * 't * 't
+                  * ('i, 't, 'ty) ecert * ('i, 't, 'ty) ecert
 (* EInduction (G, Hi₁, Hi₂, Hr, x, a, ctxt, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
    c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
    and c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
@@ -456,14 +461,22 @@ let propagate_ecert fc fi ft fty = function
       EIntroQuant (pos, fty ty, ft p, fi i, ft y, fc c)
   | EInstQuant (pos, ty, p, i, j, t, c) ->
       EInstQuant (pos, fty ty, ft p, fi i, fi j, ft t, fc c)
-  | ERewrite (pos, is_eq, ty, a, b, ctxt, i, h, c) ->
-      ERewrite (pos, is_eq, fty ty, ft a, ft b, ft ctxt, fi i, fi h, fc c)
+  | ERewrite (pos, topt, ty, a, b, ctxt, i, h, c) ->
+      ERewrite (pos, Opt.map ft topt, fty ty, ft a, ft b, ft ctxt, fi i, fi h, fc c)
   | EInduction (i1, i2, i3, i4, n, t, ctxt, c1, c2) ->
       EInduction (fi i1, fi i2, fi i3, fi i4, ft n, ft t, ft ctxt, fc c1, fc c2)
 
-let rec abstract_ecert c =
-  propagate_ecert abstract_ecert
-    (fun id -> id) abstract_term abstract_otype c
+let rec abstract_ecert = function
+  | ERewrite (pos, Some {t_node = Tapp (ls, [])}, None, a, b, ctxt, i, h, c) ->
+      let ntls = CTfvar ls.ls_name in
+      let cctxt = abstract_term ctxt in
+      let nctxt = CTquant (CTlambda, CTprop, ct_close ls.ls_name cctxt) in
+      let na = abstract_term a in
+      let nb = abstract_term b in
+      let nc = abstract_ecert c in
+      ERewrite (pos, Some ntls, CTprop, na, nb, nctxt, i, h, nc)
+  | c -> propagate_ecert abstract_ecert
+           (fun id -> id) abstract_term abstract_otype c
 
 (** Compile chain.
     1. visible_cert
@@ -663,19 +676,28 @@ let elaborate init_ct c =
                  raise Elaboration_failed end
     | Rewrite (i1, i2, c) ->
         let rew_hyp, _ = find_ident "Finding rewrite hypothesis" i1 cta in
-        let a, b, ty = match rew_hyp.t_node with
-          (* | Tbinop (Tiff, a, b) -> a, b, false *)
-          (* disabled for now *)
+        let a, b, is_eq = match rew_hyp.t_node with
+          | Tbinop (Tiff, a, b) -> a, b, false
           | Tapp (f, [a; b]) when ls_equal f ps_equ && a.t_ty <> None ->
-              a, b, Opt.get a.t_ty
+              a, b, true
           | _ -> eprintf "Bad rewrite hypothesis@.";
                  raise Elaboration_failed in
         let t, pos = find_ident "Finding to be rewritten goal" i2 cta in
-        let vs = create_vsymbol (id_fresh "ctxt_var") ty in
-        let vst = t_var vs in
-        let ctxt = t_eps (t_close_bound vs (t_replace a vst t)) in
         let cta = add i2 (t_replace a b t, pos) cta in
-        ERewrite (pos, true, Some ty, a, b, ctxt, i1, i2, elab cta c)
+        let c = elab cta c in
+        let id = id_fresh "ctxt_var" in
+        if is_eq
+        then
+          let ty = Opt.get a.t_ty in
+          let vs = create_vsymbol id ty in
+          let vst = t_var vs in
+          let ctxt = t_eps (t_close_bound vs (t_replace a vst t)) in
+          ERewrite (pos, None, Some ty, a, b, ctxt, i1, i2, c)
+        else
+          let t_r = t_app (create_psymbol id []) [] None in
+          let ctxt = t_replace a t_r t in
+          ERewrite (pos, Some t_r, None, a, b, ctxt, i1, i2, c)
+
     | Induction (g, hi1, hi2, hr, x, a, c1, c2) ->
         let a = a map in
         let le = cta.get_ls le_str in
@@ -757,7 +779,7 @@ let rec trim_certif c =
       let h, g, a, b = if pos then i, j, t2, t1 else j, i, t1, t2 in
       (* We want to close a task of the form <Γ, h : a = b ⊢ Δ, g : b = a> *)
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq, b), CTbvar 0)) in
-      let c_closed = ERewrite (not pos, true, cty, a, b, ctxt, h, g,
+      let c_closed = ERewrite (not pos, None, cty, a, b, ctxt, h, g,
                                EEqRefl (cty, b, g)) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
       erename pos pre i j @@
@@ -766,7 +788,7 @@ let rec trim_certif c =
       let c = trim_certif c in
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq, t1), CTbvar 0)) in
       eduplicate false (CTapp (CTapp (eq, t1), t2)) i1 i3 @@
-        ERewrite (false, true, cty, t2, t3, ctxt, i2, i3, c)
+        ERewrite (false, None, cty, t2, t3, ctxt, i2, i3, c)
   | _ -> propagate_ecert trim_certif (fun t -> t) (fun i -> i) (fun ty -> ty) c
 
 let make_kernel_cert init_ct _res_ct
