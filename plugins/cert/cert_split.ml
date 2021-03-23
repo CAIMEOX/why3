@@ -7,6 +7,7 @@ open Term
 open Decl
 
 open Cert_certificates
+open Cert_trans_utils
 
 type split = {
   right_only : bool;
@@ -253,7 +254,7 @@ let destruct_reconstruct pr c1 c2 =
   lambda one (fun i -> Destruct (pr, pr, pr2, Hole i))
   |>> c1
   ||> fun () -> lambda one (fun i -> rename pr pr1 (rename pr2 pr (Hole i)))
-  ||> thunk c2
+  ||> refresh c2
   ||> fun () -> lambda one (fun i -> Construct (pr1, pr, pr, Hole i))
 
 let find_pr mon =
@@ -281,7 +282,7 @@ let add find_a find_b what is_a c (pr, t) =
     | AddAnd -> c, dest
     | AddOr  -> dest, c
     | AddImplies -> Unfold (pr, dest), c in
-  Assert (pr, t, c1, c2)
+  Assert (pr, thunk t, c1, c2)
 
 let add_all mon_a mon_b mon_res what is_a c =
   let find_a = find_pr mon_a in

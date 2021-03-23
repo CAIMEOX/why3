@@ -346,13 +346,15 @@ and prpv fmt = function
    We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ>
 *)
 type ('t, 'ty) ctask =
-  { get_ident : string -> ident;
+  { get_ls : string -> lsymbol;
     types_interp : Sid.t;
     types : Sid.t;
     sigma_interp : 'ty Mid.t;
     sigma : 'ty Mid.t;
     gamma_delta : ('t * bool) Mid.t
   }
+
+type kernel_ctask = (cterm, ctype) ctask
 
 (** Pretty printing of ctask *)
 
@@ -422,8 +424,8 @@ let find_ident s h cta =
       let s = asprintf "%s : Can't find ident %a in the task" s prhyp h in
       verif_failed s
 
-let ctask_new get_ident types_interp sigma_interp =
-  { get_ident;
+let ctask_new get_ls types_interp sigma_interp =
+  { get_ls;
     types_interp;
     types = Sid.empty;
     sigma_interp;

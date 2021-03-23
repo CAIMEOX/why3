@@ -22,7 +22,7 @@ type ctask_simple =
     s  : (ident * ctype) list;
     gd : (ident * cterm) list }
 
-let simplify_task (cta : ctask) : ctask_simple =
+let simplify_task cta : ctask_simple =
   let encode_neg (k, (ct, pos)) = k, if pos then CTnot ct else ct in
   { t = Sid.elements cta.types;
     s = Mid.bindings cta.sigma;
@@ -139,16 +139,15 @@ let print_certif print_next fmt c =
         prpv t
         prhyp i
         pc c
-  | EIntroQuant (pos, (CTquant (_, cty, _) as p), i, y, c) ->
+  | EIntroQuant (pos, cty, p, i, y, c) ->
       fprintf fmt "intro_quant%s %a %a (λ %a %a,@ \
                    @[<hv>%a@]) %a"
         (rstr pos)
         prtyparen cty
         prpv p
-        prid y prhyp i pc c
+        prpv y prhyp i pc c
         prhyp i
-  | EIntroQuant _ -> assert false
-  | EInstQuant (pos, (CTquant (_, cty, _) as p), i1, i2, t, c) ->
+  | EInstQuant (pos, cty, p, i1, i2, t, c) ->
       fprintf fmt "inst_quant%s %a %a %a (λ %a %a,@ \
                    @[<hv>%a@]) %a"
         (rstr pos)
@@ -157,7 +156,6 @@ let print_certif print_next fmt c =
         prpv t
         prhyp i1 prhyp i2 pc c
         prhyp i1
-  | EInstQuant _ -> assert false
   | ERewrite (pos, is_eq, cty, t1, t2, ctxt, i1, i2, c) ->
       let pr_next fmt i1 =
         fprintf fmt "%a %a %a (λ %a %a,@ \
@@ -176,15 +174,15 @@ let print_certif print_next fmt c =
           prpv t1 prpv t2 prhyp ni1
           (rstr pos) pr_next ni1
           prhyp i1
-  | EInduction (g, hi1, hi2, hr, ix, a, ctxt, c1, c2) ->
+  | EInduction (g, hi1, hi2, hr, x, a, ctxt, c1, c2) ->
       fprintf fmt "strong_induction %a %a@ \
                    @[<hv 3>(λ %a %a %a,@ %a)@]@ \
                    @[<hv 3>(λ %a %a %a %a,@ %a)@]@ \
                    %a %a"
         prpv a prpv ctxt
-        prid ix prhyp hi1 prhyp g pc c1
-        prid ix prhyp hi2 prhyp hr prhyp g pc c2
-        prid ix prhyp g
+        prpv x prhyp hi1 prhyp g pc c1
+        prpv x prhyp hi2 prhyp hr prhyp g pc c2
+        prpv x prhyp g
   in
   pc fmt c
 

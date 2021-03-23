@@ -7,6 +7,8 @@ open Task
 
 open Cert_certificates
 
+let thunk t _ = t
+
 let decl_cert f = Trans.decl_acc (hole ()) (|>>) (fun d _ -> f d)
 let decl_l_cert f = Trans.decl_l_acc (hole ()) (|>>) (fun d _ -> f d)
 
@@ -124,14 +126,14 @@ let revert_cert pr decls =
 
 let intro_cert pr decls =
   lambda one (fun i ->
-      let rec ic decls = match decls with
+      let rec ic decls : (prsymbol, term) cert = match decls with
         |  [] -> Hole i
         |  {d_node = Dparam _}::_ ->
             let rec intro_decls_var acc = function
               | {d_node = Dparam ls} :: l -> intro_decls_var (ls::acc) l
               | l -> List.rev acc, l in
             let lls, decls = intro_decls_var [] decls in
-            List.fold_right (fun ls c -> IntroQuant (pr, ls.ls_name, c))
+            List.fold_right (fun ls c -> IntroQuant (pr, t_app ls [] ls.ls_value, c))
               lls (ic decls)
         | {d_node = Dprop (_, npr, _)}::decls ->
             Unfold (pr,
