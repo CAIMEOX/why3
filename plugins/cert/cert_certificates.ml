@@ -663,11 +663,12 @@ let elaborate init_ct c =
                  raise Elaboration_failed end
     | Rewrite (i1, i2, c) ->
         let rew_hyp, _ = find_ident "Finding rewrite hypothesis" i1 cta in
-        let a, b, ty = match rew_hyp.t_node, rew_hyp.t_ty with
+        let a, b, ty = match rew_hyp.t_node with
           (* | Tbinop (Tiff, a, b) -> a, b, false *)
           (* disabled for now *)
-          | Tapp (f, [a; b]), Some ty when ls_equal f ps_equ -> a, b, ty
-          | _ -> eprintf "Bad rewrite hypothesis";
+          | Tapp (f, [a; b]) when ls_equal f ps_equ && a.t_ty <> None ->
+              a, b, Opt.get a.t_ty
+          | _ -> eprintf "Bad rewrite hypothesis@.";
                  raise Elaboration_failed in
         let t, pos = find_ident "Finding to be rewritten goal" i2 cta in
         let vs = create_vsymbol (id_fresh "ctxt_var") ty in
