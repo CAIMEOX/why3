@@ -443,7 +443,7 @@ let revert ls : ctrans =
       let prinst = create_prsymbol (gen_ident "Hinst") in
       [task],
       lambda one (fun i ->
-          Assert (gpr, thunk (close_t),
+          Assert (gpr, thunk close_t,
           Clear (idg, Hole i),
           InstQuant (gpr, prinst, x, Axiom (prinst, idg)))))
 

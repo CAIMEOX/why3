@@ -540,7 +540,7 @@ let well_typed cta t =
 
 let infers_into ?e_str:(s="") cta t ty =
   try assert (cty_equal (infer_type cta t) ty)
-  with e -> 
+  with e ->
     eprintf "@[<v>Checking %s: wrong type for %a@ \
              expected: %a@]@." s pcte t prty ty;
             raise e
