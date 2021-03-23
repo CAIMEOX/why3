@@ -309,7 +309,7 @@ let induction x bound env =
           hr = get acc.hr and rev = acc.reverted in
       let c = revert_cert g rev
               |>> lambda two (fun j1 j2 ->
-                      Induction (g, hi1, hi2, hr, x, bound, Hole j1, Hole j2))
+                      Induction (g, hi1, hi2, hr, x, thunk bound, Hole j1, Hole j2))
               ||> thunk (intro_cert g rev) in
       [ti; tr], c)
 
