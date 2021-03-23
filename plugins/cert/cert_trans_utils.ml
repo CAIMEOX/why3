@@ -7,6 +7,8 @@ open Task
 
 open Cert_certificates
 
+let thunk t _ = t
+
 let decl_cert f = Trans.decl_acc (hole ()) (|>>) (fun d _ -> f d)
 let decl_l_cert f = Trans.decl_l_acc (hole ()) (|>>) (fun d _ -> f d)
 
@@ -111,26 +113,27 @@ let revert_cert pr decls =
             | Dparam ls ->
                 let pr' = pr_clone pr in
                 llet pr (fun g ->
-                    let ix = id_fresh ls.ls_name.id_string in
-                    let x = create_vsymbol ix (Opt.get ls.ls_value) in
-                    let vx = t_var x in
-                    let g = t_replace (t_app_infer ls []) vx g in
-                    let closed_t = t_forall_close [x] [] g in
+                    let tx = t_app_infer ls [] in
+                    let ix' = id_fresh ls.ls_name.id_string in
+                    let x' = create_vsymbol ix' (Opt.get ls.ls_value) in
+                    let closed_t map =
+                      let g = t_replace tx (t_var x') (Mid.find g map) in
+                      t_forall_close [x'] [] g in
                     Assert (pr', closed_t, Clear (pr, rename pr' pr (rc tail)),
-                            InstQuant (pr', pr', vx, Axiom (pr', pr))))
+                            InstQuant (pr', pr', tx, Axiom (pr', pr))))
             | _ -> assert false in
       rc decls)
 
 let intro_cert pr decls =
   lambda one (fun i ->
-      let rec ic decls = match decls with
+      let rec ic decls : (prsymbol, term) cert = match decls with
         |  [] -> Hole i
         |  {d_node = Dparam _}::_ ->
             let rec intro_decls_var acc = function
               | {d_node = Dparam ls} :: l -> intro_decls_var (ls::acc) l
               | l -> List.rev acc, l in
             let lls, decls = intro_decls_var [] decls in
-            List.fold_right (fun ls c -> IntroQuant (pr, ls.ls_name, c))
+            List.fold_right (fun ls c -> IntroQuant (pr, t_app ls [] ls.ls_value, c))
               lls (ic decls)
         | {d_node = Dprop (_, npr, _)}::decls ->
             Unfold (pr,

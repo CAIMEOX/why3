@@ -1,4 +1,5 @@
 open Why3
+open Ident
 open Task
 
 open Cert_syntax
@@ -18,41 +19,47 @@ let cert_dbg = Some eprcertif, None
 let cta_dbg = None, Some eplcta
 let all_dbg = Some eprcertif, Some eplcta
 
-type 'certif debug =
-  ('certif -> unit) option *
-  (ctask -> ctask list -> unit) option
-
 (** Get a certified transformation from a transformation with a certificate *)
 
 let checker_ctrans
       ?env
-      (debug : 'certif debug )
+      (debug :   (visible_cert -> unit) option *
+                 (kernel_ctask -> kernel_ctask list -> unit) option )
       (* is_lp *)
-      (checker : 'core_certif -> ctask -> ctask list -> unit)
-      (ctr : 'certif ctransformation)
+      (checker : kernel_ecert -> kernel_ctask -> kernel_ctask list -> unit)
+      (ctr : visible_cert ctransformation)
       (init_t : task) =
-  let dbg_cert, dbg_cta = debug in
-  (* let t1 = Unix.times () in *)
-  let res_t, certif = Trans.apply ctr init_t in
-  (* let t2 = Unix.times () in *)
-  Opt.iter (fun eprcertif -> eprcertif certif) dbg_cert;
-  let abstract_task = abstract_task env in
-  let init_ct = abstract_task init_t in
-  let res_ct = List.map abstract_task res_t in
-  Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_cta;
-  let core_certif = make_core init_ct res_ct certif in
-  checker core_certif init_ct res_ct;
-  (* let t3 = Unix.times () in *)
-  (* let syst = if is_lp then "Lambdapi" else "OCaml" in *)
-  (* eprintf "@[<v>temps de la transformation : %f@ \
-   *          temps de la transformation (fils) : %f@ \
-   *          temps du %s-checker : %f@ \
-   *          temps du %s-checker (fils): %f@ @]"
-   *          (t2.Unix.tms_utime-.t1.Unix.tms_utime +. t2.Unix.tms_stime -. t1.Unix.tms_stime)
-   *          (t2.Unix.tms_cutime-.t1.Unix.tms_cutime +. t2.Unix.tms_cstime -. t1.Unix.tms_cstime)
-   *          syst (t3.Unix.tms_utime-.t2.Unix.tms_utime +. t3.Unix.tms_stime -. t2.Unix.tms_stime)
-   *          syst (t3.Unix.tms_cutime-.t2.Unix.tms_cutime +. t3.Unix.tms_cstime -. t2.Unix.tms_cstime); *)
-  res_t
+  try
+    let dbg_cert, dbg_cta = debug in
+    (* let t1 = Unix.times () in *)
+    let res_t, certif = Trans.apply ctr init_t in
+    (* let t2 = Unix.times () in *)
+    Opt.iter (fun eprcertif -> eprcertif certif) dbg_cert;
+    let abstract_task = abstract_task env in
+    let init_ct = abstract_task init_t in
+    let res_ct = List.map abstract_task res_t in
+    let kernel_certif = make_kernel_cert init_ct res_t certif in
+    let init_ct = abstract_terms_task init_ct in
+    let res_ct = List.map abstract_terms_task res_ct in
+    Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_cta;
+    checker kernel_certif init_ct res_ct;
+    (* let t3 = Unix.times () in *)
+    (* let syst = if is_lp then "Lambdapi" else "OCaml" in *)
+    (* eprintf "@[<v>temps de la transformation : %f@ \
+     *          temps de la transformation (fils) : %f@ \
+     *          temps du %s-checker : %f@ \
+     *          temps du %s-checker (fils): %f@ @]"
+     *          (t2.Unix.tms_utime-.t1.Unix.tms_utime +. t2.Unix.tms_stime -. t1.Unix.tms_stime)
+     *          (t2.Unix.tms_cutime-.t1.Unix.tms_cutime +. t2.Unix.tms_cstime -. t1.Unix.tms_cstime)
+     *          syst (t3.Unix.tms_utime-.t2.Unix.tms_utime +. t3.Unix.tms_stime -. t2.Unix.tms_stime)
+     *          syst (t3.Unix.tms_cutime-.t2.Unix.tms_cutime +. t3.Unix.tms_cstime -. t2.Unix.tms_cstime); *)
+    forget_all ip;
+    forget_all hip;
+    res_t
+  with e -> forget_all ip;
+            forget_all hip;
+            raise e
+
 
 
 let cchecker ?env trans =
