@@ -164,16 +164,17 @@ let print_certif print_next fmt c =
           prhyp i1 prhyp i2 pc c
           prhyp i1
           prhyp i2 in
-      if is_eq
-      then fprintf fmt "rewrite%s %a %a"
-             (rstr pos) prtyparen cty pr_next i1
-      else
-        let ni1 = id_register (id_fresh "iff_rewrite") in
-        fprintf fmt "iffeq %a %a (λ %a,@ \
-                     @[<hv>rewrite_fmla%s %a@]) %a"
-          prpv t1 prpv t2 prhyp ni1
-          (rstr pos) pr_next ni1
-          prhyp i1
+      begin match is_eq with
+      | None ->
+          fprintf fmt "rewrite%s %a %a"
+            (rstr pos) prtyparen cty pr_next i1
+      | Some _ ->
+          let ni1 = id_register (id_fresh "iff_rewrite") in
+          fprintf fmt "iffeq %a %a (λ %a,@ \
+                       @[<hv>rewrite_fmla%s %a@]) %a"
+            prpv t1 prpv t2 prhyp ni1
+            (rstr pos) pr_next ni1
+            prhyp i1 end
   | EInduction (g, hi1, hi2, hr, x, a, ctxt, c1, c2) ->
       fprintf fmt "strong_induction %a %a@ \
                    @[<hv 3>(λ %a %a %a,@ %a)@]@ \
