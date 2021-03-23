@@ -511,11 +511,7 @@ let elaborate init_ct c =
         let t1, pos1 = find_ident "Axiom" i1 cta in
         let t2, pos2 = find_ident "Axiom" i2 cta in
         assert (pos1 <> pos2);
-        begin try assert (t_equal t1 t2); ()
-              with _ -> eprintf "@[<v>t1 : %a@ \
-                                 t2 : %a@]@."
-                          Pretty.print_term t1
-                          Pretty.print_term t2 end;
+        assert (t_equal t1 t2);
         let i1, i2 = if pos2 then i1, i2 else i2, i1 in
         EAxiom (t1, i1, i2)
     | Trivial i ->
@@ -684,10 +680,8 @@ let elaborate init_ct c =
         let le = cta.get_ls le_str in
         let lt = cta.get_ls lt_str in
         let t, _ = find_ident "induction" g cta in
-        let vsx = match x.t_node with
-          | Tvar vsx -> vsx
-          | _ -> raise Elaboration_failed in
-        let ctxt = t_eps (t_close_bound vsx t) in
+        let vsx = create_vsymbol (id_fresh "ctxt_var_induction") ty_int in
+        let ctxt = t_eps (t_close_bound vsx (t_replace x (t_var vsx) t)) in
         let cta1 = add hi1 (t_app le [x; a] None, false) cta in
         let vsn = create_vsymbol (id_fresh "ctxt_var") ty_int in
         let n = t_var vsn in
