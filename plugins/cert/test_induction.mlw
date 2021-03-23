@@ -20,5 +20,12 @@ axiom H3 : q i -> r x_file
 
 goal G3 : p i
 
+let rec function sum (n : int)
+    requires { n >= 0 }
+    variant { n }
+    =
+    if n = 0 then 0
+    else n + sum (n-1)
 
+goal G4 : forall n. n >= 0 -> 2 * sum n = n * (n+1)
 
