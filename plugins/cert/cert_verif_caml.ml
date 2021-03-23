@@ -132,7 +132,7 @@ let rec ccheck c cta =
       let t, pos = find_ident "inst_quant" i cta in
       begin match t, pos with
       | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true ->
-          infers_into ~e_str:"EInstquant" cta t_inst ty;
+          infers_into cta t_inst ty;
           let cta = add j (ct_open t t_inst, pos) cta in
           ccheck c cta
       | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
@@ -160,8 +160,8 @@ let rec ccheck c cta =
         with Found -> true in
       (* check that we are in the case of application and that we preserve
          typing *)
-      infers_into ~e_str:"EInduction, var" cta x ctint;
-      infers_into ~e_str:"EInduction, bound" cta a ctint;
+      infers_into cta x ctint;
+      infers_into cta a ctint;
       assert (ct_equal t (instantiate_safe cta ctxt x));
       assert (not (has_term_cta x cta) && pos);
       let cta1 = add hi1 (CTapp (CTapp (le, x), a), false) cta in

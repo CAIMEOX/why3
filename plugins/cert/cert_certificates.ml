@@ -487,13 +487,10 @@ let rec abstract_ecert c =
 
 exception Elaboration_failed
 
-let t_open_quant_with q tq t = match t_open_quant tq with
-  | vs::vsl,trg,t_open ->
-      let nt = t_subst_single vs t t_open in
-      let nt = t_close_quant vsl trg nt in
-      let nt = t_quant q nt in
-      let ty = vs.vs_ty in
-      q, ty, nt
+let t_open_quant_one q tq = match t_open_quant tq with
+  | vs::vsl, trg, t_open ->
+      let nt = t_quant q (t_close_quant vsl trg t_open) in
+      vs, nt
   | _ -> raise Elaboration_failed
 
 
@@ -513,7 +510,12 @@ let elaborate init_ct c =
     | Axiom (i1, i2) ->
         let t1, pos1 = find_ident "Axiom" i1 cta in
         let t2, pos2 = find_ident "Axiom" i2 cta in
-        assert (pos1 <> pos2 && t_equal t1 t2);
+        assert (pos1 <> pos2);
+        begin try assert (t_equal t1 t2); ()
+              with _ -> eprintf "@[<v>t1 : %a@ \
+                                 t2 : %a@]@."
+                          Pretty.print_term t1
+                          Pretty.print_term t2 end;
         let i1, i2 = if pos2 then i1, i2 else i2, i1 in
         EAxiom (t1, i1, i2)
     | Trivial i ->
@@ -642,21 +644,27 @@ let elaborate init_ct c =
         EDuplicate (pos, t, i1, i2, elab cta c)
     | IntroQuant (i, y, c) ->
         let t, pos = find_ident "IntroQuant" i cta in
-        let (_, ty, t), idy = match t.t_node, y.t_node with
+        begin match t.t_node, y.t_node with
           | Tquant (q, tq), Tapp (ls, []) ->
-              t_open_quant_with q tq y, ls.ls_name
-          | _ -> raise Elaboration_failed in
-        let cta = add i (t, pos) cta
-                  |> add_var idy (abstract_type ty) in
-        EIntroQuant (pos, Some ty, t, i, y, elab cta c)
+              let ty_opt = ls.ls_value in
+              let vs, t_open = t_open_quant_one q tq in
+              let t_applied = t_subst_single vs y t_open in
+              let t_fun = t_eps (t_close_bound vs t_open) in
+              let cta = add i (t_applied, pos) cta
+                        |> add_var ls.ls_name (abstract_otype ty_opt) in
+              EIntroQuant (pos, ty_opt, t_fun, i, y, elab cta c)
+          | _ -> raise Elaboration_failed end
     | InstQuant (i1, i2, t_inst, c) ->
         let t, pos = find_ident "InstQuant" i1 cta in
-        let _, ty, t = match t.t_node with
-          | Tquant (q, tq) -> t_open_quant_with q tq t_inst
+        begin match t.t_node with
+          | Tquant (q, tq) ->
+              let vs, t_open = t_open_quant_one q tq in
+              let t_applied = t_subst_single vs t_inst t_open in
+              let t = t_eps (t_close_bound vs t_open) in
+              let cta = add i2 (t_applied, pos) cta in
+              EInstQuant (pos, Some vs.vs_ty, t, i1, i2, t_inst, elab cta c)
           | _ -> eprintf "trying to instantiate a non-quantified hypothesis@.";
-                 raise Elaboration_failed in
-        let cta = add i2 (t, pos) cta in
-        EInstQuant (pos, Some ty, t, i1, i2, t_inst, elab cta c)
+                 raise Elaboration_failed end
     | Rewrite (i1, i2, c) ->
         let rew_hyp, _ = find_ident "Finding rewrite hypothesis" i1 cta in
         let a, b, ty = match rew_hyp.t_node, rew_hyp.t_ty with
