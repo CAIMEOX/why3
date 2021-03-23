@@ -139,8 +139,8 @@ let rec ccheck c cta =
       end
   | ERewrite (_, is_eq, _, _, _, ctxt, i1, i2, c) ->
       let a, b = match find_ident "rew" i1 cta, is_eq with
-        | (CTbinop (Tiff, a, b), false), false -> a, b
-        | (CTapp (CTapp (f, a), b), false), true when ct_equal f eq -> a, b
+        | (CTbinop (Tiff, a, b), false), Some _ -> a, b
+        | (CTapp (CTapp (f, a), b), false), None when ct_equal f eq -> a, b
         | _ -> verif_failed "Non-rewritable proposition" in
       let t, pos = find_ident "rew" i2 cta in
       assert (ct_equal t (instantiate_safe cta ctxt a));
