@@ -124,6 +124,6 @@ let () = printf "Model is %t@."
     (fun fmt ->
        match result1.Call_provers.pr_models with
        | [(_,m)] -> (* TODO select_model *)
-           Model_parser.print_model_json ?me_name_trans:None ?vc_line_trans:None fmt m
+           Model_parser.print_model_json ?vc_line_trans:None fmt m
        | _ -> fprintf fmt "unavailable")
 (* END{ce_callprover} *)

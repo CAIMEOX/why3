@@ -15,17 +15,17 @@ open Model_parser
 
 type ident = string
 
-type typ = string
+type sort = Sort of ident * sort list
 
 type term =
   | Tconst of model_const
   | Tvar of ident
-  | Tprover_var of typ * ident
+  | Tprover_var of sort * ident
   | Tapply of (string * term list)
   | Tarray of array
   | Tite of term * term * term
   | Tlet of (string * term) list * term
-  | Tto_array of term
+  | Tas_array of term
   | Tunparsed of string
 
 and array =
@@ -33,10 +33,22 @@ and array =
   | Aconst of term
   | Astore of array * term * term
 
+type function_def = {
+  name: ident;
+  params: (ident * sort) list;
+  sort: sort;
+  body: term
+}
+
 type definition =
-  | Dfunction of (ident * typ option) list * typ option * term
-  | Dterm of term (* corresponding value of a term *)
-  | Dnoelement
+  | Dfunction of function_def
+  | Ddecl_fun of {
+      name: ident;
+      params: sort list;
+      sort: sort;
+    }
+  | Ddecl_const of { name: ident; sort: sort }
+  | Dassert of term
 
 let add_element x (t: definition Mstr.t) =
   match x with
@@ -58,7 +70,7 @@ let rec subst var value = function
     Tite (t1, t2, t3)
   (* | Record (n, l) ->
    *   Record (n, List.map (fun (f, t) -> f, subst var value t) l) *)
-  | Tto_array t -> Tto_array (subst var value t)
+  | Tas_array t -> Tas_array (subst var value t)
   | Tapply (s, lt) ->
     Tapply (s, List.map (subst var value) lt)
   | Tunparsed _ as t -> t
@@ -86,6 +98,10 @@ let substitute l t =
 (*                              Printing                                *)
 (************************************************************************)
 
+let rec print_sort fmt (Sort (id, args)) =
+  if args = [] then Pp.string fmt id else
+    Format.fprintf fmt "%s%a" id Pp.(print_list space print_sort) args
+
 let rec print_term fmt = let open Format in function
   | Tconst v -> print_model_const_human fmt v
   | Tapply (s, lt) ->
@@ -93,7 +109,7 @@ let rec print_term fmt = let open Format in function
         Pp.(print_list space print_term) lt
   | Tarray a -> fprintf fmt "@[<hv>(Array %a)@]" print_array a
   | Tvar v -> fprintf fmt "(Var %s)" v
-  | Tprover_var (ty,v) -> fprintf fmt "(Prover_var %s:%s)" v ty
+  | Tprover_var (sort,v) -> fprintf fmt "(Prover_var %s:%a)" v print_sort sort
   | Tlet (bs, t) ->
       let print_binding fmt (s,t) = fprintf fmt "(%s %a)" s print_term t in
       fprintf fmt "(Let (%a) %a)" Pp.(print_list space print_binding) bs print_term t
@@ -103,20 +119,23 @@ let rec print_term fmt = let open Format in function
   (* | Record (n, l) ->
    *     fprintf fmt "@[<hv2>(Record %s %a)@]" n
    *       Pp.(print_list semi (fun fmt (x, a) -> fprintf fmt "(%s, %a)" x print_term a)) l *)
-  | Tto_array t -> fprintf fmt "@[<hv2>(To_array %a)@]" print_term t
+  | Tas_array t -> fprintf fmt "@[<hv2>(As_array %a)@]" print_term t
   | Tunparsed s -> fprintf fmt "(UNPARSED %s)" s
 
 and print_array fmt = function
-  | Avar v -> Format.fprintf fmt "@[<hv2>(Array_var %s)@]" v
+  | Avar v -> Format.fprintf fmt "@[<hv2>(Avar %s)@]" v
   | Aconst t -> Format.fprintf fmt "@[<hv2>(Aconst %a)@]" print_term t
   | Astore (a, t1, t2) -> Format.fprintf fmt "@[<hv2>(Astore %a %a %a)@]"
                             print_array a print_term t1 print_term t2
 
 and print_definition fmt =
   let open Format in function
-    | Dfunction (vars, iret, t) ->
-        fprintf fmt "@[<hv2>(Function (%a)@ %a@ %a)@]" Pp.(print_list space string) (List.map fst vars)
-          Pp.(print_option string) iret
-          print_term t
-    | Dterm t -> fprintf fmt "@[<hv2>(Term %a)@]" print_term t
-    | Dnoelement -> fprintf fmt "Noelement"
+    | Dfunction r ->
+        fprintf fmt "@[<hv2>(define-fun %s (%a)@ %a@ %a)@]" r.name Pp.(print_list space string) (List.map fst r.params)
+          print_sort r.sort print_term r.body
+    | Ddecl_fun r ->
+        fprintf fmt "@[<hv2>(declare-fun %s (%a)@ %a)@]" r.name
+          Pp.(print_list space print_sort) r.params print_sort r.sort
+    | Ddecl_const r ->
+        fprintf fmt "@[<hv2>(declare-const %s@ %a)@]" r.name print_sort r.sort
+    | Dassert t -> fprintf fmt "@[<hv2>(Dassert %a)@]" print_term t

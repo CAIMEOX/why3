@@ -14,17 +14,17 @@ open Model_parser
 
 type ident = string
 
-type typ = string
+type sort = Sort of ident * sort list
 
 type term =
   | Tconst of model_const
   | Tvar of ident
-  | Tprover_var of typ * ident
+  | Tprover_var of sort * ident
   | Tapply of (string * term list)
   | Tarray of array
   | Tite of term * term * term
   | Tlet of (string * term) list * term
-  | Tto_array of term
+  | Tas_array of term
   | Tunparsed of string
 
 and array =
@@ -32,10 +32,22 @@ and array =
   | Aconst of term
   | Astore of array * term * term
 
+type function_def = {
+  name: ident;
+  params: (ident * sort) list;
+  sort: sort;
+  body: term
+}
+
 type definition =
-  | Dfunction of (ident * typ option) list * typ option * term
-  | Dterm of term (* corresponding value of a term *)
-  | Dnoelement
+  | Dfunction of function_def
+  | Ddecl_fun of {
+      name: ident;
+      params: sort list;
+      sort: sort;
+    }
+  | Ddecl_const of { name: ident; sort: sort }
+  | Dassert of term
 
 val add_element: (string * definition) option ->
   definition Mstr.t -> definition Mstr.t

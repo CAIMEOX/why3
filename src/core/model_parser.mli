@@ -11,6 +11,42 @@
 
 (** {1 Counter-example model values} *)
 
+type model_element_kind =
+  | Result
+  (** Result of a function call (if the counter-example is for postcondition) *)
+  | Old
+  (** Old value of function argument (if the counter-example is for
+      postcondition) *)
+  | At of string
+  (** Value at label *)
+  | Loop_before
+  (** Value from before the loop *)
+  | Loop_before_iteration
+  (** Value from before current loop iteration *)
+  | Loop_current_iteration
+  (** Value from current loop iteration *)
+  | Error_message
+  (** The model element represents error message, not source-code element. The
+     error message is saved in the name of the model element.*)
+  | Other
+
+val print_model_kind : model_element_kind Pp.pp
+
+(** Information about the name of the model element *)
+type model_element_name = {
+  men_id : string option;
+    (** Unique identifier for a state of a source-code element, if not [None]. *)
+  men_name   : string;
+    (** The name of the source-code element  *)
+  men_kind   : model_element_kind;
+    (** The kind of model element. *)
+  men_attrs : Ident.Sattr.t;
+  men_display: string option;
+    (** Alternative string to display instead of [men_name]. *)
+  men_field_chain: string list;
+    (** The list of fields accesses for singleton record values. *)
+}
+
 type model_int = { int_value: BigInt.t; int_verbatim: string }
 
 type model_dec = { dec_int: BigInt.t; dec_frac: BigInt.t; dec_verbatim: string }
@@ -40,7 +76,10 @@ type model_value =
   | Record of model_record
   | Proj of model_proj
   | Apply of string * model_value list
+  | Ite of model_value * model_value * model_value (* in constraints only *)
   | Var of string
+  | Model_var of model_element_name
+  | Constrained
   | Undefined
   | Unparsed of string
 
@@ -55,6 +94,8 @@ and model_proj = proj_name * model_value
 and proj_name = string
 
 and field_name = string
+
+type model_constraint = model_value
 
 val array_create_constant :
   value : model_value ->
@@ -76,10 +117,10 @@ val array_add_element :
 
 val float_of_binary : model_float_binary -> model_float
 
-val print_model_value : Format.formatter -> model_value -> unit
-val print_model_value_human : Format.formatter -> model_value -> unit
+val print_model_value : model_value Pp.pp
+val print_model_value_human : model_value Pp.pp
 
-val print_model_const_human : Format.formatter -> model_const -> unit
+val print_model_const_human : model_const Pp.pp
 
 val debug_force_binary_floats : Debug.flag
 (** Print all floats using bitvectors in JSON output for models *)
@@ -90,36 +131,6 @@ val debug_force_binary_floats : Debug.flag
 ***************************************************************
 *)
 
-type model_element_kind =
-  | Result
-  (** Result of a function call (if the counter-example is for postcondition) *)
-  | Old
-  (** Old value of function argument (if the counter-example is for
-      postcondition) *)
-  | At of string
-  (** Value at label *)
-  | Loop_before
-  (** Value from before the loop *)
-  | Loop_previous_iteration
-  (** Value from before current loop iteration *)
-  | Loop_current_iteration
-  (** Value from current loop iteration *)
-  | Error_message
-  (** The model element represents error message, not source-code element. The
-     error message is saved in the name of the model element.*)
-  | Other
-
-val print_model_kind : Format.formatter -> model_element_kind -> unit
-
-(** Information about the name of the model element *)
-type model_element_name = {
-  men_name   : string;
-    (** The name of the source-code element.  *)
-  men_kind   : model_element_kind;
-    (** The kind of model element. *)
-  men_attrs : Ident.Sattr.t;
-}
-
 (** Counter-example model elements. Each element represents
     a counter-example for a single source-code element.*)
 type model_element = {
@@ -127,6 +138,10 @@ type model_element = {
     (** Information about the name of the model element  *)
   me_value      : model_value;
     (** Counter-example value for the element. *)
+  me_constraints: model_constraint list;
+    (** Constraints in case the value is [Constrained] *)
+  me_equalities: model_value list;
+    (** All other values from the equality equivalence class from the constraints *)
   me_location   : Loc.position option;
     (** Source-code location of the element. *)
   me_term       : Term.term option;
@@ -134,9 +149,11 @@ type model_element = {
 }
 
 val create_model_element :
-  name      : string ->
-  value     : model_value ->
-  attrs     : Ident.Sattr.t ->
+  ?id      : string ->
+  ?display : string ->
+  name     : string ->
+  value    : model_value ->
+  attrs    : Ident.Sattr.t ->
   model_element
 (** Creates a counter-example model element.
     @param name : the name of the source-code element
@@ -175,41 +192,22 @@ val search_model_element_for_id :
 
 (** {2 Printing the model} *)
 
-val print_model :
-  ?filter_similar:bool ->
-  ?me_name_trans:(model_element_name -> string) ->
-  print_attrs:bool ->
-  Format.formatter ->
-  model ->
-  unit
+(* val why_name_trans : model_element_name -> string *)
+
+val print_model : ?filter_similar:bool -> ?print_attrs:bool -> model Pp.pp
 (** Prints the counter-example model
 
-    @param me_name_trans the transformation of the model elements
-      names. The input is information about model element name. The
-      output is the name of the model element that should be displayed.
     @param model the counter-example model to print
     @param print_attrs: when set to true, the name is printed together with the
     attrs associated to the specific ident.
 *)
 
-val print_model_human :
-  ?filter_similar:bool ->
-  ?me_name_trans:(model_element_name -> string) ->
-  Format.formatter ->
-  model ->
-  print_attrs:bool ->
-  unit
+val print_model_human : ?filter_similar:bool -> ?print_attrs:bool -> model Pp.pp
 (** Same as print_model but is intended to be human readable.*)
 
-val print_model_json :
-  ?me_name_trans:(model_element_name -> string) ->
-  ?vc_line_trans:(int -> string) ->
-  Format.formatter ->
-  model ->
-  unit
+val print_model_json : ?vc_line_trans:(int -> string) -> model Pp.pp
 (** Prints counter-example model to json format.
 
-    @param me_name_trans see print_model
     @param vc_line_trans the transformation from the line number corresponding
       to the term that triggers VC before splitting VC to the name of JSON field
       storing counterexample information related to this term. By default, this
@@ -265,7 +263,6 @@ val interleave_with_source :
   print_attrs:bool ->
   ?start_comment:string ->
   ?end_comment:string ->
-  ?me_name_trans:(model_element_name -> string) ->
   model ->
   rel_filename:string ->
   source_code:string ->
@@ -279,7 +276,6 @@ val interleave_with_source :
 
     @param start_comment the string that starts a comment
     @param end_comment the string that ends a comment
-    @param me_name_trans see print_model
     @param model counter-example model
     @param rel_filename the file name of the source relative to the session
     @param source_code the input source code
@@ -312,13 +308,11 @@ val model_for_positions_and_decls : model ->
 
 (*
 ***************************************************************
-**  Cleaning the model
+**  Mapping the model
 ***************************************************************
 *)
 
-(** Method clean#model cleans a model from unparsed values and handles
-   contradictory VCs ("the check fails with all inputs"). *)
-class clean : object
+class map : object
   method model : model -> model
   method element : model_element -> model_element option
   method value : model_value -> model_value option
@@ -331,13 +325,20 @@ class clean : object
   method boolean : bool -> model_value option
   method bitvector : model_bv -> model_value option
   method var : string -> model_value option
+  method model_var : model_element_name -> model_value option
   method proj : string -> model_value -> model_value option
   method apply : string -> model_value list -> model_value option
   method array : model_array -> model_value option
   method record : model_record -> model_value option
+  method constrained : model_value option
+  method constraint_ : model_constraint -> model_constraint option
+  method equality : model_value -> model_value option
+  method ite : model_value -> model_value ->  model_value -> model_value option
   method undefined : model_value option
   method unparsed : string -> model_value option
 end
+
+class clean : object inherit map end
 
 val customize_clean : #clean -> unit
 (** Customize the class used to clean the values in the model. *)
@@ -353,7 +354,8 @@ type model_parser = Printer.printer_mapping -> string -> model
    elements and mapping from printer and builds model data structure. The model still has
    to be cleaned using [clean]. *)
 
-type raw_model_parser = Printer.printer_mapping -> string -> model_element list
+type raw_model_parser = Printer.printer_mapping -> string ->
+  model_value Wstdlib.Mstr.t * model_constraint list * Wstdlib.Sstr.t
 
 val register_remove_field:
   (Ident.Sattr.t * model_value -> Ident.Sattr.t * model_value) -> unit

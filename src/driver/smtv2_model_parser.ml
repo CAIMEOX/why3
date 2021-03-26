@@ -190,11 +190,16 @@ module FromSexp = struct
     if Strings.has_prefix "@" name then
       let left = String.index name '_' + 1 in
       let right = String.rindex name '_' in
-      let ty = String.sub name left (right - left) in
-      Some (try Strings.(remove_prefix "(" (remove_suffix ")" ty)) with _ -> ty)
-    else match String.split_on_char '!' name with
-      | [ty;_;_] -> Some ty
-      | _ -> None
+      let id = String.sub name left (right - left) in
+      let id = try Strings.(remove_prefix "(" (remove_suffix ")" id)) with _ -> id in
+      Some (Sort (id, []))
+    else match String.split_on_char '_' name with
+        | ["c"; id; ix] when
+            (try ignore (int_of_string ix); true with Failure _ -> false) ->
+            Some (Sort (id, [])) (* Alt-ergo *)
+        | _ -> match String.split_on_char '!' name with
+          | [id;_;_] -> Some (Sort (id, []))
+          | _ -> None
 
   let var name =
     match prover_name name with
@@ -255,7 +260,7 @@ module FromSexp = struct
 
   and as_array = function
     | List [Atom "_"; Atom "as-array"; n] ->
-        Tto_array (Tvar (name n))
+        Tas_array (Tvar (name n))
     | sexp -> error sexp "as_array"
 
   and application = function
@@ -277,21 +282,43 @@ module FromSexp = struct
         Aconst (term t) (* case not used *)
     | sexp -> error sexp "array"
 
-  let decl = function
-    | List [Atom "define-fun"; Atom n; al; iret; t] ->
-        let iret = ireturn_type iret in
-        let al = list arg al and t = term t in
-        Some (n, Dfunction (al, iret, t))
-    | _ -> None
+  let ident = function
+    | Atom id -> id
+    | sexp -> error sexp "ident"
+
+  let rec sort = function
+    | Atom _ as id -> Sort (ident id, [])
+    | List (id :: tys) -> Sort (ident id, List.map sort tys)
+    | sexp -> error sexp "ty"
+
+  let param = function
+    | List [n; t] -> name n, sort t
+    | sexp -> error sexp "param"
+
+  let model_def = function
+    | List [Atom "define-fun"; n; ps; s; b] ->
+        Some (Dfunction {
+            name= name n; params= list param ps; sort= sort s; body= term b })
+    | List [Atom "declare-fun"; n; ps; s] ->
+        Some (Ddecl_fun {
+            name= name n; params= list sort ps; sort= sort s })
+    | List [Atom "declare-const"; n; s] ->
+        Some (Ddecl_const {
+            name= name n; sort= sort s })
+    | List [Atom "assert"; t] ->
+        Some (Dassert (term t))
+    | List [Atom "declare-sort"; _; _]
+    | List [Atom "declare-datatypes"; _; _]
+    | List [Atom "forall"; _; _] (* Z3 cardinality constraints *) ->
+        None
+    | sexp ->
+        error sexp "model_def"
 
   let model = function
-    | [] ->
-        None
-    | [List (Atom "model" :: decls)] | [List decls] ->
-        Some (Mstr.of_list (Lists.map_filter decl decls))
-    | _ ->
-        failwith ("Cannot read S-expression as model: " ^
-                  "must be a single list `(model ...)` or `(...)`")
+    | [List (Atom "model" :: decls)] |[List decls] ->
+        Lists.map_filter model_def decls
+    | sexp ->
+        error (List sexp) "model (must be a single list `(model ...)` or `(...)`)"
 end
 
 (* Parses the model returned by CVC4 and Z3. *)
@@ -334,7 +361,7 @@ let parse_sexps str =
 
 let model_of_sexps sexps =
   try
-    Opt.get_def Mstr.empty (FromSexp.model sexps)
+    FromSexp.model sexps
   with FromSexp.E (sexp', s) ->
     let msg = Format.asprintf "Cannot read the following S-expression as %s: %a"
         s FromSexp.pp_sexp sexp' in
@@ -347,16 +374,11 @@ let model_of_sexps sexps =
    parsing on a fresh new line ".*" ensures it *)
 let parse pm input =
   match get_model_string input with
-  | exception Not_found -> []
   | model_string ->
       let sexps = parse_sexps model_string in
       let defs = model_of_sexps sexps in
-      let mvs = Collect_data_model.create_list pm defs in
-      List.rev
-        (Mstr.values
-           (Mstr.mapi (fun name value ->
-                let attrs = Mstr.find_def Ident.Sattr.empty name pm.Printer.set_str in
-                Model_parser.create_model_element ~name ~value ~attrs) mvs))
+      Collect_data_model.create_list pm defs
+  | exception Not_found -> Mstr.empty, [], Sstr.empty
 
 let () = Model_parser.register_model_parser "smtv2" parse
     ~desc:"Parser@ for@ the@ model@ of@ cv4@ and@ z3."

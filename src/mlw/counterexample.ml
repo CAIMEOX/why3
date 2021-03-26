@@ -72,11 +72,10 @@ let print_ce_summary_title ?check_ce fmt = function
         fprintf fmt "The@ following@ counterexample@ model@ has@ not@ \
                      been@ verified@ (%s)" reason
 
-let print_ce_summary_values ?verb_lvl ?json ~print_attrs model fmt s =
+let print_ce_summary_values ?verb_lvl ?json ?print_attrs model fmt s =
   let open Json_base in
   let print_model_field =
-    print_json_field "model"
-      (print_model_json ?me_name_trans:None ~vc_line_trans:string_of_int) in
+    print_json_field "model" (print_model_json ~vc_line_trans:string_of_int) in
   let print_log_field =
     print_json_field "log" (Log.print_log ?verb_lvl ~json:true) in
   match json with
@@ -86,9 +85,9 @@ let print_ce_summary_values ?verb_lvl ?json ~print_attrs model fmt s =
           fprintf fmt "@[%a@]" (Log.print_log ?verb_lvl ~json:false) log
       | UNKNOWN _ ->
           let print_model fmt m =
-            if json = None then print_model_human fmt m
-            else print_model (* json values *) fmt m in
-          fprintf fmt "@[%a@]" (print_model ~print_attrs) model
+            if json = None then print_model_human ?print_attrs fmt m
+            else print_model ?print_attrs fmt m in
+          fprintf fmt "@[%a@]" print_model model
       | BAD -> ()
     )
   | Some `All -> (
@@ -177,7 +176,7 @@ let print_counterexample ?verb_lvl ?check_ce ?json fmt (model,ce_summary) =
        | _ -> ());
   let print_attrs = Debug.test_flag Call_provers.debug_attrs in
   fprintf fmt "@ %a"
-    (print_ce_summary_values ?verb_lvl ~print_attrs ?json model) ce_summary
+    (print_ce_summary_values ?verb_lvl ?json ~print_attrs model) ce_summary
 
 (* Import values from solver counterexample model *)
 
@@ -280,15 +279,22 @@ let rec import_model_value check known th_known ity v =
           let v0 = import_model_value check known th_known value_ity a.arr_others in
           purefun_value ~result_ity:ity ~arg_ity:key_ity mv v0
       | Unparsed s -> cannot_import "unparsed value %s" s
-      | Undefined -> undefined_value ity in
+      | Undefined -> undefined_value ity
+      | Constrained | Model_var _ | Ite _->
+          cannot_import "constraint value %a" print_model_value_human v in
   check ity res;
   res
+
+let rec field_chain v = function
+  | [] -> v
+  | f :: fields ->
+      Record [f, field_chain v fields]
 
 let get_value m known th_known =
   fun ?loc check id ity : Value.value option ->
   let import_value me =
-    try Some (import_model_value check known th_known ity me.me_value) with
-      Exit -> None in
+    let v = field_chain me.me_value me.me_name.men_field_chain in
+    try Some (import_model_value check known th_known ity v) with Exit -> None in
   match search_model_element_for_id m ?loc id with
   | me -> import_value me
   | exception Not_found -> None
@@ -441,11 +447,10 @@ let check_model ?timelimit ?steplimit reduce env pm model =
                       ~skip_cannot_compute:false ~reduce ~get_value () in
           let vc_term_attrs = get_model_term_attrs model in
           check_model_rs ~vc_term_loc ~vc_term_attrs rac env pm rs in
-        let me_name_trans men = men.Model_parser.men_name in
         let print_attrs = Debug.test_flag Call_provers.debug_attrs in
         Debug.dprintf debug_check_ce
           "@[Validating model:@\n@[<hv2>%a@]@]@\n"
-          (print_model ~filter_similar:false ~me_name_trans ~print_attrs) model;
+          (print_model ~filter_similar:false ~print_attrs) model;
         Debug.dprintf debug_check_ce "@[Interpreting concretly@]@\n";
         let concrete = check_model_rs ~abstract:false in
         Debug.dprintf debug_check_ce "@[Interpreting abstractly@]@\n";
@@ -597,9 +602,12 @@ let model_of_exec_log ~original_model log =
     let men_kind = match search_model_element_for_id original_model id with
       | me -> me.me_name.men_kind
       | exception Not_found -> Other in
-    let me_name = { men_name; men_kind; men_attrs= id.id_attrs } in
+    let me_name = {
+      men_id= None; men_name; men_kind; men_display= None; men_field_chain= [];
+      men_attrs= id.id_attrs } in
     let me_value = model_value value in
-    {me_name; me_value; me_location= Some loc; me_term= None} in
+    {me_name; me_value; me_constraints= []; me_equalities= [];
+     me_location= Some loc; me_term= None} in
   let aux e = match e.Log.log_loc with
     | Some loc when not Loc.(equal loc dummy_position) -> (
         match e.Log.log_desc with
