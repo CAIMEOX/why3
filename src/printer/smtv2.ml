@@ -148,6 +148,7 @@ type info = {
   info_syn        : syntax_map;
   info_rliteral   : syntax_map;
   mutable info_model : S.t;
+  mutable info_optim : (string * string * int) list;
   mutable info_in_goal : bool;
   info_vc_term : vc_term_info;
   info_printer : ident_printer;
@@ -218,6 +219,15 @@ let print_typed_var info fmt vs =
 let print_var_list info fmt vsl =
   print_list space (print_typed_var info) fmt vsl
 
+let has_optimize_prefix s =
+  if Strings.has_prefix "minimize:" s then
+    Some ("minimize", Strings.remove_prefix "minimize:" s)
+  else
+  if Strings.has_prefix "maximize:" s then
+    Some ("maximize", Strings.remove_prefix "maximize:" s)
+  else
+    None
+
 let collect_model_ls info ls =
   if Sls.mem ls info.meta_model_projection then
     info.list_projs <- Mstr.add (sprintf "%a" (print_ident info) ls.ls_name)
@@ -227,6 +237,14 @@ let collect_model_ls info ls =
         ls.ls_name info.list_field_def;
   if ls.ls_args = [] && (relevant_for_counterexample ls.ls_name) then
     let t = t_app ls [] ls.ls_value in
+    Sattr.iter
+      (fun s ->
+         match has_optimize_prefix s.attr_string with
+         | None -> ()
+         | Some (pre, rank) ->
+             let e = (pre, ls.ls_name.id_string, int_of_string rank) in
+             info.info_optim <- e :: info.info_optim
+      )ls.ls_name.id_attrs;
     info.info_model <-
       add_model_element
       (t_attr_set ?loc:ls.ls_name.id_loc ls.ls_name.id_attrs t) info.info_model
@@ -571,6 +589,11 @@ let rec property_on_incremental2 _ f =
 let property_on_incremental2 f =
   property_on_incremental2 false f
 
+let print_optimization_constraints fmt info_optim =
+  let info_optim = List.fast_sort (fun (_,_,i) (_,_,j) -> i - j) info_optim in
+  List.iter
+    (fun (opt, v, _i) -> fprintf fmt "@[(%s@ %s)@]@\n" opt v) info_optim
+
 (* TODO if the property doesnt begin with quantifier, then we print it first.
    Else, we print it afterwards. *)
 let print_incremental_axiom info fmt =
@@ -578,12 +601,14 @@ let print_incremental_axiom info fmt =
   List.iter (fun (pr, f) ->
     if not (property_on_incremental2 f) then
       print_prop info fmt pr f;
-            ) l;
+    ) l;
+  print_optimization_constraints fmt info.info_optim;
   add_check_sat info fmt;
   List.iter (fun (pr, f) ->
     if property_on_incremental2 f then
       print_prop info fmt pr f)
     l;
+  print_optimization_constraints fmt info.info_optim;
   add_check_sat info fmt
 
 let print_prop_decl vc_loc vc_attrs args info fmt k pr f = match k with
@@ -602,6 +627,7 @@ let print_prop_decl vc_loc vc_attrs args info fmt k pr f = match k with
       info.info_in_goal <- true;
       fprintf fmt "  @[(not@ %a))@]@\n" (print_fmla info) f;
       info.info_in_goal <- false;
+      print_optimization_constraints fmt info.info_optim;
       add_check_sat info fmt;
 
       (* If in incremental mode, we empty the list of axioms we stored *)
@@ -755,6 +781,7 @@ let print_task version args ?old:_ fmt task =
     info_syn = Discriminate.get_syntax_map task;
     info_rliteral = Printer.get_rliteral_map task;
     info_model = S.empty;
+    info_optim = [];
     info_in_goal = false;
     info_vc_term = vc_info;
     info_printer = ident_printer ();
