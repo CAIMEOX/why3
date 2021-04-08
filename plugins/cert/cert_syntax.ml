@@ -402,6 +402,7 @@ let eplcta cta lcta =
     plcta lcta
 
 let print_ctasks filename lcta =
+  let filename = Sysutil.uniquify filename in
   let oc = open_out filename in
   let fmt = formatter_of_out_channel oc in
   fprintf fmt "@[<v>RESULTING TASKS:@ @ \

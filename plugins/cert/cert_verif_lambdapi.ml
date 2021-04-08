@@ -227,14 +227,12 @@ let print fmt init res (task_ids, certif) =
 
 let checker_lambdapi certif init res =
   try
-    let check_cert = "/tmp/check_cert.lp" in
+    let check_cert = Sysutil.uniquify "/tmp/check_cert.lp" in
     let oc = open_out check_cert in
     let fmt = formatter_of_out_channel oc in
     print fmt init res certif;
     close_out oc;
-    (* let lp_folder = Filename.(concat Config.datadir "lambdapi") in *)
     let quiet = ">/dev/null 2>&1" in
-    (* let _ = Sys.command ("make install -C  " ^ lp_folder ^ quiet) in *)
     let ret = Sys.command ("lambdapi check --map-dir check:/tmp/ "
                            ^ check_cert ^ quiet) in
     if ret <> 0 then verif_failed "Not verified by Lambdapi"
