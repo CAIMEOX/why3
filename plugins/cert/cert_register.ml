@@ -334,10 +334,8 @@ let register_lambdapi () =
   register_transform_l "trivial_lcert" trivial_l
     ~desc:"A Lambdapi certified version of (simplified) coq tactic [trivial]"
 
-let load_checkers : unit =
-  match !Whyconf.Args.opt_trans_checker with
-  | false -> ()
-  | true ->
+let register_all : unit =
+  if !Whyconf.Args.opt_cert_trans then begin
       register_caml ();
 
       let open Format in
@@ -353,3 +351,4 @@ let load_checkers : unit =
            let _ = Sys.command comm in
            register_lambdapi ()
       else printf "Can't find lambdapi... continuing without lambdapi checker@."
+    end
