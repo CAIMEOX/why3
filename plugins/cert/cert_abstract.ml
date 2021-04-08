@@ -38,7 +38,7 @@ let type_lsymbol ls =
 let rec abstract_term t =
   let s = t_ty_freevars Stv.empty t in
   let compare tv1 tv2 =
-    Stdlib.compare tv1.tv_name.id_string tv2.tv_name.id_string in
+    Pervasives.compare tv1.tv_name.id_string tv2.tv_name.id_string in
   let l = List.sort compare (Stv.elements s) in
   let t = abstract_term_rec Mid.empty 0 t in
   match l with
