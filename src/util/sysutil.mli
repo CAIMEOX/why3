@@ -85,8 +85,8 @@ val relativize_filename : string -> string -> file_path
     FIXME: this function does not handle symbolic links properly
  *)
 
-
 val uniquify : string -> string
-(** find filename that doesn't exist based on the given filename.
-    Be careful the file can be taken after the return of this function.
+(** Finds a filename that does not exist on disk by adding a suffix to the
+    basename of the given filename.
+    Be careful: the file can be taken after the return of this function.
 *)
