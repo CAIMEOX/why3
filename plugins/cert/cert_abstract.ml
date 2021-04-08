@@ -36,7 +36,14 @@ let type_lsymbol ls =
     ls.ls_args (abstract_otype ls.ls_value)
 
 let rec abstract_term t =
-  abstract_term_rec Mid.empty 0 t
+  let s = t_ty_freevars Stv.empty t in
+  let compare tv1 tv2 =
+    Stdlib.compare tv1.tv_name.id_string tv2.tv_name.id_string in
+  let l = List.sort compare (Stv.elements s) in
+  let t = abstract_term_rec Mid.empty 0 t in
+  match l with
+    | [] -> t
+    | _ -> CTqtype (l, t)
 
 (* level <lvl> is the number of binders above in the whole term *)
 (* <bv_lvl> is mapping bound variables to their respective level *)
