@@ -184,6 +184,8 @@ type main = {
   (* add the standard library in the loadpath (default true) *)
   load_default_plugins  : bool;
   (* autoload the plugins in libdir (default true) *)
+  load_trans_checkers  : bool;
+  (* load the checked-transformations (default true) *)
   timelimit : int;
   (* default prover time limit in seconds (0 unlimited) *)
   memlimit  : int;
@@ -278,6 +280,9 @@ let load_plugins main =
   if main.load_default_plugins then List.iter load (plugins_auto_detection main);
   List.iter load main.plugins
 
+let load_trans_checkers main =
+  main.load_trans_checkers
+
 type config = {
   conf_file : string;       (* "/home/innocent_user/.why3.conf" *)
   user_rc : Rc.t; (* from .why3.conf without extra_config *)
@@ -296,6 +301,7 @@ let empty_main =
     loadpath = [];
     stdlib = true;
     load_default_plugins = true;
+    load_trans_checkers = false;
     timelimit = 5;   (* 5 seconds *)
     memlimit = 1000; (* 1 Mb *)
     running_provers_max = 2; (* two provers run in parallel *)
@@ -469,6 +475,8 @@ module RC_load = struct
         | l -> l end;
       stdlib = get_bool ~default:old.stdlib section "stdlib";
       load_default_plugins = get_bool ~default:old.load_default_plugins section "load_default_plugins";
+      load_trans_checkers = old.load_trans_checkers;
+      (* FIXME : add an option to make '--cert' permanent *)
       timelimit = get_int ~default:old.timelimit section "timelimit";
       memlimit  = get_int ~default:old.memlimit section "memlimit";
       running_provers_max = get_int ~default:old.running_provers_max
@@ -1031,6 +1039,9 @@ let set_stdlib stdlib config =
 let set_load_default_plugins load_default_plugins config =
   {config with main = {config.main with load_default_plugins}}
 
+let set_trans_checker load_trans_checkers config =
+  {config with main = {config.main with load_trans_checkers}}
+
 let () = Exn_printer.register (fun fmt e -> match e with
   | ConfigFailure (f, s) ->
       Format.fprintf fmt "error in config file %s: %s" f s
@@ -1080,6 +1091,7 @@ module Args = struct
   let opt_loadpath = ref []
   let opt_stdlib = ref true
   let opt_load_default_plugins = ref true
+  let opt_trans_checker = ref false
 
   let add_command s =
     Getopt.commands := !Getopt.commands @ [s]
@@ -1096,6 +1108,8 @@ module Args = struct
       " do not add the standard library to the loadpath";
       KLong "no-load-default-plugins", Hnd0 (fun () -> opt_load_default_plugins := false),
       " do not load the plugins from the standard path";
+      KLong "cert", Hnd0 (fun () -> opt_trans_checker := true),
+      " load the checked transformations";
       Debug.Args.desc_debug;
       Debug.Args.desc_debug_all;
       Debug.Args.desc_debug_list;
@@ -1129,6 +1143,9 @@ module Args = struct
     let apply_not_default f o b = if !o then b else f !o b in
     let config = apply_not_default set_stdlib opt_stdlib config in
     let config = apply_not_default set_load_default_plugins opt_load_default_plugins config in
+    (* FIXME : needed ? *)
+    let config = if !opt_trans_checker then set_trans_checker true config
+                 else config in
     let main = get_main config in
     let lp = List.rev_append !opt_loadpath (loadpath main) in
     let config = set_main config (set_loadpath main lp) in
