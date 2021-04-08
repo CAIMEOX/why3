@@ -41,7 +41,6 @@ val read_config : string option -> config
       - if present, the content is parsed and returned,
       - otherwise, we return the built-in default_config with a
         default configuration filename.
-
  *)
 
 val init_config : ?extra_config:string list -> string option -> config
@@ -111,6 +110,7 @@ val pluginsdir : main -> string
 val set_plugins : main -> string list -> main
 val add_plugin : main -> string -> main
 val load_plugins : main -> unit
+val load_trans_checkers : main -> bool
 
 (** {2 Provers} *)
 
@@ -310,6 +310,8 @@ module Args : sig
   val first_arg : int ref
 
   val opt_config : string option ref
+
+  val opt_trans_checker : bool ref
 
   val add_command : string -> unit
 

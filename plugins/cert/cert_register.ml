@@ -128,7 +128,7 @@ let trivial_l               = lchecker trivial
 
 (** Register certified transformations *)
 
-let register_caml : unit =
+let register_caml () =
   let open Args_wrapper in
   let open Trans in
   wrap_and_register
@@ -234,7 +234,7 @@ let register_caml : unit =
     ~desc:"A OCaml certified version of (simplified) coq tactic [trivial]"
 
 
-let register_lambdapi : unit =
+let register_lambdapi () =
   let open Args_wrapper in
   let open Trans in
 
@@ -333,3 +333,23 @@ let register_lambdapi : unit =
 
   register_transform_l "trivial_lcert" trivial_l
     ~desc:"A Lambdapi certified version of (simplified) coq tactic [trivial]"
+
+let load_checkers : unit =
+  match !Whyconf.Args.opt_trans_checker with
+  | false -> ()
+  | true ->
+      register_caml ();
+
+      let open Format in
+      printf "Checking for lambdapi...@.";
+      let lpv = Sysutil.uniquify "/tmp/lambdapi_version.txt" in
+      let comm = sprintf "lambdapi --version > %s 2> /dev/null" lpv in
+      if Sys.command comm = 0
+      then let vers = Sysutil.file_contents lpv in
+           let _ = Sys.remove lpv in
+           let _ = printf "Found version: %s@." vers in
+           let lp_folder = Filename.(concat Config.datadir "lambdapi") in
+           let comm = sprintf "make install -C %s > /dev/null 2>&1" lp_folder in
+           let _ = Sys.command comm in
+           register_lambdapi ()
+      else printf "Can't find lambdapi... continuing without lambdapi checker@."
