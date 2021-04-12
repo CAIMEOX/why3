@@ -58,7 +58,7 @@ let rec try_close (lctr : ctrans list) : ctrans = Trans.store (fun task ->
             else Trans.apply (try_close t) task)
 
 (* Repeat on a transformation with a certificate : keep applying <ctr> as long
-   as the task changes *)
+   as the tasks change *)
 let repeat (ctr : ctrans) : ctrans = Trans.store (fun task ->
   let gen_task = Trans.apply id_ctrans task in
   let gen_tr = ctrans_gen ctr in

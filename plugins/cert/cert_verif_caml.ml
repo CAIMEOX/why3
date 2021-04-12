@@ -11,7 +11,7 @@ let union estr =
   let merge_no_conflicts id cta1 cta2 =
     if ctask_equal cta1 cta2
     then Some cta1
-    else (* Important : gives an error and not None *)
+    else (* Important : returns an error and NOT None *)
       let open Format in
       eprintf "@[<v>Conflict on ident: %a@ \
                Shown when checking: %s@ \
