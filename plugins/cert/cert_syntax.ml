@@ -24,6 +24,7 @@ type ctype =
   | CTyapp of tysymbol * ctype list (* (possibly) applied type constant *)
   | CTarrow of ctype * ctype (* arrow type *)
 
+(* Interpreted types *)
 let ctint = CTyapp (ts_int, [])
 let ctreal = CTyapp (ts_real, [])
 let ctbool = CTyapp (ts_bool, [])
@@ -40,29 +41,22 @@ let rec cty_equal ty1 ty2 = match ty1, ty2 with
       cty_equal f1 f2 && cty_equal a1 a2
   | (CTyvar _ | CTyapp _ | CTarrow _ | CTprop), _ -> false
 
-(* Equality modulo α-conversion *)
-let rec cty_same map ty1 ty2 = match ty1, ty2 with
-  | CTprop, CTprop -> true, map
-  | CTyvar v1, CTyvar v2 ->
-      begin match Mtv.find_opt v1 map with
-      | None -> true, Mtv.add v1 v2 map
-      | Some v2' -> Ty.tv_equal v2' v2, map end
-  | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
-      let b, map = for_all2_cty_equal map l1 l2 in
-      ts_equal ty1 ty2 && b, map
-  | CTarrow (f1, a1), CTarrow (f2, a2) ->
-      for_all2_cty_equal map [f1; a1] [f2; a2]
-  | (CTyvar _ | CTyapp _ | CTarrow _ | CTprop), _ -> false, map
+let sorted_vars s =
+  let compare tv1 tv2 = compare tv1.tv_name.id_string tv2.tv_name.id_string in
+  List.sort compare (Stv.elements s)
 
-and for_all2_cty_equal map l1 l2 = match l1, l2 with
-  | [], [] -> true, map
-  | h1::t1, h2::t2 ->
-      let b, map = cty_same map h1 h2 in
-      if b then for_all2_cty_equal map t1 t2
-      else false, map
-  | _ -> false, map
+let rec find_vars = function
+  | CTyvar tv -> Stv.singleton tv
+  | CTprop -> Stv.empty
+  | CTyapp (_, l) ->
+      List.fold_left (fun s ty -> Stv.union s (find_vars ty))
+        Stv.empty l
+  | CTarrow (ty1, ty2) ->
+      Stv.union (find_vars ty1) (find_vars ty2)
 
-let cty_same ty1 ty2 = cty_same Mtv.empty ty1 ty2 |> fst
+let create_subst ltv lty =
+  let add subst tv ty = Mtv.add tv ty subst in
+  List.fold_left2 add Mtv.empty ltv lty
 
 (* Warning: beware variable capture *)
 let rec cty_ty_subst subst = function
@@ -73,6 +67,23 @@ let rec cty_ty_subst subst = function
       CTyapp (ts, List.map (cty_ty_subst subst) l)
   | (CTyvar _ | CTprop) as cty -> cty
 
+let comparing_substs l1 l2 =
+  let new_ctyvar _ = CTyvar (create_tvsymbol (id_fresh "dummy_comparing_substs")) in
+  let lty = List.map new_ctyvar l1 in
+  let subst1 = create_subst l1 lty in
+  let subst2 = create_subst l2 lty in
+  subst1, subst2
+
+(* Equality modulo α-conversion (only used for task equality) *)
+let cty_same ty1 ty2 =
+  try
+    let ltv1 = sorted_vars (find_vars ty1) in
+    let ltv2 = sorted_vars (find_vars ty2) in
+    let subst1, subst2 = comparing_substs ltv1 ltv2 in
+    let ty1 = cty_ty_subst subst1 ty1 in
+    let ty2 = cty_ty_subst subst2 ty2 in
+    cty_equal ty1 ty2
+  with _ -> false
 
 let rec is_predicate = function
   | CTprop -> true
@@ -81,6 +92,9 @@ let rec is_predicate = function
 
 (** Pretty printing of ctype (compatible with lambdapi) *)
 
+(* We define two printers, <hip> for premises, <ip> for everything else. This is
+   needed because the logical definitions (via Dlogic) use the same ident for
+   the defined symbol and for its axiom's name. *)
 let san =
   let lower_h c = if c = 'H' then "h" else char_to_alnum c in
   sanitizer lower_h char_to_alnum
@@ -100,27 +114,20 @@ let prpr fmt pr = prhyp fmt pr.pr_name
 let rec pred_ty pred fmt ty = match ty with
   | CTyapp (ts, l) when l <> [] ->
       fprintf fmt "@[<2>%a@ %a@]"
-        prts ts
-        (print_list (pred_typaren pred)) l
+        Pretty.print_ts ts
+        (print_list (pred_pty pred)) l
   | CTarrow (t1, t2) ->
       fprintf fmt "@[%a %a@ %a@]"
-        (pred_typaren pred) t1
+        (pred_pty pred) t1
         prarrow pred
         (pred_ty pred) t2
-  | _ -> pred_typaren pred fmt ty
+  | _ -> pred_pty pred fmt ty
 
-and pred_typaren pred fmt = function
-  | CTyvar _ -> fprintf fmt "Z"
-  (* TODO handle polymorphic symbols *)
-  (* Pretty.print_tv fmt v *)
+and pred_pty pred fmt = function
+  | CTyvar v -> Pretty.print_tv fmt v
   | CTprop -> fprintf fmt "DType"
-  | CTyapp (ts, []) -> prts fmt ts
+  | CTyapp (ts, []) -> Pretty.print_ts fmt ts
   | cty -> fprintf fmt "(%a)" (pred_ty pred) cty
-
-and prts fmt ts =
-  if ts_equal ts ts_bool then fprintf fmt "Bool"
-  else if ts_equal ts ts_int then fprintf fmt "Z"
-  else Pretty.print_ts fmt ts
 
 and prarrow fmt pred =
   if pred then fprintf fmt "⇀"
@@ -131,12 +138,13 @@ let prty fmt ty =
   pred_ty (is_predicate ty) fmt ty
 
 (* Prints a type with outside parentheses if needed *)
-let prtyparen fmt ty =
-  pred_typaren (is_predicate ty) fmt ty
+let prpty fmt ty =
+  pred_pty (is_predicate ty) fmt ty
 
 type cterm =
   | CTbvar of int (* bound variables use De Bruijn indices *)
-  | CTfvar of ident (* free variables use a name *)
+  | CTfvar of ident * ctype list
+  (* free variables use a name and a list of types it is applied to *)
   | CTint of BigInt.t
   | CTapp of cterm * cterm (* binary application *)
   | CTbinop of binop * cterm * cterm (* application of a binary operator *)
@@ -147,11 +155,10 @@ type cterm =
   | CTtrue
   | CTfalse
 
+(* Interpreted terms *)
 let id_eq = ps_equ.ls_name
-let eq = CTfvar id_eq
 let id_true = fs_bool_true.ls_name
 let id_false = fs_bool_false.ls_name
-
 let le_str = op_infix "<="
 let ge_str = op_infix ">="
 let lt_str = op_infix "<"
@@ -160,6 +167,8 @@ let pl_str = op_infix "+"
 let ml_str = op_infix "*"
 let pre_mn_str = op_infix "-"
 let inf_mn_str = op_prefix "-"
+
+let eq cty = CTfvar (id_eq, [cty])
 
 (** Utility functions on cterm *)
 
@@ -178,38 +187,32 @@ let rec ct_ty_subst subst = function
                ct_ty_subst subst ct)
   | ct -> ct_map (ct_ty_subst subst) ct
 
-let rec ct_equal subst1 subst2 t1 t2 =
-  let ct_eq = ct_equal subst1 subst2 in
+let ct_equal t1 t2 =
+  let rec ct_equal subst1 subst2 t1 t2 =
+    let ct_eq t1 t2 = ct_equal subst1 subst2 t1 t2 in
+    match t1, t2 with
+    | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
+    | CTfvar (i1, l1), CTfvar (i2, l2) ->
+        id_equal i1 i2 && List.for_all2 cty_equal l1 l2
+    | CTapp (tl1, tr1), CTapp (tl2, tr2) ->
+        ct_eq tl1 tl2 && ct_eq tr1 tr2
+    | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
+        op1 = op2 && ct_eq tl1 tl2 && ct_eq tr1 tr2
+    | CTquant (q1, ty1, t1), CTquant (q2, ty2, t2) when q1 = q2 ->
+        let ty1 = cty_ty_subst subst1 ty1 in
+        let ty2 = cty_ty_subst subst2 ty2 in
+        cty_equal ty1 ty2 && ct_eq t1 t2
+    | CTtrue, CTtrue | CTfalse, CTfalse -> true
+    | CTnot t1, CTnot t2 -> ct_eq t1 t2
+    | CTint i1, CTint i2 -> BigInt.eq i1 i2
+    | (CTbvar _ | CTfvar _ | CTapp _ | CTbinop _ | CTquant _
+       | CTqtype _ | CTtrue | CTfalse | CTnot _ | CTint _), _ -> false
+  in
   match t1, t2 with
-  | CTbvar lvl1, CTbvar lvl2 -> lvl1 = lvl2
-  | CTfvar i1, CTfvar i2 -> id_equal i1 i2
-  | CTapp (tl1, tr1), CTapp (tl2, tr2) ->
-      ct_eq tl1 tl2 && ct_eq tr1 tr2
-  | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
-      op1 = op2 && ct_eq tl1 tl2 && ct_eq tr1 tr2
-  | CTquant (q1, ty1, t1), CTquant (q2, ty2, t2) when q1 = q2 ->
-      let ty1 = cty_ty_subst subst1 ty1 in
-      let ty2 = cty_ty_subst subst2 ty2 in
-      cty_equal ty1 ty2 && ct_eq t1 t2
-  | CTqtype (l1, t1), CTqtype (l2, t2) ->
-      let rec find_subst subst1 subst2 l1 l2 = match l1, l2 with
-        | tv1::l1, tv2::l2 ->
-            let tv = create_tvsymbol (id_fresh "cteq") in
-            let subst1 = Mtv.add tv1 (CTyvar tv) subst1 in
-            let subst2 = Mtv.add tv2 (CTyvar tv) subst2 in
-            find_subst subst1 subst2 l1 l2
-        | [], [] -> subst1, subst2
-        | _ -> raise Not_found in
-      begin try let subst1, subst2 = find_subst subst1 subst2 l1 l2 in
-                ct_equal subst1 subst2 t1 t2
-      with Not_found -> false end
-  | CTtrue, CTtrue | CTfalse, CTfalse -> true
-  | CTnot t1, CTnot t2 -> ct_eq t1 t2
-  | CTint i1, CTint i2 -> BigInt.eq i1 i2
-  | (CTbvar _ | CTfvar _ | CTapp _ | CTbinop _ | CTquant _
-     | CTqtype _ | CTtrue | CTfalse | CTnot _ | CTint _), _ -> false
-
-let ct_equal = ct_equal Mtv.empty Mtv.empty
+      | CTqtype (l1, t1), CTqtype (l2, t2) when List.length l1 = List.length l2 ->
+          let subst1, subst2 = comparing_substs l1 l2 in
+          ct_equal subst1 subst2 t1 t2
+      | _, _ -> ct_equal Mtv.empty Mtv.empty t1 t2
 
 (* Bound variable substitution *)
 let rec ct_bv_subst k u ctn = match ctn with
@@ -224,11 +227,12 @@ let ct_open t u = ct_bv_subst 0 u t
 (* Checks if the term is locally closed *)
 let locally_closed =
   let di = id_register (id_fresh "dummy_locally_closed_ident") in
+  let dv = CTfvar (di, []) in
   let rec term ct = match ct with
     | CTbvar _ -> false
     | CTapp (ct1, ct2)
     | CTbinop (_, ct1, ct2) -> term ct1 && term ct2
-    | CTquant (_, _, t) -> term (ct_open t (CTfvar di))
+    | CTquant (_, _, t) -> term (ct_open t dv)
     | CTqtype (_, ct)
     | CTnot ct -> term ct
     | CTint _ | CTfvar _ | CTtrue | CTfalse -> true
@@ -237,7 +241,7 @@ let locally_closed =
 
 (* Free variable substitution (u should be locally closed) *)
 let rec ct_fv_subst z u ctn = match ctn with
-  | CTfvar x -> if id_equal z x then u else ctn
+  | CTfvar (x, _) -> if id_equal z x then u else ctn
   | _ -> ct_map (ct_fv_subst z u) ctn
 
 let ct_subst (m : cterm Mid.t) ct =
@@ -245,26 +249,26 @@ let ct_subst (m : cterm Mid.t) ct =
 
 (* Variable closing *)
 let rec ct_fv_close x k ct = match ct with
-  | CTfvar y -> if id_equal x y then CTbvar k else ct
+  | CTfvar (y, l) -> if id_equal x y then (assert (l = []);  CTbvar k) else ct
   | CTquant (q, cty, ct) -> CTquant (q, cty, ct_fv_close x (k+1) ct)
   | _ -> ct_map (ct_fv_close x k) ct
 
 let ct_close x t = ct_fv_close x 0 t
 
 (* Find free variable with respect to a term *)
-let rec mem_cont x ctn cont = match ctn with
-  | CTfvar y -> cont (id_equal x y)
-  | CTapp (ct1, ct2)
-  | CTbinop (_, ct1, ct2) ->
-      mem_cont x ct1 (fun m1 ->
-      mem_cont x ct2 (fun m2 ->
-          cont (m1 || m2)))
-  | CTquant (_, _, ct)
-  | CTqtype (_, ct)
-  | CTnot ct -> mem_cont x ct cont
-  | CTint _ | CTbvar _ | CTtrue | CTfalse -> cont false
-
-let mem x t = mem_cont x t (fun x -> x)
+(* let rec mem_cont x ctn cont = match ctn with
+ *   | CTfvar (y, _) -> cont (id_equal x y)
+ *   | CTapp (ct1, ct2)
+ *   | CTbinop (_, ct1, ct2) ->
+ *       mem_cont x ct1 (fun m1 ->
+ *       mem_cont x ct2 (fun m2 ->
+ *           cont (m1 || m2)))
+ *   | CTquant (_, _, ct)
+ *   | CTqtype (_, ct)
+ *   | CTnot ct -> mem_cont x ct cont
+ *   | CTint _ | CTbvar _ | CTtrue | CTfalse -> cont false
+ * 
+ * let mem x t = mem_cont x t (fun x -> x) *)
 
 let rec replace_cterm tl tr t =
   if ct_equal t tl
@@ -276,7 +280,7 @@ let rec replace_cterm tl tr t =
 let rec pcte fmt = function
   | CTquant (CTlambda, _, t) ->
       let x = id_register (id_fresh "x") in
-      let t_open = ct_open t (CTfvar x) in
+      let t_open = ct_open t (CTfvar (x, [])) in
       fprintf fmt "λ %a, %a"
         prid x
         pcte t_open;
@@ -324,7 +328,7 @@ and prapp fmt = function
       let q_str = match q with CTforall -> "∀"
                              | CTexists -> "∃"
                              | CTlambda -> assert false in
-      let t_open = ct_open t (CTfvar x) in
+      let t_open = ct_open t (CTfvar (x, [])) in
       fprintf fmt "%s %a (λ %a, %a)"
         q_str
         prty ty
@@ -335,7 +339,12 @@ and prapp fmt = function
 
 and prpv fmt = function
   | CTbvar n -> pp_print_int fmt n
-  | CTfvar id -> prid fmt id
+  | CTfvar (id, l) ->
+      begin match l with
+      | [] -> prid fmt id
+      | _ -> prid fmt id;
+             List.iter (fprintf fmt " %a" prpty) l
+      end
   | CTint i -> pp_print_string fmt (BigInt.to_string i)
   | CTfalse -> fprintf fmt "false"
   | CTtrue -> fprintf fmt "true"
@@ -483,20 +492,48 @@ let instantiate f a =
 
 (* Typing algorithm *)
 
+let rec type_matching subst ty1 ty2 = match ty1, ty2 with
+  | CTprop, CTprop -> subst
+  | CTyvar v, _ ->
+      begin match Mtv.find_opt v subst with
+      | None -> Mtv.add v ty2 subst
+      | Some ty2' -> assert (cty_equal ty2 ty2'); subst end
+  | CTyapp (ts1, l1), CTyapp (ts2, l2) ->
+      assert (ts_equal ts1 ts2);
+      for_all2_type_matching subst l1 l2
+  | CTarrow (f1, a1), CTarrow (f2, a2) ->
+      for_all2_type_matching subst [f1; a1] [f2; a2]
+  | (CTyapp _ | CTarrow _ | CTprop), _ ->
+      assert false
+
+and for_all2_type_matching subst l1 l2 = match l1, l2 with
+  | [], [] -> subst
+  | h1::t1, h2::t2 ->
+      let subst = type_matching subst h1 h2 in
+      for_all2_type_matching subst t1 t2
+  | _ -> assert false
+
 
 let infer_type cta t =
   let rec infer_type sigma t = match t with
-    | CTfvar v -> Mid.find v sigma
+    | CTfvar (v, l) ->
+        begin match Mid.find_opt v sigma with
+        | Some ty ->
+            let formal_l = sorted_vars (find_vars ty) in
+            let subst = create_subst formal_l l in
+            cty_ty_subst subst ty
+        | None -> failwith "Can't find variable in sigma" end
     | CTbvar _ -> failwith "unbound variable"
     | CTtrue | CTfalse -> CTprop
     | CTnot t -> let ty = infer_type sigma t in
                  begin try assert (cty_equal ty CTprop);
                      CTprop
-                 with _ -> failwith "not should apply on prop" end
+                 with _ -> failwith "not should be applied on prop only" end
     | CTquant (quant, ty1, t) ->
+        assert (Mtv.is_empty (find_vars ty1));
         let ni = id_register (id_fresh "type_ident") in
         let sigma = Mid.add ni ty1 sigma in
-        let t = ct_open t (CTfvar ni) in
+        let t = ct_open t (CTfvar (ni, [])) in
         let ty2 = infer_type sigma t in
         begin match quant with
         | CTlambda -> CTarrow (ty1, ty2)
@@ -504,18 +541,12 @@ let infer_type cta t =
             try assert (cty_equal ty2 CTprop);
                 CTprop
             with _ -> failwith "quantification on non prop" end
+    | CTqtype (_, ct) -> infer_type sigma ct
     | CTapp (t1, t2) ->
         begin match infer_type sigma t1, infer_type sigma t2 with
         | CTarrow (ty1, ty2), ty3 ->
-            if cty_equal ty1 ty3 then ty2
-            else begin eprintf "@[<v>try to apply ty1 -> ty2 to ty3@ \
-                                ty1 : %a@ \
-                                ty2 : %a@ \
-                                ty3 : %a@]@."
-                         prty ty1
-                         prty ty2
-                         prty ty3;
-                       assert false end
+            let subst = type_matching Mtv.empty ty1 ty3 in
+            cty_ty_subst subst ty2
         | _ -> failwith "can't apply non functions"
         end
     | CTbinop (_, t1, t2) ->
@@ -524,7 +555,6 @@ let infer_type cta t =
                   assert (cty_equal ty2 CTprop);
                   CTprop
               with _ -> failwith "binop on non prop" end
-    | CTqtype (_, ct) -> infer_type sigma ct
     | CTint _ -> ctint in
   let sigma_plus_interp = Mid.set_union cta.sigma cta.sigma_interp in
   infer_type sigma_plus_interp t
@@ -532,10 +562,11 @@ let infer_type cta t =
 let well_typed cta t =
   ignore (infer_type cta t)
 
-let infers_into cta t ty =
+let infers_into ?e_str:(s="") cta t ty =
   try assert (cty_equal (infer_type cta t) ty)
-  with e -> eprintf "@[<v>wrong type for: %a@ \
-                     expected: %a@]@." pcte t prty ty;
+  with e ->
+    eprintf "@[<v>Checking %s: wrong type for %a@ \
+             expected: %a@]@." s pcte t prty ty;
             raise e
 
 let instantiate_safe cta f a =
