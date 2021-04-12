@@ -37,9 +37,7 @@ let type_lsymbol ls =
 
 let rec abstract_term t =
   let s = t_ty_freevars Stv.empty t in
-  let compare tv1 tv2 =
-    Pervasives.compare tv1.tv_name.id_string tv2.tv_name.id_string in
-  let l = List.sort compare (Stv.elements s) in
+  let l = sorted_vars s in
   let t = abstract_term_rec Mid.empty 0 t in
   match l with
     | [] -> t
@@ -82,7 +80,7 @@ and abstract_term_rec bv_lvl lvl t =
   | Tcase _ -> invalid_arg "Does not handle Tcase yet"
 
 and get_lvl bv_lvl lvl id  = match Mid.find_opt id bv_lvl with
-    | None -> CTfvar id
+    | None -> CTfvar (id, []) (* TODO *)
     | Some lvl_id ->
         (* a variable should not appear before its declaration *)
         assert (lvl_id <= lvl);
@@ -191,6 +189,6 @@ let abstract_terms_task cta =
                              cta.gamma_delta }
 
 let abstract_task env =
-  let get_ls, types_interp, sigma_interp = types_sigma_interp env  in
+  let get_ls, types_interp, sigma_interp = types_sigma_interp env in
   fun task ->
   abstract_task_acc (ctask_new get_ls types_interp sigma_interp) task
