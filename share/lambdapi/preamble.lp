@@ -50,8 +50,8 @@ notation ∨ infix right 16;
 
 symbol ∃ T P ≔  forall (λ C, ttPi T (λ x, P x ↝ C) ↝  C);
 
-symbol eq T (x y : tEv T) ≔  ktPi (T ⇀ DType)
-       	       	       	     	  (λ P, P x ↝ P y);
+symbol infixspeq T (x y : tEv T) ≔  ktPi (T ⇀ DType)
+       	       	       	     	         (λ P, P x ↝ P y);
 
 symbol eq_fmla A B ≔  ktPi (kkPi DType (λ _, DType))
 		           (λ P, P A ↝ P B);
@@ -103,8 +103,6 @@ symbol infixspas : tEv Z → tEv Z → tEv Z;
 symbol infixspmn : tEv Z → tEv Z → tEv Z;
 
 symbol prefixspmn : tEv Z → tEv Z;
-
-symbol infixspeq ≔  eq Z;
 
 
 // Booleans
@@ -193,14 +191,14 @@ symbol exists_elim : Π T P Q, tEv (∃ T P) →  (Π x, tEv (P x ↝ Q)) → tE
 
 // Equality
 
-symbol eq_refl : Π T x, tEv (eq T x x)
+symbol eq_refl : Π T x, tEv (infixspeq T x x)
 ≔  λ T x P px, px;
 
-symbol eq_sym : Π T x y, tEv (eq T x y) → tEv (eq T y x)
-≔  λ T x y eqxy, eqxy (λ t, eq T t x) (eq_refl T x);
+symbol eq_sym : Π T x y, tEv (infixspeq T x y) → tEv (infixspeq T y x)
+≔  λ T x y eqxy, eqxy (λ t, infixspeq T t x) (eq_refl T x);
 
-symbol eq_trans : Π T x y z, tEv (eq T x y) → tEv (eq T y z) → tEv (eq T x z)
-≔  λ T x y z eqxy eqyz, eqyz (λ t, eq T x t) eqxy;
+symbol eq_trans : Π T x y z, tEv (infixspeq T x y) → tEv (infixspeq T y z) → tEv (infixspeq T x z)
+≔  λ T x y z eqxy eqyz, eqyz (λ t, infixspeq T x t) eqxy;
 
 
 
@@ -224,7 +222,7 @@ symbol trivial_goal :
 ≔  λ ntt, ntt tt;
 
 symbol eqrefl : Π T t,
-  tEv (goal (eq T t t) empty)
+  tEv (goal (infixspeq T t t) empty)
 ≔  λ T t neqtt, neqtt (eq_refl T t);
 
 symbol cut : Π A,
@@ -361,13 +359,13 @@ symbol inst_quant_hyp : Π T P t,
 ≔  λ T P t s h, s h (h t);
 
 symbol rewrite_hyp : Π T a b P,
-   tEv (hyp (eq T a b) (hyp (P b) empty)) →
-   tEv (hyp (eq T a b) (hyp (P a) empty))
+   tEv (hyp (infixspeq T a b) (hyp (P b) empty)) →
+   tEv (hyp (infixspeq T a b) (hyp (P a) empty))
 ≔  λ T a b P s h i, s h (h P i);
 
 symbol rewrite_goal : Π T a b P,
-   tEv (hyp (eq T a b) (goal (P b) empty)) →
-   tEv (hyp (eq T a b) (goal (P a) empty))
+   tEv (hyp (infixspeq T a b) (goal (P b) empty)) →
+   tEv (hyp (infixspeq T a b) (goal (P a) empty))
 ≔  λ T a b P s h i, s h (h (λ x, ¬ P x) i);
 
 symbol rewrite_fmla_hyp : Π A B P,

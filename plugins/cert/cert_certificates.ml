@@ -123,8 +123,8 @@ let llet pr (cont : ident -> vcert) =
 let eqrefl i = Trivial i
 (* eqrefl i ⇓ (Γ ⊢ Δ, i : t = t) stands *)
 
-let create_eqrefl i t c =
-  Assert (i, (fun _ -> CTapp (CTapp (eq, t), t)), eqrefl i, c)
+let create_eqrefl i (t : term) c =
+  Assert (i, (fun _ -> t_app_infer ps_equ [t; t]), eqrefl i, c)
 (* create_eqrefl i t c ⇓ (Γ ⊢ Δ) ≜  c ⇓ (Γ, i : t = t ⊢ Δ) *)
 
 let rename i1 i2 c =
@@ -198,17 +198,20 @@ type ('i, 't, 'ty) ecert =
   (* ETrivial (true, i) ⇓ (Γ ⊢ Δ, i : true ) stands *)
   (* Notice that trivial equalities use the following certificate. *)
   | EEqRefl of 'ty * 't * 'i
-  (* EEqRefl (τ, t, i) ⇓ (Γ ⊢ Δ, i : t = t) stands *)
+  (* EEqRefl (τ, t, i) ⇓ (Γ ⊢ Δ, i : t = t) stands if t is of type τ *)
   | EEqSym of bool * 'ty * 't * 't * 'i * ('i, 't, 'ty) ecert (* not kernel *)
   (* EEqSym (true, τ, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ = t₂) ≜
-     c ⇓ (Γ ⊢ Δ, i : t₂ = t₁) *)
+     c ⇓ (Γ ⊢ Δ, i : t₂ = t₁)
+     and t₁ and t₂ are of type τ *)
   (* EEqSym (false, τ, t₁, t₂, i, c) ⇓ (Γ, i : t₁ = t₂ ⊢ Δ) ≜
-     c ⇓ (Γ, i : t₂ = t₁ ⊢ Δ) *)
+     c ⇓ (Γ, i : t₂ = t₁ ⊢ Δ)
+     and t₁ and t₂ are of type τ *)
   | EEqTrans of 'ty * 't * 't * 't * 'i * 'i * 'i * ('i, 't, 'ty) ecert
   (* not kernel *)
   (* EEqTrans (τ, t₁, t₂, t₃, i₁, i₂, i₃, c) ⇓
      (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃ ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃, i₃ : t₁ = t₃ ⊢ Δ) *)
+     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃, i₃ : t₁ = t₃ ⊢ Δ)
+     and t₁, t₂ and t₃ are of type τ *)
   | EUnfoldIff of (bool * 't * 't * 'i * ('i, 't, 'ty) ecert)
   (* EUnfoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) *)
@@ -279,16 +282,20 @@ type ('i, 't, 'ty) ecert =
                 * ('i, 't, 'ty) ecert
   (* ERewrite (true, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
-     c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
+     c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂])
+     and t₁ and t₂ are of type τ *)
   (* ERewrite (false, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
+     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ)
+     and t₁ and t₂ are of type τ *)
   (* ERewrite (true, _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
-     c ⇓ (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
+     c ⇓ (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₂])
+     and t₁ and t₂ are of type τ *)
   (* ERewrite (false, _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
+     c ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₂] ⊢ Δ)
+     and t₁ and t₂ are of type τ *)
   (* Second argument is None when working with an equality, and Some ls when
      working with an equivalence. The lsymbol ls is used to bind the ctxt (which
      is not possible in Why3) *)
@@ -468,7 +475,7 @@ let propagate_ecert fc fi ft fty = function
 
 let rec abstract_ecert = function
   | ERewrite (pos, Some {t_node = Tapp (ls, [])}, None, a, b, ctxt, i, h, c) ->
-      let ntls = CTfvar ls.ls_name in
+      let ntls = CTfvar (ls.ls_name, []) in
       let cctxt = abstract_term ctxt in
       let nctxt = CTquant (CTlambda, CTprop, ct_close ls.ls_name cctxt) in
       let na = abstract_term a in
@@ -773,12 +780,12 @@ let rec trim_certif c =
   | EEqSym (pos, cty, t1, t2, i, c) ->
       let c = trim_certif c in
       let j = id_register (id_fresh "eqsym_temp") in
-      let pre = CTapp (CTapp (eq, t1), t2) in
-      let post = CTapp (CTapp (eq, t2), t1) in
+      let pre = CTapp (CTapp (eq cty, t1), t2) in
+      let post = CTapp (CTapp (eq cty, t2), t1) in
       let c_open = EClear (pos, pre, j, c) in
       let h, g, a, b = if pos then i, j, t2, t1 else j, i, t1, t2 in
       (* We want to close a task of the form <Γ, h : a = b ⊢ Δ, g : b = a> *)
-      let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq, b), CTbvar 0)) in
+      let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq cty, b), CTbvar 0)) in
       let c_closed = ERewrite (not pos, None, cty, a, b, ctxt, h, g,
                                EEqRefl (cty, b, g)) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
@@ -786,8 +793,8 @@ let rec trim_certif c =
         EAssert (i, post, c1, c2)
   | EEqTrans (cty, t1, t2, t3, i1, i2, i3, c) ->
       let c = trim_certif c in
-      let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq, t1), CTbvar 0)) in
-      eduplicate false (CTapp (CTapp (eq, t1), t2)) i1 i3 @@
+      let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq cty, t1), CTbvar 0)) in
+      eduplicate false (CTapp (CTapp (eq cty, t1), t2)) i1 i3 @@
         ERewrite (false, None, cty, t2, t3, ctxt, i2, i3, c)
   | _ -> propagate_ecert trim_certif (fun t -> t) (fun i -> i) (fun ty -> ty) c
 
