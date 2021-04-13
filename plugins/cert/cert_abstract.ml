@@ -48,12 +48,13 @@ let rec abstract_term t =
 and abstract_term_rec bv_lvl lvl t =
   let abstract = abstract_term_rec bv_lvl lvl in
   match t.t_node with
-  | Tvar v -> get_lvl bv_lvl lvl v.vs_name
+  | Tvar v -> get_var bv_lvl lvl v.vs_name []
   | Ttrue  -> CTtrue
   | Tfalse -> CTfalse
   | Tnot t -> CTnot (abstract t)
   | Tapp (ls, lt) ->
-      let cts = get_lvl bv_lvl lvl ls.ls_name in
+      let lty = List.map (fun t -> abstract_otype t.t_ty) lt in
+      let cts = get_var bv_lvl lvl ls.ls_name lty in
       let ctapp ct t = CTapp (ct, abstract t) in
       List.fold_left ctapp cts lt
   | Tbinop (op, t1, t2) ->
@@ -79,8 +80,8 @@ and abstract_term_rec bv_lvl lvl t =
   | Tlet _ -> invalid_arg "Does not handle Tlet yet"
   | Tcase _ -> invalid_arg "Does not handle Tcase yet"
 
-and get_lvl bv_lvl lvl id  = match Mid.find_opt id bv_lvl with
-    | None -> CTfvar (id, []) (* TODO *)
+and get_var bv_lvl lvl id lty  = match Mid.find_opt id bv_lvl with
+    | None -> CTfvar (id, lty)
     | Some lvl_id ->
         (* a variable should not appear before its declaration *)
         assert (lvl_id <= lvl);

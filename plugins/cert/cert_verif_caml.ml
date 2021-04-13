@@ -53,10 +53,10 @@ let rec ccheck c cta =
       | CTfalse, false | CTtrue, true -> Mid.empty
       | _ -> verif_failed "Non trivial hypothesis"
       end
-  | EEqRefl (_, _, i) ->
+  | EEqRefl (cty, _, i) ->
       let t, pos = find_ident "eqrefl" i cta in
       begin match t, pos with
-      | CTapp (CTapp (e, t1), t2), _ when ct_equal t1 t2 && ct_equal e eq ->
+      | CTapp (CTapp (e, t1), t2), _ when ct_equal t1 t2 && ct_equal e (eq cty) ->
           Mid.empty
       | _ -> verif_failed "Non eqrefl hypothesis" end
   | EAssert (i, a, c1, c2) ->
@@ -110,11 +110,9 @@ let rec ccheck c cta =
   | EIntroQuant (_, _, _, i, y, c) ->
       let t, pos = find_ident "intro_quant" i cta in
       begin match t, pos, y with
-      | CTquant (CTforall, cty, t), true, CTfvar y
-      | CTquant (CTexists, cty, t), false, CTfvar y ->
-          if (* TODO : check that y does not appear in cta, maybe with:
-                Mid.mem y cta.sigma || *)
-            mem y t
+      | CTquant (CTforall, cty, t), true, CTfvar (y, [])
+      | CTquant (CTexists, cty, t), false, CTfvar (y, []) ->
+          if Mid.mem y cta.sigma
           then begin
               Format.eprintf "@[<v>TASK@ %a@ \
                        i : %a@ \
@@ -124,7 +122,7 @@ let rec ccheck c cta =
                 prid y;
               verif_failed "non-free variable"
             end
-          else let cta = add i (ct_open t (CTfvar y), pos) cta
+          else let cta = add i (ct_open t (CTfvar (y, [])), pos) cta
                          |> add_var y cty in
                ccheck c cta
       | _ -> verif_failed "Nothing to introduce" end
@@ -137,36 +135,31 @@ let rec ccheck c cta =
           ccheck c cta
       | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
       end
-  | ERewrite (_, is_eq, _, _, _, ctxt, i1, i2, c) ->
+  | ERewrite (_, is_eq, cty, _, _, ctxt, i1, i2, c) ->
       let a, b = match find_ident "rew" i1 cta, is_eq with
         | (CTbinop (Tiff, a, b), false), Some _ -> a, b
-        | (CTapp (CTapp (f, a), b), false), None when ct_equal f eq -> a, b
+        | (CTapp (CTapp (f, a), b), false), None when ct_equal f (eq cty) -> a, b
         | _ -> verif_failed "Non-rewritable proposition" in
       let t, pos = find_ident "rew" i2 cta in
+      infers_into cta a cty;
+      infers_into cta b cty;
       assert (ct_equal t (instantiate_safe cta ctxt a));
       let cta =  add i2 (instantiate ctxt b, pos) cta in
       ccheck c cta
   | EInduction (g, hi1, hi2, hr, x, a, ctxt, c1, c2) ->
-      let le = CTfvar (cta.get_ls le_str).ls_name in
-      let lt = CTfvar (cta.get_ls lt_str).ls_name in
+      let le = CTfvar ((cta.get_ls le_str).ls_name, []) in
+      let lt = CTfvar ((cta.get_ls lt_str).ls_name, []) in
       let t, pos = find_ident "induction" g cta in
-      let has_term_cta x cta =
-        let i = match x with CTfvar ix -> ix | _ -> assert false in
-        let rec found_ident_term i t = match t with
-          | CTfvar i' when id_equal i i' -> raise Found
-          | _ -> ct_map (found_ident_term i) t in
-        try Mid.map (fun (t, _) -> found_ident_term i t)
-              (remove g cta).gamma_delta |> ignore; false
-        with Found -> true in
+      let ix =  match x with CTfvar (ix, _) -> ix | _ -> assert false in
       (* check that we are in the case of application and that we preserve
          typing *)
       infers_into ~e_str:"EInduction, var" cta x ctint;
       infers_into ~e_str:"EInduction, bound" cta a ctint;
       assert (ct_equal t (instantiate_safe cta ctxt x));
-      assert (not (has_term_cta x cta) && pos);
+      assert (not (Mid.mem ix cta.sigma) && pos);
       let cta1 = add hi1 (CTapp (CTapp (le, x), a), false) cta in
       let idn = id_register (id_fresh "ctxt_var") in
-      let n = CTfvar idn in
+      let n = CTfvar (idn, []) in
       let cta2 = add hi2 (CTapp (CTapp (lt, a), x), false) cta
                  |> add hr (CTquant (CTforall, ctint, ct_close idn (
                             CTbinop (Timplies, CTapp (CTapp (lt, n), x),

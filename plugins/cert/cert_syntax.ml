@@ -162,6 +162,8 @@ let ml_str = op_infix "*"
 let pre_mn_str = op_infix "-"
 let inf_mn_str = op_prefix "-"
 
+let eq cty = CTfvar (id_eq, [cty])
+
 (** Utility functions on cterm *)
 
 let ct_map f ct = match ct with
@@ -250,7 +252,7 @@ let ct_close x t = ct_fv_close x 0 t
 
 (* Find free variable with respect to a term *)
 (* let rec mem_cont x ctn cont = match ctn with
- *   | CTfvar y -> cont (id_equal x y)
+ *   | CTfvar (y, _) -> cont (id_equal x y)
  *   | CTapp (ct1, ct2)
  *   | CTbinop (_, ct1, ct2) ->
  *       mem_cont x ct1 (fun m1 ->
