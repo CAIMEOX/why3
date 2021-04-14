@@ -196,7 +196,6 @@ let p1 = relativize_filename "test"
 *)
 
 let uniquify file =
-  (* Uniquify the filename if it exists on disk *)
   let i =
     try String.rindex file '.'
     with _ -> String.length file

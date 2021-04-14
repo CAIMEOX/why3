@@ -41,7 +41,7 @@ and print_s fmt {s; gd} =
       let pred = is_predicate cty in
       fprintf fmt "%a %a (λ %a,@ %a)"
         prquant pred
-        (pred_typaren pred) cty
+        (pred_pty pred) cty
         prid id
         print_s {t = []; s; gd}
 
@@ -73,7 +73,7 @@ let print_certif print_next fmt c =
         prhyp i
   | EEqRefl (cty, t, i) ->
       fprintf fmt "eqrefl %a %a %a"
-        prtyparen cty
+        prpty cty
         prpv t
         prhyp i
   | EAssert (i, t, c1, c2) ->
@@ -143,7 +143,7 @@ let print_certif print_next fmt c =
       fprintf fmt "intro_quant%s %a %a (λ %a %a,@ \
                    @[<hv>%a@]) %a"
         (rstr pos)
-        prtyparen cty
+        prpty cty
         prpv p
         prpv y prhyp i pc c
         prhyp i
@@ -151,7 +151,7 @@ let print_certif print_next fmt c =
       fprintf fmt "inst_quant%s %a %a %a (λ %a %a,@ \
                    @[<hv>%a@]) %a"
         (rstr pos)
-        prtyparen cty
+        prpty cty
         prpv p
         prpv t
         prhyp i1 prhyp i2 pc c
@@ -167,7 +167,7 @@ let print_certif print_next fmt c =
       begin match is_eq with
       | None ->
           fprintf fmt "rewrite%s %a %a"
-            (rstr pos) prtyparen cty pr_next i1
+            (rstr pos) prpty cty pr_next i1
       | Some _ ->
           let ni1 = id_register (id_fresh "iff_rewrite") in
           fprintf fmt "iffeq %a %a (λ %a,@ \
@@ -227,14 +227,12 @@ let print fmt init res (task_ids, certif) =
 
 let checker_lambdapi certif init res =
   try
-    let check_cert = "/tmp/check_cert.lp" in
+    let check_cert = Sysutil.uniquify "/tmp/check_cert.lp" in
     let oc = open_out check_cert in
     let fmt = formatter_of_out_channel oc in
     print fmt init res certif;
     close_out oc;
-    (* let lp_folder = Filename.(concat Config.datadir "lambdapi") in *)
     let quiet = ">/dev/null 2>&1" in
-    (* let _ = Sys.command ("make install -C  " ^ lp_folder ^ quiet) in *)
     let ret = Sys.command ("lambdapi check --map-dir check:/tmp/ "
                            ^ check_cert ^ quiet) in
     if ret <> 0 then verif_failed "Not verified by Lambdapi"

@@ -36,19 +36,29 @@ let type_lsymbol ls =
     ls.ls_args (abstract_otype ls.ls_value)
 
 let rec abstract_term t =
-  abstract_term_rec Mid.empty 0 t
+  let s = t_ty_freevars Stv.empty t in
+  let l = sorted_vars s in
+  let t = abstract_term_rec Mid.empty 0 t in
+  match l with
+    | [] -> t
+    | _ -> CTqtype (l, t)
 
 (* level <lvl> is the number of binders above in the whole term *)
 (* <bv_lvl> is mapping bound variables to their respective level *)
 and abstract_term_rec bv_lvl lvl t =
   let abstract = abstract_term_rec bv_lvl lvl in
   match t.t_node with
-  | Tvar v -> get_lvl bv_lvl lvl v.vs_name
+  | Tvar v -> get_var bv_lvl lvl v.vs_name []
   | Ttrue  -> CTtrue
   | Tfalse -> CTfalse
   | Tnot t -> CTnot (abstract t)
   | Tapp (ls, lt) ->
-      let cts = get_lvl bv_lvl lvl ls.ls_name in
+      let actual_types = List.map (fun t -> abstract_otype t.t_ty) lt in
+      let formal_types = List.map abstract_type ls.ls_args in
+      let subst = for_all2_type_matching Mtv.empty formal_types actual_types in
+      let lv = sorted_vars (find_vars (type_lsymbol ls)) in
+      let lty = List.map (fun tv -> Mtv.find tv subst) lv in
+      let cts = get_var bv_lvl lvl ls.ls_name lty in
       let ctapp ct t = CTapp (ct, abstract t) in
       List.fold_left ctapp cts lt
   | Tbinop (op, t1, t2) ->
@@ -74,8 +84,8 @@ and abstract_term_rec bv_lvl lvl t =
   | Tlet _ -> invalid_arg "Does not handle Tlet yet"
   | Tcase _ -> invalid_arg "Does not handle Tcase yet"
 
-and get_lvl bv_lvl lvl id  = match Mid.find_opt id bv_lvl with
-    | None -> CTfvar id
+and get_var bv_lvl lvl id lty  = match Mid.find_opt id bv_lvl with
+    | None -> CTfvar (id, lty)
     | Some lvl_id ->
         (* a variable should not appear before its declaration *)
         assert (lvl_id <= lvl);
@@ -132,10 +142,8 @@ let types_sigma_interp env =
     List.iter add [ts_int; ts_real; ts_bool] in
 
   let _ =
-    let add (id, cty) = interp_var := (id, cty) :: !interp_var in
-    List.iter add [ id_true, ctbool;
-                    id_false, ctbool;
-                    id_eq, CTarrow (ctint, CTarrow (ctint, CTprop))];
+    let add ls = interp_var := (ls.ls_name, type_lsymbol ls) :: !interp_var in
+    List.iter add [fs_bool_true; fs_bool_false; ps_equ];
 
     try let env = Opt.get env in
         let th_int = Env.read_theory env ["int"] "Int" in
@@ -148,18 +156,18 @@ let types_sigma_interp env =
         let pmn = ns_find_ls th_int.th_export [pre_mn_str] in
         let imn = ns_find_ls th_int.th_export [inf_mn_str] in
 
-        let add (str, ls, cty) =
-          add (ls.ls_name, cty);
+        let add (str, ls) =
+          add ls;
           str_ls := (str, ls) :: !str_ls in
         List.iter add
-          [le_str, le, type_lsymbol le;
-           ge_str, ge, type_lsymbol ge;
-           lt_str, lt, type_lsymbol lt;
-           gt_str, gt, type_lsymbol gt;
-           pl_str, pl, type_lsymbol pl;
-           ml_str, ml, type_lsymbol ml;
-           pre_mn_str, pmn, type_lsymbol pmn;
-           inf_mn_str, imn, type_lsymbol imn;
+          [le_str, le;
+           ge_str, ge;
+           lt_str, lt;
+           gt_str, gt;
+           pl_str, pl;
+           ml_str, ml;
+           pre_mn_str, pmn;
+           inf_mn_str, imn;
           ]
     with _ -> () in
 
@@ -184,6 +192,6 @@ let abstract_terms_task cta =
                              cta.gamma_delta }
 
 let abstract_task env =
-  let get_ls, types_interp, sigma_interp = types_sigma_interp env  in
+  let get_ls, types_interp, sigma_interp = types_sigma_interp env in
   fun task ->
   abstract_task_acc (ctask_new get_ls types_interp sigma_interp) task
