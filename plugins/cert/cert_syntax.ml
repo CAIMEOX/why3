@@ -24,8 +24,7 @@ type ctype =
   | CTyapp of tysymbol * ctype list (* (possibly) applied type constant *)
   | CTarrow of ctype * ctype (* arrow type *)
 
-let ctyvar tv = CTyvar tv
-
+(* Interpreted types *)
 let ctint = CTyapp (ts_int, [])
 let ctreal = CTyapp (ts_real, [])
 let ctbool = CTyapp (ts_bool, [])
@@ -43,8 +42,7 @@ let rec cty_equal ty1 ty2 = match ty1, ty2 with
   | (CTyvar _ | CTyapp _ | CTarrow _ | CTprop), _ -> false
 
 let sorted_vars s =
-  let compare tv1 tv2 =
-    Pervasives.compare tv1.tv_name.id_string tv2.tv_name.id_string in
+  let compare tv1 tv2 = compare tv1.tv_name.id_string tv2.tv_name.id_string in
   List.sort compare (Stv.elements s)
 
 let rec find_vars = function
@@ -69,18 +67,23 @@ let rec cty_ty_subst subst = function
       CTyapp (ts, List.map (cty_ty_subst subst) l)
   | (CTyvar _ | CTprop) as cty -> cty
 
+let comparing_substs l1 l2 =
+  let new_ctyvar _ = CTyvar (create_tvsymbol (id_fresh "dummy_comparing_substs")) in
+  let lty = List.map new_ctyvar l1 in
+  let subst1 = create_subst l1 lty in
+  let subst2 = create_subst l2 lty in
+  subst1, subst2
 
 (* Equality modulo α-conversion (only used for task equality) *)
 let cty_same ty1 ty2 =
-  let ltv1 = sorted_vars (find_vars ty1) in
-  let ltv2 = sorted_vars (find_vars ty2) in
-  let create_var _ = CTyvar (create_tvsymbol (id_fresh "cty_same")) in
-  let lty = List.(init (length ltv1) create_var) in
-  let subst1 = create_subst ltv1 lty in
-  let subst2 = create_subst ltv2 lty in
-  let ty1 = cty_ty_subst subst1 ty1 in
-  let ty2 = cty_ty_subst subst2 ty2 in
-  cty_equal ty1 ty2
+  try
+    let ltv1 = sorted_vars (find_vars ty1) in
+    let ltv2 = sorted_vars (find_vars ty2) in
+    let subst1, subst2 = comparing_substs ltv1 ltv2 in
+    let ty1 = cty_ty_subst subst1 ty1 in
+    let ty2 = cty_ty_subst subst2 ty2 in
+    cty_equal ty1 ty2
+  with _ -> false
 
 let rec is_predicate = function
   | CTprop -> true
@@ -89,6 +92,9 @@ let rec is_predicate = function
 
 (** Pretty printing of ctype (compatible with lambdapi) *)
 
+(* We define two printers, <hip> for premises, <ip> for everything else. This is
+   needed because the logical definitions (via Dlogic) use the same ident for
+   the defined symbol and for its axiom's name. *)
 let san =
   let lower_h c = if c = 'H' then "h" else char_to_alnum c in
   sanitizer lower_h char_to_alnum
@@ -149,10 +155,10 @@ type cterm =
   | CTtrue
   | CTfalse
 
+(* Interpreted terms *)
 let id_eq = ps_equ.ls_name
 let id_true = fs_bool_true.ls_name
 let id_false = fs_bool_false.ls_name
-
 let le_str = op_infix "<="
 let ge_str = op_infix ">="
 let lt_str = op_infix "<"
@@ -203,10 +209,9 @@ let ct_equal t1 t2 =
        | CTqtype _ | CTtrue | CTfalse | CTnot _ | CTint _), _ -> false
   in
   match t1, t2 with
-      | CTqtype (l1, t1), CTqtype (l2, t2) ->
-        let subst1 = create_subst l1 (List.map ctyvar l2) in
-        let subst2 = create_subst l2 (List.map ctyvar l1) in
-        ct_equal subst1 subst2 t1 t2
+      | CTqtype (l1, t1), CTqtype (l2, t2) when List.length l1 = List.length l2 ->
+          let subst1, subst2 = comparing_substs l1 l2 in
+          ct_equal subst1 subst2 t1 t2
       | _, _ -> ct_equal Mtv.empty Mtv.empty t1 t2
 
 (* Bound variable substitution *)
@@ -514,8 +519,8 @@ let infer_type cta t =
     | CTfvar (v, l) ->
         begin match Mid.find_opt v sigma with
         | Some ty ->
-            let fl = sorted_vars (find_vars ty) in
-            let subst = create_subst fl l in
+            let formal_l = sorted_vars (find_vars ty) in
+            let subst = create_subst formal_l l in
             cty_ty_subst subst ty
         | None -> failwith "Can't find variable in sigma" end
     | CTbvar _ -> failwith "unbound variable"
@@ -523,7 +528,7 @@ let infer_type cta t =
     | CTnot t -> let ty = infer_type sigma t in
                  begin try assert (cty_equal ty CTprop);
                      CTprop
-                 with _ -> failwith "not should apply on prop" end
+                 with _ -> failwith "not should be applied on prop only" end
     | CTquant (quant, ty1, t) ->
         assert (Mtv.is_empty (find_vars ty1));
         let ni = id_register (id_fresh "type_ident") in

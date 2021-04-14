@@ -53,7 +53,11 @@ and abstract_term_rec bv_lvl lvl t =
   | Tfalse -> CTfalse
   | Tnot t -> CTnot (abstract t)
   | Tapp (ls, lt) ->
-      let lty = List.map (fun t -> abstract_otype t.t_ty) lt in
+      let actual_types = List.map (fun t -> abstract_otype t.t_ty) lt in
+      let formal_types = List.map abstract_type ls.ls_args in
+      let subst = for_all2_type_matching Mtv.empty formal_types actual_types in
+      let lv = sorted_vars (find_vars (type_lsymbol ls)) in
+      let lty = List.map (fun tv -> Mtv.find tv subst) lv in
       let cts = get_var bv_lvl lvl ls.ls_name lty in
       let ctapp ct t = CTapp (ct, abstract t) in
       List.fold_left ctapp cts lt
@@ -138,10 +142,8 @@ let types_sigma_interp env =
     List.iter add [ts_int; ts_real; ts_bool] in
 
   let _ =
-    let add (id, cty) = interp_var := (id, cty) :: !interp_var in
-    List.iter add [ id_true, ctbool;
-                    id_false, ctbool;
-                    id_eq, CTarrow (ctint, CTarrow (ctint, CTprop))];
+    let add ls = interp_var := (ls.ls_name, type_lsymbol ls) :: !interp_var in
+    List.iter add [fs_bool_true; fs_bool_false; ps_equ];
 
     try let env = Opt.get env in
         let th_int = Env.read_theory env ["int"] "Int" in
@@ -154,18 +156,18 @@ let types_sigma_interp env =
         let pmn = ns_find_ls th_int.th_export [pre_mn_str] in
         let imn = ns_find_ls th_int.th_export [inf_mn_str] in
 
-        let add (str, ls, cty) =
-          add (ls.ls_name, cty);
+        let add (str, ls) =
+          add ls;
           str_ls := (str, ls) :: !str_ls in
         List.iter add
-          [le_str, le, type_lsymbol le;
-           ge_str, ge, type_lsymbol ge;
-           lt_str, lt, type_lsymbol lt;
-           gt_str, gt, type_lsymbol gt;
-           pl_str, pl, type_lsymbol pl;
-           ml_str, ml, type_lsymbol ml;
-           pre_mn_str, pmn, type_lsymbol pmn;
-           inf_mn_str, imn, type_lsymbol imn;
+          [le_str, le;
+           ge_str, ge;
+           lt_str, lt;
+           gt_str, gt;
+           pl_str, pl;
+           ml_str, ml;
+           pre_mn_str, pmn;
+           inf_mn_str, imn;
           ]
     with _ -> () in
 
