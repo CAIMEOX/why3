@@ -106,11 +106,11 @@
    <proof prover="0"><result status="valid" time="0.03" steps="1403"/></proof>
    </goal>
   </transf>
-  <transf name="induction_ccert" arg1="n">
-   <goal name="G4.0.0" expl="base case">
+  <transf name="induction_ccert" proved="true" arg1="n">
+   <goal name="G4.0.0" expl="base case" proved="true">
    <proof prover="0"><result status="valid" time="0.04" steps="686"/></proof>
    </goal>
-   <goal name="G4.0.1" expl="recursive case">
+   <goal name="G4.0.1" expl="recursive case" proved="true">
    <proof prover="0"><result status="valid" time="0.03" steps="1403"/></proof>
    </goal>
   </transf>

@@ -139,6 +139,10 @@ let print_certif print_next fmt c =
         prpv t
         prhyp i
         pc c
+  | EForget (_, c) ->
+      fprintf fmt "forget (@,\
+                   @[<hv>%a@])"
+        pc c
   | EIntroQuant (pos, cty, p, i, y, c) ->
       fprintf fmt "intro_quant%s %a %a (λ %a %a,@ \
                    @[<hv>%a@]) %a"

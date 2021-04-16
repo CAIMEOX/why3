@@ -338,6 +338,11 @@ symbol cleargoal : Π A,
 
 symbol clear_goal A HA s ≔  cleargoal A s HA;
 
+symbol forget :
+    tEv empty →
+    tEv empty
+≔  λ f, f;
+
 symbol intro_quant_hyp : Π (T : Type) (P : kEv (T ⇀ DType)),
     (Π (y : tEv T), tEv (hyp (P y) empty)) →
     tEv (hyp (∃ T P) empty)
