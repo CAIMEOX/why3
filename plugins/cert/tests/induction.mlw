@@ -1,0 +1,33 @@
+use int.Int
+
+let rec function sum (n : int)
+    requires { n >= 0 }
+    variant { n }
+    =
+    if n = 0 then 0
+    else n + sum (n-1)
+
+goal G1 : forall n. n >= 0 -> 2 * sum n = n * (n+1)
+
+predicate p int
+predicate q int
+predicate r int
+constant i : int
+constant u : int
+
+axiom to_use_after_tests : false
+
+goal G2 :  p i
+
+axiom H1 : q i
+
+goal G3 : p i
+
+axiom H2 : r u
+
+goal G4 : p i
+
+axiom H3 : q i -> r u
+
+goal G5 : p i
+
