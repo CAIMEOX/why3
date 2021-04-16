@@ -4,7 +4,7 @@ predicate p int
 predicate q int
 predicate r int
 constant i : int
-constant x_file : int
+constant u : int
 
 goal G :  p i
 
@@ -12,11 +12,11 @@ axiom H1 : q i
 
 goal G1 : p i
 
-axiom H2 : r x_file
+axiom H2 : r u
 
 goal G2 : p i
 
-axiom H3 : q i -> r x_file
+axiom H3 : q i -> r u
 
 goal G3 : p i
 

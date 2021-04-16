@@ -56,9 +56,11 @@ let checker_ctrans
     forget_all ip;
     forget_all hip;
     res_t
-  with e -> forget_all ip;
+  with Invalid_argument s -> forget_all ip;
             forget_all hip;
-            raise e
+            Format.printf "%s" s;
+            raise Not_found
+     | Not_found -> raise Found
 
 
 
