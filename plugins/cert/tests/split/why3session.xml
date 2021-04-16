@@ -3,7 +3,7 @@
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
 <file format="whyml">
-<path name=".."/><path name="test_split.mlw"/>
+<path name=".."/><path name="split.mlw"/>
 <theory name="Top">
  <goal name="G1">
  <transf name="split_all_full_ccert" >
@@ -20,6 +20,14 @@
  </transf>
  </goal>
  <goal name="G2">
+ <transf name="intro_ccert" >
+  <goal name="G2.0">
+  <transf name="split_all_full" >
+   <goal name="G2.0.0">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
  </goal>
  <goal name="G3">
  <transf name="intro_ccert" >
@@ -27,9 +35,19 @@
   <transf name="split_all_full" >
    <goal name="G3.0.0">
    </goal>
+   <goal name="G3.0.1">
+   </goal>
   </transf>
   <transf name="split_all_full_ccert" >
    <goal name="G3.0.0">
+   </goal>
+   <goal name="G3.0.1">
+   </goal>
+  </transf>
+  <transf name="split_all_full_lcert" >
+   <goal name="G3.0.0">
+   </goal>
+   <goal name="G3.0.1">
    </goal>
   </transf>
   </goal>
@@ -38,120 +56,90 @@
  <goal name="G4">
  <transf name="intro_ccert" >
   <goal name="G4.0">
+  <transf name="split_all_full" >
+   <goal name="G4.0.0">
+   </goal>
+  </transf>
+  <transf name="split_all_full_ccert" >
+   <goal name="G4.0.0">
+   </goal>
+  </transf>
   </goal>
  </transf>
  </goal>
  <goal name="G5">
- </goal>
- <goal name="G6">
  <transf name="split_all_full" >
-  <goal name="G6.0">
+  <goal name="G5.0">
   </goal>
-  <goal name="G6.1">
+  <goal name="G5.1">
   </goal>
  </transf>
  <transf name="split_all_full_ccert" >
-  <goal name="G6.0">
+  <goal name="G5.0">
   </goal>
-  <goal name="G6.1">
+  <goal name="G5.1">
+  </goal>
+ </transf>
+ <transf name="split_all_full_lcert" >
+  <goal name="G5.0">
+  </goal>
+  <goal name="G5.1">
+  </goal>
+ </transf>
+ </goal>
+ <goal name="G6">
+ <transf name="intro_ccert" >
+  <goal name="G6.0">
+  <transf name="split_all_full_ccert" >
+   <goal name="G6.0.0">
+   </goal>
+  </transf>
+  <transf name="split_all_full_lcert" >
+   <goal name="G6.0.0">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ <transf name="split_all_full" >
+  <goal name="G6.0">
   </goal>
  </transf>
  </goal>
  <goal name="G7">
- <transf name="intro_ccert" >
+ <transf name="split_all_full" >
   <goal name="G7.0">
+  </goal>
+  <goal name="G7.1">
+  </goal>
+  <goal name="G7.2">
+  </goal>
+  <goal name="G7.3">
+  </goal>
+ </transf>
+ <transf name="split_all_full_ccert" >
+  <goal name="G7.0">
+  </goal>
+  <goal name="G7.1">
+  </goal>
+  <goal name="G7.2">
+  </goal>
+  <goal name="G7.3">
+  </goal>
+ </transf>
+ <transf name="split_all_full_lcert" >
+  <goal name="G7.0">
+  </goal>
+  <goal name="G7.1">
+  </goal>
+  <goal name="G7.2">
+  </goal>
+  <goal name="G7.3">
   </goal>
  </transf>
  </goal>
  <goal name="G8">
- <transf name="intro_ccert" >
+ <transf name="split_all_full" >
   <goal name="G8.0">
-  <transf name="split_all_full" >
-   <goal name="G8.0.0">
-   </goal>
-  </transf>
-  <transf name="split_all_full_ccert" >
-   <goal name="G8.0.0">
-   </goal>
-  </transf>
-  </goal>
- </transf>
- </goal>
- <goal name="G9">
- </goal>
- <goal name="G10">
- <transf name="split_all_full" >
-  <goal name="G10.0">
-  </goal>
-  <goal name="G10.1">
-  </goal>
- </transf>
- <transf name="split_all_full_ccert" >
-  <goal name="G10.0">
-  </goal>
-  <goal name="G10.1">
-  </goal>
- </transf>
- <transf name="split_all_full_lcert" >
-  <goal name="G10.0">
-  </goal>
-  <goal name="G10.1">
-  </goal>
- </transf>
- </goal>
- <goal name="G11">
- <transf name="intro_ccert" >
-  <goal name="G11.0">
-  </goal>
- </transf>
- </goal>
- <goal name="G12">
- <transf name="intro_ccert" >
-  <goal name="G12.0">
-  <transf name="split_all_full" >
-   <goal name="G12.0.0">
-   </goal>
-  </transf>
-  <transf name="split_all_full_ccert" >
-   <goal name="G12.0.0">
-   </goal>
-  </transf>
-  <transf name="split_all_full_lcert" >
-   <goal name="G12.0.0">
-   </goal>
-  </transf>
-  </goal>
- </transf>
- </goal>
- <goal name="G13">
- <transf name="split_all_full" >
-  <goal name="G13.0">
-  </goal>
-  <goal name="G13.1">
-  </goal>
-  <goal name="G13.2">
-  </goal>
-  <goal name="G13.3">
-  </goal>
- </transf>
- <transf name="split_all_full_ccert" >
-  <goal name="G13.0">
-  </goal>
-  <goal name="G13.1">
-  </goal>
-  <goal name="G13.2">
-  </goal>
-  <goal name="G13.3">
-  </goal>
- </transf>
- <transf name="split_all_full_lcert" >
-  <goal name="G13.0">
-  </goal>
-  <goal name="G13.1">
-  </goal>
-  <goal name="G13.2">
-  </goal>
-  <goal name="G13.3">
   </goal>
  </transf>
  </goal>

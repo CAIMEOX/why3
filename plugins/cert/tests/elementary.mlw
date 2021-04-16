@@ -54,9 +54,9 @@ goal clear : a -> d -> a -> a -> d
 (* (\* Testing blast *\) *)
 goal blast_simp : not ((not c) /\ (not not c))
 goal blast_and : (a /\ b) /\ (a /\ a /\ a /\ b)
-goal blast_and_hole : (b /\ a) /\ ( (a /\ a) /\ c)
+goal blast_and_hole : (b /\ a) /\ ( (a /\ a) /\ (forall _: bool. a))
 goal blast_or : (a \/ c) /\ (d \/ b)
-goal blast_or_hole : a /\ (c \/ d)
+goal blast_or_hole : a /\ (c \/ (forall _: bool. a))
 goal blast_big : (a /\ (d \/ c) ) \/ (((a /\ b) /\ ((b /\ (d \/ e \/ a)) \/d)) \/ (a /\ c))
 goal blast_big_big : ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
      		       	        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a)))) /\
