@@ -108,7 +108,10 @@ let prid fmt i = fprintf fmt "%s" (id_unique ip i)
 
 let prhyp fmt i = fprintf fmt "%s" (id_unique hip i)
 
+let prls fmt ls = prid fmt ls.ls_name
+
 let prpr fmt pr = prhyp fmt pr.pr_name
+
 
 (* pred functions know if we are printing the type of a predicate or not *)
 let rec pred_ty pred fmt ty = match ty with
@@ -434,11 +437,20 @@ let ctask_equal cta1 cta2 =
       ct_equal t1 t2 && p1 = p2 in
     Mid.equal cterm_pos_equal cta1.gamma_delta cta2.gamma_delta
 
-let find_ident s h cta =
+let find_variable s i cta =
+  match Mid.find_opt i cta.sigma with
+  | Some x -> x
+  | None ->
+      let s = asprintf "%s : Can't find a variable with name %a in the task"
+                s prid i in
+      verif_failed s
+
+let find_formula s h cta =
   match Mid.find_opt h cta.gamma_delta with
   | Some x -> x
   | None ->
-      let s = asprintf "%s : Can't find ident %a in the task" s prhyp h in
+      let s = asprintf "%s : Can't find a formula with name %a in the task"
+                s prhyp h in
       verif_failed s
 
 let ctask_new get_ls types_interp sigma_interp =
@@ -461,6 +473,9 @@ let add_type i cta =
 let add_var i cty cta =
   if Mid.mem i cta.sigma_interp then cta
   else { cta with sigma = Mid.add i cty cta.sigma  }
+
+let remove_var i cta =
+  { cta with sigma = Mid.remove i cta.sigma  }
 
 let remove i cta = lift_mid_cta (Mid.remove i) cta
 
@@ -489,6 +504,16 @@ let instantiate f a =
   match f with
   | CTquant (CTlambda, _, f) -> ct_open f a
   | _ -> assert false
+
+(* Verify that an ident is fresh in relation to a context of propositions *)
+exception Found
+let has_ident_context i ctxt =
+  let rec found_ident_term i t = match t with
+    | CTfvar (i', _) when id_equal i i' -> raise Found
+    | _ -> ct_map (found_ident_term i) t in
+  try Mid.map (fun (t, _) -> found_ident_term i t)
+        ctxt |> ignore; false
+  with Found -> true
 
 (* Typing algorithm *)
 
