@@ -119,14 +119,15 @@ let revert_cert pr decls =
                     let closed_t map =
                       let g = t_replace tx (t_var x') (Mid.find g map) in
                       t_forall_close [x'] [] g in
-                    Assert (pr', closed_t, Clear (pr, rename pr' pr (rc tail)),
+                    Assert (pr', closed_t,
+                            Clear (pr, Forget (ls, rename pr' pr (rc tail))),
                             InstQuant (pr', pr', tx, Axiom (pr', pr))))
             | _ -> assert false in
       rc decls)
 
 let intro_cert pr decls =
   lambda one (fun i ->
-      let rec ic decls : (prsymbol, term) cert = match decls with
+      let rec ic decls : vcert = match decls with
         |  [] -> Hole i
         |  {d_node = Dparam _}::_ ->
             let rec intro_decls_var acc = function
