@@ -231,7 +231,7 @@ let print fmt init res (task_ids, certif) =
 
 let checker_lambdapi certif init res =
   try
-    let check_cert = Sysutil.uniquify "/tmp/check_cert.lp" in
+    let check_cert = "/tmp/check_cert.lp" in
     let oc = open_out check_cert in
     let fmt = formatter_of_out_channel oc in
     print fmt init res certif;

@@ -548,7 +548,7 @@ let elaborate init_ct c =
         let t, pos = find_formula "Trivial" i cta in
         begin match t.t_node, pos with
         | Tapp (e, [t1; t2]), _ when t_equal t1 t2 && ls_equal e ps_equ ->
-            EEqRefl (t.t_ty, t1, i)
+            EEqRefl (t1.t_ty, t1, i)
         | Tfalse, false | Ttrue, true ->
             ETrivial (pos, i)
         | _ -> eprintf "not an equality or not same terms in eqrefl";
