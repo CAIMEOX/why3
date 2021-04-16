@@ -1,0 +1,15 @@
+predicate a
+predicate b
+predicate c
+predicate d
+
+axiom A : a
+axiom B : b
+
+goal G1 : a /\ b
+goal G2 : c /\ (b -> d) -> false
+goal G3 : not (a \/ b)
+goal G4 : not (a \/ b) -> false
+goal G5 : not (a -> b)
+goal G6 : not (a -> b) -> false
+goal G7 : not ((a \/ b) /\ (c \/ d))
