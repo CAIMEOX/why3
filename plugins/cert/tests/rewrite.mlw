@@ -1,0 +1,35 @@
+module RewInt
+
+use int.Int
+
+constant x : int
+
+axiom x_zero : x = 0
+
+goal G1 : x + 1 = 1
+
+end
+
+
+module RewMonoid
+
+clone algebra.Monoid with axiom .
+
+goal one_inv : forall a b. op a b = op b a -> forall x . op (op x a) b = op (op x b) a
+
+end
+
+
+module RewGroup
+
+  clone algebra.Monoid with axiom .
+
+  function inv t : t
+  axiom Inv_def_l : forall x : t. op (inv x) x = unit
+
+  lemma Inv_both : forall x : t. op (inv x) (op x (inv x)) = inv x
+
+  goal Inv_def_right : forall y. op y (inv y) = unit
+
+end
+

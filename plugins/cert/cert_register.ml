@@ -56,12 +56,9 @@ let checker_ctrans
     forget_all ip;
     forget_all hip;
     res_t
-  with Invalid_argument s -> forget_all ip;
+  with e -> forget_all ip;
             forget_all hip;
-            Format.printf "%s" s;
-            raise Not_found
-     | Not_found -> raise Found
-
+            raise e
 
 
 let cchecker ?env trans =

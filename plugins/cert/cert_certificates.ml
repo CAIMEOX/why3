@@ -110,7 +110,9 @@ type ('v, 'h, 't) cert =
 (* Induction (G, Hi₁, Hi₂, Hr, x, a, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
    c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
    and c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
-   and i does not appear in Γ or Δ *)
+   and i does not appear in Γ, Δ or C
+   and x and a are of type int
+ *)
 (* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
    stands for this context where the holes have been replaced with t *)
 
@@ -203,17 +205,14 @@ type ('v, 'h, 't, 'ty) ecert =
   (* EEqRefl (τ, t, i) ⇓ (Γ ⊢ Δ, i : t = t) stands if t is of type τ *)
   | EEqSym of bool * 'ty * 't * 't * 'h * ('v, 'h, 't, 'ty) ecert (* not kernel *)
   (* EEqSym (true, τ, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ = t₂) ≜
-     c ⇓ (Γ ⊢ Δ, i : t₂ = t₁)
-     and t₁ and t₂ are of type τ *)
+     c ⇓ (Γ ⊢ Δ, i : t₂ = t₁) *)
   (* EEqSym (false, τ, t₁, t₂, i, c) ⇓ (Γ, i : t₁ = t₂ ⊢ Δ) ≜
-     c ⇓ (Γ, i : t₂ = t₁ ⊢ Δ)
-     and t₁ and t₂ are of type τ *)
+     c ⇓ (Γ, i : t₂ = t₁ ⊢ Δ) *)
   | EEqTrans of 'ty * 't * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) ecert
   (* not kernel *)
   (* EEqTrans (τ, t₁, t₂, t₃, i₁, i₂, i₃, c) ⇓
      (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃ ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃, i₃ : t₁ = t₃ ⊢ Δ)
-     and t₁, t₂ and t₃ are of type τ *)
+     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃, i₃ : t₁ = t₃ ⊢ Δ) *)
   | EUnfoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) ecert)
   (* EUnfoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) *)
@@ -286,20 +285,16 @@ type ('v, 'h, 't, 'ty) ecert =
                 * ('v, 'h, 't, 'ty) ecert
   (* ERewrite (true, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
-     c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂])
-     and t₁ and t₂ are of type τ *)
+     c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
   (* ERewrite (false, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ)
-     and t₁ and t₂ are of type τ *)
+     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
   (* ERewrite (true, _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
-     c ⇓ (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₂])
-     and t₁ and t₂ are of type τ *)
+     c ⇓ (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
   (* ERewrite (false, _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₂] ⊢ Δ)
-     and t₁ and t₂ are of type τ *)
+     c ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
   (* Second argument is None when working with an equality, and Some ls when
      working with an equivalence. The lsymbol ls is used to bind the ctxt (which
      is not possible in Why3) *)
@@ -308,7 +303,8 @@ type ('v, 'h, 't, 'ty) ecert =
 (* EInduction (G, Hi₁, Hi₂, Hr, x, a, ctxt, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
    c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
    and c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
-   and i does not appear in Γ or Δ *)
+   and i does not appear in Γ, Δ or C
+   and x and a are of type int *)
 (* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
    stands for this context where the holes have been replaced with t *)
 
@@ -538,8 +534,12 @@ let elaborate init_ct c =
             raise Elaboration_failed
     | Hole i -> EHole i
     | Axiom (i1, i2) ->
-        let t1, pos1 = find_formula "Axiom" i1 cta in
-        let t2, pos2 = find_formula "Axiom" i2 cta in
+        let t1, pos1 = try find_formula "Axiom1" i1 cta
+                       with e -> pcta err_formatter cta; raise e
+        in
+        let t2, pos2 = try find_formula "Axiom2" i2 cta
+                       with e -> pcta err_formatter cta; raise e
+        in
         assert (pos1 <> pos2);
         assert (t_equal t1 t2);
         let i1, i2 = if pos2 then i1, i2 else i2, i1 in
@@ -548,7 +548,7 @@ let elaborate init_ct c =
         let t, pos = find_formula "Trivial" i cta in
         begin match t.t_node, pos with
         | Tapp (e, [t1; t2]), _ when t_equal t1 t2 && ls_equal e ps_equ ->
-            EEqRefl (t.t_ty, t1, i)
+            EEqRefl (t1.t_ty, t1, i)
         | Tfalse, false | Ttrue, true ->
             ETrivial (pos, i)
         | _ -> eprintf "not an equality or not same terms in eqrefl";

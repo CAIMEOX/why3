@@ -3,10 +3,10 @@
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
 <file format="whyml">
-<path name=".."/><path name="test.mlw"/>
+<path name=".."/><path name="debug.mlw"/>
 <theory name="Top">
  <goal name="G">
- <transf name="introduce_premises" >
+ <transf name="intro_ccert" >
   <goal name="G.0">
   </goal>
  </transf>
