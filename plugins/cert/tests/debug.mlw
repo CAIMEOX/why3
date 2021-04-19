@@ -37,12 +37,20 @@
 (* predicate a *)
 (* goal G : a \/ a *)
 
-type t
+(* type t *)
 
-val constant a : t
+(* val constant a : t *)
 
-goal G : a = a
+(* goal G : a = a *)
 
 (* predicate p (x : bool) *)
 
 (* goal inst_goal : p true -> exists x : bool. p x *)
+
+
+predicate a
+predicate b
+predicate c
+
+goal G : a /\ (b \/ c) -> false
+

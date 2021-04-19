@@ -391,13 +391,14 @@ let prpos fmt = function
   | true  -> fprintf fmt "GOAL| "
   | false -> fprintf fmt "HYP | "
 
-let prprop fmt h (cte, pos) =
-  fprintf fmt "%a%a : %a@ " prpos pos prhyp h pcte cte
+let prprop pt fmt h (t, pos) =
+  fprintf fmt "%a%a : %a@ " prpos pos prhyp h pt t
 
-let prgd fmt mid =
-  Mid.iter (prprop fmt) mid
+let prgd pt fmt mid =
+  Mid.iter (prprop pt fmt) mid
 
-let pcta fmt cta =
+
+let gen_pcta pt fmt cta =
   fprintf fmt "@[<v>TYPES INTERP:@ %a@ \
                TYPES:@ %a@ \
                SIGMA INTERP:@ %a@ \
@@ -407,17 +408,21 @@ let pcta fmt cta =
     prt cta.types
     prs cta.sigma_interp
     prs cta.sigma
-    prgd cta.gamma_delta
+    (prgd pt) cta.gamma_delta
+
+let pacta = gen_pcta pcte
+
+let pcta = gen_pcta Pretty.print_term
 
 let plcta =
-  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "========@ ") pcta
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "========@ ") pacta
 
 let eplcta cta lcta =
   eprintf "@[<v>INIT :@ \
            %a==========@ \
            RES :@ \
            %a@]@."
-    pcta cta
+    pacta cta
     plcta lcta
 
 let print_ctasks filename lcta =
