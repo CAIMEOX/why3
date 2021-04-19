@@ -19,8 +19,8 @@ let union estr =
                task 2: %a@]@."
         prhyp id
         estr
-        pcta cta1
-        pcta cta2;
+        pacta cta1
+        pacta cta2;
       verif_failed "Conflict of ident, see stderr" in
   Mid.union merge_no_conflicts
 
@@ -121,7 +121,7 @@ let rec ccheck c cta =
                               TASK@ %a@]@."
                 prhyp i
                 prid y
-                pcta cta;
+                pacta cta;
               verif_failed "non-free variable"
             end
           else let cta = add i (ct_open t (CTfvar (y, [])), pos) cta
@@ -143,8 +143,6 @@ let rec ccheck c cta =
         | (CTapp (CTapp (f, a), b), false), None when ct_equal f (eq cty) -> a, b
         | _ -> verif_failed "Non-rewritable proposition" in
       let t, pos = find_formula "rew" i2 cta in
-      infers_into cta a cty;
-      infers_into cta b cty;
       assert (ct_equal t (instantiate_safe cta ctxt a));
       let cta =  add i2 (instantiate ctxt b, pos) cta in
       ccheck c cta

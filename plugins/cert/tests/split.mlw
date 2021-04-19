@@ -7,7 +7,8 @@ axiom A : a
 axiom B : b
 
 goal G1 : a /\ b
-goal G2 : c /\ (b -> d) -> false
+goal G : a \/ b -> false
+goal G2 : (c /\ (a \/ b)) -> false
 goal G3 : not (a \/ b)
 goal G4 : not (a \/ b) -> false
 goal G5 : not (a -> b)

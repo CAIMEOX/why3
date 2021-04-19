@@ -19,6 +19,8 @@
   </goal>
  </transf>
  </goal>
+ <goal name="G">
+ </goal>
  <goal name="G2">
  <transf name="intro_ccert" >
   <goal name="G2.0">
@@ -134,12 +136,6 @@
   <goal name="G7.2">
   </goal>
   <goal name="G7.3">
-  </goal>
- </transf>
- </goal>
- <goal name="G8">
- <transf name="split_all_full" >
-  <goal name="G8.0">
   </goal>
  </transf>
  </goal>
