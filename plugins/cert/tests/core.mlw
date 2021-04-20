@@ -7,7 +7,7 @@ predicate f
 axiom A : a
 axiom B : b
 
-predicate p (x : bool)
+predicate p bool
 
 
 (** Elementary rules **)
@@ -62,15 +62,6 @@ goal blast_big_big : ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
      		       	        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a)))) /\
 			 ((((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))) /\
 			        (((a /\ a) /\ (a /\ a)) /\ ((a /\ a) /\ (a /\ a))))
-
-(* Testing rewrite *)
-goal rew_goal  : (c <-> a) -> (d \/ c)
-goal rew_hyp : (c <-> d) -> c -> d
-goal rew_inv_hyp : (d <-> c) -> c -> d
-goal rew_prem_hyp : (a -> b -> c <-> d) -> c -> d
-goal rew_inv_prem_hyp : (a -> b -> d <-> c) -> c -> d
-goal rew_forall_hyp : forall x. (forall u. p u <-> a) -> (p x <-> p x)
-
 
 (* (\* Drinker's paradox example *\) *)
 goal drinker : exists x : bool. p x -> (forall y. p y)
