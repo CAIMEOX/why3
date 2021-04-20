@@ -11,6 +11,31 @@ goal G1 : x + 1 = 1
 end
 
 
+module RewProp
+
+predicate a
+predicate b
+predicate c
+predicate d
+predicate p bool
+axiom A : a
+axiom B : b
+
+goal rew_goal  : (c <-> a) -> (d \/ c)
+
+goal rew_hyp : (c <-> d) -> c -> d
+
+goal rew_inv_hyp : (d <-> c) -> c -> d
+
+goal rew_prem_hyp : (a -> b -> c <-> d) -> c -> d
+
+goal rew_inv_prem_hyp : (a -> b -> d <-> c) -> c -> d
+
+goal rew_forall_hyp : forall x. (forall u. p u <-> a) -> (p x <-> p x)
+
+end
+
+
 module RewMonoid
 
 clone algebra.Monoid with axiom .
