@@ -488,11 +488,6 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
                        then pr_clone pr, pr_clone pr
                        else pr, pr in
         let sf1 = rc pr1 f1 and sf2 = rc pr2 f2 in
-        let open Cert_syntax in
-        Format.eprintf "@[<v> pr1 : %a@ \
-                        pr2 : %a@]@."
-          prpr pr1
-          prpr pr2;
         let fwd = sf1.fwd ||| sf2.fwd and bwd = sf1.bwd ||| sf2.bwd in
         let asym = sp.asym_split && asym f1 in
         let sd = if asym then [sf2.side] else [] in
@@ -509,11 +504,6 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
         let disj = sf1.disj ++ disj2 in
         let cp = destruct_reconstruct pr sf1.cp sf2.cp in
         let add_all = add_all sf1.conj sf2.conj conj AddOr in
-        Format.eprintf "@[<v> mon1 : %a@ \
-                       mon2 : %a@]@."
-          (print_mon " ") sf1.conj
-          (print_mon " ") sf2.conj;
-
         let remove_all = remove_all sf1.conj sf2.conj in
         let h = hole () in
         let cn = lambda two (fun i j -> Split (pr, Hole i, Hole j))
