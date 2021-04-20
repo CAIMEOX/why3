@@ -52,11 +52,11 @@ This can take a few seconds depending on the file this is loading.
 Source code
 -----------
 
-The soure code is available in the directory `plugin/cert` and is mostly composed of 11 files:
-   - file `cert_syntax.ml` defines the representation of tasks
-   - file `cert_abstract.ml` defines the translation of Why3's tasks into this representation
-   - file `cert_certificates.ml` defines the certificates
-   - file `cert_trans_util.ml` defines utility function for defining certifying transformations
+The soure code is available in the directory `plugin/cert` and is mostly composed of the following files:
+   - file `cert_syntax.ml` defines the representation of terms, types and tasks
+   - file `cert_abstract.ml` implements the translation of Why3's tasks into this representation
+   - file `cert_certificates.ml` defines the certificates and implements the elaboration
+   - file `cert_trans_util.ml` defines utility functions for defining certifying transformations
    - file `cert_trans_core.ml` defines the core certifying transformations
    - file `cert_rewrite.ml` defines the certifying version of the `rewrite` transformation
    - file `cert_induction.ml` defines the certifying version of the `induction` transformation
