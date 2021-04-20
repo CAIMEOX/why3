@@ -10,7 +10,7 @@
 (********************************************************************)
 
 
-(* Interface to Why3 and Alt-Ergo *)
+(* Interface to Why3 *)
 
 let why3_conf_file = "/trywhy3.conf"
 
@@ -154,7 +154,7 @@ module Task =
 
     let gen_id =
       let c = ref 0 in
-      fun () -> incr c; "id" ^ (string_of_int !c)
+      fun () -> incr c; !c
 
     let task_text t =
       Pp.string_of Pretty.print_task t
@@ -190,7 +190,7 @@ module Task =
 				     tid:: acc) [] tasks in
       Hashtbl.add task_table th_id  {
           task = Theory th;
-          parent_id = "theory-list";
+          parent_id = 0;
           status = StNew;
           subtasks = List.rev task_ids;
           loc = [];
@@ -329,14 +329,14 @@ let why3_execute_one m rs =
     try
       let reduce = rac_reduce_config_lit config env ~trans:"compute_in_goal" () in
       let rac_config = rac_config ~do_rac:false ~abstract:false ~reduce () in
-      let res = eval_global_fundef rac_config env m [] expr in
+      let res = eval_global_fundef rac_config env m [] None expr in
       asprintf "returns %a" (report_eval_result expr) res
     with
     | Contr (ctx, term) ->
         asprintf "has failed: %a" report_cntr_body (ctx, term)
     | CannotCompute r ->
         asprintf "cannot compute (%s)" r.reason
-    | RACStuck (_, l) ->
+    | RACStuck (_, l, _) ->
         asprintf "got stuck at %a"
           (Pp.print_option_or_default "unknown location" Pretty.print_loc') l in
   let {Theory.th_name = th} = m.Pmodule.mod_theory in
