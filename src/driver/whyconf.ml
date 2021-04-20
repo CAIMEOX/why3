@@ -390,7 +390,7 @@ module RC_load = struct
       | Some info ->
           { editor_name = get_string ~default:info.editor_name section "name";
             editor_command = get_string ~default:info.editor_command section "command";
-            editor_options = (get_stringl section "options") @ info.editor_options;
+            editor_options = (get_stringl section "options")@info.editor_options;
           }
       in
       Meditor.add id info editors

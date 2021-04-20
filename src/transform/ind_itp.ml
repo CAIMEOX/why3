@@ -154,11 +154,7 @@ let collect_lsymbol s (d: decl) =
    used in the declaration d.  *)
 let depends dep d =
   let new_set = collect_lsymbol Sls.empty d in
-  (* not (Sls.disjoint dep new_set) *)
-  if Sls.equal (Sls.inter dep new_set) Sls.empty then
-    false
-  else
-    true
+  not (Sls.disjoint dep new_set)
 
 (* TODO Do a transformation as a fold that reverts automatically dependencies
    but that could be used elsewhere instead of all those adhoc functions. *)

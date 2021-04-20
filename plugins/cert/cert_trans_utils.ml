@@ -12,10 +12,6 @@ let thunk t _ = t
 let decl_cert f = Trans.decl_acc (hole ()) (|>>) (fun d _ -> f d)
 let decl_l_cert f = Trans.decl_l_acc (hole ()) (|>>) (fun d _ -> f d)
 
-let map_ty = function
-    | None -> Ty.ty_bool
-    | Some ty -> ty
-
 (* Identity transformation with a certificate *)
 let id_ctrans = Trans.store (fun task -> [task], hole ())
 
