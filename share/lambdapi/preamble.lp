@@ -74,6 +74,8 @@ symbol xI : positive → positive;
 symbol xO : positive → positive;
 symbol xH : positive;
 
+symbol result (ty : Type) : positive → Type ≔ λ _, ty;
+
 symbol positive_rect :
   tEv (ktPi (pos ⇀ DType) (λ Q,
        (∀ pos (λ p, Q p ↝ Q (xI p))) ↝
@@ -88,10 +90,8 @@ symbol positive_rect :
 //   Π p, tEv (Q p);
 
 rule positive_rect _  _   _   $vH xH      ↪ $vH;
-rule positive_rect $a $vI $vO $vH (xI $p) ↪ $vI $p (positive_rect $a $vI $vO $vH $p);
-rule positive_rect $a $vI $vO $vH (xO $p) ↪ $vO $p (positive_rect $a $vI $vO $vH $p);
-
-symbol result (ty : Type) : positive → Type ≔ λ _, ty;
+rule positive_rect $Q $vI $vO $vH (xI $p) ↪ $vI $p (positive_rect $Q $vI $vO $vH $p);
+rule positive_rect $Q $vI $vO $vH (xO $p) ↪ $vO $p (positive_rect $Q $vI $vO $vH $p);
 
 symbol pos_pred_double (x : positive) : positive ≔
   positive_rect (result pos) (λ p _, xI (xO p)) (λ _ rp, xI rp) xH x;
@@ -105,6 +105,17 @@ symbol integer ≔ tEv int;
 symbol Z0 : integer;
 symbol Zpos : positive → integer;
 symbol Zneg : positive → integer;
+
+symbol integer_rect :
+  tEv (ktPi (int ⇀ DType) (λ Q,
+       Q Z0 ↝
+       (∀ pos (λ p, Q (Zpos p))) ↝
+       (∀ pos (λ p, Q (Zneg p))) ↝
+       ∀ int (λ z, Q z)));
+
+rule integer_rect _ $v0 _     _     Z0        ↪ $v0;
+rule integer_rect _ _   $vpos _     (Zpos $x) ↪ $vpos $x;
+rule integer_rect _ _   _     $vneg (Zneg $x) ↪ $vneg $x;
 
 symbol zero ≔  Z0;
 symbol one ≔  Zpos xH;
