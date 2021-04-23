@@ -74,25 +74,27 @@ symbol xI : positive → positive;
 symbol xO : positive → positive;
 symbol xH : positive;
 
-symbol positive_rec :
-  positive →
-  (positive → positive → positive) →
-  (positive → positive → positive) →
-  positive →
-  positive;
-               
-  // tEv (ktPi (positive ⇀ DType) (λ P,
-  //      P xH ↝
-  //      (∀ positive (λ n, P n ↝ P (xI n))) ↝
-  //      (∀ positive (λ n, P n ↝ P (xO n))) ↝
-  //       ∀ positive (λ n, P n)));
+symbol positive_rect :
+  tEv (ktPi (pos ⇀ DType) (λ Q,
+       (∀ pos (λ p, Q p ↝ Q (xI p))) ↝
+       (∀ pos (λ p, Q p ↝ Q (xO p))) ↝
+       Q xH ↝
+       ∀ pos (λ p, Q p)));
 
-rule positive_rec $vH _   _   xH      ↪ $vH;
-rule positive_rec $vH $vI $vO (xI $p) ↪ $vI $p (positive_rec $vH $vI $vO $p);
-rule positive_rec $vH $vI $vO (xO $p) ↪ $vO $p (positive_rec $vH $vI $vO $p);
+// symbol positive_rect :  Π (Q : positive → Type),
+//   (Π p, tEv (Q p) → tEv (Q (xI p))) →
+//   (Π p, tEv (Q p) → tEv (Q (xO p))) →
+//   tEv (Q xH) →
+//   Π p, tEv (Q p);
+
+rule positive_rect _  _   _   $vH xH      ↪ $vH;
+rule positive_rect $a $vI $vO $vH (xI $p) ↪ $vI $p (positive_rect $a $vI $vO $vH $p);
+rule positive_rect $a $vI $vO $vH (xO $p) ↪ $vO $p (positive_rect $a $vI $vO $vH $p);
+
+symbol result (ty : Type) : positive → Type ≔ λ _, ty;
 
 symbol pos_pred_double (x : positive) : positive ≔
-  positive_rec xH (λ p _, xI (xO p)) (λ _ rp, xI rp) x;
+  positive_rect (result pos) (λ p _, xI (xO p)) (λ _ rp, xI rp) xH x;
 
 // Check that 2 * 6 - 1 ≡ 11
 // assert ⊢ pos_pred_double (xO (xI xH)) ≡ xI (xI (xO xH)); 
