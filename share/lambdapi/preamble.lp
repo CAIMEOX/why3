@@ -67,50 +67,68 @@ symbol iff_eq : Π (A : Type) (B : Type),
 
 // Integers
 
-symbol positive : Type;
+symbol pos : Type;
+symbol positive ≔ tEv pos;
 
-symbol xI : tEv positive → tEv positive;
-symbol xO : tEv positive → tEv positive;
-symbol xH : tEv positive;
+symbol xI : positive → positive;
+symbol xO : positive → positive;
+symbol xH : positive;
 
 symbol positive_rec :
-  tEv (ktPi (positive ⇀ DType) (λ P,
-       P xH ↝
-       (∀ positive (λ n, P n ↝ P (xI n))) ↝
-       (∀ positive (λ n, P n ↝ P (xO n))) ↝
-        ∀ positive (λ n, P n)));
+  positive →
+  (positive → positive → positive) →
+  (positive → positive → positive) →
+  positive →
+  positive;
+               
+  // tEv (ktPi (positive ⇀ DType) (λ P,
+  //      P xH ↝
+  //      (∀ positive (λ n, P n ↝ P (xI n))) ↝
+  //      (∀ positive (λ n, P n ↝ P (xO n))) ↝
+  //       ∀ positive (λ n, P n)));
 
+rule positive_rec $vH _   _   xH      ↪ $vH;
+rule positive_rec $vH $vI $vO (xI $p) ↪ $vI $p (positive_rec $vH $vI $vO $p);
+rule positive_rec $vH $vI $vO (xO $p) ↪ $vO $p (positive_rec $vH $vI $vO $p);
 
-symbol Z : Type;
-symbol Z0 : tEv Z;
-symbol Zpos : tEv positive → tEv Z;
-symbol Zneg : tEv positive → tEv Z;
+symbol pos_pred_double (x : positive) : positive ≔
+  positive_rec xH (λ p _, xI (xO p)) (λ _ rp, xI rp) x;
+
+// Check that 2 * 6 - 1 ≡ 11
+// assert ⊢ pos_pred_double (xO (xI xH)) ≡ xI (xI (xO xH)); 
+
+symbol int : Type;
+symbol integer ≔ tEv int;
+
+symbol Z0 : integer;
+symbol Zpos : positive → integer;
+symbol Zneg : positive → integer;
 
 symbol zero ≔  Z0;
 symbol one ≔  Zpos xH;
-symbol succ : tEv Z → tEv Z;
+symbol succ : integer → integer;
 
 builtin "0"  ≔  zero;
 builtin "+1" ≔  succ;
 
-symbol infixspls : tEv Z → tEv Z → Type;
-symbol infixspgt : tEv Z → tEv Z → Type;
-symbol infixsplseq : tEv Z → tEv Z → Type;
-symbol infixspgteq : tEv Z → tEv Z → Type;
+symbol infixspls : integer → integer → Type;
+symbol infixspgt : integer → integer → Type;
+symbol infixsplseq : integer → integer → Type;
+symbol infixspgteq : integer → integer → Type;
 
-symbol infixsppl : tEv Z → tEv Z → tEv Z;
-symbol infixspas : tEv Z → tEv Z → tEv Z;
-symbol infixspmn : tEv Z → tEv Z → tEv Z;
+symbol infixsppl : integer → integer → integer;
+symbol infixspas : integer → integer → integer;
+symbol infixspmn : integer → integer → integer;
 
-symbol prefixspmn : tEv Z → tEv Z;
+symbol prefixspmn : integer → integer;
 
 
 // Booleans
 
-symbol Bool : Type;
+symbol bool : Type;
 
-symbol True : tEv Bool;
-symbol False : tEv Bool;
+symbol True : tEv bool;
+symbol False : tEv bool;
 
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
@@ -390,6 +408,6 @@ symbol iffeq : Π (A : Type) (B : Type),
 
 symbol strong_induction : Π a P,
    (Π x, tEv (hyp (infixsplseq x a) (goal (P x) empty))) →
-   (Π x, tEv (hyp (infixspls a x) (hyp (∀ Z (λ n, infixspls n x ↝ P n)) (goal (P x) empty)))) →
+   (Π x, tEv (hyp (infixspls a x) (hyp (∀ int (λ n, infixspls n x ↝ P n)) (goal (P x) empty)))) →
    Π x, tEv (goal (P x) empty);
 
