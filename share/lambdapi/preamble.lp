@@ -74,8 +74,6 @@ symbol xI : positive → positive;
 symbol xO : positive → positive;
 symbol xH : positive;
 
-symbol result (ty : Type) : positive → Type ≔ λ _, ty;
-
 symbol positive_rect :
   tEv (ktPi (pos ⇀ DType) (λ Q,
        (∀ pos (λ p, Q p ↝ Q (xI p))) ↝
@@ -94,7 +92,7 @@ rule positive_rect $Q $vI $vO $vH (xI $p) ↪ $vI $p (positive_rect $Q $vI $vO $
 rule positive_rect $Q $vI $vO $vH (xO $p) ↪ $vO $p (positive_rect $Q $vI $vO $vH $p);
 
 symbol pos_pred_double (x : positive) : positive ≔
-  positive_rect (result pos) (λ p _, xI (xO p)) (λ _ rp, xI rp) xH x;
+  positive_rect (λ _, pos) (λ p _, xI (xO p)) (λ _ rp, xI rp) xH x;
 
 // Check that 2 * 6 - 1 ≡ 11
 // assert ⊢ pos_pred_double (xO (xI xH)) ≡ xI (xI (xO xH)); 
@@ -117,8 +115,37 @@ rule integer_rect _ $v0 _     _     Z0        ↪ $v0;
 rule integer_rect _ _   $vpos _     (Zpos $x) ↪ $vpos $x;
 rule integer_rect _ _   _     $vneg (Zneg $x) ↪ $vneg $x;
 
-symbol zero ≔  Z0;
-symbol one ≔  Zpos xH;
+symbol zero ≔ Z0;
+symbol one ≔ Zpos xH;
+
+symbol double ≔
+  integer_rect (λ _, int) zero
+               (λ p, Zpos (xO p))
+               (λ p, Zneg (xO p));
+
+// Check that 2 * 7 ≡ 14
+// assert ⊢ double (Zpos (xI (xI xH))) ≡ Zpos (xO (xI (xI xH))); 
+
+symbol succ_double ≔
+  integer_rect (λ _, int) one
+               (λ p, Zpos (xI p))
+               (λ p, Zneg (pos_pred_double p));
+
+// Check that 2 * (-5) + 1 ≡ -9 and that 2 * 5 + 1 ≡ 11
+// assert ⊢ succ_double (Zneg (xI (xO xH))) ≡ Zneg (xI (xO (xO xH))); 
+// assert ⊢ succ_double (Zpos (xI (xO xH))) ≡ Zpos (xI (xI (xO xH))); 
+
+symbol pred_double ≔
+  integer_rect (λ _, int) (Zneg xH)
+               (λ p, Zpos (pos_pred_double p))
+               (λ p, Zneg (xI p));
+
+// Check that 2 * (-5) - 1 ≡ -11 and that 2 * 5 - 1 ≡ 9
+// assert ⊢ pred_double (Zneg (xI (xO xH))) ≡ Zneg (xI (xI (xO xH))); 
+// assert ⊢ pred_double (Zpos (xI (xO xH))) ≡ Zpos (xI (xO (xO xH))); 
+
+
+
 symbol succ : integer → integer;
 
 builtin "0"  ≔  zero;
