@@ -67,42 +67,60 @@ symbol iff_eq : Π (A : Type) (B : Type),
 
 // Integers
 
-symbol positive : Type;
+symbol pos : Type;
+symbol positive ≔ tEv pos;
 
-symbol xI : tEv positive → tEv positive;
-symbol xO : tEv positive → tEv positive;
-symbol xH : tEv positive;
+symbol xI : positive → positive;
+symbol xO : positive → positive;
+symbol xH : positive;
 
 symbol positive_rec :
-  tEv (ktPi (positive ⇀ DType) (λ P,
-       P xH ↝
-       (∀ positive (λ n, P n ↝ P (xI n))) ↝
-       (∀ positive (λ n, P n ↝ P (xO n))) ↝
-        ∀ positive (λ n, P n)));
+  positive →
+  (positive → positive → positive) →
+  (positive → positive → positive) →
+  positive →
+  positive;
+               
+  // tEv (ktPi (positive ⇀ DType) (λ P,
+  //      P xH ↝
+  //      (∀ positive (λ n, P n ↝ P (xI n))) ↝
+  //      (∀ positive (λ n, P n ↝ P (xO n))) ↝
+  //       ∀ positive (λ n, P n)));
 
+rule positive_rec $vH _   _   xH      ↪ $vH;
+rule positive_rec $vH $vI $vO (xI $p) ↪ $vI $p (positive_rec $vH $vI $vO $p);
+rule positive_rec $vH $vI $vO (xO $p) ↪ $vO $p (positive_rec $vH $vI $vO $p);
+
+symbol pos_pred_double (x : positive) : positive ≔
+  positive_rec xH (λ p _, xI (xO p)) (λ _ rp, xI rp) x;
+
+// Check that 2 * 6 - 1 ≡ 11
+// assert ⊢ pos_pred_double (xO (xI xH)) ≡ xI (xI (xO xH)); 
 
 symbol int : Type;
-symbol Z0 : tEv int;
-symbol Zpos : tEv positive → tEv int;
-symbol Zneg : tEv positive → tEv int;
+symbol integer ≔ tEv int;
+
+symbol Z0 : integer;
+symbol Zpos : positive → integer;
+symbol Zneg : positive → integer;
 
 symbol zero ≔  Z0;
 symbol one ≔  Zpos xH;
-symbol succ : tEv int → tEv int;
+symbol succ : integer → integer;
 
 builtin "0"  ≔  zero;
 builtin "+1" ≔  succ;
 
-symbol infixspls : tEv int → tEv int → Type;
-symbol infixspgt : tEv int → tEv int → Type;
-symbol infixsplseq : tEv int → tEv int → Type;
-symbol infixspgteq : tEv int → tEv int → Type;
+symbol infixspls : integer → integer → Type;
+symbol infixspgt : integer → integer → Type;
+symbol infixsplseq : integer → integer → Type;
+symbol infixspgteq : integer → integer → Type;
 
-symbol infixsppl : tEv int → tEv int → tEv int;
-symbol infixspas : tEv int → tEv int → tEv int;
-symbol infixspmn : tEv int → tEv int → tEv int;
+symbol infixsppl : integer → integer → integer;
+symbol infixspas : integer → integer → integer;
+symbol infixspmn : integer → integer → integer;
 
-symbol prefixspmn : tEv int → tEv int;
+symbol prefixspmn : integer → integer;
 
 
 // Booleans
