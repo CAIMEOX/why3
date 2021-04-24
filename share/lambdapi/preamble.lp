@@ -68,8 +68,8 @@ symbol iff_eq : Π (A : Type) (B : Type),
 symbol bool : Type;
 symbol boolean ≔ tEv bool;
 
-symbol True : tEv bool;
-symbol False : tEv bool;
+symbol True : boolean;
+symbol False : boolean;
 
 symbol boolean_rect :
   tEv (ktPi (bool ⇀ DType) (λ Q,
@@ -92,32 +92,32 @@ symbol xI : positive → positive;
 symbol xO : positive → positive;
 symbol xH : positive;
 
-symbol positive_rect :
+symbol pos_rect :
   tEv (ktPi (pos ⇀ DType) (λ Q,
        (∀ pos (λ p, Q p ↝ Q (xI p))) ↝
        (∀ pos (λ p, Q p ↝ Q (xO p))) ↝
        Q xH ↝
        ∀ pos (λ p, Q p)));
 
-// symbol positive_rect :  Π (Q : positive → Type),
+// symbol pos_rect :  Π (Q : positive → Type),
 //   (Π p, tEv (Q p) → tEv (Q (xI p))) →
 //   (Π p, tEv (Q p) → tEv (Q (xO p))) →
 //   tEv (Q xH) →
 //   Π p, tEv (Q p);
 
-rule positive_rect _  _   _   $vH xH      ↪ $vH;
-rule positive_rect $Q $vI $vO $vH (xI $p) ↪ $vI $p (positive_rect $Q $vI $vO $vH $p);
-rule positive_rect $Q $vI $vO $vH (xO $p) ↪ $vO $p (positive_rect $Q $vI $vO $vH $p);
+rule pos_rect _  _   _   $vH xH      ↪ $vH;
+rule pos_rect $Q $vI $vO $vH (xI $p) ↪ $vI $p (pos_rect $Q $vI $vO $vH $p);
+rule pos_rect $Q $vI $vO $vH (xO $p) ↪ $vO $p (pos_rect $Q $vI $vO $vH $p);
 
 symbol pos_succ ≔
-  positive_rect (λ _, pos)
+  pos_rect (λ _, pos)
     (λ _ succ_p, xO succ_p)
     (λ p _, xI p)
     (xO xH);
 
 symbol pos_add_carry  ≔
-  positive_rect (λ _, pos ⇁ bool ⇁ pos)
-    (λ p ac_p y b, positive_rect (λ _, pos)
+  pos_rect (λ _, pos ⇁ bool ⇁ pos)
+    (λ p ac_p y b, pos_rect (λ _, pos)
        (λ q _, if pos b
                (xI (ac_p q True))
                (xO (ac_p q True)))
@@ -128,7 +128,7 @@ symbol pos_add_carry  ≔
         (xI (pos_succ p))
         (xO (pos_succ p)))
        y)
-    (λ p ac_p y b, positive_rect (λ _, pos)
+    (λ p ac_p y b, pos_rect (λ _, pos)
        (λ q _, if pos b
                (xO (ac_p q True))
                (xI (ac_p q False)))
@@ -139,7 +139,7 @@ symbol pos_add_carry  ≔
         (xO (pos_succ p))
         (xI p))
        y)
-    (λ y b, positive_rect (λ _, pos)
+    (λ y b, pos_rect (λ _, pos)
        (λ q _, if pos b
                (xI (pos_succ q))
                (xO (pos_succ q)))
@@ -158,9 +158,20 @@ symbol pos_add x y ≔ pos_add_carry x y False;
 
 // Check that 110101010 + 101101100 ≡ 1100010110 in base 2 (426 + 364 ≡ 790)
 // assert ⊢ pos_add (xO (xI (xO (xI (xO (xI (xO (xI xH)))))))) (xO (xO (xI (xI (xO (xI (xI (xO xH)))))))) // ≡ (xO (xI (xI (xO (xI (xO (xO (xO (xI xH)))))))));
+
+symbol pos_mul x y ≔
+  pos_rect (λ _, pos)
+     (λ _ mul_p_y, pos_add y (xO mul_p_y))
+     (λ _ mul_p_y, xO mul_p_y)
+     y
+     x;
+
+// Check that 6 * 5 = 30
+// assert ⊢ pos_mul (xO (xI xH)) (xI (xO xH)) ≡ xO (xI (xI (xI xH)));
+
      
 symbol pos_pred_double ≔
-  positive_rect (λ _, pos)
+  pos_rect (λ _, pos)
      (λ p _, xI (xO p))
      (λ _ pos_pred_double_p, xI pos_pred_double_p)
      xH;
@@ -175,22 +186,22 @@ symbol Z0 : integer;
 symbol Zpos : positive → integer;
 symbol Zneg : positive → integer;
 
-symbol integer_rect :
+symbol int_rect :
   tEv (ktPi (int ⇀ DType) (λ Q,
        Q Z0 ↝
        (∀ pos (λ p, Q (Zpos p))) ↝
        (∀ pos (λ p, Q (Zneg p))) ↝
        ∀ int (λ z, Q z)));
 
-rule integer_rect _ $v0 _     _     Z0        ↪ $v0;
-rule integer_rect _ _   $vpos _     (Zpos $x) ↪ $vpos $x;
-rule integer_rect _ _   _     $vneg (Zneg $x) ↪ $vneg $x;
+rule int_rect _ $v0 _     _     Z0        ↪ $v0;
+rule int_rect _ _   $vpos _     (Zpos $x) ↪ $vpos $x;
+rule int_rect _ _   _     $vneg (Zneg $x) ↪ $vneg $x;
 
 symbol zero ≔ Z0;
 symbol one ≔ Zpos xH;
 
 symbol double ≔
-  integer_rect (λ _, int)
+  int_rect (λ _, int)
     zero
     (λ p, Zpos (xO p))
     (λ p, Zneg (xO p));
@@ -199,7 +210,7 @@ symbol double ≔
 // assert ⊢ double (Zpos (xI (xI xH))) ≡ Zpos (xO (xI (xI xH))); 
 
 symbol succ_double ≔
-  integer_rect (λ _, int)
+  int_rect (λ _, int)
     one
     (λ p, Zpos (xI p))
     (λ p, Zneg (pos_pred_double p));
@@ -209,7 +220,7 @@ symbol succ_double ≔
 // assert ⊢ succ_double (Zpos (xI (xO xH))) ≡ Zpos (xI (xI (xO xH))); 
 
 symbol pred_double ≔
-  integer_rect (λ _, int)
+  int_rect (λ _, int)
     (Zneg xH)
     (λ p, Zpos (pos_pred_double p))
     (λ p, Zneg (xI p));
@@ -219,16 +230,16 @@ symbol pred_double ≔
 // assert ⊢ pred_double (Zpos (xI (xO xH))) ≡ Zpos (xI (xO (xO xH))); 
 
 symbol pos_sub ≔
-  positive_rect (λ _, pos ⇁ int)
-     (λ p pos_sub_p, positive_rect (λ _, int)
+  pos_rect (λ _, pos ⇁ int)
+     (λ p pos_sub_p, pos_rect (λ _, int)
         (λ q _, double (pos_sub_p q))
         (λ q _, succ_double (pos_sub_p q))
         (Zpos (xO p)))
-     (λ p pos_sub_p, positive_rect (λ _, int)
+     (λ p pos_sub_p, pos_rect (λ _, int)
         (λ q _, pred_double (pos_sub_p q))
         (λ q _, double (pos_sub_p q))
         (Zpos (pos_pred_double p)))
-     (positive_rect (λ _, int)
+     (pos_rect (λ _, int)
         (λ q _, Zneg (xO q))
         (λ q _, Zneg (pos_pred_double q))
         zero);
@@ -254,23 +265,22 @@ symbol pos_sub ≔
 
 
 symbol add x y ≔
-  integer_rect (λ _, int)
+  int_rect (λ _, int)
     y
-    (λ x', integer_rect (λ _, int)
+    (λ x', int_rect (λ _, int)
        x
        (λ y', Zpos (pos_add x' y'))
        (λ y', pos_sub x' y')
        y)
-    (λ x', integer_rect (λ _, int)
+    (λ x', int_rect (λ _, int)
        x
        (λ y', pos_sub y' x')
        (λ y', Zneg (pos_add x' y'))
        y)
     x;
 
-
 symbol opp ≔
-  integer_rect (λ _, int)
+  int_rect (λ _, int)
      zero
      (λ x, Zneg x)
      (λ x, Zpos x);
@@ -278,6 +288,21 @@ symbol opp ≔
 symbol succ x ≔ add x one;
 
 symbol sub x y ≔ add x (opp y);
+
+symbol mul x y ≔
+  int_rect (λ _, int)
+     zero
+     (λ x', int_rect (λ _, int)
+        zero
+        (λ y', Zpos (pos_mul x' y'))
+        (λ y', Zneg (pos_mul x' y'))
+        y)
+     (λ x', int_rect (λ _, int)
+        zero
+        (λ y', Zneg (pos_mul x' y'))
+        (λ y', Zpos (pos_mul x' y'))
+        y)
+     x;
 
 builtin "0"  ≔  zero;
 builtin "+1" ≔  succ;
@@ -288,7 +313,7 @@ symbol infixsplseq : integer → integer → Type;
 symbol infixspgteq : integer → integer → Type;
 
 symbol infixsppl ≔ add;
-symbol infixspas : integer → integer → integer;
+symbol infixspas ≔ mul;
 symbol infixspmn ≔ sub;
 
 symbol prefixspmn ≔ opp;
