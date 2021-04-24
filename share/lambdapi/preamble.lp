@@ -63,7 +63,25 @@ symbol iff_eq : Π (A : Type) (B : Type),
        	        tEv (A ⇔  B) →
 		tEv (eq_fmla A B);
 
+// Booleans
 
+symbol bool : Type;
+symbol boolean ≔ tEv bool;
+
+symbol True : tEv bool;
+symbol False : tEv bool;
+
+symbol boolean_rect :
+  tEv (ktPi (bool ⇀ DType) (λ Q,
+       Q True ↝
+       Q False ↝
+       ∀ bool (λ b, Q b)));
+
+rule boolean_rect _ $vT _   True  ↪ $vT;
+rule boolean_rect _ _   $vF False ↪ $vF;
+
+symbol if a b t e ≔
+  boolean_rect (λ _, a) t e b;
 
 // Integers
 
@@ -91,6 +109,56 @@ rule positive_rect _  _   _   $vH xH      ↪ $vH;
 rule positive_rect $Q $vI $vO $vH (xI $p) ↪ $vI $p (positive_rect $Q $vI $vO $vH $p);
 rule positive_rect $Q $vI $vO $vH (xO $p) ↪ $vO $p (positive_rect $Q $vI $vO $vH $p);
 
+symbol pos_succ ≔
+  positive_rect (λ _, pos)
+    (λ _ succ_p, xO succ_p)
+    (λ p _, xI p)
+    (xO xH);
+
+symbol pos_add_carry  ≔
+  positive_rect (λ _, pos ⇁ bool ⇁ pos)
+    (λ p ac_p y b, positive_rect (λ _, pos)
+       (λ q _, if pos b
+               (xI (ac_p q True))
+               (xO (ac_p q True)))
+       (λ q _, if pos b
+               (xO (ac_p q True))
+               (xI (ac_p q False)))
+       (if pos b
+        (xI (pos_succ p))
+        (xO (pos_succ p)))
+       y)
+    (λ p ac_p y b, positive_rect (λ _, pos)
+       (λ q _, if pos b
+               (xO (ac_p q True))
+               (xI (ac_p q False)))
+       (λ q _, if pos b
+               (xI (ac_p q False))
+               (xO (ac_p q False)))
+       (if pos b
+        (xO (pos_succ p))
+        (xI p))
+       y)
+    (λ y b, positive_rect (λ _, pos)
+       (λ q _, if pos b
+               (xI (pos_succ q))
+               (xO (pos_succ q)))
+       (λ q _, if pos b
+               (xO (pos_succ q))
+               (xI q))
+       (if pos b
+        (xI xH)
+        (xO xH))
+       y);
+
+symbol pos_add x y ≔ pos_add_carry x y False;
+
+// Check that 7 + 5 = 12
+// assert ⊢ pos_add (xI (xI xH)) (xI (xO xH)) ≡ xO (xO (xI xH));
+
+// Check that 110101010 + 101101100 ≡ 1100010110 in base 2 (426 + 364 ≡ 790)
+// assert ⊢ pos_add (xO (xI (xO (xI (xO (xI (xO (xI xH)))))))) (xO (xO (xI (xI (xO (xI (xI (xO xH)))))))) // ≡ (xO (xI (xI (xO (xI (xO (xO (xO (xI xH)))))))));
+     
 symbol pos_pred_double ≔
   positive_rect (λ _, pos)
      (λ p _, xI (xO p))
@@ -185,7 +253,31 @@ symbol pos_sub ≔
 // assert ⊢ pos_sub xH xH ≡ Z0;
 
 
-symbol succ : integer → integer;
+symbol add x y ≔
+  integer_rect (λ _, int)
+    y
+    (λ x', integer_rect (λ _, int)
+       x
+       (λ y', Zpos (pos_add x' y'))
+       (λ y', pos_sub x' y')
+       y)
+    (λ x', integer_rect (λ _, int)
+       x
+       (λ y', pos_sub y' x')
+       (λ y', Zneg (pos_add x' y'))
+       y)
+    x;
+
+
+symbol opp ≔
+  integer_rect (λ _, int)
+     zero
+     (λ x, Zneg x)
+     (λ x, Zpos x);
+
+symbol succ x ≔ add x one;
+
+symbol sub x y ≔ add x (opp y);
 
 builtin "0"  ≔  zero;
 builtin "+1" ≔  succ;
@@ -195,19 +287,12 @@ symbol infixspgt : integer → integer → Type;
 symbol infixsplseq : integer → integer → Type;
 symbol infixspgteq : integer → integer → Type;
 
-symbol infixsppl : integer → integer → integer;
+symbol infixsppl ≔ add;
 symbol infixspas : integer → integer → integer;
-symbol infixspmn : integer → integer → integer;
+symbol infixspmn ≔ sub;
 
-symbol prefixspmn : integer → integer;
+symbol prefixspmn ≔ opp;
 
-
-// Booleans
-
-symbol bool : Type;
-
-symbol True : tEv bool;
-symbol False : tEv bool;
 
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
