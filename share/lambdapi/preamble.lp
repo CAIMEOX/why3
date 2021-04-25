@@ -10,6 +10,7 @@ symbol kEv : Kind → TYPE;
 symbol DType : Kind;
 rule kEv DType ↪ Type;
 
+
 symbol ttPi : Π (x : Type), (tEv x → Type) → Type;
 symbol tkPi : Π (x : Type), (tEv x → Kind) → Kind;
 symbol ktPi : Π (x : Kind), (kEv x → Type) → Type;
@@ -50,8 +51,10 @@ notation ∨ infix right 16;
 
 symbol ∃ T P ≔  forall (λ C, ttPi T (λ x, P x ↝ C) ↝  C);
 
-symbol infixspeq T (x y : tEv T) ≔  ktPi (T ⇀ DType)
-       	       	       	     	         (λ P, P x ↝ P y);
+
+symbol eq T (x y : tEv T) ≔  ktPi (T ⇀ DType)
+       	       	       	     	  (λ P, P x ↝ P y);
+symbol infixspeq ≔ eq;
 
 symbol eq_fmla A B ≔  ktPi (kkPi DType (λ _, DType))
 		           (λ P, P A ↝ P B);
@@ -71,17 +74,49 @@ symbol boolean ≔ tEv bool;
 symbol True : boolean;
 symbol False : boolean;
 
-symbol boolean_rect :
+symbol bool_rect :
   tEv (ktPi (bool ⇀ DType) (λ Q,
        Q True ↝
        Q False ↝
        ∀ bool (λ b, Q b)));
 
-rule boolean_rect _ $vT _   True  ↪ $vT;
-rule boolean_rect _ _   $vF False ↪ $vF;
+rule bool_rect _ $vT _   True  ↪ $vT;
+rule bool_rect _ _   $vF False ↪ $vF;
 
 symbol if a b t e ≔
-  boolean_rect (λ _, a) t e b;
+  bool_rect (λ _, a) t e b;
+
+// symbol bool_ind :  Π (Q : boolean → TYPE),
+//   Q True →
+//   Q False →
+//   Π b, Q b;
+// symbol is_True ≔
+//   bool_ind (λ _, Type)
+//       true
+//       false;
+
+symbol is_True b ≔
+  eq bool b True;
+
+// Comparison
+
+symbol comp : Type;
+symbol comparison ≔ tEv comp;
+
+symbol Eq : comparison;
+symbol Lt : comparison;
+symbol Gt : comparison;
+
+symbol comp_rect :
+  tEv (ktPi (comp ⇀ DType) (λ Q,
+       Q Eq ↝
+       Q Lt ↝
+       Q Gt ↝
+       ∀ comp (λ c, Q c)));
+
+rule comp_rect _ $vE _   _   Eq  ↪ $vE;
+rule comp_rect _ _   $vL _   Lt  ↪ $vL;
+rule comp_rect _ _   _   $vG Gt  ↪ $vG;
 
 // Integers
 
@@ -157,7 +192,7 @@ symbol pos_add x y ≔ pos_add_carry x y False;
 // assert ⊢ pos_add (xI (xI xH)) (xI (xO xH)) ≡ xO (xO (xI xH));
 
 // Check that 110101010 + 101101100 ≡ 1100010110 in base 2 (426 + 364 ≡ 790)
-// assert ⊢ pos_add (xO (xI (xO (xI (xO (xI (xO (xI xH)))))))) (xO (xO (xI (xI (xO (xI (xI (xO xH)))))))) // ≡ (xO (xI (xI (xO (xI (xO (xO (xO (xI xH)))))))));
+// assert ⊢ pos_add (xO (xI (xO (xI (xO (xI (xO (xI xH)))))))) (xO (xO (xI (xI (xO (xI (xI (xO xH)))))))) ≡ (xO (xI (xI (xO (xI (xO (xO (xO (xI xH)))))))));
 
 symbol pos_mul x y ≔
   pos_rect (λ _, pos)
@@ -178,6 +213,23 @@ symbol pos_pred_double ≔
 
 // Check that 2 * 6 - 1 ≡ 11
 // assert ⊢ pos_pred_double (xO (xI xH)) ≡ xI (xI (xO xH)); 
+
+symbol pos_compare_acc ≔
+  pos_rect (λ _, comp ⇁ pos ⇁ comp)
+     (λ _ comp_p r, pos_rect (λ _, comp)
+        (λ q _, comp_p r q)
+        (λ q _, comp_p Gt q)
+        Gt)
+     (λ _ comp_p r, pos_rect (λ _, comp)
+        (λ q _, comp_p Lt q)
+        (λ q _, comp_p r q)
+        Gt)
+     (λ r, pos_rect (λ _, comp)
+        (λ _ _, Lt)
+        (λ _ _, Lt)
+        r);
+
+symbol pos_compare x y ≔ pos_compare_acc x Eq y;
 
 symbol int : Type;
 symbol integer ≔ tEv int;
@@ -304,19 +356,66 @@ symbol mul x y ≔
         y)
      x;
 
+symbol compare x y ≔
+  int_rect (λ _, comp)
+     (int_rect (λ _, comp)
+         Eq
+         (λ _, Lt)
+         (λ _, Gt)
+         y)
+     (λ x', int_rect (λ _, comp)
+        Gt
+        (λ y', pos_compare x' y')
+        (λ _, Gt)
+        y)
+     (λ x', int_rect (λ _, comp)
+        Lt
+        (λ _, Lt)
+        (λ y', pos_compare y' x')
+        y)
+     x;
+
+symbol leb x y ≔
+  comp_rect (λ _, bool)
+      True
+      True
+      False
+      (compare x y);
+
+symbol ltb x y ≔
+  comp_rect (λ _, bool)
+      False
+      True
+      False
+      (compare x y);
+
+symbol geb x y ≔
+  comp_rect (λ _, bool)
+      True
+      False
+      True
+      (compare x y);
+
+symbol gtb x y ≔
+  comp_rect (λ _, bool)
+      False
+      False
+      True
+      (compare x y);
+
 builtin "0"  ≔  zero;
 builtin "+1" ≔  succ;
-
-symbol infixspls : integer → integer → Type;
-symbol infixspgt : integer → integer → Type;
-symbol infixsplseq : integer → integer → Type;
-symbol infixspgteq : integer → integer → Type;
 
 symbol infixsppl ≔ add;
 symbol infixspas ≔ mul;
 symbol infixspmn ≔ sub;
-
 symbol prefixspmn ≔ opp;
+
+symbol infixspls x y ≔ is_True (ltb x y);
+symbol infixspgt x y ≔ is_True (gtb x y);
+symbol infixsplseq x y ≔ is_True (leb x y);
+symbol infixspgteq x y ≔ is_True (geb x y);
+
 
 
 
@@ -600,3 +699,9 @@ symbol strong_induction : Π a P,
    (Π x, tEv (hyp (infixspls a x) (hyp (∀ int (λ n, infixspls n x ↝ P n)) (goal (P x) empty)))) →
    Π x, tEv (goal (P x) empty);
 
+
+
+symbol emb : Π b, tEv (eq bool b True ∨ eq bool b False) ≔
+  bool_rect (λ b, eq bool b True ∨ eq bool b False)
+      (λ C f1 _, f1 (eq_refl bool True))
+      (λ C _ f2, f2 (eq_refl bool False));
