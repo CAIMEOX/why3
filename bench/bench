@@ -33,7 +33,7 @@ while [ $# != 0 ]; do
             echo "and is one of the following:"
             echo "  badfiles drivers execution extraction goodfiles invalidgoals list"
             echo "  mlwprinter rac realizations replay replay-without-shapes stdlib"
-            echo "  steplimit validgoals validsplitgoals."
+            echo "  steplimit memlimit timelimit validgoals validsplitgoals."
             exit 1
     esac
 done
@@ -182,25 +182,75 @@ invalid_goals () {
 }
 
 step_limit () {
-    pgm="bin/why3$suffix prove"
+    pgm="bin/why3$suffix prove --stepslimit 10"
     test -d $1 || exit 1
     # FIXME: no reproducible test for Z3 yet, since Z3 replies
     # "unknown" when step limit reached
-    provers=`why3 config list-provers | grep 'Alt-Ergo 2\.[0-9]\|CVC4 1\.[6-9]' | tr ' ' ',' | tr -d '()'`
+    res=0
+    provers=`bin/why3$suffix config list-provers | grep 'Alt-Ergo 2\.[0-9]\|CVC4 1\.[6-9]' | tr ' ' ',' | tr -d '()'`
     for f in $1/*.mlw; do
         for p in $provers ; do
             printf "  $f (steps limit for $p)... "
-            if $pgm --stepslimit 10 -P $p $f | \
+            if $pgm -P $p $f | \
                     grep -q "Prover result is: Step limit exceeded" ; then
                 echo "ok"
             else
                 echo "failed!"
-                echo $pgm --stepslimit 10 -P $p $f
-                $pgm --stepslimit 10 -P $p $f
-                exit 1
+                echo $pgm -P $p $f
+                $pgm -P $p $f
+                res=1
             fi
         done
     done
+    test $res -eq 0 || echo "testing of steps limit failed."; exit 1
+}
+
+time_limit () {
+    pgm="bin/why3$suffix prove --timelimit 1"
+    test -d $1 || exit 1
+    # FIXME: no reproducible test for Alt-Ergo yet
+    provers=`bin/why3$suffix config list-provers | grep 'Alt-Ergo\|CVC4\|Z3' | tr ' ' ',' | tr -d '()'`
+    res=0
+    for f in $1/*.mlw; do
+        for p in $provers ; do
+            printf "  $f (time limit for $p)... "
+            if $pgm -P $p $f | \
+                    grep -q "Prover result is: Timeout" ; then
+                echo "ok"
+            else
+                echo "failed!"
+                echo $pgm -P $p $f
+                $pgm -P $p $f
+                res=1
+            fi
+        done
+    done
+    test $res -eq 0 || echo "testing of time limit failed."; exit 1
+}
+
+memory_limit () {
+    pgm="bin/why3$suffix prove --timelimit 10000 --memlimit 40"
+    test -d $1 || exit 1
+    # FIXME: no reproducible test for Alt-Ergo yet
+    # FIXME: no reproducible test for CVC4 yet
+    # FIXME: no reproducible test for Z3 4.8.[6-8] yet
+    provers=`bin/why3$suffix config list-provers | grep 'Alt-Ergo 2\.4\.0$\|CVC4 1\.7$\|Z3 4\.8\.[4-4]$' | tr ' ' ',' | tr -d '()'`
+    res=0
+    for f in $1/*.mlw; do
+        for p in $provers ; do
+            printf "  $f (memory limit for $p)... "
+            if $pgm -P $p $f | \
+                    grep -q "Prover result is: Out of memory" ; then
+                echo "ok"
+            else
+                echo "failed!"
+                echo $pgm -P $p $f
+                $pgm -P $p $f
+                res=1
+            fi
+        done
+    done;
+    test $res -eq 0 || echo "testing of memory limit failed."; exit 1
 }
 
 replay () {
@@ -466,11 +516,24 @@ invalid_goals bench/invalid
 echo ""
 fi
 
+if enabled timelimit; then
+echo "=== Checking time limits ==="
+time_limit bench/timelimit
+echo ""
+fi
+
+if enabled memlimit; then
+echo "=== Checking memory limits ==="
+memory_limit bench/memlimit
+echo ""
+fi
+
 if enabled steplimit; then
 echo "=== Checking step limits ==="
 step_limit bench/steplimit
 echo ""
 fi
+
 
 if enabled rac; then
 echo "=== Checking RAC ==="
