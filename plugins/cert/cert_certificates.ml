@@ -87,18 +87,18 @@ type ('v, 'h, 't) cert =
   (* Duplicate (i₁, i₂, c) ⇓ (Γ ⊢ Δ, i₁ : t) ≜  c ⇓ (Γ ⊢ Δ, i₁ : t, i₂ : t) *)
   (* Duplicate (i₁, i₂, c) ⇓ (Γ, i₁ : t ⊢ Δ) ≜  c ⇓ (Γ, i₁ : t, i₂ : t ⊢ Δ) *)
   | IntroQuant of 'h * 't * ('v, 'h, 't) cert
-  (* IntroQuant (i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p x ⊢ Δ) ≜
-     c ⇓ (Σ, y : τ | Γ, i : p y ⊢ Δ)
+  (* IntroQuant (i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p ⊢ Δ) ≜
+     c ⇓ (Σ, y : τ | Γ, i : p[x ↦ y] ⊢ Δ)
      and y ∉  Σ *)
-  (* IntroQuant (i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p x) ≜
-     c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p y)
+  (* IntroQuant (i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p) ≜
+     c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p[x ↦ y])
      and y ∉  Σ *)
   | InstQuant of 'h * 'h * 't * ('v, 'h, 't) cert
-  (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p x ⊢ Δ) ≜
-     c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p x, i₂ : p t ⊢ Δ)
+  (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p ⊢ Δ) ≜
+     c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p x, i₂ : p[x ↦ t] ⊢ Δ)
      and Σ ⊩ t : τ *)
-  (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x) ≜
-     c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p t)
+  (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p) ≜
+     c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p[x ↦ t])
      and Σ ⊩ t : τ *)
   | Rewrite of 'h * 'h * ('v, 'h, 't) cert
   (* Rewrite (i₁, i₂, c) ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
@@ -204,6 +204,7 @@ type ('v, 'h, 't, 'ty) ecert =
   | EEqRefl of 'ty * 't * 'h
   (* EEqRefl (τ, t, i) ⇓ (Γ ⊢ Δ, i : t = t) stands if t is of type τ *)
   | EEqSym of bool * 'ty * 't * 't * 'h * ('v, 'h, 't, 'ty) ecert (* not kernel *)
+  (* not kernel *)
   (* EEqSym (true, τ, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ = t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : t₂ = t₁) *)
   (* EEqSym (false, τ, t₁, t₂, i, c) ⇓ (Γ, i : t₁ = t₂ ⊢ Δ) ≜
@@ -268,18 +269,18 @@ type ('v, 'h, 't, 'ty) ecert =
   (* EDuplicate (false, t, i₁, i₂, c) ⇓ (Γ, i₁ : t ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t, i₂ : t ⊢ Δ) *)
   | EIntroQuant of bool * 'ty * 't * 'h * 't * ('v, 'h, 't, 'ty) ecert
-  (* EIntroQuant (false, τ, p, i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p x ⊢ Δ) ≜
-     c ⇓ (Σ, y : τ | Γ, i : p y ⊢ Δ)
+  (* EIntroQuant (false, τ, p, i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p ⊢ Δ) ≜
+     c ⇓ (Σ, y : τ | Γ, i : p[x ↦ y] ⊢ Δ)
      and y ∉  Σ *)
-  (* EIntroQuant (true, τ, p, i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p x) ≜
-     c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p y)
+  (* EIntroQuant (true, τ, p, i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p) ≜
+     c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p[x ↦ y])
      and y ∉  Σ *)
-  | EInstQuant of bool * 'ty* 't * 'h * 'h * 't * ('v, 'h, 't, 'ty) ecert
-  (* EInstQuant (false, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p x ⊢ Δ) ≜
-     c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p x, i₂ : p t ⊢ Δ)
+  | EInstQuant of bool * 'ty * 't * 'h * 'h * 't * ('v, 'h, 't, 'ty) ecert
+  (* EInstQuant (false, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p ⊢ Δ) ≜
+     c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p, i₂ : p[x ↦ t] ⊢ Δ)
      and Σ ⊩ t : τ *)
-  (* EInstQuant (true, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x) ≜
-     c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p t)
+  (* EInstQuant (true, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p) ≜
+     c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p[x ↦ t])
      and Σ ⊩ t : τ *)
   | ERewrite of bool * 't option * 'ty * 't * 't * 't * 'h * 'h
                 * ('v, 'h, 't, 'ty) ecert
