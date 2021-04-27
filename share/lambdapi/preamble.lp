@@ -51,11 +51,8 @@ notation ∨ infix right 16;
 
 symbol ∃ T P ≔  forall (λ C, ttPi T (λ x, P x ↝ C) ↝  C);
 
-
 symbol eq T (x y : tEv T) ≔  ktPi (T ⇀ DType)
        	       	       	     	  (λ P, P x ↝ P y);
-symbol infixspeq ≔ eq;
-
 symbol eq_fmla A B ≔  ktPi (kkPi DType (λ _, DType))
 		           (λ P, P A ↝ P B);
 
@@ -124,6 +121,23 @@ symbol comp_ind :
 rule comp_ind _ $vE _   _   Eq  ↪ $vE
 with comp_ind _ _   $vL _   Lt  ↪ $vL
 with comp_ind _ _   _   $vG Gt  ↪ $vG;
+
+// Naturals
+
+symbol nat : Type;
+symbol natural ≔ tEv nat;
+
+symbol O : natural;
+symbol S : natural → natural;
+
+symbol nat_ind :
+  tEv (ktPi (nat ⇀ DType) (λ Q,
+       Q O ↝
+       (∀ nat (λ n, Q n ↝ Q (S n))) ↝
+       ∀ nat (λ n, Q n)));
+
+rule nat_ind _  $vO _   O      ↪ $vO
+with nat_ind $Q $vO $vS (S $n) ↪ $vS $n (nat_ind $Q $vO $vS $n);
 
 // Integers
 
@@ -413,24 +427,62 @@ symbol gtb x y ≔
 builtin "0"  ≔  zero;
 builtin "+1" ≔  succ;
 
-symbol infixsppl ≔ add;
-symbol infixspas ≔ mul;
-symbol infixspmn ≔ sub;
-symbol prefixspmn ≔ opp;
+symbol le x y ≔ is_True (leb x y);
+symbol lt x y ≔ is_True (ltb x y);
+symbol ge x y ≔ is_True (geb x y);
+symbol gt x y ≔ is_True (gtb x y);
 
-symbol infixspls x y ≔ is_True (ltb x y);
-symbol infixspgt x y ≔ is_True (gtb x y);
-symbol infixsplseq x y ≔ is_True (leb x y);
-symbol infixspgteq x y ≔ is_True (geb x y);
+// assert ⊢ lt 3 (opp 2) ≡ false;
+// assert ⊢ lt 3 3 ≡ false;
+// assert ⊢ lt 3 5 ≡ true;
 
-// assert ⊢ infixspls 3 (opp 2) ≡ false;
-// assert ⊢ infixspls 3 3 ≡ false;
-// assert ⊢ infixspls 3 5 ≡ true;
+// assert ⊢ ge 4 (opp 3) ≡ true;
+// assert ⊢ ge 4 4 ≡ true;
+// assert ⊢ ge 4 7 ≡ false;
 
-// assert ⊢ infixspgteq 4 (opp 3) ≡ true;
-// assert ⊢ infixspgteq 4 4 ≡ true;
-// assert ⊢ infixspgteq 4 7 ≡ false;
 
+// Conversions
+
+symbol of_nat : natural → integer ≔
+  nat_ind (λ _, int)
+     Z0
+     (λ _, succ);
+
+symbol of_nat_0_le :
+  Π n,
+  tEv (le zero (of_nat n));
+
+symbol to_nat : integer → natural;
+
+symbol of_nat_to_nat :
+  Π (z : integer),
+  tEv (le zero z) →
+  tEv (eq int (of_nat (to_nat z)) z);
+
+symbol to_nat_of_nat :
+  Π (n : natural),
+  tEv (eq nat n (to_nat (of_nat n)));
+
+// Prove strong induction
+
+symbol natlike_rec : Π (P : integer → Type),
+                     tEv (P zero) →
+                     (Π (z : integer), tEv (le zero z) → tEv (P z) → tEv (P (succ z))) →
+                     Π (z : integer), tEv (le zero z) → tEv (P z)
+≔
+  λ (P : integer → Type) (P0 : tEv (P zero))
+    (Prec : (Π (z : integer), tEv (le zero z) → tEv (P z) → tEv (P (succ z))))
+    (z : integer) (Hz : tEv (le zero z)),
+  let Q (n : natural) : Type ≔ P (of_nat n) in
+  let qO : tEv (Q O) ≔ P0 in
+  let qrec n : tEv (Q n) → tEv (Q (S n)) ≔
+    Prec (of_nat n) (of_nat_0_le n) in
+  let q : Π n, tEv (Q n) ≔ nat_ind Q
+                             qO
+                             qrec in
+  let pconv : tEv (P (of_nat (to_nat z))) ≔
+    q (to_nat z) in
+  of_nat_to_nat z Hz P pconv;
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
 
@@ -510,14 +562,14 @@ symbol exists_elim : Π T P Q, tEv (∃ T P) →  (Π x, tEv (P x ↝ Q)) → tE
 
 // Equality
 
-symbol eq_refl : Π T x, tEv (infixspeq T x x)
+symbol eq_refl : Π T x, tEv (eq T x x)
 ≔  λ T x P px, px;
 
-symbol eq_sym : Π T x y, tEv (infixspeq T x y) → tEv (infixspeq T y x)
-≔  λ T x y eqxy, eqxy (λ t, infixspeq T t x) (eq_refl T x);
+symbol eq_sym : Π T x y, tEv (eq T x y) → tEv (eq T y x)
+≔  λ T x y eqxy, eqxy (λ t, eq T t x) (eq_refl T x);
 
-symbol eq_trans : Π T x y z, tEv (infixspeq T x y) → tEv (infixspeq T y z) → tEv (infixspeq T x z)
-≔  λ T x y z eqxy eqyz, eqyz (λ t, infixspeq T x t) eqxy;
+symbol eq_trans : Π T x y z, tEv (eq T x y) → tEv (eq T y z) → tEv (eq T x z)
+≔  λ T x y z eqxy eqyz, eqyz (λ t, eq T x t) eqxy;
 
 
 
@@ -541,7 +593,7 @@ symbol trivial_goal :
 ≔  λ ntt, ntt tt;
 
 symbol eqrefl : Π T t,
-  tEv (goal (infixspeq T t t) empty)
+  tEv (goal (eq T t t) empty)
 ≔  λ T t neqtt, neqtt (eq_refl T t);
 
 symbol cut : Π A,
@@ -683,13 +735,13 @@ symbol inst_quant_hyp : Π T P t,
 ≔  λ T P t s h, s h (h t);
 
 symbol rewrite_hyp : Π T a b P,
-   tEv (hyp (infixspeq T a b) (hyp (P b) empty)) →
-   tEv (hyp (infixspeq T a b) (hyp (P a) empty))
+   tEv (hyp (eq T a b) (hyp (P b) empty)) →
+   tEv (hyp (eq T a b) (hyp (P a) empty))
 ≔  λ T a b P s h i, s h (h P i);
 
 symbol rewrite_goal : Π T a b P,
-   tEv (hyp (infixspeq T a b) (goal (P b) empty)) →
-   tEv (hyp (infixspeq T a b) (goal (P a) empty))
+   tEv (hyp (eq T a b) (goal (P b) empty)) →
+   tEv (hyp (eq T a b) (goal (P a) empty))
 ≔  λ T a b P s h i, s h (h (λ x, ¬ P x) i);
 
 symbol rewrite_fmla_hyp : Π A B P,
@@ -708,8 +760,8 @@ symbol iffeq : Π (A : Type) (B : Type),
 ≔  λ A B s eab, s (iff_eq A B eab);
 
 symbol strong_induction : Π a P,
-   (Π x, tEv (hyp (infixsplseq x a) (goal (P x) empty))) →
-   (Π x, tEv (hyp (infixspls a x) (hyp (∀ int (λ n, infixspls n x ↝ P n)) (goal (P x) empty)))) →
+   (Π x, tEv (hyp (le x a) (goal (P x) empty))) →
+   (Π x, tEv (hyp (lt a x) (hyp (∀ int (λ n, lt n x ↝ P n)) (goal (P x) empty)))) →
    Π x, tEv (goal (P x) empty);
 
 
@@ -717,3 +769,23 @@ symbol emb : Π b, tEv (eq bool b True ∨ eq bool b False) ≔
   bool_ind (λ b, eq bool b True ∨ eq bool b False)
       (λ C f1 _ , f1 (eq_refl bool True))
       (λ C _  f2, f2 (eq_refl bool False));
+
+
+// Compatibility with identifiers from Why3
+
+// symbol True ≔ True;
+// symbol False ≔ False;
+
+symbol infixspeq ≔ eq;
+
+symbol infixsppl ≔ add;
+symbol infixspas ≔ mul;
+symbol infixspmn ≔ sub;
+symbol prefixspmn ≔ opp;
+
+symbol infixsplseq ≔ le;
+symbol infixspls ≔ lt;
+symbol infixspgteq ≔ ge;
+symbol infixspgt ≔ gt;
+
+
