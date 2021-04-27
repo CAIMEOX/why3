@@ -443,9 +443,13 @@ symbol gt x y ≔ is_True (gtb x y);
 
 // Conversions
 
+symbol max : integer → integer → integer;
+symbol max_is_greater_1 : Π x y, tEv (le x (max x y));
+symbol max_is_greater_2 : Π x y, tEv (le y (max x y));
+
 symbol case u bound : tEv (le u bound) → tEv (eq int bound u ∨ lt u bound);
 
-symbol le_lt u z : tEv (lt u (succ z)) → tEv (le u z);
+symbol lt_le u z : tEv (lt u (succ z)) → tEv (le u z);
 
 symbol of_nat : natural → integer ≔
   nat_ind (λ _, int)
@@ -454,13 +458,13 @@ symbol of_nat : natural → integer ≔
 
 symbol of_nat_0_le :
   Π n,
-  tEv (le zero (of_nat n));
+  tEv (le 0 (of_nat n));
 
 symbol to_nat : integer → natural;
 
 symbol of_nat_to_nat :
   Π (z : integer),
-  tEv (le zero z) →
+  tEv (le 0 z) →
   tEv (eq int (of_nat (to_nat z)) z);
 
 symbol to_nat_of_nat :
@@ -471,9 +475,9 @@ symbol to_nat_of_nat :
 
 
 
-opaque symbol natlike_rec : Π (P : integer → Type), tEv (P zero) →
-                     (Π (z : integer), tEv (le zero z) → tEv (P z) → tEv (P (succ z))) →
-                     Π (z : integer), tEv (le zero z) → tEv (P z) ≔
+opaque symbol natlike_rec : Π (P : integer → Type), tEv (P 0) →
+                     (Π (z : integer), tEv (le 0 z) → tEv (P z) → tEv (P (succ z))) →
+                     Π (z : integer), tEv (le 0 z) → tEv (P z) ≔
   begin
   assume P p0 prec z Hz;
   simplify;
@@ -489,9 +493,9 @@ opaque symbol natlike_rec : Π (P : integer → Type), tEv (P zero) →
   refine e P H;
 end;
 
-  // λ (P : integer → Type) (p0 : tEv (P zero))
-  //   (prec : (Π (z : integer), tEv (le zero z) → tEv (P z) → tEv (P (succ z))))
-  //   (z : integer) (Hz : tEv (le zero z)),
+  // λ (P : integer → Type) (p0 : tEv (P 0))
+  //   (prec : (Π (z : integer), tEv (le 0 z) → tEv (P z) → tEv (P (succ z))))
+  //   (z : integer) (Hz : tEv (le 0 z)),
   // let Q (n : natural) : Type ≔ P (of_nat n) in
   // let qrec n : tEv (Q n) → tEv (Q (S n)) ≔
   //   prec (of_nat n) (of_nat_0_le n) in
@@ -504,24 +508,36 @@ end;
 
 
 symbol strong_bound_0_alt_rec : Π P,
-                                (Π z, tEv (le z zero) → tEv (P z)) →
-                                (Π z, tEv (le zero z) → (Π v, tEv (le v z) → tEv (P v)) →
+                                (Π z, tEv (le z 0) → tEv (P z)) →
+                                (Π z, tEv (le 0 z) →
+                                      (Π v, tEv (le v z) → tEv (P v)) →
                                       tEv (P (succ z))) →
                                 Π z, tEv (P z)
 ≔
-  begin
-    assume P p0 prec;
-admit;
-    // have q : Π u, tEv (le u z);
-  // λ (P : integer → Type) (p0 : (Π z, tEv (le z zero) → tEv (P z)))
-  //   (prec : (Π z, tEv (le zero z) → (Π v, tEv (le v z) → tEv (P v)) → tEv (P (succ z)))) (z : integer),
-  // let Q z ≔ ∀ int (λ u, le u z ↝ P u) in
-  // let qrec z Hz (qz : tEv (Q z)) : tEv (Q (succ z)) ≔
-  //   λ u Hu, case u (succ z) Hu (tEv (P u))
-  //             (λ eq_sz_u, eq_sz_u P (prec z Hz qz))
-  //             (λ lt_u_sz, qz u (le_lt u z lt_u_sz)) in
-  // natlike_rec Q p0 qrec;
+begin
+  assume P p0 prec;
 
+// use natlike_rec on Q ≔ λz, ∀ u, u ≤ z → P u
+  have q : Π z, tEv (le 0 z) → Π u, tEv (le u z) → tEv (P u);
+  refine natlike_rec (λ a, ∀ int (λ u, le u a ↝ P u)) _ _;
+// Base case
+  refine p0;
+// Recursive case
+  assume z Hz Hrec u Hu;
+  refine case u (succ z) Hu (P u) _ _;
+  assume eq_sz_u;
+  have r : tEv (P (succ z));
+  refine prec z Hz _;
+  refine Hrec;
+  refine eq_sz_u P r;
+  assume lt_u_sz;
+  refine Hrec u _;
+  refine lt_le u z lt_u_sz;
+
+  assume z;
+  refine q (max 0 z) _ z _;
+  refine max_is_greater_1 0 z;
+  refine max_is_greater_2 0 z;
 end;
 
 
@@ -804,12 +820,6 @@ symbol strong_induction : Π a P,
    (Π x, tEv (hyp (le x a) (goal (P x) empty))) →
    (Π x, tEv (hyp (lt a x) (hyp (∀ int (λ n, lt n x ↝ P n)) (goal (P x) empty)))) →
    Π x, tEv (goal (P x) empty);
-
-
-symbol emb : Π b, tEv (eq bool b True ∨ eq bool b False) ≔
-  bool_ind (λ b, eq bool b True ∨ eq bool b False)
-      (λ C f1 _ , f1 (eq_refl bool True))
-      (λ C _  f2, f2 (eq_refl bool False));
 
 
 // Compatibility with identifiers from Why3
