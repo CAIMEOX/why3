@@ -225,7 +225,7 @@ symbol pos_mul x y ≔
 // Check that 6 * 5 = 30
 // assert ⊢ pos_mul (xO (xI xH)) (xI (xO xH)) ≡ xO (xI (xI (xI xH)));
 
-     
+
 symbol pos_pred_double ≔
   pos_ind (λ _, pos)
      (λ p _, xI (xO p))
@@ -233,7 +233,7 @@ symbol pos_pred_double ≔
      xH;
 
 // Check that 2 * 6 - 1 ≡ 11
-// assert ⊢ pos_pred_double (xO (xI xH)) ≡ xI (xI (xO xH)); 
+// assert ⊢ pos_pred_double (xO (xI xH)) ≡ xI (xI (xO xH));
 
 symbol pos_compare_acc ≔
   pos_ind (λ _, comp ⇁ pos ⇁ comp)
@@ -280,7 +280,7 @@ symbol double ≔
     (λ p, Zneg (xO p));
 
 // Check that 2 * 7 ≡ 14
-// assert ⊢ double (Zpos (xI (xI xH))) ≡ Zpos (xO (xI (xI xH))); 
+// assert ⊢ double (Zpos (xI (xI xH))) ≡ Zpos (xO (xI (xI xH)));
 
 symbol succ_double ≔
   int_ind (λ _, int)
@@ -289,8 +289,8 @@ symbol succ_double ≔
     (λ p, Zneg (pos_pred_double p));
 
 // Check that 2 * (-5) + 1 ≡ -9 and that 2 * 5 + 1 ≡ 11
-// assert ⊢ succ_double (Zneg (xI (xO xH))) ≡ Zneg (xI (xO (xO xH))); 
-// assert ⊢ succ_double (Zpos (xI (xO xH))) ≡ Zpos (xI (xI (xO xH))); 
+// assert ⊢ succ_double (Zneg (xI (xO xH))) ≡ Zneg (xI (xO (xO xH)));
+// assert ⊢ succ_double (Zpos (xI (xO xH))) ≡ Zpos (xI (xI (xO xH)));
 
 symbol pred_double ≔
   int_ind (λ _, int)
@@ -299,8 +299,8 @@ symbol pred_double ≔
     (λ p, Zneg (xI p));
 
 // Check that 2 * (-5) - 1 ≡ -11 and that 2 * 5 - 1 ≡ 9
-// assert ⊢ pred_double (Zneg (xI (xO xH))) ≡ Zneg (xI (xI (xO xH))); 
-// assert ⊢ pred_double (Zpos (xI (xO xH))) ≡ Zpos (xI (xO (xO xH))); 
+// assert ⊢ pred_double (Zneg (xI (xO xH))) ≡ Zneg (xI (xI (xO xH)));
+// assert ⊢ pred_double (Zpos (xI (xO xH))) ≡ Zpos (xI (xO (xO xH)));
 
 symbol pos_sub ≔
   pos_ind (λ _, pos ⇁ int)
@@ -443,6 +443,10 @@ symbol gt x y ≔ is_True (gtb x y);
 
 // Conversions
 
+symbol case u bound : tEv (le u bound) → tEv (eq int bound u ∨ lt u bound);
+
+symbol le_lt u z : tEv (lt u (succ z)) → tEv (le u z);
+
 symbol of_nat : natural → integer ≔
   nat_ind (λ _, int)
      Z0
@@ -465,24 +469,61 @@ symbol to_nat_of_nat :
 
 // Prove strong induction
 
-symbol natlike_rec : Π (P : integer → Type),
-                     tEv (P zero) →
+
+
+opaque symbol natlike_rec : Π (P : integer → Type), tEv (P zero) →
                      (Π (z : integer), tEv (le zero z) → tEv (P z) → tEv (P (succ z))) →
-                     Π (z : integer), tEv (le zero z) → tEv (P z)
+                     Π (z : integer), tEv (le zero z) → tEv (P z) ≔
+  begin
+  assume P p0 prec z Hz;
+  simplify;
+  have e : tEv (eq int (of_nat (to_nat z)) z);
+  refine of_nat_to_nat z Hz;
+  have H : tEv (P (of_nat (to_nat z))) ;
+  refine nat_ind (λ n, P (of_nat n)) _ _ (to_nat z);
+  apply p0;
+  assume n H;
+  refine prec (of_nat n) _ _;
+  refine of_nat_0_le n;
+  refine H;
+  refine e P H;
+end;
+
+  // λ (P : integer → Type) (p0 : tEv (P zero))
+  //   (prec : (Π (z : integer), tEv (le zero z) → tEv (P z) → tEv (P (succ z))))
+  //   (z : integer) (Hz : tEv (le zero z)),
+  // let Q (n : natural) : Type ≔ P (of_nat n) in
+  // let qrec n : tEv (Q n) → tEv (Q (S n)) ≔
+  //   prec (of_nat n) (of_nat_0_le n) in
+  // let q : Π n, tEv (Q n) ≔ nat_ind Q
+  //                            p0
+  //                            qrec in
+  // let pconv : tEv (P (of_nat (to_nat z))) ≔
+  //   q (to_nat z) in
+  // of_nat_to_nat z Hz P pconv;
+
+
+symbol strong_bound_0_alt_rec : Π P,
+                                (Π z, tEv (le z zero) → tEv (P z)) →
+                                (Π z, tEv (le zero z) → (Π v, tEv (le v z) → tEv (P v)) →
+                                      tEv (P (succ z))) →
+                                Π z, tEv (P z)
 ≔
-  λ (P : integer → Type) (P0 : tEv (P zero))
-    (Prec : (Π (z : integer), tEv (le zero z) → tEv (P z) → tEv (P (succ z))))
-    (z : integer) (Hz : tEv (le zero z)),
-  let Q (n : natural) : Type ≔ P (of_nat n) in
-  let qO : tEv (Q O) ≔ P0 in
-  let qrec n : tEv (Q n) → tEv (Q (S n)) ≔
-    Prec (of_nat n) (of_nat_0_le n) in
-  let q : Π n, tEv (Q n) ≔ nat_ind Q
-                             qO
-                             qrec in
-  let pconv : tEv (P (of_nat (to_nat z))) ≔
-    q (to_nat z) in
-  of_nat_to_nat z Hz P pconv;
+  begin
+    assume P p0 prec;
+admit;
+    // have q : Π u, tEv (le u z);
+  // λ (P : integer → Type) (p0 : (Π z, tEv (le z zero) → tEv (P z)))
+  //   (prec : (Π z, tEv (le zero z) → (Π v, tEv (le v z) → tEv (P v)) → tEv (P (succ z)))) (z : integer),
+  // let Q z ≔ ∀ int (λ u, le u z ↝ P u) in
+  // let qrec z Hz (qz : tEv (Q z)) : tEv (Q (succ z)) ≔
+  //   λ u Hu, case u (succ z) Hu (tEv (P u))
+  //             (λ eq_sz_u, eq_sz_u P (prec z Hz qz))
+  //             (λ lt_u_sz, qz u (le_lt u z lt_u_sz)) in
+  // natlike_rec Q p0 qrec;
+
+end;
+
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
 
@@ -787,5 +828,3 @@ symbol infixsplseq ≔ le;
 symbol infixspls ≔ lt;
 symbol infixspgteq ≔ ge;
 symbol infixspgt ≔ gt;
-
-
