@@ -63,6 +63,81 @@ symbol iff_eq : Π (A : Type) (B : Type),
        	        tEv (A ⇔  B) →
 		tEv (eq_fmla A B);
 
+
+// Excluded-middle axiom and reasoning about negation.
+
+symbol nni : Π A, tEv A → tEv (¬ ¬ A)
+≔  λ A a na, na a;
+
+symbol contra : Π A B, (tEv A → tEv B) → tEv (¬ B) → tEv (¬ A)
+≔  λ A B p nb a, nb (p a);
+
+symbol em : tEv (forall (λ A, A ∨ ¬ A));
+
+symbol nne : Π A, tEv (¬ ¬ A) → tEv A
+≔  λ A nna, em A A (λ a, a) (λ na, nna na A);
+
+
+// Theorems
+
+// Implication
+
+symbol imp_elim : Π A B, tEv (A ↝ B) → tEv A → tEv B
+≔  λ A B p, p;
+
+symbol imp_intro : Π A B, (tEv A → tEv B) → tEv (A ↝ B)
+≔  λ A B p, p;
+
+// Disjunction
+
+symbol or_intro_1 : Π A B, tEv A → tEv (A ∨ B)
+≔  λ A B (a : tEv A) C (ac: tEv A → tEv C) _, ac a;
+
+symbol or_intro_2 : Π A B, tEv B → tEv (A ∨ B)
+≔  λ A B (b : tEv B) C _ (bc: tEv B → tEv C), bc b;
+
+symbol or_elim : Π A B, tEv (A ∨ B) → Π C, tEv (A ↝ C) → tEv (B ↝ C) → tEv C
+≔  λ A B ab, ab;
+
+// Conjunction
+
+symbol and_intro : Π A B, tEv A → tEv B → tEv (A ∧ B)
+≔  λ A B a b C (p : tEv A → tEv B → tEv C), p a b;
+
+symbol and_elim_1 : Π A B, tEv (A ∧ B) → tEv A
+≔  λ A B (ab : tEv (A ∧ B)), ab A (λ a _, a);
+
+symbol and_elim_2 : Π A B, tEv (A ∧ B) → tEv B
+≔  λ A B (ab : tEv (A ∧ B)), ab B (λ _ b, b);
+
+// Universal quantifier
+
+symbol forall_intro : Π P, (Π t, tEv (P t)) → tEv (forall P)
+≔  λ P p, p;
+
+symbol forall_elim : Π P t, tEv (forall P) → tEv (P t)
+≔  λ P t p, p t;
+
+// Existential quantifier
+
+symbol exists_intro : Π T P t, tEv (P t) → tEv (∃ T P)
+≔  λ T P t pt C (q : Π x, tEv (P x) → tEv C), q t pt;
+
+symbol exists_elim : Π T P Q, tEv (∃ T P) →  (Π x, tEv (P x ↝ Q)) → tEv Q
+≔  λ T P Q e pq, e Q pq;
+
+// Equality
+
+symbol eq_refl : Π T x, tEv (eq T x x)
+≔  λ T x P px, px;
+
+symbol eq_sym : Π T x y, tEv (eq T x y) → tEv (eq T y x)
+≔  λ T x y eqxy, eqxy (λ t, eq T t x) (eq_refl T x);
+
+symbol eq_trans : Π T x y z, tEv (eq T x y) → tEv (eq T y z) → tEv (eq T x z)
+≔  λ T x y z eqxy eqyz, eqyz (λ t, eq T x t) eqxy;
+
+
 // Booleans
 
 
@@ -443,6 +518,14 @@ symbol gt x y ≔ is_True (gtb x y);
 
 // Conversions
 
+// symbol add_assoc x y z : tEv (eq int (add x (add y z)) (add (add x y) z));
+// symbol add_comm x y : tEv (eq int (add x y) (add y x));
+
+// symbol add_opp a : tEv (eq int (add a (opp a)) 0);
+
+symbol simpl_right x a : tEv (eq int (sub (add x a) a) x);
+symbol simpl_inv_right x a : tEv (eq int (add (sub x a) a) x);
+
 symbol max : integer → integer → integer;
 symbol max_is_greater_1 : Π x y, tEv (le x (max x y));
 symbol max_is_greater_2 : Π x y, tEv (le y (max x y));
@@ -450,6 +533,12 @@ symbol max_is_greater_2 : Π x y, tEv (le y (max x y));
 symbol case u bound : tEv (le u bound) → tEv (eq int bound u ∨ lt u bound);
 
 symbol lt_le u z : tEv (lt u (succ z)) → tEv (le u z);
+
+symbol le_lt u z : tEv (le u z) → tEv (lt u (succ z));
+
+symbol le_compat_add x y a : tEv (le x y) → tEv (le (add x a) (add y a));
+
+symbol lt_compat_add x y a : tEv (lt x y) → tEv (lt (add x a) (add y a));
 
 symbol of_nat : natural → integer ≔
   nat_ind (λ _, int)
@@ -475,7 +564,7 @@ symbol to_nat_of_nat :
 
 
 
-opaque symbol natlike_rec : Π (P : integer → Type), tEv (P 0) →
+symbol natlike_rec : Π (P : integer → Type), tEv (P 0) →
                      (Π (z : integer), tEv (le 0 z) → tEv (P z) → tEv (P (succ z))) →
                      Π (z : integer), tEv (le 0 z) → tEv (P z) ≔
   begin
@@ -540,6 +629,44 @@ begin
   refine max_is_greater_2 0 z;
 end;
 
+symbol strong_ind : Π a P,
+                    (Π x, tEv (le x a) → tEv (P x)) →
+                    (Π x, tEv (lt a x) →
+                          (Π v, tEv (lt v x) → tEv (P v)) →
+                          tEv (P x)) →
+                    Π x, tEv (P x)
+≔ begin
+  assume a P p0 prec;
+
+  have q : Π z, tEv (P (add z a));
+  refine strong_bound_0_alt_rec (λ z, P (add z a)) _ _;
+// Base case
+  assume z Hz;
+  refine p0 (add z a) _;
+  refine le_compat_add z 0 a Hz;
+// Recursive case
+  assume z Hz Hrec;
+  refine prec (add (succ z) a) _ _;
+  refine lt_compat_add 0 (succ z) a _;
+  refine le_lt 0 z Hz;
+  assume v Hv;
+  refine simpl_inv_right v a P _;
+  refine Hrec (sub v a) _;
+  refine lt_le (sub v a) z _;
+  have eqsa : tEv (eq int (sub (add (succ z) a) a) (succ z));
+  refine simpl_right (succ z) a;
+  refine eqsa (λ u, lt (sub v a) u) _;
+  refine lt_compat_add v (add (succ z) a) (opp a) Hv;
+
+  assume x;
+  have e : tEv (eq int (add (sub x a) a) x);
+  refine simpl_inv_right x a;
+
+  refine e P _;
+  refine q (sub x a);
+end;
+
+
 
 // Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
 
@@ -554,79 +681,6 @@ symbol goal : Type → Type → Type
 
 
 
-// Excluded-middle axiom and reasoning about negation.
-
-symbol nni : Π A, tEv A → tEv (¬ ¬ A)
-≔  λ A a na, na a;
-
-symbol contra : Π A B, (tEv A → tEv B) → tEv (¬ B) → tEv (¬ A)
-≔  λ A B p nb a, nb (p a);
-
-symbol em : tEv (forall (λ A, A ∨ ¬ A));
-
-symbol nne : Π A, tEv (¬ ¬ A) → tEv A
-≔  λ A nna, em A A (λ a, a) (λ na, nna na A);
-
-
-
-// Theorems
-
-// Implication
-
-symbol imp_elim : Π A B, tEv (A ↝ B) → tEv A → tEv B
-≔  λ A B p, p;
-
-symbol imp_intro : Π A B, (tEv A → tEv B) → tEv (A ↝ B)
-≔  λ A B p, p;
-
-// Disjunction
-
-symbol or_intro_1 : Π A B, tEv A → tEv (A ∨ B)
-≔  λ A B (a : tEv A) C (ac: tEv A → tEv C) _, ac a;
-
-symbol or_intro_2 : Π A B, tEv B → tEv (A ∨ B)
-≔  λ A B (b : tEv B) C _ (bc: tEv B → tEv C), bc b;
-
-symbol or_elim : Π A B, tEv (A ∨ B) → Π C, tEv (A ↝ C) → tEv (B ↝ C) → tEv C
-≔  λ A B ab, ab;
-
-// Conjunction
-
-symbol and_intro : Π A B, tEv A → tEv B → tEv (A ∧ B)
-≔  λ A B a b C (p : tEv A → tEv B → tEv C), p a b;
-
-symbol and_elim_1 : Π A B, tEv (A ∧ B) → tEv A
-≔  λ A B (ab : tEv (A ∧ B)), ab A (λ a _, a);
-
-symbol and_elim_2 : Π A B, tEv (A ∧ B) → tEv B
-≔  λ A B (ab : tEv (A ∧ B)), ab B (λ _ b, b);
-
-// Universal quantifier
-
-symbol forall_intro : Π P, (Π t, tEv (P t)) → tEv (forall P)
-≔  λ P p, p;
-
-symbol forall_elim : Π P t, tEv (forall P) → tEv (P t)
-≔  λ P t p, p t;
-
-// Existential quantifier
-
-symbol exists_intro : Π T P t, tEv (P t) → tEv (∃ T P)
-≔  λ T P t pt C (q : Π x, tEv (P x) → tEv C), q t pt;
-
-symbol exists_elim : Π T P Q, tEv (∃ T P) →  (Π x, tEv (P x ↝ Q)) → tEv Q
-≔  λ T P Q e pq, e Q pq;
-
-// Equality
-
-symbol eq_refl : Π T x, tEv (eq T x x)
-≔  λ T x P px, px;
-
-symbol eq_sym : Π T x y, tEv (eq T x y) → tEv (eq T y x)
-≔  λ T x y eqxy, eqxy (λ t, eq T t x) (eq_refl T x);
-
-symbol eq_trans : Π T x y z, tEv (eq T x y) → tEv (eq T y z) → tEv (eq T x z)
-≔  λ T x y z eqxy eqyz, eqyz (λ t, eq T x t) eqxy;
 
 
 
@@ -815,12 +869,29 @@ symbol iffeq : Π (A : Type) (B : Type),
 	   	   tEv (hyp (eq_fmla A B) empty) →
 		   tEv (hyp (A ⇔ B) empty)
 ≔  λ A B s eab, s (iff_eq A B eab);
+// symbol strong_ind : Π a P,
+//                     (Π x, tEv (le x a) → tEv (P x)) →
+//                     (Π x, tEv (lt a x) →
+//                           (Π v, tEv (lt v x) → tEv (P v)) →
+//                           tEv (P x)) →
+//                     Π x, tEv (P x)
 
 symbol strong_induction : Π a P,
    (Π x, tEv (hyp (le x a) (goal (P x) empty))) →
    (Π x, tEv (hyp (lt a x) (hyp (∀ int (λ n, lt n x ↝ P n)) (goal (P x) empty)))) →
-   Π x, tEv (goal (P x) empty);
+   Π x, tEv (goal (P x) empty)
+≔ begin
+  assume a P pbase prec x;
+  refine nni (P x) _;
+  refine strong_ind a P _ _ x;
+  assume z Hz;
+  refine nne (P z) _;
+  refine pbase z Hz;
 
+  assume z Ha Hrec;
+  refine nne (P z) _;
+  refine prec z Ha Hrec;
+end;
 
 // Compatibility with identifiers from Why3
 
