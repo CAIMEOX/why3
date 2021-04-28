@@ -940,5 +940,8 @@ symbol infixspls ≔ lt;
 symbol infixspgteq ≔ ge;
 symbol infixspgt ≔ gt;
 
+symbol - ≔ opp;
+notation - prefix 20;
+
 // Also targeted, but not from an ident : quantifications and arrows, true,
 // false, ∧, ∨, ¬, ⇔, opp, Z, boolean, DType, Type, int litterals
