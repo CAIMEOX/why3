@@ -39,20 +39,20 @@ and print_s fmt {s; gd} =
   | [] -> print_gd fmt gd
   | (id, cty)::s ->
       let pred = is_predicate cty in
-      fprintf fmt "%a %a (λ %a,@ %a)"
+      fprintf fmt "(%a %a : %a,@ %a)"
         prquant pred
-        (pred_pty pred) cty
         prid id
+        prty cty
         print_s {t = []; s; gd}
 
 and prquant fmt pred =
-  if pred then fprintf fmt "ktPi"
-  else fprintf fmt "∀"
+  if pred then fprintf fmt "`π"
+  else fprintf fmt "`∀"
 
 and print_gd fmt gd =
   let _, terms = List.split gd in
   let tp = terms @ [CTfalse] in
-  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ↝@ ") prdisj fmt tp
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇒@ ") prdisj fmt tp
 
 let print_certif print_next fmt c =
   let rstr pos = if pos then "_goal" else "_hyp" in
@@ -71,9 +71,8 @@ let print_certif print_next fmt c =
       fprintf fmt "trivial%s %a"
         (rstr pos)
         prhyp i
-  | EEqRefl (cty, t, i) ->
-      fprintf fmt "eqrefl %a %a %a"
-        prpty cty
+  | EEqRefl (_, t, i) ->
+      fprintf fmt "eqrefl %a %a"
         prpv t
         prhyp i
   | EAssert (i, t, c1, c2) ->
@@ -143,24 +142,22 @@ let print_certif print_next fmt c =
       fprintf fmt "forget (@,\
                    @[<hv>%a@])"
         pc c
-  | EIntroQuant (pos, cty, p, i, y, c) ->
-      fprintf fmt "intro_quant%s %a %a (λ %a %a,@ \
+  | EIntroQuant (pos, _, p, i, y, c) ->
+      fprintf fmt "intro_quant%s %a (λ %a %a,@ \
                    @[<hv>%a@]) %a"
         (rstr pos)
-        prpty cty
         prpv p
         prpv y prhyp i pc c
         prhyp i
-  | EInstQuant (pos, cty, p, i1, i2, t, c) ->
-      fprintf fmt "inst_quant%s %a %a %a (λ %a %a,@ \
+  | EInstQuant (pos, _, p, i1, i2, t, c) ->
+      fprintf fmt "inst_quant%s %a %a (λ %a %a,@ \
                    @[<hv>%a@]) %a"
         (rstr pos)
-        prpty cty
         prpv p
         prpv t
         prhyp i1 prhyp i2 pc c
         prhyp i1
-  | ERewrite (pos, is_eq, cty, t1, t2, ctxt, i1, i2, c) ->
+  | ERewrite (pos, is_eq, _, t1, t2, ctxt, i1, i2, c) ->
       let pr_next fmt i1 =
         fprintf fmt "%a %a %a (λ %a %a,@ \
                      @[<hv>%a@]) %a %a"
@@ -170,8 +167,8 @@ let print_certif print_next fmt c =
           prhyp i2 in
       begin match is_eq with
       | None ->
-          fprintf fmt "rewrite%s %a %a"
-            (rstr pos) prpty cty pr_next i1
+          fprintf fmt "rewrite%s %a"
+            (rstr pos) pr_next i1
       | Some _ ->
           let ni1 = id_register (id_fresh "iff_rewrite") in
           fprintf fmt "iffeq %a %a (λ %a,@ \
@@ -221,6 +218,11 @@ let print fmt init res (task_ids, certif) =
     print_certif print_applied_task fmt certif in
 
   fprintf fmt "@[<v>require open cert_lambdapi.preamble;@ @ \
+               unif_rule Type ≡ kEv $t ↪ [ $t ≡ DType ];@ \
+               unif_rule tEv $a ≡ tEv $b ↪ [ $a ≡ $b ];@ \
+               unif_rule kEv $a ≡ kEv $b ↪ [ $a ≡ $b ];@ \
+               unif_rule $a → $b ≡ kEv $c ↪ [ $a ≡ tEv $a'; $b ≡ kEv $b'; $c ≡ $a' ⟶ $b' ];@ \
+               unif_rule $a → $b ≡ tEv $c ↪ [ $a ≡ tEv $a'; $b ≡ tEv $b'; $c ≡ $a' ⇒ $b' ];@ @ \
                symbol to_verify :@ \
                @[<v>%a@]@ \
                @<3>%s@[<v>%a@]@];@."
