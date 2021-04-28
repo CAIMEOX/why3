@@ -1,4 +1,6 @@
-// Define CoC encoding
+
+
+// COC ENCODING
 
 
 symbol Type : TYPE;
@@ -10,61 +12,81 @@ symbol kEv : Kind → TYPE;
 symbol DType : Kind;
 rule kEv DType ↪ Type;
 
-
 symbol ttPi : Π (x : Type), (tEv x → Type) → Type;
 symbol tkPi : Π (x : Type), (tEv x → Kind) → Kind;
 symbol ktPi : Π (x : Kind), (kEv x → Type) → Type;
 symbol kkPi : Π (x : Kind), (kEv x → Kind) → Kind;
 
 rule tEv (ttPi $x $y) ↪  Π (w : tEv $x), tEv ($y w)
-with tEv (ktPi $x $y) ↪  Π (w : kEv $x), tEv ($y w)
 with kEv (tkPi $x $y) ↪  Π (w : tEv $x), kEv ($y w)
+with tEv (ktPi $x $y) ↪  Π (w : kEv $x), tEv ($y w)
 with kEv (kkPi $x $y) ↪  Π (w : kEv $x), kEv ($y w);
 
-symbol ⇀ A B ≔  tkPi A (λ _, B);
-notation ⇀ infix right 14;
+// Improve quantification notations
 
-symbol ⇁ A B ≔  ttPi A (λ _, B);
-notation ⇁ infix right 14;
+symbol ∀ {A} ≔ ttPi A;
+notation ∀ quantifier;
 
-symbol ∀ ≔  ttPi;
+symbol π {A} ≔ ktPi A;
+notation π quantifier;
 
-symbol forall ≔  ktPi DType;
-
-symbol false ≔  forall (λ C, C);
-
-symbol ↝ A B ≔  ttPi A (λ _, B);
+symbol ↝ A B ≔  tkPi A (λ _, B);
 notation ↝ infix right 14;
 
-symbol true ≔  false ↝ false;
+symbol ⇒ A B ≔  ttPi A (λ _, B);
+notation ⇒ infix right 14;
+
+// Help the unification algorithm so that we can use the shallow types
+// inside the deep terms
+
+unif_rule Type ≡ kEv $t ↪ [ $t ≡ DType ];
+unif_rule tEv $a ≡ tEv $b ↪ [ $a ≡ $b ];
+unif_rule kEv $a ≡ kEv $b ↪ [ $a ≡ $b ];
+unif_rule $a → $b ≡ kEv $c ↪ [ $a ≡ tEv $a'; $b ≡ kEv $b'; $c ≡ $a' ↝ $b' ];
+unif_rule $a → $b ≡ tEv $c ↪ [ $a ≡ tEv $a'; $b ≡ tEv $b'; $c ≡ $a' ⇒ $b' ];
+
+// Define our higher order logic
+
+symbol false ≔  `π C : Type, C;
+
+symbol true ≔  false ⇒ false;
 
 symbol tt : tEv true ≔  λ x, x;
 
-symbol ¬ A ≔  A ↝ false;
+symbol ¬ A ≔  A ⇒ false;
 notation ¬ prefix 20;
 
-symbol ∧ A B ≔  forall (λ C, (A ↝ B ↝ C) ↝ C);
+symbol ∧ A B ≔  `π C, (A ⇒ B ⇒ C) ⇒ C;
 notation ∧ infix right 18;
 
-symbol ∨ A B ≔  forall (λ C, (A ↝ C) ↝ (B ↝ C) ↝ C);
+symbol ∨ A B ≔  `π C, (A ⇒ C) ⇒ (B ⇒ C) ⇒ C;
 notation ∨ infix right 16;
 
-symbol ∃ T P ≔  forall (λ C, ttPi T (λ x, P x ↝ C) ↝  C);
+symbol ∃ {T} P ≔  `π C, (`∀ (x : tEv T), P x ⇒ C) ⇒  C;
+notation ∃ quantifier;
 
-symbol eq T (x y : tEv T) ≔  ktPi (T ⇀ DType)
-       	       	       	     	  (λ P, P x ↝ P y);
-symbol eq_fmla A B ≔  ktPi (kkPi DType (λ _, DType))
-		           (λ P, P A ↝ P B);
+// Equality
 
-symbol ⇔ A B ≔  (A ↝ B) ∧ (B ↝ A);
+symbol eq T (x y : tEv T) ≔ `π P, P x ⇒ P y;
+symbol eq_fmla A B ≔ ktPi (kkPi DType (λ _, DType))
+		          (λ P, P A ⇒ P B);
+
+symbol ⇔ A B ≔ (A ⇒ B) ∧ (B ⇒ A);
 notation ⇔ infix right 14;
 
 symbol iff_eq : Π (A : Type) (B : Type),
        	        tEv (A ⇔  B) →
 		tEv (eq_fmla A B);
 
+// Excluded-middle axiom
 
-// Excluded-middle axiom and reasoning about negation.
+symbol em : tEv (`π A, A ∨ ¬ A);
+
+
+// THEOREMS
+
+
+//  Reasoning about negation.
 
 symbol nni : Π A, tEv A → tEv (¬ ¬ A)
 ≔  λ A a na, na a;
@@ -72,20 +94,15 @@ symbol nni : Π A, tEv A → tEv (¬ ¬ A)
 symbol contra : Π A B, (tEv A → tEv B) → tEv (¬ B) → tEv (¬ A)
 ≔  λ A B p nb a, nb (p a);
 
-symbol em : tEv (forall (λ A, A ∨ ¬ A));
-
 symbol nne : Π A, tEv (¬ ¬ A) → tEv A
 ≔  λ A nna, em A A (λ a, a) (λ na, nna na A);
 
-
-// Theorems
-
 // Implication
 
-symbol imp_elim : Π A B, tEv (A ↝ B) → tEv A → tEv B
+symbol imp_elim : Π A B, tEv (A ⇒ B) → tEv A → tEv B
 ≔  λ A B p, p;
 
-symbol imp_intro : Π A B, (tEv A → tEv B) → tEv (A ↝ B)
+symbol imp_intro : Π A B, (tEv A → tEv B) → tEv (A ⇒ B)
 ≔  λ A B p, p;
 
 // Disjunction
@@ -96,7 +113,7 @@ symbol or_intro_1 : Π A B, tEv A → tEv (A ∨ B)
 symbol or_intro_2 : Π A B, tEv B → tEv (A ∨ B)
 ≔  λ A B (b : tEv B) C _ (bc: tEv B → tEv C), bc b;
 
-symbol or_elim : Π A B, tEv (A ∨ B) → Π C, tEv (A ↝ C) → tEv (B ↝ C) → tEv C
+symbol or_elim : Π A B, tEv (A ∨ B) → Π C, tEv (A ⇒ C) → tEv (B ⇒ C) → tEv C
 ≔  λ A B ab, ab;
 
 // Conjunction
@@ -112,47 +129,49 @@ symbol and_elim_2 : Π A B, tEv (A ∧ B) → tEv B
 
 // Universal quantifier
 
-symbol forall_intro : Π P, (Π t, tEv (P t)) → tEv (forall P)
+symbol forall_intro : Π (P : Type → Type), (Π t, tEv (P t)) → tEv (`π x, P x)
 ≔  λ P p, p;
 
-symbol forall_elim : Π P t, tEv (forall P) → tEv (P t)
+symbol forall_elim : Π (P : Type → Type) t, tEv (`π x, P x) → tEv (P t)
 ≔  λ P t p, p t;
 
 // Existential quantifier
 
-symbol exists_intro : Π T P t, tEv (P t) → tEv (∃ T P)
-≔  λ T P t pt C (q : Π x, tEv (P x) → tEv C), q t pt;
+symbol exists_intro : Π T P (t : tEv T), tEv (P t) → tEv (`∃ x, P x)
+≔  λ T P t pt C q, q t pt;
 
-symbol exists_elim : Π T P Q, tEv (∃ T P) →  (Π x, tEv (P x ↝ Q)) → tEv Q
-≔  λ T P Q e pq, e Q pq;
+symbol exists_elim : Π T P Q, tEv (`∃ x, P x) → (Π x, tEv (P x ⇒ Q)) → tEv Q
+≔  λ T (P : tEv T → Type) Q e pq, e Q pq;
 
 // Equality
 
-symbol eq_refl : Π T x, tEv (eq T x x)
+symbol eq_refl : Π T (x : tEv T), tEv (eq T x x)
 ≔  λ T x P px, px;
 
-symbol eq_sym : Π T x y, tEv (eq T x y) → tEv (eq T y x)
+symbol eq_sym : Π T (x y : tEv T), tEv (eq T x y) → tEv (eq T y x)
 ≔  λ T x y eqxy, eqxy (λ t, eq T t x) (eq_refl T x);
 
-symbol eq_trans : Π T x y z, tEv (eq T x y) → tEv (eq T y z) → tEv (eq T x z)
+symbol eq_trans : Π T (x y z : tEv T), tEv (eq T x y) →
+                                       tEv (eq T y z) → tEv (eq T x z)
 ≔  λ T x y z eqxy eqyz, eqyz (λ t, eq T x t) eqxy;
+
+
+// THEORIES
 
 
 // Booleans
 
-
-symbol bool : Type;
-symbol boolean ≔ tEv bool;
+symbol Dboolean : Type;
+symbol boolean ≔ tEv Dboolean;
 
 symbol True : boolean;
 symbol False : boolean;
 
 symbol bool_ind :
-  tEv (ktPi (bool ⇀ DType) (λ Q,
-       Q True ↝
-       Q False ↝
-       ∀ bool (λ b, Q b))
-      );
+  tEv (`π Q,
+       Q True ⇒
+       Q False ⇒
+       (`∀ b : boolean, Q b));
 
 rule bool_ind _ $vT _   True  ↪ $vT
 with bool_ind _ _   $vF False ↪ $vF;
@@ -174,24 +193,21 @@ symbol is_True ≔
       true
       false;
 
-// symbol is_True b ≔
-//   eq bool b True;
-
 // Comparison
 
-symbol comp : Type;
-symbol comparison ≔ tEv comp;
+symbol Dcomparison : Type;
+symbol comparison ≔ tEv Dcomparison;
 
 symbol Eq : comparison;
 symbol Lt : comparison;
 symbol Gt : comparison;
 
 symbol comp_ind :
-  tEv (ktPi (comp ⇀ DType) (λ Q,
-       Q Eq ↝
-       Q Lt ↝
-       Q Gt ↝
-       ∀ comp (λ c, Q c)));
+  tEv (`π Q : comparison → Type,
+       Q Eq ⇒
+       Q Lt ⇒
+       Q Gt ⇒
+       (`∀ c : comparison, Q c));
 
 rule comp_ind _ $vE _   _   Eq  ↪ $vE
 with comp_ind _ _   $vL _   Lt  ↪ $vL
@@ -199,36 +215,36 @@ with comp_ind _ _   _   $vG Gt  ↪ $vG;
 
 // Naturals
 
-symbol nat : Type;
-symbol natural ≔ tEv nat;
+symbol Dnat : Type;
+symbol nat ≔ tEv Dnat;
 
-symbol O : natural;
-symbol S : natural → natural;
+symbol O : nat;
+symbol S : nat → nat;
 
 symbol nat_ind :
-  tEv (ktPi (nat ⇀ DType) (λ Q,
-       Q O ↝
-       (∀ nat (λ n, Q n ↝ Q (S n))) ↝
-       ∀ nat (λ n, Q n)));
+  tEv (`π Q : nat → Type,
+       Q O ⇒
+       (`∀ n : nat, Q n ⇒ Q (S n)) ⇒
+       (`∀ n : nat, Q n));
 
 rule nat_ind _  $vO _   O      ↪ $vO
 with nat_ind $Q $vO $vS (S $n) ↪ $vS $n (nat_ind $Q $vO $vS $n);
 
-// Integers
+// Positives
 
-symbol pos : Type;
-symbol positive ≔ tEv pos;
+symbol Dpositive : Type;
+symbol positive ≔ tEv Dpositive;
 
 symbol xI : positive → positive;
 symbol xO : positive → positive;
 symbol xH : positive;
 
 symbol pos_ind :
-  tEv (ktPi (pos ⇀ DType) (λ Q,
-       (∀ pos (λ p, Q p ↝ Q (xI p))) ↝
-       (∀ pos (λ p, Q p ↝ Q (xO p))) ↝
-       Q xH ↝
-       ∀ pos (λ p, Q p)));
+  tEv (`π Q : positive → Type,
+       (`∀ p : positive, Q p ⇒ Q (xI p)) ⇒
+       (`∀ p : positive, Q p ⇒ Q (xO p)) ⇒
+       Q xH ⇒
+       (`∀ p : positive, Q p));
 
 // symbol pos_ind :  Π (Q : positive → Type),
 //   (Π p, tEv (Q p) → tEv (Q (xI p))) →
@@ -241,43 +257,43 @@ with pos_ind $Q $vI $vO $vH (xI $p) ↪ $vI $p (pos_ind $Q $vI $vO $vH $p)
 with pos_ind $Q $vI $vO $vH (xO $p) ↪ $vO $p (pos_ind $Q $vI $vO $vH $p);
 
 symbol pos_succ ≔
-  pos_ind (λ _, pos)
+  pos_ind (λ _, Dpositive)
     (λ _ succ_p, xO succ_p)
     (λ p _, xI p)
     (xO xH);
 
 symbol pos_add_carry  ≔
-  pos_ind (λ _, pos ⇁ bool ⇁ pos)
-    (λ p ac_p y b, pos_ind (λ _, pos)
-       (λ q _, if pos b
+  pos_ind (λ _, Dpositive ⇒ Dboolean ⇒ Dpositive)
+    (λ p ac_p y b, pos_ind (λ _, Dpositive)
+       (λ q _, if Dpositive b
                (xI (ac_p q True))
                (xO (ac_p q True)))
-       (λ q _, if pos b
+       (λ q _, if Dpositive b
                (xO (ac_p q True))
                (xI (ac_p q False)))
-       (if pos b
+       (if Dpositive b
         (xI (pos_succ p))
         (xO (pos_succ p)))
        y)
-    (λ p ac_p y b, pos_ind (λ _, pos)
-       (λ q _, if pos b
+    (λ p ac_p y b, pos_ind (λ _, Dpositive)
+       (λ q _, if Dpositive b
                (xO (ac_p q True))
                (xI (ac_p q False)))
-       (λ q _, if pos b
+       (λ q _, if Dpositive b
                (xI (ac_p q False))
                (xO (ac_p q False)))
-       (if pos b
+       (if Dpositive b
         (xO (pos_succ p))
         (xI p))
        y)
-    (λ y b, pos_ind (λ _, pos)
-       (λ q _, if pos b
+    (λ y b, pos_ind (λ _, Dpositive)
+       (λ q _, if Dpositive b
                (xI (pos_succ q))
                (xO (pos_succ q)))
-       (λ q _, if pos b
+       (λ q _, if Dpositive b
                (xO (pos_succ q))
                (xI q))
-       (if pos b
+       (if Dpositive b
         (xI xH)
         (xO xH))
        y);
@@ -291,7 +307,7 @@ symbol pos_add x y ≔ pos_add_carry x y False;
 // assert ⊢ pos_add (xO (xI (xO (xI (xO (xI (xO (xI xH)))))))) (xO (xO (xI (xI (xO (xI (xI (xO xH)))))))) ≡ (xO (xI (xI (xO (xI (xO (xO (xO (xI xH)))))))));
 
 symbol pos_mul x y ≔
-  pos_ind (λ _, pos)
+  pos_ind (λ _, Dpositive)
      (λ _ mul_p_y, pos_add y (xO mul_p_y))
      (λ _ mul_p_y, xO mul_p_y)
      y
@@ -300,9 +316,8 @@ symbol pos_mul x y ≔
 // Check that 6 * 5 = 30
 // assert ⊢ pos_mul (xO (xI xH)) (xI (xO xH)) ≡ xO (xI (xI (xI xH)));
 
-
 symbol pos_pred_double ≔
-  pos_ind (λ _, pos)
+  pos_ind (λ _, Dpositive)
      (λ p _, xI (xO p))
      (λ _ pos_pred_double_p, xI pos_pred_double_p)
      xH;
@@ -311,45 +326,64 @@ symbol pos_pred_double ≔
 // assert ⊢ pos_pred_double (xO (xI xH)) ≡ xI (xI (xO xH));
 
 symbol pos_compare_acc ≔
-  pos_ind (λ _, comp ⇁ pos ⇁ comp)
-     (λ _ comp_p r, pos_ind (λ _, comp)
+  pos_ind (λ _, Dcomparison ⇒ Dpositive ⇒ Dcomparison)
+     (λ _ comp_p r, pos_ind (λ _, Dcomparison)
         (λ q _, comp_p r q)
         (λ q _, comp_p Gt q)
         Gt)
-     (λ _ comp_p r, pos_ind (λ _, comp)
+     (λ _ comp_p r, pos_ind (λ _, Dcomparison)
         (λ q _, comp_p Lt q)
         (λ q _, comp_p r q)
         Gt)
-     (λ r, pos_ind (λ _, comp)
+     (λ r, pos_ind (λ _, Dcomparison)
         (λ _ _, Lt)
         (λ _ _, Lt)
         r);
 
 symbol pos_compare x y ≔ pos_compare_acc x Eq y;
 
-symbol int : Type;
-symbol integer ≔ tEv int;
+// N
 
-symbol Z0 : integer;
-symbol Zpos : positive → integer;
-symbol Zneg : positive → integer;
+symbol DN : Type;
+symbol N ≔ tEv DN;
 
-symbol int_ind :
-  tEv (ktPi (int ⇀ DType) (λ Q,
-       Q Z0 ↝
-       (∀ pos (λ p, Q (Zpos p))) ↝
-       (∀ pos (λ p, Q (Zneg p))) ↝
-       ∀ int (λ z, Q z)));
+symbol N0 : N;
+symbol Npos : positive → N;
 
-rule int_ind _ $v0 _     _     Z0        ↪ $v0
-with int_ind _ _   $vpos _     (Zpos $x) ↪ $vpos $x
-with int_ind _ _   _     $vneg (Zneg $x) ↪ $vneg $x;
+symbol N_ind :
+  tEv (`π Q : N → Type,
+       Q N0 ⇒
+       (`∀ p : positive, Q (Npos p)) ⇒
+       (`∀ z : N, Q z));
+
+rule N_ind _ $v0 _     N0        ↪ $v0
+with N_ind _ _   $vpos (Npos $x) ↪ $vpos $x;
+
+// Integers
+
+symbol DZ : Type;
+symbol Z ≔ tEv DZ;
+
+symbol Z0 : Z;
+symbol Zpos : positive → Z;
+symbol Zneg : positive → Z;
+
+symbol Z_ind :
+  tEv (`π Q : Z → Type,
+       Q Z0 ⇒
+       (`∀ p : positive, Q (Zpos p)) ⇒
+       (`∀ p : positive, Q (Zneg p)) ⇒
+       (`∀ z : Z, Q z));
+
+rule Z_ind _ $v0 _     _     Z0        ↪ $v0
+with Z_ind _ _   $vpos _     (Zpos $x) ↪ $vpos $x
+with Z_ind _ _   _     $vneg (Zneg $x) ↪ $vneg $x;
 
 symbol zero ≔ Z0;
 symbol one ≔ Zpos xH;
 
 symbol double ≔
-  int_ind (λ _, int)
+  Z_ind (λ _, DZ)
     zero
     (λ p, Zpos (xO p))
     (λ p, Zneg (xO p));
@@ -358,7 +392,7 @@ symbol double ≔
 // assert ⊢ double (Zpos (xI (xI xH))) ≡ Zpos (xO (xI (xI xH)));
 
 symbol succ_double ≔
-  int_ind (λ _, int)
+  Z_ind (λ _, DZ)
     one
     (λ p, Zpos (xI p))
     (λ p, Zneg (pos_pred_double p));
@@ -368,7 +402,7 @@ symbol succ_double ≔
 // assert ⊢ succ_double (Zpos (xI (xO xH))) ≡ Zpos (xI (xI (xO xH)));
 
 symbol pred_double ≔
-  int_ind (λ _, int)
+  Z_ind (λ _, DZ)
     (Zneg xH)
     (λ p, Zpos (pos_pred_double p))
     (λ p, Zneg (xI p));
@@ -378,16 +412,16 @@ symbol pred_double ≔
 // assert ⊢ pred_double (Zpos (xI (xO xH))) ≡ Zpos (xI (xO (xO xH)));
 
 symbol pos_sub ≔
-  pos_ind (λ _, pos ⇁ int)
-     (λ p pos_sub_p, pos_ind (λ _, int)
+  pos_ind (λ _, Dpositive ⇒ DZ)
+     (λ p pos_sub_p, pos_ind (λ _, DZ)
         (λ q _, double (pos_sub_p q))
         (λ q _, succ_double (pos_sub_p q))
         (Zpos (xO p)))
-     (λ p pos_sub_p, pos_ind (λ _, int)
+     (λ p pos_sub_p, pos_ind (λ _, DZ)
         (λ q _, pred_double (pos_sub_p q))
         (λ q _, double (pos_sub_p q))
         (Zpos (pos_pred_double p)))
-     (pos_ind (λ _, int)
+     (pos_ind (λ _, DZ)
         (λ q _, Zneg (xO q))
         (λ q _, Zneg (pos_pred_double q))
         zero);
@@ -413,14 +447,14 @@ symbol pos_sub ≔
 
 
 symbol add x y ≔
-  int_ind (λ _, int)
+  Z_ind (λ _, DZ)
     y
-    (λ x', int_ind (λ _, int)
+    (λ x', Z_ind (λ _, DZ)
        x
        (λ y', Zpos (pos_add x' y'))
        (λ y', pos_sub x' y')
        y)
-    (λ x', int_ind (λ _, int)
+    (λ x', Z_ind (λ _, DZ)
        x
        (λ y', pos_sub y' x')
        (λ y', Zneg (pos_add x' y'))
@@ -428,7 +462,7 @@ symbol add x y ≔
     x;
 
 symbol opp ≔
-  int_ind (λ _, int)
+  Z_ind (λ _, DZ)
      zero
      (λ x, Zneg x)
      (λ x, Zpos x);
@@ -438,14 +472,14 @@ symbol succ x ≔ add x one;
 symbol sub x y ≔ add x (opp y);
 
 symbol mul x y ≔
-  int_ind (λ _, int)
+  Z_ind (λ _, DZ)
      zero
-     (λ x', int_ind (λ _, int)
+     (λ x', Z_ind (λ _, DZ)
         zero
         (λ y', Zpos (pos_mul x' y'))
         (λ y', Zneg (pos_mul x' y'))
         y)
-     (λ x', int_ind (λ _, int)
+     (λ x', Z_ind (λ _, DZ)
         zero
         (λ y', Zneg (pos_mul x' y'))
         (λ y', Zpos (pos_mul x' y'))
@@ -453,18 +487,18 @@ symbol mul x y ≔
      x;
 
 symbol compare x y ≔
-  int_ind (λ _, comp)
-     (int_ind (λ _, comp)
+  Z_ind (λ _, Dcomparison)
+     (Z_ind (λ _, Dcomparison)
          Eq
          (λ _, Lt)
          (λ _, Gt)
          y)
-     (λ x', int_ind (λ _, comp)
+     (λ x', Z_ind (λ _, Dcomparison)
         Gt
         (λ y', pos_compare x' y')
         (λ _, Gt)
         y)
-     (λ x', int_ind (λ _, comp)
+     (λ x', Z_ind (λ _, Dcomparison)
         Lt
         (λ _, Lt)
         (λ y', pos_compare y' x')
@@ -472,28 +506,28 @@ symbol compare x y ≔
      x;
 
 symbol leb x y ≔
-  comp_ind (λ _, bool)
+  comp_ind (λ _, Dboolean)
       True
       True
       False
       (compare x y);
 
 symbol ltb x y ≔
-  comp_ind (λ _, bool)
+  comp_ind (λ _, Dboolean)
       False
       True
       False
       (compare x y);
 
 symbol geb x y ≔
-  comp_ind (λ _, bool)
+  comp_ind (λ _, Dboolean)
       True
       False
       True
       (compare x y);
 
 symbol gtb x y ≔
-  comp_ind (λ _, bool)
+  comp_ind (λ _, Dboolean)
       False
       False
       True
@@ -518,19 +552,19 @@ symbol gt x y ≔ is_True (gtb x y);
 
 // Conversions
 
-// symbol add_assoc x y z : tEv (eq int (add x (add y z)) (add (add x y) z));
-// symbol add_comm x y : tEv (eq int (add x y) (add y x));
+// symbol add_assoc x y z : tEv (eq DZ (add x (add y z)) (add (add x y) z));
+// symbol add_comm x y : tEv (eq DZ (add x y) (add y x));
 
-// symbol add_opp a : tEv (eq int (add a (opp a)) 0);
+// symbol add_opp a : tEv (eq DZ (add a (opp a)) 0);
 
-symbol simpl_right x a : tEv (eq int (sub (add x a) a) x);
-symbol simpl_inv_right x a : tEv (eq int (add (sub x a) a) x);
+symbol simpl_right x a : tEv (eq DZ (sub (add x a) a) x);
+symbol simpl_inv_right x a : tEv (eq DZ (add (sub x a) a) x);
 
-symbol max : integer → integer → integer;
+symbol max : Z → Z → Z;
 symbol max_is_greater_1 : Π x y, tEv (le x (max x y));
 symbol max_is_greater_2 : Π x y, tEv (le y (max x y));
 
-symbol case u bound : tEv (le u bound) → tEv (eq int bound u ∨ lt u bound);
+symbol case u bound : tEv (le u bound) → tEv (eq DZ bound u ∨ lt u bound);
 
 symbol lt_le u z : tEv (lt u (succ z)) → tEv (le u z);
 
@@ -540,8 +574,8 @@ symbol le_compat_add x y a : tEv (le x y) → tEv (le (add x a) (add y a));
 
 symbol lt_compat_add x y a : tEv (lt x y) → tEv (lt (add x a) (add y a));
 
-symbol of_nat : natural → integer ≔
-  nat_ind (λ _, int)
+symbol of_nat : nat → Z ≔
+  nat_ind (λ _, DZ)
      Z0
      (λ _, succ);
 
@@ -549,28 +583,26 @@ symbol of_nat_0_le :
   Π n,
   tEv (le 0 (of_nat n));
 
-symbol to_nat : integer → natural;
+symbol to_nat : Z → nat;
 
 symbol of_nat_to_nat :
-  Π (z : integer),
+  Π (z : Z),
   tEv (le 0 z) →
-  tEv (eq int (of_nat (to_nat z)) z);
+  tEv (eq DZ (of_nat (to_nat z)) z);
 
 symbol to_nat_of_nat :
-  Π (n : natural),
-  tEv (eq nat n (to_nat (of_nat n)));
+  Π (n : nat),
+  tEv (eq Dnat n (to_nat (of_nat n)));
 
 // Prove strong induction
 
-
-
-symbol natlike_rec : Π (P : integer → Type), tEv (P 0) →
-                     (Π (z : integer), tEv (le 0 z) → tEv (P z) → tEv (P (succ z))) →
-                     Π (z : integer), tEv (le 0 z) → tEv (P z) ≔
+symbol natlike_rec : Π (P : Z → Type), tEv (P 0) →
+                     (Π (z : Z), tEv (le 0 z) → tEv (P z) → tEv (P (succ z))) →
+                     Π (z : Z), tEv (le 0 z) → tEv (P z) ≔
   begin
   assume P p0 prec z Hz;
   simplify;
-  have e : tEv (eq int (of_nat (to_nat z)) z);
+  have e : tEv (eq DZ (of_nat (to_nat z)) z);
   refine of_nat_to_nat z Hz;
   have H : tEv (P (of_nat (to_nat z))) ;
   refine nat_ind (λ n, P (of_nat n)) _ _ (to_nat z);
@@ -581,11 +613,10 @@ symbol natlike_rec : Π (P : integer → Type), tEv (P 0) →
   refine H;
   refine e P H;
 end;
-
-  // λ (P : integer → Type) (p0 : tEv (P 0))
-  //   (prec : (Π (z : integer), tEv (le 0 z) → tEv (P z) → tEv (P (succ z))))
-  //   (z : integer) (Hz : tEv (le 0 z)),
-  // let Q (n : natural) : Type ≔ P (of_nat n) in
+  // λ (P : Z → Type) (p0 : tEv (P 0))
+  //   (prec : (Π (z : Z), tEv (le 0 z) → tEv (P z) → tEv (P (succ z))))
+  //   (z : Z) (Hz : tEv (le 0 z)),
+  // let Q (n : nat) : Type ≔ P (of_nat n) in
   // let qrec n : tEv (Q n) → tEv (Q (S n)) ≔
   //   prec (of_nat n) (of_nat_0_le n) in
   // let q : Π n, tEv (Q n) ≔ nat_ind Q
@@ -608,7 +639,7 @@ begin
 
 // use natlike_rec on Q ≔ λz, ∀ u, u ≤ z → P u
   have q : Π z, tEv (le 0 z) → Π u, tEv (le u z) → tEv (P u);
-  refine natlike_rec (λ a, ∀ int (λ u, le u a ↝ P u)) _ _;
+  refine natlike_rec (λ a, `∀ u : Z, le u a ⇒ P u) _ _;
 // Base case
   refine p0;
 // Recursive case
@@ -653,13 +684,13 @@ symbol strong_ind : Π a P,
   refine simpl_inv_right v a P _;
   refine Hrec (sub v a) _;
   refine lt_le (sub v a) z _;
-  have eqsa : tEv (eq int (sub (add (succ z) a) a) (succ z));
+  have eqsa : tEv (eq DZ (sub (add (succ z) a) a) (succ z));
   refine simpl_right (succ z) a;
   refine eqsa (λ u, lt (sub v a) u) _;
   refine lt_compat_add v (add (succ z) a) (opp a) Hv;
 
   assume x;
-  have e : tEv (eq int (add (sub x a) a) x);
+  have e : tEv (eq DZ (add (sub x a) a) x);
   refine simpl_inv_right x a;
 
   refine e P _;
@@ -667,24 +698,25 @@ symbol strong_ind : Π a P,
 end;
 
 
+// ENCODING OF TASKS
 
-// Define sequents : the sequent <A, B ⊢ C, D> is represented by <A → B → ¬ C → ¬ D → false>.
 
 symbol empty : Type
 ≔  false;
 
 symbol hyp : Type → Type → Type
-≔  λ A s, A ↝ s;
+≔  λ A s, A ⇒ s;
 
 symbol goal : Type → Type → Type
-≔  λ A s, ¬ A ↝ s;
+≔  λ A s, ¬ A ⇒ s;
+
+// A task < t | x : t | H : A ⊢ G : B > is encoded by
+// < `π t : Type, ∀ x : t, hyp (tr A) (goal (tr A)) empty >
+// where < tr > is the function encoding terms
 
 
+// KERNEL CERTIFICATE RULES
 
-
-
-
-// Certificate lines
 
 symbol hole :
   tEv empty →
@@ -726,26 +758,26 @@ symbol split_goal : Π A B,
 ≔  λ A B nna nnb, nni (A ∧ B) (and_intro A B (nne A nna) (nne B nnb));
 
 symbol unfold_iff_hyp : Π A B,
-    tEv (hyp ((A ↝ B) ∧ (B ↝ A)) empty) →
+    tEv (hyp ((A ⇒ B) ∧ (B ⇒ A)) empty) →
     tEv (hyp (A ⇔ B) empty)
 ≔  λ A B s, s;
 
 symbol unfold_iff_goal : Π A B,
-    tEv (goal ((A ↝ B) ∧ (B ↝ A)) empty) →
+    tEv (goal ((A ⇒ B) ∧ (B ⇒ A)) empty) →
     tEv (goal (A ⇔ B) empty)
 ≔  λ A B s, s;
 
 symbol unfold_arr_hyp : Π A B,
     tEv (hyp (¬ A ∨ B) empty) →
-    tEv (hyp (A ↝ B) empty)
+    tEv (hyp (A ⇒ B) empty)
 ≔  λ A B s impab,
    s (em A (¬ A ∨ B) (λ a, or_intro_2 (¬ A) B (impab a))
      	      	     (λ na, or_intro_1 (¬ A) B na));
 
 symbol unfold_arr_goal : Π A B,
     tEv (goal (¬ A ∨ B) empty) →
-    tEv (goal (A ↝ B) empty)
-≔  λ A B s, nni (A ↝ B) (λ a,
+    tEv (goal (A ⇒ B) empty)
+≔  λ A B s, nni (A ⇒ B) (λ a,
       nne (¬ A ∨ B) s B (λ na, na a B)
                         (λ b, b));
 
@@ -825,32 +857,32 @@ symbol forget :
     tEv empty
 ≔  λ f, f;
 
-symbol intro_quant_hyp : Π (T : Type) (P : kEv (T ⇀ DType)),
-    (Π (y : tEv T), tEv (hyp (P y) empty)) →
-    tEv (hyp (∃ T P) empty)
+symbol intro_quant_hyp : Π {T} P,
+    (Π y, tEv (hyp (P y) empty)) →
+    tEv (hyp (`∃ x : tEv T, P x) empty)
 ≔  λ T P s ep, exists_elim T P false ep s;
 
-symbol intro_quant_goal : Π T P,
-    (Π (y : tEv T), tEv (goal (P y) empty)) →
-    tEv (goal (∀ T P) empty)
+symbol intro_quant_goal : Π {T} P,
+    (Π y, tEv (goal (P y) empty)) →
+    tEv (goal (`∀ x : tEv T, P x) empty)
 ≔  λ T P s nfp, nfp (λ t, nne (P t) (s t));
 
-symbol inst_quant_goal : Π T P t,
-    tEv (goal (∃ T P) (goal (P t) empty)) →
-    tEv (goal (∃ T P) empty)
+symbol inst_quant_goal : Π {T} P t,
+    tEv (goal (`∃ x : tEv T, P x) (goal (P t) empty)) →
+    tEv (goal (`∃ x : tEv T, P x) empty)
 ≔  λ T P t s nep, s nep (λ pt, nep (exists_intro T P t pt));
 
-symbol inst_quant_hyp : Π T P t,
-    tEv (hyp (∀ T (λ x, P x)) (hyp (P t) empty)) →
-    tEv (hyp (∀ T (λ x, P x)) empty)
+symbol inst_quant_hyp : Π {T} P t,
+    tEv (hyp (`∀ x, P x) (hyp (P t) empty)) →
+    tEv (hyp (`∀ x : tEv T, P x) empty)
 ≔  λ T P t s h, s h (h t);
 
-symbol rewrite_hyp : Π T a b P,
+symbol rewrite_hyp : Π {T} (a b : tEv T) P,
    tEv (hyp (eq T a b) (hyp (P b) empty)) →
    tEv (hyp (eq T a b) (hyp (P a) empty))
 ≔  λ T a b P s h i, s h (h P i);
 
-symbol rewrite_goal : Π T a b P,
+symbol rewrite_goal : Π {T} (a b : tEv T) P,
    tEv (hyp (eq T a b) (goal (P b) empty)) →
    tEv (hyp (eq T a b) (goal (P a) empty))
 ≔  λ T a b P s h i, s h (h (λ x, ¬ P x) i);
@@ -869,16 +901,10 @@ symbol iffeq : Π (A : Type) (B : Type),
 	   	   tEv (hyp (eq_fmla A B) empty) →
 		   tEv (hyp (A ⇔ B) empty)
 ≔  λ A B s eab, s (iff_eq A B eab);
-// symbol strong_ind : Π a P,
-//                     (Π x, tEv (le x a) → tEv (P x)) →
-//                     (Π x, tEv (lt a x) →
-//                           (Π v, tEv (lt v x) → tEv (P v)) →
-//                           tEv (P x)) →
-//                     Π x, tEv (P x)
 
 symbol strong_induction : Π a P,
    (Π x, tEv (hyp (le x a) (goal (P x) empty))) →
-   (Π x, tEv (hyp (lt a x) (hyp (∀ int (λ n, lt n x ↝ P n)) (goal (P x) empty)))) →
+   (Π x, tEv (hyp (lt a x) (hyp (`∀ n : Z, lt n x ⇒ P n) (goal (P x) empty)))) →
    Π x, tEv (goal (P x) empty)
 ≔ begin
   assume a P pbase prec x;
@@ -893,7 +919,11 @@ symbol strong_induction : Π a P,
   refine prec z Ha Hrec;
 end;
 
-// Compatibility with identifiers from Why3
+
+// COMPATIBILITY WITH IDENTIFIERS FROM Why3
+
+symbol int ≔ DZ;
+symbol bool ≔ Dboolean;
 
 // symbol True ≔ True;
 // symbol False ≔ False;
@@ -909,3 +939,6 @@ symbol infixsplseq ≔ le;
 symbol infixspls ≔ lt;
 symbol infixspgteq ≔ ge;
 symbol infixspgt ≔ gt;
+
+// Also targeted, but not from an ident : quantifications and arrows, true,
+// false, ∧, ∨, ¬, ⇔, opp, Z, boolean, DType, Type, int litterals
