@@ -353,6 +353,8 @@ and prapp fmt = function
       fprintf fmt "%a %a"
         prapp ct1
         prpv ct2
+  | CTint i when BigInt.sign i = -1 ->
+      fprintf fmt "- %s" BigInt.(to_string (abs i))
   | ct -> prpv fmt ct
 
 and prpv fmt = function
@@ -363,7 +365,8 @@ and prpv fmt = function
       | _ -> prid fmt id;
              List.iter (fprintf fmt " %a" prdty_paren) l
       end
-  | CTint i -> pp_print_string fmt (BigInt.to_string i)
+  | CTint i when BigInt.sign i <> -1 ->
+      pp_print_string fmt (BigInt.to_string i)
   | CTfalse -> fprintf fmt "false"
   | CTtrue -> fprintf fmt "true"
   | ct -> fprintf fmt "(%a)" pcte ct
