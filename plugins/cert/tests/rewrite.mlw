@@ -4,9 +4,9 @@ use int.Int
 
 constant x : int
 
-axiom x_zero : x = 0
+axiom x_zero : x = -1
 
-goal G1 : x + 1 = 1
+goal G1 : x + 1 = 0
 
 end
 
