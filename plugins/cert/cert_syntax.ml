@@ -353,7 +353,7 @@ and prapp fmt = function
       fprintf fmt "%a %a"
         prapp ct1
         prpv ct2
-  | CTint i when BigInt.sign i = -1 ->
+  | CTint i when BigInt.sign i < 0 ->
       fprintf fmt "- %s" BigInt.(to_string (abs i))
   | ct -> prpv fmt ct
 
@@ -365,30 +365,20 @@ and prpv fmt = function
       | _ -> prid fmt id;
              List.iter (fprintf fmt " %a" prdty_paren) l
       end
-  | CTint i when BigInt.sign i <> -1 ->
+  | CTint i when BigInt.sign i >= 0 ->
       pp_print_string fmt (BigInt.to_string i)
   | CTfalse -> fprintf fmt "false"
   | CTtrue -> fprintf fmt "true"
   | ct -> fprintf fmt "(%a)" pcte ct
 
-(* TODO : update this
-   We will denote a ctask <sigma; gamma_delta> by <Σ | Γ ⊢ Δ> where:
-   • <Σ> contains all the signature declarations <x : ty>
-     where <x> is mapped to <ty> in <sigma>
-   • <Γ> contains all the declarations <H : P>
-     where <H> is mapped to <(P, false)> in <gamma_delta>
-   • <Δ> contains all the declarations <H : P>
-     where <H> is mapped to <(P,  true)> in <gamma_delta>
-
-   We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ>
-*)
 type ('t, 'ty) ctask =
-  { get_ls : string -> lsymbol;
-    types_interp : Sid.t;
-    types : Sid.t;
-    sigma_interp : 'ty Mid.t;
-    sigma : 'ty Mid.t;
-    gamma_delta : ('t * bool) Mid.t
+  { get_ls : string -> lsymbol; (* remember interpreted symbols for efficiency*)
+    types_interp : Sid.t; (* interpreted types *)
+    types : Sid.t; (* types *)
+    sigma_interp : 'ty Mid.t; (* interpreted variables with their type *)
+    sigma : 'ty Mid.t; (* variables with their type *)
+    gamma_delta : ('t * bool) Mid.t (* names of premises with their formula and
+    their positivity (false means it's an hypothesis, true means it's a goal) *)
   }
 
 type kernel_ctask = (cterm, ctype) ctask
