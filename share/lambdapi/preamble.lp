@@ -47,22 +47,22 @@ unif_rule $a → $b ≡ tEv $c ↪ [ $a ≡ tEv $a'; $b ≡ tEv $b'; $c ≡ $a' 
 
 // Define our higher order logic
 
-symbol false ≔  `π C : Type, C;
+symbol false ≔ `π C : Type, C;
 
-symbol true ≔  false ⇒ false;
+symbol true ≔ false ⇒ false;
 
-symbol tt : tEv true ≔  λ x, x;
+symbol tt : tEv true ≔ λ x, x;
 
 symbol ¬ A ≔  A ⇒ false;
 notation ¬ prefix 20;
 
-symbol ∧ A B ≔  `π C, (A ⇒ B ⇒ C) ⇒ C;
+symbol ∧ A B ≔ `π C, (A ⇒ B ⇒ C) ⇒ C;
 notation ∧ infix right 18;
 
-symbol ∨ A B ≔  `π C, (A ⇒ C) ⇒ (B ⇒ C) ⇒ C;
+symbol ∨ A B ≔ `π C, (A ⇒ C) ⇒ (B ⇒ C) ⇒ C;
 notation ∨ infix right 16;
 
-symbol ∃ {T} P ≔  `π C, (`∀ (x : tEv T), P x ⇒ C) ⇒  C;
+symbol ∃ {T} P ≔ `π C, (`∀ (x : tEv T), P x ⇒ C) ⇒  C;
 notation ∃ quantifier;
 
 // Equality
@@ -161,20 +161,34 @@ symbol eq_trans : Π T (x y z : tEv T), tEv (eq T x y) →
 
 // Booleans
 
+// symbol Dboolean : Type;
+// symbol boolean ≔ tEv Dboolean;
+
+builtin "Prop" ≔ Type;
+builtin "P" ≔ tEv;
+
+inductive boolean : TYPE ≔
+| True : boolean
+| False : boolean;
+
 symbol Dboolean : Type;
-symbol boolean ≔ tEv Dboolean;
+rule tEv Dboolean ↪ boolean;
+unif_rule boolean ≡ tEv $t ↪ [ $t ≡ Dboolean ];
 
-symbol True : boolean;
-symbol False : boolean;
+// symbol True : boolean;
+// symbol False : boolean;
 
-symbol bool_ind :
-  tEv (`π Q,
-       Q True ⇒
-       Q False ⇒
-       (`∀ b : boolean, Q b));
+// symbol bool_ind :
+//   tEv (`π Q,
+//        Q True ⇒
+//        Q False ⇒
+//        (`∀ b : boolean, Q b)) ≔ ind_boolean;
 
-rule bool_ind _ $vT _   True  ↪ $vT
-with bool_ind _ _   $vF False ↪ $vF;
+// rule bool_ind _ $vT _   True  ↪ $vT
+// with bool_ind _ _   $vF False ↪ $vF;
+
+symbol if (a : Type) b t e ≔
+  ind_boolean (λ _, a) t e b;
 
 symbol bool_rect :
   Π (Q : boolean → Kind),
@@ -185,9 +199,6 @@ symbol bool_rect :
 rule bool_rect _ $vT _   True  ↪ $vT
 with bool_rect _ _   $vF False ↪ $vF;
 
-symbol if a b t e ≔
-  bool_ind (λ _, a) t e b;
-
 symbol is_True ≔
   bool_rect (λ _, DType)
       true
@@ -195,66 +206,86 @@ symbol is_True ≔
 
 // Comparison
 
-symbol Dcomparison : Type;
-symbol comparison ≔ tEv Dcomparison;
+inductive comparison : TYPE ≔
+| Eq : comparison
+| Lt : comparison
+| Gt : comparison;
 
-symbol Eq : comparison;
-symbol Lt : comparison;
-symbol Gt : comparison;
+symbol Dcomparison : Type;
+rule tEv Dcomparison ↪ comparison;
+unif_rule comparison ≡ tEv $t ↪ [ $t ≡ Dcomparison ];
+
+// symbol Dcomparison : Type;
+// symbol comparison ≔ tEv Dcomparison;
+
+// symbol Eq : comparison;
+// symbol Lt : comparison;
+// symbol Gt : comparison;
 
 symbol comp_ind :
   tEv (`π Q : comparison → Type,
        Q Eq ⇒
        Q Lt ⇒
        Q Gt ⇒
-       (`∀ c : comparison, Q c));
+       (`∀ c : comparison, Q c)) ≔ ind_comparison;
 
-rule comp_ind _ $vE _   _   Eq  ↪ $vE
-with comp_ind _ _   $vL _   Lt  ↪ $vL
-with comp_ind _ _   _   $vG Gt  ↪ $vG;
+// rule comp_ind _ $vE _   _   Eq  ↪ $vE
+// with comp_ind _ _   $vL _   Lt  ↪ $vL
+// with comp_ind _ _   _   $vG Gt  ↪ $vG;
 
 // Naturals
 
-symbol Dnat : Type;
-symbol nat ≔ tEv Dnat;
+inductive nat : TYPE ≔
+| O : nat
+| S : nat → nat;
 
-symbol O : nat;
-symbol S : nat → nat;
+symbol Dnat : Type;
+rule tEv Dnat ↪ nat;
+unif_rule nat ≡ tEv $t ↪ [ $t ≡ Dnat ];
+
+// symbol Dnat : Type;
+// symbol nat ≔ tEv Dnat;
+
+// symbol O : nat;
+// symbol S : nat → nat;
 
 symbol nat_ind :
   tEv (`π Q : nat → Type,
        Q O ⇒
        (`∀ n : nat, Q n ⇒ Q (S n)) ⇒
-       (`∀ n : nat, Q n));
+       (`∀ n : nat, Q n)) ≔ ind_nat;
 
-rule nat_ind _  $vO _   O      ↪ $vO
-with nat_ind $Q $vO $vS (S $n) ↪ $vS $n (nat_ind $Q $vO $vS $n);
+// rule nat_ind _  $vO _   O      ↪ $vO
+// with nat_ind $Q $vO $vS (S $n) ↪ $vS $n (nat_ind $Q $vO $vS $n);
 
 // Positives
 
-symbol Dpositive : Type;
-symbol positive ≔ tEv Dpositive;
+inductive positive : TYPE ≔
+| xI : positive → positive
+| xO : positive → positive
+| xH : positive;
 
-symbol xI : positive → positive;
-symbol xO : positive → positive;
-symbol xH : positive;
+symbol Dpositive : Type;
+rule tEv Dpositive ↪ positive;
+unif_rule positive ≡ tEv $t ↪ [ $t ≡ Dpositive ];
+
+// symbol Dpositive : Type;
+// symbol positive ≔ tEv Dpositive;
+
+// symbol xI : positive → positive;
+// symbol xO : positive → positive;
+// symbol xH : positive;
 
 symbol pos_ind :
   tEv (`π Q : positive → Type,
        (`∀ p : positive, Q p ⇒ Q (xI p)) ⇒
        (`∀ p : positive, Q p ⇒ Q (xO p)) ⇒
        Q xH ⇒
-       (`∀ p : positive, Q p));
+       (`∀ p : positive, Q p)) ≔ ind_positive;
 
-// symbol pos_ind :  Π (Q : positive → Type),
-//   (Π p, tEv (Q p) → tEv (Q (xI p))) →
-//   (Π p, tEv (Q p) → tEv (Q (xO p))) →
-//   tEv (Q xH) →
-//   Π p, tEv (Q p);
-
-rule pos_ind _  _   _   $vH xH      ↪ $vH
-with pos_ind $Q $vI $vO $vH (xI $p) ↪ $vI $p (pos_ind $Q $vI $vO $vH $p)
-with pos_ind $Q $vI $vO $vH (xO $p) ↪ $vO $p (pos_ind $Q $vI $vO $vH $p);
+// rule pos_ind _  _   _   $vH xH      ↪ $vH
+// with pos_ind $Q $vI $vO $vH (xI $p) ↪ $vI $p (pos_ind $Q $vI $vO $vH $p)
+// with pos_ind $Q $vI $vO $vH (xO $p) ↪ $vO $p (pos_ind $Q $vI $vO $vH $p);
 
 symbol pos_succ ≔
   pos_ind (λ _, Dpositive)
@@ -344,40 +375,57 @@ symbol pos_compare x y ≔ pos_compare_acc x Eq y;
 
 // N
 
+inductive N : TYPE ≔
+| N0 : N
+| Npos : positive → N;
+
 symbol DN : Type;
-symbol N ≔ tEv DN;
+rule tEv DN ↪ N;
+unif_rule N ≡ tEv $t ↪ [ $t ≡ DN ];
 
-symbol N0 : N;
-symbol Npos : positive → N;
+// symbol DN : Type;
+// symbol N ≔ tEv DN;
 
-symbol N_ind :
-  tEv (`π Q : N → Type,
-       Q N0 ⇒
-       (`∀ p : positive, Q (Npos p)) ⇒
-       (`∀ z : N, Q z));
+// symbol N0 : N;
+// symbol Npos : positive → N;
 
-rule N_ind _ $v0 _     N0        ↪ $v0
-with N_ind _ _   $vpos (Npos $x) ↪ $vpos $x;
+// symbol N_ind :
+//   tEv (`π Q : N → Type,
+//        Q N0 ⇒
+//        (`∀ p : positive, Q (Npos p)) ⇒
+//        (`∀ z : N, Q z));
+
+// rule N_ind _ $v0 _     N0        ↪ $v0
+// with N_ind _ _   $vpos (Npos $x) ↪ $vpos $x;
 
 // Integers
 
-symbol DZ : Type;
-symbol Z ≔ tEv DZ;
+inductive Z : TYPE ≔
+| Z0 : Z
+| Zpos : positive → Z
+| Zneg : positive → Z;
 
-symbol Z0 : Z;
-symbol Zpos : positive → Z;
-symbol Zneg : positive → Z;
+symbol DZ : Type;
+rule tEv DZ ↪ Z;
+unif_rule Z ≡ tEv $t ↪ [ $t ≡ DZ ];
+
+// symbol DZ : Type;
+// symbol Z ≔ tEv DZ;
+
+// symbol Z0 : Z;
+// symbol Zpos : positive → Z;
+// symbol Zneg : positive → Z;
 
 symbol Z_ind :
   tEv (`π Q : Z → Type,
        Q Z0 ⇒
        (`∀ p : positive, Q (Zpos p)) ⇒
        (`∀ p : positive, Q (Zneg p)) ⇒
-       (`∀ z : Z, Q z));
+       (`∀ z : Z, Q z)) ≔ ind_Z;
 
-rule Z_ind _ $v0 _     _     Z0        ↪ $v0
-with Z_ind _ _   $vpos _     (Zpos $x) ↪ $vpos $x
-with Z_ind _ _   _     $vneg (Zneg $x) ↪ $vneg $x;
+// rule Z_ind _ $v0 _     _     Z0        ↪ $v0
+// with Z_ind _ _   $vpos _     (Zpos $x) ↪ $vpos $x
+// with Z_ind _ _   _     $vneg (Zneg $x) ↪ $vneg $x;
 
 symbol zero ≔ Z0;
 symbol one ≔ Zpos xH;
