@@ -9,12 +9,12 @@
  <goal name="G1" proved="true">
  <transf name="rewrite_ccert" proved="true" arg1="x_zero">
   <goal name="G1.0" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="52"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="58"/></proof>
   </goal>
  </transf>
  <transf name="rewrite_lcert" proved="true" arg1="x_zero">
   <goal name="G1.0" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="52"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="58"/></proof>
   </goal>
  </transf>
  </goal>

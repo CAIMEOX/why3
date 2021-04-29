@@ -11,6 +11,9 @@ open Cert_abstract
 (** We equip each transformation application with a certificate indicating
     why the resulting list of tasks is implying the initial task *)
 
+(* We will denote a ctask <{sigma; gamma_delta}> by <Σ | Γ ⊢ Δ>
+   We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ> *)
+
 type ('v, 'h, 't) cert =
   (* 'v is used to designate variables, 'h is used to designate an hypothesis,
      't is used for terms *)
