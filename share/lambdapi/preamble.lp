@@ -45,6 +45,8 @@ unif_rule kEv $a ≡ kEv $b ↪ [ $a ≡ $b ];
 unif_rule $a → $b ≡ kEv $c ↪ [ $a ≡ tEv $a'; $b ≡ kEv $b'; $c ≡ $a' ↝ $b' ];
 unif_rule $a → $b ≡ tEv $c ↪ [ $a ≡ tEv $a'; $b ≡ tEv $b'; $c ≡ $a' ⇒ $b' ];
 
+// To use the inductive notation
+
 builtin "Prop" ≔ Type;
 builtin "P" ≔ tEv;
 
@@ -81,60 +83,60 @@ symbol em : tEv (`π A, A ∨ ¬ A);
 
 //  Reasoning about negation.
 
-symbol nni : Π A, tEv A → tEv (¬ ¬ A)
-≔  λ A a na, na a;
+symbol nni A : tEv A → tEv (¬ ¬ A)
+≔  λ a na, na a;
 
-symbol contra : Π A B, (tEv A → tEv B) → tEv (¬ B) → tEv (¬ A)
-≔  λ A B p nb a, nb (p a);
+symbol contra A B : (tEv A → tEv B) → tEv (¬ B) → tEv (¬ A)
+≔  λ p nb a, nb (p a);
 
-symbol nne : Π A, tEv (¬ ¬ A) → tEv A
-≔  λ A nna, em A A (λ a, a) (λ na, nna na A);
+symbol nne A : tEv (¬ ¬ A) → tEv A
+≔  λ nna, em A A (λ a, a) (λ na, nna na A);
 
 // Implication
 
-symbol imp_elim : Π A B, tEv (A ⇒ B) → tEv A → tEv B
-≔  λ A B p, p;
+symbol imp_elim A B : tEv (A ⇒ B) → tEv A → tEv B
+≔  λ p, p;
 
-symbol imp_intro : Π A B, (tEv A → tEv B) → tEv (A ⇒ B)
-≔  λ A B p, p;
+symbol imp_intro A B : (tEv A → tEv B) → tEv (A ⇒ B)
+≔  λ p, p;
 
 // Disjunction
 
-symbol or_intro_1 : Π A B, tEv A → tEv (A ∨ B)
-≔  λ A B (a : tEv A) C (ac: tEv A → tEv C) _, ac a;
+symbol or_intro_1 A B : tEv A → tEv (A ∨ B)
+≔  λ (a : tEv A) C (ac: tEv A → tEv C) _, ac a;
 
-symbol or_intro_2 : Π A B, tEv B → tEv (A ∨ B)
-≔  λ A B (b : tEv B) C _ (bc: tEv B → tEv C), bc b;
+symbol or_intro_2 A B : tEv B → tEv (A ∨ B)
+≔  λ (b : tEv B) C _ (bc: tEv B → tEv C), bc b;
 
-symbol or_elim : Π A B, tEv (A ∨ B) → Π C, tEv (A ⇒ C) → tEv (B ⇒ C) → tEv C
-≔  λ A B ab, ab;
+symbol or_elim A B : tEv (A ∨ B) → Π C, tEv (A ⇒ C) → tEv (B ⇒ C) → tEv C
+≔  λ ab, ab;
 
 // Conjunction
 
-symbol and_intro : Π A B, tEv A → tEv B → tEv (A ∧ B)
-≔  λ A B a b C (p : tEv A → tEv B → tEv C), p a b;
+symbol and_intro A B : tEv A → tEv B → tEv (A ∧ B)
+≔  λ a b C (p : tEv A → tEv B → tEv C), p a b;
 
-symbol and_elim_1 : Π A B, tEv (A ∧ B) → tEv A
-≔  λ A B (ab : tEv (A ∧ B)), ab A (λ a _, a);
+symbol and_elim_1 A B : tEv (A ∧ B) → tEv A
+≔  λ (ab : tEv (A ∧ B)), ab A (λ a _, a);
 
-symbol and_elim_2 : Π A B, tEv (A ∧ B) → tEv B
-≔  λ A B (ab : tEv (A ∧ B)), ab B (λ _ b, b);
+symbol and_elim_2 A B : tEv (A ∧ B) → tEv B
+≔  λ (ab : tEv (A ∧ B)), ab B (λ _ b, b);
 
 // Universal quantifier
 
-symbol forall_intro : Π (P : Type → Type), (Π t, tEv (P t)) → tEv (`π x, P x)
+symbol forall_intro T : Π P, (Π t : tEv T, tEv (P t)) → tEv (`∀ x, P x)
 ≔  λ P p, p;
 
-symbol forall_elim : Π (P : Type → Type) t, tEv (`π x, P x) → tEv (P t)
+symbol forall_elim T : Π P (t : tEv T), tEv (`∀ x, P x) → tEv (P t)
 ≔  λ P t p, p t;
 
 // Existential quantifier
 
-symbol exists_intro : Π T P (t : tEv T), tEv (P t) → tEv (`∃ x, P x)
-≔  λ T P t pt C q, q t pt;
+symbol exists_intro T : Π P (t : tEv T), tEv (P t) → tEv (`∃ x, P x)
+≔  λ P t pt C q, q t pt;
 
-symbol exists_elim : Π T P Q, tEv (`∃ x, P x) → (Π x, tEv (P x ⇒ Q)) → tEv Q
-≔  λ T (P : tEv T → Type) Q e pq, e Q pq;
+symbol exists_elim T : Π P Q, tEv (`∃ x, P x) → (Π x, tEv (P x ⇒ Q)) → tEv Q
+≔  λ (P : tEv T → Type) Q e pq, e Q pq;
 
 // Equality
 
@@ -147,16 +149,16 @@ symbol iff_eq : Π (A : Type) (B : Type),
        	        tEv (A ⇔ B) →
 		tEv (eq_fmla A B);
 
-symbol eq_refl : Π {T} (x : tEv T), tEv (eq T x x)
-≔  λ T x P px, px;
+symbol eq_refl {T} x : tEv (eq T x x)
+≔  λ P px, px;
 
-symbol eq_sym : Π {T} (x y : tEv T), tEv (eq T x y) → tEv (eq T y x)
-≔  λ T x y eqxy, eqxy (λ t, eq T t x) (eq_refl x);
+symbol eq_sym {T} x y : tEv (eq T x y) → tEv (eq T y x)
+≔  λ eqxy, eqxy (λ t, eq T t x) (eq_refl x);
 
-symbol eq_trans : Π T (x y z : tEv T), tEv (eq T x y) → tEv (eq T y z) → tEv (eq T x z)
-≔  λ T x y z eqxy eqyz, eqyz (λ t, eq T x t) eqxy;
+symbol eq_trans {T} x y z: tEv (eq T x y) → tEv (eq T y z) → tEv (eq T x z)
+≔  λ eqxy eqyz, eqyz (λ t, eq T x t) eqxy;
 
-symbol eq_ind T (x y : tEv T) : tEv (eq T x y) → Π P, tEv (P y) → tEv (P x)
+symbol eq_ind T x y : tEv (eq T x y) → Π P, tEv (P y) → tEv (P x)
 ≔ λ eq, eq_sym x y eq;
 
 // symbol exists (T : Kind) (P : kEv T → Type)  ≔
@@ -420,15 +422,16 @@ symbol pos_to_nat p ≔ pos_to_nat_acc p (S O);
 //   tEv (eq Dnat (pos_to_nat (pos_succ p)) (S (pos_to_nat p)));
 // ≔
 //   pos_ind (λ _, Type)
+
 // N
 
-inductive N : TYPE ≔
-| N0 : N
-| Npos : positive → N;
+// inductive N : TYPE ≔
+// | N0 : N
+// | Npos : positive → N;
 
-symbol DN : Type;
-rule tEv DN ↪ N;
-unif_rule N ≡ tEv $t ↪ [ $t ≡ DN ];
+// symbol DN : Type;
+// rule tEv DN ↪ N;
+// unif_rule N ≡ tEv $t ↪ [ $t ≡ DN ];
 
 // symbol DN : Type;
 // symbol N ≔ tEv DN;
@@ -444,10 +447,6 @@ unif_rule N ≡ tEv $t ↪ [ $t ≡ DN ];
 
 // rule N_ind _ $v0 _     N0        ↪ $v0
 // with N_ind _ _   $vpos (Npos $x) ↪ $vpos $x;
-
-
-
-
 
 // Integers
 
@@ -823,9 +822,9 @@ symbol hole :
   tEv empty
 ≔  λ f, f;
 
-symbol axiom : Π A,
+symbol axiom A :
   tEv (hyp A (goal A empty))
-≔  λ A a na, na a;
+≔  λ a na, na a;
 
 symbol trivial_hyp :
   tEv (hyp false empty)
@@ -835,147 +834,147 @@ symbol trivial_goal :
   tEv (goal true empty)
 ≔  λ ntt, ntt tt;
 
-symbol eqrefl : Π T t,
+symbol eqrefl T t :
   tEv (goal (t = t) empty)
-≔  λ T t neqtt, neqtt (=_refl T t);
+≔  λ neqtt, neqtt (=_refl T t);
 
-symbol cut : Π A,
+symbol cut A :
   tEv (goal A empty) →
   tEv (hyp A empty) →
   tEv empty
-≔  λ A nna na, nna na;
+≔  λ nna na, nna na;
 
-symbol split_hyp : Π A B,
+symbol split_hyp A B :
   tEv (hyp A empty) →
   tEv (hyp B empty) →
   tEv (hyp (A ∨ B) empty)
-≔  λ A B s1 s2 ab, or_elim A B ab false s1 s2;
+≔  λ s1 s2 ab, or_elim A B ab false s1 s2;
 
-symbol split_goal : Π A B,
+symbol split_goal A B :
     tEv (goal A empty) →
     tEv (goal B empty) →
     tEv (goal (A ∧ B) empty)
-≔  λ A B nna nnb, nni (A ∧ B) (and_intro A B (nne A nna) (nne B nnb));
+≔  λ nna nnb, nni (A ∧ B) (and_intro A B (nne A nna) (nne B nnb));
 
-symbol unfold_iff_hyp : Π A B,
+symbol unfold_iff_hyp A B :
     tEv (hyp ((A ⇒ B) ∧ (B ⇒ A)) empty) →
     tEv (hyp (A ⇔ B) empty)
-≔  λ A B s, s;
+≔  λ s, s;
 
-symbol unfold_iff_goal : Π A B,
+symbol unfold_iff_goal A B :
     tEv (goal ((A ⇒ B) ∧ (B ⇒ A)) empty) →
     tEv (goal (A ⇔ B) empty)
-≔  λ A B s, s;
+≔  λ s, s;
 
-symbol unfold_arr_hyp : Π A B,
+symbol unfold_arr_hyp A B :
     tEv (hyp (¬ A ∨ B) empty) →
     tEv (hyp (A ⇒ B) empty)
-≔  λ A B s impab,
+≔  λ s impab,
    s (em A (¬ A ∨ B) (λ a, or_intro_2 (¬ A) B (impab a))
      	      	     (λ na, or_intro_1 (¬ A) B na));
 
-symbol unfold_arr_goal : Π A B,
+symbol unfold_arr_goal A B :
     tEv (goal (¬ A ∨ B) empty) →
     tEv (goal (A ⇒ B) empty)
-≔  λ A B s, nni (A ⇒ B) (λ a,
+≔  λ s, nni (A ⇒ B) (λ a,
       nne (¬ A ∨ B) s B (λ na, na a B)
                         (λ b, b));
 
-symbol swap_neg_hyp : Π A,
+symbol swap_neg_hyp A :
     tEv (goal A empty) →
     tEv (hyp (¬ A) empty)
-≔  λ A s, s;
+≔  λ s, s;
 
-symbol swap_hyp : Π A,
+symbol swap_hyp A :
     tEv (goal (¬ A) empty) →
     tEv (hyp A empty)
-≔  λ A nnna, nne (¬ A) nnna;
+≔  λ nnna, nne (¬ A) nnna;
 
-symbol swap_goal : Π A,
+symbol swap_goal A :
     tEv (hyp (¬ A) empty) →
     tEv (goal A empty)
-≔  λ A s, s;
+≔  λ s, s;
 
-symbol swap_neg_goal : Π A,
+symbol swap_neg_goal A :
     tEv (hyp A empty) →
     tEv (goal (¬ A) empty)
-≔  λ A na, nni (¬ A) na;
+≔  λ na, nni (¬ A) na;
 
-symbol destruct_hyp : Π A B,
+symbol destruct_hyp A B :
     tEv (hyp A (hyp B empty)) →
     tEv (hyp (A ∧ B) empty)
-≔  λ A B s ab,
+≔  λ s ab,
    s (and_elim_1 A B ab) (and_elim_2 A B ab);
 
-symbol destruct_goal : Π A B,
+symbol destruct_goal A B :
     tEv (goal A (goal B empty)) →
     tEv (goal (A ∨ B) empty)
-≔  λ A B s nab, s (λ a, nab (or_intro_1 A B a))
-                  (λ b, nab (or_intro_2 A B b));
+≔  λ s nab, s (λ a, nab (or_intro_1 A B a))
+              (λ b, nab (or_intro_2 A B b));
 
-symbol construct_goal : Π A B,
+symbol construct_goal A B :
     tEv (goal (A ∨ B) empty) →
     tEv (goal A (goal B empty))
-≔  λ A B s na nb, or_elim A B (nne (A ∨ B) s) false na nb;
+≔  λ s na nb, or_elim A B (nne (A ∨ B) s) false na nb;
 
-symbol dir_left_hyp : Π A B,
+symbol dir_left_hyp A B :
     tEv (hyp A empty) →
     tEv (hyp (A ∧ B) empty)
-≔  λ A B na ab, na (and_elim_1 A B ab);
+≔  λ na ab, na (and_elim_1 A B ab);
 
-symbol dir_left_goal : Π A B,
+symbol dir_left_goal A B :
     tEv (goal A empty) →
     tEv (goal (A ∨ B) empty)
-≔  λ A B nna nab, nab (or_intro_1 A B (nne A nna));
+≔  λ nna nab, nab (or_intro_1 A B (nne A nna));
 
-symbol dir_right_hyp : Π A B,
+symbol dir_right_hyp A B :
     tEv (hyp B empty) →
     tEv (hyp (A ∧ B) empty)
-≔  λ A B nb ab, nb (and_elim_2 A B ab);
+≔  λ nb ab, nb (and_elim_2 A B ab);
 
-symbol dir_right_goal : Π A B,
+symbol dir_right_goal A B :
     tEv (goal B empty) →
     tEv (goal (A ∨ B) empty)
-≔  λ A B nnb nab, nab (or_intro_2 A B (nne B nnb));
+≔  λ nnb nab, nab (or_intro_2 A B (nne B nnb));
 
-symbol clearhyp : Π A,
+symbol clearhyp A :
     tEv empty →
     tEv (hyp A empty)
-≔  λ A f _, f;
+≔  λ f _, f;
 
-symbol clear_hyp A HA s ≔  clearhyp A s HA;
+symbol clear_hyp A HA s ≔ clearhyp A s HA;
 
-symbol cleargoal : Π A,
+symbol cleargoal A :
     tEv empty →
     tEv (goal A empty)
-≔  λ A f _, f;
+≔  λ f _, f;
 
-symbol clear_goal A HA s ≔  cleargoal A s HA;
+symbol clear_goal A HA s ≔ cleargoal A s HA;
 
 symbol forget :
     tEv empty →
     tEv empty
 ≔  λ f, f;
 
-symbol intro_quant_hyp : Π {T} P,
+symbol intro_quant_hyp {T} P :
     (Π y, tEv (hyp (P y) empty)) →
     tEv (hyp (`∃ x : tEv T, P x) empty)
-≔  λ T P s ep, exists_elim T P false ep s;
+≔  λ s ep, exists_elim T P false ep s;
 
-symbol intro_quant_goal : Π {T} P,
+symbol intro_quant_goal {T} P :
     (Π y, tEv (goal (P y) empty)) →
     tEv (goal (`∀ x : tEv T, P x) empty)
-≔  λ T P s nfp, nfp (λ t, nne (P t) (s t));
+≔  λ s nfp, nfp (λ t, nne (P t) (s t));
 
-symbol inst_quant_goal : Π {T} P t,
+symbol inst_quant_goal {T} P t :
     tEv (goal (`∃ x : tEv T, P x) (goal (P t) empty)) →
     tEv (goal (`∃ x : tEv T, P x) empty)
-≔  λ T P t s nep, s nep (λ pt, nep (exists_intro T P t pt));
+≔  λ s nep, s nep (λ pt, nep (exists_intro T P t pt));
 
-symbol inst_quant_hyp : Π {T} P t,
+symbol inst_quant_hyp {T} P t :
     tEv (hyp (`∀ x, P x) (hyp (P t) empty)) →
     tEv (hyp (`∀ x : tEv T, P x) empty)
-≔  λ T P t s h, s h (h t);
+≔  λ s h, s h (h t);
 
 symbol rewrite_hyp {T} (a b : tEv T) P :
    tEv (hyp (a = b) (hyp (P b) empty)) →
@@ -997,22 +996,22 @@ symbol rewrite_goal {T} (a b : tEv T) P :
   refine pa;
 end;
 
-symbol rewrite_fmla_hyp : Π A B P,
+symbol rewrite_fmla_hyp A B P :
    tEv (hyp (eq_fmla A B) (hyp (P B) empty)) →
    tEv (hyp (eq_fmla A B) (hyp (P A) empty))
-≔  λ A B P s h i, s h (h P i);
+≔  λ s h i, s h (h P i);
 
-symbol rewrite_fmla_goal : Π A B P,
+symbol rewrite_fmla_goal A B P :
    tEv (hyp (eq_fmla A B) (goal (P B) empty)) →
    tEv (hyp (eq_fmla A B) (goal (P A) empty))
-≔  λ A B P s h i, s h (h (λ x, ¬ P x) i);
+≔  λ s h i, s h (h (λ x, ¬ P x) i);
 
-symbol iffeq : Π (A : Type) (B : Type),
-	   	   tEv (hyp (eq_fmla A B) empty) →
-		   tEv (hyp (A ⇔ B) empty)
-≔  λ A B s eab, s (iff_eq A B eab);
+symbol iffeq A B :
+  tEv (hyp (eq_fmla A B) empty) →
+  tEv (hyp (A ⇔ B) empty)
+≔  λ s eab, s (iff_eq A B eab);
 
-symbol strong_induction : Π a P,
+symbol strong_induction a P :
    (Π x, tEv (hyp (le x a) (goal (P x) empty))) →
    (Π x, tEv (hyp (lt a x) (hyp (`∀ n : Z, lt n x ⇒ P n) (goal (P x) empty)))) →
    Π x, tEv (goal (P x) empty)
