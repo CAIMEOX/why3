@@ -354,7 +354,7 @@ and prapp fmt = function
         prapp ct1
         prpv ct2
   | CTint i when BigInt.sign i < 0 ->
-      fprintf fmt "- %s" BigInt.(to_string (abs i))
+      fprintf fmt "~ %s" BigInt.(to_string (abs i))
   | ct -> prpv fmt ct
 
 and prpv fmt = function
