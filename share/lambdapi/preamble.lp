@@ -293,7 +293,14 @@ symbol nat_add ≔
      (λ _ nat_add_n m, S (nat_add_n m));
 
 symbol nat_plus_one (n : nat) :
-  tEv (nat_add O n = n);
+  tEv (nat_add O n = n)
+≔ begin
+  induction;
+  reflexivity;
+
+  assume n Hrec;
+  reflexivity;
+end;
 
 // Positives
 
@@ -419,9 +426,10 @@ symbol pos_to_nat_acc ≔
 symbol pos_to_nat p ≔ pos_to_nat_acc p (S O);
 
 // symbol inj_succ (p : positive) :
-//   tEv (eq Dnat (pos_to_nat (pos_succ p)) (S (pos_to_nat p)));
-// ≔
-//   pos_ind (λ _, Type)
+//   tEv (pos_to_nat (pos_succ p) = S (pos_to_nat p))
+// ≔ begin
+//   induction;
+// end;
 
 // N
 
@@ -543,8 +551,7 @@ symbol pos_sub ≔
 // assert ⊢ pos_sub xH (xO xH) ≡ Zneg xH;
 // assert ⊢ pos_sub xH xH ≡ Z0;
 
-
-symbol add x y ≔
+symbol + x y ≔
   Z_ind (λ _, DZ)
     y
     (λ x', Z_ind (λ _, DZ)
@@ -558,18 +565,21 @@ symbol add x y ≔
        (λ y', Zneg (pos_add x' y'))
        y)
     x;
+notation + infix left 40;
 
-symbol opp ≔
+symbol ~ ≔
   Z_ind (λ _, DZ)
      zero
      (λ x, Zneg x)
      (λ x, Zpos x);
+notation ~ prefix 44;
 
-symbol succ x ≔ add x one;
+symbol succ x ≔ x + one;
 
-symbol sub x y ≔ add x (opp y);
+symbol - x y ≔ x + ~ y;
+notation - infix left 40;
 
-symbol mul x y ≔
+symbol * x y ≔
   Z_ind (λ _, DZ)
      zero
      (λ x', Z_ind (λ _, DZ)
@@ -583,6 +593,7 @@ symbol mul x y ≔
         (λ y', Zpos (pos_mul x' y'))
         y)
      x;
+notation * infix right 42;
 
 symbol compare x y ≔
   Z_ind (λ _, Dcomparison)
@@ -631,21 +642,26 @@ symbol gtb x y ≔
       True
       (compare x y);
 
+
 builtin "0"  ≔  zero;
 builtin "+1" ≔  succ;
 
-symbol le x y ≔ is_True (leb x y);
-symbol lt x y ≔ is_True (ltb x y);
-symbol ge x y ≔ is_True (geb x y);
-symbol gt x y ≔ is_True (gtb x y);
+symbol ≤ x y ≔ is_True (leb x y);
+notation ≤ infix 30;
+symbol < x y ≔ is_True (ltb x y);
+notation < infix 30;
+symbol ≥ x y ≔ is_True (geb x y);
+notation ≥ infix 30;
+symbol > x y ≔ is_True (gtb x y);
+notation > infix 30;
 
-// assert ⊢ lt 3 (opp 2) ≡ false;
-// assert ⊢ lt 3 3 ≡ false;
-// assert ⊢ lt 3 5 ≡ true;
+// assert ⊢ 3 < ~ 2 ≡ false;
+// assert ⊢ 3 < 3 ≡ false;
+// assert ⊢ 3 < 5 ≡ true;
 
-// assert ⊢ ge 4 (opp 3) ≡ true;
-// assert ⊢ ge 4 4 ≡ true;
-// assert ⊢ ge 4 7 ≡ false;
+// assert ⊢ 4 ≥ ~ 3 ≡ true;
+// assert ⊢ 4 ≥ 4 ≡ true;
+// assert ⊢ 4 ≥ 7 ≡ false;
 
 
 // Conversions
@@ -655,22 +671,22 @@ symbol gt x y ≔ is_True (gtb x y);
 
 // symbol add_opp a : tEv (eq DZ (add a (opp a)) 0);
 
-symbol simpl_right x a : tEv (sub (add x a) a = x);
-symbol simpl_inv_right x a : tEv (add (sub x a) a = x);
+symbol simpl_right x a : tEv (x + a - a = x);
+symbol simpl_inv_right x a : tEv (x - a + a = x);
 
 symbol max : Z → Z → Z;
-symbol max_is_greater_1 : Π x y, tEv (le x (max x y));
-symbol max_is_greater_2 : Π x y, tEv (le y (max x y));
+symbol max_is_greater_1 : Π x y, tEv (x ≤ max x y);
+symbol max_is_greater_2 : Π x y, tEv (y ≤ max x y);
 
-symbol case u bound : tEv (le u bound) → tEv (bound = u ∨ lt u bound);
+symbol case u bound : tEv (u ≤ bound) → tEv (bound = u ∨ u < bound);
 
-symbol lt_le u z : tEv (lt u (succ z)) → tEv (le u z);
+symbol lt_le u z : tEv (u < succ z) → tEv (u ≤ z);
 
-symbol le_lt u z : tEv (le u z) → tEv (lt u (succ z));
+symbol le_lt u z : tEv (u ≤ z) → tEv (u < succ z);
 
-symbol le_compat_add x y a : tEv (le x y) → tEv (le (add x a) (add y a));
+symbol le_compat_add x y a : tEv (x ≤ y) → tEv (x + a ≤ y + a);
 
-symbol lt_compat_add x y a : tEv (lt x y) → tEv (lt (add x a) (add y a));
+symbol lt_compat_add x y a : tEv (x < y) → tEv (x + a < y + a);
 
 symbol of_nat : nat → Z ≔
   nat_ind (λ _, DZ)
@@ -679,13 +695,13 @@ symbol of_nat : nat → Z ≔
 
 symbol of_nat_0_le :
   Π n,
-  tEv (le 0 (of_nat n));
+  tEv (0 ≤ of_nat n);
 
 symbol to_nat : Z → nat;
 
 symbol of_nat_to_nat :
   Π (z : Z),
-  tEv (le 0 z) →
+  tEv (0 ≤ z) →
   tEv (of_nat (to_nat z) = z);
 
 symbol to_nat_of_nat :
@@ -695,8 +711,8 @@ symbol to_nat_of_nat :
 // Prove strong induction
 
 symbol natlike_rec : Π (P : Z → Type), tEv (P 0) →
-                     (Π (z : Z), tEv (le 0 z) → tEv (P z) → tEv (P (succ z))) →
-                     Π (z : Z), tEv (le 0 z) → tEv (P z) ≔
+                     (Π (z : Z), tEv (0 ≤ z) → tEv (P z) → tEv (P (z + 1))) →
+                     Π (z : Z), tEv (0 ≤ z) → tEv (P z) ≔
   begin
   assume P p0 prec z Hz;
   simplify;
@@ -726,18 +742,18 @@ end;
 
 
 symbol strong_bound_0_alt_rec : Π P,
-                                (Π z, tEv (le z 0) → tEv (P z)) →
-                                (Π z, tEv (le 0 z) →
-                                      (Π v, tEv (le v z) → tEv (P v)) →
-                                      tEv (P (succ z))) →
+                                (Π z, tEv (z ≤ 0) → tEv (P z)) →
+                                (Π z, tEv (0 ≤ z) →
+                                      (Π v, tEv (v ≤ z) → tEv (P v)) →
+                                      tEv (P (z + 1))) →
                                 Π z, tEv (P z)
 ≔
 begin
   assume P p0 prec;
 
 // use natlike_rec on Q ≔ λz, ∀ u, u ≤ z → P u
-  have q : Π z, tEv (le 0 z) → Π u, tEv (le u z) → tEv (P u);
-  refine natlike_rec (λ a, `∀ u : Z, le u a ⇒ P u) _ _;
+  have q : Π z, tEv (0 ≤ z) → Π u, tEv (u ≤ z) → tEv (P u);
+  refine natlike_rec (λ a, `∀ u : Z, u ≤ a ⇒ P u) _ _;
 // Base case
   refine p0;
 // Recursive case
@@ -758,42 +774,42 @@ begin
 end;
 
 symbol strong_ind : Π a P,
-                    (Π x, tEv (le x a) → tEv (P x)) →
-                    (Π x, tEv (lt a x) →
-                          (Π v, tEv (lt v x) → tEv (P v)) →
+                    (Π x, tEv (x ≤ a) → tEv (P x)) →
+                    (Π x, tEv (a < x) →
+                          (Π v, tEv (v < x) → tEv (P v)) →
                           tEv (P x)) →
                     Π x, tEv (P x)
 ≔ begin
   assume a P p0 prec;
 
-  have q : Π z, tEv (P (add z a));
-  refine strong_bound_0_alt_rec (λ z, P (add z a)) _ _;
+  have q : Π z, tEv (P (z + a));
+  refine strong_bound_0_alt_rec (λ z, P (z + a)) _ _;
 // Base case
   assume z Hz;
-  refine p0 (add z a) _;
+  refine p0 (z + a) _;
   refine le_compat_add z 0 a Hz;
 // Recursive case
   assume z Hz Hrec;
-  refine prec (add (succ z) a) _ _;
-  refine lt_compat_add 0 (succ z) a _;
+  refine prec (z + 1 + a) _ _;
+  refine lt_compat_add 0 (z + 1) a _;
   refine le_lt 0 z Hz;
   assume v Hv;
-  have e : tEv (v = add (sub v a) a);
+  have e : tEv (v = v - a + a);
   symmetry;
   refine simpl_inv_right v a;
   rewrite e;
-  refine Hrec (sub v a) _;
-  refine lt_le (sub v a) z _;
-  have eqsa : tEv (sub (add (succ z) a) a = succ z);
+  refine Hrec (v - a) _;
+  refine lt_le (v - a) z _;
+  have eqsa : tEv (z + 1 + a - a = succ z);
   refine simpl_right (succ z) a;
   rewrite left eqsa;
-  refine lt_compat_add v (add (succ z) a) (opp a) Hv;
+  refine lt_compat_add v (z + 1 + a) (~ a) Hv;
 
   assume x;
-  have e : tEv (add (sub x a) a = x);
+  have e : tEv (x - a + a = x);
   refine simpl_inv_right x a;
   rewrite left e;
-  refine q (sub x a);
+  refine q (x - a);
 end;
 
 
@@ -1012,8 +1028,8 @@ symbol iffeq A B :
 ≔  λ s eab, s (iff_eq A B eab);
 
 symbol strong_induction a P :
-   (Π x, tEv (hyp (le x a) (goal (P x) empty))) →
-   (Π x, tEv (hyp (lt a x) (hyp (`∀ n : Z, lt n x ⇒ P n) (goal (P x) empty)))) →
+   (Π x, tEv (hyp (x ≤ a) (goal (P x) empty))) →
+   (Π x, tEv (hyp (a < x) (hyp (`∀ n : Z, n < x ⇒ P n) (goal (P x) empty)))) →
    Π x, tEv (goal (P x) empty)
 ≔ begin
   assume a P pbase prec x;
@@ -1039,18 +1055,15 @@ symbol bool ≔ Dboolean;
 
 symbol infixspeq T a b ≔ @= T a b;
 
-symbol infixsppl ≔ add;
-symbol infixspas ≔ mul;
-symbol infixspmn ≔ sub;
-symbol prefixspmn ≔ opp;
+symbol infixsppl ≔ @+;
+symbol infixspas ≔ @*;
+symbol infixspmn ≔ @-;
+symbol prefixspmn z ≔ ~ z;
 
-symbol infixsplseq ≔ le;
-symbol infixspls ≔ lt;
-symbol infixspgteq ≔ ge;
-symbol infixspgt ≔ gt;
-
-symbol - ≔ opp;
-notation - prefix 20;
+symbol infixsplseq ≔ @≤;
+symbol infixspls ≔ @<;
+symbol infixspgteq ≔ @≥;
+symbol infixspgt ≔ @>;
 
 // Also targeted, but not from an ident : quantifications and arrows, true,
 // false, ∧, ∨, ¬, ⇔, opp, Z, boolean, DType, Type, int litterals
