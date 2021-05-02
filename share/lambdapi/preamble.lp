@@ -292,13 +292,34 @@ symbol nat_add ≔
      (λ m, m)
      (λ _ nat_add_n m, S (nat_add_n m));
 
-symbol nat_plus_one (n : nat) :
-  tEv (nat_add O n = n)
+symbol nat_add_O n : tEv (nat_add O n = n)
+≔ begin reflexivity; end;
+
+symbol nat_add_S m n : tEv (nat_add (S m) n = S (nat_add m n))
+≔ begin reflexivity; end;
+
+symbol nat_plus_zero (n : nat) :
+  tEv (nat_add n O = n)
 ≔ begin
   induction;
   reflexivity;
 
   assume n Hrec;
+  rewrite left [x in _ = S x] Hrec;
+  reflexivity;
+end;
+
+symbol nat_add_assoc a b c:
+  tEv (nat_add a (nat_add b c) = nat_add (nat_add a b) c)
+≔ begin
+  refine nat_ind (λ a, `∀ b, `∀ c, nat_add a (nat_add b c) = nat_add (nat_add a b) c)
+         _ _;
+  reflexivity;
+  assume n Hrec b c;
+  rewrite nat_add_S;
+  rewrite nat_add_S;
+  rewrite nat_add_S;
+  rewrite Hrec;
   reflexivity;
 end;
 
@@ -336,6 +357,44 @@ symbol pos_succ ≔
     (λ _ succ_p, xO succ_p)
     (λ p _, xI p)
     (xO xH);
+
+opaque symbol pos_succ_xI p : tEv (pos_succ (xI p) = xO (pos_succ p))
+≔ begin reflexivity; end;
+
+opaque symbol pos_succ_xO p : tEv (pos_succ (xO p) = xI p)
+≔ begin reflexivity; end;
+
+opaque symbol pos_succ_xH : tEv (pos_succ xH = xO xH)
+≔ begin reflexivity; end;
+
+symbol pos_peano_ind :
+   tEv (`π Q : positive → Type,
+        Q xH ⇒ (`∀ p, Q p ⇒ Q (pos_succ p)) ⇒ (`∀ p, Q p))
+≔ begin
+  assume Q qH qS p;
+  refine pos_ind (λ p, `π P, P xH ⇒ (`∀ x, P x ⇒ P (pos_succ x)) ⇒ P p)
+                 _ _ _ p Q qH qS;
+  assume q rec_q P pH pS;
+  rewrite left (pos_succ_xO q);
+  refine pS (xO q) _;
+  refine rec_q (λ p, P (xO p)) (pS xH pH) _;
+  assume x p2x;
+  rewrite left (pos_succ_xI x);
+  refine pS (pos_succ (xO x)) _;
+  rewrite left (pos_succ_xO x);
+  refine pS (xO x) p2x;
+
+  assume q rec_q P pH pS;
+  refine rec_q (λ p, P (xO p)) (pS xH pH) _;
+  assume x p2x;
+  rewrite left (pos_succ_xI x);
+  refine pS (pos_succ (xO x)) _;
+  rewrite left (pos_succ_xO x);
+  refine pS (xO x) p2x;
+
+  assume P pH pS;
+  refine pH;
+end;
 
 symbol pos_add_carry  ≔
   pos_ind (λ _, Dpositive ⇒ Dboolean ⇒ Dpositive)
@@ -417,19 +476,45 @@ symbol pos_compare_acc ≔
 
 symbol pos_compare x y ≔ pos_compare_acc x Eq y;
 
-symbol pos_to_nat_acc ≔
-  pos_ind (λ _, Dnat ⇒ Dnat)
-     (λ p pos_to_nat_p acc, nat_add acc (pos_to_nat_p (nat_add acc acc)))
-     (λ p pos_to_nat_p acc, pos_to_nat_p (nat_add acc acc))
-     (λ acc, acc);
+// symbol pos_to_nat_acc ≔
+//   pos_ind (λ _, Dnat ⇒ Dnat)
+//      (λ p pos_to_nat_p acc, nat_add acc (pos_to_nat_p (nat_add acc acc)))
+//      (λ p pos_to_nat_p acc, pos_to_nat_p (nat_add acc acc))
+//      (λ acc, acc);
 
-symbol pos_to_nat p ≔ pos_to_nat_acc p (S O);
+// symbol pos_to_nat_xI p acc :
+//   tEv (pos_to_nat_acc (xI p) acc = nat_add acc (pos_to_nat_acc p (nat_add acc acc)))
+// ≔ begin reflexivity; end;
 
-// symbol inj_succ (p : positive) :
-//   tEv (pos_to_nat (pos_succ p) = S (pos_to_nat p))
+// symbol pos_to_nat_xO p acc :
+//   tEv (pos_to_nat_acc (xO p) acc = pos_to_nat_acc p (nat_add acc acc))
+// ≔ begin reflexivity; end;
+
+// symbol pos_to_nat_xH acc :
+//   tEv (pos_to_nat_acc xH acc = acc)
+// ≔ begin reflexivity; end;
+
+// symbol pos_to_nat p ≔ pos_to_nat_acc p (S O);
+
+// symbol inj_succ : Π p,
+//   tEv (`∀ acc, pos_to_nat_acc (pos_succ p) acc = nat_add acc (pos_to_nat_acc p acc))
 // ≔ begin
-//   induction;
+//   refine pos_ind
+//   (λ p, `∀ acc, pos_to_nat_acc (pos_succ p) acc = nat_add acc (pos_to_nat_acc p acc))
+//   _ _ _;
+// // Case xI
+//   assume p Hrec acc;
+//   rewrite pos_succ_xI;
+//   rewrite pos_to_nat_xO;
+//   rewrite pos_to_nat_xI;
+//   rewrite nat_add_assoc;
+//   refine Hrec (nat_add acc acc);
+// // Case xO
+//   reflexivity;
+// // Case xH
+//   reflexivity;
 // end;
+
 
 // N
 
@@ -678,68 +763,42 @@ symbol max : Z → Z → Z;
 symbol max_is_greater_1 : Π x y, tEv (x ≤ max x y);
 symbol max_is_greater_2 : Π x y, tEv (y ≤ max x y);
 
-symbol case u bound : tEv (u ≤ bound) → tEv (bound = u ∨ u < bound);
-
 symbol lt_le u z : tEv (u < succ z) → tEv (u ≤ z);
-
 symbol le_lt u z : tEv (u ≤ z) → tEv (u < succ z);
 
 symbol le_compat_add x y a : tEv (x ≤ y) → tEv (x + a ≤ y + a);
-
 symbol lt_compat_add x y a : tEv (x < y) → tEv (x + a < y + a);
 
-symbol of_nat : nat → Z ≔
-  nat_ind (λ _, DZ)
-     Z0
-     (λ _, succ);
+symbol case u bound : tEv (u ≤ bound) → tEv (bound = u ∨ u < bound);
 
-symbol of_nat_0_le :
-  Π n,
-  tEv (0 ≤ of_nat n);
-
-symbol to_nat : Z → nat;
-
-symbol of_nat_to_nat :
-  Π (z : Z),
-  tEv (0 ≤ z) →
-  tEv (of_nat (to_nat z) = z);
-
-symbol to_nat_of_nat :
-  Π (n : nat),
-  tEv (n = to_nat (of_nat n));
 
 // Prove strong induction
 
 symbol natlike_rec : Π (P : Z → Type), tEv (P 0) →
                      (Π (z : Z), tEv (0 ≤ z) → tEv (P z) → tEv (P (z + 1))) →
-                     Π (z : Z), tEv (0 ≤ z) → tEv (P z) ≔
-  begin
+                     Π (z : Z), tEv (0 ≤ z) → tEv (P z)
+≔ begin
   assume P p0 prec z Hz;
-  simplify;
-  have e : tEv (z = of_nat (to_nat z));
-  symmetry;
-  refine of_nat_to_nat z Hz;
-  rewrite e;
-  refine nat_ind (λ n, P (of_nat n)) _ _ (to_nat z);
-  apply p0;
-  assume n H;
-  refine prec (of_nat n) _ _;
-  refine of_nat_0_le n;
-  refine H;
-end;
-  // λ (P : Z → Type) (p0 : tEv (P 0))
-  //   (prec : (Π (z : Z), tEv (le 0 z) → tEv (P z) → tEv (P (succ z))))
-  //   (z : Z) (Hz : tEv (le 0 z)),
-  // let Q (n : nat) : Type ≔ P (of_nat n) in
-  // let qrec n : tEv (Q n) → tEv (Q (S n)) ≔
-  //   prec (of_nat n) (of_nat_0_le n) in
-  // let q : Π n, tEv (Q n) ≔ nat_ind Q
-  //                            p0
-  //                            qrec in
-  // let pconv : tEv (P (of_nat (to_nat z))) ≔
-  //   q (to_nat z) in
-  // of_nat_to_nat z Hz P pconv;
+  have posrec : Π p, tEv (P (Zpos p));
+  refine pos_peano_ind (λ p, P (Zpos p)) _ _;
+  refine prec 0 _ p0;
+  simplify; refine (λ t, t);
 
+  assume a ha;
+  have e : tEv (Zpos (pos_succ a) = Zpos a + 1);
+  refine pos_ind (λ a, Zpos (pos_succ a) = Zpos a + 1) _ _ _ a;
+  reflexivity; reflexivity; reflexivity;
+  rewrite e;
+  refine prec (Zpos a) _ ha;
+  simplify; refine (λ t, t);
+
+  refine Z_ind (λ z, 0 ≤ z ⇒ P z) _ _ _ z Hz;
+  assume _; refine p0;
+  assume p _; refine posrec p;
+
+  assume p Hp;
+  refine Hp (P (Zneg p));
+end;
 
 symbol strong_bound_0_alt_rec : Π P,
                                 (Π z, tEv (z ≤ 0) → tEv (P z)) →
