@@ -39,7 +39,7 @@ and print_s fmt {s; gd} =
   | [] -> print_gd fmt gd
   | (id, cty)::s ->
       let pred = is_predicate cty in
-      fprintf fmt "(%a %a : %a,@ %a)"
+      fprintf fmt "%a %a : %a,@ %a"
         prquant pred
         prid id
         prty cty

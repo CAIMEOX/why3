@@ -309,7 +309,7 @@ let rec pcte fmt = function
       let q_str = match q with CTforall -> "`∀"
                              | CTexists -> "`∃"
                              | CTlambda -> "λ" in
-      fprintf fmt "(%s %a : %a, %a)"
+      fprintf fmt "%s %a : %a, %a"
         q_str
         prid x
         prty cty
