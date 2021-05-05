@@ -554,6 +554,9 @@ symbol pos_compare_acc : positive → comparison → positive → comparison  �
         r);
 
 symbol pos_compare x y ≔ pos_compare_acc x Eq y;
+symbol pos_compare_def x y : tEv (pos_compare x y = pos_compare_acc x Eq y)
+≔ begin assume x y; reflexivity; end;
+
 
 symbol pos_compare' ≔
   pos_ind (λ _, Dpositive ⇒ Dcomparison)
@@ -578,7 +581,51 @@ symbol pos_compare' ≔
               (λ _ _, Lt)
               Eq);
 
-symbol pos_compare'_sym x y : tEv (pos_compare' y x = CompOpp (pos_compare' x y));
+symbol pos_comp'_opp x y :
+  tEv (pos_compare' y x = CompOpp (pos_compare' x y));
+
+// symbol pos_comp_opp x y r :
+//   tEv (pos_compare_acc x r y =
+//        CompOpp (pos_compare_acc y (CompOpp r) x))
+// ≔ begin
+//   refine pos_ind (λ x, `∀ y, `∀ r, pos_compare_acc x r y =
+//        CompOpp (pos_compare_acc y (CompOpp r) x))
+//                  _ _ _;
+
+//   assume p Hrec y r;
+
+//   refine pos_ind (λ y, pos_compare_acc (xI p) r y =
+//                  CompOpp (pos_compare_acc y (CompOpp r) (xI p)))
+//                  _ _ _ y;
+//   assume q _; refine Hrec q r;
+//   assume q _; refine Hrec q Gt;
+//   reflexivity;
+
+//   assume p Hrec y r;
+//   refine pos_ind (λ y, pos_compare_acc (xO p) r y =
+//                  CompOpp (pos_compare_acc y (CompOpp r) (xO p)))
+//                  _ _ _ y;
+//   assume q _; refine Hrec q Lt;
+//   assume q _; refine Hrec q r;
+//   reflexivity;
+
+//   assume y r;
+//   refine pos_ind (λ y, pos_compare_acc xH r y =
+//                   CompOpp (pos_compare_acc y (CompOpp r) xH))
+//                  _ _ _ y;
+//   assume p _; reflexivity;
+//   assume p _; reflexivity;
+//   rewrite left [in pos_compare_acc xH r xH] (compopp_idem r);
+//   reflexivity;
+// end;
+
+// symbol pos_compare_opp x y : tEv (pos_compare x y = CompOpp (pos_compare y x))
+// ≔ begin
+//   assume x y;
+//   rewrite pos_compare_def;
+//   rewrite pos_comp_opp;
+//   reflexivity;
+// end;
 
 
 
@@ -586,98 +633,86 @@ symbol pos_compare'_sym x y : tEv (pos_compare' y x = CompOpp (pos_compare' x y)
 // assert ⊢ pos_compare (xI xH) xH ≡ Gt;
 // assert ⊢ pos_compare (xI xH) (xO xH) ≡ Gt;
 
-// symbol left_acc ≔
-//   comp_ind (λ _, Dpositive ⇒ Dpositive)
-//       (λ p, p)
-//       xO
-//       xI;
+symbol eq_Eq ≔ comp_rect (λ _, DType) true false false;
 
-// symbol right_acc ≔
-//   comp_ind (λ _, Dpositive ⇒ Dpositive)
-//       (λ p, p)
-//       xI
-//       xO;
-
-// Eq = a
-
-// fun c ⇒ comp_ind (λ _, Dcomparison)
-// true
-// false
-// false
-// c
-
-// f Eq
-
-// rewrite H
-
-// f a A
-// A
-// symbol eq_Eq ≔ comp_rect (λ _, DType) true false false;
-
-// symbol discr_I_O x y A : tEv (pos_compare' (xI x) (xO y) = Eq ⇒ A)
-// ≔ begin
-//   assume x y A;
-//   have e : tEv (pos_compare' (xI x) (xO y) =
-//                            comp_ind (λ _, Dcomparison) Gt Lt Gt
-//                            (pos_compare' x y));
-//   reflexivity;
-//   refine comp_ind (λ p, pos_compare' x y = p ⇒ pos_compare' (xI x) (xO y) = Eq ⇒ A) _ _ _ (pos_compare' x y) _;
+symbol discr_I_O x y A : tEv (pos_compare' (xI x) (xO y) = Eq ⇒ A)
+≔ begin
+  assume x y A;
+  have e : tEv (pos_compare' (xI x) (xO y) =
+                           comp_ind (λ _, Dcomparison) Gt Lt Gt
+                           (pos_compare' x y));
+  reflexivity;
+  refine comp_ind (λ p, pos_compare' x y = p ⇒ pos_compare' (xI x) (xO y) = Eq ⇒ A) _ _ _ (pos_compare' x y) _;
 
 
-//   rewrite e;
-//   assume eq;
-//   refine =_ind Dcomparison (pos_compare' x y) Eq eq (λ u :comparison, (comp_ind (λ _, Dcomparison) Gt Lt Gt u = Eq) ⇒ A) _;
-//   assume H;
-//   have f : tEv (eq_Eq Gt);
-//   refine =_ind Dcomparison Gt Eq H (λ u, eq_Eq u) _;
-//   refine tt;
-//   refine f _;
+  rewrite e;
+  assume eq;
+  refine =_ind Dcomparison (pos_compare' x y) Eq eq (λ u :comparison, (comp_ind (λ _, Dcomparison) Gt Lt Gt u = Eq) ⇒ A) _;
+  assume H;
+  have f : tEv (eq_Eq Gt);
+  refine =_ind Dcomparison Gt Eq H (λ u, eq_Eq u) _;
+  refine tt;
+  refine f _;
 
-//   rewrite e;
-//   assume eq;
-//   refine =_ind Dcomparison (pos_compare' x y) Lt eq (λ u :comparison, (comp_ind (λ _, Dcomparison) Gt Lt Gt u = Eq) ⇒ A) _;
-//   assume H;
-//   have f : tEv (eq_Eq Lt);
-//   refine =_ind Dcomparison Lt Eq H (λ u, eq_Eq u) _;
-//   refine tt;
-//   refine f _;
+  rewrite e;
+  assume eq;
+  refine =_ind Dcomparison (pos_compare' x y) Lt eq (λ u :comparison, (comp_ind (λ _, Dcomparison) Gt Lt Gt u = Eq) ⇒ A) _;
+  assume H;
+  have f : tEv (eq_Eq Lt);
+  refine =_ind Dcomparison Lt Eq H (λ u, eq_Eq u) _;
+  refine tt;
+  refine f _;
 
-//   rewrite e;
-//   assume eq;
-//   refine =_ind Dcomparison (pos_compare' x y) Gt eq (λ u :comparison, (comp_ind (λ _, Dcomparison) Gt Lt Gt u = Eq) ⇒ A) _;
-//   assume H;
-//   have f : tEv (eq_Eq Gt);
-//   refine =_ind Dcomparison Gt Eq H (λ u, eq_Eq u) _;
-//   refine tt;
-//   refine f _;
+  rewrite e;
+  assume eq;
+  refine =_ind Dcomparison (pos_compare' x y) Gt eq (λ u :comparison, (comp_ind (λ _, Dcomparison) Gt Lt Gt u = Eq) ⇒ A) _;
+  assume H;
+  have f : tEv (eq_Eq Gt);
+  refine =_ind Dcomparison Gt Eq H (λ u, eq_Eq u) _;
+  refine tt;
+  refine f _;
 
-//   reflexivity;
-// end;
+  reflexivity;
+end;
 
-// symbol discr_acc x y acc : tEv (pos_compare' (left_acc acc (xI x))
-//                                            (right_acc acc (xO y)) =
-//                                 pos_compare' (xI x) (xO y))
-// ≔ begin
-//   assume x y;
-//   induction;
-//   reflexivity;
-//   refine comp_ind (λ c, pos_compare' (xI x) (xO y) = c ⇒ comp_ind (λ _, Dcomparison) Lt Lt Gt c = c) _ _ _
-//                   (pos_compare' (xI x) (xO y)) _;
-//   assume H; refine discr_I_O x y _ H;
-//   assume _; reflexivity;
-//   assume _; reflexivity;
-//   reflexivity;
+symbol discr_O_I x y A : tEv (pos_compare' (xO x) (xI y) = Eq ⇒ A);
 
-//   refine comp_ind (λ c, pos_compare' (xI x) (xO y) = c ⇒ comp_ind (λ _, Dcomparison) Gt Lt Gt c = c) _ _ _
-//                   (pos_compare' (xI x) (xO y)) _;
-//   assume H; refine discr_I_O x y _ H;
-//   assume _; reflexivity;
-//   assume _; reflexivity;
-//   reflexivity;
-// end;
+symbol left_acc ≔
+  comp_ind (λ _, Dpositive ⇒ Dpositive)
+      (λ p, p)
+      xO
+      xI;
 
-// symbol pos_compare_compare'_aux x y acc :
-//   tEv (pos_compare' (left_acc acc x) (right_acc acc y) = pos_compare_acc x acc y);
+symbol right_acc ≔
+  comp_ind (λ _, Dpositive ⇒ Dpositive)
+      (λ p, p)
+      xI
+      xO;
+
+symbol discr_acc x y acc : tEv (pos_compare' (left_acc acc (xI x))
+                                             (right_acc acc (xO y)) =
+                                pos_compare' (xI x) (xO y))
+≔ begin
+  assume x y;
+  induction;
+  reflexivity;
+  refine comp_ind (λ c, pos_compare' (xI x) (xO y) = c ⇒ comp_ind (λ _, Dcomparison) Lt Lt Gt c = c) _ _ _
+                  (pos_compare' (xI x) (xO y)) _;
+  assume H; refine discr_I_O x y _ H;
+  assume _; reflexivity;
+  assume _; reflexivity;
+  reflexivity;
+
+  refine comp_ind (λ c, pos_compare' (xI x) (xO y) = c ⇒ comp_ind (λ _, Dcomparison) Gt Lt Gt c = c) _ _ _
+                  (pos_compare' (xI x) (xO y)) _;
+  assume H; refine discr_I_O x y _ H;
+  assume _; reflexivity;
+  assume _; reflexivity;
+  reflexivity;
+end;
+
+symbol pos_compare_compare'_aux x y acc :
+  tEv (pos_compare' (left_acc acc x) (right_acc acc y) = pos_compare_acc x acc y);
 // ≔ begin
 //   refine pos_ind (λ x, `∀ y, `∀ acc, pos_compare' (left_acc acc x) (right_acc acc y) = pos_compare_acc x acc y) _ _ _;
 
@@ -698,110 +733,98 @@ symbol pos_compare'_sym x y : tEv (pos_compare' y x = CompOpp (pos_compare' x y)
 
 //   refine xrec q Gt;
 //   refine xrec q Gt;
-
-
 // end;
 
-// symbol pos_compare_compare' x y : tEv (pos_compare' x y = pos_compare x y)
-// ≔ begin
-//   assume x y;
-//   refine pos_compare_compare'_aux x y Eq;
-// end;
-
-// TODO (prove by saying that Eq does not propagate)
-symbol pos_comp_eq x y : tEv (pos_compare_acc x Eq y = Eq ⇒ x = y);
-// ≔ begin
-//   refine pos_ind (λ x, `∀ y, pos_compare_acc x Eq y = Eq ⇒ x = y) _ _ _;
-//   assume x Hrec;
-//   induction;
-//   assume y _ H; rewrite (Hrec y H); reflexivity;
-//   assume y _ H;
-// end;
-
-symbol pos_comp_opp x y r :
-  tEv (pos_compare_acc x r y =
-       CompOpp (pos_compare_acc y (CompOpp r) x))
-≔ begin
-  refine pos_ind (λ x, `∀ y, `∀ r, pos_compare_acc x r y =
-       CompOpp (pos_compare_acc y (CompOpp r) x))
-                 _ _ _;
-
-  assume p Hrec y r;
-
-  refine pos_ind (λ y, pos_compare_acc (xI p) r y =
-                 CompOpp (pos_compare_acc y (CompOpp r) (xI p)))
-                 _ _ _ y;
-  assume q _; refine Hrec q r;
-  assume q _; refine Hrec q Gt;
-  reflexivity;
-
-  assume p Hrec y r;
-  refine pos_ind (λ y, pos_compare_acc (xO p) r y =
-                 CompOpp (pos_compare_acc y (CompOpp r) (xO p)))
-                 _ _ _ y;
-  assume q _; refine Hrec q Lt;
-  assume q _; refine Hrec q r;
-  reflexivity;
-
-  assume y r;
-  refine pos_ind (λ y, pos_compare_acc xH r y =
-                  CompOpp (pos_compare_acc y (CompOpp r) xH))
-                 _ _ _ y;
-  assume p _; reflexivity;
-  assume p _; reflexivity;
-  rewrite left [in pos_compare_acc xH r xH] (compopp_idem r);
-  reflexivity;
-end;
-
-symbol pos_compare_def x y : tEv (pos_compare x y = pos_compare_acc x Eq y)
-≔ begin assume x y; reflexivity; end;
-
-symbol pos_compare_opp x y : tEv (pos_compare x y = CompOpp (pos_compare y x))
+symbol pos_compare_compare' x y : tEv (pos_compare x y = pos_compare' x y)
 ≔ begin
   assume x y;
-  rewrite pos_compare_def;
-  rewrite pos_comp_opp;
-  reflexivity;
+  symmetry;
+  refine pos_compare_compare'_aux x y Eq;
 end;
 
-// symbol pos_to_nat_acc ≔
-//   pos_ind (λ _, Dnat ⇒ Dnat)
-//      (λ p pos_to_nat_p acc, nat_add acc (pos_to_nat_p (nat_add acc acc)))
-//      (λ p pos_to_nat_p acc, pos_to_nat_p (nat_add acc acc))
-//      (λ acc, acc);
+symbol pos_comp_opp x y : tEv (pos_compare y x = CompOpp (pos_compare x y))
+≔ begin
+  assume x y;
+  rewrite pos_compare_compare';
+  rewrite pos_compare_compare';
+  refine pos_comp'_opp x y;
+end;
 
-// symbol pos_to_nat_xI p acc :
-//   tEv (pos_to_nat_acc (xI p) acc = nat_add acc (pos_to_nat_acc p (nat_add acc acc)))
-// ≔ begin reflexivity; end;
 
-// symbol pos_to_nat_xO p acc :
-//   tEv (pos_to_nat_acc (xO p) acc = pos_to_nat_acc p (nat_add acc acc))
-// ≔ begin reflexivity; end;
+symbol pos_comp_xI x y : tEv (pos_compare' (xI x) y = Eq ⇒ `∃ q, y = xI q)
+≔ begin
+  assume x y;
+  refine pos_ind (λ y, pos_compare' (xI x) y = Eq ⇒ `∃ q, y = xI q) _ _ _ y;
+  assume q _ _ a b; refine b q _; reflexivity;
+  assume q _ H;
+  refine discr_I_O x q (`∃ q0, xO q = xI q0) H;
+  assume H;
+  have f : tEv (eq_Eq Gt);
+  refine =_ind Dcomparison Gt Eq H (λ u, eq_Eq u) _;
+  refine tt;
+  refine f (`∃ q, xH = xI q);
+end;
 
-// symbol pos_to_nat_xH acc :
-//   tEv (pos_to_nat_acc xH acc = acc)
-// ≔ begin reflexivity; end;
+symbol pos_comp_xO x y : tEv (pos_compare' (xO x) y = Eq ⇒ `∃ q, y = xO q)
+≔ begin
+  assume x y;
+  refine pos_ind (λ y, pos_compare' (xO x) y = Eq ⇒ `∃ q, y = xO q) _ _ _ y;
+  assume q _ H;
+  refine discr_O_I x q (`∃ q0, xI q = xO q0) H;
+  assume q _ _ a b; refine b q _; reflexivity;
+  assume H;
+  have f : tEv (eq_Eq Gt);
+  refine =_ind Dcomparison Gt Eq H (λ u, eq_Eq u) _;
+  refine tt;
+  refine f (`∃ q, xH = xO q);
+end;
 
-// symbol pos_to_nat p ≔ pos_to_nat_acc p (S O);
+symbol pos_comp_xH y : tEv (pos_compare' xH y = Eq ⇒ xH = y)
+≔ begin
+  induction;
+  assume q _ H;
+  have e : tEv (eq_Eq Eq ⇒ xH = xI q);
+  rewrite left H; assume f;
+  refine f _; refine e tt;
 
-// symbol inj_succ : Π p,
-//   tEv (`∀ acc, pos_to_nat_acc (pos_succ p) acc = nat_add acc (pos_to_nat_acc p acc))
-// ≔ begin
-//   refine pos_ind
-//   (λ p, `∀ acc, pos_to_nat_acc (pos_succ p) acc = nat_add acc (pos_to_nat_acc p acc))
-//   _ _ _;
-// // Case xI
-//   assume p Hrec acc;
-//   rewrite pos_succ_xI;
-//   rewrite pos_to_nat_xO;
-//   rewrite pos_to_nat_xI;
-//   rewrite nat_add_assoc;
-//   refine Hrec (nat_add acc acc);
-// // Case xO
-//   reflexivity;
-// // Case xH
-//   reflexivity;
-// end;
+  assume q _ H;
+  have e : tEv (eq_Eq Eq ⇒ xH = xO q);
+  rewrite left H; assume f;
+  refine f _; refine e tt;
+
+  assume _; reflexivity;
+end;
+
+
+symbol pos_comp_eq x y : tEv (pos_compare x y = Eq ⇒ x = y)
+≔ begin
+  assume x y;
+  rewrite pos_compare_compare';
+  refine pos_ind (λ x, `∀ y, pos_compare' x y = Eq ⇒ x = y) _ _ _ x y;
+
+  assume p prec q H;
+  refine pos_comp_xI p q H _ (λ q', _);
+  assume Hq1;
+  rewrite Hq1;
+  have H1 : tEv (pos_compare' (xI p) q = Eq); refine H;
+  generalize H1;
+  refine =_ind Dpositive q (xI q') Hq1 (λ u, pos_compare' (xI p) u = Eq ⇒ xI p = xI q') _;
+  assume H1; rewrite prec q' H1;
+  reflexivity;
+
+  assume p prec q H;
+  refine pos_comp_xO p q H _ (λ q', _);
+  assume Hq1;
+  rewrite Hq1;
+  have H1 : tEv (pos_compare' (xO p) q = Eq); refine H;
+  generalize H1;
+  refine =_ind Dpositive q (xO q') Hq1 (λ u, pos_compare' (xO p) u = Eq ⇒ xO p = xO q') _;
+  assume H1; rewrite prec q' H1;
+  reflexivity;
+
+  refine pos_comp_xH;
+end;
+
 
 // Integers
 
@@ -975,14 +998,14 @@ symbol compare_opp x y : tEv (compare x y = CompOpp (compare y x))
   assume x0;
   induction;
   reflexivity;
-  assume x1; refine pos_compare_opp x0 x1;
+  assume x1; refine pos_comp_opp x1 x0;
   reflexivity;
 
   assume x0;
   induction;
   reflexivity;
   reflexivity;
-  assume x1; refine pos_compare_opp x1 x0;
+  assume x1; refine pos_comp_opp x0 x1;
 end;
 
 symbol leb x y ≔
