@@ -213,7 +213,7 @@ unif_rule boolean ≡ tEv $t ↪ [ $t ≡ Dboolean ];
 //   tEv (`π Q,
 //        Q True ⇒
 //        Q False ⇒
-//        (`∀ b : boolean, Q b)) ≔ ind_boolean;
+//        `∀ b : boolean, Q b) ≔ ind_boolean;
 
 // rule bool_ind _ $vT _   True  ↪ $vT
 // with bool_ind _ _   $vF False ↪ $vF;
@@ -282,7 +282,7 @@ symbol comp_ind :
        Q Eq ⇒
        Q Lt ⇒
        Q Gt ⇒
-       (`∀ c : comparison, Q c)) ≔ ind_comparison;
+       `∀ c : comparison, Q c) ≔ ind_comparison;
 
 // rule comp_ind _ $vE _   _   Eq  ↪ $vE
 // with comp_ind _ _   $vL _   Lt  ↪ $vL
@@ -315,64 +315,64 @@ end;
 
 // Naturals
 
-inductive nat : TYPE ≔
-| O : nat
-| S : nat → nat;
-
-symbol Dnat : Type;
-rule tEv Dnat ↪ nat;
-unif_rule nat ≡ tEv $t ↪ [ $t ≡ Dnat ];
+// inductive nat : TYPE ≔
+// | O : nat
+// | S : nat → nat;
 
 // symbol Dnat : Type;
-// symbol nat ≔ tEv Dnat;
+// rule tEv Dnat ↪ nat;
+// unif_rule nat ≡ tEv $t ↪ [ $t ≡ Dnat ];
 
-// symbol O : nat;
-// symbol S : nat → nat;
+// // symbol Dnat : Type;
+// // symbol nat ≔ tEv Dnat;
 
-symbol nat_ind :
-  tEv (`π Q : nat → Type,
-       Q O ⇒
-       (`∀ n : nat, Q n ⇒ Q (S n)) ⇒
-       (`∀ n : nat, Q n)) ≔ ind_nat;
+// // symbol O : nat;
+// // symbol S : nat → nat;
 
-// rule nat_ind _  $vO _   O      ↪ $vO
-// with nat_ind $Q $vO $vS (S $n) ↪ $vS $n (nat_ind $Q $vO $vS $n);
+// symbol nat_ind :
+//   tEv (`π Q : nat → Type,
+//        Q O ⇒
+//        `∀ n : nat, Q n ⇒ Q (S n) ⇒
+//        `∀ n : nat, Q n) ≔ ind_nat;
 
-symbol nat_add ≔
-  ind_nat (λ _, Dnat ⇒ Dnat)
-     (λ m, m)
-     (λ _ nat_add_n m, S (nat_add_n m));
+// // rule nat_ind _  $vO _   O      ↪ $vO
+// // with nat_ind $Q $vO $vS (S $n) ↪ $vS $n (nat_ind $Q $vO $vS $n);
 
-symbol nat_add_O n : tEv (nat_add O n = n)
-≔ begin assume n; reflexivity; end;
+// symbol nat_add ≔
+//   ind_nat (λ _, Dnat ⇒ Dnat)
+//      (λ m, m)
+//      (λ _ nat_add_n m, S (nat_add_n m));
 
-symbol nat_add_S m n : tEv (nat_add (S m) n = S (nat_add m n))
-≔ begin assume m n; reflexivity; end;
+// symbol nat_add_O n : tEv (nat_add O n = n)
+// ≔ begin assume n; reflexivity; end;
 
-symbol nat_plus_zero (n : nat) :
-  tEv (nat_add n O = n)
-≔ begin
-  induction;
-  reflexivity;
+// symbol nat_add_S m n : tEv (nat_add (S m) n = S (nat_add m n))
+// ≔ begin assume m n; reflexivity; end;
 
-  assume n Hrec;
-  rewrite left [x in _ = S x] Hrec;
-  reflexivity;
-end;
+// symbol nat_plus_zero (n : nat) :
+//   tEv (nat_add n O = n)
+// ≔ begin
+//   induction;
+//   reflexivity;
 
-symbol nat_add_assoc a :
-  tEv (`∀ b, `∀ c, nat_add a (nat_add b c) = nat_add (nat_add a b) c)
-≔ begin
-  refine nat_ind (λ a, `∀ b, `∀ c, nat_add a (nat_add b c) = nat_add (nat_add a b) c)
-         _ _;
-  assume b c; reflexivity;
-  assume n Hrec b c;
-  rewrite nat_add_S;
-  rewrite nat_add_S;
-  rewrite nat_add_S;
-  rewrite Hrec;
-  reflexivity;
-end;
+//   assume n Hrec;
+//   rewrite left [x in _ = S x] Hrec;
+//   reflexivity;
+// end;
+
+// symbol nat_add_assoc a :
+//   tEv (`∀ b, `∀ c, nat_add a (nat_add b c) = nat_add (nat_add a b) c)
+// ≔ begin
+//   refine nat_ind (λ a, `∀ b, `∀ c, nat_add a (nat_add b c) = nat_add (nat_add a b) c)
+//          _ _;
+//   assume b c; reflexivity;
+//   assume n Hrec b c;
+//   rewrite nat_add_S;
+//   rewrite nat_add_S;
+//   rewrite nat_add_S;
+//   rewrite Hrec;
+//   reflexivity;
+// end;
 
 // Positives
 
@@ -397,7 +397,7 @@ symbol pos_ind :
        (`∀ p : positive, Q p ⇒ Q (xI p)) ⇒
        (`∀ p : positive, Q p ⇒ Q (xO p)) ⇒
        Q xH ⇒
-       (`∀ p : positive, Q p)) ≔ ind_positive;
+       `∀ p : positive, Q p) ≔ ind_positive;
 
 // rule pos_ind _  _   _   $vH xH      ↪ $vH
 // with pos_ind $Q $vI $vO $vH (xI $p) ↪ $vI $p (pos_ind $Q $vI $vO $vH $p)
@@ -420,7 +420,9 @@ opaque symbol pos_succ_xH : tEv (pos_succ xH = xO xH)
 
 symbol pos_peano_ind :
    tEv (`π Q : positive → Type,
-        Q xH ⇒ (`∀ p, Q p ⇒ Q (pos_succ p)) ⇒ (`∀ p, Q p))
+        Q xH ⇒
+        (`∀ p, Q p ⇒ Q (pos_succ p)) ⇒
+        `∀ p, Q p)
 ≔ begin
   assume Q qH qS p;
 
@@ -576,21 +578,25 @@ symbol pos_compare' ≔
               (λ _ _, Lt)
               Eq);
 
+symbol pos_compare'_sym x y : tEv (pos_compare' y x = CompOpp (pos_compare' x y));
+
+
+
 // assert ⊢ pos_compare xH xH ≡ Eq;
 // assert ⊢ pos_compare (xI xH) xH ≡ Gt;
 // assert ⊢ pos_compare (xI xH) (xO xH) ≡ Gt;
 
-symbol left_acc ≔
-  comp_ind (λ _, Dpositive ⇒ Dpositive)
-      (λ p, p)
-      xO
-      xI;
+// symbol left_acc ≔
+//   comp_ind (λ _, Dpositive ⇒ Dpositive)
+//       (λ p, p)
+//       xO
+//       xI;
 
-symbol right_acc ≔
-  comp_ind (λ _, Dpositive ⇒ Dpositive)
-      (λ p, p)
-      xI
-      xO;
+// symbol right_acc ≔
+//   comp_ind (λ _, Dpositive ⇒ Dpositive)
+//       (λ p, p)
+//       xI
+//       xO;
 
 // Eq = a
 
@@ -606,72 +612,72 @@ symbol right_acc ≔
 
 // f a A
 // A
-symbol eq_Eq ≔ comp_rect (λ _, DType) true false false;
+// symbol eq_Eq ≔ comp_rect (λ _, DType) true false false;
 
-symbol discr_I_O x y A : tEv (pos_compare' (xI x) (xO y) = Eq ⇒ A)
-≔ begin
-  assume x y A;
-  have e : tEv (pos_compare' (xI x) (xO y) =
-                           comp_ind (λ _, Dcomparison) Gt Lt Gt
-                           (pos_compare' x y));
-  reflexivity;
-  refine comp_ind (λ p, pos_compare' x y = p ⇒ pos_compare' (xI x) (xO y) = Eq ⇒ A) _ _ _ (pos_compare' x y) _;
+// symbol discr_I_O x y A : tEv (pos_compare' (xI x) (xO y) = Eq ⇒ A)
+// ≔ begin
+//   assume x y A;
+//   have e : tEv (pos_compare' (xI x) (xO y) =
+//                            comp_ind (λ _, Dcomparison) Gt Lt Gt
+//                            (pos_compare' x y));
+//   reflexivity;
+//   refine comp_ind (λ p, pos_compare' x y = p ⇒ pos_compare' (xI x) (xO y) = Eq ⇒ A) _ _ _ (pos_compare' x y) _;
 
 
-  rewrite e;
-  assume eq;
-  refine =_ind Dcomparison (pos_compare' x y) Eq eq (λ u :comparison, (comp_ind (λ _, Dcomparison) Gt Lt Gt u = Eq) ⇒ A) _;
-  assume H;
-  have f : tEv (eq_Eq Gt);
-  refine =_ind Dcomparison Gt Eq H (λ u, eq_Eq u) _;
-  refine tt;
-  refine f _;
+//   rewrite e;
+//   assume eq;
+//   refine =_ind Dcomparison (pos_compare' x y) Eq eq (λ u :comparison, (comp_ind (λ _, Dcomparison) Gt Lt Gt u = Eq) ⇒ A) _;
+//   assume H;
+//   have f : tEv (eq_Eq Gt);
+//   refine =_ind Dcomparison Gt Eq H (λ u, eq_Eq u) _;
+//   refine tt;
+//   refine f _;
 
-  rewrite e;
-  assume eq;
-  refine =_ind Dcomparison (pos_compare' x y) Lt eq (λ u :comparison, (comp_ind (λ _, Dcomparison) Gt Lt Gt u = Eq) ⇒ A) _;
-  assume H;
-  have f : tEv (eq_Eq Lt);
-  refine =_ind Dcomparison Lt Eq H (λ u, eq_Eq u) _;
-  refine tt;
-  refine f _;
+//   rewrite e;
+//   assume eq;
+//   refine =_ind Dcomparison (pos_compare' x y) Lt eq (λ u :comparison, (comp_ind (λ _, Dcomparison) Gt Lt Gt u = Eq) ⇒ A) _;
+//   assume H;
+//   have f : tEv (eq_Eq Lt);
+//   refine =_ind Dcomparison Lt Eq H (λ u, eq_Eq u) _;
+//   refine tt;
+//   refine f _;
 
-  rewrite e;
-  assume eq;
-  refine =_ind Dcomparison (pos_compare' x y) Gt eq (λ u :comparison, (comp_ind (λ _, Dcomparison) Gt Lt Gt u = Eq) ⇒ A) _;
-  assume H;
-  have f : tEv (eq_Eq Gt);
-  refine =_ind Dcomparison Gt Eq H (λ u, eq_Eq u) _;
-  refine tt;
-  refine f _;
+//   rewrite e;
+//   assume eq;
+//   refine =_ind Dcomparison (pos_compare' x y) Gt eq (λ u :comparison, (comp_ind (λ _, Dcomparison) Gt Lt Gt u = Eq) ⇒ A) _;
+//   assume H;
+//   have f : tEv (eq_Eq Gt);
+//   refine =_ind Dcomparison Gt Eq H (λ u, eq_Eq u) _;
+//   refine tt;
+//   refine f _;
 
-  reflexivity;
-end;
+//   reflexivity;
+// end;
 
-symbol discr_acc x y acc : tEv (pos_compare' (left_acc acc (xI x))
-                                           (right_acc acc (xO y)) =
-                                pos_compare' (xI x) (xO y))
-≔ begin
-  assume x y;
-  induction;
-  reflexivity;
-  refine comp_ind (λ c, pos_compare' (xI x) (xO y) = c ⇒ comp_ind (λ _, Dcomparison) Lt Lt Gt c = c) _ _ _
-                  (pos_compare' (xI x) (xO y)) _;
-  assume H; refine discr_I_O x y _ H;
-  assume _; reflexivity;
-  assume _; reflexivity;
-  reflexivity;
+// symbol discr_acc x y acc : tEv (pos_compare' (left_acc acc (xI x))
+//                                            (right_acc acc (xO y)) =
+//                                 pos_compare' (xI x) (xO y))
+// ≔ begin
+//   assume x y;
+//   induction;
+//   reflexivity;
+//   refine comp_ind (λ c, pos_compare' (xI x) (xO y) = c ⇒ comp_ind (λ _, Dcomparison) Lt Lt Gt c = c) _ _ _
+//                   (pos_compare' (xI x) (xO y)) _;
+//   assume H; refine discr_I_O x y _ H;
+//   assume _; reflexivity;
+//   assume _; reflexivity;
+//   reflexivity;
 
-  refine comp_ind (λ c, pos_compare' (xI x) (xO y) = c ⇒ comp_ind (λ _, Dcomparison) Gt Lt Gt c = c) _ _ _
-                  (pos_compare' (xI x) (xO y)) _;
-  assume H; refine discr_I_O x y _ H;
-  assume _; reflexivity;
-  assume _; reflexivity;
-  reflexivity;
-end;
+//   refine comp_ind (λ c, pos_compare' (xI x) (xO y) = c ⇒ comp_ind (λ _, Dcomparison) Gt Lt Gt c = c) _ _ _
+//                   (pos_compare' (xI x) (xO y)) _;
+//   assume H; refine discr_I_O x y _ H;
+//   assume _; reflexivity;
+//   assume _; reflexivity;
+//   reflexivity;
+// end;
 
-symbol pos_compare_compare'_aux x y acc :
-  tEv (pos_compare' (left_acc acc x) (right_acc acc y) = pos_compare_acc x acc y);
+// symbol pos_compare_compare'_aux x y acc :
+//   tEv (pos_compare' (left_acc acc x) (right_acc acc y) = pos_compare_acc x acc y);
 // ≔ begin
 //   refine pos_ind (λ x, `∀ y, `∀ acc, pos_compare' (left_acc acc x) (right_acc acc y) = pos_compare_acc x acc y) _ _ _;
 
@@ -696,11 +702,11 @@ symbol pos_compare_compare'_aux x y acc :
 
 // end;
 
-symbol pos_compare_compare' x y : tEv (pos_compare' x y = pos_compare x y)
-≔ begin
-  assume x y;
-  refine pos_compare_compare'_aux x y Eq;
-end;
+// symbol pos_compare_compare' x y : tEv (pos_compare' x y = pos_compare x y)
+// ≔ begin
+//   assume x y;
+//   refine pos_compare_compare'_aux x y Eq;
+// end;
 
 // TODO (prove by saying that Eq does not propagate)
 symbol pos_comp_eq x y : tEv (pos_compare_acc x Eq y = Eq ⇒ x = y);
@@ -820,7 +826,7 @@ symbol Z_ind :
        Q Z0 ⇒
        (`∀ p : positive, Q (Zpos p)) ⇒
        (`∀ p : positive, Q (Zneg p)) ⇒
-       (`∀ z : Z, Q z)) ≔ ind_Z;
+       `∀ z : Z, Q z) ≔ ind_Z;
 
 // rule Z_ind _ $v0 _     _     Z0        ↪ $v0
 // with Z_ind _ _   $vpos _     (Zpos $x) ↪ $vpos $x
