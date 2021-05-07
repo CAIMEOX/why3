@@ -539,9 +539,9 @@ symbol pos_add_succ x y : tEv (pos_add (pos_succ x) y = pos_succ (pos_add x y))
   reflexivity;
 end;
 
-symbol pos_add_assoc x y z : tEv (pos_add x (pos_add y z) = pos_add (pos_add x y) z)
+symbol pos_add_assoc x y z : tEv (pos_add (pos_add x y) z = pos_add x (pos_add y z))
 ≔ begin
-  refine pos_peano_ind (λ x, `∀ y, `∀ z, pos_add x (pos_add y z) = pos_add (pos_add x y) z) _ _;
+  refine pos_peano_ind (λ x, `∀ y, `∀ z, pos_add (pos_add x y) z = pos_add x (pos_add y z)) _ _;
   assume y z;
   rewrite pos_add_xH;
   rewrite pos_add_xH;
@@ -1249,6 +1249,18 @@ symbol pos_sub ≔
 // assert ⊢ pos_sub xH (xO xH) ≡ Zneg xH;
 // assert ⊢ pos_sub xH xH ≡ Z0;
 
+symbol ps_same x : tEv (pos_sub x x = zero)
+≔ begin
+  induction;
+  assume x xrec;
+  have e : tEv (pos_sub (xI x) (xI x) = double (pos_sub x x));
+  reflexivity; rewrite e; rewrite xrec; reflexivity;
+  assume x xrec;
+  have e : tEv (pos_sub (xO x) (xO x) = double (pos_sub x x));
+  reflexivity; rewrite e; rewrite xrec; reflexivity;
+  reflexivity;
+end;
+
 symbol + x y ≔
   Z_ind (λ _, DZ)
     y
@@ -1265,6 +1277,41 @@ symbol + x y ≔
     x;
 notation + infix left 40;
 
+symbol add_comm x y : tEv (x + y = y + x)
+≔ begin
+  refine Z_ind (λ x, `∀ y, x + y = y + x) _ _ _;
+  induction;
+  reflexivity;
+  reflexivity;
+  reflexivity;
+
+  assume x;
+  induction;
+  reflexivity;
+  assume y; have e : tEv (Zpos x + Zpos y = Zpos (pos_add x y));
+  reflexivity; rewrite e;
+  rewrite pos_add_comm; reflexivity;
+  reflexivity;
+
+  assume x;
+  induction;
+  reflexivity;
+  reflexivity;
+  assume y; have e : tEv (Zneg x + Zneg y = Zneg (pos_add x y));
+  reflexivity; rewrite e;
+  rewrite pos_add_comm; reflexivity;
+end;
+
+symbol add_Z0 x : tEv (Z0 + x = x)
+≔ begin
+  induction; reflexivity; reflexivity; reflexivity;
+end;
+
+symbol add_Z0_right x : tEv (x + Z0 = x)
+≔ begin
+  induction; reflexivity; reflexivity; reflexivity;
+end;
+
 symbol ~ ≔
   Z_ind (λ _, DZ)
      zero
@@ -1279,6 +1326,14 @@ notation - infix left 40;
 
 symbol sub_def x y : tEv (x - y = x + ~ y)
 ≔ begin assume x y; reflexivity; end;
+
+symbol add_opp a : tEv (a - a = zero)
+≔ begin
+  induction;
+  reflexivity;
+  assume x; refine ps_same x;
+  assume x; refine ps_same x;
+end;
 
 symbol * x y ≔
   Z_ind (λ _, DZ)
@@ -1295,6 +1350,112 @@ symbol * x y ≔
         y)
      x;
 notation * infix right 42;
+
+// TODO
+symbol ps_opp a b : tEv (~ (pos_sub a b) = pos_sub b a);
+
+symbol distr_opp x y : tEv (~ (x + y) = ~ x + ~ y)
+≔ begin
+  assume x y;
+  refine Z_ind (λ x, ~ (x + y) = (~ x + ~ y)) _ _ _ x;
+  reflexivity;
+  assume a;
+  refine Z_ind (λ y, ~ (Zpos a + y) = (~ (Zpos a) + ~ y)) _ _ _ y;
+  reflexivity;
+  reflexivity;
+  assume b; refine ps_opp a b;
+  assume a;
+  refine Z_ind (λ y, ~ (Zneg a + y) = (~ (Zneg a) + ~ y)) _ _ _ y;
+  reflexivity;
+  assume b;
+  refine ps_opp b a;
+  reflexivity;
+end;
+
+// TODO
+symbol ps_Zpos a b c : tEv (pos_sub a b + Zpos c = pos_sub (pos_add a c) b);
+
+symbol ps_Zneg a b c : tEv (pos_sub a b + Zneg c = pos_sub a (pos_add b c))
+≔ begin
+  assume a b c;
+  rewrite left ps_opp b a;
+  have e : tEv (Zneg c = ~ Zpos c);
+  reflexivity; rewrite e;
+  rewrite left distr_opp (pos_sub b a) (Zpos c);
+  rewrite ps_Zpos;
+  rewrite ps_opp;
+  reflexivity;
+end;
+
+symbol add_assoc x y z : tEv (x + y + z = x + (y + z))
+≔ begin
+  assume x y z;
+  refine Z_ind (λ x, (x + y) + z = x + (y + z)) _ _ _ x;
+  reflexivity;
+
+  assume a;
+  refine Z_ind (λ y, ((Zpos a + y) + z) = (Zpos a + (y + z))) _ _ _ y;
+  reflexivity;
+
+  assume b;
+  refine Z_ind (λ z, ((Zpos a + Zpos b) + z) = (Zpos a + (Zpos b + z))) _ _ _ z;
+  reflexivity;
+  // Zpos - Zpos - Zpos case
+  assume c;
+  have e : tEv ((Zpos a + Zpos b) + Zpos c = Zpos (pos_add (pos_add a b) c));
+  reflexivity; rewrite e; rewrite pos_add_assoc; reflexivity;
+  // Zpos - Zpos - Zneg case
+  assume c;
+  symmetry; rewrite add_comm;
+  rewrite [Zpos a + Zpos b] add_comm;
+  refine ps_Zpos b c a;
+
+  assume b;
+  refine Z_ind (λ z, ((Zpos a + Zneg b) + z) = (Zpos a + (Zneg b + z))) _ _ _ z;
+  rewrite add_Z0_right; rewrite add_Z0_right; reflexivity;
+  // Zpos - Zneg - Zpos case
+  assume c;
+  have e : tEv (Zpos a + Zneg b = pos_sub a b);
+  reflexivity; rewrite e;
+  rewrite ps_Zpos a b c;
+  rewrite pos_add_comm; symmetry;
+  rewrite add_comm; refine ps_Zpos c b a;
+  // Zpos - Zneg - Zpos case
+  assume c;
+  refine ps_Zneg a b c;
+
+  assume a;
+  refine Z_ind (λ y, ((Zneg a + y) + z) = (Zneg a + (y + z))) _ _ _ y;
+  reflexivity;
+
+  assume b;
+  refine Z_ind (λ z, ((Zneg a + Zpos b) + z) = (Zneg a + (Zpos b + z))) _ _ _ z;
+  rewrite add_Z0_right; rewrite add_Z0_right; reflexivity;
+  // Zneg - Zpos - Zpos case
+  assume c;
+  refine ps_Zpos b a c;
+  // Zneg - Zpos - Zneg case
+  assume c;
+  have e : tEv ((Zneg a + Zpos b) + Zneg c = pos_sub b a + Zneg c);
+  reflexivity; rewrite e; rewrite ps_Zneg b a c;
+  symmetry; rewrite pos_add_comm; rewrite add_comm;
+  refine ps_Zneg b c a;
+
+  assume b;
+  refine Z_ind (λ z, ((Zneg a + Zneg b) + z) = (Zneg a + (Zneg b + z))) _ _ _ z;
+  reflexivity;
+  // Zneg - Zneg - Zpos case
+  assume c;
+  rewrite [Zneg a + Zneg b] add_comm;
+  symmetry; rewrite add_comm;
+  refine ps_Zneg c b a;
+  // Zneg - Zneg - Zneg case
+  assume c;
+  have e : tEv (Zneg a + Zneg b + Zneg c = Zneg (pos_add (pos_add a b) c));
+  reflexivity; rewrite e;
+  rewrite pos_add_assoc;
+  reflexivity;
+end;
 
 symbol compare x y ≔
   Z_ind (λ _, Dcomparison)
@@ -1315,7 +1476,7 @@ symbol compare x y ≔
         y)
      x;
 
-symbol compare_comm x y : tEv (compare x y = CompOpp (compare y x))
+symbol c_comm x y : tEv (compare x y = CompOpp (compare y x))
 ≔ begin
   assume x;
   refine ind_Z (λ x, `∀ y, compare x y = CompOpp (compare y x)) _ _ _ x;
@@ -1335,6 +1496,18 @@ symbol compare_comm x y : tEv (compare x y = CompOpp (compare y x))
   reflexivity;
   assume x1; refine pca_comm x1 x0 Eq;
 end;
+
+// TODO
+symbol c_opp a b :
+  tEv (compare (~ a) (~ b) = CompOpp (compare a b));
+
+// TODO
+symbol pc'_sub a b c :
+  tEv (pos_compare' a b = compare (pos_sub a b) (pos_sub b c));
+
+// TODO
+symbol c_Zpos_add_sub a b c :
+  tEv (compare (Zpos (pos_add a c)) (pos_sub a b) = Gt);
 
 symbol leb x y ≔
   comp_ind (λ _, Dboolean)
@@ -1508,14 +1681,6 @@ symbol natlike_rec : Π (P : Z → Type), tEv (P 0) →
   refine Hp (P (Zneg p));
 end;
 
-
-// TODO
-symbol add_assoc x y z : tEv (x + y + z = x + (y + z));
-// TODO
-symbol add_comm x y : tEv (x + y = y + x);
-// TODO
-symbol add_opp a : tEv (a - a = 0);
-
 symbol simpl_right x a : tEv (x + a - a = x)
 ≔ begin
   assume x a;
@@ -1636,7 +1801,7 @@ symbol max_is_greater_2 : Π x y, tEv (y ≤ max x y)
   rewrite gt; reflexivity;
   generalize lt;
   have g : tEv (CompOpp (compare x y) = Lt ⇒ y ≤ x);
-  rewrite left (compare_comm y x);
+  rewrite left (c_comm y x);
   assume lt;
   refine eq_True_is_True (leb y x) _;
   refine leb_lt y x lt;
