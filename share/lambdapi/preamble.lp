@@ -193,7 +193,7 @@ builtin "eq"    ≔ =;
 builtin "refl"  ≔ =_refl;
 builtin "eqind" ≔ =_ind;
 
-symbol f_equal {T1} {T2} (a b : tEv T1) (f : tEv T1 → tEv T2) :
+symbol f_equal {T1 T2} (a b : tEv T1) (f : tEv T1 → tEv T2) :
   tEv (a = b ⇒ f a = f b)
 ≔ begin
   assume T1 T2 a b f eq;
@@ -1186,11 +1186,26 @@ symbol Z_ind :
 symbol zero ≔ Z0;
 symbol one ≔ Zpos xH;
 
+symbol ~ ≔
+  Z_ind (λ _, DZ)
+     zero
+     (λ x, Zneg x)
+     (λ x, Zpos x);
+notation ~ prefix 44;
+
 symbol double ≔
   Z_ind (λ _, DZ)
     zero
     (λ p, Zpos (xO p))
     (λ p, Zneg (xO p));
+
+symbol double_opp x : tEv (double (~ x) = ~ double x)
+≔ begin
+  induction;
+  reflexivity;
+  reflexivity;
+  reflexivity;
+end;
 
 // Check that 2 * 7 ≡ 14
 // assert ⊢ double (Zpos (xI (xI xH))) ≡ Zpos (xO (xI (xI xH)));
@@ -1210,6 +1225,22 @@ symbol pred_double ≔
     (Zneg xH)
     (λ p, Zpos (pos_pred_double p))
     (λ p, Zneg (xI p));
+
+symbol pred_double_opp x : tEv (pred_double (~ x) = ~ succ_double x)
+≔ begin
+  induction;
+  reflexivity;
+  reflexivity;
+  reflexivity;
+end;
+
+symbol succ_double_opp x : tEv (succ_double (~ x) = ~ pred_double x)
+≔ begin
+  induction;
+  reflexivity;
+  reflexivity;
+  reflexivity;
+end;
 
 // Check that 2 * (-5) - 1 ≡ -11 and that 2 * 5 - 1 ≡ 9
 // assert ⊢ pred_double (Zneg (xI (xO xH))) ≡ Zneg (xI (xI (xO xH)));
@@ -1258,6 +1289,44 @@ symbol ps_same x : tEv (pos_sub x x = zero)
   assume x xrec;
   have e : tEv (pos_sub (xO x) (xO x) = double (pos_sub x x));
   reflexivity; rewrite e; rewrite xrec; reflexivity;
+  reflexivity;
+end;
+
+
+symbol ps_opp x y : tEv (~ pos_sub x y = pos_sub y x)
+≔ begin
+  refine pos_ind (λ x, `∀ y, ~ (pos_sub x y) = pos_sub y x) _ _ _;
+  assume a arec;
+  induction;
+  assume b _;
+  have e : tEv (pos_sub (xI a) (xI b) = double (pos_sub a b));
+  reflexivity; rewrite e;
+  rewrite left double_opp (pos_sub a b);
+  rewrite arec; reflexivity;
+  assume b _;
+  have e : tEv (pos_sub (xI a) (xO b) = succ_double (pos_sub a b));
+  reflexivity; rewrite e;
+  rewrite left pred_double_opp (pos_sub a b);
+  rewrite arec; reflexivity;
+  reflexivity;
+
+  assume a arec;
+  induction;
+  assume b _;
+  have e : tEv (pos_sub (xO a) (xI b) = pred_double (pos_sub a b));
+  reflexivity; rewrite e;
+  rewrite left succ_double_opp (pos_sub a b);
+  rewrite arec; reflexivity;
+  assume b _;
+  have e : tEv (pos_sub (xO a) (xO b) = double (pos_sub a b));
+  reflexivity; rewrite e;
+  rewrite left double_opp (pos_sub a b);
+  rewrite arec; reflexivity;
+  reflexivity;
+
+  induction;
+  reflexivity;
+  reflexivity;
   reflexivity;
 end;
 
@@ -1312,13 +1381,6 @@ symbol add_Z0_right x : tEv (x + Z0 = x)
   induction; reflexivity; reflexivity; reflexivity;
 end;
 
-symbol ~ ≔
-  Z_ind (λ _, DZ)
-     zero
-     (λ x, Zneg x)
-     (λ x, Zpos x);
-notation ~ prefix 44;
-
 symbol succ x ≔ x + one;
 
 symbol - x y ≔ x + ~ y;
@@ -1351,8 +1413,7 @@ symbol * x y ≔
      x;
 notation * infix right 42;
 
-// TODO
-symbol ps_opp a b : tEv (~ (pos_sub a b) = pos_sub b a);
+
 
 symbol distr_opp x y : tEv (~ (x + y) = ~ x + ~ y)
 ≔ begin
