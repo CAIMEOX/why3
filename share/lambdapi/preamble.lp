@@ -142,10 +142,10 @@ symbol exists_elim T : Π P Q, tEv (`∃ x, P x) → (Π x, tEv (P x ⇒ Q)) →
 
 symbol eq T (x y : tEv T) ≔ `π P, P x ⇒ P y;
 
-// TODO : explain why we need another axiom
 symbol eq_fmla A B ≔ ktPi (kkPi DType (λ _, DType))
                           (λ P, P A ⇒ P B);
 
+// This axiom is needed to be able to rewrite formulas
 symbol iff_eq A B : tEv (
   (A ⇔ B) ⇒
   eq_fmla A B);
@@ -2126,12 +2126,6 @@ symbol goal : Type → Type → Type
 
 // KERNEL CERTIFICATE RULES
 
-
-symbol hole : tEv (
-  empty ⇒
-  empty)
-≔ λ f, f;
-
 symbol axiom A : tEv (
   hyp A (goal A empty))
 ≔ λ a na, na a;
@@ -2195,6 +2189,11 @@ symbol swap_neg_hyp A : tEv (
   hyp (¬ A) empty)
 ≔ λ s, s;
 
+symbol swap_neg_goal A : tEv (
+  hyp A empty ⇒
+  goal (¬ A) empty)
+≔ λ na, nni (¬ A) na;
+
 symbol swap_hyp A : tEv (
   goal (¬ A) empty ⇒
   hyp A empty)
@@ -2204,11 +2203,6 @@ symbol swap_goal A : tEv (
   hyp (¬ A) empty ⇒
   goal A empty)
 ≔ λ s, s;
-
-symbol swap_neg_goal A : tEv (
-  hyp A empty ⇒
-  goal (¬ A) empty)
-≔ λ na, nni (¬ A) na;
 
 symbol destruct_hyp A B : tEv (
   hyp A (hyp B empty) ⇒
@@ -2222,48 +2216,21 @@ symbol destruct_goal A B : tEv (
 ≔ λ s nab, s (λ a, nab (or_intro_1 A B a))
              (λ b, nab (or_intro_2 A B b));
 
-symbol construct_goal A B : tEv (
-  goal (A ∨ B) empty ⇒
-  goal A (goal B empty))
-≔ λ s na nb, or_elim A B (nne (A ∨ B) s) false na nb;
-
-symbol dir_left_hyp A B : tEv (
-  hyp A empty ⇒
-  hyp (A ∧ B) empty)
-≔ λ na ab, na (and_elim_1 A B ab);
-
-symbol dir_left_goal A B : tEv (
-  goal A empty ⇒
-  goal (A ∨ B) empty)
-≔ λ nna nab, nab (or_intro_1 A B (nne A nna));
-
-symbol dir_right_hyp A B : tEv (
-  hyp B empty ⇒
-  hyp (A ∧ B) empty)
-≔ λ nb ab, nb (and_elim_2 A B ab);
-
-symbol dir_right_goal A B : tEv (
-  goal B empty ⇒
-  goal (A ∨ B) empty)
-≔ λ nnb nab, nab (or_intro_2 A B (nne B nnb));
-
 symbol clearhyp A : tEv (
   empty ⇒
   hyp A empty)
 ≔ λ f _, f;
-
 symbol clear_hyp A HA s ≔ clearhyp A s HA;
 
-symbol cleargoal A :
-  tEv empty →
-  tEv (goal A empty)
+symbol cleargoal A : tEv (
+  empty ⇒
+  goal A empty)
 ≔ λ f _, f;
-
 symbol clear_goal A HA s ≔ cleargoal A s HA;
 
-symbol forget :
-  tEv empty →
-  tEv empty
+symbol forget : tEv (
+  empty ⇒
+  empty)
 ≔ λ f, f;
 
 symbol intro_quant_hyp {T} P : tEv (
@@ -2276,15 +2243,15 @@ symbol intro_quant_goal {T} P : tEv (
   goal (`∀ x : tEv T, P x) empty)
 ≔ λ s nfp, nfp (λ t, nne (P t) (s t));
 
-symbol inst_quant_goal {T} P t : tEv (
-  goal (`∃ x : tEv T, P x) (goal (P t) empty) ⇒
-  goal (`∃ x : tEv T, P x) empty)
-≔ λ s nep, s nep (λ pt, nep (exists_intro T P t pt));
-
 symbol inst_quant_hyp {T} P t : tEv (
   hyp (`∀ x, P x) (hyp (P t) empty) ⇒
   hyp (`∀ x : tEv T, P x) empty)
 ≔ λ s h, s h (h t);
+
+symbol inst_quant_goal {T} P t : tEv (
+  goal (`∃ x : tEv T, P x) (goal (P t) empty) ⇒
+  goal (`∃ x : tEv T, P x) empty)
+≔ λ s nep, s nep (λ pt, nep (exists_intro T P t pt));
 
 symbol rewrite_hyp {T} (a b : tEv T) P : tEv (
   hyp (a = b) (hyp (P b) empty) ⇒
@@ -2307,19 +2274,14 @@ symbol rewrite_goal {T} (a b : tEv T) P : tEv (
 end;
 
 symbol rewrite_fmla_hyp A B P : tEv (
-  hyp (eq_fmla A B) (hyp (P B) empty) ⇒
-  hyp (eq_fmla A B) (hyp (P A) empty))
-≔ λ s h i, s h (h P i);
+  hyp (A ⇔ B) (hyp (P B) empty) ⇒
+  hyp (A ⇔ B) (hyp (P A) empty))
+≔ λ s eab pa, s eab (iff_eq A B eab (λ x, P x) pa);
 
 symbol rewrite_fmla_goal A B P : tEv (
-  hyp (eq_fmla A B) (goal (P B) empty) ⇒
-  hyp (eq_fmla A B) (goal (P A) empty))
-≔ λ s h i, s h (h (λ x, ¬ P x) i);
-
-symbol iffeq A B : tEv (
-  hyp (eq_fmla A B) empty ⇒
-  hyp (A ⇔ B) empty)
-≔ λ s eab, s (iff_eq A B eab);
+  hyp (A ⇔ B) (goal (P B) empty) ⇒
+  hyp (A ⇔ B) (goal (P A) empty))
+≔ λ s eab pa, s eab (iff_eq A B eab (λ x, ¬ P x) pa);
 
 symbol strong_induction a P : tEv (
   (`∀ x, hyp (x ≤ a) (goal (P x) empty)) ⇒
