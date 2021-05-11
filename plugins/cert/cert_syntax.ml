@@ -90,7 +90,6 @@ let rec is_predicate = function
   | CTarrow (_, ct) -> is_predicate ct
   | _ -> false
 
-(** Pretty printing of ctype (compatible with lambdapi) *)
 
 (* We define two printers, <hip> for premises, <ip> for everything else. This is
    needed because the logical definitions (via Dlogic) use the same ident for
@@ -112,6 +111,30 @@ let prls fmt ls = prid fmt ls.ls_name
 
 let prpr fmt pr = prhyp fmt pr.pr_name
 
+(** Pretty printing of ctype (compatible with lambdapi) *)
+(* Prints a shallow type without outside parentheses *)
+let rec prty fmt ty = match ty with
+  | CTyapp (ts, l) when l <> [] ->
+      fprintf fmt "@[<2>%a@ %a@]"
+        prts ts
+        (print_list prty_paren) l
+  | CTarrow (t1, t2) ->
+      fprintf fmt "@[%a →@ %a@]"
+        prty_paren t1
+        prty t2
+  | _ -> prty_paren fmt ty
+
+(* Prints a shallow type, protected with outside parentheses if needed *)
+and prty_paren fmt = function
+  | CTyvar v -> fprintf fmt "tEv %a" Pretty.print_tv v
+  | CTprop -> fprintf fmt "Type"
+  | CTyapp (ts, []) -> prts fmt ts
+  | cty -> fprintf fmt "(%a)" prty cty
+
+and prts fmt ts =
+  if ts_equal ts ts_int then fprintf fmt "Z"
+  else if ts_equal ts ts_bool then fprintf fmt "boolean"
+  else fprintf fmt "tEv %a" Pretty.print_ts ts
 
 (* pred functions know if we are printing the type of a predicate or not *)
 let rec pred_ty pred fmt ty = match ty with
@@ -125,7 +148,6 @@ let rec pred_ty pred fmt ty = match ty with
         prarrow pred
         (pred_ty pred) t2
   | _ -> pred_pty pred fmt ty
-
 and pred_pty pred fmt = function
   | CTyvar v -> Pretty.print_tv fmt v
   | CTprop -> fprintf fmt "DType"
@@ -133,16 +155,16 @@ and pred_pty pred fmt = function
   | cty -> fprintf fmt "(%a)" (pred_ty pred) cty
 
 and prarrow fmt pred =
-  if pred then fprintf fmt "⇀"
-  else fprintf fmt "⇁"
+  if pred then fprintf fmt "↝"
+  else fprintf fmt "⇒"
 
-(* Prints a type without outside parentheses *)
-let prty fmt ty =
+(* Prints a deep type without outside parentheses *)
+let prdty fmt ty =
   pred_ty (is_predicate ty) fmt ty
-
-(* Prints a type with outside parentheses if needed *)
-let prpty fmt ty =
+(* Prints a deep type, protected with outside parentheses if needed *)
+let prdty_paren fmt ty =
   pred_pty (is_predicate ty) fmt ty
+
 
 type cterm =
   | CTbvar of int (* bound variables use De Bruijn indices *)
@@ -281,18 +303,23 @@ let rec replace_cterm tl tr t =
 (** Pretty printing of terms (compatible with lambdapi) *)
 
 let rec pcte fmt = function
-  | CTquant (CTlambda, _, t) ->
+  | CTquant (q, cty, t) ->
       let x = id_register (id_fresh "x") in
       let t_open = ct_open t (CTfvar (x, [])) in
-      fprintf fmt "λ %a, %a"
+      let q_str = match q with CTforall -> "`∀"
+                             | CTexists -> "`∃"
+                             | CTlambda -> "λ" in
+      fprintf fmt "%s %a : %a, %a"
+        q_str
         prid x
+        prty cty
         pcte t_open;
       forget_id ip x
   | ct -> prarr fmt ct
 
 and prarr fmt = function
   | CTbinop (Timplies, ct1, ct2) ->
-      fprintf fmt "%a ↝ %a"
+      fprintf fmt "%a ⇒ %a"
         prdisj ct1
         prarr ct2
   | CTbinop (Tiff, ct1, ct2) ->
@@ -326,18 +353,8 @@ and prapp fmt = function
       fprintf fmt "%a %a"
         prapp ct1
         prpv ct2
-  | CTquant (q, ty, t) when q <> CTlambda ->
-      let x = id_register (id_fresh "x") in
-      let q_str = match q with CTforall -> "∀"
-                             | CTexists -> "∃"
-                             | CTlambda -> assert false in
-      let t_open = ct_open t (CTfvar (x, [])) in
-      fprintf fmt "%s %a (λ %a, %a)"
-        q_str
-        prty ty
-        prid x
-        pcte t_open;
-      forget_id ip x
+  | CTint i when BigInt.sign i < 0 ->
+      fprintf fmt "~ %s" BigInt.(to_string (abs i))
   | ct -> prpv fmt ct
 
 and prpv fmt = function
@@ -346,31 +363,22 @@ and prpv fmt = function
       begin match l with
       | [] -> prid fmt id
       | _ -> prid fmt id;
-             List.iter (fprintf fmt " %a" prpty) l
+             List.iter (fprintf fmt " %a" prdty_paren) l
       end
-  | CTint i -> pp_print_string fmt (BigInt.to_string i)
+  | CTint i when BigInt.sign i >= 0 ->
+      pp_print_string fmt (BigInt.to_string i)
   | CTfalse -> fprintf fmt "false"
   | CTtrue -> fprintf fmt "true"
   | ct -> fprintf fmt "(%a)" pcte ct
 
-(* TODO : update this
-   We will denote a ctask <sigma; gamma_delta> by <Σ | Γ ⊢ Δ> where:
-   • <Σ> contains all the signature declarations <x : ty>
-     where <x> is mapped to <ty> in <sigma>
-   • <Γ> contains all the declarations <H : P>
-     where <H> is mapped to <(P, false)> in <gamma_delta>
-   • <Δ> contains all the declarations <H : P>
-     where <H> is mapped to <(P,  true)> in <gamma_delta>
-
-   We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ>
-*)
 type ('t, 'ty) ctask =
-  { get_ls : string -> lsymbol;
-    types_interp : Sid.t;
-    types : Sid.t;
-    sigma_interp : 'ty Mid.t;
-    sigma : 'ty Mid.t;
-    gamma_delta : ('t * bool) Mid.t
+  { get_ls : string -> lsymbol; (* remember interpreted symbols for efficiency*)
+    types_interp : Sid.t; (* interpreted types *)
+    types : Sid.t; (* types *)
+    sigma_interp : 'ty Mid.t; (* interpreted variables with their type *)
+    sigma : 'ty Mid.t; (* variables with their type *)
+    gamma_delta : ('t * bool) Mid.t (* names of premises with their formula and
+    their positivity (false means it's an hypothesis, true means it's a goal) *)
   }
 
 type kernel_ctask = (cterm, ctype) ctask
