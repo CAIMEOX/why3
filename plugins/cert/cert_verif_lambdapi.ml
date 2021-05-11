@@ -55,7 +55,7 @@ and print_gd fmt gd =
   pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇒@ ") prdisj fmt tp
 
 let print_certif print_next fmt c =
-  let rstr pos = if pos then "_goal" else "_hyp" in
+  let rstr pos = if pos then "Goal" else "Hyp" in
   let rec pc fmt = function
   | EConstruct _ | EDuplicate _ | EFoldArr _
   | EFoldIff _ | EEqSym _ | EEqTrans _ ->
@@ -63,118 +63,87 @@ let print_certif print_next fmt c =
   | EHole task_id ->
       print_next fmt task_id
   | EAxiom (t, i1, i2) ->
-      fprintf fmt "axiom %a %a %a"
-        prpv t
-        prhyp i1
-        prhyp i2
+      fprintf fmt "Axiom %a %a %a"
+        prpv t prhyp i1 prhyp i2
   | ETrivial (pos, i) ->
-      fprintf fmt "trivial%s %a"
+      fprintf fmt "Trivial%s %a"
         (rstr pos)
         prhyp i
   | EEqRefl (_, t, i) ->
-      fprintf fmt "eqrefl %a %a"
-        prpv t
-        prhyp i
+      fprintf fmt "EqRefl %a %a"
+        prpv t prhyp i
   | EAssert (i, t, c1, c2) ->
-      fprintf fmt "cut %a@ \
+      fprintf fmt "Assert %a@ \
                    @[<hv 3>(λ %a,@ %a)@]@ \
                    @[<hv 3>(λ %a,@ %a)@]"
         prpv t
         prhyp i pc c1
         prhyp i pc c2
   | ESplit (pos, t1, t2, i, c1, c2) ->
-      fprintf fmt "split%s %a %a@ \
+      fprintf fmt "Split%s %a %a %a@ \
                    @[<hv 3>(λ %a,@ %a)@]@ \
-                   @[<hv 3>(λ %a,@ %a)@]@ \
-                   %a"
-        (rstr pos)
-        prpv t1
-        prpv t2
+                   @[<hv 3>(λ %a,@ %a)@]"
+        (rstr pos) prpv t1 prpv t2 prhyp i
         prhyp i pc c1
         prhyp i pc c2
-        prhyp i
   | EUnfoldIff (pos, t1, t2, i, c) ->
-      fprintf fmt "unfold_iff%s %a %a (λ %a,@ \
-                   @[<hv>%a@]) %a"
-        (rstr pos)
-        prpv t1
-        prpv t2
-        prhyp i pc c
-        prhyp i
-  | EUnfoldArr (pos, t1, t2, i, c) ->
-      fprintf fmt "unfold_arr%s %a %a (λ %a,@ \
-                   @[<hv>%a@]) %a"
-        (rstr pos)
-        prpv t1
-        prpv t2
-        prhyp i pc c
-        prhyp i
-  | ESwapNeg (pos, t, i, c) ->
-      fprintf fmt "swap_neg%s %a (λ %a,@ \
-                   @[<hv>%a@]) %a"
-        (rstr pos)
-        prpv t
-        prhyp i pc c
-        prhyp i
-  | ESwap (pos, t, i, c) ->
-      fprintf fmt "swap%s %a (λ %a,@ \
-                   @[<hv>%a@]) %a"
-        (rstr pos)
-        prpv t
-        prhyp i pc c
-        prhyp i
-  | EDestruct (pos, t1, t2, i, i1, i2, c) ->
-      fprintf fmt "destruct%s %a %a (λ %a %a,@ \
-                   @[<hv>%a@]) %a"
-        (rstr pos)
-        prpv t1
-        prpv t2
-        prhyp i1 prhyp i2 pc c
-        prhyp i
-  | EClear (pos, t, i, c) ->
-      fprintf fmt "clear%s %a %a (@,\
+      fprintf fmt "UnfoldIff%s %a %a %a (λ %a,@ \
                    @[<hv>%a@])"
-        (rstr pos)
-        prpv t
-        prhyp i
+        (rstr pos) prpv t1 prpv t2 prhyp i prhyp i
+        pc c
+  | EUnfoldArr (pos, t1, t2, i, c) ->
+      fprintf fmt "UnfoldArr%s %a %a %a (λ %a,@ \
+                   @[<hv>%a@])"
+        (rstr pos) prpv t1 prpv t2 prhyp i prhyp i
+        pc c
+  | ESwapNeg (pos, t, i, c) ->
+      fprintf fmt "SwapNeg%s %a %a (λ %a,@ \
+                   @[<hv>%a@])"
+        (rstr pos) prpv t prhyp i prhyp i
+        pc c
+  | ESwap (pos, t, i, c) ->
+      fprintf fmt "Swap%s %a %a (λ %a,@ \
+                   @[<hv>%a@])"
+        (rstr pos) prpv t prhyp i prhyp i
+        pc c
+  | EDestruct (pos, t1, t2, i, i1, i2, c) ->
+      fprintf fmt "Destruct%s %a %a %a (λ %a %a,@ \
+                   @[<hv>%a@])"
+        (rstr pos) prpv t1 prpv t2 prhyp i prhyp i1 prhyp i2
+        pc c
+  | EClear (pos, t, i, c) ->
+      fprintf fmt "Clear%s %a %a (@,\
+                   @[<hv>%a@])"
+        (rstr pos) prpv t prhyp i
         pc c
   | EForget (_, c) ->
-      fprintf fmt "forget (@,\
+      fprintf fmt "Forget (@,\
                    @[<hv>%a@])"
         pc c
   | EIntroQuant (pos, _, p, i, y, c) ->
-      fprintf fmt "intro_quant%s %a (λ %a %a,@ \
-                   @[<hv>%a@]) %a"
-        (rstr pos)
-        prpv p
-        prpv y prhyp i pc c
-        prhyp i
+      fprintf fmt "IntroQuant%s %a %a (λ %a %a,@ \
+                   @[<hv>%a@])"
+        (rstr pos) prpv p prhyp i prpv y prhyp i
+        pc c
   | EInstQuant (pos, _, p, i1, i2, t, c) ->
-      fprintf fmt "inst_quant%s %a %a (λ %a %a,@ \
-                   @[<hv>%a@]) %a"
-        (rstr pos)
-        prpv p
-        prpv t
-        prhyp i1 prhyp i2 pc c
-        prhyp i1
+      fprintf fmt "InstQuant%s %a %a %a (λ %a %a,@ \
+                   @[<hv>%a@])"
+        (rstr pos) prpv p prpv t prhyp i1 prhyp i1 prhyp i2
+        pc c
   | ERewrite (pos, is_eq, _, t1, t2, ctxt, i1, i2, c) ->
-      let str_fmla = match is_eq with None -> "" | _ -> "_fmla" in
-        fprintf fmt "rewrite%s%s %a %a %a (λ %a %a,@ \
-                     @[<hv>%a@]) %a %a"
-          str_fmla (rstr pos)
-          prpv t1 prpv t2 prpv ctxt
-          prhyp i1 prhyp i2 pc c
-          prhyp i1
-          prhyp i2
+      let str_fmla = match is_eq with None -> "" | _ -> "Fmla" in
+      fprintf fmt "Rewrite%s%s %a %a %a %a %a (λ %a %a,@ \
+                   @[<hv>%a@])"
+        str_fmla (rstr pos) prpv t1 prpv t2 prpv ctxt
+        prhyp i1 prhyp i2 prhyp i1 prhyp i2
+        pc c
   | EInduction (g, hi1, hi2, hr, x, a, ctxt, c1, c2) ->
-      fprintf fmt "strong_induction %a %a@ \
+      fprintf fmt "Induction %a %a %a %a@ \
                    @[<hv 3>(λ %a %a %a,@ %a)@]@ \
-                   @[<hv 3>(λ %a %a %a %a,@ %a)@]@ \
-                   %a %a"
-        prpv a prpv ctxt
+                   @[<hv 3>(λ %a %a %a %a,@ %a)@]"
+        prpv a prpv ctxt prpv x prhyp g
         prpv x prhyp hi1 prhyp g pc c1
         prpv x prhyp hi2 prhyp hr prhyp g pc c2
-        prpv x prhyp g
   in
   pc fmt c
 
@@ -211,7 +180,7 @@ let print fmt init res (task_ids, certif) =
                unif_rule Type ≡ kEv $t ↪ [ $t ≡ DType ];@ \
                unif_rule tEv $a ≡ tEv $b ↪ [ $a ≡ $b ];@ \
                unif_rule kEv $a ≡ kEv $b ↪ [ $a ≡ $b ];@ \
-               unif_rule $a → $b ≡ kEv $c ↪ [ $a ≡ tEv $a'; $b ≡ kEv $b'; $c ≡ $a' ↝ $b' ];@ \
+               unif_rule $a → $b ≡ kEv $c ↪ [ $a ≡ tEv $a'; $b ≡ kEv $b'; $c ≡ $a' ⇁ $b' ];@ \
                unif_rule $a → $b ≡ tEv $c ↪ [ $a ≡ tEv $a'; $b ≡ tEv $b'; $c ≡ $a' ⇒ $b' ];@ @ \
                symbol to_verify :@ \
                @[<v>%a@]@ \
