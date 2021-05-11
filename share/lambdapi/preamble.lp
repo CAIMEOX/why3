@@ -30,8 +30,11 @@ notation ∀ quantifier;
 symbol π {A} ≔ ktPi A;
 notation π quantifier;
 
-symbol ↝ A B ≔  tkPi A (λ _, B);
-notation ↝ infix right 14;
+symbol ⇀ A B ≔  kkPi A (λ _, B);
+notation ⇀ infix right 14;
+
+symbol ⇁ A B ≔  tkPi A (λ _, B);
+notation ⇁ infix right 14;
 
 symbol ⇒ A B ≔  ttPi A (λ _, B);
 notation ⇒ infix right 14;
@@ -42,7 +45,7 @@ notation ⇒ infix right 14;
 unif_rule Type ≡ kEv $t ↪ [ $t ≡ DType ];
 unif_rule tEv $a ≡ tEv $b ↪ [ $a ≡ $b ];
 unif_rule kEv $a ≡ kEv $b ↪ [ $a ≡ $b ];
-unif_rule $a → $b ≡ kEv $c ↪ [ $a ≡ tEv $a'; $b ≡ kEv $b'; $c ≡ $a' ↝ $b' ];
+unif_rule $a → $b ≡ kEv $c ↪ [ $a ≡ tEv $a'; $b ≡ kEv $b'; $c ≡ $a' ⇁ $b' ];
 unif_rule $a → $b ≡ tEv $c ↪ [ $a ≡ tEv $a'; $b ≡ tEv $b'; $c ≡ $a' ⇒ $b' ];
 
 // To use the inductive notation
@@ -166,7 +169,7 @@ symbol eq_ind T x y : tEv (eq T x y) → Π P, tEv (P y) → tEv (P x)
 // `π C, (`π x : kEv T, P x ⇒ C) ⇒ C;
 
 // opaque symbol eq_and_def :
-//   tEv (exists (kkPi DType (λ T, T ↝ T ↝ DType)) (λ eq,
+//   tEv (exists (kkPi DType (λ T, T ⇁ T ⇁ DType)) (λ eq,
 //        @π DType (λ C : Type,
 //           ((`π T : Type, `∀ x : tEv T, eq T x x) ⇒
 //            (`π T : Type, (`∀ x : tEv T, (`∀ y : tEv T, eq T x y ⇒
@@ -2110,183 +2113,211 @@ end;
 // ENCODING OF TASKS
 
 
-symbol empty : Type
-≔ false;
+symbol ListDType : Kind;
 
-symbol hyp : Type → Type → Type
-≔ λ A s, A ⇒ s;
+symbol ∅ : kEv ListDType;
 
-symbol goal : Type → Type → Type
-≔ λ A s, ¬ A ⇒ s;
+symbol ∙ : kEv (DType ⇀ ListDType ⇀ ListDType);
+notation ∙ infix right 13;
 
-// A task < t | x : t | H : A ⊢ G : B > is encoded by
-// < `π t : Type, ∀ x : t, hyp (tr A) (goal (tr A)) empty >
+symbol ⊧  : kEv (ListDType ⇀ ListDType ⇀ DType);
+notation ⊧ infix 12;
+
+symbol ⟹  ≔ ⇒;
+notation ⟹  infix right 11;
+
+rule $A ∙ $B ⊧ $C ↪ $A ⟹  $B ⊧ $C
+with ∅ ⊧ $A ∙ $B  ↪ ¬ $A ⟹  ∅ ⊧ $B
+with ∅ ⊧ ∅        ↪ false;
+
+// A task < t | x : t | H1 : A1, H2 : A2 ⊢ G : B > is encoded by
+// <`π t : Type, ∀ x : t, tr A1 ∙ tr A2 ∙ ∅ ⊧ tr A ∙ ∅ >
 // where < tr > is the function encoding terms
 
 
 // KERNEL CERTIFICATE RULES
 
-symbol axiom A : tEv (
-  hyp A (goal A empty))
+symbol Axiom A : tEv (
+  A ∙ ∅ ⊧ A ∙ ∅)
 ≔ λ a na, na a;
 
-symbol trivial_hyp : tEv (
-  hyp false empty)
+symbol TrivialHyp : tEv (
+  false ∙ ∅ ⊧ ∅)
 ≔ λ f, f;
 
-symbol trivial_goal : tEv (
-  goal true empty)
+symbol TrivialGoal : tEv (
+  ∅ ⊧ true ∙ ∅)
 ≔ λ ntt, ntt tt;
 
-symbol eqrefl T t : tEv (
-  goal (t = t) empty)
+symbol EqRefl T (t : tEv T) : tEv (
+  ∅ ⊧ t = t ∙ ∅)
 ≔ λ neqtt, neqtt (=_refl T t);
 
-symbol cut A : tEv (
-  goal A empty ⇒
-  hyp A empty ⇒
-  empty)
+symbol Assert A : tEv (
+  ∅ ⊧ A ∙ ∅ ⟹
+  A ∙ ∅ ⊧ ∅ ⟹
+  ∅ ⊧ ∅)
 ≔ λ nna na, nna na;
 
-symbol split_hyp A B : tEv (
-  hyp A empty ⇒
-  hyp B empty ⇒
-  hyp (A ∨ B) empty)
+symbol SplitHyp' A B : tEv (
+  A ∙ ∅ ⊧ ∅ ⟹
+  B ∙ ∅ ⊧ ∅ ⟹
+  A ∨ B ∙ ∅ ⊧ ∅)
 ≔ λ s1 s2 ab, or_elim A B ab false s1 s2;
+symbol SplitHyp A B H s1 s2 ≔ SplitHyp' A B s1 s2 H;
 
-symbol split_goal A B : tEv (
-  goal A empty ⇒
-  goal B empty ⇒
-  goal (A ∧ B) empty)
+symbol SplitGoal' A B : tEv (
+  ∅ ⊧ A ∙ ∅ ⟹
+  ∅ ⊧ B ∙ ∅ ⟹
+  ∅ ⊧ A ∧ B ∙ ∅)
 ≔ λ nna nnb, nni (A ∧ B) (and_intro A B (nne A nna) (nne B nnb));
+symbol SplitGoal A B H s1 s2 ≔ SplitGoal' A B s1 s2 H;
 
-symbol unfold_iff_hyp A B : tEv (
-  hyp ((A ⇒ B) ∧ (B ⇒ A)) empty ⇒
-  hyp (A ⇔ B) empty)
+symbol UnfoldIffHyp' A B : tEv (
+  (A ⇒ B) ∧ (B ⇒ A) ∙ ∅ ⊧ ∅ ⟹
+  A ⇔ B ∙ ∅ ⊧ ∅)
 ≔ λ s, s;
+symbol UnfoldIffHyp A B H s ≔ UnfoldIffHyp' A B s H;
 
-symbol unfold_iff_goal A B : tEv (
-  goal ((A ⇒ B) ∧ (B ⇒ A)) empty ⇒
-  goal (A ⇔ B) empty)
+symbol UnfoldIffGoal' A B : tEv (
+  ∅ ⊧ (A ⇒ B) ∧ (B ⇒ A) ∙ ∅ ⟹
+  ∅ ⊧ A ⇔ B ∙ ∅)
 ≔ λ s, s;
+symbol UnfoldIffGoal A B H s ≔ UnfoldIffGoal' A B s H;
 
-symbol unfold_arr_hyp A B : tEv (
-  hyp (¬ A ∨ B) empty ⇒
-  hyp (A ⇒ B) empty)
+symbol UnfoldArrHyp' A B : tEv (
+  ¬ A ∨ B ∙ ∅ ⊧ ∅ ⟹
+  A ⇒ B ∙ ∅ ⊧ ∅)
 ≔ λ s impab,
   s (em A (¬ A ∨ B) (λ a, or_intro_2 (¬ A) B (impab a))
                     (λ na, or_intro_1 (¬ A) B na));
+symbol UnfoldArrHyp A B H s ≔ UnfoldArrHyp' A B s H;
 
-symbol unfold_arr_goal A B : tEv (
-  goal (¬ A ∨ B) empty ⇒
-  goal (A ⇒ B) empty)
+symbol UnfoldArrGoal' A B : tEv (
+  ∅ ⊧ ¬ A ∨ B ∙ ∅ ⟹
+  ∅ ⊧ A ⇒ B ∙ ∅)
 ≔ λ s, nni (A ⇒ B) (λ a,
        nne (¬ A ∨ B) s B (λ na, na a B)
                          (λ b, b));
+symbol UnfoldArrGoal A B H s ≔ UnfoldArrGoal' A B s H;
 
-symbol swap_neg_hyp A : tEv (
-  goal A empty ⇒
-  hyp (¬ A) empty)
+symbol SwapNegHyp' A : tEv (
+  ∅ ⊧ A ∙ ∅ ⟹
+  ¬ A ∙ ∅ ⊧ ∅)
 ≔ λ s, s;
+symbol SwapNegHyp A H s ≔ SwapNegHyp' A s H;
 
-symbol swap_neg_goal A : tEv (
-  hyp A empty ⇒
-  goal (¬ A) empty)
+symbol SwapNegGoal' A : tEv (
+  A ∙ ∅ ⊧ ∅ ⟹
+  ∅ ⊧ ¬ A ∙ ∅)
 ≔ λ na, nni (¬ A) na;
+symbol SwapNegGoal A H s ≔ SwapNegGoal' A s H;
 
-symbol swap_hyp A : tEv (
-  goal (¬ A) empty ⇒
-  hyp A empty)
+symbol SwapHyp' A : tEv (
+  ∅ ⊧ ¬ A ∙ ∅ ⟹
+  A ∙ ∅ ⊧ ∅)
 ≔ λ nnna, nne (¬ A) nnna;
+symbol SwapHyp A H s ≔ SwapHyp' A s H;
 
-symbol swap_goal A : tEv (
-  hyp (¬ A) empty ⇒
-  goal A empty)
+symbol SwapGoal' A : tEv (
+  ¬ A ∙ ∅ ⊧ ∅ ⟹
+  ∅ ⊧ A ∙ ∅)
 ≔ λ s, s;
+symbol SwapGoal A H s ≔ SwapGoal' A s H;
 
-symbol destruct_hyp A B : tEv (
-  hyp A (hyp B empty) ⇒
-  hyp (A ∧ B) empty)
+symbol DestructHyp' A B : tEv (
+  A ∙ B ∙ ∅ ⊧ ∅ ⟹
+  A ∧ B ∙ ∅ ⊧ ∅)
 ≔ λ s ab,
   s (and_elim_1 A B ab) (and_elim_2 A B ab);
+symbol DestructHyp A B H s ≔ DestructHyp' A B s H;
 
-symbol destruct_goal A B : tEv (
-  goal A (goal B empty) ⇒
-  goal (A ∨ B) empty)
+symbol DestructGoal' A B : tEv (
+  ∅ ⊧ A ∙ B ∙ ∅ ⟹
+  ∅ ⊧ A ∨ B ∙ ∅)
 ≔ λ s nab, s (λ a, nab (or_intro_1 A B a))
              (λ b, nab (or_intro_2 A B b));
+symbol DestructGoal A B H s ≔ DestructGoal' A B s H;
 
-symbol clearhyp A : tEv (
-  empty ⇒
-  hyp A empty)
+symbol ClearHyp' A : tEv (
+  ∅ ⊧ ∅ ⟹
+  A ∙ ∅ ⊧ ∅)
 ≔ λ f _, f;
-symbol clear_hyp A HA s ≔ clearhyp A s HA;
+symbol ClearHyp A HA s ≔ ClearHyp' A s HA;
 
-symbol cleargoal A : tEv (
-  empty ⇒
-  goal A empty)
+symbol ClearGoal' A : tEv (
+  ∅ ⊧ ∅ ⟹
+  ∅ ⊧ A ∙ ∅)
 ≔ λ f _, f;
-symbol clear_goal A HA s ≔ cleargoal A s HA;
+symbol ClearGoal A HA s ≔ ClearGoal' A s HA;
 
-symbol forget : tEv (
-  empty ⇒
-  empty)
+symbol Forget : tEv (
+  ∅ ⊧ ∅ ⟹
+  ∅ ⊧ ∅)
 ≔ λ f, f;
 
-symbol intro_quant_hyp {T} P : tEv (
-  (`∀ y, hyp (P y) empty) ⇒
-  hyp (`∃ x : tEv T, P x) empty)
+symbol IntroQuantHyp' T P : tEv (
+  (`∀ y : tEv T, P y ∙ ∅ ⊧ ∅) ⟹
+  (`∃ x : tEv T, P x) ∙ ∅ ⊧ ∅)
 ≔ λ s ep, exists_elim T P false ep s;
+symbol IntroQuantHyp {T} P H s ≔ IntroQuantHyp' T P s H;
 
-symbol intro_quant_goal {T} P : tEv (
-  (`∀ y, goal (P y) empty) ⇒
-  goal (`∀ x : tEv T, P x) empty)
+symbol IntroQuantGoal' T P : tEv (
+  (`∀ y : tEv T, ∅ ⊧ P y ∙ ∅) ⟹
+  ∅ ⊧ (`∀ x : tEv T, P x) ∙ ∅)
 ≔ λ s nfp, nfp (λ t, nne (P t) (s t));
+symbol IntroQuantGoal {T} P H s ≔ IntroQuantGoal' T P s H;
 
-symbol inst_quant_hyp {T} P t : tEv (
-  hyp (`∀ x, P x) (hyp (P t) empty) ⇒
-  hyp (`∀ x : tEv T, P x) empty)
+symbol InstQuantHyp' T P t : tEv (
+  (`∀ x : tEv T, P x) ∙ P t ∙ ∅ ⊧ ∅ ⟹
+  (`∀ x : tEv T, P x) ∙ ∅ ⊧ ∅)
 ≔ λ s h, s h (h t);
+symbol InstQuantHyp {T} P t H s ≔ InstQuantHyp' T P t s H;
 
-symbol inst_quant_goal {T} P t : tEv (
-  goal (`∃ x : tEv T, P x) (goal (P t) empty) ⇒
-  goal (`∃ x : tEv T, P x) empty)
+symbol InstQuantGoal' T P t : tEv (
+  ∅ ⊧ (`∃ x : tEv T, P x) ∙ P t ∙ ∅ ⟹
+  ∅ ⊧ (`∃ x : tEv T, P x) ∙ ∅)
 ≔ λ s nep, s nep (λ pt, nep (exists_intro T P t pt));
+symbol InstQuantGoal {T} P t H s ≔ InstQuantGoal' T P t s H;
 
-symbol rewrite_hyp {T} (a b : tEv T) P : tEv (
-  hyp (a = b) (hyp (P b) empty) ⇒
-  hyp (a = b) (hyp (P a) empty))
+symbol RewriteHyp' T (a b : tEv T) P : tEv (
+  a = b ∙ P b ∙ ∅ ⊧ ∅ ⟹
+  a = b ∙ P a ∙ ∅ ⊧ ∅)
 ≔ begin
   assume T a b P s eq pa;
   refine s eq _;
   rewrite left eq;
   refine pa;
 end;
+symbol RewriteHyp {T} a b P eab pa s ≔ RewriteHyp' T a b P s eab pa;
 
-symbol rewrite_goal {T} (a b : tEv T) P : tEv (
-  hyp (a = b) (goal (P b) empty) ⇒
-  hyp (a = b) (goal (P a) empty))
+symbol RewriteGoal' T (a b : tEv T) P : tEv (
+  a = b ∙ ∅ ⊧ P b ∙ ∅ ⟹
+  a = b ∙ ∅ ⊧ P a ∙ ∅)
 ≔ begin
   assume T a b P s eq pa;
   refine s eq _;
   rewrite left eq;
   refine pa;
 end;
+symbol RewriteGoal {T} a b P eab pa s ≔ RewriteGoal' T a b P s eab pa;
 
-symbol rewrite_fmla_hyp A B P : tEv (
-  hyp (A ⇔ B) (hyp (P B) empty) ⇒
-  hyp (A ⇔ B) (hyp (P A) empty))
+symbol RewriteFmlaHyp' A B P : tEv (
+  A ⇔ B ∙ P B ∙ ∅ ⊧ ∅ ⟹
+  A ⇔ B ∙ P A ∙ ∅ ⊧ ∅)
 ≔ λ s eab pa, s eab (iff_eq A B eab (λ x, P x) pa);
+symbol RewriteFmlaHyp a b P eab pa s ≔ RewriteFmlaHyp' a b P s eab pa;
 
-symbol rewrite_fmla_goal A B P : tEv (
-  hyp (A ⇔ B) (goal (P B) empty) ⇒
-  hyp (A ⇔ B) (goal (P A) empty))
+symbol RewriteFmlaGoal' A B P : tEv (
+  (A ⇔ B) ∙ ∅ ⊧ P B ∙ ∅ ⟹
+  (A ⇔ B) ∙ ∅ ⊧ P A ∙ ∅)
 ≔ λ s eab pa, s eab (iff_eq A B eab (λ x, ¬ P x) pa);
+symbol RewriteFmlaGoal a b P eab pa s ≔ RewriteFmlaGoal' a b P s eab pa;
 
-symbol strong_induction a P : tEv (
-  (`∀ x, hyp (x ≤ a) (goal (P x) empty)) ⇒
-  (`∀ x, hyp (a < x) (hyp (`∀ n : Z, n < x ⇒ P n) (goal (P x) empty))) ⇒
-  `∀ x, goal (P x) empty)
+symbol Induction' a P : tEv (
+  (`∀ x, x ≤ a ∙ ∅ ⊧ P x ∙ ∅) ⟹
+  (`∀ x, a < x ∙ (`∀ n : Z, n < x ⇒ P n) ∙ ∅ ⊧ P x ∙ ∅) ⟹
+  `∀ x, ∅ ⊧ P x ∙ ∅)
 ≔ begin
   assume a P pbase prec x;
   refine nni (P x) _;
@@ -2299,6 +2330,7 @@ symbol strong_induction a P : tEv (
   refine nne (P z) _;
   refine prec z Ha Hrec;
 end;
+symbol Induction a P x H s1 s2 ≔ Induction' a P s1 s2 x H;
 
 
 // COMPATIBILITY WITH IDENTIFIERS FROM Why3
