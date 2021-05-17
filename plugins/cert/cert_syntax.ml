@@ -371,17 +371,18 @@ and prpv fmt = function
   | CTtrue -> fprintf fmt "true"
   | ct -> fprintf fmt "(%a)" pcte ct
 
-type ('t, 'ty) ctask =
-  { get_ls : string -> lsymbol; (* remember interpreted symbols for efficiency*)
+type 't ctask =
+  { uid : ident; (* A unique identifier of the task *)
+    get_ls : string -> lsymbol; (* remember interpreted symbols for efficiency*)
     types_interp : Sid.t; (* interpreted types *)
     types : Sid.t; (* types *)
-    sigma_interp : 'ty Mid.t; (* interpreted variables with their type *)
-    sigma : 'ty Mid.t; (* variables with their type *)
+    sigma_interp : ctype Mid.t; (* interpreted variables with their type *)
+    sigma : ctype Mid.t; (* variables with their type *)
     gamma_delta : ('t * bool) Mid.t (* names of premises with their formula and
     their positivity (false means it's an hypothesis, true means it's a goal) *)
   }
 
-type kernel_ctask = (cterm, ctype) ctask
+type kernel_ctask = cterm ctask
 
 (** Pretty printing of ctask *)
 
@@ -467,12 +468,16 @@ let find_formula s h cta =
       verif_failed s
 
 let ctask_new get_ls types_interp sigma_interp =
-  { get_ls;
+  { uid = id_register (id_fresh "s");
+    get_ls;
     types_interp;
     types = Sid.empty;
     sigma_interp;
     sigma = Mid.empty;
     gamma_delta = Mid.empty }
+
+let dummy_ctask _ =
+  ctask_new (fun _ -> assert false) Sid.empty Mid.empty
 
 let lift_mid_cta f cta =
   { cta with gamma_delta = f (cta.gamma_delta) }
