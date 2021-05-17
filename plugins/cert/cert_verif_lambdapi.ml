@@ -15,44 +15,29 @@ open Cert_certificates
    ∀ x₁ : ty₁, ... ∀ xᵢ: tyᵢ,
    A₁ → ... → Aⱼ →
    ¬B₁ → ... → ¬Bₖ → ⊥
-   As an intermediate data structure we use lists to fix the order
  *)
-type ctask_simple =
-  { t  : ident list;
-    s  : (ident * ctype) list;
-    gd : (ident * cterm) list }
 
-let simplify_task cta : ctask_simple =
-  let encode_neg (k, (ct, pos)) = k, if pos then CTnot ct else ct in
-  { t = Sid.elements cta.types;
-    s = Mid.bindings cta.sigma;
-    gd = Mid.bindings cta.gamma_delta
-         |> List.map encode_neg }
-
-let rec print_task fmt {t; s; gd} =
-  let s = List.map (fun id -> id, CTprop) t @ s in
-  fprintf fmt "tEv (@[<hv>%a@])"
-    print_s {t = []; s; gd}
-
-and print_s fmt {s; gd} =
-  match s with
-  | [] -> print_gd fmt gd
-  | (id, cty)::s ->
-      let pred = is_predicate cty in
-      fprintf fmt "%a %a : %a,@ %a"
-        prquant pred
-        prid id
-        prty cty
-        print_s {t = []; s; gd}
-
-and prquant fmt pred =
+let prquant fmt pred =
   if pred then fprintf fmt "`π"
   else fprintf fmt "`∀"
 
-and print_gd fmt gd =
-  let _, terms = List.split gd in
-  let tp = terms @ [CTfalse] in
-  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ⇒@ ") prdisj fmt tp
+let print_decl fmt id cty =
+  let pred = is_predicate cty in
+  fprintf fmt "%a %a : %a,@ "
+    prquant pred
+    prid id
+    prty cty
+
+let encode_neg (ct, pos) = if pos then CTnot ct else ct
+
+let print_task_type fmt {types; sigma; gamma_delta} =
+  fprintf fmt "tEv (@[<hv>";
+  Sid.iter (fun id -> print_decl fmt id CTprop) types;
+  Mid.iter (print_decl fmt) sigma;
+  Mid.iter (fun _ tp -> fprintf fmt "%a ⇒@ "
+                          prdisj (encode_neg tp)) gamma_delta;
+  prpv fmt CTfalse;
+  fprintf fmt "@])"
 
 let print_certif print_next fmt c =
   let rstr pos = if pos then "Goal" else "Hyp" in
@@ -61,6 +46,7 @@ let print_certif print_next fmt c =
   | EFoldIff _ | EEqSym _ | EEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/Eq/Let left"
   | EHole task_id ->
+      (* TODO *)
       print_next fmt task_id
   | EAxiom (t, i1, i2) ->
       fprintf fmt "Axiom %a %a %a"
