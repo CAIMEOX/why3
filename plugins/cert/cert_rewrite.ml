@@ -66,12 +66,12 @@ let rewrite_in rev with_terms prh pri task =
               | Tapp (ls, [t1; t2]) when ls_equal ls ps_equ ->
                   (* Support to rewrite from the right *)
                   if rev
-                  then (fun c -> c), t1, t2
-                  else (fun c -> EqSym (nprh, c)), t2, t1
+                  then idc, t1, t2
+                  else eqsym nprh, t2, t1
               | Tbinop (Tiff, t1, t2) ->
                   (* Support to rewrite from the right *)
                   if rev
-                  then (fun c -> c), t1, t2
+                  then idc, t1, t2
                   else iffsym_hyp nprh, t2, t1
               | _ -> raise (Arg_bad_hypothesis ("rewrite", f)) in
             Some (lp, lv, llet, revert, t1, t2, trew)
@@ -113,30 +113,30 @@ let rewrite_in rev with_terms prh pri task =
         let pr = Task.task_goal task in
         let n = List.length lp + 1 in
         let cert =
-          lambda (List n) (fun l ->
-              let rec app_inst trew lid lv c = match trew.t_node, lid with
+          lambdan n (fun l ->
+              let rec app_inst trew lid lv = match trew.t_node, lid with
                 | Tbinop (Timplies, _, trew), id::lid ->
-                    let c = app_inst trew lid lv c in
-                    Unfold (nprh, Split (nprh,
-                    Clear (pr, Swap (nprh, rename nprh pr (Hole id))),
-                    c))
+                    unfold nprh ++ split nprh +++
+                      [clear pr ++ swap nprh ++ rename nprh pr ++ return id;
+                       app_inst trew lid lv]
                 | Tquant (Tforall, fq), _ ->
                     let vsl, _, trew = t_open_quant fq in
-                    let rec inst lv vsl c = match lv, vsl with
-                      | _, [] -> app_inst trew lid lv c
+                    let rec inst lv vsl = match lv, vsl with
+                      | _, [] -> app_inst trew lid lv
                       | v::lv, _::vsl ->
-                          let c = inst lv vsl c in
+                          let c = inst lv vsl in
                           let tv = Mvs.find v subst in
-                          InstQuant (nprh, nprh, tv, c)
+                          instquant nprh nprh tv ++ c
                       | _ -> assert false in
-                    inst lv vsl c
-                | _ -> c in
+                    inst lv vsl
+                | _ -> idc in
               let id, lid = match l with
                 | [] -> assert false
                 | h::t -> h, t in
-              let rew_cert = Rewrite (nprh, pri, Clear (nprh, Hole id)) in
-              Duplicate (prh, nprh,
-              app_inst trew lid lv (revert rew_cert))) in
+              let rew_cert = rewrite nprh pri ++ clear nprh ++ return id in
+              let rcert = duplicate prh nprh ++
+                            app_inst trew lid lv ++ revert ++ rew_cert in
+              apply rcert) in
 
         Trans.store (fun task ->
             Trans.apply (Trans.par (trans_rewriting :: list_par)) task,
