@@ -14,7 +14,7 @@ open Cert_abstract
 (* We will denote a ctask <{sigma; gamma_delta}> by <Σ | Γ ⊢ Δ>
    We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ> *)
 
-type ('v, 'h, 't) scert =
+type ('a, 'v, 'h, 't) scert =
   (* 'v is used to designate variables, 'h is used to designate an hypothesis,
      't is used for terms *)
   (* Replaying a certif cert against a ctask cta will be denoted <cert ⇓ cta>.
@@ -22,14 +22,14 @@ type ('v, 'h, 't) scert =
      <Cert_verif_caml.ccheck>. *)
   | Nc
   (* Makes verification fail : use it as a placeholder *)
-  (* | Hole of 'a *)
+  | Hole of 'a
   (* Hole ct ⇓ (Γ ⊢ Δ) stands iff ct refers to <Γ ⊢ Δ> *)
-  | Assert of 'h * ('t Mid.t -> 't) * ('v, 'h, 't) scert * ('v, 'h, 't) scert
+  | Assert of 'h * ('t Mid.t -> 't) * ('a, 'v, 'h, 't) scert * ('a, 'v, 'h, 't) scert
   (* Assert (i, t, c₁, c₂) ⇓ (Σ | Γ ⊢ Δ) ≜
          c₁ ⇓ (Σ | Γ ⊢ Δ, i : t)
      and c₂ ⇓ (Σ | Γ, i : t ⊢ Δ)
      and Σ ⊩ t : prop *)
-  | Let of 't * 'h * ('v, 'h, 't) scert
+  | Let of 't * 'h * ('a, 'v, 'h, 't) scert
   (* Let (x, i, c) ⇓ t ≜  c[x → i(t)] ⇓ t *)
   (* Meaning : in c, x is mapped to the formula identified by i in task t *)
   | Axiom of 'h * 'h
@@ -39,77 +39,77 @@ type ('v, 'h, 't) scert =
   (* Trivial i ⇓ (Γ, i : false ⊢ Δ) stands *)
   (* Trivial i ⇓ (Γ ⊢ Δ, i : true ) stands *)
   (* Trivial i ⇓ (Γ ⊢ Δ, i : t = t) stands *)
-  | EqSym of 'h * ('v, 'h, 't) scert
+  | EqSym of 'h * ('a, 'v, 'h, 't) scert
   (* EqSym (i, c) ⇓ (Γ ⊢ Δ, i : t₁ = t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₂ = t₁) *)
   (* EqSym (i, c) ⇓ (Γ, i : t₁ = t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ = t₁ ⊢ Δ) *)
-  | EqTrans of 'h * 'h * 'h * ('v, 'h, 't) scert
+  | EqTrans of 'h * 'h * 'h * ('a, 'v, 'h, 't) scert
   (* EqTrans (i₁, i₂, i₃, c) ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃ ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃, i₃ : t₁ = t₃ ⊢ Δ) *)
-  | Unfold of 'h * ('v, 'h, 't) scert
+  | Unfold of 'h * ('a, 'v, 'h, 't) scert
   (* Unfold (i, c) ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) *)
   (* Unfold (i, c) ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) *)
   (* Unfold (i, c) ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ)*)
   (* Unfold (i, c) ⇓ (Γ ⊢ Δ, i : t₁ → t₂) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂)*)
-  | Fold of 'h * ('v, 'h, 't) scert
+  | Fold of 'h * ('a, 'v, 'h, 't) scert
   (* Fold (i, c) ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) ≜
      c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) *)
   (* Fold (i, c) ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) ≜
      c ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) *)
   (* Fold (i, c) ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) *)
   (* Fold (i, c) ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₁ → t₂) *)
-  | Split of 'h * ('v, 'h, 't) scert * ('v, 'h, 't) scert
+  | Split of 'h * ('a, 'v, 'h, 't) scert * ('a, 'v, 'h, 't) scert
   (* Split (i, c₁, c₂) ⇓ (Γ, i : t₁ ∨ t₂ ⊢ Δ) ≜
      c₁ ⇓ (Γ, i : t₁ ⊢ Δ)
      and c₂ ⇓ (Γ, i : t₂ ⊢ Δ) *)
   (* Split (i, c₁, c₂) ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜
      c₁ ⇓ (Γ ⊢ Δ, i : t₁)
      and c₂ ⇓ (Γ ⊢ Δ, i : t₂) *)
-  | Destruct of 'h * 'h * 'h * ('v, 'h, 't) scert
+  | Destruct of 'h * 'h * 'h * ('a, 'v, 'h, 't) scert
   (* Destruct (i, i₁, i₂, c) ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) *)
   (* Destruct (i, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i : t₁ ∨ t₂) ≜
      c ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) *)
-  | Construct of 'h * 'h * 'h * ('v, 'h, 't) scert
+  | Construct of 'h * 'h * 'h * ('a, 'v, 'h, 't) scert
   (* Construct (i₁, i₂, i, c) ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) *)
   (* Construct (i₁, i₂, i, c) ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) *)
-  | Swap of 'h * ('v, 'h, 't) scert
+  | Swap of 'h * ('a, 'v, 'h, 't) scert
   (* Swap (i, c) ⇓ (Γ, i : ¬t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : t) *)
   (* Swap (i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t) *)
   (* Swap (i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ, i : ¬t ⊢ Δ) *)
   (* Swap (i, c) ⇓ (Γ ⊢ Δ, i : ¬t) ≜  c ⇓ (Γ, i : t ⊢ Δ) *)
-  | Clear of 'h * ('v, 'h, 't) scert
+  | Clear of 'h * ('a, 'v, 'h, 't) scert
   (* Clear (i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Clear (i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | Forget of 'v * ('v, 'h, 't) scert
+  | Forget of 'v * ('a, 'v, 'h, 't) scert
   (* Forget (i, c) ⇓ (Σ, i | Γ ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | Duplicate of 'h * 'h * ('v, 'h, 't) scert
+  | Duplicate of 'h * 'h * ('a, 'v, 'h, 't) scert
   (* Duplicate (i₁, i₂, c) ⇓ (Γ ⊢ Δ, i₁ : t) ≜  c ⇓ (Γ ⊢ Δ, i₁ : t, i₂ : t) *)
   (* Duplicate (i₁, i₂, c) ⇓ (Γ, i₁ : t ⊢ Δ) ≜  c ⇓ (Γ, i₁ : t, i₂ : t ⊢ Δ) *)
-  | IntroQuant of 'h * 't * ('v, 'h, 't) scert
+  | IntroQuant of 'h * 't * ('a, 'v, 'h, 't) scert
   (* IntroQuant (i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p ⊢ Δ) ≜
      c ⇓ (Σ, y : τ | Γ, i : p[x ↦ y] ⊢ Δ)
      and y ∉  Σ *)
   (* IntroQuant (i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p) ≜
      c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p[x ↦ y])
      and y ∉  Σ *)
-  | InstQuant of 'h * 'h * 't * ('v, 'h, 't) scert
+  | InstQuant of 'h * 'h * 't * ('a, 'v, 'h, 't) scert
   (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p ⊢ Δ) ≜
      c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p x, i₂ : p[x ↦ t] ⊢ Δ)
      and Σ ⊩ t : τ *)
   (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p) ≜
      c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p[x ↦ t])
      and Σ ⊩ t : τ *)
-  | Rewrite of 'h * 'h * ('v, 'h, 't) scert
+  | Rewrite of 'h * 'h * ('a, 'v, 'h, 't) scert
   (* Rewrite (i₁, i₂, c) ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
      c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
   (* Rewrite (i₁, i₂, c) ⇓ (Γ, H : t₁ = t₂, i₁ : ctxt[t₁] ⊢ Δ) ≜
      c ⇓ (Γ, H : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
   | Induction of 'h * 'h * 'h * 'h * 't * ('t Mid.t -> 't)
-                 * ('v, 'h, 't) scert * ('v, 'h, 't) scert
+                 * ('a, 'v, 'h, 't) scert * ('a, 'v, 'h, 't) scert
 (* Induction (G, Hi₁, Hi₂, Hr, x, a, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
    c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
    and c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
@@ -119,9 +119,9 @@ type ('v, 'h, 't) scert =
 (* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
    stands for this context where the holes have been replaced with t *)
 
-type wscert = (lsymbol, prsymbol, term) scert
+type 'a wscert = ('a, lsymbol, prsymbol, term) scert
 
-type sc = int * (wscert list -> wscert)
+type 'a sc = int * ('a wscert list -> 'a wscert)
 
 let fail_arg () = verif_failed "Argument arity mismatch when composing certificates"
 
@@ -165,7 +165,7 @@ let ( *** ) (n1, f1) lc2 =
   let n = List.fold_left (fun acc (n, _) -> acc + n) 0 lc2 in
   n, fun lu -> f1 (dispatch lu lc2)
 
-let ( ** ) (n1, f1) c2 : sc =
+let ( ** ) (n1, f1) c2 : 'a sc =
   let lc2 = List.init n1 (fun _ -> c2) in
   (n1, f1) *** lc2
 
@@ -190,7 +190,7 @@ let rewrite i1 i2 = lambda1 (fun a -> Rewrite (i1, i2, a))
 let induction g hi1 hi2 hr x a =
   lambda2 (fun a1 a2 -> Induction (g, hi1, hi2, hr, x, a, a1, a2))
 
-let llet pr (cont : ident -> sc) : sc =
+let llet pr (cont : ident -> 'a sc) : 'a sc =
   let ls = create_psymbol (id_fresh "Let_var") [] in
   let t = t_app ls [] None in
   lambda1 (fun u -> Let (t, pr, u)) ** cont ls.ls_name
@@ -228,7 +228,7 @@ let iffsym_hyp i c =
 
 let nc = [], Nc
 
-type ctrans = sc ctransformation
+type 'a ctrans = 'a sc ctransformation
 
 type ('v, 'h, 't, 'ty) ecert =
   (* 'v is used to designate a variable, 'h is used to designate an hypothesis,
@@ -363,15 +363,15 @@ let rec print_certif filename cert =
   fprintf fmt "%a@." prcertif cert;
   close_out oc
 
-and prcvit : type v i t. (formatter -> v -> unit) ->
+and prcvit : type a v i t. (formatter -> v -> unit) ->
                  (formatter -> i -> unit) ->
                  (formatter -> t -> unit) ->
-                 formatter -> (v, i, t) scert -> unit
+                 formatter -> (a, v, i, t) scert -> unit
   = fun prv pri prt fmt c ->
   let prc = prcvit prv pri prt in
   match c with
   | Nc -> fprintf fmt "No_certif"
-  (* | Hole ct -> fprintf fmt "Hole %a" prid ct *)
+  | Hole ct -> fprintf fmt "Hole"
   | Assert (i, _, c1, c2) ->
       fprintf fmt "Assert (@[%a, <fun>,@ @[<4>%a@],@ @[<4>%a@])@]"
         pri i prc c1 prc c2
@@ -417,7 +417,7 @@ let eprcertif c = eprintf "%a@." prcertif c
 
 (* Use propagate to define recursive functions on elements of type cert *)
 let propagate_cert fc fv fi = function
-  | Nc -> Nc
+  | (Hole _ | Nc) as c -> c
   | Axiom (h, g) -> Axiom (fi h, fi g)
   | Trivial i -> Trivial (fi i)
   | EqSym (i, c) -> EqSym (fi i, fc c)
@@ -566,10 +566,11 @@ let t_open_quant_one q tq = match t_open_quant tq with
   | _ -> raise Elaboration_failed
 
 
-let elaborate init_ct c =
+let elaborate init_ct res_ct (_, f) =
+  let c = f (List.map (fun u -> Hole u) res_ct) in
   let rec elaborate (map : term Mid.t)
             (cta : (term, ctype) ctask)
-            (c : (ident, ident, term) scert)
+            (c : ('a, ident, ident, term) scert)
     : (ident, ident, term, ty option) ecert
     =
     (* the map argument registers Let-defined variables and is used
@@ -858,7 +859,7 @@ let rec trim_certif c =
   | _ -> propagate_ecert trim_certif (fun t -> t) (fun i -> i) (fun ty -> ty) c
 
 let make_kernel_cert init_ct _res_ct
-      (v, c : visible_cert) =
+      (v, c : 'a sc) =
   v, pr_name_cert c
      |> elaborate init_ct
      |> abstract_ecert
