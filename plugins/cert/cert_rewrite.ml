@@ -134,9 +134,8 @@ let rewrite_in rev with_terms prh pri task =
                 | [] -> assert false
                 | h::t -> h, t in
               let rew_cert = rewrite nprh pri ++ clear nprh ++ return id in
-              let rcert = duplicate prh nprh ++
-                            app_inst trew lid lv ++ revert ++ rew_cert in
-              apply rcert) in
+              duplicate prh nprh ++
+                app_inst trew lid lv ++ revert ++ rew_cert) in
 
         Trans.store (fun task ->
             Trans.apply (Trans.par (trans_rewriting :: list_par)) task,

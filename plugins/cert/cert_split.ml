@@ -257,12 +257,6 @@ let destruct_reconstruct pr c1 c2 =
   c2 ++
   construct pr1 pr pr
 
-  (* lambda one (fun i -> Destruct (pr, pr, pr2, Hole i))
-   * |>> c1
-   * ||> fun () -> lambda one (fun i -> rename pr pr1 (rename pr2 pr (Hole i)))
-   * ||> refresh c2
-   * ||> fun () -> lambda one (fun i -> Construct (pr1, pr, pr, Hole i)) *)
-
 let find_pr mon =
   let open Mterm in
   let map = List.fold_left (fun map (pr, t) -> add t pr map)
@@ -407,12 +401,11 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
         let add_all = add_all sf1.disj sf2.disj disj AddAnd in
         let remove_all = remove_all sf1.disj sf2.disj in
         let dp = lambda1 (fun t ->
-                     let c = (split pr +++
-                               [rename pr pr1; rename pr pr2]) +++
-                               [sf1.dp ; sf2.dp] +++
-                               [add_all true  ++ remove_all true  ++ return t;
-                                add_all false ++ remove_all false ++ return t] in
-                     apply c) in
+                     split pr +++
+                       [rename pr pr1; rename pr pr2] +++
+                       [sf1.dp ; sf2.dp] +++
+                       [add_all true  ++ remove_all true  ++ return t;
+                        add_all false ++ remove_all false ++ return t]) in
         ret conj cp cn
           disj dn dp
           bwd fwd side false (cn1 || cn2)
@@ -455,12 +448,11 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
         let add_all = add_all sf1.disj sf2.conj conj AddImplies in
         let remove_all = remove_all sf1.disj sf2.conj in
         let cn = lambda1 (fun t ->
-                     let c = unfold pr ++ split pr +++
-                               [swap pr ++ sf1.dp ++ swap_all sf1.disj;
-                                sf2.cn ] +++
-                               [add_all true  ++ remove_all true  ++ return t;
-                                add_all false ++ remove_all false ++ return t] in
-                     apply c) in
+                     unfold pr ++ split pr +++
+                       [swap pr ++ sf1.dp ++ swap_all sf1.disj;
+                        sf2.cn ] +++
+                       [add_all true  ++ remove_all true  ++ return t;
+                        add_all false ++ remove_all false ++ return t]) in
         let dn = unfold pr ++ split pr +++
                    [swap pr ++ sf1.cp ++ swap pr;
                     sf2.dn] in
@@ -494,11 +486,10 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
         let add_all = add_all sf1.conj sf2.conj conj AddOr in
         let remove_all = remove_all sf1.conj sf2.conj in
         let cn = lambda1 (fun t ->
-                     let c = split pr +++
-                             [sf1.cn ; sf2.cn] +++
-                             [add_all true  ++ remove_all true  ++ return t;
-                              add_all false ++ remove_all false ++ return t] in
-                     apply c) in
+                     split pr +++
+                       [sf1.cn ; sf2.cn] +++
+                       [add_all true  ++ remove_all true  ++ return t;
+                        add_all false ++ remove_all false ++ return t]) in
         let dn = split pr +++ [sf1.dn; sf2.dn] in
         let dp = destruct pr pr1 pr2 ++ sf1.dp ++ sf2.dp in
         ret conj cp cn
