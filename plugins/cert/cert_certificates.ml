@@ -177,7 +177,7 @@ let (+++) (n1, f1) lc2 =
   n, fun lu -> f1 (dispatch lu lc2)
 
 let (++) (n1, f1) c2 : scert =
-  let lc2 = List.init n1 (fun _ -> c2) in
+  let lc2 = Lists.init n1 (fun _ -> c2) in
   (n1, f1) +++ lc2
 
 let nc = 0, fun _ -> Nc
@@ -414,7 +414,7 @@ and prcvit : type v i. (formatter -> v -> unit) ->
 
 and prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
 and prcertif fmt (n, c) =
-  let cts = List.init n dummy_ctask in
+  let cts = Lists.init n dummy_ctask in
   let lid = List.map (fun ct -> ct.uid) cts in
   let c = fill_tasks (n, c) cts in
   fprintf fmt "@[<v>[%a],@ @[%a@]@]"
