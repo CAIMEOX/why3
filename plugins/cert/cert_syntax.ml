@@ -372,7 +372,8 @@ and prpv fmt = function
   | ct -> fprintf fmt "(%a)" pcte ct
 
 type ('t, 'ty) ctask =
-  { get_ls : string -> lsymbol; (* remember interpreted symbols for efficiency*)
+  { uid : ident; (* A unique identifier of the task *)
+    get_ls : string -> lsymbol; (* remember interpreted symbols for efficiency*)
     types_interp : Sid.t; (* interpreted types *)
     types : Sid.t; (* types *)
     sigma_interp : 'ty Mid.t; (* interpreted variables with their type *)
@@ -467,7 +468,8 @@ let find_formula s h cta =
       verif_failed s
 
 let ctask_new get_ls types_interp sigma_interp =
-  { get_ls;
+  { uid = id_register (id_fresh "s");
+    get_ls;
     types_interp;
     types = Sid.empty;
     sigma_interp;

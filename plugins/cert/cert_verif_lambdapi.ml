@@ -39,15 +39,22 @@ let print_task_type fmt {types; sigma; gamma_delta} =
   prpv fmt CTfalse;
   fprintf fmt "@])"
 
-let print_certif print_next fmt c =
+let decl_hyp_ids ct =
+  let decl_ids = Sid.elements ct.types @ Mid.keys ct.sigma in
+  let hyp_ids = Mid.keys ct.gamma_delta in
+  decl_ids, hyp_ids
+
+let print_certif fmt c =
   let rstr pos = if pos then "Goal" else "Hyp" in
   let rec pc fmt = function
   | EConstruct _ | EDuplicate _ | EFoldArr _
   | EFoldIff _ | EEqSym _ | EEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/Eq/Let left"
-  | EHole task_id ->
-      (* TODO *)
-      print_next fmt task_id
+  | EHole ct ->
+      let decl_ids, hyp_ids = decl_hyp_ids ct in
+      fprintf fmt "@[%a %a@]"
+        (print_list prid) (ct.uid :: decl_ids)
+        (print_list prhyp) hyp_ids
   | EAxiom (t, i1, i2) ->
       fprintf fmt "Axiom %a %a %a"
         prpv t prhyp i1 prhyp i2
@@ -133,34 +140,21 @@ let print_certif print_next fmt c =
   in
   pc fmt c
 
-let print fmt init res (task_ids, certif) =
-  let res = List.map simplify_task res in
-  let init = simplify_task init in
+let print fmt init res certif =
   (* The type we need to check is inhabited. *)
   let p_type fmt () =
     pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " →@ ")
-      print_task fmt (res @ [init]) in
-  (* The following function is used to fill the holes. *)
-  let print_applied_task =
-    let map = Mid.of_list (List.combine task_ids res) in
-    fun fmt task_id ->
-    let {t; s; gd} = Mid.find task_id map in
-    let fv_ids, _ = List.split s in
-    let hyp_ids, _ = List.split gd in
-    fprintf fmt "@[%a %a@]"
-      (print_list prid) (task_id :: t @ fv_ids)
-      (print_list prhyp) hyp_ids in
+      print_task_type fmt (res @ [init]) in
   (* The term that has the correct type. *)
   let p_term fmt () =
-    let {t; s; gd} = init in
-    let fv_ids, _ = List.split s in
-    let hyp_ids, _ = List.split gd in
+    let decl_ids, hyp_ids = decl_hyp_ids init in
+    let task_ids = List.map (fun ct -> ct.uid) res in
     fprintf fmt "@[<2>@<1>%s %a@ %a@]"
       "λ"
-      (print_list prid) (task_ids @ t @ fv_ids)
+      (print_list prid) (task_ids @ decl_ids)
       (print_list prhyp) hyp_ids;
     fprintf fmt ",@ ";
-    print_certif print_applied_task fmt certif in
+    print_certif fmt certif in
 
   fprintf fmt "@[<v>require open cert_lambdapi.preamble;@ @ \
                unif_rule Type ≡ kEv $t ↪ [ $t ≡ DType ];@ \

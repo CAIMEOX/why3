@@ -212,10 +212,10 @@ let rename i1 i2 =
 (* rename i₁ i₂ c ⇓ (Γ ⊢ Δ, i₁ : t) ≜  c ⇓ (Γ ⊢ Δ, i₂ : t) *)
 (* rename i₁ i₂ c ⇓ (Γ, i₁ : t ⊢ Δ) ≜  c ⇓ (Γ, i₂ : t ⊢ Δ) *)
 
-let dir d i c =
+let dir d i =
   let j = create_prsymbol (id_fresh "dir") in
   let left, right = if d then j, i else i, j in
-  Destruct (i, left, right, Clear (j, c))
+  destruct i left right ** clear j
 (* dir false i c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ ⊢ Δ) *)
 (* dir true i c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ ⊢ Δ) *)
 (* dir false i c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₁) *)
@@ -531,15 +531,16 @@ let rec elab_lambda_prop = function
 
 exception Elaboration_failed
 
-let elab_apply (_, f) res_ct =
-  f (List.map (fun u -> Hole u) res_ct)
+let elab_apply (n, f) res_ct =
+  if List.length res_ct = n
+  then f (List.map (fun u -> Hole u) res_ct)
+  else verif_failed "Wrong number of holes in certificate"
 
 let t_open_quant_one q tq = match t_open_quant tq with
   | vs::vsl, trg, t_open ->
       let nt = t_quant q (t_close_quant vsl trg t_open) in
       vs, nt
   | _ -> raise Elaboration_failed
-
 
 let elaborate init_ct c =
   let rec elaborate (map : term Mid.t)

@@ -113,13 +113,13 @@ let rewrite_in rev with_terms prh pri task =
         let pr = Task.task_goal task in
         let n = List.length lp + 1 in
         let cert =
-          lambda (List n) (fun l ->
+          lambdan n (fun l ->
               let rec app_inst trew lid lv c = match trew.t_node, lid with
                 | Tbinop (Timplies, _, trew), id::lid ->
                     let c = app_inst trew lid lv c in
-                    Unfold (nprh, Split (nprh,
-                    Clear (pr, Swap (nprh, rename nprh pr (Hole id))),
-                    c))
+                    unfold nprh ** split nprh ***
+                      [clear pr ** swap nprh ** rename nprh pr;
+                       c]
                 | Tquant (Tforall, fq), _ ->
                     let vsl, _, trew = t_open_quant fq in
                     let rec inst lv vsl c = match lv, vsl with
@@ -127,16 +127,16 @@ let rewrite_in rev with_terms prh pri task =
                       | v::lv, _::vsl ->
                           let c = inst lv vsl c in
                           let tv = Mvs.find v subst in
-                          InstQuant (nprh, nprh, tv, c)
+                          instquant nprh nprh tv ** c
                       | _ -> assert false in
                     inst lv vsl c
                 | _ -> c in
               let id, lid = match l with
                 | [] -> assert false
                 | h::t -> h, t in
-              let rew_cert = Rewrite (nprh, pri, Clear (nprh, Hole id)) in
-              Duplicate (prh, nprh,
-              app_inst trew lid lv (revert rew_cert))) in
+              let rew_cert = rewrite nprh pri ** clear nprh in (* id *)
+              duplicate prh nprh **
+                app_inst trew lid lv (revert rew_cert)) in
 
         Trans.store (fun task ->
             Trans.apply (Trans.par (trans_rewriting :: list_par)) task,
@@ -145,7 +145,7 @@ let rewrite_in rev with_terms prh pri task =
   (* Composing previous functions *)
   Trans.apply (Trans.bind (Trans.bind found_eq lp_new) recreate_tasks) task
 
-let rewrite g rev with_terms where : ctrans =
+let rewrite g rev with_terms where : 'a ctrans =
   Trans.store (fun task ->
       let h1 = default_goal task where in
       let wt = match with_terms with Some wt -> wt | None -> [] in
