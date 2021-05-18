@@ -125,39 +125,40 @@ type scert = int * (wsc list -> wsc)
 
 let fail_arg () = verif_failed "Argument arity mismatch when composing certificates"
 
-let lambda0 c = 0, fun _ -> c
-let lambda1 f = 1, fun l -> match l with [u] -> f u | _ -> fail_arg ()
-let lambda2 f = 2, fun l -> match l with [u1; u2] -> f u1 u2 | _ -> fail_arg ()
-let lambdan n f = n, f
-
-let return = lambda0
-let apply (_, f) = f []
-
 let fill_tasks (n, f) res_ct =
   if List.length res_ct = n
   then f (List.map (fun u -> Hole u) res_ct)
   else verif_failed "Wrong number of holes in certificate"
 
-(* type ('a, 'b) args =
- *   | Z : ('a, 'a wscert) args
- *   | Succ : ('a, 'b) args -> ('a, 'a wscert -> 'b) args
- *   | List : int -> ('a, 'a wscert list -> 'a wscert) args
- * 
- * let one = Succ Z
- * let two = Succ one
- * 
- * let rec lambda : type a b. (a, b) args -> b -> a sc = fun args f ->
- *   match args with
- *   | Z -> 0, fun _ -> f
- *   | Succ args ->
- *       let i1 = create_prsymbol (id_fresh "i1") in
- *       let i2 = create_prsymbol (id_fresh "i2") in
- *       let dummy_cert = Axiom (i1, i2) in
- *       let n, _ = lambda args (f dummy_cert) in
- *       n, (fun l -> let i, l = List.hd l, List.tl l in
- *                    let _, c = lambda args (f i) in
- *                    c l)
- *   | List n -> n, f *)
+type 'a args =
+  | Z : wsc args
+  | Succ : 'a args -> (wsc -> 'a) args
+
+let rec lambda : type a. a args -> a -> wsc list -> wsc = fun args f ->
+  match args with
+  | Z -> fun _ -> f
+  | Succ args -> function
+                  [] -> assert false
+                | h::l -> lambda args (f h) l
+
+let rec arity : type a. a args -> int = fun args ->
+  match args with
+  | Z -> 0
+  | Succ args -> arity args + 1
+
+let newcert : type a. a args -> a -> scert = fun args f ->
+  arity args, lambda args f
+
+let return c = newcert Z c
+let newcert1 f = newcert (Succ Z) f
+let newcert2 f = newcert (Succ (Succ Z)) f
+let newcertn n f = n, f
+
+let apply ((_, f) : scert) : wsc = f []
+
+let lambda1 f = newcert1 (fun t -> apply (f t))
+let lambda2 f = newcert2 (fun t1 t2 -> apply (f t1 t2))
+let lambdan n f = newcertn n (fun l -> apply (f l))
 
 let rec cut n = function
   | h::t when n > 0 ->
@@ -180,32 +181,32 @@ let (++) (n1, f1) c2 : scert =
   let lc2 = Lists.init n1 (fun _ -> c2) in
   (n1, f1) +++ lc2
 
-let nc = 0, fun _ -> Nc
-let idc = 1, fun l -> match l with [u] -> u | _ -> fail_arg ()
-let assertion h t = lambda2 (fun a1 a2 -> Assert (h, t, a1, a2))
-let axiom i1 i2 = lambda0 (Axiom (i1, i2))
-let trivial i = lambda0 (Trivial i)
-let eqsym i = lambda1 (fun a -> EqSym (i, a))
-let eqtrans i1 i2 i3 = lambda1 (fun a -> EqTrans (i1, i2, i3, a))
-let unfold i = lambda1 (fun a -> Unfold (i, a))
-let fold i = lambda1 (fun a -> Fold (i, a))
-let split i = lambda2 (fun a1 a2 -> Split (i, a1, a2))
-let destruct i i1 i2 = lambda1 (fun a -> Destruct (i, i1, i2, a))
-let construct i1 i2 i = lambda1 (fun a -> Construct (i1, i2, i, a))
-let swap i = lambda1 (fun a -> Swap (i, a))
-let clear i = lambda1 (fun a -> Clear (i, a))
-let forget i = lambda1 (fun a -> Forget (i, a))
-let duplicate i1 i2 = lambda1 (fun a -> Duplicate (i1, i2, a))
-let introquant i t = lambda1 (fun a -> IntroQuant (i, t, a))
-let instquant i1 i2 t = lambda1 (fun a -> InstQuant (i1, i2, t, a))
-let rewrite i1 i2 = lambda1 (fun a -> Rewrite (i1, i2, a))
+let nc : scert = return Nc
+let idc : scert = newcert1 (fun t -> t)
+let assertion h t = newcert2 (fun a1 a2 -> Assert (h, t, a1, a2))
+let axiom i1 i2 = return (Axiom (i1, i2))
+let trivial i = return (Trivial i)
+let eqsym i = newcert1 (fun a -> EqSym (i, a))
+let eqtrans i1 i2 i3 = newcert1 (fun a -> EqTrans (i1, i2, i3, a))
+let unfold i = newcert1 (fun a -> Unfold (i, a))
+let fold i = newcert1 (fun a -> Fold (i, a))
+let split i = newcert2 (fun a1 a2 -> Split (i, a1, a2))
+let destruct i i1 i2 = newcert1 (fun a -> Destruct (i, i1, i2, a))
+let construct i1 i2 i = newcert1 (fun a -> Construct (i1, i2, i, a))
+let swap i = newcert1 (fun a -> Swap (i, a))
+let clear i = newcert1 (fun a -> Clear (i, a))
+let forget i = newcert1 (fun a -> Forget (i, a))
+let duplicate i1 i2 = newcert1 (fun a -> Duplicate (i1, i2, a))
+let introquant i t = newcert1 (fun a -> IntroQuant (i, t, a))
+let instquant i1 i2 t = newcert1 (fun a -> InstQuant (i1, i2, t, a))
+let rewrite i1 i2 = newcert1 (fun a -> Rewrite (i1, i2, a))
 let induction g hi1 hi2 hr x a =
-  lambda2 (fun a1 a2 -> Induction (g, hi1, hi2, hr, x, a, a1, a2))
+  newcert2 (fun a1 a2 -> Induction (g, hi1, hi2, hr, x, a, a1, a2))
 
 let llet pr (cont : ident -> scert) : scert =
   let ls = create_psymbol (id_fresh "Let_var") [] in
   let t = t_app ls [] None in
-  lambda1 (fun u -> Let (t, pr, u)) ++ cont ls.ls_name
+  newcert1 (fun u -> Let (t, pr, u)) ++ cont ls.ls_name
   (* n, Let (t, pr, cont ls.ls_name) *)
 
 let eqrefl i = trivial i
