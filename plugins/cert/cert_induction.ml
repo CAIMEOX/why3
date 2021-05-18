@@ -307,9 +307,8 @@ let induction x bound env =
       let open Opt in
       let g = get acc.g and hi1 = get acc.hi1 and hi2 = get acc.hi2 and
           hr = get acc.hr and rev = acc.reverted in
-      let c = revert_cert g rev
-              |>> lambda two (fun j1 j2 ->
-                      Induction (g, hi1, hi2, hr, x, thunk bound, Hole j1, Hole j2))
-              ||> refresh (intro_cert g rev) in
+      let c = revert_cert g rev ++
+                induction g hi1 hi2 hr x (thunk bound) ++
+                intro_cert g rev in
       [ti; tr], c)
 

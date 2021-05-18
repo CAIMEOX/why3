@@ -23,11 +23,11 @@ let all_dbg = Some eprcertif, Some eplcta
 
 let checker_ctrans
       ?env
-      (debug :   (visible_cert -> unit) option *
+      (debug :   (scert -> unit) option *
                  (kernel_ctask -> kernel_ctask list -> unit) option )
       (* is_lp *)
-      (checker : kernel_ecert -> kernel_ctask -> kernel_ctask list -> unit)
-      (ctr : visible_cert ctransformation)
+      (checker : kcert -> kernel_ctask -> kernel_ctask list -> unit)
+      (ctr : ctrans)
       (init_t : task) =
   try
     let dbg_cert, dbg_cta = debug in
@@ -37,10 +37,9 @@ let checker_ctrans
     Opt.iter (fun eprcertif -> eprcertif certif) dbg_cert;
     let abstract_task = abstract_task env in
     let init_ct = abstract_task init_t in
-    let res_ct = List.map abstract_task res_t in
-    let kernel_certif = make_kernel_cert init_ct res_t certif in
+    let res_ct = List.map (fun t -> abstract_terms_task (abstract_task t)) res_t in
+    let kernel_certif = make_kernel_cert init_ct res_ct certif in
     let init_ct = abstract_terms_task init_ct in
-    let res_ct = List.map abstract_terms_task res_ct in
     Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_cta;
     checker kernel_certif init_ct res_ct;
     (* let t3 = Unix.times () in *)

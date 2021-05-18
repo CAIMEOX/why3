@@ -18,7 +18,7 @@ let tprint_tg target =
           [d], None
       | _ -> [d], None)
 
-let tprint any every where : 'a ctrans =
+let tprint any every where : ctrans =
   Trans.store (fun task ->
       let tg = find_target any every where task in
       let ta, (_, c) = tprint_tg tg task in
@@ -32,12 +32,12 @@ let assumption_pr_t prg tg =
       | Dprop (Paxiom, pr, t) when t_equal t tg -> [], axiom pr prg
       | _ -> [[d]], idc)
 
-let assumption : 'a ctrans = Trans.store (fun task ->
+let assumption : ctrans = Trans.store (fun task ->
   let prg, tg = task_goal task, task_goal_fmla task in
   assumption_pr_t prg tg task)
 
 let find_contradict =
-  Trans.fold_decl (fun d (m, found, (cert : 'a sc)) ->
+  Trans.fold_decl (fun d (m, found, (cert : scert)) ->
       match d.d_node with
       | Dprop (Paxiom, pr, t) when not found ->
           let un_not_t = match t.t_node with Tnot t -> t | _ -> t_not t in
@@ -48,7 +48,7 @@ let find_contradict =
           Mterm.add t pr m, found, new_cert
       | _ -> m, found, cert) (Mterm.empty, false, idc)
 
-let contradict : 'a ctrans =
+let contradict : ctrans =
   Trans.store (fun task ->
       let _, found, c = Trans.apply find_contradict task in
       let res_task = if found then [] else [task] in
@@ -63,7 +63,7 @@ let ren pr1 =
           rename pr1 pr2
       | _ -> [d], idc)
 
-let crename pr1 : 'a ctrans =
+let crename pr1 : ctrans =
   Trans.store (fun task ->
       let ta, c = ren pr1 task in
       [ta], c)
@@ -71,7 +71,7 @@ let crename pr1 : 'a ctrans =
 
 (* Closes task if hypotheses contain false or if the goal is true or reflexivity
    of equality *)
-let close : 'a ctrans =
+let close : ctrans =
   Trans.store (fun task ->
       let trans =
         Trans.fold_decl (fun d acc ->
@@ -105,7 +105,7 @@ let destruct_tg target =
           Some (destruct pr pr1 pr2)
       | _ -> [d], None)
 
-let destruct_and any every where : 'a ctrans =
+let destruct_and any every where : ctrans =
   Trans.store (fun task ->
       let tg = find_target any every where task in
       let ta, (_, c) = destruct_tg tg task in
@@ -124,7 +124,7 @@ let split_or_and_tg target =
           | _ -> [[d]], None end
       | _ -> [[d]], None)
 
-let split_or_and any every where : 'a ctrans =
+let split_or_and any every where : ctrans =
   Trans.store (fun task ->
       let tg = find_target any every where task in
       let lta, (_, c) = split_or_and_tg tg task in
@@ -152,7 +152,7 @@ let destruct_all_tg target =
           | _ -> [[d]], None end
       | _ -> [[d]], None)
 
-let destruct_all any every where : 'a ctrans =
+let destruct_all any every where : ctrans =
   Trans.store (fun task ->
       let tg = find_target any every where task in
       let lta, (_, c) = destruct_all_tg tg task in
@@ -211,7 +211,7 @@ let neg_decompose_tg target =
           | _ -> [[d]], None end
       | _ -> [[d]], None)
 
-let neg_decompose any every where : 'a ctrans = Trans.store (fun task ->
+let neg_decompose any every where : ctrans = Trans.store (fun task ->
    let tg = find_target any every where task in
    let lta, (_, c) = neg_decompose_tg tg task in
    lta, c)
@@ -234,7 +234,7 @@ let unfold_tg target =
           | _ -> [d], None end
       | _ -> [d], None)
 
-let unfold_hyp_arr any every where : 'a ctrans =
+let unfold_hyp_arr any every where : ctrans =
   Trans.store (fun task ->
       let tg = find_target any every where task in
       let ta, (_, c) = unfold_tg tg task in
@@ -277,7 +277,7 @@ let intro_tg target =
 (* introduces hypothesis H : A when the goal is of the form A → B or introduces
    variable x when the goal is of the form ∀ x. P x introduces variable x when a
    hypothesis is of the form ∃ x. P x *)
-let intro any every where : 'a ctrans =
+let intro any every where : ctrans =
   Trans.store (fun task ->
       let tg = find_target any every where task in
       let ta, (_, c) = intro_tg tg task in
@@ -300,7 +300,7 @@ let cdir_pr d prg =
           | _ -> [decl], false end
       | _ -> [decl], false)
 
-let cdir d where : 'a ctrans =
+let cdir d where : ctrans =
   Trans.store (fun task ->
       let pr = default_goal task where in
       let nt, found = cdir_pr d pr task in
@@ -316,7 +316,7 @@ let assert_h_t h t =
            [create_prop_decl Paxiom h t; decl]]
       | _ -> [[decl]]) None
 
-let cassert t : 'a ctrans =
+let cassert t : ctrans =
   Trans.store (fun task ->
       let h = create_prsymbol (gen_ident "H") in
       let prg = task_goal task in
@@ -343,14 +343,14 @@ let inst_tg t_inst target = Trans.decl_acc (target, idc) update_tg_c
          | _ -> [decl], None end
      | _ -> [decl], None)
 
-let inst t_inst where : 'a ctrans =
+let inst t_inst where : ctrans =
   Trans.store (fun task ->
       let target = find_target false false where task in
       let ta, (_, c) = inst_tg t_inst target task in
       [ta], c)
 
 
-let exfalso : 'a ctrans =
+let exfalso : ctrans =
   Trans.store (fun task ->
       let h = create_prsymbol (gen_ident "H") in
       let trans =
@@ -363,7 +363,7 @@ let exfalso : 'a ctrans =
       [Trans.apply trans task],
       assertion h (thunk t_false) +++ [clear g; trivial h])
 
-let case t : 'a ctrans = Trans.store (fun task ->
+let case t : ctrans = Trans.store (fun task ->
   let h = create_prsymbol (gen_ident "H") in
   let trans =
     Trans.decl_l (fun decl ->
@@ -384,7 +384,7 @@ let swap_pr gpr =
           Some t, acc_task
       | _ -> opt_t, add_decl acc_task d) (None, None)
 
-let swap where : 'a ctrans =
+let swap where : ctrans =
   Trans.store (fun task ->
       let gpr = default_goal task where in
       let t, pr_goal = task_goal_fmla task, task_goal task in
@@ -403,7 +403,7 @@ let swap where : 'a ctrans =
             swap gpr ++ clear pr_goal
         | None -> [task], idc)
 
-let revert ls : 'a ctrans =
+let revert ls : ctrans =
   Trans.store (fun task ->
       let x = t_app_infer ls [] in
       let gpr = create_prsymbol (gen_ident "G") in
@@ -430,7 +430,7 @@ let clear_one_d g =
           [], clear pr
       | _ -> [decl], idc)
 
-let clear_one g : 'a ctrans =
+let clear_one g : ctrans =
   Trans.store (fun task ->
       let ta, c = clear_one_d g task in
       [ta], c)
@@ -484,6 +484,6 @@ let rec blast task =
                 id_ctrans))
       task
 
-let blast : 'a ctrans = Trans.store blast
+let blast : ctrans = Trans.store blast
 
 let clear l = compose_list (List.map (fun pr -> clear_one pr) l)

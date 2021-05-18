@@ -145,7 +145,7 @@ let rewrite_in rev with_terms prh pri task =
   (* Composing previous functions *)
   Trans.apply (Trans.bind (Trans.bind found_eq lp_new) recreate_tasks) task
 
-let rewrite g rev with_terms where : 'a ctrans =
+let rewrite g rev with_terms where : ctrans =
   Trans.store (fun task ->
       let h1 = default_goal task where in
       let wt = match with_terms with Some wt -> wt | None -> [] in

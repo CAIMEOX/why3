@@ -156,6 +156,6 @@ let rec ccheck c cta =
                                      instantiate ctxt n))), false) in
       ccheck c1 cta1; ccheck c2 cta2
 
-let checker_caml kc init_ct =
+let checker_caml kc init_ct _res_ct =
   try ccheck kc init_ct
   with e -> raise (Trans.TransFailure ("checker_caml", e))
