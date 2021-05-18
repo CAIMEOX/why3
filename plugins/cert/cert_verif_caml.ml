@@ -26,14 +26,14 @@ let rec ccheck c cta =
       let t1, pos1 = find_formula "axiom1" i1 cta in
       let t2, pos2 = find_formula "axiom2" i2 cta in
       if not pos1 && pos2
-      then if not (ct_equal t1 t2)
-           then begin
-               Format.eprintf "@[<v>t1: %a@ \
-                               t2: %a@]@."
-                 pcte t1
-                 pcte t2;
-               verif_failed "The hypothesis and goal given do not match"
-             end
+      then (if not (ct_equal t1 t2)
+            then begin
+                Format.eprintf "@[<v>t1: %a@ \
+                                t2: %a@]@."
+                  pcte t1
+                  pcte t2;
+                verif_failed "The hypothesis and goal given do not match"
+              end)
       else verif_failed "Terms have wrong positivities in the task"
   | ETrivial (_, i) ->
       let t, pos = find_formula "trivial" i cta in
