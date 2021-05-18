@@ -126,9 +126,17 @@ type 'a sc = int * ('a wscert list -> 'a wscert)
 let fail_arg () = verif_failed "Argument arity mismatch when composing certificates"
 
 let lambda0 c = 0, fun _ -> c
-let lambda1 f = 1, (fun l -> match l with [u] -> f u | _ -> fail_arg ())
-let lambda2 f = 2, (fun l -> match l with [u1; u2] -> f u1 u2 | _ -> fail_arg ())
+let lambda1 f = 1, fun l -> match l with [u] -> f u | _ -> fail_arg ()
+let lambda2 f = 2, fun l -> match l with [u1; u2] -> f u1 u2 | _ -> fail_arg ()
 let lambdan n f = n, f
+
+let return = lambda0
+let apply (_, f) = f []
+
+let apply_cert_list (n, f) res_ct =
+  if List.length res_ct = n
+  then f (List.map (fun u -> Hole u) res_ct)
+  else verif_failed "Wrong number of holes in certificate"
 
 (* type ('a, 'b) args =
  *   | Z : ('a, 'a wscert) args
@@ -163,17 +171,17 @@ let rec dispatch lu lc = match lc with
       f2 lu2 :: dispatch lu lc
   | [] -> []
 
-let ( *** ) (n1, f1) lc2 =
+let (+++) (n1, f1) lc2 =
   assert (List.length lc2 = n1);
   let n = List.fold_left (fun acc (n, _) -> acc + n) 0 lc2 in
   n, fun lu -> f1 (dispatch lu lc2)
 
-let ( ** ) (n1, f1) c2 : 'a sc =
+let (++) (n1, f1) c2 : 'a sc =
   let lc2 = List.init n1 (fun _ -> c2) in
-  (n1, f1) *** lc2
+  (n1, f1) +++ lc2
 
-let idc : 'a sc = 1, (fun l -> List.hd l)
-(* let id = lambda1 (fun a -> a) *)
+let nc = 0, fun _ -> Nc
+let idc = 1, fun l -> match l with [u] -> u | _ -> fail_arg ()
 let assertion h t = lambda2 (fun a1 a2 -> Assert (h, t, a1, a2))
 let axiom i1 i2 = lambda0 (Axiom (i1, i2))
 let trivial i = lambda0 (Trivial i)
@@ -197,40 +205,38 @@ let induction g hi1 hi2 hr x a =
 let llet pr (cont : ident -> 'a sc) : 'a sc =
   let ls = create_psymbol (id_fresh "Let_var") [] in
   let t = t_app ls [] None in
-  lambda1 (fun u -> Let (t, pr, u)) ** cont ls.ls_name
+  lambda1 (fun u -> Let (t, pr, u)) ++ cont ls.ls_name
   (* n, Let (t, pr, cont ls.ls_name) *)
 
 let eqrefl i = trivial i
 (* eqrefl i ⇓ (Γ ⊢ Δ, i : t = t) stands *)
 
 let create_eqrefl i (t : term) c =
-  assertion i (fun _ -> t_app_infer ps_equ [t; t]) *** [eqrefl i; c]
+  assertion i (fun _ -> t_app_infer ps_equ [t; t]) +++ [eqrefl i; c]
 (* create_eqrefl i t c ⇓ (Γ ⊢ Δ) ≜  c ⇓ (Γ, i : t = t ⊢ Δ) *)
 
 let rename i1 i2 =
-  duplicate i1 i2 ** clear i1
+  duplicate i1 i2 ++ clear i1
 (* rename i₁ i₂ c ⇓ (Γ ⊢ Δ, i₁ : t) ≜  c ⇓ (Γ ⊢ Δ, i₂ : t) *)
 (* rename i₁ i₂ c ⇓ (Γ, i₁ : t ⊢ Δ) ≜  c ⇓ (Γ, i₂ : t ⊢ Δ) *)
 
 let dir d i =
   let j = create_prsymbol (id_fresh "dir") in
   let left, right = if d then j, i else i, j in
-  destruct i left right ** clear j
+  destruct i left right ++ clear j
 (* dir false i c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ ⊢ Δ) *)
 (* dir true i c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ ⊢ Δ) *)
 (* dir false i c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₁) *)
 (* dir true i c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₂) *)
 
-let iffsym_hyp i c =
+let iffsym_hyp i =
   let i1 = pr_clone i in
   let i2 = pr_clone i in
-  Unfold (i,
-          Destruct (i, i1, i2,
-                    Construct (i2, i1, i,
-                               Fold (i, c))))
+  unfold i ++
+    destruct i i1 i2 ++
+      construct i2 i1 i ++
+        fold i
 (* iffsym_hyp i c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ ↔ t₁ ⊢ Δ) *)
-
-let nc = [], Nc
 
 type 'a ctrans = 'a sc ctransformation
 
@@ -366,15 +372,16 @@ let rec print_certif filename cert =
   fprintf fmt "%a@." prcertif cert;
   close_out oc
 
-and prcvit : type a v i t. (formatter -> v -> unit) ->
+and prcvit : type a v i t. (formatter -> a -> unit) ->
+                  (formatter -> v -> unit) ->
                  (formatter -> i -> unit) ->
                  (formatter -> t -> unit) ->
                  formatter -> (a, v, i, t) scert -> unit
-  = fun prv pri prt fmt c ->
-  let prc = prcvit prv pri prt in
+  = fun pra prv pri prt fmt c ->
+  let prc = prcvit pra prv pri prt in
   match c with
   | Nc -> fprintf fmt "No_certif"
-  | Hole _ -> fprintf fmt "Hole"
+  | Hole a -> fprintf fmt "Hole %a" pra a
   | Assert (i, _, c1, c2) ->
       fprintf fmt "Assert (@[%a, <fun>,@ @[<4>%a@],@ @[<4>%a@])@]"
         pri i prc c1 prc c2
@@ -407,8 +414,11 @@ and prcvit : type a v i t. (formatter -> v -> unit) ->
         pri i1 pri i2 pri i3 pri i4 prt x prc c1 prc c2
 
 and prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
-and prcertif fmt (vs, c) = fprintf fmt "@[<v>[%a],@ @[%a@]@]"
-                            prlid vs (prcvit prls prpr Pretty.print_term) c
+and prcertif fmt (n, c) =
+  let vs = List.init n (fun _ -> id_register (id_fresh "h")) in
+  let c = apply_cert_list (n, c) vs in
+  fprintf fmt "@[<v>[%a],@ @[%a@]@]"
+    prlid vs (prcvit prid prls prpr Pretty.print_term) c
 (* and prcore_certif fmt (v, c) = fprintf fmt "@[<v>[%a],@ @[%a@]@]"
  *                                  prlid v (prcvit prid prhyp pcte) c *)
 
@@ -530,11 +540,6 @@ let rec elab_lambda_prop = function
  *)
 
 exception Elaboration_failed
-
-let elab_apply (n, f) res_ct =
-  if List.length res_ct = n
-  then f (List.map (fun u -> Hole u) res_ct)
-  else verif_failed "Wrong number of holes in certificate"
 
 let t_open_quant_one q tq = match t_open_quant tq with
   | vs::vsl, trg, t_open ->
@@ -834,7 +839,7 @@ let rec elab_trim c =
   | _ -> propagate_ecert elab_trim (fun t -> t) (fun i -> i) (fun ty -> ty) c
 
 let make_kernel_cert init_ct res_ct (c : 'a sc) : 'a kc =
-  elab_apply c res_ct
+  apply_cert_list c res_ct
   |> elab_abstract
   |> elaborate init_ct
   |> elab_lambda_prop

@@ -43,7 +43,7 @@ let find_contradict =
           let un_not_t = match t.t_node with Tnot t -> t | _ -> t_not t in
           let found, new_cert =
             match Mterm.(find_opt (t_not t) m, find_opt un_not_t m) with
-            | Some g, _ | _, Some g -> true, swap g ** axiom pr g
+            | Some g, _ | _, Some g -> true, swap g ++ axiom pr g
             | _ -> false, cert in
           Mterm.add t pr m, found, new_cert
       | _ -> m, found, cert) (Mterm.empty, false, idc)
@@ -148,7 +148,7 @@ let destruct_all_tg target =
               let prh = pr_clone pr in
               [[create_prop_decl Paxiom prh (t_not_simp f1);
                 create_prop_decl Pgoal pr f2]],
-              Some (destruct pr prh pr ** swap prh)
+              Some (destruct pr prh pr ++ swap prh)
           | _ -> [[d]], None end
       | _ -> [[d]], None)
 
@@ -167,45 +167,45 @@ let neg_decompose_tg target =
               begin match k, nt.t_node with
               | k, Tnot nnt -> (* double negation *)
                   [[create_prop_decl k pr nnt]],
-                  Some (swap pr ** swap pr)
+                  Some (swap pr ++ swap pr)
               | Paxiom, Tbinop (Tor, f1, f2) -> (* destruct *)
                   let pr1 = pr_clone pr in
                   let pr2 = pr_clone pr in
                   [[create_prop_decl Paxiom pr1 (t_not_simp f1);
                     create_prop_decl Paxiom pr2 (t_not_simp f2)]],
-                  Some (swap pr ** destruct pr pr1 pr2 ** swap pr1 ** swap pr2)
+                  Some (swap pr ++ destruct pr pr1 pr2 ++ swap pr1 ++ swap pr2)
               | Pgoal, Tbinop (Tand, f1, f2) ->
                   let pr1 = pr_clone pr in
                   let pr2 = pr_clone pr in
                   [[create_prop_decl Paxiom pr1 f1;
                     create_prop_decl Pgoal pr2 (t_not_simp f2)]],
-                  Some (swap pr ** destruct pr pr1 pr2 ** swap pr2)
+                  Some (swap pr ++ destruct pr pr1 pr2 ++ swap pr2)
               | Paxiom, Tbinop (Tand, f1, f2) -> (* split *)
                   [[create_prop_decl Paxiom pr (t_not_simp f1)];
                    [create_prop_decl Paxiom pr (t_not_simp f2)]],
-                  Some (swap pr ** split pr ** swap pr)
+                  Some (swap pr ++ split pr ++ swap pr)
               | Pgoal, Tbinop (Tor, f1, f2) ->
                   [[create_prop_decl Pgoal pr (t_not_simp f1)];
                    [create_prop_decl Pgoal pr (t_not_simp f2)]],
-                  Some (swap pr ** split pr ** swap pr)
+                  Some (swap pr ++ split pr ++ swap pr)
               | Pgoal, Ttrue -> (* ⊥ and ⊤ *)
                   [[create_prop_decl Pgoal pr t_false]],
-                  Some (clear pr ** assertion pr (thunk t_false) ***
+                  Some (clear pr ++ assertion pr (thunk t_false) +++
                           [idc; trivial pr])
               | Pgoal, Tfalse ->
-                  [], Some (swap pr ** trivial pr)
+                  [], Some (swap pr ++ trivial pr)
               | Paxiom, Tfalse ->
                   [[]], Some (clear pr)
               | Paxiom, Ttrue ->
-                  [], Some (swap pr ** trivial pr)
+                  [], Some (swap pr ++ trivial pr)
               | k, Tbinop (Tiff, f1, f2) -> (* unfold *)
                   let destr_iff = t_and (t_implies f1 f2) (t_implies f2 f1) in
                   [[create_prop_decl k pr destr_iff]],
-                  Some (swap pr ** unfold pr ** swap pr)
+                  Some (swap pr ++ unfold pr ++ swap pr)
               | k, Tbinop (Timplies, f1, f2) ->
                   let destr_imp = t_or (t_not f1) f2 in
                   [[create_prop_decl k pr destr_imp]],
-                  Some (swap pr ** unfold pr ** swap pr)
+                  Some (swap pr ++ unfold pr ++ swap pr)
               | _ -> [[d]], None
               end
           | _ -> [[d]], None end
@@ -256,7 +256,7 @@ let intro_tg target =
           | Tbinop (Timplies, f1, f2), Pgoal ->
               let hpr = create_prsymbol (id_fresh "H") in
               [create_prop_decl Paxiom hpr f1; create_prop_decl Pgoal pr f2],
-              Some (unfold pr ** destruct pr hpr pr ** swap hpr)
+              Some (unfold pr ++ destruct pr hpr pr ++ swap hpr)
           | Tquant ((Tforall as q), f), (Pgoal as k)
           | Tquant ((Texists as q), f), (Paxiom as k) ->
               let vsl, tg, f_t = t_open_quant f in
@@ -321,7 +321,7 @@ let cassert t : 'a ctrans =
       let h = create_prsymbol (gen_ident "H") in
       let prg = task_goal task in
       Trans.apply (assert_h_t h t) task,
-      assertion h (thunk t) *** [clear prg; idc])
+      assertion h (thunk t) +++ [clear prg; idc])
 
 (* Instantiate with certificate *)
 
@@ -339,7 +339,7 @@ let inst_tg t_inst target = Trans.decl_acc (target, idc) update_tg_c
              let hpr = create_prsymbol (gen_ident "H") in
              let t_subst = subst_exist t t_inst in
              [create_prop_decl k hpr t_subst],
-             Some (instquant pr hpr t_inst ** clear pr)
+             Some (instquant pr hpr t_inst ++ clear pr)
          | _ -> [decl], None end
      | _ -> [decl], None)
 
@@ -361,7 +361,7 @@ let exfalso : 'a ctrans =
             | _ -> [decl]) None in
       let g = task_goal task in
       [Trans.apply trans task],
-      assertion h (thunk t_false) *** [clear g; trivial h])
+      assertion h (thunk t_false) +++ [clear g; trivial h])
 
 let case t : 'a ctrans = Trans.store (fun task ->
   let h = create_prsymbol (gen_ident "H") in
@@ -373,7 +373,7 @@ let case t : 'a ctrans = Trans.store (fun task ->
               [create_prop_decl Paxiom h (t_not t); decl] ]
         | _ -> [[decl]]) None in
   Trans.apply trans task,
-  assertion h (thunk (t_not t)) *** [swap h; idc])
+  assertion h (thunk (t_not t)) +++ [swap h; idc])
 
 (* if formula <f> designed by <where> is a premise, dismiss the old
  goal and put <not f> in its place *)
@@ -400,7 +400,7 @@ let swap where : 'a ctrans =
             let not_t = match t.t_node with Tnot t' -> t' | _ -> t_not t in
             let decl = create_prop_decl Pgoal gpr not_t in
             [add_decl nt decl],
-            swap gpr ** clear pr_goal
+            swap gpr ++ clear pr_goal
         | None -> [task], idc)
 
 let revert ls : 'a ctrans =
@@ -415,9 +415,9 @@ let revert ls : 'a ctrans =
       let close_t = t_forall_close [new_var] [] t in
       let task = add_decl hyp (create_prop_decl Pgoal gpr close_t) in
       let prinst = create_prsymbol (gen_ident "Hinst") in
-      let cert = assertion gpr (thunk close_t) ***
+      let cert = assertion gpr (thunk close_t) +++
                    [clear idg;
-                    instquant gpr prinst x ** axiom prinst idg] in
+                    instquant gpr prinst x ++ axiom prinst idg] in
       [task], cert)
 
 
