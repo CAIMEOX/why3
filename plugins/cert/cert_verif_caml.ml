@@ -6,24 +6,6 @@ open Term (* only for binop *)
 open Cert_syntax
 open Cert_certificates
 
-(* To collect tasks with their names *)
-let union estr =
-  let merge_no_conflicts id cta1 cta2 =
-    if ctask_equal cta1 cta2
-    then Some cta1
-    else (* Important : returns an error and NOT None *)
-      let open Format in
-      eprintf "@[<v>Conflict on ident: %a@ \
-               Shown when checking: %s@ \
-               task 1: %a@ \
-               task 2: %a@]@."
-        prhyp id
-        estr
-        pacta cta1
-        pacta cta2;
-      verif_failed "Conflict of ident, see stderr" in
-  Mid.union merge_no_conflicts
-
 (* This is the main verification function : <ccheck> replays the certificate on
    a ctask *)
 let rec ccheck c cta =
@@ -31,44 +13,52 @@ let rec ccheck c cta =
   | EConstruct _ | EDuplicate _
   | EFoldArr _ | EFoldIff _ | EEqSym _ | EEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/Eq/Let left"
-  | EHole i -> Mid.singleton i cta
+  | EHole cta' -> if not (ctask_equal cta cta')
+                  then begin
+                      Format.eprintf "@[<v>Conflict of tasks: @ \
+                                      Actual task: %a@ \
+                                      Certif task: %a@]@."
+                        pacta cta'
+                        pacta cta;
+                      verif_failed "Tasks differ, look at std_err" end
+
   | EAxiom (_, i1, i2) ->
       let t1, pos1 = find_formula "axiom1" i1 cta in
       let t2, pos2 = find_formula "axiom2" i2 cta in
       if not pos1 && pos2
-      then if ct_equal t1 t2 then Mid.empty
-           else begin
-               Format.eprintf "@[<v>t1: %a@ \
-                               t2: %a@]@."
-                 pcte t1
-                 pcte t2;
-               verif_failed "The hypothesis and goal given do not match"
-             end
+      then (if not (ct_equal t1 t2)
+            then begin
+                Format.eprintf "@[<v>t1: %a@ \
+                                t2: %a@]@."
+                  pcte t1
+                  pcte t2;
+                verif_failed "The hypothesis and goal given do not match"
+              end)
       else verif_failed "Terms have wrong positivities in the task"
   | ETrivial (_, i) ->
       let t, pos = find_formula "trivial" i cta in
       begin match t, pos with
-      | CTfalse, false | CTtrue, true -> Mid.empty
+      | CTfalse, false | CTtrue, true -> ()
       | _ -> verif_failed "Non trivial hypothesis"
       end
   | EEqRefl (cty, _, i) ->
       let t, pos = find_formula "eqrefl" i cta in
       begin match t, pos with
       | CTapp (CTapp (e, t1), t2), _ when ct_equal t1 t2 && ct_equal e (eq cty) ->
-          Mid.empty
+          ()
       | _ -> verif_failed "Non eqrefl hypothesis" end
   | EAssert (i, a, c1, c2) ->
       infers_into ~e_str:"EAssert" cta a CTprop;
       let cta1 = add i (a, true) cta in
       let cta2 = add i (a, false) cta in
-      union "assert" (ccheck c1 cta1) (ccheck c2 cta2)
+      ccheck c1 cta1; ccheck c2 cta2
   | ESplit (_, _, _, i, c1, c2) ->
       let t, pos = find_formula "split" i cta in
       begin match t, pos with
       | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false ->
           let cta1 = add i (t1, pos) cta in
           let cta2 = add i (t2, pos) cta in
-          union "split" (ccheck c1 cta1) (ccheck c2 cta2)
+          ccheck c1 cta1; ccheck c2 cta2
       | _ -> verif_failed "Not splittable" end
   | EUnfoldIff (_, _, _, i, c) ->
       let t, pos = find_formula "unfold" i cta in
@@ -164,16 +154,8 @@ let rec ccheck c cta =
                  |> add hr (CTquant (CTforall, ctint, ct_close idn (
                             CTbinop (Timplies, CTapp (CTapp (lt, n), x),
                                      instantiate ctxt n))), false) in
-      union "induction" (ccheck c1 cta1) (ccheck c2 cta2)
+      ccheck c1 cta1; ccheck c2 cta2
 
-let checker_caml (vs, certif) init_ct res_ct =
-  try let map_cert = ccheck certif init_ct in
-      let map_trans = Mid.of_list (List.combine vs res_ct) in
-      if not (Mid.equal ctask_equal map_cert map_trans)
-      then begin
-          let res_ct' = Mid.values map_cert in
-          print_ctasks "/tmp/from_trans.log" res_ct;
-          print_ctasks "/tmp/from_cert.log" res_ct';
-          verif_failed "Replaying certif gives different result, log available"
-        end
+let checker_caml kc init_ct _res_ct =
+  try ccheck kc init_ct
   with e -> raise (Trans.TransFailure ("checker_caml", e))
