@@ -13,7 +13,7 @@ let decl_cert f = Trans.decl_acc idc ( ** ) (fun d _ -> f d)
 let decl_l_cert f = Trans.decl_l_acc idc ( ** ) (fun d _ -> f d)
 
 (* Identity transformation with a certificate *)
-let id_ctrans = Trans.store (fun task -> [task], idc)
+(* let id_ctrans = Trans.store (fun task -> [task], idc) *)
 
 (** Combinators on transformations with a certificate *)
 
@@ -28,37 +28,37 @@ let ctrans_gen (ctr : 'a ctrans) (ts, c : task list * 'a sc) =
 let compose (tr1 : 'a ctrans) (tr2 : 'a ctrans) : 'a ctrans =
   Trans.store (fun t -> Trans.apply tr1 t |> ctrans_gen tr2)
 
-let compose_list l = List.fold_left compose id_ctrans l
+(* let compose_list l = List.fold_left compose id_ctrans l *)
 
 (* If Then Else on transformations with a certificate : applies [tri], if the
    task changed then apply [trt] else apply [tre] *)
 let ite tri trt tre = Trans.store (fun task ->
-  let (lt, c) as tri_task = Trans.apply tri task in
+  let (lt, _) as tri_task = Trans.apply tri task in
   if not (Lists.equal task_equal lt [task])
   then ctrans_gen trt tri_task
   else ctrans_gen tre tri_task)
 
 (* Try on transformations with a certificate : try each transformation in <lctr>
    and keep the one that closes the <task> *)
-let rec try_close (lctr : 'a ctrans list) : 'a ctrans = Trans.store (fun task ->
-  match lctr with
-  | [] -> Trans.apply id_ctrans task
-  | h::t -> let lctask_h, cert_h = Trans.apply h task in
-            if lctask_h = []
-            then [], cert_h
-            else Trans.apply (try_close t) task)
+(* let rec try_close (lctr : 'a ctrans list) : 'a ctrans = Trans.store (fun task ->
+ *   match lctr with
+ *   | [] -> Trans.apply id_ctrans task
+ *   | h::t -> let lctask_h, cert_h = Trans.apply h task in
+ *             if lctask_h = []
+ *             then [], cert_h
+ *             else Trans.apply (try_close t) task) *)
 
 (* Repeat on a transformation with a certificate : keep applying <ctr> as long
    as the tasks change *)
-let repeat (ctr : 'a ctrans) : 'a ctrans = Trans.store (fun task ->
-  let gen_task = Trans.apply id_ctrans task in
-  let gen_tr = ctrans_gen ctr in
-  let rec loop gt =
-    let new_gt = gen_tr gt in
-    if Lists.equal task_equal (fst new_gt) (fst gt)
-    then gt
-    else loop new_gt in
-  loop gen_task)
+(* let repeat (ctr : 'a ctrans) : 'a ctrans = Trans.store (fun task ->
+ *   let gen_task = Trans.apply id_ctrans task in
+ *   let gen_tr = ctrans_gen ctr in
+ *   let rec loop gt =
+ *     let new_gt = gen_tr gt in
+ *     if Lists.equal task_equal (fst new_gt) (fst gt)
+ *     then gt
+ *     else loop new_gt in
+ *   loop gen_task) *)
 
 
 (** Primitive transformations with a certificate *)
