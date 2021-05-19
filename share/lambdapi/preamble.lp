@@ -372,21 +372,21 @@ symbol ind_positive_peano :
   refine ind_positive (λ p, `π P, P xH ⇒ (`∀ x, P x ⇒ P (pos_succ x)) ⇒ P p)
                  _ _ _ p Q qH qS;
   assume q rec_q P pH pS;
-  rewrite left (pos_succ_xO q);
+  rewrite left pos_succ_xO q;
   refine pS (xO q) _;
   refine rec_q (λ p, P (xO p)) (pS xH pH) _;
   assume x p2x;
-  rewrite left (pos_succ_xI x);
+  rewrite left pos_succ_xI x;
   refine pS (pos_succ (xO x)) _;
-  rewrite left (pos_succ_xO x);
+  rewrite left pos_succ_xO x;
   refine pS (xO x) p2x;
 
   assume q rec_q P pH pS;
   refine rec_q (λ p, P (xO p)) (pS xH pH) _;
   assume x p2x;
-  rewrite left (pos_succ_xI x);
+  rewrite left pos_succ_xI x;
   refine pS (pos_succ (xO x)) _;
-  rewrite left (pos_succ_xO x);
+  rewrite left pos_succ_xO x;
   refine pS (xO x) p2x;
 
   assume P pH pS;
@@ -484,8 +484,7 @@ symbol pa_succ x y : tEv (pos_add (pos_succ x) y = pos_succ (pos_add x y))
   have e : tEv (pos_add (pos_succ (xI p)) (xI q) = xI (pos_add (pos_succ p) q));
   reflexivity; rewrite e;
   rewrite prec;
-  // TODO : why do we need to provide p and q here ?
-  rewrite left (pac_succ p q);
+  rewrite left pac_succ p q;
   reflexivity;
   assume q _;
   have e : tEv (pos_add (pos_succ (xI p)) (xO q) = xO (pos_add (pos_succ p) q));
@@ -676,7 +675,7 @@ symbol pca_comm x y r : tEv (
                  _ _ _ y;
   assume p _; reflexivity;
   assume p _; reflexivity;
-  rewrite left [in pos_compare_acc xH r xH] (compopp_idem r);
+  rewrite left [in pos_compare_acc xH r xH] compopp_idem r;
   reflexivity;
 end;
 
@@ -1644,7 +1643,7 @@ symbol c_decides x y : tEv (compare x y = Eq ⇒ x = y)
   assume gteq;
   refine discr_Gt_Eq gteq _;
   assume y H;
-  rewrite (pc_decides x y H);
+  rewrite pc_decides x y H;
   reflexivity;
   assume y gteq;
   refine discr_Gt_Eq gteq _;
@@ -1656,7 +1655,7 @@ symbol c_decides x y : tEv (compare x y = Eq ⇒ x = y)
   assume y lteq;
   refine discr_Lt_Eq lteq _;
   assume y H;
-  rewrite (pc_decides y x H);
+  rewrite pc_decides y x H;
   reflexivity;
 end;
 
@@ -2368,7 +2367,7 @@ symbol UnfoldArrGoal' A B : tEv (
   refine ab _; assume a;
   refine DestructDisj (¬ A) B B (from_nn (¬ A ∨ B) s) _ _;
   assume na; refine na a _;
-  refine (λ x, x);
+  refine λ x, x;
 end;
 symbol UnfoldArrGoal A B H s ≔ UnfoldArrGoal' A B s H;
 
