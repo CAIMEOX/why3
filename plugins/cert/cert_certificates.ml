@@ -21,9 +21,9 @@ type ('v, 'h) sc =
      For more details, take a look at the OCaml implementation
      <Cert_verif_caml.ccheck>. *)
   | Nc
-  (* Makes verification fail : use it as a placeholder *)
+  (* Makes verification fail: use it as a placeholder *)
   | Hole of cterm ctask
-  (* Hole ct ⇓ (Γ ⊢ Δ) stands iff ct refers to <Γ ⊢ Δ> *)
+  (* You should never use this certificate *)
   | Assert of 'h * (term Mid.t -> term) * ('v, 'h) sc * ('v, 'h) sc
   (* Assert (i, t, c₁, c₂) ⇓ (Σ | Γ ⊢ Δ) ≜
          c₁ ⇓ (Σ | Γ ⊢ Δ, i : t)
@@ -207,28 +207,24 @@ let llet pr (cont : ident -> scert) : scert =
   let ls = create_psymbol (id_fresh "Let_var") [] in
   let t = t_app ls [] None in
   newcert1 (fun u -> Let (t, pr, u)) ++ cont ls.ls_name
-  (* n, Let (t, pr, cont ls.ls_name) *)
 
-let eqrefl i = trivial i
-(* eqrefl i ⇓ (Γ ⊢ Δ, i : t = t) stands *)
-
-let create_eqrefl i (t : term) c =
-  assertion i (fun _ -> t_app_infer ps_equ [t; t]) +++ [eqrefl i; c]
-(* create_eqrefl i t c ⇓ (Γ ⊢ Δ) ≜  c ⇓ (Γ, i : t = t ⊢ Δ) *)
+let create_eqrefl i (t : term) =
+  assertion i (fun _ -> t_app_infer ps_equ [t; t]) +++ [trivial i; idc]
+(* create_eqrefl i t ++ c ⇓ (Γ ⊢ Δ) ≜  c ⇓ (Γ, i : t = t ⊢ Δ) *)
 
 let rename i1 i2 =
   duplicate i1 i2 ++ clear i1
-(* rename i₁ i₂ c ⇓ (Γ ⊢ Δ, i₁ : t) ≜  c ⇓ (Γ ⊢ Δ, i₂ : t) *)
-(* rename i₁ i₂ c ⇓ (Γ, i₁ : t ⊢ Δ) ≜  c ⇓ (Γ, i₂ : t ⊢ Δ) *)
+(* rename i₁ i₂ ++ c ⇓ (Γ ⊢ Δ, i₁ : t) ≜  c ⇓ (Γ ⊢ Δ, i₂ : t) *)
+(* rename i₁ i₂ ++ c ⇓ (Γ, i₁ : t ⊢ Δ) ≜  c ⇓ (Γ, i₂ : t ⊢ Δ) *)
 
 let dir d i =
   let j = create_prsymbol (id_fresh "dir") in
   let left, right = if d then j, i else i, j in
   destruct i left right ++ clear j
-(* dir false i c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ ⊢ Δ) *)
-(* dir true i c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ ⊢ Δ) *)
-(* dir false i c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₁) *)
-(* dir true i c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₂) *)
+(* dir false i ++ c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ ⊢ Δ) *)
+(* dir true  i ++ c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ ⊢ Δ) *)
+(* dir false i ++ c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₁) *)
+(* dir true  i ++ c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₂) *)
 
 let iffsym_hyp i =
   let i1 = pr_clone i in
@@ -237,7 +233,7 @@ let iffsym_hyp i =
     destruct i i1 i2 ++
       construct i2 i1 i ++
         fold i
-(* iffsym_hyp i c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ ↔ t₁ ⊢ Δ) *)
+(* iffsym_hyp i ++ c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ ↔ t₁ ⊢ Δ) *)
 
 type ctrans = scert ctransformation
 
