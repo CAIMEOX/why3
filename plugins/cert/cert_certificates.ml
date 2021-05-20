@@ -236,122 +236,122 @@ type ctrans = scert ctransformation
 type ('v, 'h, 't, 'ty) kc =
   (* 't is used for terms (term or cterm)
      and 'ty is used for types (ty option or ctype) *)
-  | EHole of cterm ctask
-  (* EHole ct ⇓ (Γ ⊢ Δ) stands iff ct refers to <Γ ⊢ Δ> *)
-  | EClear of bool * 't * 'h * ('v, 'h, 't, 'ty) kc
-  (* EClear (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ ⊢ Δ) *)
-  (* EClear (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | EDuplicate of bool * 't * 'h * 'h * ('v, 'h, 't, 'ty) kc (* not kernel *)
-  (* EDuplicate (true, t, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i₁ : t) ≜
+  | KHole of cterm ctask
+  (* KHole ct ⇓ (Γ ⊢ Δ) stands iff ct refers to <Γ ⊢ Δ> *)
+  | KClear of bool * 't * 'h * ('v, 'h, 't, 'ty) kc
+  (* KClear (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ ⊢ Δ) *)
+  (* KClear (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
+  | KDuplicate of bool * 't * 'h * 'h * ('v, 'h, 't, 'ty) kc (* not kernel *)
+  (* KDuplicate (true, t, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i₁ : t) ≜
      c ⇓ (Γ ⊢ Δ, i₁ : t, i₂ : t) *)
-  (* EDuplicate (false, t, i₁, i₂, c) ⇓ (Γ, i₁ : t ⊢ Δ) ≜
+  (* KDuplicate (false, t, i₁, i₂, c) ⇓ (Γ, i₁ : t ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t, i₂ : t ⊢ Δ) *)
-  | EForget of 'v * ('v, 'h, 't, 'ty) kc
-  (* EForget (i, c) ⇓ (Σ, i : τ | Γ ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | EAssert of 'h * 't * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
-  (* EAssert (i, t, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜
+  | KForget of 'v * ('v, 'h, 't, 'ty) kc
+  (* KForget (i, c) ⇓ (Σ, i : τ | Γ ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
+  | KAssert of 'h * 't * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
+  (* KAssert (i, t, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜
      c₁ ⇓ (Γ ⊢ Δ, i : t)
      and c₂ ⇓ (Γ, i : t ⊢ Δ) *)
-  | EAxiom of 't * 'h * 'h
-  (* EAxiom (t, i1, i2) ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
+  | KAxiom of 't * 'h * 'h
+  (* KAxiom (t, i1, i2) ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
   (* Notice that there is only one rule. *)
-  | ETrivial of bool * 'h
-  (* ETrivial (false, i) ⇓ (Γ, i : false ⊢ Δ) stands *)
-  (* ETrivial (true, i) ⇓ (Γ ⊢ Δ, i : true ) stands *)
+  | KTrivial of bool * 'h
+  (* KTrivial (false, i) ⇓ (Γ, i : false ⊢ Δ) stands *)
+  (* KTrivial (true, i) ⇓ (Γ ⊢ Δ, i : true ) stands *)
   (* Notice that trivial equalities use the following certificate. *)
-  | ESwap of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
-  (* ESwap (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t) *)
-  (* ESwap (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ, i : ¬t ⊢ Δ) *)
-  | ESwapNeg of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
-  (* ESwap_neg (false, t, i, c) ⇓ (Γ, i : ¬t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : t)  *)
-  (* ESwap_neg (true, t, i, c) ⇓ (Γ ⊢ Δ, i : ¬t) ≜  c ⇓ (Γ, i : t ⊢ Δ)  *)
-  | EUnfoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
-  (* EUnfoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜
+  | KSwap of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  (* KSwap (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t) *)
+  (* KSwap (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ, i : ¬t ⊢ Δ) *)
+  | KSwapNeg of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  (* KSwap_neg (false, t, i, c) ⇓ (Γ, i : ¬t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : t)  *)
+  (* KSwap_neg (true, t, i, c) ⇓ (Γ ⊢ Δ, i : ¬t) ≜  c ⇓ (Γ, i : t ⊢ Δ)  *)
+  | KUnfoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  (* KUnfoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) *)
-  (* EUnfoldIff (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) ≜
+  (* KUnfoldIff (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) *)
-  | EUnfoldArr of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
-  (* EUnfoldArr (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) ≜
+  | KUnfoldArr of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  (* KUnfoldArr (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ)*)
-  (* EUnfoldArr (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ → t₂) ≜
+  (* KUnfoldArr (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ → t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂)*)
-  | EFoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  | KFoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* not kernel *)
-  (* EFoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) ≜
+  (* KFoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) ≜
      c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) *)
-  (* EFoldIff (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) ≜
+  (* KFoldIff (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) ≜
      c ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) *)
-  | EFoldArr of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  | KFoldArr of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* not kernel *)
-  (* EFoldArr (false, t₁, t₂, i, c) ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ) ≜
+  (* KFoldArr (false, t₁, t₂, i, c) ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : t₁ → t₂ ⊢ Δ)*)
-  (* EFoldArr (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂) ≜
+  (* KFoldArr (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : t₁ → t₂)*)
-  | ESplit of bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
-  (* ESplit (false, t₁, t₂, i, c₁, c₂) ⇓ (Γ, i : t₁ ∨ t₂ ⊢ Δ) ≜
+  | KSplit of bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
+  (* KSplit (false, t₁, t₂, i, c₁, c₂) ⇓ (Γ, i : t₁ ∨ t₂ ⊢ Δ) ≜
      c₁ ⇓ (Γ, i : t₁ ⊢ Δ)
      and c₂ ⇓ (Γ, i : t₂ ⊢ Δ) *)
-  (* ESplit (true, t₁, t₂, i, c₁, c₂) ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜
+  (* KSplit (true, t₁, t₂, i, c₁, c₂) ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜
      c₁ ⇓ (Γ ⊢ Δ, i : t₁)
      and c₂ ⇓ (Γ ⊢ Δ, i : t₂) *)
-  | EDestruct of bool * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
-  (* EDestruct (false, t₁, t₂, i, i₁, i₂, c) ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜
+  | KDestruct of bool * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
+  (* KDestruct (false, t₁, t₂, i, i₁, i₂, c) ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) *)
-  (* EDestruct (true, t₁, t₂, i, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i : t₁ ∨ t₂) ≜
+  (* KDestruct (true, t₁, t₂, i, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i : t₁ ∨ t₂) ≜
      c ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) *)
-  | EConstruct of bool * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
+  | KConstruct of bool * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
   (* not kernel *)
-  (* EConstruct (false, t₁, t₂, i₁, i₂, i, c) ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) ≜
+  (* KConstruct (false, t₁, t₂, i₁, i₂, i, c) ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) *)
-  (* EConstruct (true, t₁, t₂, i₁, i₂, i, c) ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) ≜
+  (* KConstruct (true, t₁, t₂, i₁, i₂, i, c) ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) *)
-  | EIntroQuant of bool * 'ty * 't * 'h * 'v * ('v, 'h, 't, 'ty) kc
-  (* EIntroQuant (false, τ, p, i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p ⊢ Δ) ≜
+  | KIntroQuant of bool * 'ty * 't * 'h * 'v * ('v, 'h, 't, 'ty) kc
+  (* KIntroQuant (false, τ, p, i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p ⊢ Δ) ≜
      c ⇓ (Σ, y : τ | Γ, i : p[x ↦ y] ⊢ Δ)
      and y ∉  Σ *)
-  (* EIntroQuant (true, τ, p, i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p) ≜
+  (* KIntroQuant (true, τ, p, i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p) ≜
      c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p[x ↦ y])
      and y ∉  Σ *)
-  | EInstQuant of bool * 'ty * 't * 'h * 'h * 't * ('v, 'h, 't, 'ty) kc
-  (* EInstQuant (false, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p ⊢ Δ) ≜
+  | KInstQuant of bool * 'ty * 't * 'h * 'h * 't * ('v, 'h, 't, 'ty) kc
+  (* KInstQuant (false, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p ⊢ Δ) ≜
      c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p, i₂ : p[x ↦ t] ⊢ Δ)
      and Σ ⊩ t : τ *)
-  (* EInstQuant (true, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p) ≜
+  (* KInstQuant (true, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p) ≜
      c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p[x ↦ t])
      and Σ ⊩ t : τ *)
-  | EEqRefl of 'ty * 't * 'h
-  (* EEqRefl (τ, t, i) ⇓ (Γ ⊢ Δ, i : t = t) stands if t is of type τ *)
-  | EEqSym of bool * 'ty * 't * 't * 'h * ('v, 'h, 't, 'ty) kc
+  | KEqRefl of 'ty * 't * 'h
+  (* KEqRefl (τ, t, i) ⇓ (Γ ⊢ Δ, i : t = t) stands if t is of type τ *)
+  | KEqSym of bool * 'ty * 't * 't * 'h * ('v, 'h, 't, 'ty) kc
   (* not kernel *)
-  (* EEqSym (true, τ, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ = t₂) ≜
+  (* KEqSym (true, τ, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ = t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : t₂ = t₁) *)
-  (* EEqSym (false, τ, t₁, t₂, i, c) ⇓ (Γ, i : t₁ = t₂ ⊢ Δ) ≜
+  (* KEqSym (false, τ, t₁, t₂, i, c) ⇓ (Γ, i : t₁ = t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : t₂ = t₁ ⊢ Δ) *)
-  | EEqTrans of 'ty * 't * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
+  | KEqTrans of 'ty * 't * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
   (* not kernel *)
-  (* EEqTrans (τ, t₁, t₂, t₃, i₁, i₂, i₃, c) ⇓
+  (* KEqTrans (τ, t₁, t₂, t₃, i₁, i₂, i₃, c) ⇓
      (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃ ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃, i₃ : t₁ = t₃ ⊢ Δ) *)
-  | ERewrite of bool * 't option * 'ty * 't * 't * 't * 'h * 'h
+  | KRewrite of bool * 't option * 'ty * 't * 't * 't * 'h * 'h
                 * ('v, 'h, 't, 'ty) kc
-  (* ERewrite (true, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
+  (* KRewrite (true, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
      c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
-  (* ERewrite (false, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
+  (* KRewrite (false, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
-  (* ERewrite (true, _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
+  (* KRewrite (true, _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
      c ⇓ (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
-  (* ERewrite (false, _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
+  (* KRewrite (false, _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
   (* Second argument is None when working with an equality, and Some ls when
      working with an equivalence. The lsymbol ls is used to bind the ctxt (which
      is not possible in Why3) *)
-  | EInduction of 'h * 'h * 'h * 'h * 't * 't * 't
+  | KInduction of 'h * 'h * 'h * 'h * 't * 't * 't
                   * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
-(* EInduction (G, Hi₁, Hi₂, Hr, x, a, ctxt, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
+(* KInduction (G, Hi₁, Hi₂, Hr, x, a, ctxt, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
    c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
    and c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
    and i does not appear in Γ, Δ or C
@@ -449,53 +449,56 @@ let propagate_sc fc = function
 
 (* Use propagate to define recursive functions on elements of type kc *)
 let propagate_kc fc fv fh ft fty = function
-  | EHole _ as c -> c
-  | EAssert (i, a, c1, c2) ->
+  | KHole _ as c -> c
+  | KAssert (i, a, c1, c2) ->
       let f1 = fc c1 in
       let f2 = fc c2 in
-      EAssert (fh i, ft a, f1, f2)
-  | EAxiom (a, i1, i2) -> EAxiom (ft a, fh i1, fh i2)
-  | ETrivial (pos, i) -> ETrivial (pos, fh i)
-  | EEqRefl (ty, t, i) -> EEqRefl (fty ty, ft t, fh i)
-  | EEqSym (pos, ty, t1, t2, i, c) ->
-      EEqSym (pos, fty ty, ft t1, ft t2, fh i, fc c)
-  | EEqTrans (ty, t1, t2, t3, i1, i2, i3, c) ->
-      EEqTrans (fty ty, ft t1, ft t2, ft t3, fh i1, fh i2, fh i3, fc c)
-  | ESplit (pos, a, b, i, c1, c2) ->
+      KAssert (fh i, ft a, f1, f2)
+  | KAxiom (a, i1, i2) -> KAxiom (ft a, fh i1, fh i2)
+  | KTrivial (pos, i) -> KTrivial (pos, fh i)
+  | KEqRefl (ty, t, i) -> KEqRefl (fty ty, ft t, fh i)
+  | KEqSym (pos, ty, t1, t2, i, c) ->
+      KEqSym (pos, fty ty, ft t1, ft t2, fh i, fc c)
+  | KEqTrans (ty, t1, t2, t3, i1, i2, i3, c) ->
+      KEqTrans (fty ty, ft t1, ft t2, ft t3, fh i1, fh i2, fh i3, fc c)
+  | KSplit (pos, a, b, i, c1, c2) ->
       let f1 = fc c1 in
       let f2 = fc c2 in
-      ESplit (pos, ft a, ft b, fh i, f1, f2)
-  | EUnfoldIff (pos, a, b, i, c) -> EUnfoldIff (pos, ft a, ft b, fh i, fc c)
-  | EUnfoldArr (pos, a, b, i, c) -> EUnfoldArr (pos, ft a, ft b, fh i, fc c)
-  | EFoldIff (pos, a, b, i, c) -> EFoldIff (pos, ft a, ft b, fh i, fc c)
-  | EFoldArr (pos, a, b, i, c) -> EFoldArr (pos, ft a, ft b, fh i, fc c)
-  | EDestruct (pos, a, b, i, j1, j2, c) ->
-      EDestruct (pos, ft a, ft b, fh i, fh j1, fh j2, fc c)
-  | EConstruct (pos, a, b, i1, i2, j, c) ->
-      EConstruct (pos, ft a, ft b, fh i1, fh i2, fh j, fc c)
-  | ESwap (pos, a, i, c) -> ESwap (pos, ft a, fh i, fc c)
-  | ESwapNeg (pos, a, i, c) -> ESwapNeg (pos, ft a, fh i, fc c)
-  | EClear (pos, a, i, c) -> EClear (pos, ft a, fh i, fc c)
-  | EForget (i, c) -> EForget (fv i, fc c)
-  | EDuplicate (pos, a, i1, i2, c) -> EDuplicate (pos, ft a, fh i1, fh i2, fc c)
-  | EIntroQuant (pos, ty, p, i, y, c) ->
-      EIntroQuant (pos, fty ty, ft p, fh i, fv y, fc c)
-  | EInstQuant (pos, ty, p, i, j, t, c) ->
-      EInstQuant (pos, fty ty, ft p, fh i, fh j, ft t, fc c)
-  | ERewrite (pos, topt, ty, a, b, ctxt, i, h, c) ->
-      ERewrite (pos, Opt.map ft topt, fty ty, ft a, ft b, ft ctxt, fh i, fh h, fc c)
-  | EInduction (i1, i2, i3, i4, n, t, ctxt, c1, c2) ->
-      EInduction (fh i1, fh i2, fh i3, fh i4, ft n, ft t, ft ctxt, fc c1, fc c2)
+      KSplit (pos, ft a, ft b, fh i, f1, f2)
+  | KUnfoldIff (pos, a, b, i, c) -> KUnfoldIff (pos, ft a, ft b, fh i, fc c)
+  | KUnfoldArr (pos, a, b, i, c) -> KUnfoldArr (pos, ft a, ft b, fh i, fc c)
+  | KFoldIff (pos, a, b, i, c) -> KFoldIff (pos, ft a, ft b, fh i, fc c)
+  | KFoldArr (pos, a, b, i, c) -> KFoldArr (pos, ft a, ft b, fh i, fc c)
+  | KDestruct (pos, a, b, i, j1, j2, c) ->
+      KDestruct (pos, ft a, ft b, fh i, fh j1, fh j2, fc c)
+  | KConstruct (pos, a, b, i1, i2, j, c) ->
+      KConstruct (pos, ft a, ft b, fh i1, fh i2, fh j, fc c)
+  | KSwap (pos, a, i, c) -> KSwap (pos, ft a, fh i, fc c)
+  | KSwapNeg (pos, a, i, c) -> KSwapNeg (pos, ft a, fh i, fc c)
+  | KClear (pos, a, i, c) -> KClear (pos, ft a, fh i, fc c)
+  | KForget (i, c) -> KForget (fv i, fc c)
+  | KDuplicate (pos, a, i1, i2, c) -> KDuplicate (pos, ft a, fh i1, fh i2, fc c)
+  | KIntroQuant (pos, ty, p, i, y, c) ->
+      KIntroQuant (pos, fty ty, ft p, fh i, fv y, fc c)
+  | KInstQuant (pos, ty, p, i, j, t, c) ->
+      KInstQuant (pos, fty ty, ft p, fh i, fh j, ft t, fc c)
+  | KRewrite (pos, topt, ty, a, b, ctxt, i, h, c) ->
+      KRewrite (pos, Opt.map ft topt, fty ty, ft a, ft b, ft ctxt, fh i, fh h, fc c)
+  | KInduction (i1, i2, i3, i4, n, t, ctxt, c1, c2) ->
+      KInduction (fh i1, fh i2, fh i3, fh i4, ft n, ft t, ft ctxt, fc c1, fc c2)
 
+(* <abstract_terms_types> also simplifies all symbols into ident, and
+   builds the context to rewrite formulas (this is a function that cannot be
+   defined as a Why3.term) *)
 let rec abstract_terms_types (l : wkc) : kcert = match l with
-  | ERewrite (pos, Some {t_node = Tapp (ls, [])}, None, a, b, ctxt, i, h, c) ->
+  | KRewrite (pos, Some {t_node = Tapp (ls, [])}, None, a, b, ctxt, i, h, c) ->
       let ntls = CTfvar (ls.ls_name, []) in
       let cctxt = abstract_term ctxt in
       let nctxt = CTquant (CTlambda, CTprop, ct_close ls.ls_name cctxt) in
       let na = abstract_term a in
       let nb = abstract_term b in
       let nc = abstract_terms_types c in
-      ERewrite (pos, Some ntls, CTprop, na, nb, nctxt, i.pr_name, h.pr_name, nc)
+      KRewrite (pos, Some ntls, CTprop, na, nb, nctxt, i.pr_name, h.pr_name, nc)
   | c -> propagate_kc abstract_terms_types
            (fun ls -> ls.ls_name) (fun pr -> pr.pr_name)
            abstract_term abstract_otype c
@@ -505,22 +508,19 @@ let rec abstract_terms_types (l : wkc) : kcert = match l with
        The certificates returned by certifying transformations.
        Many constructors and few parameters to ease making certifying
        a transformation.
-    2. applied certificates : wsc
+    2. applied certificates : sc
        Result of the function <elab_apply>, this is not a function anymore.
-    3. abstracted certificates : (ident, ident) sc
-       Result of the function <abstract_symbols>. Same as before but with simpler
-       types that can be used by our checkers.
-    3. elaborated certificates : (term, ty option) kc
+    3. elaborated certificates : wkc
        Result of the main elaboration function <elaborate> and as such contains
        many additional information such as the current formula and whether the focus
        is on a goal or on an hypothesis. Knowing those additional informations,
        Let-variables can be substituted
     4. abstracted kernel certificates : kcert
        Result of applying the <abstract_terms_types>. Same as before but with
-       simpler types that can be used by our checkers.
+       simpler symbols, terms and types that can be used by our checkers.
     5. trimmed certificates : kcert
        Result of the function <trim>. It trims the certificate of rules that are
-       derivable with other core rules (Duplicate, Construct).
+       derivable with other core rules such as KDuplicate, KConstruct.
        Few constructors and many parameters to ease formal verification of
        checkers.
  *)
@@ -545,7 +545,7 @@ let elaborate init_ct c =
     match c with
     | Nc -> eprintf "No certificates@.";
             raise Elaboration_failed
-    | Hole task -> EHole task
+    | Hole task -> KHole task
     | Axiom (i1, i2) ->
         let t1, pos1 = try find_formula "Axiom1" i1 cta
                        with e -> pcta err_formatter cta; raise e
@@ -556,14 +556,14 @@ let elaborate init_ct c =
         assert (pos1 <> pos2);
         assert (t_equal t1 t2);
         let i1, i2 = if pos2 then i1, i2 else i2, i1 in
-        EAxiom (t1, i1, i2)
+        KAxiom (t1, i1, i2)
     | Trivial i ->
         let t, pos = find_formula "Trivial" i cta in
         begin match t.t_node, pos with
         | Tapp (e, [t1; t2]), _ when t_equal t1 t2 && ls_equal e ps_equ ->
-            EEqRefl (t1.t_ty, t1, i)
+            KEqRefl (t1.t_ty, t1, i)
         | Tfalse, false | Ttrue, true ->
-            ETrivial (pos, i)
+            KTrivial (pos, i)
         | _ -> eprintf "not an equality or not same terms in eqrefl";
                raise Elaboration_failed end
     | EqSym (i, c) ->
@@ -572,7 +572,7 @@ let elaborate init_ct c =
         | Tapp (e, [t1; t2]) when ls_equal e ps_equ ->
             let rev_eq = t_app ps_equ [t2; t1] t.t_ty in
             let cta = add i (rev_eq, pos) cta in
-            EEqSym (pos, t1.t_ty, t1, t2, i, elab cta c)
+            KEqSym (pos, t1.t_ty, t1, t2, i, elab cta c)
         | _ -> eprintf "not an equality"; raise Elaboration_failed end
     | EqTrans (i1, i2, i3, c) ->
         let t1, pos1 = find_formula "EqTrans" i1 cta in
@@ -583,7 +583,7 @@ let elaborate init_ct c =
             when t_equal t12 t21 && ls_equal e1 ps_equ && ls_equal e2 ps_equ ->
             let new_eq = t_app ps_equ [t11; t22] t1.t_ty in
             let cta = add i3 (new_eq, false) cta in
-            EEqTrans (t11.t_ty, t11, t12, t22, i1, i2, i3, elab cta c)
+            KEqTrans (t11.t_ty, t11, t12, t22, i1, i2, i3, elab cta c)
         | _ -> eprintf "wrong hyps form in eqtrans";
                raise Elaboration_failed end
     | Assert (i, a, c1, c2) ->
@@ -592,7 +592,7 @@ let elaborate init_ct c =
         let cta2 = add i (a, false) cta in
         let c1 = elab cta1 c1 in
         let c2 = elab cta2 c2 in
-        EAssert (i, a, c1, c2)
+        KAssert (i, a, c1, c2)
     | Let (x, i, c) ->
         let y, _ = find_formula "Let" i cta in
         let ix = match x.t_node with
@@ -608,11 +608,11 @@ let elaborate init_ct c =
                                  (t_binary Timplies t1 t2)
                                  (t_binary Timplies t2 t1), pos in
             let cta = add i unfolded_iff cta in
-            EUnfoldIff (pos, t1, t2, i, elab cta c)
+            KUnfoldIff (pos, t1, t2, i, elab cta c)
         | Tbinop (Timplies, t1, t2) ->
             let unfolded_imp = t_binary Tor (t_not t1) t2, pos in
             let cta = add i unfolded_imp cta in
-            EUnfoldArr (pos, t1, t2, i, elab cta c)
+            KUnfoldArr (pos, t1, t2, i, elab cta c)
         | _ -> eprintf "Nothing to unfold";
                raise Elaboration_failed end
     | Fold (i, c) ->
@@ -623,10 +623,10 @@ let elaborate init_ct c =
             when t_equal t1 t1' && t_equal t2 t2' ->
             let folded_iff = t_binary Tiff t1 t2, pos in
             let cta = add i folded_iff cta in
-            EFoldIff (pos, t1, t2, i, elab cta c)
+            KFoldIff (pos, t1, t2, i, elab cta c)
         | Tbinop (Tor, {t_node = Tnot t1}, t2) ->
             let cta = add i (t_binary Timplies t1 t2, pos) cta in
-            EFoldArr (pos, t1, t2, i, elab cta c)
+            KFoldArr (pos, t1, t2, i, elab cta c)
         | _ -> eprintf "Nothing to fold";
                raise Elaboration_failed end
     | Split (i, c1, c2) ->
@@ -640,7 +640,7 @@ let elaborate init_ct c =
         let cta2 = add i (t2, pos) cta in
         let c1 = elab cta1 c1 in
         let c2 = elab cta2 c2 in
-        ESplit (pos, t1, t2, i, c1, c2)
+        KSplit (pos, t1, t2, i, c1, c2)
     | Destruct (i, i1, i2, c) ->
         let t, pos = find_formula "Destruct" i cta in
         let t1, t2 = match t.t_node, pos with
@@ -651,7 +651,7 @@ let elaborate init_ct c =
         let cta = remove i cta
                   |> add i1 (t1, pos)
                   |> add i2 (t2, pos) in
-        EDestruct (pos, t1, t2, i, i1, i2, elab cta c)
+        KDestruct (pos, t1, t2, i, i1, i2, elab cta c)
     | Construct (i1, i2, i, c) ->
         let t1, pos1 = find_formula "Construct1" i1 cta in
         let t2, pos2 = find_formula "Construct2" i2 cta in
@@ -662,7 +662,7 @@ let elaborate init_ct c =
         let cta = remove i1 cta
                   |> remove i2
                   |> add i (t, pos1) in
-        EConstruct (pos1, t1, t2, i1, i2, i, elab cta c)
+        KConstruct (pos1, t1, t2, i1, i2, i, elab cta c)
     | Swap (i, c) ->
         let t, pos = find_formula "Swap" i cta in
         let neg, underlying_t, neg_t = match t.t_node with
@@ -671,19 +671,19 @@ let elaborate init_ct c =
         let cta = add i (neg_t, not pos) cta in
         let pack = pos, underlying_t, i, elab cta c in
         if neg
-        then ESwapNeg pack
-        else ESwap pack
+        then KSwapNeg pack
+        else KSwap pack
     | Clear (i, c) ->
         let t, pos = find_formula "Clear" i cta in
         let cta = remove i cta in
-        EClear (pos, t, i, elab cta c)
+        KClear (pos, t, i, elab cta c)
     | Forget (i, c) ->
         let cta = remove_var i cta in
-        EForget (i, elab cta c)
+        KForget (i, elab cta c)
     | Duplicate (i1, i2, c) ->
         let t, pos = find_formula "Duplicate" i1 cta in
         let cta = add i2 (t, pos) cta in
-        EDuplicate (pos, t, i1, i2, elab cta c)
+        KDuplicate (pos, t, i1, i2, elab cta c)
     | IntroQuant (i, ls, c) ->
         let y = t_app_infer ls [] in
         let t, pos = find_formula "IntroQuant" i cta in
@@ -695,7 +695,7 @@ let elaborate init_ct c =
               let t_fun = t_eps (t_close_bound vs t_open) in
               let cta = add i (t_applied, pos) cta
                         |> add_var ls.ls_name (abstract_otype ty_opt) in
-              EIntroQuant (pos, ty_opt, t_fun, i, ls, elab cta c)
+              KIntroQuant (pos, ty_opt, t_fun, i, ls, elab cta c)
           | _ -> raise Elaboration_failed end
     | InstQuant (i1, i2, t_inst, c) ->
         let t, pos = find_formula "InstQuant" i1 cta in
@@ -705,7 +705,7 @@ let elaborate init_ct c =
               let t_applied = t_subst_single vs t_inst t_open in
               let t = t_eps (t_close_bound vs t_open) in
               let cta = add i2 (t_applied, pos) cta in
-              EInstQuant (pos, Some vs.vs_ty, t, i1, i2, t_inst, elab cta c)
+              KInstQuant (pos, Some vs.vs_ty, t, i1, i2, t_inst, elab cta c)
           | _ -> eprintf "trying to instantiate a non-quantified hypothesis@.";
                  raise Elaboration_failed end
     | Rewrite (i1, i2, c) ->
@@ -726,11 +726,11 @@ let elaborate init_ct c =
           let vs = create_vsymbol id ty in
           let vst = t_var vs in
           let ctxt = t_eps (t_close_bound vs (t_replace a vst t)) in
-          ERewrite (pos, None, Some ty, a, b, ctxt, i1, i2, c)
+          KRewrite (pos, None, Some ty, a, b, ctxt, i1, i2, c)
         else
           let t_r = t_app (create_psymbol id []) [] None in
           let ctxt = t_replace a t_r t in
-          ERewrite (pos, Some t_r, None, a, b, ctxt, i1, i2, c)
+          KRewrite (pos, Some t_r, None, a, b, ctxt, i1, i2, c)
 
     | Induction (g, hi1, hi2, hr, x, a, c1, c2) ->
         let a = a map in
@@ -749,13 +749,13 @@ let elaborate init_ct c =
                                       (t_app lt [n; a] None)
                                       (t_replace x n t))),
                               false) in
-        EInduction (g, hi1, hi2, hr, x, a, ctxt, elab cta1 c1, elab cta2 c2)
+        KInduction (g, hi1, hi2, hr, x, a, ctxt, elab cta1 c1, elab cta2 c2)
   in
   elaborate Mid.empty init_ct c
 
 let eaxiom pos t i1 i2 =
-  if pos then EAxiom (t, i1, i2)
-  else EAxiom (t, i2, i1)
+  if pos then KAxiom (t, i1, i2)
+  else KAxiom (t, i2, i1)
 (* eaxiom true t i1 i2 ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
 (* eaxiom false t i1 i2 ⇓ (Γ, i2 : t ⊢ Δ, i1 : t) stands *)
 
@@ -764,22 +764,22 @@ let eduplicate pos t i1 i2 c =
   let c1, c2 = if pos
                then c, c_closed
                else c_closed, c in
-  EAssert (i2, t, c1, c2)
+  KAssert (i2, t, c1, c2)
 
 let erename pos a i1 i2 c =
-  eduplicate pos a i1 i2 (EClear (pos, a, i1, c))
+  eduplicate pos a i1 i2 (KClear (pos, a, i1, c))
 
 let rec trim c =
   match c with
-  | EDuplicate (pos, t, i1, i2, c) ->
+  | KDuplicate (pos, t, i1, i2, c) ->
       let c = trim c in
       eduplicate pos t i1 i2 c
-  | EConstruct (pos, t1, t2, i1, i2, i, c) ->
+  | KConstruct (pos, t1, t2, i1, i2, i, c) ->
       let c = trim c in
       let i1' = id_register (id_fresh "i1") in
       let i2' = id_register (id_fresh "i2") in
-      let c_open = EClear (pos, t1, i1', EClear (pos, t2, i2', c)) in
-      let c_closed = ESplit (not pos, t1, t2, i,
+      let c_open = KClear (pos, t1, i1', KClear (pos, t2, i2', c)) in
+      let c_closed = KSplit (not pos, t1, t2, i,
                              eaxiom (not pos) t1 i1' i,
                              eaxiom (not pos) t2 i2' i) in
       let c1, c2, cut = if pos
@@ -787,9 +787,9 @@ let rec trim c =
                         else c_closed, c_open, CTbinop (Tand, t1, t2) in
       erename pos t1 i1 i1' @@
         erename pos t2 i2 i2' @@
-          EAssert (i, cut, c1, c2)
-  | EFoldArr (pos, t1, t2, i, c') | EFoldIff (pos, t1, t2, i, c') ->
-      let is_arr = match c with EFoldArr _ -> true | _ -> false in
+          KAssert (i, cut, c1, c2)
+  | KFoldArr (pos, t1, t2, i, c') | KFoldIff (pos, t1, t2, i, c') ->
+      let is_arr = match c with KFoldArr _ -> true | _ -> false in
       let c = trim c' in
       let j = id_register (id_fresh "fold_temp") in
       let pre, post = if is_arr
@@ -798,31 +798,31 @@ let rec trim c =
                       else CTbinop (Tand, CTbinop (Timplies, t1, t2),
                                     CTbinop (Timplies, t2, t1)),
                            CTbinop (Tiff, t1, t2) in
-      let unfold pack = if is_arr then EUnfoldArr pack else EUnfoldIff pack in
-      let c_open = EClear (pos, pre, j, c) in
+      let unfold pack = if is_arr then KUnfoldArr pack else KUnfoldIff pack in
+      let c_open = KClear (pos, pre, j, c) in
       let c_closed = unfold (not pos, t1, t2, i, eaxiom pos pre i j) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
       erename pos pre i j @@
-        EAssert (i, post, c1, c2)
-  | EEqSym (pos, cty, t1, t2, i, c) ->
+        KAssert (i, post, c1, c2)
+  | KEqSym (pos, cty, t1, t2, i, c) ->
       let c = trim c in
       let j = id_register (id_fresh "eqsym_temp") in
       let pre = CTapp (CTapp (eq cty, t1), t2) in
       let post = CTapp (CTapp (eq cty, t2), t1) in
-      let c_open = EClear (pos, pre, j, c) in
+      let c_open = KClear (pos, pre, j, c) in
       let h, g, a, b = if pos then i, j, t2, t1 else j, i, t1, t2 in
       (* We want to close a task of the form <Γ, h : a = b ⊢ Δ, g : b = a> *)
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq cty, b), CTbvar 0)) in
-      let c_closed = ERewrite (not pos, None, cty, a, b, ctxt, h, g,
-                               EEqRefl (cty, b, g)) in
+      let c_closed = KRewrite (not pos, None, cty, a, b, ctxt, h, g,
+                               KEqRefl (cty, b, g)) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
       erename pos pre i j @@
-        EAssert (i, post, c1, c2)
-  | EEqTrans (cty, t1, t2, t3, i1, i2, i3, c) ->
+        KAssert (i, post, c1, c2)
+  | KEqTrans (cty, t1, t2, t3, i1, i2, i3, c) ->
       let c = trim c in
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq cty, t1), CTbvar 0)) in
       eduplicate false (CTapp (CTapp (eq cty, t1), t2)) i1 i3 @@
-        ERewrite (false, None, cty, t2, t3, ctxt, i2, i3, c)
+        KRewrite (false, None, cty, t2, t3, ctxt, i2, i3, c)
   | _ -> propagate_kc trim (fun v -> v) (fun h -> h) (fun t -> t) (fun ty -> ty) c
 
 let make_kernel_cert init_ct res_ct (c : scert) : kcert =
