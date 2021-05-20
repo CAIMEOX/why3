@@ -11,107 +11,32 @@ open Cert_abstract
 (** We equip each transformation application with a certificate indicating
     why the list of resulting tasks implies the initial task *)
 
-(* We will denote a ctask <{sigma; gamma_delta}> by <Σ | Γ ⊢ Δ>
-   We sometimes omit the signature (when it's not confusing) and write <Γ ⊢ Δ> *)
-
 type sc =
   | Nc
   | Hole of cterm ctask
   (* You should never use the Hole certificate *)
   | Assert of prsymbol * (term Mid.t -> term) * sc * sc
   | Let of term * prsymbol * sc
-  (* Let (x, i, c) ⇓ t ≜  c[x → i(t)] ⇓ t *)
-  (* Meaning : in c, x is mapped to the formula identified by i in task t *)
   | Axiom of prsymbol * prsymbol
-  (* Axiom (i1, i2) ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
-  (* Axiom (i1, i2) ⇓ (Γ, i2 : t ⊢ Δ, i1 : t) stands *)
   | Trivial of prsymbol
-  (* Trivial i ⇓ (Γ, i : false ⊢ Δ) stands *)
-  (* Trivial i ⇓ (Γ ⊢ Δ, i : true ) stands *)
-  (* Trivial i ⇓ (Γ ⊢ Δ, i : t = t) stands *)
   | EqSym of prsymbol * sc
-  (* EqSym (i, c) ⇓ (Γ ⊢ Δ, i : t₁ = t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₂ = t₁) *)
-  (* EqSym (i, c) ⇓ (Γ, i : t₁ = t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ = t₁ ⊢ Δ) *)
   | EqTrans of prsymbol * prsymbol * prsymbol * sc
-  (* EqTrans (i₁, i₂, i₃, c) ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃ ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃, i₃ : t₁ = t₃ ⊢ Δ) *)
   | Unfold of prsymbol * sc
-  (* Unfold (i, c) ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜
-     c ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) *)
-  (* Unfold (i, c) ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) ≜
-     c ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) *)
-  (* Unfold (i, c) ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ)*)
-  (* Unfold (i, c) ⇓ (Γ ⊢ Δ, i : t₁ → t₂) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂)*)
   | Fold of prsymbol * sc
-  (* Fold (i, c) ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) ≜
-     c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) *)
-  (* Fold (i, c) ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) ≜
-     c ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) *)
-  (* Fold (i, c) ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) *)
-  (* Fold (i, c) ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₁ → t₂) *)
   | Split of prsymbol * sc * sc
-  (* Split (i, c₁, c₂) ⇓ (Γ, i : t₁ ∨ t₂ ⊢ Δ) ≜
-     c₁ ⇓ (Γ, i : t₁ ⊢ Δ)
-     and c₂ ⇓ (Γ, i : t₂ ⊢ Δ) *)
-  (* Split (i, c₁, c₂) ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜
-     c₁ ⇓ (Γ ⊢ Δ, i : t₁)
-     and c₂ ⇓ (Γ ⊢ Δ, i : t₂) *)
   | Destruct of prsymbol * prsymbol * prsymbol * sc
-  (* Destruct (i, i₁, i₂, c) ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) *)
-  (* Destruct (i, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i : t₁ ∨ t₂) ≜
-     c ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) *)
   | Construct of prsymbol * prsymbol * prsymbol * sc
-  (* Construct (i₁, i₂, i, c) ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) ≜
-     c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) *)
-  (* Construct (i₁, i₂, i, c) ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) ≜
-     c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) *)
   | Swap of prsymbol * sc
-  (* Swap (i, c) ⇓ (Γ, i : ¬t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : t) *)
-  (* Swap (i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t) *)
-  (* Swap (i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ, i : ¬t ⊢ Δ) *)
-  (* Swap (i, c) ⇓ (Γ ⊢ Δ, i : ¬t) ≜  c ⇓ (Γ, i : t ⊢ Δ) *)
   | Clear of prsymbol * sc
-  (* Clear (i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ ⊢ Δ) *)
-  (* Clear (i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
   | Forget of lsymbol * sc
-  (* Forget (i, c) ⇓ (Σ, i | Γ ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
   | Duplicate of prsymbol * prsymbol * sc
-  (* Duplicate (i₁, i₂, c) ⇓ (Γ ⊢ Δ, i₁ : t) ≜  c ⇓ (Γ ⊢ Δ, i₁ : t, i₂ : t) *)
-  (* Duplicate (i₁, i₂, c) ⇓ (Γ, i₁ : t ⊢ Δ) ≜  c ⇓ (Γ, i₁ : t, i₂ : t ⊢ Δ) *)
   | IntroQuant of prsymbol * lsymbol * sc
-  (* IntroQuant (i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p ⊢ Δ) ≜
-     c ⇓ (Σ, y : τ | Γ, i : p[x ↦ y] ⊢ Δ)
-     and y ∉  Σ *)
-  (* IntroQuant (i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p) ≜
-     c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p[x ↦ y])
-     and y ∉  Σ *)
   | InstQuant of prsymbol * prsymbol * term * sc
-  (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p ⊢ Δ) ≜
-     c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p x, i₂ : p[x ↦ t] ⊢ Δ)
-     and Σ ⊩ t : τ *)
-  (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p) ≜
-     c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p[x ↦ t])
-     and Σ ⊩ t : τ *)
   | Rewrite of prsymbol * prsymbol * sc
-  (* Rewrite (i₁, i₂, c) ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
-     c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
-  (* Rewrite (i₁, i₂, c) ⇓ (Γ, H : t₁ = t₂, i₁ : ctxt[t₁] ⊢ Δ) ≜
-     c ⇓ (Γ, H : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
-  | Induction of prsymbol * prsymbol * prsymbol * prsymbol * term * (term Mid.t -> term)
-                 * sc * sc
-(* Induction (G, Hi₁, Hi₂, Hr, x, a, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
-   c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
-   and c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
-   and i does not appear in Γ, Δ or C
-   and x and a are of type int
- *)
-(* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
-   stands for this context where the holes have been replaced with t *)
+  | Induction of prsymbol * prsymbol * prsymbol * prsymbol * term *
+                   (term Mid.t -> term) * sc * sc
 
 type scert = int * (sc list -> sc)
-
-let fail_arg () = verif_failed "Argument arity mismatch when composing certificates"
 
 let fill_tasks (n, f) res_ct =
   if List.length res_ct = n
@@ -274,6 +199,8 @@ let iffsym_hyp h =
 
 type ctrans = scert ctransformation
 
+(* We will denote a ctask <{sigma; gamma_delta}> by <Σ | Γ ⊢ Δ>
+   We sometimes omit the signature (when it's not confusing) and write <Γ ⊢ Δ> *)
 
 (* Replaying a certif cert against a ctask cta will be denoted <cert ⇓ cta>.
    For more details, take a look at the OCaml implementation
@@ -509,9 +436,31 @@ let map_kc fc fv fh ft fty = function
   | KInduction (i1, i2, i3, i4, n, t, ctxt, c1, c2) ->
       KInduction (fh i1, fh i2, fh i3, fh i4, ft n, ft t, ft ctxt, fc c1, fc c2)
 
-(* <abstract_terms_types> also simplifies all symbols into ident, and
-   builds the context to rewrite formulas (this is a function that cannot be
-   defined as a Why3.term) *)
+(** Compile chain.
+    1. surface certificates: scert
+       The certificates returned by certifying transformations.
+       Many constructors and few parameters to ease making certifying
+       a transformation.
+    2. applied certificates: sc
+       Result of the function <fill_tasks>, this is not a function anymore and
+       resulting tasks are contained in the certificate.
+    3. elaborated certificates: wkc
+       Result of the main elaboration function <elaborate> and as such contains
+       many additional information such as the current formula and whether the focus
+       is on a goal or on an hypothesis. Knowing those additional informations,
+       Let-variables can be substituted
+    4. abstracted kernel certificates: kcert
+       Result of applying the <abstract_terms_types>. Same as before but with
+       simpler symbols, terms and types that can be used by our checkers. It also
+       builds the context to rewrite formulas since this is a function that cannot be
+       defined as a Why3.term
+    5. trimmed certificates: kcert
+       Result of the function <trim>. It trims the certificate of rules that are
+       derivable with other core rules such as KDuplicate, KConstruct.
+       Few constructors and many parameters to ease formal verification of
+       checkers.
+ *)
+
 let rec abstract_terms_types (l : wkc) : kcert = match l with
   | KRewrite (pos, Some {t_node = Tapp (ls, [])}, None, a, b, ctxt, i, h, c) ->
       let ntls = CTfvar (ls.ls_name, []) in
@@ -524,28 +473,6 @@ let rec abstract_terms_types (l : wkc) : kcert = match l with
   | c -> map_kc abstract_terms_types
            (fun ls -> ls.ls_name) (fun pr -> pr.pr_name)
            abstract_term abstract_otype c
-
-(** Compile chain.
-    1. surface certificates : scert
-       The certificates returned by certifying transformations.
-       Many constructors and few parameters to ease making certifying
-       a transformation.
-    2. applied certificates : sc
-       Result of the function <elab_apply>, this is not a function anymore.
-    3. elaborated certificates : wkc
-       Result of the main elaboration function <elaborate> and as such contains
-       many additional information such as the current formula and whether the focus
-       is on a goal or on an hypothesis. Knowing those additional informations,
-       Let-variables can be substituted
-    4. abstracted kernel certificates : kcert
-       Result of applying the <abstract_terms_types>. Same as before but with
-       simpler symbols, terms and types that can be used by our checkers.
-    5. trimmed certificates : kcert
-       Result of the function <trim>. It trims the certificate of rules that are
-       derivable with other core rules such as KDuplicate, KConstruct.
-       Few constructors and many parameters to ease formal verification of
-       checkers.
- *)
 
 exception Elaboration_failed
 
@@ -775,40 +702,44 @@ let elaborate init_ct c =
   in
   elaborate Mid.empty init_ct c
 
-let eaxiom pos t i1 i2 =
-  if pos then KAxiom (t, i1, i2)
-  else KAxiom (t, i2, i1)
-(* eaxiom true t i1 i2 ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
-(* eaxiom false t i1 i2 ⇓ (Γ, i2 : t ⊢ Δ, i1 : t) stands *)
+let kaxiom pos t p1 p2 =
+  if pos then KAxiom (t, p1, p2)
+  else KAxiom (t, p2, p1)
+(* kaxiom true t p1 p2 ⇓ (Γ, p1 : t ⊢ Δ, p2 : t) stands *)
+(* kaxiom false t p1 p2 ⇓ (Γ, p2 : t ⊢ Δ, p1 : t) stands *)
 
-let eduplicate pos t i1 i2 c =
-  let c_closed = eaxiom (not pos) t i1 i2 in
+let kduplicate pos t p1 p2 c =
+  let c_closed = kaxiom (not pos) t p1 p2 in
   let c1, c2 = if pos
                then c, c_closed
                else c_closed, c in
-  KAssert (i2, t, c1, c2)
+  KAssert (p2, t, c1, c2)
+(* kduplicate true t p₁ p₂ c ⇓ (Γ ⊢ Δ, p₁ : t) ≜ c ⇓ (Γ ⊢ Δ, p₁ : t, p₂ : t) *)
+(* kduplicate false t p₁ p₂ c ⇓ (Γ, p₁ : t ⊢ Δ) ≜ c ⇓ (Γ, p₁ : t, p₂ : t ⊢ Δ) *)
 
-let erename pos a i1 i2 c =
-  eduplicate pos a i1 i2 (KClear (pos, a, i1, c))
+let krename pos a p1 p2 c =
+  kduplicate pos a p1 p2 (KClear (pos, a, p1, c))
+(* krename true t p₁ p₂ c ⇓ (Γ ⊢ Δ, p₁ : t) ≜ c ⇓ (Γ ⊢ Δ, p₂ : t) *)
+(* krename false t p₁ p₂ c ⇓ (Γ, p₁ : t ⊢ Δ) ≜ c ⇓ (Γ, p₂ : t ⊢ Δ) *)
 
 let rec trim c =
   match c with
   | KDuplicate (pos, t, i1, i2, c) ->
       let c = trim c in
-      eduplicate pos t i1 i2 c
+      kduplicate pos t i1 i2 c
   | KConstruct (pos, t1, t2, i1, i2, i, c) ->
       let c = trim c in
       let i1' = id_register (id_fresh "i1") in
       let i2' = id_register (id_fresh "i2") in
       let c_open = KClear (pos, t1, i1', KClear (pos, t2, i2', c)) in
       let c_closed = KSplit (not pos, t1, t2, i,
-                             eaxiom (not pos) t1 i1' i,
-                             eaxiom (not pos) t2 i2' i) in
+                             kaxiom (not pos) t1 i1' i,
+                             kaxiom (not pos) t2 i2' i) in
       let c1, c2, cut = if pos
                         then c_open, c_closed, CTbinop (Tor, t1, t2)
                         else c_closed, c_open, CTbinop (Tand, t1, t2) in
-      erename pos t1 i1 i1' @@
-        erename pos t2 i2 i2' @@
+      krename pos t1 i1 i1' @@
+        krename pos t2 i2 i2' @@
           KAssert (i, cut, c1, c2)
   | KFoldArr (pos, t1, t2, i, c') | KFoldIff (pos, t1, t2, i, c') ->
       let is_arr = match c with KFoldArr _ -> true | _ -> false in
@@ -822,9 +753,9 @@ let rec trim c =
                            CTbinop (Tiff, t1, t2) in
       let unfold pack = if is_arr then KUnfoldArr pack else KUnfoldIff pack in
       let c_open = KClear (pos, pre, j, c) in
-      let c_closed = unfold (not pos, t1, t2, i, eaxiom pos pre i j) in
+      let c_closed = unfold (not pos, t1, t2, i, kaxiom pos pre i j) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
-      erename pos pre i j @@
+      krename pos pre i j @@
         KAssert (i, post, c1, c2)
   | KEqSym (pos, cty, t1, t2, i, c) ->
       let c = trim c in
@@ -838,12 +769,12 @@ let rec trim c =
       let c_closed = KRewrite (not pos, None, cty, a, b, ctxt, h, g,
                                KEqRefl (cty, b, g)) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
-      erename pos pre i j @@
+      krename pos pre i j @@
         KAssert (i, post, c1, c2)
   | KEqTrans (cty, t1, t2, t3, i1, i2, i3, c) ->
       let c = trim c in
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq cty, t1), CTbvar 0)) in
-      eduplicate false (CTapp (CTapp (eq cty, t1), t2)) i1 i3 @@
+      kduplicate false (CTapp (CTapp (eq cty, t1), t2)) i1 i3 @@
         KRewrite (false, None, cty, t2, t3, ctxt, i2, i3, c)
   | _ -> map_kc trim (fun v -> v) (fun h -> h) (fun t -> t) (fun ty -> ty) c
 
