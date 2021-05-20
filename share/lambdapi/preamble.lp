@@ -56,11 +56,11 @@ builtin "P" ≔ tEv;
 
 // Define our higher order logic
 
-symbol false ≔ `π C : Type, C;
-symbol true ≔ false ⇒ false;
-symbol tt : tEv true ≔ λ x, x;
+symbol ⊥ ≔ `π C : Type, C;
+symbol ⊤ ≔ ⊥ ⇒ ⊥;
+symbol tt : tEv ⊤ ≔ λ x, x;
 
-symbol ¬ A ≔ A ⇒ false;
+symbol ¬ A ≔ A ⇒ ⊥;
 notation ¬ prefix 20;
 
 symbol ∧ A B ≔ `π C, (A ⇒ B ⇒ C) ⇒ C;
@@ -124,8 +124,8 @@ symbol DestructConj A B C : tEv (
 
 symbol eq T (x y : tEv T) ≔ `π P, P x ⇒ P y;
 
-symbol eq_fmla A B ≔ ktPi (DType ⇀ DType)
-                          (λ P, P A ⇒ P B);
+symbol eq_fmla A B ≔ @π (DType ⇀ DType)
+                      (λ P, P A ⇒ P B);
 
 // This axiom is needed to be able to rewrite formulas
 symbol iff_eq A B : tEv (
@@ -215,22 +215,22 @@ with rect_boolean _ _   $vF False ↪ $vF;
 
 symbol is_True ≔
   rect_boolean (λ _, DType)
-      true
-      false;
+      ⊤
+      ⊥;
 
 symbol discr_False_True : tEv (¬ (False = True))
 ≔ begin assume H;
   have f : tEv (is_True False);
   rewrite H; refine tt;
-  // TODO : why do we need to provide false here ?
-  refine f false;
+  // TODO : why do we need to provide ⊥ here ?
+  refine f ⊥;
 end;
 
 symbol eq_True_is_True b : tEv (b = True ⇒ is_True b)
 ≔ begin
   induction;
   assume _; refine tt;
-  assume f; refine discr_False_True f false;
+  assume f; refine discr_False_True f ⊥;
 end;
 
 symbol eq_False_not_is_True b : tEv (b = False ⇒ ¬ is_True b)
@@ -278,28 +278,28 @@ rule rect_comparison _ $vE _   _   Eq  ↪ $vE
 with rect_comparison _ _   $vL _   Lt  ↪ $vL
 with rect_comparison _ _   _   $vG Gt  ↪ $vG;
 
-symbol is_Eq ≔ rect_comparison (λ _, DType) true false false;
+symbol is_Eq ≔ rect_comparison (λ _, DType) ⊤ ⊥ ⊥;
 
 symbol discr_Lt_Eq : tEv (¬ (Lt = Eq))
 ≔ begin assume H;
   have f : tEv (is_Eq Lt);
   rewrite H; refine tt;
-  refine f false;
+  refine f ⊥;
 end;
 
 symbol discr_Gt_Eq : tEv (¬ (Gt = Eq))
 ≔ begin assume H;
   have f : tEv (is_Eq Gt);
   rewrite H; refine tt;
-  refine f false;
+  refine f ⊥;
 end;
 
-symbol is_Lt ≔ rect_comparison (λ _, DType) false true false;
+symbol is_Lt ≔ rect_comparison (λ _, DType) ⊥ ⊤ ⊥;
 symbol discr_Gt_Lt : tEv (¬ (Gt = Lt))
 ≔ begin assume H;
   have f : tEv (is_Lt Gt);
   rewrite H; refine tt;
-  refine f false;
+  refine f ⊥;
 end;
 
 symbol CompOpp ≔
@@ -1956,13 +1956,13 @@ notation ≥ infix 30;
 symbol > x y ≔ is_True (gtb x y);
 notation > infix 30;
 
-// assert ⊢ 3 < ~ 2 ≡ false;
-// assert ⊢ 3 < 3 ≡ false;
-// assert ⊢ 3 < 5 ≡ true;
+// assert ⊢ 3 < ~ 2 ≡ ⊥;
+// assert ⊢ 3 < 3 ≡ ⊥;
+// assert ⊢ 3 < 5 ≡ ⊤;
 
-// assert ⊢ 4 ≥ ~ 3 ≡ true;
-// assert ⊢ 4 ≥ 4 ≡ true;
-// assert ⊢ 4 ≥ 7 ≡ false;
+// assert ⊢ 4 ≥ ~ 3 ≡ ⊤;
+// assert ⊢ 4 ≥ 4 ≡ ⊤;
+// assert ⊢ 4 ≥ 7 ≡ ⊥;
 
 symbol natlike_rec P : tEv (
   P 0 ⇒
@@ -2092,11 +2092,11 @@ symbol lt_le_Z0 z : tEv (0 < succ z ⇒ 0 ≤ z)
   generalize z;
   refine ind_positive (λ x, 0 < succ (Zneg x) ⇒ 0 ≤ Zneg x) _ _ _;
   assume x _ f;
-  refine f false;
+  refine f ⊥;
   assume x _ f;
-  refine f false;
+  refine f ⊥;
   assume f;
-  refine f false;
+  refine f ⊥;
 end;
 
 symbol lt_le u z : tEv (u < succ z ⇒ u ≤ z)
@@ -2288,7 +2288,7 @@ notation ⟹  infix right 11;
 
 rule $A ∙ $B ⊧ $C ↪ $A ⟹  $B ⊧ $C
 with ∅ ⊧ $A ∙ $B  ↪ ¬ $A ⟹  ∅ ⊧ $B
-with ∅ ⊧ ∅        ↪ false;
+with ∅ ⊧ ∅        ↪ ⊥;
 
 // A task < t | x : t | H1 : A1, H2 : A2 ⊢ G : B > is encoded by
 // <`π t : Type, ∀ x : t, tr A1 ∙ tr A2 ∙ ∅ ⊧ tr A ∙ ∅ >
@@ -2302,11 +2302,11 @@ symbol Axiom A : tEv (
 ≔ λ a na, na a;
 
 symbol TrivialHyp : tEv (
-  false ∙ ∅ ⊧ ∅)
+  ⊥ ∙ ∅ ⊧ ∅)
 ≔ λ f, f;
 
 symbol TrivialGoal : tEv (
-  ∅ ⊧ true ∙ ∅)
+  ∅ ⊧ ⊤ ∙ ∅)
 ≔ λ ntt, ntt tt;
 
 symbol EqRefl T (t : tEv T) : tEv (
@@ -2324,7 +2324,7 @@ symbol SplitHyp' A B : tEv (
   B ∙ ∅ ⊧ ∅ ⟹
   A ∨ B ∙ ∅ ⊧ ∅)
 ≔ begin assume A B s1 s2 H;
-  refine DestructDisj A B false H s1 s2; end;
+  refine DestructDisj A B ⊥ H s1 s2; end;
 symbol SplitHyp A B H s1 s2 ≔ SplitHyp' A B s1 s2 H;
 
 symbol SplitGoal' A B : tEv (
@@ -2399,7 +2399,7 @@ symbol DestructHyp' A B : tEv (
   A ∙ B ∙ ∅ ⊧ ∅ ⟹
   A ∧ B ∙ ∅ ⊧ ∅)
 ≔ begin assume A B s ab;
-  refine DestructConj A B false ab s;
+  refine DestructConj A B ⊥ ab s;
 end;
 symbol DestructHyp A B H s ≔ DestructHyp' A B s H;
 
@@ -2433,7 +2433,7 @@ symbol Forget : tEv (
 symbol IntroQuantHyp' T (P : tEv T → Type) : tEv (
   (`∀ x, P x ∙ ∅ ⊧ ∅) ⟹
   (`∃ x, P x) ∙ ∅ ⊧ ∅)
-≔ begin assume T P s ep; refine ep false s; end;
+≔ begin assume T P s ep; refine ep ⊥ s; end;
 symbol IntroQuantHyp {T} P H s ≔ IntroQuantHyp' T P s H;
 
 symbol IntroQuantGoal' T (P : tEv T → Type) : tEv (
@@ -2516,6 +2516,9 @@ symbol Induction a P x H s1 s2 ≔ Induction' a P s1 s2 x H;
 symbol int ≔ DZ;
 symbol bool ≔ Dboolean;
 
+symbol true ≔ ⊤;
+symbol false ≔ ⊥;
+
 // symbol True ≔ True;
 // symbol False ≔ False;
 
@@ -2531,5 +2534,5 @@ symbol infixspls ≔ @<;
 symbol infixspgteq ≔ @≥;
 symbol infixspgt ≔ @>;
 
-// Also targeted, but not from an ident : quantifications and arrows, true,
-// false, ∧, ∨, ¬, ⇔, ~, Z, boolean, DType, Type, int litterals
+// Also targeted, but not from an ident : quantifications and arrows, ∧, ∨, ¬,
+// ⇔, ~, Z, boolean, DType, Type, int litterals
