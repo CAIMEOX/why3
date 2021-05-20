@@ -21,7 +21,13 @@ let rec ccheck c cta =
                         pacta cta'
                         pacta cta;
                       verif_failed "Tasks differ, look at std_err" end
-
+  | KClear (_, _, i, c) ->
+      let cta = remove i cta in
+      ccheck c cta
+  | KForget (i, c) ->
+      assert (not (has_ident_context i cta.gamma_delta));
+      let cta = remove_var i cta in
+      ccheck c cta
   | KAxiom (_, i1, i2) ->
       let t1, pos1 = find_formula "axiom1" i1 cta in
       let t2, pos2 = find_formula "axiom2" i2 cta in
@@ -44,9 +50,9 @@ let rec ccheck c cta =
   | KEqRefl (cty, _, i) ->
       let t, pos = find_formula "eqrefl" i cta in
       begin match t, pos with
-      | CTapp (CTapp (e, t1), t2), _ when ct_equal t1 t2 && ct_equal e (eq cty) ->
-          ()
-      | _ -> verif_failed "Non eqrefl hypothesis" end
+      | CTapp (CTapp (e, t1), t2), true
+          when ct_equal t1 t2 && ct_equal e (eq cty) -> ()
+      | _ -> verif_failed "Non eqrefl goal" end
   | KAssert (i, a, c1, c2) ->
       infers_into ~e_str:"KAssert" cta a CTprop;
       let cta1 = add i (a, true) cta in
@@ -92,13 +98,6 @@ let rec ccheck c cta =
                     |> add j2 (t2, pos) in
           ccheck c cta
       | _ -> verif_failed "Nothing to destruct" end
-  | KClear (_, _, i, c) ->
-      let cta = remove i cta in
-      ccheck c cta
-  | KForget (i, c) ->
-      assert (not (has_ident_context i cta.gamma_delta));
-      let cta = remove_var i cta in
-      ccheck c cta
   | KIntroQuant (_, _, _, i, y, c) ->
       let t, pos = find_formula "intro_quant" i cta in
       begin match t, pos with

@@ -9,24 +9,16 @@ open Cert_syntax
 open Cert_abstract
 
 (** We equip each transformation application with a certificate indicating
-    why the resulting list of tasks is implying the initial task *)
+    why the list of resulting tasks implies the initial task *)
 
 (* We will denote a ctask <{sigma; gamma_delta}> by <Σ | Γ ⊢ Δ>
-   We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ> *)
+   We sometimes omit the signature (when it's not confusing) and write <Γ ⊢ Δ> *)
 
 type sc =
-  (* Replaying a certif cert against a ctask cta will be denoted <cert ⇓ cta>.
-     For more details, take a look at the OCaml implementation
-     <Cert_verif_caml.ccheck>. *)
   | Nc
-  (* Makes verification fail: use it as a placeholder *)
   | Hole of cterm ctask
-  (* You should never use this certificate *)
+  (* You should never use the Hole certificate *)
   | Assert of prsymbol * (term Mid.t -> term) * sc * sc
-  (* Assert (i, t, c₁, c₂) ⇓ (Σ | Γ ⊢ Δ) ≜
-         c₁ ⇓ (Σ | Γ ⊢ Δ, i : t)
-     and c₂ ⇓ (Σ | Γ, i : t ⊢ Δ)
-     and Σ ⊩ t : prop *)
   | Let of term * prsymbol * sc
   (* Let (x, i, c) ⇓ t ≜  c[x → i(t)] ⇓ t *)
   (* Meaning : in c, x is mapped to the formula identified by i in task t *)
@@ -132,10 +124,14 @@ type 'a args =
 
 let rec lambda : type a. a args -> a -> sc list -> sc = fun args f ->
   match args with
-  | Z -> fun _ -> f
-  | Succ args -> function
-                  [] -> assert false
-                | h::l -> lambda args (f h) l
+  | Z ->
+      begin function
+        | [] -> f
+        | _  -> verif_failed "Too many arguments in certificate application" end
+  | Succ args ->
+      function
+      | [] -> verif_failed "Missing arguments in certificate application"
+      | h::l -> lambda args (f h) l
 
 let rec arity : type a. a args -> int = fun args ->
   match args with
@@ -168,7 +164,7 @@ let rec dispatch lu lc = match lc with
       f2 lu2 :: dispatch lu lc
   | [] -> []
 
-let (+++) (n1, f1) lc2 =
+let (+++) (n1, f1) lc2 : scert =
   assert (List.length lc2 = n1);
   let n = List.fold_left (fun acc (n, _) -> acc + n) 0 lc2 in
   n, fun lu -> f1 (dispatch lu lc2)
@@ -178,93 +174,141 @@ let (++) (n1, f1) c2 : scert =
   (n1, f1) +++ lc2
 
 let nc : scert = return Nc
+(* "no certificate", makes verification fail: use it as a placeholder *)
 let idc : scert = newcert1 (fun t -> t)
-let assertion h t = newcert2 (fun a1 a2 -> Assert (h, t, a1, a2))
-let axiom i1 i2 = return (Axiom (i1, i2))
-let trivial i = return (Trivial i)
-let eqsym i = newcert1 (fun a -> EqSym (i, a))
-let eqtrans i1 i2 i3 = newcert1 (fun a -> EqTrans (i1, i2, i3, a))
-let unfold i = newcert1 (fun a -> Unfold (i, a))
-let fold i = newcert1 (fun a -> Fold (i, a))
-let split i = newcert2 (fun a1 a2 -> Split (i, a1, a2))
-let destruct i i1 i2 = newcert1 (fun a -> Destruct (i, i1, i2, a))
-let construct i1 i2 i = newcert1 (fun a -> Construct (i1, i2, i, a))
-let swap i = newcert1 (fun a -> Swap (i, a))
-let clear i = newcert1 (fun a -> Clear (i, a))
-let forget i = newcert1 (fun a -> Forget (i, a))
-let duplicate i1 i2 = newcert1 (fun a -> Duplicate (i1, i2, a))
-let introquant i t = newcert1 (fun a -> IntroQuant (i, t, a))
-let instquant i1 i2 t = newcert1 (fun a -> InstQuant (i1, i2, t, a))
-let rewrite i1 i2 = newcert1 (fun a -> Rewrite (i1, i2, a))
+(* For the identity transformation *)
+let assertion p t = newcert2 (fun a1 a2 -> Assert (p, t, a1, a2))
+(* Produces two new tasks: one with p : t added to the goals and
+   one with p : t added to the hypotheses *)
+let axiom p1 p2 = return (Axiom (p1, p2))
+(* Closes the task when p1 and p2 contain the same formula and
+   one is in the hypotheses while the other is in the goals *)
+let trivial p = return (Trivial p)
+(* Closes the task when p either contains ⊥ in the hypotheses,
+   ⊤ in the goals or a formula of the form t = t in the goals *)
+let eqsym p = newcert1 (fun a -> EqSym (p, a))
+(* From a task with a premise of the form p : t₁ = t₂, produces the
+   same task with premise p modified into p : t₂ = t₁ *)
+let eqtrans h1 h2 h3 = newcert1 (fun a -> EqTrans (h1, h2, h3, a))
+(* From a task with two hypotheses of the form h₁ : t₁ = t₂ and h₂ : t₂ = t₃,
+   produces the same task with added hypothesis h₃ : t₁ = t₃*)
+let unfold p = newcert1 (fun a -> Unfold (p, a))
+(* From a task with a premise of the form p : t₁ → t₂ (resp. p : t₁ ↔ t₂),
+   produces the same task with premise p modified into p : ¬ t₁ ∨ t₂
+   (resp. p : (t₁ → t₂) ∧ (t₂ → t₁)) *)
+let fold p = newcert1 (fun a -> Fold (p, a))
+(* From a task with a premise of the form p : ¬ t₁ ∨ t₂
+   (resp. p : (t₁ → t₂) ∧ (t₂ → t₁)), produces the same task with premise p
+   modified into p : t₁ → t₂ (resp. p : t₁ ↔ t₂) *)
+let split p = newcert2 (fun a1 a2 -> Split (p, a1, a2))
+(* From a task with an hypothesis of the form p : t₁ ∨ t₂ (resp. a goal of the
+   form p : t₁ ∧ t₂), produces two new tasks: one with hypothesis (resp. goal) p
+   is replaced with p : t₁ and one with hypothesis (resp. goal) p is replaced with
+   p : t₂ *)
+let destruct p p1 p2 = newcert1 (fun a -> Destruct (p, p1, p2, a))
+(* From a task with an hypothesis of the form p : t₁ ∧ t₂ (resp. a goal of
+   the form p : t₁ ∨ t₂), produces the same task where hypothesis (resp. goal) p
+   is replaced by two hypotheses (resp. goals) p₁ : t₁ and p₂ : t₂ *)
+let construct p1 p2 p = newcert1 (fun a -> Construct (p1, p2, p, a))
+(* From a task with hypotheses (resp. goals) of the form p₁ : t₁ and p₂ : t₂,
+   produces the same task where hypotheses (resp. goals) p₁ and p₂ are replaced
+   with hypothesis p : t₁ ∧ t₂ (resp. goal p : t₁ ∨ t₂) *)
+let swap p = newcert1 (fun a -> Swap (p, a))
+(* Puts an hypothesis (resp. a goal) into the goals (resp. the hypotheses),
+   by negating it, removing double negation *)
+let clear p = newcert1 (fun a -> Clear (p, a))
+(* Removes a premise p from the task *)
+let forget ls = newcert1 (fun a -> Forget (ls, a))
+(* Removes an unused abstract type ls from the task *)
+let duplicate p1 p2 =
+  assert (not (pr_equal p1 p2));
+  newcert1 (fun a -> Duplicate (p1, p2, a))
+(* Duplicates a premise p₁ into p₂ *)
+let introquant p y = newcert1 (fun a -> IntroQuant (p, y, a))
+(* From a fresh variable y and a task with hypothesis p : ∃ x : τ. q
+   (resp. goal p : ∀ x. q), produces a new task with the variable y of
+   type \τ and hypothesis (resp. goal) p modified into p : q[x ↦ y] *)
+let instquant p1 p2 t = newcert1 (fun a -> InstQuant (p1, p2, t, a))
+(* From a term t of type τ and a task with hypothesis p₁ : ∀ x : τ. q
+   (resp. goal p₁ : ∃ x. q), produces a new task with the variable y of
+   type τ and the added hypothesis (resp. goal) p₂ : q[x ↦ t] *)
+let rewrite h p = newcert1 (fun a -> Rewrite (h, p, a))
+(* From a task with hypothesis h : t₁ = t₂ and premise p : t[t₁],
+   produces the tasks with p modified into p : t[t₂] *)
 let induction g hi1 hi2 hr x a =
   newcert2 (fun a1 a2 -> Induction (g, hi1, hi2, hr, x, a, a1, a2))
+(* From an integer a and a task with a goal g : t[x] with x being an integer,
+   produces two new tasks: one with the added hypothesis hi1 : i ≤ a and the
+   other with the added hypotheses hi2 : a < i and hr : ∀ n. n < i → t[n] *)
 
 let llet pr (cont : ident -> scert) : scert =
   let ls = create_psymbol (id_fresh "Let_var") [] in
   let t = t_app ls [] None in
   newcert1 (fun u -> Let (t, pr, u)) ++ cont ls.ls_name
+(* From a task with premise pr : t, produces the same tasks as cont i,
+   where i is mapped to t *)
 
-let create_eqrefl i (t : term) =
-  assertion i (fun _ -> t_app_infer ps_equ [t; t]) +++ [trivial i; idc]
-(* create_eqrefl i t ++ c ⇓ (Γ ⊢ Δ) ≜  c ⇓ (Γ, i : t = t ⊢ Δ) *)
+let create_eqrefl h (t : term) =
+  assertion h (fun _ -> t_app_infer ps_equ [t; t]) +++ [trivial h; idc]
+(* Produces a task with the added hypothesis h : t = t *)
 
-let rename i1 i2 =
-  duplicate i1 i2 ++ clear i1
-(* rename i₁ i₂ ++ c ⇓ (Γ ⊢ Δ, i₁ : t) ≜  c ⇓ (Γ ⊢ Δ, i₂ : t) *)
-(* rename i₁ i₂ ++ c ⇓ (Γ, i₁ : t ⊢ Δ) ≜  c ⇓ (Γ, i₂ : t ⊢ Δ) *)
+let rename p1 p2 =
+  duplicate p1 p2 ++ clear p1
+(* Renames a premise p₁ into p₂ *)
 
-let dir d i =
-  let j = create_prsymbol (id_fresh "dir") in
-  let left, right = if d then j, i else i, j in
-  destruct i left right ++ clear j
-(* dir false i ++ c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ ⊢ Δ) *)
-(* dir true  i ++ c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ ⊢ Δ) *)
-(* dir false i ++ c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₁) *)
-(* dir true  i ++ c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₂) *)
+let dir d p =
+  let q = create_prsymbol (id_fresh "dir") in
+  let left, right = if d then q, p else p, q in
+  destruct p left right ++ clear q
+(* Chose a direction for hypothesis p : t₁ ∨ t₂ or goal p : t₁ ∧ t₂ *)
 
-let iffsym_hyp i =
-  let i1 = pr_clone i in
-  let i2 = pr_clone i in
-  unfold i ++
-    destruct i i1 i2 ++
-      construct i2 i1 i ++
-        fold i
-(* iffsym_hyp i ++ c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ ↔ t₁ ⊢ Δ) *)
+let iffsym_hyp h =
+  let h1 = pr_clone h in
+  let h2 = pr_clone h in
+  unfold h ++
+    destruct h h1 h2 ++
+      construct h2 h1 h ++
+        fold h
+(* From a task with an hypothesis of the form h : t₁ ↔ t₂, produces the
+   same task with premise h modified into h : t₂ ↔ t₁ *)
 
 type ctrans = scert ctransformation
 
+
+(* Replaying a certif cert against a ctask cta will be denoted <cert ⇓ cta>.
+   For more details, take a look at the OCaml implementation
+   <Cert_verif_caml.ccheck>. *)
+
+(* ('v, 'h, 't, 'ty) kc is the type of kernel certificates, where:
+   • 'v is used for variables
+   • 'h is used for premise names
+   • 't is used for terms
+   • 'ty is used for types *)
 type ('v, 'h, 't, 'ty) kc =
-  (* 't is used for terms (term or cterm)
-     and 'ty is used for types (ty option or ctype) *)
   | KHole of cterm ctask
-  (* KHole ct ⇓ (Γ ⊢ Δ) stands iff ct refers to <Γ ⊢ Δ> *)
+  (* KHole cta ⇓ cta stands *)
   | KClear of bool * 't * 'h * ('v, 'h, 't, 'ty) kc
-  (* KClear (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ ⊢ Δ) *)
-  (* KClear (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | KDuplicate of bool * 't * 'h * 'h * ('v, 'h, 't, 'ty) kc (* not kernel *)
-  (* KDuplicate (true, t, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i₁ : t) ≜
-     c ⇓ (Γ ⊢ Δ, i₁ : t, i₂ : t) *)
-  (* KDuplicate (false, t, i₁, i₂, c) ⇓ (Γ, i₁ : t ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t, i₂ : t ⊢ Δ) *)
+  (* KClear (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜ c ⇓ (Γ ⊢ Δ) *)
+  (* KClear (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ) *)
+  | KDuplicate of bool * 't * 'h * 'h * ('v, 'h, 't, 'ty) kc
+  (* not kernel *)
   | KForget of 'v * ('v, 'h, 't, 'ty) kc
-  (* KForget (i, c) ⇓ (Σ, i : τ | Γ ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
+  (* KForget (i, c) ⇓ (Σ, i : τ | Γ ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ) *)
   | KAssert of 'h * 't * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
   (* KAssert (i, t, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜
-     c₁ ⇓ (Γ ⊢ Δ, i : t)
-     and c₂ ⇓ (Γ, i : t ⊢ Δ) *)
+     c₁ ⇓ (Γ ⊢ Δ, i : t) and
+     c₂ ⇓ (Γ, i : t ⊢ Δ) *)
   | KAxiom of 't * 'h * 'h
   (* KAxiom (t, i1, i2) ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
-  (* Notice that there is only one rule. *)
   | KTrivial of bool * 'h
-  (* KTrivial (false, i) ⇓ (Γ, i : false ⊢ Δ) stands *)
-  (* KTrivial (true, i) ⇓ (Γ ⊢ Δ, i : true ) stands *)
-  (* Notice that trivial equalities use the following certificate. *)
+  (* KTrivial (false, i) ⇓ (Γ, i : ⊥ ⊢ Δ) stands *)
+  (* KTrivial (true, i) ⇓ (Γ ⊢ Δ, i : ⊤) stands *)
   | KSwap of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
-  (* KSwap (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t) *)
-  (* KSwap (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ, i : ¬t ⊢ Δ) *)
+  (* KSwap (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, i : ¬t) *)
+  (* KSwap (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜ c ⇓ (Γ, i : ¬t ⊢ Δ) *)
   | KSwapNeg of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
-  (* KSwap_neg (false, t, i, c) ⇓ (Γ, i : ¬t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : t)  *)
-  (* KSwap_neg (true, t, i, c) ⇓ (Γ ⊢ Δ, i : ¬t) ≜  c ⇓ (Γ, i : t ⊢ Δ)  *)
+  (* KSwapNeg (false, t, i, c) ⇓ (Γ, i : ¬t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, i : t)  *)
+  (* KSwapNeg (true, t, i, c) ⇓ (Γ ⊢ Δ, i : ¬t) ≜ c ⇓ (Γ, i : t ⊢ Δ)  *)
   | KUnfoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* KUnfoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) *)
@@ -277,23 +321,15 @@ type ('v, 'h, 't, 'ty) kc =
      c ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂)*)
   | KFoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* not kernel *)
-  (* KFoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) ≜
-     c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) *)
-  (* KFoldIff (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) ≜
-     c ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) *)
   | KFoldArr of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* not kernel *)
-  (* KFoldArr (false, t₁, t₂, i, c) ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ) ≜
-     c ⇓ (Γ, i : t₁ → t₂ ⊢ Δ)*)
-  (* KFoldArr (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂) ≜
-     c ⇓ (Γ ⊢ Δ, i : t₁ → t₂)*)
   | KSplit of bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
   (* KSplit (false, t₁, t₂, i, c₁, c₂) ⇓ (Γ, i : t₁ ∨ t₂ ⊢ Δ) ≜
-     c₁ ⇓ (Γ, i : t₁ ⊢ Δ)
-     and c₂ ⇓ (Γ, i : t₂ ⊢ Δ) *)
+     c₁ ⇓ (Γ, i : t₁ ⊢ Δ) and
+     c₂ ⇓ (Γ, i : t₂ ⊢ Δ) *)
   (* KSplit (true, t₁, t₂, i, c₁, c₂) ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜
-     c₁ ⇓ (Γ ⊢ Δ, i : t₁)
-     and c₂ ⇓ (Γ ⊢ Δ, i : t₂) *)
+     c₁ ⇓ (Γ ⊢ Δ, i : t₁) and
+     c₂ ⇓ (Γ ⊢ Δ, i : t₂) *)
   | KDestruct of bool * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
   (* KDestruct (false, t₁, t₂, i, i₁, i₂, c) ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) *)
@@ -301,17 +337,13 @@ type ('v, 'h, 't, 'ty) kc =
      c ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) *)
   | KConstruct of bool * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
   (* not kernel *)
-  (* KConstruct (false, t₁, t₂, i₁, i₂, i, c) ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) ≜
-     c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) *)
-  (* KConstruct (true, t₁, t₂, i₁, i₂, i, c) ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) ≜
-     c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) *)
   | KIntroQuant of bool * 'ty * 't * 'h * 'v * ('v, 'h, 't, 'ty) kc
   (* KIntroQuant (false, τ, p, i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p ⊢ Δ) ≜
      c ⇓ (Σ, y : τ | Γ, i : p[x ↦ y] ⊢ Δ)
-     and y ∉  Σ *)
+     and y ∉ Σ *)
   (* KIntroQuant (true, τ, p, i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p) ≜
      c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p[x ↦ y])
-     and y ∉  Σ *)
+     and y ∉ Σ *)
   | KInstQuant of bool * 'ty * 't * 'h * 'h * 't * ('v, 'h, 't, 'ty) kc
   (* KInstQuant (false, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p ⊢ Δ) ≜
      c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p, i₂ : p[x ↦ t] ⊢ Δ)
@@ -323,15 +355,8 @@ type ('v, 'h, 't, 'ty) kc =
   (* KEqRefl (τ, t, i) ⇓ (Γ ⊢ Δ, i : t = t) stands if t is of type τ *)
   | KEqSym of bool * 'ty * 't * 't * 'h * ('v, 'h, 't, 'ty) kc
   (* not kernel *)
-  (* KEqSym (true, τ, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ = t₂) ≜
-     c ⇓ (Γ ⊢ Δ, i : t₂ = t₁) *)
-  (* KEqSym (false, τ, t₁, t₂, i, c) ⇓ (Γ, i : t₁ = t₂ ⊢ Δ) ≜
-     c ⇓ (Γ, i : t₂ = t₁ ⊢ Δ) *)
   | KEqTrans of 'ty * 't * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
   (* not kernel *)
-  (* KEqTrans (τ, t₁, t₂, t₃, i₁, i₂, i₃, c) ⇓
-     (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃ ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃, i₃ : t₁ = t₃ ⊢ Δ) *)
   | KRewrite of bool * 't option * 'ty * 't * 't * 't * 'h * 'h
                 * ('v, 'h, 't, 'ty) kc
   (* KRewrite (true, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
@@ -340,20 +365,17 @@ type ('v, 'h, 't, 'ty) kc =
   (* KRewrite (false, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
-  (* KRewrite (true, _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
+  (* KRewrite (true, Some _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
      c ⇓ (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
-  (* KRewrite (false, _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
+  (* KRewrite (false, Some _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
-  (* Second argument is None when working with an equality, and Some ls when
-     working with an equivalence. The lsymbol ls is used to bind the ctxt (which
-     is not possible in Why3) *)
   | KInduction of 'h * 'h * 'h * 'h * 't * 't * 't
                   * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
 (* KInduction (G, Hi₁, Hi₂, Hr, x, a, ctxt, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
-   c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
-   and c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
+   c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x]) and
+   c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
    and i does not appear in Γ, Δ or C
    and x and a are of type int *)
 (* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
@@ -418,8 +440,8 @@ let eprcertif c = eprintf "%a@." prcertif c
 
 (** Utility functions on certificates *)
 
-(* Use propagate to define recursive functions on elements of type sc *)
-let propagate_sc fc = function
+(* To define recursive functions on elements of type sc *)
+let map_sc fc = function
   | (Hole _ | Nc) as c -> c
   | Axiom (h, g) -> Axiom (h, g)
   | Trivial i -> Trivial (i)
@@ -447,8 +469,8 @@ let propagate_sc fc = function
   | Induction (i1, i2, i3, i4, n, t, c1, c2) ->
       Induction (i1, i2, i3, i4, n, t, fc c1, fc c2)
 
-(* Use propagate to define recursive functions on elements of type kc *)
-let propagate_kc fc fv fh ft fty = function
+(* To define recursive functions on elements of type kc *)
+let map_kc fc fv fh ft fty = function
   | KHole _ as c -> c
   | KAssert (i, a, c1, c2) ->
       let f1 = fc c1 in
@@ -499,7 +521,7 @@ let rec abstract_terms_types (l : wkc) : kcert = match l with
       let nb = abstract_term b in
       let nc = abstract_terms_types c in
       KRewrite (pos, Some ntls, CTprop, na, nb, nctxt, i.pr_name, h.pr_name, nc)
-  | c -> propagate_kc abstract_terms_types
+  | c -> map_kc abstract_terms_types
            (fun ls -> ls.ls_name) (fun pr -> pr.pr_name)
            abstract_term abstract_otype c
 
@@ -823,7 +845,7 @@ let rec trim c =
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq cty, t1), CTbvar 0)) in
       eduplicate false (CTapp (CTapp (eq cty, t1), t2)) i1 i3 @@
         KRewrite (false, None, cty, t2, t3, ctxt, i2, i3, c)
-  | _ -> propagate_kc trim (fun v -> v) (fun h -> h) (fun t -> t) (fun ty -> ty) c
+  | _ -> map_kc trim (fun v -> v) (fun h -> h) (fun t -> t) (fun ty -> ty) c
 
 let make_kernel_cert init_ct res_ct (c : scert) : kcert =
   fill_tasks c res_ct
