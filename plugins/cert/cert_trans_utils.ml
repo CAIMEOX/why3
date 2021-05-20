@@ -123,7 +123,7 @@ let intro_cert pr decls =
            | {d_node = Dparam ls} :: l -> intro_decls_var (ls::acc) l
            | l -> List.rev acc, l in
          let lls, decls = intro_decls_var [] decls in
-         List.fold_right (fun ls c -> introquant pr (t_app ls [] ls.ls_value) ++ c)
+         List.fold_right (fun ls c -> introquant pr ls ++ c)
            lls (ic decls)
     | {d_node = Dprop (_, npr, _)}::decls ->
         unfold pr ++
