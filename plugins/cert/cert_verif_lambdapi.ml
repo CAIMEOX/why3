@@ -47,90 +47,90 @@ let decl_hyp_ids ct =
 let print_certif fmt c =
   let rstr pos = if pos then "Goal" else "Hyp" in
   let rec pc fmt = function
-  | EConstruct _ | EDuplicate _ | EFoldArr _
-  | EFoldIff _ | EEqSym _ | EEqTrans _ ->
+  | KConstruct _ | KDuplicate _ | KFoldArr _
+  | KFoldIff _ | KEqSym _ | KEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/Eq/Let left"
-  | EHole ct ->
+  | KHole ct ->
       let decl_ids, hyp_ids = decl_hyp_ids ct in
       fprintf fmt "@[%a %a@]"
         (print_list prid) (ct.uid :: decl_ids)
         (print_list prhyp) hyp_ids
-  | EAxiom (t, i1, i2) ->
+  | KAxiom (t, i1, i2) ->
       fprintf fmt "Axiom %a %a %a"
         prpv t prhyp i1 prhyp i2
-  | ETrivial (pos, i) ->
+  | KTrivial (pos, i) ->
       fprintf fmt "Trivial%s %a"
         (rstr pos)
         prhyp i
-  | EEqRefl (_, t, i) ->
+  | KEqRefl (_, t, i) ->
       fprintf fmt "EqRefl %a %a"
         prpv t prhyp i
-  | EAssert (i, t, c1, c2) ->
+  | KAssert (i, t, c1, c2) ->
       fprintf fmt "Assert %a@ \
                    @[<hv 3>(λ %a,@ %a)@]@ \
                    @[<hv 3>(λ %a,@ %a)@]"
         prpv t
         prhyp i pc c1
         prhyp i pc c2
-  | ESplit (pos, t1, t2, i, c1, c2) ->
+  | KSplit (pos, t1, t2, i, c1, c2) ->
       fprintf fmt "Split%s %a %a %a@ \
                    @[<hv 3>(λ %a,@ %a)@]@ \
                    @[<hv 3>(λ %a,@ %a)@]"
         (rstr pos) prpv t1 prpv t2 prhyp i
         prhyp i pc c1
         prhyp i pc c2
-  | EUnfoldIff (pos, t1, t2, i, c) ->
+  | KUnfoldIff (pos, t1, t2, i, c) ->
       fprintf fmt "UnfoldIff%s %a %a %a (λ %a,@ \
                    @[<hv>%a@])"
         (rstr pos) prpv t1 prpv t2 prhyp i prhyp i
         pc c
-  | EUnfoldArr (pos, t1, t2, i, c) ->
+  | KUnfoldArr (pos, t1, t2, i, c) ->
       fprintf fmt "UnfoldArr%s %a %a %a (λ %a,@ \
                    @[<hv>%a@])"
         (rstr pos) prpv t1 prpv t2 prhyp i prhyp i
         pc c
-  | ESwapNeg (pos, t, i, c) ->
+  | KSwapNeg (pos, t, i, c) ->
       fprintf fmt "SwapNeg%s %a %a (λ %a,@ \
                    @[<hv>%a@])"
         (rstr pos) prpv t prhyp i prhyp i
         pc c
-  | ESwap (pos, t, i, c) ->
+  | KSwap (pos, t, i, c) ->
       fprintf fmt "Swap%s %a %a (λ %a,@ \
                    @[<hv>%a@])"
         (rstr pos) prpv t prhyp i prhyp i
         pc c
-  | EDestruct (pos, t1, t2, i, i1, i2, c) ->
+  | KDestruct (pos, t1, t2, i, i1, i2, c) ->
       fprintf fmt "Destruct%s %a %a %a (λ %a %a,@ \
                    @[<hv>%a@])"
         (rstr pos) prpv t1 prpv t2 prhyp i prhyp i1 prhyp i2
         pc c
-  | EClear (pos, t, i, c) ->
+  | KClear (pos, t, i, c) ->
       fprintf fmt "Clear%s %a %a (@,\
                    @[<hv>%a@])"
         (rstr pos) prpv t prhyp i
         pc c
-  | EForget (_, c) ->
+  | KForget (_, c) ->
       fprintf fmt "Forget (@,\
                    @[<hv>%a@])"
         pc c
-  | EIntroQuant (pos, _, p, i, y, c) ->
+  | KIntroQuant (pos, _, p, i, y, c) ->
       fprintf fmt "IntroQuant%s %a %a (λ %a %a,@ \
                    @[<hv>%a@])"
         (rstr pos) prpv p prhyp i prid y prhyp i
         pc c
-  | EInstQuant (pos, _, p, i1, i2, t, c) ->
+  | KInstQuant (pos, _, p, i1, i2, t, c) ->
       fprintf fmt "InstQuant%s %a %a %a (λ %a %a,@ \
                    @[<hv>%a@])"
         (rstr pos) prpv p prpv t prhyp i1 prhyp i1 prhyp i2
         pc c
-  | ERewrite (pos, is_eq, _, t1, t2, ctxt, i1, i2, c) ->
+  | KRewrite (pos, is_eq, _, t1, t2, ctxt, i1, i2, c) ->
       let str_fmla = match is_eq with None -> "" | _ -> "Fmla" in
       fprintf fmt "Rewrite%s%s %a %a %a %a %a (λ %a %a,@ \
                    @[<hv>%a@])"
         str_fmla (rstr pos) prpv t1 prpv t2 prpv ctxt
         prhyp i1 prhyp i2 prhyp i1 prhyp i2
         pc c
-  | EInduction (g, hi1, hi2, hr, x, a, ctxt, c1, c2) ->
+  | KInduction (g, hi1, hi2, hr, x, a, ctxt, c1, c2) ->
       fprintf fmt "Induction %a %a %a %a@ \
                    @[<hv 3>(λ %a %a %a,@ %a)@]@ \
                    @[<hv 3>(λ %a %a %a %a,@ %a)@]"

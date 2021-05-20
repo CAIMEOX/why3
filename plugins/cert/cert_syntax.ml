@@ -172,13 +172,15 @@ type cterm =
   (* free variables use a name and a list of types it is applied to *)
   | CTint of BigInt.t
   | CTapp of cterm * cterm (* binary application *)
-  | CTbinop of binop * cterm * cterm (* application of a binary operator *)
-  | CTquant of cquant * ctype * cterm (* quantifier binding *)
+  | CTbinop of binop * cterm * cterm
+  (* application of a binary operator, written ∧, ∨, ⇒ and ⇔ *)
+  | CTquant of cquant * ctype * cterm
+  (* quantifier bindings, written ∃, ∀ and λ *)
   | CTqtype of tvsymbol list * cterm
-  (* type quantifier binding, they are assumed to only be in prenex form *)
-  | CTnot of cterm
-  | CTtrue
-  | CTfalse
+  (* type quantifier binding, assumed to only be in prenex form, written Π *)
+  | CTnot of cterm (* négation, written ¬ *)
+  | CTtrue (* true formula, written ⊤ *)
+  | CTfalse (* false formula, written ⊥ *)
 
 (* Interpreted terms *)
 let id_eq = ps_equ.ls_name
