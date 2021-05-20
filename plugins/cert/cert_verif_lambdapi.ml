@@ -116,7 +116,7 @@ let print_certif fmt c =
   | EIntroQuant (pos, _, p, i, y, c) ->
       fprintf fmt "IntroQuant%s %a %a (λ %a %a,@ \
                    @[<hv>%a@])"
-        (rstr pos) prpv p prhyp i prpv y prhyp i
+        (rstr pos) prpv p prhyp i prid y prhyp i
         pc c
   | EInstQuant (pos, _, p, i1, i2, t, c) ->
       fprintf fmt "InstQuant%s %a %a %a (λ %a %a,@ \

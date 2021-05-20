@@ -101,9 +101,9 @@ let rec ccheck c cta =
       ccheck c cta
   | EIntroQuant (_, _, _, i, y, c) ->
       let t, pos = find_formula "intro_quant" i cta in
-      begin match t, pos, y with
-      | CTquant (CTforall, cty, t), true, CTfvar (y, [])
-      | CTquant (CTexists, cty, t), false, CTfvar (y, []) ->
+      begin match t, pos with
+      | CTquant (CTforall, cty, t), true
+      | CTquant (CTexists, cty, t), false ->
           if Mid.mem y cta.sigma
           then begin
               Format.eprintf "@[<v>i : %a@ \
