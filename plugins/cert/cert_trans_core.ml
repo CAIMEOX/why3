@@ -268,7 +268,7 @@ let intro_tg target =
                           |> t_close_quant vsl tg
                           |> t_quant q in
                   [create_param_decl ls; create_prop_decl k pr f],
-                  Some (introquant pr (t_app ls [] ls.ls_value))
+                  Some (introquant pr ls)
               | [] -> assert false
               end
           | _ -> [d], None end

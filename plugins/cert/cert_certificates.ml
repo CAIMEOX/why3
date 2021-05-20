@@ -14,9 +14,7 @@ open Cert_abstract
 (* We will denote a ctask <{sigma; gamma_delta}> by <Σ | Γ ⊢ Δ>
    We sometimes omit signature (when it's not confusing) and write <Γ ⊢ Δ> *)
 
-type ('v, 'h) sc =
-  (* 'v is used to designate variables (lsymbol or ident)
-     'h is used to designate an hypothesis (prsymbol or ident) *)
+type sc =
   (* Replaying a certif cert against a ctask cta will be denoted <cert ⇓ cta>.
      For more details, take a look at the OCaml implementation
      <Cert_verif_caml.ccheck>. *)
@@ -24,92 +22,92 @@ type ('v, 'h) sc =
   (* Makes verification fail: use it as a placeholder *)
   | Hole of cterm ctask
   (* You should never use this certificate *)
-  | Assert of 'h * (term Mid.t -> term) * ('v, 'h) sc * ('v, 'h) sc
+  | Assert of prsymbol * (term Mid.t -> term) * sc * sc
   (* Assert (i, t, c₁, c₂) ⇓ (Σ | Γ ⊢ Δ) ≜
          c₁ ⇓ (Σ | Γ ⊢ Δ, i : t)
      and c₂ ⇓ (Σ | Γ, i : t ⊢ Δ)
      and Σ ⊩ t : prop *)
-  | Let of term * 'h * ('v, 'h) sc
+  | Let of term * prsymbol * sc
   (* Let (x, i, c) ⇓ t ≜  c[x → i(t)] ⇓ t *)
   (* Meaning : in c, x is mapped to the formula identified by i in task t *)
-  | Axiom of 'h * 'h
+  | Axiom of prsymbol * prsymbol
   (* Axiom (i1, i2) ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
   (* Axiom (i1, i2) ⇓ (Γ, i2 : t ⊢ Δ, i1 : t) stands *)
-  | Trivial of 'h
+  | Trivial of prsymbol
   (* Trivial i ⇓ (Γ, i : false ⊢ Δ) stands *)
   (* Trivial i ⇓ (Γ ⊢ Δ, i : true ) stands *)
   (* Trivial i ⇓ (Γ ⊢ Δ, i : t = t) stands *)
-  | EqSym of 'h * ('v, 'h) sc
+  | EqSym of prsymbol * sc
   (* EqSym (i, c) ⇓ (Γ ⊢ Δ, i : t₁ = t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₂ = t₁) *)
   (* EqSym (i, c) ⇓ (Γ, i : t₁ = t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₂ = t₁ ⊢ Δ) *)
-  | EqTrans of 'h * 'h * 'h * ('v, 'h) sc
+  | EqTrans of prsymbol * prsymbol * prsymbol * sc
   (* EqTrans (i₁, i₂, i₃, c) ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃ ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃, i₃ : t₁ = t₃ ⊢ Δ) *)
-  | Unfold of 'h * ('v, 'h) sc
+  | Unfold of prsymbol * sc
   (* Unfold (i, c) ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) *)
   (* Unfold (i, c) ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) *)
   (* Unfold (i, c) ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ)*)
   (* Unfold (i, c) ⇓ (Γ ⊢ Δ, i : t₁ → t₂) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂)*)
-  | Fold of 'h * ('v, 'h) sc
+  | Fold of prsymbol * sc
   (* Fold (i, c) ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) ≜
      c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) *)
   (* Fold (i, c) ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) ≜
      c ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) *)
   (* Fold (i, c) ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ) ≜  c ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) *)
   (* Fold (i, c) ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂) ≜  c ⇓ (Γ ⊢ Δ, i : t₁ → t₂) *)
-  | Split of 'h * ('v, 'h) sc * ('v, 'h) sc
+  | Split of prsymbol * sc * sc
   (* Split (i, c₁, c₂) ⇓ (Γ, i : t₁ ∨ t₂ ⊢ Δ) ≜
      c₁ ⇓ (Γ, i : t₁ ⊢ Δ)
      and c₂ ⇓ (Γ, i : t₂ ⊢ Δ) *)
   (* Split (i, c₁, c₂) ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜
      c₁ ⇓ (Γ ⊢ Δ, i : t₁)
      and c₂ ⇓ (Γ ⊢ Δ, i : t₂) *)
-  | Destruct of 'h * 'h * 'h * ('v, 'h) sc
+  | Destruct of prsymbol * prsymbol * prsymbol * sc
   (* Destruct (i, i₁, i₂, c) ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) *)
   (* Destruct (i, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i : t₁ ∨ t₂) ≜
      c ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) *)
-  | Construct of 'h * 'h * 'h * ('v, 'h) sc
+  | Construct of prsymbol * prsymbol * prsymbol * sc
   (* Construct (i₁, i₂, i, c) ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) *)
   (* Construct (i₁, i₂, i, c) ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) *)
-  | Swap of 'h * ('v, 'h) sc
+  | Swap of prsymbol * sc
   (* Swap (i, c) ⇓ (Γ, i : ¬t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : t) *)
   (* Swap (i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t) *)
   (* Swap (i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ, i : ¬t ⊢ Δ) *)
   (* Swap (i, c) ⇓ (Γ ⊢ Δ, i : ¬t) ≜  c ⇓ (Γ, i : t ⊢ Δ) *)
-  | Clear of 'h * ('v, 'h) sc
+  | Clear of prsymbol * sc
   (* Clear (i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ ⊢ Δ) *)
   (* Clear (i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | Forget of 'v * ('v, 'h) sc
+  | Forget of lsymbol * sc
   (* Forget (i, c) ⇓ (Σ, i | Γ ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | Duplicate of 'h * 'h * ('v, 'h) sc
+  | Duplicate of prsymbol * prsymbol * sc
   (* Duplicate (i₁, i₂, c) ⇓ (Γ ⊢ Δ, i₁ : t) ≜  c ⇓ (Γ ⊢ Δ, i₁ : t, i₂ : t) *)
   (* Duplicate (i₁, i₂, c) ⇓ (Γ, i₁ : t ⊢ Δ) ≜  c ⇓ (Γ, i₁ : t, i₂ : t ⊢ Δ) *)
-  | IntroQuant of 'h * term * ('v, 'h) sc
+  | IntroQuant of prsymbol * lsymbol * sc
   (* IntroQuant (i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p ⊢ Δ) ≜
      c ⇓ (Σ, y : τ | Γ, i : p[x ↦ y] ⊢ Δ)
      and y ∉  Σ *)
   (* IntroQuant (i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p) ≜
      c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p[x ↦ y])
      and y ∉  Σ *)
-  | InstQuant of 'h * 'h * term * ('v, 'h) sc
+  | InstQuant of prsymbol * prsymbol * term * sc
   (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p ⊢ Δ) ≜
      c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p x, i₂ : p[x ↦ t] ⊢ Δ)
      and Σ ⊩ t : τ *)
   (* InstQuant (i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p) ≜
      c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p[x ↦ t])
      and Σ ⊩ t : τ *)
-  | Rewrite of 'h * 'h * ('v, 'h) sc
+  | Rewrite of prsymbol * prsymbol * sc
   (* Rewrite (i₁, i₂, c) ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
      c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
   (* Rewrite (i₁, i₂, c) ⇓ (Γ, H : t₁ = t₂, i₁ : ctxt[t₁] ⊢ Δ) ≜
      c ⇓ (Γ, H : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
-  | Induction of 'h * 'h * 'h * 'h * term * (term Mid.t -> term)
-                 * ('v, 'h) sc * ('v, 'h) sc
+  | Induction of prsymbol * prsymbol * prsymbol * prsymbol * term * (term Mid.t -> term)
+                 * sc * sc
 (* Induction (G, Hi₁, Hi₂, Hr, x, a, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
    c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
    and c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
@@ -119,9 +117,7 @@ type ('v, 'h) sc =
 (* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
    stands for this context where the holes have been replaced with t *)
 
-type wsc = (lsymbol, prsymbol) sc
-
-type scert = int * (wsc list -> wsc)
+type scert = int * (sc list -> sc)
 
 let fail_arg () = verif_failed "Argument arity mismatch when composing certificates"
 
@@ -131,10 +127,10 @@ let fill_tasks (n, f) res_ct =
   else verif_failed "Wrong number of holes in certificate"
 
 type 'a args =
-  | Z : wsc args
-  | Succ : 'a args -> (wsc -> 'a) args
+  | Z : sc args
+  | Succ : 'a args -> (sc -> 'a) args
 
-let rec lambda : type a. a args -> a -> wsc list -> wsc = fun args f ->
+let rec lambda : type a. a args -> a -> sc list -> sc = fun args f ->
   match args with
   | Z -> fun _ -> f
   | Succ args -> function
@@ -154,7 +150,7 @@ let newcert1 f = newcert (Succ Z) f
 let newcert2 f = newcert (Succ (Succ Z)) f
 let newcertn n f = n, f
 
-let apply ((_, f) : scert) : wsc = f []
+let apply ((_, f) : scert) : sc = f []
 
 let lambda1 f = newcert1 (fun t -> apply (f t))
 let lambda2 f = newcert2 (fun t1 t2 -> apply (f t1 t2))
@@ -237,105 +233,107 @@ let iffsym_hyp i =
 
 type ctrans = scert ctransformation
 
-type ('t, 'ty) kc =
+type ('v, 'h, 't, 'ty) kc =
   (* 't is used for terms (term or cterm)
      and 'ty is used for types (ty option or ctype) *)
   | EHole of cterm ctask
   (* EHole ct ⇓ (Γ ⊢ Δ) stands iff ct refers to <Γ ⊢ Δ> *)
-  | EAssert of ident * 't * ('t, 'ty) kc * ('t, 'ty) kc
+  | EClear of bool * 't * 'h * ('v, 'h, 't, 'ty) kc
+  (* EClear (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ ⊢ Δ) *)
+  (* EClear (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
+  | EDuplicate of bool * 't * 'h * 'h * ('v, 'h, 't, 'ty) kc (* not kernel *)
+  (* EDuplicate (true, t, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i₁ : t) ≜
+     c ⇓ (Γ ⊢ Δ, i₁ : t, i₂ : t) *)
+  (* EDuplicate (false, t, i₁, i₂, c) ⇓ (Γ, i₁ : t ⊢ Δ) ≜
+     c ⇓ (Γ, i₁ : t, i₂ : t ⊢ Δ) *)
+  | EForget of 'v * ('v, 'h, 't, 'ty) kc
+  (* EForget (i, c) ⇓ (Σ, i : τ | Γ ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
+  | EAssert of 'h * 't * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
   (* EAssert (i, t, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜
      c₁ ⇓ (Γ ⊢ Δ, i : t)
      and c₂ ⇓ (Γ, i : t ⊢ Δ) *)
-  | EAxiom of 't * ident * ident
+  | EAxiom of 't * 'h * 'h
   (* EAxiom (t, i1, i2) ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
   (* Notice that there is only one rule. *)
-  | ETrivial of bool * ident
+  | ETrivial of bool * 'h
   (* ETrivial (false, i) ⇓ (Γ, i : false ⊢ Δ) stands *)
   (* ETrivial (true, i) ⇓ (Γ ⊢ Δ, i : true ) stands *)
   (* Notice that trivial equalities use the following certificate. *)
-  | EEqRefl of 'ty * 't * ident
-  (* EEqRefl (τ, t, i) ⇓ (Γ ⊢ Δ, i : t = t) stands if t is of type τ *)
-  | EEqSym of bool * 'ty * 't * 't * ident * ('t, 'ty) kc (* not kernel *)
-  (* not kernel *)
-  (* EEqSym (true, τ, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ = t₂) ≜
-     c ⇓ (Γ ⊢ Δ, i : t₂ = t₁) *)
-  (* EEqSym (false, τ, t₁, t₂, i, c) ⇓ (Γ, i : t₁ = t₂ ⊢ Δ) ≜
-     c ⇓ (Γ, i : t₂ = t₁ ⊢ Δ) *)
-  | EEqTrans of 'ty * 't * 't * 't * ident * ident * ident * ('t, 'ty) kc
-  (* not kernel *)
-  (* EEqTrans (τ, t₁, t₂, t₃, i₁, i₂, i₃, c) ⇓
-     (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃ ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃, i₃ : t₁ = t₃ ⊢ Δ) *)
-  | EUnfoldIff of (bool * 't * 't * ident * ('t, 'ty) kc)
+  | ESwap of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  (* ESwap (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t) *)
+  (* ESwap (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ, i : ¬t ⊢ Δ) *)
+  | ESwapNeg of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  (* ESwap_neg (false, t, i, c) ⇓ (Γ, i : ¬t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : t)  *)
+  (* ESwap_neg (true, t, i, c) ⇓ (Γ ⊢ Δ, i : ¬t) ≜  c ⇓ (Γ, i : t ⊢ Δ)  *)
+  | EUnfoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* EUnfoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) *)
   (* EUnfoldIff (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) *)
-  | EUnfoldArr of (bool * 't * 't * ident * ('t, 'ty) kc)
+  | EUnfoldArr of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* EUnfoldArr (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ)*)
   (* EUnfoldArr (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ → t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂)*)
-  | EFoldIff of (bool * 't * 't * ident * ('t, 'ty) kc) (* not kernel *)
+  | EFoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  (* not kernel *)
   (* EFoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) ≜
      c ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) *)
   (* EFoldIff (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) ≜
      c ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) *)
-  | EFoldArr of (bool * 't * 't * ident * ('t, 'ty) kc) (* not kernel *)
+  | EFoldArr of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  (* not kernel *)
   (* EFoldArr (false, t₁, t₂, i, c) ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : t₁ → t₂ ⊢ Δ)*)
   (* EFoldArr (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : t₁ → t₂)*)
-  | ESplit of bool * 't * 't * ident * ('t, 'ty) kc * ('t, 'ty) kc
+  | ESplit of bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
   (* ESplit (false, t₁, t₂, i, c₁, c₂) ⇓ (Γ, i : t₁ ∨ t₂ ⊢ Δ) ≜
      c₁ ⇓ (Γ, i : t₁ ⊢ Δ)
      and c₂ ⇓ (Γ, i : t₂ ⊢ Δ) *)
   (* ESplit (true, t₁, t₂, i, c₁, c₂) ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜
      c₁ ⇓ (Γ ⊢ Δ, i : t₁)
      and c₂ ⇓ (Γ ⊢ Δ, i : t₂) *)
-  | EDestruct of bool * 't * 't * ident * ident * ident * ('t, 'ty) kc
+  | EDestruct of bool * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
   (* EDestruct (false, t₁, t₂, i, i₁, i₂, c) ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) *)
   (* EDestruct (true, t₁, t₂, i, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i : t₁ ∨ t₂) ≜
      c ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) *)
-  | EConstruct of bool * 't * 't * ident * ident * ident * ('t, 'ty) kc
+  | EConstruct of bool * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
   (* not kernel *)
   (* EConstruct (false, t₁, t₂, i₁, i₂, i, c) ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) *)
   (* EConstruct (true, t₁, t₂, i₁, i₂, i, c) ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) ≜
      c ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) *)
-  | ESwap of (bool * 't * ident * ('t, 'ty) kc)
-  (* ESwap (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : ¬t) *)
-  (* ESwap (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ, i : ¬t ⊢ Δ) *)
-  | ESwapNeg of (bool * 't * ident * ('t, 'ty) kc)
-  (* ESwap_neg (false, t, i, c) ⇓ (Γ, i : ¬t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ, i : t)  *)
-  (* ESwap_neg (true, t, i, c) ⇓ (Γ ⊢ Δ, i : ¬t) ≜  c ⇓ (Γ, i : t ⊢ Δ)  *)
-  | EClear of bool * 't * ident * ('t, 'ty) kc
-  (* EClear (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜  c ⇓ (Γ ⊢ Δ) *)
-  (* EClear (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | EForget of ident * ('t, 'ty) kc
-  (* EForget (i, c) ⇓ (Σ, i : τ | Γ ⊢ Δ) ≜  c ⇓ (Γ ⊢ Δ) *)
-  | EDuplicate of bool * 't * ident * ident * ('t, 'ty) kc (* not kernel *)
-  (* EDuplicate (true, t, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i₁ : t) ≜
-     c ⇓ (Γ ⊢ Δ, i₁ : t, i₂ : t) *)
-  (* EDuplicate (false, t, i₁, i₂, c) ⇓ (Γ, i₁ : t ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t, i₂ : t ⊢ Δ) *)
-  | EIntroQuant of bool * 'ty * 't * ident * 't * ('t, 'ty) kc
+  | EIntroQuant of bool * 'ty * 't * 'h * 'v * ('v, 'h, 't, 'ty) kc
   (* EIntroQuant (false, τ, p, i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p ⊢ Δ) ≜
      c ⇓ (Σ, y : τ | Γ, i : p[x ↦ y] ⊢ Δ)
      and y ∉  Σ *)
   (* EIntroQuant (true, τ, p, i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p) ≜
      c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p[x ↦ y])
      and y ∉  Σ *)
-  | EInstQuant of bool * 'ty * 't * ident * ident * 't * ('t, 'ty) kc
+  | EInstQuant of bool * 'ty * 't * 'h * 'h * 't * ('v, 'h, 't, 'ty) kc
   (* EInstQuant (false, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p ⊢ Δ) ≜
      c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p, i₂ : p[x ↦ t] ⊢ Δ)
      and Σ ⊩ t : τ *)
   (* EInstQuant (true, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p) ≜
      c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p[x ↦ t])
      and Σ ⊩ t : τ *)
-  | ERewrite of bool * 't option * 'ty * 't * 't * 't * ident * ident
-                * ('t, 'ty) kc
+  | EEqRefl of 'ty * 't * 'h
+  (* EEqRefl (τ, t, i) ⇓ (Γ ⊢ Δ, i : t = t) stands if t is of type τ *)
+  | EEqSym of bool * 'ty * 't * 't * 'h * ('v, 'h, 't, 'ty) kc
+  (* not kernel *)
+  (* EEqSym (true, τ, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ = t₂) ≜
+     c ⇓ (Γ ⊢ Δ, i : t₂ = t₁) *)
+  (* EEqSym (false, τ, t₁, t₂, i, c) ⇓ (Γ, i : t₁ = t₂ ⊢ Δ) ≜
+     c ⇓ (Γ, i : t₂ = t₁ ⊢ Δ) *)
+  | EEqTrans of 'ty * 't * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
+  (* not kernel *)
+  (* EEqTrans (τ, t₁, t₂, t₃, i₁, i₂, i₃, c) ⇓
+     (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃ ⊢ Δ) ≜
+     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : t₂ = t₃, i₃ : t₁ = t₃ ⊢ Δ) *)
+  | ERewrite of bool * 't option * 'ty * 't * 't * 't * 'h * 'h
+                * ('v, 'h, 't, 'ty) kc
   (* ERewrite (true, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
      (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
      c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
@@ -351,8 +349,8 @@ type ('t, 'ty) kc =
   (* Second argument is None when working with an equality, and Some ls when
      working with an equivalence. The lsymbol ls is used to bind the ctxt (which
      is not possible in Why3) *)
-  | EInduction of ident * ident * ident * ident * 't * 't * 't
-                  * ('t, 'ty) kc * ('t, 'ty) kc
+  | EInduction of 'h * 'h * 'h * 'h * 't * 't * 't
+                  * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
 (* EInduction (G, Hi₁, Hi₂, Hr, x, a, ctxt, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
    c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x])
    and c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
@@ -361,7 +359,8 @@ type ('t, 'ty) kc =
 (* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
    stands for this context where the holes have been replaced with t *)
 
-type kcert = (cterm, ctype) kc
+type wkc = (lsymbol, prsymbol, term, ty option) kc
+type kcert = (ident, ident, cterm, ctype) kc
 
 let rec print_certif filename cert =
   let oc = open_out filename in
@@ -369,45 +368,41 @@ let rec print_certif filename cert =
   fprintf fmt "%a@." prcertif cert;
   close_out oc
 
-and prcvit : type v i. (formatter -> v -> unit) ->
-                 (formatter -> i -> unit) ->
-                 formatter -> (v, i) sc -> unit
-  = fun prv pri fmt c ->
+and prc fmt c =
   let prt = Pretty.print_term in
-  let prc = prcvit prv pri in
   match c with
   | Nc -> fprintf fmt "No_certif"
   | Hole ct -> fprintf fmt "Hole %a" prid ct.uid
   | Assert (i, _, c1, c2) ->
       fprintf fmt "Assert (@[%a, <fun>,@ @[<4>%a@],@ @[<4>%a@])@]"
-        pri i prc c1 prc c2
-  | Let (x, i, c) -> fprintf fmt "Let (%a, %a,@ %a)" prt x pri i prc c
-  | Axiom (i1, i2) -> fprintf fmt "Axiom (%a, %a)" pri i1 pri i2
-  | Trivial i -> fprintf fmt "Trivial %a" pri i
-  | EqSym (i, c) -> fprintf fmt "EqSym (%a,@ %a)" pri i prc c
+        prpr i prc c1 prc c2
+  | Let (x, i, c) -> fprintf fmt "Let (%a, %a,@ %a)" prt x prpr i prc c
+  | Axiom (i1, i2) -> fprintf fmt "Axiom (%a, %a)" prpr i1 prpr i2
+  | Trivial i -> fprintf fmt "Trivial %a" prpr i
+  | EqSym (i, c) -> fprintf fmt "EqSym (%a,@ %a)" prpr i prc c
   | EqTrans (i1, i2, i3, c) -> fprintf fmt "EqTrans (%a, %a, %a, @ %a)"
-                                 pri i1 pri i2 pri i3 prc c
-  | Unfold (i, c) -> fprintf fmt "Unfold (%a,@ %a)" pri i prc c
-  | Fold (i, c) -> fprintf fmt "Fold (%a,@ %a)" pri i prc c
+                                 prpr i1 prpr i2 prpr i3 prc c
+  | Unfold (i, c) -> fprintf fmt "Unfold (%a,@ %a)" prpr i prc c
+  | Fold (i, c) -> fprintf fmt "Fold (%a,@ %a)" prpr i prc c
   | Split (i, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]"
-                           pri i prc c1 prc c2
+                           prpr i prc c1 prc c2
   | Destruct (i, j1, j2, c) ->
-      fprintf fmt "Destruct (%a, %a, %a,@ %a)" pri i pri j1 pri j2 prc c
+      fprintf fmt "Destruct (%a, %a, %a,@ %a)" prpr i prpr j1 prpr j2 prc c
   | Construct (i1, i2, j, c) ->
-      fprintf fmt "Construct (%a, %a, %a,@ %a)" pri i1 pri i2 pri j prc c
-  | Swap (i, c) -> fprintf fmt "Swap (%a,@ %a)" pri i prc c
-  | Clear (i, c) -> fprintf fmt "Clear@ (%a,@ %a)" pri i prc c
-  | Forget (v, c) -> fprintf fmt "Forget@ (%a,@ %a)" prv v prc c
+      fprintf fmt "Construct (%a, %a, %a,@ %a)" prpr i1 prpr i2 prpr j prc c
+  | Swap (i, c) -> fprintf fmt "Swap (%a,@ %a)" prpr i prc c
+  | Clear (i, c) -> fprintf fmt "Clear@ (%a,@ %a)" prpr i prc c
+  | Forget (v, c) -> fprintf fmt "Forget@ (%a,@ %a)" prls v prc c
   | Duplicate (i1, i2, c) -> fprintf fmt "Duplicate@ (%a, %a, @ %a)"
-                               pri i1 pri i2 prc c
+                               prpr i1 prpr i2 prc c
   | IntroQuant (i, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)"
-                              pri i prt y prc c
+                              prpr i prls y prc c
   | InstQuant (i, j, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)"
-                                pri i pri j prt t prc c
-  | Rewrite (i, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" pri i pri h prc c
+                                prpr i prpr j prt t prc c
+  | Rewrite (i, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" prpr i prpr h prc c
   | Induction (i1, i2, i3, i4, x, _, c1, c2) ->
       fprintf fmt "Induction (%a, %a, %a, %a, %a, <fun>,@ %a,@ %a)"
-        pri i1 pri i2 pri i3 pri i4 prt x prc c1 prc c2
+        prpr i1 prpr i2 prpr i3 prpr i4 prt x prc c1 prc c2
 
 and prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
 and prcertif fmt (n, c) =
@@ -415,10 +410,8 @@ and prcertif fmt (n, c) =
   let lid = List.map (fun ct -> ct.uid) cts in
   let c = fill_tasks (n, c) cts in
   fprintf fmt "@[<v>[%a],@ @[%a@]@]"
-    prlid lid (prcvit prls prpr) c;
+    prlid lid prc c;
   List.iter (forget_id ip) lid
-(* and prcore_certif fmt (v, c) = fprintf fmt "@[<v>[%a],@ @[%a@]@]"
- *                                  prlid v (prcvit prid prhyp pcte) c *)
 
 let eprcertif c = eprintf "%a@." prcertif c
 
@@ -426,79 +419,75 @@ let eprcertif c = eprintf "%a@." prcertif c
 (** Utility functions on certificates *)
 
 (* Use propagate to define recursive functions on elements of type sc *)
-let propagate_sc fc fv fi = function
+let propagate_sc fc = function
   | (Hole _ | Nc) as c -> c
-  | Axiom (h, g) -> Axiom (fi h, fi g)
-  | Trivial i -> Trivial (fi i)
-  | EqSym (i, c) -> EqSym (fi i, fc c)
-  | EqTrans (i1, i2, i3, c) -> EqTrans (fi i1, fi i2, fi i3, fc c)
+  | Axiom (h, g) -> Axiom (h, g)
+  | Trivial i -> Trivial (i)
+  | EqSym (i, c) -> EqSym (i, fc c)
+  | EqTrans (i1, i2, i3, c) -> EqTrans (i1, i2, i3, fc c)
   | Assert (i, a, c1, c2) ->
       let f1 = fc c1 in
       let f2 = fc c2 in
-      Assert (fi i, a, f1, f2)
-  | Let (x, i, c) -> Let (x, fi i, fc c)
-  | Unfold (i, c) -> Unfold (fi i, fc c)
-  | Fold (i, c) -> Fold (fi i, fc c)
+      Assert (i, a, f1, f2)
+  | Let (x, i, c) -> Let (x, i, fc c)
+  | Unfold (i, c) -> Unfold (i, fc c)
+  | Fold (i, c) -> Fold (i, fc c)
   | Split (i, c1, c2) ->
       let f1 = fc c1 in let f2 = fc c2 in
-                        Split (fi i, f1, f2)
-  | Destruct (i, j1, j2, c) -> Destruct (fi i, fi j1, fi j2, fc c)
-  | Construct (i1, i2, j, c) -> Construct (fi i1, fi i2, fi j, fc c)
-  | Swap (i, c) -> Swap (fi i, fc c)
-  | Clear (i, c) -> Clear (fi i, fc c)
-  | Forget (v, c) -> Forget (fv v, fc c)
-  | Duplicate (i1, i2, c) -> Duplicate (fi i1, fi i2, fc c)
-  | IntroQuant (i, y, c) -> IntroQuant (fi i, y, fc c)
-  | InstQuant (i, j, t, c) -> InstQuant (fi i, fi j, t, fc c)
-  | Rewrite (i, h, c) -> Rewrite (fi i, fi h, fc c)
+                        Split (i, f1, f2)
+  | Destruct (i, j1, j2, c) -> Destruct (i, j1, j2, fc c)
+  | Construct (i1, i2, j, c) -> Construct (i1, i2, j, fc c)
+  | Swap (i, c) -> Swap (i, fc c)
+  | Clear (i, c) -> Clear (i, fc c)
+  | Forget (v, c) -> Forget (v, fc c)
+  | Duplicate (i1, i2, c) -> Duplicate (i1, i2, fc c)
+  | IntroQuant (i, y, c) -> IntroQuant (i, y, fc c)
+  | InstQuant (i, j, t, c) -> InstQuant (i, j, t, fc c)
+  | Rewrite (i, h, c) -> Rewrite (i, h, fc c)
   | Induction (i1, i2, i3, i4, n, t, c1, c2) ->
-      Induction (fi i1, fi i2, fi i3, fi i4, n, t, fc c1, fc c2)
+      Induction (i1, i2, i3, i4, n, t, fc c1, fc c2)
 
-let rec abstract_symbols c =
-  propagate_sc abstract_symbols
-    (fun ls -> ls.ls_name) (fun pr -> pr.pr_name) c
-
-(* Use propagate to define recursive functions on elements of type kcert *)
-let propagate_kcert fc fi ft fty = function
+(* Use propagate to define recursive functions on elements of type kc *)
+let propagate_kc fc fv fh ft fty = function
   | EHole _ as c -> c
   | EAssert (i, a, c1, c2) ->
       let f1 = fc c1 in
       let f2 = fc c2 in
-      EAssert (fi i, ft a, f1, f2)
-  | EAxiom (a, i1, i2) -> EAxiom (ft a, fi i1, fi i2)
-  | ETrivial (pos, i) -> ETrivial (pos, fi i)
-  | EEqRefl (ty, t, i) -> EEqRefl (fty ty, ft t, fi i)
+      EAssert (fh i, ft a, f1, f2)
+  | EAxiom (a, i1, i2) -> EAxiom (ft a, fh i1, fh i2)
+  | ETrivial (pos, i) -> ETrivial (pos, fh i)
+  | EEqRefl (ty, t, i) -> EEqRefl (fty ty, ft t, fh i)
   | EEqSym (pos, ty, t1, t2, i, c) ->
-      EEqSym (pos, fty ty, ft t1, ft t2, fi i, fc c)
+      EEqSym (pos, fty ty, ft t1, ft t2, fh i, fc c)
   | EEqTrans (ty, t1, t2, t3, i1, i2, i3, c) ->
-      EEqTrans (fty ty, ft t1, ft t2, ft t3, fi i1, fi i2, fi i3, fc c)
+      EEqTrans (fty ty, ft t1, ft t2, ft t3, fh i1, fh i2, fh i3, fc c)
   | ESplit (pos, a, b, i, c1, c2) ->
       let f1 = fc c1 in
       let f2 = fc c2 in
-      ESplit (pos, ft a, ft b, fi i, f1, f2)
-  | EUnfoldIff (pos, a, b, i, c) -> EUnfoldIff (pos, ft a, ft b, fi i, fc c)
-  | EUnfoldArr (pos, a, b, i, c) -> EUnfoldArr (pos, ft a, ft b, fi i, fc c)
-  | EFoldIff (pos, a, b, i, c) -> EFoldIff (pos, ft a, ft b, fi i, fc c)
-  | EFoldArr (pos, a, b, i, c) -> EFoldArr (pos, ft a, ft b, fi i, fc c)
+      ESplit (pos, ft a, ft b, fh i, f1, f2)
+  | EUnfoldIff (pos, a, b, i, c) -> EUnfoldIff (pos, ft a, ft b, fh i, fc c)
+  | EUnfoldArr (pos, a, b, i, c) -> EUnfoldArr (pos, ft a, ft b, fh i, fc c)
+  | EFoldIff (pos, a, b, i, c) -> EFoldIff (pos, ft a, ft b, fh i, fc c)
+  | EFoldArr (pos, a, b, i, c) -> EFoldArr (pos, ft a, ft b, fh i, fc c)
   | EDestruct (pos, a, b, i, j1, j2, c) ->
-      EDestruct (pos, ft a, ft b, fi i, fi j1, fi j2, fc c)
+      EDestruct (pos, ft a, ft b, fh i, fh j1, fh j2, fc c)
   | EConstruct (pos, a, b, i1, i2, j, c) ->
-      EConstruct (pos, ft a, ft b, fi i1, fi i2, fi j, fc c)
-  | ESwap (pos, a, i, c) -> ESwap (pos, ft a, fi i, fc c)
-  | ESwapNeg (pos, a, i, c) -> ESwapNeg (pos, ft a, fi i, fc c)
-  | EClear (pos, a, i, c) -> EClear (pos, ft a, fi i, fc c)
-  | EForget (i, c) -> EForget (fi i, fc c)
-  | EDuplicate (pos, a, i1, i2, c) -> EDuplicate (pos, ft a, fi i1, fi i2, fc c)
+      EConstruct (pos, ft a, ft b, fh i1, fh i2, fh j, fc c)
+  | ESwap (pos, a, i, c) -> ESwap (pos, ft a, fh i, fc c)
+  | ESwapNeg (pos, a, i, c) -> ESwapNeg (pos, ft a, fh i, fc c)
+  | EClear (pos, a, i, c) -> EClear (pos, ft a, fh i, fc c)
+  | EForget (i, c) -> EForget (fv i, fc c)
+  | EDuplicate (pos, a, i1, i2, c) -> EDuplicate (pos, ft a, fh i1, fh i2, fc c)
   | EIntroQuant (pos, ty, p, i, y, c) ->
-      EIntroQuant (pos, fty ty, ft p, fi i, ft y, fc c)
+      EIntroQuant (pos, fty ty, ft p, fh i, fv y, fc c)
   | EInstQuant (pos, ty, p, i, j, t, c) ->
-      EInstQuant (pos, fty ty, ft p, fi i, fi j, ft t, fc c)
+      EInstQuant (pos, fty ty, ft p, fh i, fh j, ft t, fc c)
   | ERewrite (pos, topt, ty, a, b, ctxt, i, h, c) ->
-      ERewrite (pos, Opt.map ft topt, fty ty, ft a, ft b, ft ctxt, fi i, fi h, fc c)
+      ERewrite (pos, Opt.map ft topt, fty ty, ft a, ft b, ft ctxt, fh i, fh h, fc c)
   | EInduction (i1, i2, i3, i4, n, t, ctxt, c1, c2) ->
-      EInduction (fi i1, fi i2, fi i3, fi i4, ft n, ft t, ft ctxt, fc c1, fc c2)
+      EInduction (fh i1, fh i2, fh i3, fh i4, ft n, ft t, ft ctxt, fc c1, fc c2)
 
-let rec abstract_terms_types = function
+let rec abstract_terms_types (l : wkc) : kcert = match l with
   | ERewrite (pos, Some {t_node = Tapp (ls, [])}, None, a, b, ctxt, i, h, c) ->
       let ntls = CTfvar (ls.ls_name, []) in
       let cctxt = abstract_term ctxt in
@@ -506,9 +495,10 @@ let rec abstract_terms_types = function
       let na = abstract_term a in
       let nb = abstract_term b in
       let nc = abstract_terms_types c in
-      ERewrite (pos, Some ntls, CTprop, na, nb, nctxt, i, h, nc)
-  | c -> propagate_kcert abstract_terms_types
-           (fun id -> id) abstract_term abstract_otype c
+      ERewrite (pos, Some ntls, CTprop, na, nb, nctxt, i.pr_name, h.pr_name, nc)
+  | c -> propagate_kc abstract_terms_types
+           (fun ls -> ls.ls_name) (fun pr -> pr.pr_name)
+           abstract_term abstract_otype c
 
 (** Compile chain.
     1. surface certificates : scert
@@ -544,11 +534,11 @@ let t_open_quant_one q tq = match t_open_quant tq with
   | _ -> raise Elaboration_failed
 
 let elaborate init_ct c =
-  let rec elaborate (map : term Mid.t)
-            (cta : term ctask)
-            (c : (ident, ident) sc)
-    : (term, ty option) kc
-    =
+  let find_formula s pr cta = find_formula s pr.pr_name cta in
+  let add pr t cta = add pr.pr_name t cta in
+  let remove pr cta = remove pr.pr_name cta in
+  let remove_var ls cta = remove_var ls.ls_name cta in
+  let rec elaborate (map : term Mid.t) (cta : term ctask) (c : sc) : wkc =
     (* the map argument registers Let-defined variables and is used
        to substitute user-provided terms that appear in certificates *)
     let elab = elaborate map in
@@ -694,17 +684,18 @@ let elaborate init_ct c =
         let t, pos = find_formula "Duplicate" i1 cta in
         let cta = add i2 (t, pos) cta in
         EDuplicate (pos, t, i1, i2, elab cta c)
-    | IntroQuant (i, y, c) ->
+    | IntroQuant (i, ls, c) ->
+        let y = t_app_infer ls [] in
         let t, pos = find_formula "IntroQuant" i cta in
-        begin match t.t_node, y.t_node with
-          | Tquant (q, tq), Tapp (ls, []) ->
+        begin match t.t_node with
+          | Tquant (q, tq) ->
               let ty_opt = ls.ls_value in
               let vs, t_open = t_open_quant_one q tq in
               let t_applied = t_subst_single vs y t_open in
               let t_fun = t_eps (t_close_bound vs t_open) in
               let cta = add i (t_applied, pos) cta
                         |> add_var ls.ls_name (abstract_otype ty_opt) in
-              EIntroQuant (pos, ty_opt, t_fun, i, y, elab cta c)
+              EIntroQuant (pos, ty_opt, t_fun, i, ls, elab cta c)
           | _ -> raise Elaboration_failed end
     | InstQuant (i1, i2, t_inst, c) ->
         let t, pos = find_formula "InstQuant" i1 cta in
@@ -832,11 +823,10 @@ let rec trim c =
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq cty, t1), CTbvar 0)) in
       eduplicate false (CTapp (CTapp (eq cty, t1), t2)) i1 i3 @@
         ERewrite (false, None, cty, t2, t3, ctxt, i2, i3, c)
-  | _ -> propagate_kcert trim (fun t -> t) (fun i -> i) (fun ty -> ty) c
+  | _ -> propagate_kc trim (fun v -> v) (fun h -> h) (fun t -> t) (fun ty -> ty) c
 
 let make_kernel_cert init_ct res_ct (c : scert) : kcert =
   fill_tasks c res_ct
-  |> abstract_symbols
   |> elaborate init_ct
   |> abstract_terms_types
   |> trim
