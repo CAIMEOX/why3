@@ -137,6 +137,7 @@ and prts fmt ts =
   else fprintf fmt "tEv %a" Pretty.print_ts ts
 
 (* pred functions know if we are printing the type of a predicate or not *)
+(* Prints a deep type, protected with outside parentheses if needed *)
 let rec pred_ty pred fmt ty = match ty with
   | CTyapp (ts, l) when l <> [] ->
       fprintf fmt "@[<2>%a@ %a@]"
@@ -369,8 +370,8 @@ and prpv fmt = function
       end
   | CTint i when BigInt.sign i >= 0 ->
       pp_print_string fmt (BigInt.to_string i)
-  | CTfalse -> fprintf fmt "false"
-  | CTtrue -> fprintf fmt "true"
+  | CTfalse -> fprintf fmt "⊥"
+  | CTtrue -> fprintf fmt "⊤"
   | ct -> fprintf fmt "(%a)" pcte ct
 
 type 't ctask =

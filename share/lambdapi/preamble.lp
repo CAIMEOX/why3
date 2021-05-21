@@ -2516,9 +2516,6 @@ symbol Induction a P x H s1 s2 ≔ Induction' a P s1 s2 x H;
 symbol int ≔ DZ;
 symbol bool ≔ Dboolean;
 
-symbol true ≔ ⊤;
-symbol false ≔ ⊥;
-
 // symbol True ≔ True;
 // symbol False ≔ False;
 
@@ -2534,5 +2531,5 @@ symbol infixspls ≔ @<;
 symbol infixspgteq ≔ @≥;
 symbol infixspgt ≔ @>;
 
-// Also targeted, but not from an ident : quantifications and arrows, ∧, ∨, ¬,
-// ⇔, ~, Z, boolean, DType, Type, int litterals
+// Also targeted, but not from an ident : quantifications and arrows, ⊤, ⊥, ¬,
+// ∧, ∨, ⇒, ⇔, ~, Z, boolean, DType, Type, int litterals
