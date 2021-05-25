@@ -140,7 +140,7 @@ let construct p1 p2 p = newcert1 (fun a -> Construct (p1, p2, p, a))
    with hypothesis p : t₁ ∧ t₂ (resp. goal p : t₁ ∨ t₂) *)
 let swap p = newcert1 (fun a -> Swap (p, a))
 (* Puts an hypothesis (resp. a goal) into the goals (resp. the hypotheses),
-   by negating it, removing double negation *)
+   by negating it, removing a double negation after that *)
 let clear p = newcert1 (fun a -> Clear (p, a))
 (* Removes a premise p from the task *)
 let forget ls = newcert1 (fun a -> Forget (ls, a))
@@ -234,8 +234,7 @@ type ('v, 'h, 't, 'ty) kc =
   (* KSwap (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, i : ¬t) *)
   (* KSwap (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜ c ⇓ (Γ, i : ¬t ⊢ Δ) *)
   | KSwapNeg of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
-  (* KSwapNeg (false, t, i, c) ⇓ (Γ, i : ¬t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, i : t)  *)
-  (* KSwapNeg (true, t, i, c) ⇓ (Γ ⊢ Δ, i : ¬t) ≜ c ⇓ (Γ, i : t ⊢ Δ)  *)
+  (* not kernel *)
   | KUnfoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* KUnfoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) *)
@@ -717,30 +716,50 @@ let kduplicate pos t p1 p2 c =
 (* kduplicate true t p₁ p₂ c ⇓ (Γ ⊢ Δ, p₁ : t) ≜ c ⇓ (Γ ⊢ Δ, p₁ : t, p₂ : t) *)
 (* kduplicate false t p₁ p₂ c ⇓ (Γ, p₁ : t ⊢ Δ) ≜ c ⇓ (Γ, p₁ : t, p₂ : t ⊢ Δ) *)
 
-let krename pos a p1 p2 c =
-  kduplicate pos a p1 p2 (KClear (pos, a, p1, c))
+let krename pos t p1 p2 c =
+  kduplicate pos t p1 p2 (KClear (pos, t, p1, c))
 (* krename true t p₁ p₂ c ⇓ (Γ ⊢ Δ, p₁ : t) ≜ c ⇓ (Γ ⊢ Δ, p₂ : t) *)
 (* krename false t p₁ p₂ c ⇓ (Γ, p₁ : t ⊢ Δ) ≜ c ⇓ (Γ, p₂ : t ⊢ Δ) *)
 
+let kswapneg pos t p c =
+  let q = id_register (id_fresh "q") in
+  let c_closed = KSwap (pos, t, p, kaxiom pos (CTnot t) p q) in
+  let c_open = KClear (pos, CTnot t, q, c) in
+  let c1, c2 = if pos then c_closed, c_open else c_open, c_closed in
+  krename pos (CTnot t) p q @@
+    KAssert (p, t, c1, c2)
+(* kswapneg false t p c ⇓ (Γ, p : ¬ t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, p : t)  *)
+(* kswapneg true t i c ⇓ (Γ ⊢ Δ, p : ¬ t) ≜ c ⇓ (Γ, p : t ⊢ Δ)  *)
+
+let kconstruct pos t1 t2 p1 p2 p c =
+  let p1' = id_register (id_fresh "p1") in
+  let p2' = id_register (id_fresh "p2") in
+  let c_open = KClear (pos, t1, p1', KClear (pos, t2, p2', c)) in
+  let c_closed = KSplit (not pos, t1, t2, p,
+                         kaxiom pos t1 p p1',
+                         kaxiom pos t2 p p2') in
+  let c1, c2, cut = if pos
+                    then c_open, c_closed, CTbinop (Tor, t1, t2)
+                    else c_closed, c_open, CTbinop (Tand, t1, t2) in
+  krename pos t1 p1 p1' @@
+    krename pos t2 p2 p2' @@
+      KAssert (p, cut, c1, c2)
+(* kconstruct false t₁ t₂ p₁ p₂ p c ⇓ (Γ, p₁ : t₁, p₂ : t₂ ⊢ Δ) ≜
+   c ⇓ (Γ, p : t₁ ∧ t₂ ⊢ Δ)  *)
+(* kconstruct true t₁ t₂ p₁ p₂ p c ⇓ (Γ ⊢ Δ, p₁ : t₁, p₂ : t₂) ≜
+   c ⇓ (Γ ⊢ Δ, p : t₁ ∨ t₂)  *)
+
 let rec trim c =
   match c with
-  | KDuplicate (pos, t, i1, i2, c) ->
+  | KDuplicate (pos, t, p1, p2, c) ->
       let c = trim c in
-      kduplicate pos t i1 i2 c
-  | KConstruct (pos, t1, t2, i1, i2, i, c) ->
+      kduplicate pos t p1 p2 c
+  | KSwapNeg (pos, t, p, c) ->
       let c = trim c in
-      let i1' = id_register (id_fresh "i1") in
-      let i2' = id_register (id_fresh "i2") in
-      let c_open = KClear (pos, t1, i1', KClear (pos, t2, i2', c)) in
-      let c_closed = KSplit (not pos, t1, t2, i,
-                             kaxiom (not pos) t1 i1' i,
-                             kaxiom (not pos) t2 i2' i) in
-      let c1, c2, cut = if pos
-                        then c_open, c_closed, CTbinop (Tor, t1, t2)
-                        else c_closed, c_open, CTbinop (Tand, t1, t2) in
-      krename pos t1 i1 i1' @@
-        krename pos t2 i2 i2' @@
-          KAssert (i, cut, c1, c2)
+      kswapneg pos t p c
+  | KConstruct (pos, t1, t2, p1, p2, p, c) ->
+      let c = trim c in
+      kconstruct pos t1 t2 p1 p2 p c
   | KFoldArr (pos, t1, t2, i, c') | KFoldIff (pos, t1, t2, i, c') ->
       let is_arr = match c with KFoldArr _ -> true | _ -> false in
       let c = trim c' in

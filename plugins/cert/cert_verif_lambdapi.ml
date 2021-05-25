@@ -48,8 +48,8 @@ let print_certif fmt c =
   let rstr pos = if pos then "Goal" else "Hyp" in
   let rec pc fmt = function
   | KConstruct _ | KDuplicate _ | KFoldArr _
-  | KFoldIff _ | KEqSym _ | KEqTrans _ ->
-      verif_failed "Construct/Duplicate/Fold/Eq/Let left"
+  | KFoldIff _  | KSwapNeg _| KEqSym _ | KEqTrans _ ->
+      verif_failed "Construct/Duplicate/Fold/SwapNeg/Eq/Let left"
   | KHole ct ->
       let decl_ids, hyp_ids = decl_hyp_ids ct in
       fprintf fmt "@[%a %a@]"
@@ -88,11 +88,6 @@ let print_certif fmt c =
       fprintf fmt "UnfoldArr%s %a %a %a (λ %a,@ \
                    @[<hv>%a@])"
         (rstr pos) prpv t1 prpv t2 prhyp i prhyp i
-        pc c
-  | KSwapNeg (pos, t, i, c) ->
-      fprintf fmt "SwapNeg%s %a %a (λ %a,@ \
-                   @[<hv>%a@])"
-        (rstr pos) prpv t prhyp i prhyp i
         pc c
   | KSwap (pos, t, i, c) ->
       fprintf fmt "Swap%s %a %a (λ %a,@ \

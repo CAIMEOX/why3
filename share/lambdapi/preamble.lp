@@ -2357,18 +2357,6 @@ symbol UnfoldArrGoal' A B : tEv (
 end;
 symbol UnfoldArrGoal A B H s ≔ UnfoldArrGoal' A B s H;
 
-symbol SwapNegHyp' A : tEv (
-  ∅ ⊧ A ∙ ∅ ⟹
-  ¬ A ∙ ∅ ⊧ ∅)
-≔ λ s, s;
-symbol SwapNegHyp A H s ≔ SwapNegHyp' A s H;
-
-symbol SwapNegGoal' A : tEv (
-  A ∙ ∅ ⊧ ∅ ⟹
-  ∅ ⊧ ¬ A ∙ ∅)
-≔ λ na, to_nn (¬ A) na;
-symbol SwapNegGoal A H s ≔ SwapNegGoal' A s H;
-
 symbol SwapHyp' A : tEv (
   ∅ ⊧ ¬ A ∙ ∅ ⟹
   A ∙ ∅ ⊧ ∅)
