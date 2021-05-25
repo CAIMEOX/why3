@@ -6,9 +6,8 @@
 symbol Type : TYPE;
 symbol Kind : TYPE;
 
-// injective makes it slow to verify
-symbol tEv : Type → TYPE;
-symbol kEv : Kind → TYPE;
+injective symbol tEv : Type → TYPE;
+injective symbol kEv : Kind → TYPE;
 
 symbol DType : Kind;
 rule kEv DType ↪ Type;
@@ -43,9 +42,6 @@ notation ⇒ infix right 14;
 // Help the unification algorithm so that we can use the shallow types
 // inside the deep terms
 
-unif_rule Type ≡ kEv $t ↪ [ $t ≡ DType ];
-unif_rule tEv $a ≡ tEv $b ↪ [ $a ≡ $b ];
-unif_rule kEv $a ≡ kEv $b ↪ [ $a ≡ $b ];
 unif_rule $a → $b ≡ kEv $c ↪ [ $a ≡ tEv $a'; $b ≡ kEv $b'; $c ≡ $a' ⇁ $b' ];
 unif_rule $a → $b ≡ tEv $c ↪ [ $a ≡ tEv $a'; $b ≡ tEv $b'; $c ≡ $a' ⇒ $b' ];
 
