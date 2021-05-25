@@ -157,8 +157,6 @@ let print fmt init res certif =
     print_certif fmt certif in
 
   fprintf fmt "@[<v>require open cert_lambdapi.preamble;@ @ \
-               unif_rule $a → $b ≡ kEv $c ↪ [ $a ≡ tEv $a'; $b ≡ kEv $b'; $c ≡ $a' ⇁ $b' ];@ \
-               unif_rule $a → $b ≡ tEv $c ↪ [ $a ≡ tEv $a'; $b ≡ tEv $b'; $c ≡ $a' ⇒ $b' ];@ @ \
                symbol to_verify :@ \
                @[<v>%a@]@ \
                @<3>%s@[<v>%a@]@];@."
