@@ -10,9 +10,9 @@ open Cert_certificates
    a ctask *)
 let rec ccheck c cta =
   match c with
-  | KConstruct _ | KDuplicate _
-  | KFoldArr _ | KFoldIff _ | KEqSym _ | KEqTrans _ ->
-      verif_failed "Construct/Duplicate/Fold/Eq/Let left"
+  | KConstruct _ | KDuplicate _ | KFoldArr _
+  | KFoldIff _  | KSwapNeg _| KEqSym _ | KEqTrans _ ->
+      verif_failed "Construct/Duplicate/Fold/SwapNeg/Eq/Let left"
   | KHole cta' -> if not (ctask_equal cta cta')
                   then begin
                       Format.eprintf "@[<v>Conflict of tasks: @ \
@@ -84,9 +84,9 @@ let rec ccheck c cta =
           let cta = add i unfolded_imp cta in
           ccheck c cta
       | _ -> verif_failed "Nothing to unfold" end
-  | KSwap (_, _, i, c) | KSwapNeg (_, _, i, c) ->
+  | KSwap (_, _, i, c) ->
       let t, pos = find_formula "Swap" i cta in
-      let neg_t = match t with CTnot t -> t | _ -> CTnot t in
+      let neg_t = CTnot t in
       let cta = add i (neg_t, not pos) cta in
       ccheck c cta
   | KDestruct (_, _, _, i, j1, j2, c) ->
