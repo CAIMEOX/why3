@@ -39,12 +39,6 @@ notation ⇁ infix right 14;
 symbol ⇒ A B ≔  ttPi A (λ _, B);
 notation ⇒ infix right 14;
 
-// Help the unification algorithm so that we can use the shallow types
-// inside the deep terms
-
-unif_rule $a → $b ≡ kEv $c ↪ [ $a ≡ tEv $a'; $b ≡ kEv $b'; $c ≡ $a' ⇁ $b' ];
-unif_rule $a → $b ≡ tEv $c ↪ [ $a ≡ tEv $a'; $b ≡ tEv $b'; $c ≡ $a' ⇒ $b' ];
-
 // To use the inductive notation
 
 builtin "Prop" ≔ Type;
@@ -76,7 +70,7 @@ notation ∃ quantifier;
 symbol em : tEv (`π A, A ∨ ¬ A);
 
 
-// THEOREMS
+// UTILITY THEOREMS
 
 
 //  Reasoning about negation.
@@ -182,7 +176,6 @@ inductive boolean : TYPE ≔
 
 symbol Dboolean : Type;
 rule tEv Dboolean ↪ boolean;
-unif_rule boolean ≡ tEv $t ↪ [ $t ≡ Dboolean ];
 
 // symbol True : boolean;
 // symbol False : boolean;
@@ -243,7 +236,6 @@ inductive comparison : TYPE ≔
 
 symbol Dcomparison : Type;
 rule tEv Dcomparison ↪ comparison;
-unif_rule comparison ≡ tEv $t ↪ [ $t ≡ Dcomparison ];
 
 // symbol Dcomparison : Type;
 // symbol comparison ≔ tEv Dcomparison;
@@ -321,7 +313,6 @@ inductive positive : TYPE ≔
 
 symbol Dpositive : Type;
 rule tEv Dpositive ↪ positive;
-unif_rule positive ≡ tEv $t ↪ [ $t ≡ Dpositive ];
 
 // symbol Dpositive : Type;
 // symbol positive ≔ tEv Dpositive;
@@ -1117,7 +1108,6 @@ inductive Z : TYPE ≔
 
 symbol DZ : Type;
 rule tEv DZ ↪ Z;
-unif_rule Z ≡ tEv $t ↪ [ $t ≡ DZ ];
 
 // symbol DZ : Type;
 // symbol Z ≔ tEv DZ;
