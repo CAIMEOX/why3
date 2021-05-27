@@ -1,0 +1,9 @@
+use int.Int
+
+predicate p int
+
+axiom P : p 5
+
+goal G1 : p (2 + 3)
+
+goal G2 : 2 <= 3

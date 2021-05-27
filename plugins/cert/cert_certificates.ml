@@ -35,6 +35,7 @@ type sc =
   | Rewrite of prsymbol * prsymbol * sc
   | Induction of prsymbol * prsymbol * prsymbol * prsymbol * term *
                    (term Mid.t -> term) * sc * sc
+  | Compute of prsymbol * sc
 
 type scert = int * (sc list -> sc)
 
@@ -165,6 +166,9 @@ let induction g hi1 hi2 hr x a =
 (* From an integer a and a task with a goal g : t[x] with x being an integer,
    produces two new tasks: one with the added hypothesis hi1 : i ≤ a and the
    other with the added hypotheses hi2 : a < i and hr : ∀ n. n < i → t[n] *)
+let compute p =
+  newcert1 (fun a -> Compute (p, a))
+(* Returns the task where a computation has been done in p *)
 
 let llet pr (cont : ident -> scert) : scert =
   let ls = create_psymbol (id_fresh "Let_var") [] in
@@ -215,97 +219,101 @@ type ('v, 'h, 't, 'ty) kc =
   | KHole of cterm ctask
   (* KHole cta ⇓ cta stands *)
   | KClear of bool * 't * 'h * ('v, 'h, 't, 'ty) kc
-  (* KClear (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜ c ⇓ (Γ ⊢ Δ) *)
-  (* KClear (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ) *)
+  (* KClear (true, t, p, c) ⇓ (Γ ⊢ Δ, p : t) ≜ c ⇓ (Γ ⊢ Δ) *)
+  (* KClear (false, t, p, c) ⇓ (Γ, p : t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ) *)
   | KDuplicate of bool * 't * 'h * 'h * ('v, 'h, 't, 'ty) kc
   (* not kernel *)
   | KForget of 'v * ('v, 'h, 't, 'ty) kc
-  (* KForget (i, c) ⇓ (Σ, i : τ | Γ ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ) *)
+  (* KForget (v, c) ⇓ (Σ, v : τ | Γ ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ) *)
   | KAssert of 'h * 't * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
-  (* KAssert (i, t, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜
-     c₁ ⇓ (Γ ⊢ Δ, i : t) and
-     c₂ ⇓ (Γ, i : t ⊢ Δ) *)
+  (* KAssert (p, t, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜
+     c₁ ⇓ (Γ ⊢ Δ, p : t) and
+     c₂ ⇓ (Γ, p : t ⊢ Δ) *)
   | KAxiom of 't * 'h * 'h
-  (* KAxiom (t, i1, i2) ⇓ (Γ, i1 : t ⊢ Δ, i2 : t) stands *)
+  (* KAxiom (t, p₁, p2) ⇓ (Γ, p₁ : t ⊢ Δ, p₂ : t) stands *)
   | KTrivial of bool * 'h
-  (* KTrivial (false, i) ⇓ (Γ, i : ⊥ ⊢ Δ) stands *)
-  (* KTrivial (true, i) ⇓ (Γ ⊢ Δ, i : ⊤) stands *)
+  (* KTrivial (false, p) ⇓ (Γ, p : ⊥ ⊢ Δ) stands *)
+  (* KTrivial (true, p) ⇓ (Γ ⊢ Δ, p : ⊤) stands *)
   | KSwap of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
-  (* KSwap (false, t, i, c) ⇓ (Γ, i : t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, i : ¬t) *)
-  (* KSwap (true, t, i, c) ⇓ (Γ ⊢ Δ, i : t) ≜ c ⇓ (Γ, i : ¬t ⊢ Δ) *)
+  (* KSwap (false, t, p, c) ⇓ (Γ, p : t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, p : ¬t) *)
+  (* KSwap (true, t, p, c) ⇓ (Γ ⊢ Δ, p : t) ≜ c ⇓ (Γ, p : ¬t ⊢ Δ) *)
   | KSwapNeg of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* not kernel *)
   | KUnfoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
-  (* KUnfoldIff (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ ↔ t₂ ⊢ Δ) ≜
-     c ⇓ (Γ, i : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) *)
-  (* KUnfoldIff (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ ↔ t₂) ≜
-     c ⇓ (Γ ⊢ Δ, i : (t₁ → t₂) ∧ (t₂ → t₁)) *)
+  (* KUnfoldIff (false, t₁, t₂, p, c) ⇓ (Γ, p : t₁ ↔ t₂ ⊢ Δ) ≜
+     c ⇓ (Γ, p : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) *)
+  (* KUnfoldIff (true, t₁, t₂, p, c) ⇓ (Γ ⊢ Δ, p : t₁ ↔ t₂) ≜
+     c ⇓ (Γ ⊢ Δ, p : (t₁ → t₂) ∧ (t₂ → t₁)) *)
   | KUnfoldArr of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
-  (* KUnfoldArr (false, t₁, t₂, i, c) ⇓ (Γ, i : t₁ → t₂ ⊢ Δ) ≜
-     c ⇓ (Γ, i : ¬t₁ ∨ t₂ ⊢ Δ)*)
-  (* KUnfoldArr (true, t₁, t₂, i, c) ⇓ (Γ ⊢ Δ, i : t₁ → t₂) ≜
-     c ⇓ (Γ ⊢ Δ, i : ¬t₁ ∨ t₂)*)
+  (* KUnfoldArr (false, t₁, t₂, p, c) ⇓ (Γ, p : t₁ → t₂ ⊢ Δ) ≜
+     c ⇓ (Γ, p : ¬t₁ ∨ t₂ ⊢ Δ)*)
+  (* KUnfoldArr (true, t₁, t₂, p, c) ⇓ (Γ ⊢ Δ, p : t₁ → t₂) ≜
+     c ⇓ (Γ ⊢ Δ, p : ¬t₁ ∨ t₂)*)
   | KFoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* not kernel *)
   | KFoldArr of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* not kernel *)
   | KSplit of bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
-  (* KSplit (false, t₁, t₂, i, c₁, c₂) ⇓ (Γ, i : t₁ ∨ t₂ ⊢ Δ) ≜
-     c₁ ⇓ (Γ, i : t₁ ⊢ Δ) and
-     c₂ ⇓ (Γ, i : t₂ ⊢ Δ) *)
-  (* KSplit (true, t₁, t₂, i, c₁, c₂) ⇓ (Γ ⊢ Δ, i : t₁ ∧ t₂) ≜
-     c₁ ⇓ (Γ ⊢ Δ, i : t₁) and
-     c₂ ⇓ (Γ ⊢ Δ, i : t₂) *)
+  (* KSplit (false, t₁, t₂, p, c₁, c₂) ⇓ (Γ, p : t₁ ∨ t₂ ⊢ Δ) ≜
+     c₁ ⇓ (Γ, p : t₁ ⊢ Δ) and
+     c₂ ⇓ (Γ, p : t₂ ⊢ Δ) *)
+  (* KSplit (true, t₁, t₂, p, c₁, c₂) ⇓ (Γ ⊢ Δ, p : t₁ ∧ t₂) ≜
+     c₁ ⇓ (Γ ⊢ Δ, p : t₁) and
+     c₂ ⇓ (Γ ⊢ Δ, p : t₂) *)
   | KDestruct of bool * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
-  (* KDestruct (false, t₁, t₂, i, i₁, i₂, c) ⇓ (Γ, i : t₁ ∧ t₂ ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁, i₂ : t₂ ⊢ Δ) *)
-  (* KDestruct (true, t₁, t₂, i, i₁, i₂, c) ⇓ (Γ ⊢ Δ, i : t₁ ∨ t₂) ≜
-     c ⇓ (Γ ⊢ Δ, i₁ : t₁, i₂ : t₂) *)
+  (* KDestruct (false, t₁, t₂, p, p₁, p₂, c) ⇓ (Γ, p : t₁ ∧ t₂ ⊢ Δ) ≜
+     c ⇓ (Γ, p₁ : t₁, p₂ : t₂ ⊢ Δ) *)
+  (* KDestruct (true, t₁, t₂, p, p₁, p₂, c) ⇓ (Γ ⊢ Δ, p : t₁ ∨ t₂) ≜
+     c ⇓ (Γ ⊢ Δ, p₁ : t₁, p₂ : t₂) *)
   | KConstruct of bool * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
   (* not kernel *)
   | KIntroQuant of bool * 'ty * 't * 'h * 'v * ('v, 'h, 't, 'ty) kc
-  (* KIntroQuant (false, τ, p, i, y, c) ⇓ (Σ | Γ, i : ∃ x : τ. p ⊢ Δ) ≜
-     c ⇓ (Σ, y : τ | Γ, i : p[x ↦ y] ⊢ Δ)
+  (* KIntroQuant (false, τ, f, p, y, c) ⇓ (Σ | Γ, p : ∃ x : τ. f ⊢ Δ) ≜
+     c ⇓ (Σ, y : τ | Γ, p : f[x ↦ y] ⊢ Δ)
      and y ∉ Σ *)
-  (* KIntroQuant (true, τ, p, i, y, c) ⇓ (Σ | Γ ⊢ Δ, i : ∀ x : τ. p) ≜
-     c ⇓ (Σ, y : τ | Γ ⊢ Δ, i : p[x ↦ y])
+  (* KIntroQuant (true, τ, f, p, y, c) ⇓ (Σ | Γ ⊢ Δ, p : ∀ x : τ. f) ≜
+     c ⇓ (Σ, y : τ | Γ ⊢ Δ, p : f[x ↦ y])
      and y ∉ Σ *)
   | KInstQuant of bool * 'ty * 't * 'h * 'h * 't * ('v, 'h, 't, 'ty) kc
-  (* KInstQuant (false, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ, i₁ : ∀ x : τ. p ⊢ Δ) ≜
-     c ⇓ (Σ | Γ, i₁ : ∀ x : τ. p, i₂ : p[x ↦ t] ⊢ Δ)
+  (* KInstQuant (false, τ, f, p₁, p₂, t, c) ⇓ (Σ | Γ, p₁ : ∀ x : τ. f ⊢ Δ) ≜
+     c ⇓ (Σ | Γ, p₁ : ∀ x : τ. f, p₂ : f[x ↦ t] ⊢ Δ)
      and Σ ⊩ t : τ *)
-  (* KInstQuant (true, τ, p, i₁, i₂, t, c) ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p) ≜
-     c ⇓ (Σ | Γ ⊢ Δ, i₁ : ∃ x : τ. p x, i₂ : p[x ↦ t])
+  (* KInstQuant (true, τ, f, p₁, p₂, t, c) ⇓ (Σ | Γ ⊢ Δ, p₁ : ∃ x : τ. f) ≜
+     c ⇓ (Σ | Γ ⊢ Δ, p₁ : ∃ x : τ. f, p₂ : f[x ↦ t])
      and Σ ⊩ t : τ *)
   | KEqRefl of 'ty * 't * 'h
-  (* KEqRefl (τ, t, i) ⇓ (Γ ⊢ Δ, i : t = t) stands if t is of type τ *)
+  (* KEqRefl (τ, t, g) ⇓ (Γ ⊢ Δ, g : t = t) stands *)
   | KEqSym of bool * 'ty * 't * 't * 'h * ('v, 'h, 't, 'ty) kc
   (* not kernel *)
   | KEqTrans of 'ty * 't * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
   (* not kernel *)
   | KRewrite of bool * 't option * 'ty * 't * 't * 't * 'h * 'h
                 * ('v, 'h, 't, 'ty) kc
-  (* KRewrite (true, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
-     (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
-     c ⇓ (Γ, i₁ : t₁ = t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
-  (* KRewrite (false, None, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
-     (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁ = t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
-  (* KRewrite (true, Some _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
-     (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₁]) ≜
-     c ⇓ (Γ, i₁ : t₁ ↔ t₂ ⊢ Δ, i₂ : ctxt[t₂]) *)
-  (* KRewrite (false, Some _, τ, t₁, t₂, ctxt, i₁, i₂, c) ⇓
-     (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₁] ⊢ Δ) ≜
-     c ⇓ (Γ, i₁ : t₁ ↔ t₂, i₂ : ctxt[t₂] ⊢ Δ) *)
+  (* KRewrite (true, None, τ, t₁, t₂, f, h, p, c) ⇓
+     (Γ, h : t₁ = t₂ ⊢ Δ, p : f[t₁]) ≜
+     c ⇓ (Γ, h : t₁ = t₂ ⊢ Δ, p : f[t₂]) *)
+  (* KRewrite (false, None, τ, t₁, t₂, f, h, p, c) ⇓
+     (Γ, h : t₁ = t₂, p : f[t₁] ⊢ Δ) ≜
+     c ⇓ (Γ, h : t₁ = t₂, p : f[t₂] ⊢ Δ) *)
+  (* KRewrite (true, Some _, τ, t₁, t₂, f, h, p, c) ⇓
+     (Γ, h : t₁ ↔ t₂ ⊢ Δ, p : f[t₁]) ≜
+     c ⇓ (Γ, h : t₁ ↔ t₂ ⊢ Δ, p : f[t₂]) *)
+  (* KRewrite (false, Some _, τ, t₁, t₂, f, h, p, c) ⇓
+     (Γ, h : t₁ ↔ t₂, p : f[t₁] ⊢ Δ) ≜
+     c ⇓ (Γ, h : t₁ ↔ t₂, p : f[t₂] ⊢ Δ) *)
   | KInduction of 'h * 'h * 'h * 'h * 't * 't * 't
                   * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
-(* KInduction (G, Hi₁, Hi₂, Hr, x, a, ctxt, c₁, c₂) ⇓ (Γ ⊢ Δ, G : ctxt[x]) ≜
-   c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : ctxt[x]) and
-   c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → ctxt[n] ⊢ ctxt[x])
+(* KInduction (G, Hi₁, Hi₂, Hr, x, a, f, c₁, c₂) ⇓ (Γ ⊢ Δ, G : f[x]) ≜
+   c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : f[x]) and
+   c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → f[n] ⊢ f[x])
    and i does not appear in Γ, Δ or C
    and x and a are of type int *)
-(* In the induction and rewrite rules ctxt is a context and the notation ctxt[t]
+(* In the induction and rewrite rules f is a context and the notation f[t]
    stands for this context where the holes have been replaced with t *)
+  | KCompute of bool * 't * 'h * ('v, 'h, 't, 'ty) kc
+  (* KCompute (false, t, p, c) ⇓ (Γ, p : t ⊢ Δ) ≜ (Γ, p : c(t) ⊢ Δ)
+     KCompute (true, t, p, c)  ⇓ (Γ ⊢ Δ, p : t) ≜ (Γ ⊢ Δ, p : c(t))
+     where c(t) is obtained by doing some computations in t *)
 
 type wkc = (lsymbol, prsymbol, term, ty option) kc
 type kcert = (ident, ident, cterm, ctype) kc
@@ -321,36 +329,37 @@ and prc fmt c =
   match c with
   | Nc -> fprintf fmt "No_certif"
   | Hole ct -> fprintf fmt "Hole %a" prid ct.uid
-  | Assert (i, _, c1, c2) ->
+  | Assert (p, _, c1, c2) ->
       fprintf fmt "Assert (@[%a, <fun>,@ @[<4>%a@],@ @[<4>%a@])@]"
-        prpr i prc c1 prc c2
-  | Let (x, i, c) -> fprintf fmt "Let (%a, %a,@ %a)" prt x prpr i prc c
-  | Axiom (i1, i2) -> fprintf fmt "Axiom (%a, %a)" prpr i1 prpr i2
-  | Trivial i -> fprintf fmt "Trivial %a" prpr i
-  | EqSym (i, c) -> fprintf fmt "EqSym (%a,@ %a)" prpr i prc c
-  | EqTrans (i1, i2, i3, c) -> fprintf fmt "EqTrans (%a, %a, %a, @ %a)"
-                                 prpr i1 prpr i2 prpr i3 prc c
-  | Unfold (i, c) -> fprintf fmt "Unfold (%a,@ %a)" prpr i prc c
-  | Fold (i, c) -> fprintf fmt "Fold (%a,@ %a)" prpr i prc c
-  | Split (i, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]"
-                           prpr i prc c1 prc c2
-  | Destruct (i, j1, j2, c) ->
-      fprintf fmt "Destruct (%a, %a, %a,@ %a)" prpr i prpr j1 prpr j2 prc c
-  | Construct (i1, i2, j, c) ->
-      fprintf fmt "Construct (%a, %a, %a,@ %a)" prpr i1 prpr i2 prpr j prc c
-  | Swap (i, c) -> fprintf fmt "Swap (%a,@ %a)" prpr i prc c
-  | Clear (i, c) -> fprintf fmt "Clear@ (%a,@ %a)" prpr i prc c
+        prpr p prc c1 prc c2
+  | Let (x, p, c) -> fprintf fmt "Let (%a, %a,@ %a)" prt x prpr p prc c
+  | Axiom (p1, p2) -> fprintf fmt "Axiom (%a, %a)" prpr p1 prpr p2
+  | Trivial p -> fprintf fmt "Trivial %a" prpr p
+  | EqSym (p, c) -> fprintf fmt "EqSym (%a,@ %a)" prpr p prc c
+  | EqTrans (p1, p2, p3, c) -> fprintf fmt "EqTrans (%a, %a, %a, @ %a)"
+                                 prpr p1 prpr p2 prpr p3 prc c
+  | Unfold (p, c) -> fprintf fmt "Unfold (%a,@ %a)" prpr p prc c
+  | Fold (p, c) -> fprintf fmt "Fold (%a,@ %a)" prpr p prc c
+  | Split (p, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]"
+                           prpr p prc c1 prc c2
+  | Destruct (p, p1, p2, c) ->
+      fprintf fmt "Destruct (%a, %a, %a,@ %a)" prpr p prpr p1 prpr p2 prc c
+  | Construct (p1, p2, p, c) ->
+      fprintf fmt "Construct (%a, %a, %a,@ %a)" prpr p1 prpr p2 prpr p prc c
+  | Swap (p, c) -> fprintf fmt "Swap (%a,@ %a)" prpr p prc c
+  | Clear (p, c) -> fprintf fmt "Clear@ (%a,@ %a)" prpr p prc c
   | Forget (v, c) -> fprintf fmt "Forget@ (%a,@ %a)" prls v prc c
-  | Duplicate (i1, i2, c) -> fprintf fmt "Duplicate@ (%a, %a, @ %a)"
-                               prpr i1 prpr i2 prc c
-  | IntroQuant (i, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)"
-                              prpr i prls y prc c
-  | InstQuant (i, j, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)"
-                                prpr i prpr j prt t prc c
-  | Rewrite (i, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" prpr i prpr h prc c
-  | Induction (i1, i2, i3, i4, x, _, c1, c2) ->
+  | Duplicate (p1, p2, c) -> fprintf fmt "Duplicate@ (%a, %a, @ %a)"
+                               prpr p1 prpr p2 prc c
+  | IntroQuant (p, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)"
+                              prpr p prls y prc c
+  | InstQuant (p1, p2, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)"
+                                prpr p1 prpr p2 prt t prc c
+  | Rewrite (p, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" prpr p prpr h prc c
+  | Induction (p1, p2, p3, p4, x, _, c1, c2) ->
       fprintf fmt "Induction (%a, %a, %a, %a, %a, <fun>,@ %a,@ %a)"
-        prpr i1 prpr i2 prpr i3 prpr i4 prt x prc c1 prc c2
+        prpr p1 prpr p2 prpr p3 prpr p4 prt x prc c1 prc c2
+  | Compute (p, c) -> fprintf fmt "Compute@ (%a,@ %a)" prpr p prc c
 
 and prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
 and prcertif fmt (n, c) =
@@ -370,70 +379,72 @@ let eprcertif c = eprintf "%a@." prcertif c
 let map_sc fc = function
   | (Hole _ | Nc) as c -> c
   | Axiom (h, g) -> Axiom (h, g)
-  | Trivial i -> Trivial (i)
-  | EqSym (i, c) -> EqSym (i, fc c)
-  | EqTrans (i1, i2, i3, c) -> EqTrans (i1, i2, i3, fc c)
-  | Assert (i, a, c1, c2) ->
+  | Trivial p -> Trivial p
+  | EqSym (p, c) -> EqSym (p, fc c)
+  | EqTrans (p1, p2, p3, c) -> EqTrans (p1, p2, p3, fc c)
+  | Assert (p, t, c1, c2) ->
       let f1 = fc c1 in
       let f2 = fc c2 in
-      Assert (i, a, f1, f2)
-  | Let (x, i, c) -> Let (x, i, fc c)
-  | Unfold (i, c) -> Unfold (i, fc c)
-  | Fold (i, c) -> Fold (i, fc c)
-  | Split (i, c1, c2) ->
+      Assert (p, t, f1, f2)
+  | Let (x, p, c) -> Let (x, p, fc c)
+  | Unfold (p, c) -> Unfold (p, fc c)
+  | Fold (p, c) -> Fold (p, fc c)
+  | Split (p, c1, c2) ->
       let f1 = fc c1 in let f2 = fc c2 in
-                        Split (i, f1, f2)
-  | Destruct (i, j1, j2, c) -> Destruct (i, j1, j2, fc c)
-  | Construct (i1, i2, j, c) -> Construct (i1, i2, j, fc c)
-  | Swap (i, c) -> Swap (i, fc c)
-  | Clear (i, c) -> Clear (i, fc c)
+                        Split (p, f1, f2)
+  | Destruct (p, p1, p2, c) -> Destruct (p, p1, p2, fc c)
+  | Construct (p1, p2, p, c) -> Construct (p1, p2, p, fc c)
+  | Swap (p, c) -> Swap (p, fc c)
+  | Clear (p, c) -> Clear (p, fc c)
   | Forget (v, c) -> Forget (v, fc c)
-  | Duplicate (i1, i2, c) -> Duplicate (i1, i2, fc c)
-  | IntroQuant (i, y, c) -> IntroQuant (i, y, fc c)
-  | InstQuant (i, j, t, c) -> InstQuant (i, j, t, fc c)
-  | Rewrite (i, h, c) -> Rewrite (i, h, fc c)
-  | Induction (i1, i2, i3, i4, n, t, c1, c2) ->
-      Induction (i1, i2, i3, i4, n, t, fc c1, fc c2)
+  | Duplicate (p1, p2, c) -> Duplicate (p1, p2, fc c)
+  | IntroQuant (p, y, c) -> IntroQuant (p, y, fc c)
+  | InstQuant (p1, p2, t, c) -> InstQuant (p1, p2, t, fc c)
+  | Rewrite (p, h, c) -> Rewrite (p, h, fc c)
+  | Induction (p1, p2, p3, p4, x, a, c1, c2) ->
+      Induction (p1, p2, p3, p4, x, a, fc c1, fc c2)
+  | Compute (p, c) -> Compute (p, fc c)
 
 (* To define recursive functions on elements of type kc *)
 let map_kc fc fv fh ft fty = function
   | KHole _ as c -> c
-  | KAssert (i, a, c1, c2) ->
+  | KAssert (p, t, c1, c2) ->
       let f1 = fc c1 in
       let f2 = fc c2 in
-      KAssert (fh i, ft a, f1, f2)
-  | KAxiom (a, i1, i2) -> KAxiom (ft a, fh i1, fh i2)
-  | KTrivial (pos, i) -> KTrivial (pos, fh i)
-  | KEqRefl (ty, t, i) -> KEqRefl (fty ty, ft t, fh i)
-  | KEqSym (pos, ty, t1, t2, i, c) ->
-      KEqSym (pos, fty ty, ft t1, ft t2, fh i, fc c)
-  | KEqTrans (ty, t1, t2, t3, i1, i2, i3, c) ->
-      KEqTrans (fty ty, ft t1, ft t2, ft t3, fh i1, fh i2, fh i3, fc c)
-  | KSplit (pos, a, b, i, c1, c2) ->
+      KAssert (fh p, ft t, f1, f2)
+  | KAxiom (t, p1, p2) -> KAxiom (ft t, fh p1, fh p2)
+  | KTrivial (pos, p) -> KTrivial (pos, fh p)
+  | KEqRefl (ty, t, g) -> KEqRefl (fty ty, ft t, fh g)
+  | KEqSym (pos, ty, t1, t2, p, c) ->
+      KEqSym (pos, fty ty, ft t1, ft t2, fh p, fc c)
+  | KEqTrans (ty, t1, t2, t3, p1, p2, p3, c) ->
+      KEqTrans (fty ty, ft t1, ft t2, ft t3, fh p1, fh p2, fh p3, fc c)
+  | KSplit (pos, t1, t2, p, c1, c2) ->
       let f1 = fc c1 in
       let f2 = fc c2 in
-      KSplit (pos, ft a, ft b, fh i, f1, f2)
-  | KUnfoldIff (pos, a, b, i, c) -> KUnfoldIff (pos, ft a, ft b, fh i, fc c)
-  | KUnfoldArr (pos, a, b, i, c) -> KUnfoldArr (pos, ft a, ft b, fh i, fc c)
-  | KFoldIff (pos, a, b, i, c) -> KFoldIff (pos, ft a, ft b, fh i, fc c)
-  | KFoldArr (pos, a, b, i, c) -> KFoldArr (pos, ft a, ft b, fh i, fc c)
-  | KDestruct (pos, a, b, i, j1, j2, c) ->
-      KDestruct (pos, ft a, ft b, fh i, fh j1, fh j2, fc c)
-  | KConstruct (pos, a, b, i1, i2, j, c) ->
-      KConstruct (pos, ft a, ft b, fh i1, fh i2, fh j, fc c)
-  | KSwap (pos, a, i, c) -> KSwap (pos, ft a, fh i, fc c)
-  | KSwapNeg (pos, a, i, c) -> KSwapNeg (pos, ft a, fh i, fc c)
-  | KClear (pos, a, i, c) -> KClear (pos, ft a, fh i, fc c)
-  | KForget (i, c) -> KForget (fv i, fc c)
-  | KDuplicate (pos, a, i1, i2, c) -> KDuplicate (pos, ft a, fh i1, fh i2, fc c)
-  | KIntroQuant (pos, ty, p, i, y, c) ->
-      KIntroQuant (pos, fty ty, ft p, fh i, fv y, fc c)
-  | KInstQuant (pos, ty, p, i, j, t, c) ->
-      KInstQuant (pos, fty ty, ft p, fh i, fh j, ft t, fc c)
-  | KRewrite (pos, topt, ty, a, b, ctxt, i, h, c) ->
-      KRewrite (pos, Opt.map ft topt, fty ty, ft a, ft b, ft ctxt, fh i, fh h, fc c)
-  | KInduction (i1, i2, i3, i4, n, t, ctxt, c1, c2) ->
-      KInduction (fh i1, fh i2, fh i3, fh i4, ft n, ft t, ft ctxt, fc c1, fc c2)
+      KSplit (pos, ft t1, ft t2, fh p, f1, f2)
+  | KUnfoldIff (pos, t1, t2, p, c) -> KUnfoldIff (pos, ft t1, ft t2, fh p, fc c)
+  | KUnfoldArr (pos, t1, t2, p, c) -> KUnfoldArr (pos, ft t1, ft t2, fh p, fc c)
+  | KFoldIff (pos, t1, t2, p, c) -> KFoldIff (pos, ft t1, ft t2, fh p, fc c)
+  | KFoldArr (pos, t1, t2, p, c) -> KFoldArr (pos, ft t1, ft t2, fh p, fc c)
+  | KDestruct (pos, t1, t2, p, j1, j2, c) ->
+      KDestruct (pos, ft t1, ft t2, fh p, fh j1, fh j2, fc c)
+  | KConstruct (pos, t1, t2, p1, p2, j, c) ->
+      KConstruct (pos, ft t1, ft t2, fh p1, fh p2, fh j, fc c)
+  | KSwap (pos, t, p, c) -> KSwap (pos, ft t, fh p, fc c)
+  | KSwapNeg (pos, t, p, c) -> KSwapNeg (pos, ft t, fh p, fc c)
+  | KClear (pos, t, p, c) -> KClear (pos, ft t, fh p, fc c)
+  | KForget (p, c) -> KForget (fv p, fc c)
+  | KDuplicate (pos, t, p1, p2, c) -> KDuplicate (pos, ft t, fh p1, fh p2, fc c)
+  | KIntroQuant (pos, ty, f, p, y, c) ->
+      KIntroQuant (pos, fty ty, ft f, fh p, fv y, fc c)
+  | KInstQuant (pos, ty, f, p1, p2, t, c) ->
+      KInstQuant (pos, fty ty, ft f, fh p1, fh p2, ft t, fc c)
+  | KRewrite (pos, topt, ty, t1, t2, f, p, h, c) ->
+      KRewrite (pos, Opt.map ft topt, fty ty, ft t1, ft t2, ft f, fh p, fh h, fc c)
+  | KInduction (p1, p2, p3, p4, x, a, f, c1, c2) ->
+      KInduction (fh p1, fh p2, fh p3, fh p4, ft x, ft a, ft f, fc c1, fc c2)
+  | KCompute (pos, t, p, c) -> KCompute (pos, ft t, fh p, fc c)
 
 (** Compile chain.
     1. surface certificates: scert
@@ -494,178 +505,178 @@ let elaborate init_ct c =
     | Nc -> eprintf "No certificates@.";
             raise Elaboration_failed
     | Hole task -> KHole task
-    | Axiom (i1, i2) ->
-        let t1, pos1 = try find_formula "Axiom1" i1 cta
+    | Axiom (p1, p2) ->
+        let t1, pos1 = try find_formula "Axiom1" p1 cta
                        with e -> pcta err_formatter cta; raise e
         in
-        let t2, pos2 = try find_formula "Axiom2" i2 cta
+        let t2, pos2 = try find_formula "Axiom2" p2 cta
                        with e -> pcta err_formatter cta; raise e
         in
         assert (pos1 <> pos2);
         assert (t_equal t1 t2);
-        let i1, i2 = if pos2 then i1, i2 else i2, i1 in
-        KAxiom (t1, i1, i2)
-    | Trivial i ->
-        let t, pos = find_formula "Trivial" i cta in
+        let p1, p2 = if pos2 then p1, p2 else p2, p1 in
+        KAxiom (t1, p1, p2)
+    | Trivial p ->
+        let t, pos = find_formula "Trivial" p cta in
         begin match t.t_node, pos with
         | Tapp (e, [t1; t2]), _ when t_equal t1 t2 && ls_equal e ps_equ ->
-            KEqRefl (t1.t_ty, t1, i)
+            KEqRefl (t1.t_ty, t1, p)
         | Tfalse, false | Ttrue, true ->
-            KTrivial (pos, i)
+            KTrivial (pos, p)
         | _ -> eprintf "not an equality or not same terms in eqrefl";
                raise Elaboration_failed end
-    | EqSym (i, c) ->
-        let t, pos = find_formula "EqSym" i cta in
+    | EqSym (p, c) ->
+        let t, pos = find_formula "EqSym" p cta in
         begin match t.t_node with
         | Tapp (e, [t1; t2]) when ls_equal e ps_equ ->
             let rev_eq = t_app ps_equ [t2; t1] t.t_ty in
-            let cta = add i (rev_eq, pos) cta in
-            KEqSym (pos, t1.t_ty, t1, t2, i, elab cta c)
+            let cta = add p (rev_eq, pos) cta in
+            KEqSym (pos, t1.t_ty, t1, t2, p, elab cta c)
         | _ -> eprintf "not an equality"; raise Elaboration_failed end
-    | EqTrans (i1, i2, i3, c) ->
-        let t1, pos1 = find_formula "EqTrans" i1 cta in
-        let t2, pos2 = find_formula "EqTrans" i2 cta in
+    | EqTrans (p1, p2, i3, c) ->
+        let t1, pos1 = find_formula "EqTrans" p1 cta in
+        let t2, pos2 = find_formula "EqTrans" p2 cta in
         begin match t1.t_node, t2.t_node, pos1, pos2 with
         | Tapp (e1, [t11; t12]),
           Tapp (e2, [t21; t22]), false, false
             when t_equal t12 t21 && ls_equal e1 ps_equ && ls_equal e2 ps_equ ->
             let new_eq = t_app ps_equ [t11; t22] t1.t_ty in
             let cta = add i3 (new_eq, false) cta in
-            KEqTrans (t11.t_ty, t11, t12, t22, i1, i2, i3, elab cta c)
+            KEqTrans (t11.t_ty, t11, t12, t22, p1, p2, i3, elab cta c)
         | _ -> eprintf "wrong hyps form in eqtrans";
                raise Elaboration_failed end
-    | Assert (i, a, c1, c2) ->
-        let a = a map in
-        let cta1 = add i (a, true) cta in
-        let cta2 = add i (a, false) cta in
+    | Assert (p, t, c1, c2) ->
+        let t = t map in
+        let cta1 = add p (t, true) cta in
+        let cta2 = add p (t, false) cta in
         let c1 = elab cta1 c1 in
         let c2 = elab cta2 c2 in
-        KAssert (i, a, c1, c2)
-    | Let (x, i, c) ->
-        let y, _ = find_formula "Let" i cta in
+        KAssert (p, t, c1, c2)
+    | Let (x, p, c) ->
+        let y, _ = find_formula "Let" p cta in
         let ix = match x.t_node with
           | Tapp (ls, []) -> ls.ls_name
           | _ -> assert false in
         let map = Mid.add ix y map in
         elaborate map cta c
-    | Unfold (i, c) ->
-        let t, pos = find_formula "Unfold" i cta in
+    | Unfold (p, c) ->
+        let t, pos = find_formula "Unfold" p cta in
         begin match t.t_node with
         | Tbinop (Tiff, t1, t2) ->
             let unfolded_iff = t_binary Tand
                                  (t_binary Timplies t1 t2)
                                  (t_binary Timplies t2 t1), pos in
-            let cta = add i unfolded_iff cta in
-            KUnfoldIff (pos, t1, t2, i, elab cta c)
+            let cta = add p unfolded_iff cta in
+            KUnfoldIff (pos, t1, t2, p, elab cta c)
         | Tbinop (Timplies, t1, t2) ->
             let unfolded_imp = t_binary Tor (t_not t1) t2, pos in
-            let cta = add i unfolded_imp cta in
-            KUnfoldArr (pos, t1, t2, i, elab cta c)
+            let cta = add p unfolded_imp cta in
+            KUnfoldArr (pos, t1, t2, p, elab cta c)
         | _ -> eprintf "Nothing to unfold";
                raise Elaboration_failed end
-    | Fold (i, c) ->
-        let t, pos = find_formula "Fold" i cta in
+    | Fold (p, c) ->
+        let t, pos = find_formula "Fold" p cta in
         begin match t.t_node with
         | Tbinop (Tand, {t_node = Tbinop (Timplies, t1, t2)},
                   {t_node = Tbinop (Timplies, t2', t1')})
             when t_equal t1 t1' && t_equal t2 t2' ->
             let folded_iff = t_binary Tiff t1 t2, pos in
-            let cta = add i folded_iff cta in
-            KFoldIff (pos, t1, t2, i, elab cta c)
+            let cta = add p folded_iff cta in
+            KFoldIff (pos, t1, t2, p, elab cta c)
         | Tbinop (Tor, {t_node = Tnot t1}, t2) ->
-            let cta = add i (t_binary Timplies t1 t2, pos) cta in
-            KFoldArr (pos, t1, t2, i, elab cta c)
+            let cta = add p (t_binary Timplies t1 t2, pos) cta in
+            KFoldArr (pos, t1, t2, p, elab cta c)
         | _ -> eprintf "Nothing to fold";
                raise Elaboration_failed end
-    | Split (i, c1, c2) ->
-        let t, pos = find_formula "Split" i cta in
+    | Split (p, c1, c2) ->
+        let t, pos = find_formula "Split" p cta in
         let t1, t2 = match t.t_node, pos with
           | Tbinop (Tand, t1, t2), true
           | Tbinop (Tor, t1, t2), false -> t1, t2
           | _ -> eprintf "Not splittable@.";
                  raise Elaboration_failed in
-        let cta1 = add i (t1, pos) cta in
-        let cta2 = add i (t2, pos) cta in
+        let cta1 = add p (t1, pos) cta in
+        let cta2 = add p (t2, pos) cta in
         let c1 = elab cta1 c1 in
         let c2 = elab cta2 c2 in
-        KSplit (pos, t1, t2, i, c1, c2)
-    | Destruct (i, i1, i2, c) ->
-        let t, pos = find_formula "Destruct" i cta in
+        KSplit (pos, t1, t2, p, c1, c2)
+    | Destruct (p, p1, p2, c) ->
+        let t, pos = find_formula "Destruct" p cta in
         let t1, t2 = match t.t_node, pos with
           | Tbinop (Tand, t1, t2), false
           | Tbinop (Tor, t1, t2), true -> t1, t2
           | _ -> eprintf "Nothing to destruct@.";
                  raise Elaboration_failed in
-        let cta = remove i cta
-                  |> add i1 (t1, pos)
-                  |> add i2 (t2, pos) in
-        KDestruct (pos, t1, t2, i, i1, i2, elab cta c)
-    | Construct (i1, i2, i, c) ->
-        let t1, pos1 = find_formula "Construct1" i1 cta in
-        let t2, pos2 = find_formula "Construct2" i2 cta in
+        let cta = remove p cta
+                  |> add p1 (t1, pos)
+                  |> add p2 (t2, pos) in
+        KDestruct (pos, t1, t2, p, p1, p2, elab cta c)
+    | Construct (p1, p2, p, c) ->
+        let t1, pos1 = find_formula "Construct1" p1 cta in
+        let t2, pos2 = find_formula "Construct2" p2 cta in
         assert (pos1 = pos2);
         let t = if pos1
                 then t_binary Tor t1 t2
                 else t_binary Tand t1 t2 in
-        let cta = remove i1 cta
-                  |> remove i2
-                  |> add i (t, pos1) in
-        KConstruct (pos1, t1, t2, i1, i2, i, elab cta c)
-    | Swap (i, c) ->
-        let t, pos = find_formula "Swap" i cta in
+        let cta = remove p1 cta
+                  |> remove p2
+                  |> add p (t, pos1) in
+        KConstruct (pos1, t1, t2, p1, p2, p, elab cta c)
+    | Swap (p, c) ->
+        let t, pos = find_formula "Swap" p cta in
         let neg, underlying_t, neg_t = match t.t_node with
           | Tnot t -> true, t, t
           | _ -> false, t, t_not t in
-        let cta = add i (neg_t, not pos) cta in
-        let pack = pos, underlying_t, i, elab cta c in
+        let cta = add p (neg_t, not pos) cta in
+        let pack = pos, underlying_t, p, elab cta c in
         if neg
         then KSwapNeg pack
         else KSwap pack
-    | Clear (i, c) ->
-        let t, pos = find_formula "Clear" i cta in
-        let cta = remove i cta in
-        KClear (pos, t, i, elab cta c)
-    | Forget (i, c) ->
-        let cta = remove_var i cta in
-        KForget (i, elab cta c)
-    | Duplicate (i1, i2, c) ->
-        let t, pos = find_formula "Duplicate" i1 cta in
-        let cta = add i2 (t, pos) cta in
-        KDuplicate (pos, t, i1, i2, elab cta c)
-    | IntroQuant (i, ls, c) ->
+    | Clear (p, c) ->
+        let t, pos = find_formula "Clear" p cta in
+        let cta = remove p cta in
+        KClear (pos, t, p, elab cta c)
+    | Forget (v, c) ->
+        let cta = remove_var v cta in
+        KForget (v, elab cta c)
+    | Duplicate (p1, p2, c) ->
+        let t, pos = find_formula "Duplicate" p1 cta in
+        let cta = add p2 (t, pos) cta in
+        KDuplicate (pos, t, p1, p2, elab cta c)
+    | IntroQuant (p, ls, c) ->
         let y = t_app_infer ls [] in
-        let t, pos = find_formula "IntroQuant" i cta in
+        let t, pos = find_formula "IntroQuant" p cta in
         begin match t.t_node with
           | Tquant (q, tq) ->
               let ty_opt = ls.ls_value in
               let vs, t_open = t_open_quant_one q tq in
               let t_applied = t_subst_single vs y t_open in
               let t_fun = t_eps (t_close_bound vs t_open) in
-              let cta = add i (t_applied, pos) cta
+              let cta = add p (t_applied, pos) cta
                         |> add_var ls.ls_name (abstract_otype ty_opt) in
-              KIntroQuant (pos, ty_opt, t_fun, i, ls, elab cta c)
+              KIntroQuant (pos, ty_opt, t_fun, p, ls, elab cta c)
           | _ -> raise Elaboration_failed end
-    | InstQuant (i1, i2, t_inst, c) ->
-        let t, pos = find_formula "InstQuant" i1 cta in
+    | InstQuant (p1, p2, t_inst, c) ->
+        let t, pos = find_formula "InstQuant" p1 cta in
         begin match t.t_node with
           | Tquant (q, tq) ->
               let vs, t_open = t_open_quant_one q tq in
               let t_applied = t_subst_single vs t_inst t_open in
               let t = t_eps (t_close_bound vs t_open) in
-              let cta = add i2 (t_applied, pos) cta in
-              KInstQuant (pos, Some vs.vs_ty, t, i1, i2, t_inst, elab cta c)
+              let cta = add p2 (t_applied, pos) cta in
+              KInstQuant (pos, Some vs.vs_ty, t, p1, p2, t_inst, elab cta c)
           | _ -> eprintf "trying to instantiate a non-quantified hypothesis@.";
                  raise Elaboration_failed end
-    | Rewrite (i1, i2, c) ->
-        let rew_hyp, _ = find_formula "Finding rewrite hypothesis" i1 cta in
+    | Rewrite (h, p, c) ->
+        let rew_hyp, _ = find_formula "Finding rewrite hypothesis" h cta in
         let a, b, is_eq = match rew_hyp.t_node with
           | Tbinop (Tiff, a, b) -> a, b, false
           | Tapp (f, [a; b]) when ls_equal f ps_equ && a.t_ty <> None ->
               a, b, true
           | _ -> eprintf "Bad rewrite hypothesis@.";
                  raise Elaboration_failed in
-        let t, pos = find_formula "Finding to be rewritten goal" i2 cta in
-        let cta = add i2 (t_replace a b t, pos) cta in
+        let t, pos = find_formula "Finding to be rewritten goal" p cta in
+        let cta = add p (t_replace a b t, pos) cta in
         let c = elab cta c in
         let id = id_fresh "ctxt_var" in
         if is_eq
@@ -674,11 +685,11 @@ let elaborate init_ct c =
           let vs = create_vsymbol id ty in
           let vst = t_var vs in
           let ctxt = t_eps (t_close_bound vs (t_replace a vst t)) in
-          KRewrite (pos, None, Some ty, a, b, ctxt, i1, i2, c)
+          KRewrite (pos, None, Some ty, a, b, ctxt, h, p, c)
         else
           let t_r = t_app (create_psymbol id []) [] None in
           let ctxt = t_replace a t_r t in
-          KRewrite (pos, Some t_r, None, a, b, ctxt, i1, i2, c)
+          KRewrite (pos, Some t_r, None, a, b, ctxt, h, p, c)
 
     | Induction (g, hi1, hi2, hr, x, a, c1, c2) ->
         let a = a map in
@@ -698,6 +709,9 @@ let elaborate init_ct c =
                                       (t_replace x n t))),
                               false) in
         KInduction (g, hi1, hi2, hr, x, a, ctxt, elab cta1 c1, elab cta2 c2)
+    | Compute (p, c) ->
+        let t, pos = find_formula "Compute" p cta in
+        KClear (pos, t, p, elab cta c)
   in
   elaborate Mid.empty init_ct c
 
