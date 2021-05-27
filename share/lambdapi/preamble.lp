@@ -221,7 +221,7 @@ symbol eq_True_is_True b : tEv (b = True ⇒ is_True b)
 end;
 
 symbol eq_False_not_is_True b : tEv (b = False ⇒ ¬ is_True b)
-≔ begin assume b eb; refine fold_arrow _;
+≔ begin assume b eb;
   rewrite eb; refine tt;
 end;
 
@@ -731,9 +731,6 @@ end;
 
 symbol discr_pc'_xI_xO x y : tEv (¬ (pos_compare' (xI x) (xO y) = Eq))
 ≔ begin assume x y;
-  // have e : tEv (pos_compare' (xI x) (xO y) =
-  //               ind_comparison (λ _, Dcomparison) Gt Lt Gt (pos_compare' x y));
-  // reflexivity; refine fold_arrow _; rewrite e;
   refine ind_comparison (λ p, pos_compare' x y = p ⇒ ¬ (ind_comparison (λ _, Dcomparison) Gt Lt Gt (pos_compare' x y) = Eq)) _ _ _ (pos_compare' x y) _;
 
   assume eq;
