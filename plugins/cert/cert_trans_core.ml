@@ -1,5 +1,4 @@
 open Why3
-
 open Task
 open Decl
 open Term

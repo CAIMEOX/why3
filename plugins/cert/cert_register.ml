@@ -9,6 +9,7 @@ open Cert_split
 open Cert_induction
 open Cert_trans_core
 open Cert_rewrite
+open Cert_compute
 open Cert_verif_caml
 open Cert_verif_lambdapi
 
@@ -64,6 +65,9 @@ let cchecker ?env trans =
   Trans.store (checker_ctrans ?env no_dbg checker_caml trans)
 let lchecker ?env trans =
   Trans.store (checker_ctrans ?env no_dbg checker_lambdapi trans)
+
+let compute_l specified steps where env =
+  lchecker ~env:env (ccompute specified steps where env)
 
 let induction_c x bound env = cchecker ~env:env (induction x bound env)
 let induction_l x bound env = lchecker ~env:env (induction x bound env)
@@ -235,6 +239,14 @@ let register_caml () =
 let register_lambdapi () =
   let open Args_wrapper in
   let open Trans in
+
+  wrap_and_register
+    ~desc:"compute [upto int] [specified] [in <name>]@ performs@ computations@ \
+           in@ the@ given@ premise (default to the goal), using only@ using@ \
+           the@ user-specified@ rules@ if@ the@ flag <specified> is@ present"
+    "compute_lcert"
+    (Toptbool ("specified", Topt ("upto", Tint (Topt ("in", Tprsymbol Tenvtrans_l)))))
+    compute_l;
 
   wrap_and_register
     ~desc:"induction <term1> [from] <term2>@ \

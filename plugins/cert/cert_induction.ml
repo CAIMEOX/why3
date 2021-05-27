@@ -1,5 +1,5 @@
+(* From Ind_itp *)
 open Why3
-
 open Decl
 open Term
 open Generic_arg_trans_utils

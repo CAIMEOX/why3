@@ -1,6 +1,5 @@
+(* From Split_goal *)
 open Why3
-
-
 open Ident
 open Ty
 open Term

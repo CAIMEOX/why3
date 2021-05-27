@@ -50,6 +50,8 @@ let print_certif fmt c =
   | KConstruct _ | KDuplicate _ | KFoldArr _
   | KFoldIff _  | KSwapNeg _| KEqSym _ | KEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/SwapNeg/Eq/Let left"
+  | KCompute (_, _, _, c) ->
+      pc fmt c
   | KHole ct ->
       let decl_ids, hyp_ids = decl_hyp_ids ct in
       fprintf fmt "@[%a %a@]"
