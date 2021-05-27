@@ -83,7 +83,7 @@ symbol from_nn A : tEv (¬ ¬ A) → tEv A
 
 // Implication
 
-symbol ShowDeepArrow {A B} : tEv (A ⇒ B) → tEv A → tEv B
+symbol fold_arrow {A B} : tEv (A ⇒ B) → tEv A → tEv B
 ≔ λ p, p;
 
 // Disjunction
@@ -192,7 +192,6 @@ rule tEv Dboolean ↪ boolean;
 symbol if (a : Type) b t e ≔
   ind_boolean (λ _, a) t e b;
 
-// TODO : can't do this with the inductive definition (and define is_True) ?
 symbol rect_boolean :
   Π (Q : boolean → Kind),
   kEv (Q True) →
@@ -211,7 +210,6 @@ symbol discr_False_True : tEv (¬ (False = True))
 ≔ begin assume H;
   have f : tEv (is_True False);
   rewrite H; refine tt;
-  // TODO : why do we need to provide ⊥ here ?
   refine f ⊥;
 end;
 
@@ -363,17 +361,15 @@ symbol ind_positive_peano :
   refine pS (xO q) _;
   refine rec_q (λ p, P (xO p)) (pS xH pH) _;
   assume x p2x;
-  rewrite left pos_succ_xI x;
+  rewrite left pos_succ_xI;
   refine pS (pos_succ (xO x)) _;
-  rewrite left pos_succ_xO x;
   refine pS (xO x) p2x;
 
   assume q rec_q P pH pS;
   refine rec_q (λ p, P (xO p)) (pS xH pH) _;
   assume x p2x;
-  rewrite left pos_succ_xI x;
+  rewrite left pos_succ_xI;
   refine pS (pos_succ (xO x)) _;
-  rewrite left pos_succ_xO x;
   refine pS (xO x) p2x;
 
   assume P pH pS;
@@ -735,9 +731,6 @@ end;
 
 symbol discr_pc'_xI_xO x y : tEv (¬ (pos_compare' (xI x) (xO y) = Eq))
 ≔ begin assume x y;
-  have e : tEv (pos_compare' (xI x) (xO y) =
-                ind_comparison (λ _, Dcomparison) Gt Lt Gt (pos_compare' x y));
-  reflexivity; rewrite e;
   refine ind_comparison (λ p, pos_compare' x y = p ⇒ ¬ (ind_comparison (λ _, Dcomparison) Gt Lt Gt (pos_compare' x y) = Eq)) _ _ _ (pos_compare' x y) _;
 
   assume eq;
@@ -931,8 +924,9 @@ symbol pc'_xH y : tEv (pos_compare' xH y = Eq ⇒ xH = y)
   assume _; reflexivity;
 end;
 
-symbol pc_decides x y : tEv (pos_compare x y = Eq ⇒ x = y)
-≔ begin assume x y;
+symbol pc_decides : tEv (`∀ x, `∀ y, pos_compare x y = Eq ⇒ x = y)
+≔ begin
+  assume x y;
   rewrite pcc';
   refine ind_positive (λ x, `∀ y, pos_compare' x y = Eq ⇒ x = y) _ _ _ x y;
 
@@ -940,7 +934,7 @@ symbol pc_decides x y : tEv (pos_compare x y = Eq ⇒ x = y)
   refine pc'_xI p q H _ (λ q' Hq', _);
   rewrite Hq';
   have H1 : tEv (pos_compare' (xI p) q = Eq); refine H;
-  generalize H1; refine ShowDeepArrow _; rewrite Hq';
+  generalize H1; refine fold_arrow _; rewrite Hq';
   assume H1; rewrite prec q' H1;
   reflexivity;
 
@@ -948,7 +942,7 @@ symbol pc_decides x y : tEv (pos_compare x y = Eq ⇒ x = y)
   refine pc'_xO p q H _ (λ q' Hq', _);
   rewrite Hq';
   have H1 : tEv (pos_compare' (xO p) q = Eq); refine H;
-  generalize H1; refine ShowDeepArrow _; rewrite Hq';
+  generalize H1; refine fold_arrow _; rewrite Hq';
   assume H1; rewrite prec q' H1;
   reflexivity;
 
@@ -2269,7 +2263,7 @@ notation ∙ infix right 13;
 symbol ⊧  : kEv (ListDType ⇀ ListDType ⇀ DType);
 notation ⊧ infix 12;
 
-symbol ⟹  ≔ ⇒;
+symbol ⟹  ≔ @⇒;
 notation ⟹  infix right 11;
 
 rule $A ∙ $B ⊧ $C ↪ $A ⟹  $B ⊧ $C
