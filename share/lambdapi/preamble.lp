@@ -357,7 +357,7 @@ symbol ind_positive_peano :
   refine ind_positive (λ p, `π P, P xH ⇒ (`∀ x, P x ⇒ P (pos_succ x)) ⇒ P p)
                  _ _ _ p Q qH qS;
   assume q rec_q P pH pS;
-  rewrite left pos_succ_xO q;
+  rewrite left pos_succ_xO;
   refine pS (xO q) _;
   refine rec_q (λ p, P (xO p)) (pS xH pH) _;
   assume x p2x;
@@ -467,7 +467,7 @@ symbol pa_succ x y : tEv (pos_add (pos_succ x) y = pos_succ (pos_add x y))
   have e : tEv (pos_add (pos_succ (xI p)) (xI q) = xI (pos_add (pos_succ p) q));
   reflexivity; rewrite e;
   rewrite prec;
-  rewrite left pac_succ p q;
+  rewrite left pac_succ;
   reflexivity;
   assume q _;
   have e : tEv (pos_add (pos_succ (xI p)) (xO q) = xO (pos_add (pos_succ p) q));
@@ -658,7 +658,7 @@ symbol pca_comm x y r : tEv (
                  _ _ _ y;
   assume p _; reflexivity;
   assume p _; reflexivity;
-  rewrite left [in pos_compare_acc xH r xH] compopp_idem r;
+  rewrite left [in pos_compare_acc xH r xH] compopp_idem;
   reflexivity;
 end;
 
@@ -685,10 +685,8 @@ symbol pc'_comm x y : tEv (pos_compare' x y = CompOpp (pos_compare' y x))
   reflexivity; rewrite e1;
   have e2 : tEv (pos_compare' (xO q) (xI p) =
                  ind_comparison (λ _, Dcomparison) Lt Lt Gt (pos_compare' q p));
-  reflexivity;
-  refine =_ind (pos_compare' (xO q) (xI p)) (ind_comparison (λ _, Dcomparison) Lt Lt Gt (pos_compare' q p)) e2 (λ u, ind_comparison (λ _, Dcomparison) Gt Lt Gt (pos_compare' p q) = CompOpp u) _;
-  refine =_ind (pos_compare' p q) (CompOpp (pos_compare' q p)) (prec q)
-               (λ u, ind_comparison (λ _, Dcomparison) Gt Lt Gt u = CompOpp (ind_comparison (λ _, Dcomparison) Lt Lt Gt (pos_compare' q p))) _;
+  reflexivity; rewrite e2;
+  rewrite prec;
   refine ind_comparison (λ c, ind_comparison (λ _, Dcomparison) Gt Lt Gt (CompOpp c) = CompOpp (ind_comparison (λ _, Dcomparison) Lt Lt Gt c)) _ _ _ (pos_compare' q p);
   reflexivity;
   reflexivity;
@@ -705,10 +703,8 @@ symbol pc'_comm x y : tEv (pos_compare' x y = CompOpp (pos_compare' y x))
   reflexivity; rewrite e1;
   have e2 : tEv (pos_compare' (xI q) (xO p) =
                  ind_comparison (λ _, Dcomparison) Gt Lt Gt (pos_compare' q p));
-  reflexivity;
-  refine =_ind (pos_compare' (xI q) (xO p)) (ind_comparison (λ _, Dcomparison) Gt Lt Gt (pos_compare' q p)) e2 (λ u, ind_comparison (λ _, Dcomparison) Lt Lt Gt (pos_compare' p q) = CompOpp u) _;
-  refine =_ind (pos_compare' p q) (CompOpp (pos_compare' q p)) (prec q)
-               (λ u, ind_comparison (λ _, Dcomparison) Lt Lt Gt u = CompOpp (ind_comparison (λ _, Dcomparison) Gt Lt Gt (pos_compare' q p))) _;
+  reflexivity; rewrite e2;
+  rewrite prec;
   refine ind_comparison (λ c, ind_comparison (λ _, Dcomparison) Lt Lt Gt (CompOpp c) = CompOpp (ind_comparison (λ _, Dcomparison) Gt Lt Gt c)) _ _ _ (pos_compare' q p);
   reflexivity;
   reflexivity;
@@ -733,17 +729,11 @@ symbol discr_pc'_xI_xO x y : tEv (¬ (pos_compare' (xI x) (xO y) = Eq))
 ≔ begin assume x y;
   refine ind_comparison (λ p, pos_compare' x y = p ⇒ ¬ (ind_comparison (λ _, Dcomparison) Gt Lt Gt (pos_compare' x y) = Eq)) _ _ _ (pos_compare' x y) _;
 
-  assume eq;
-  refine =_ind (pos_compare' x y) Eq eq (λ u :comparison, ¬ (ind_comparison (λ _, Dcomparison) Gt Lt Gt u = Eq)) _;
-  refine discr_Gt_Eq;
+  assume eq; rewrite eq; refine discr_Gt_Eq;
 
-  assume eq;
-  refine =_ind (pos_compare' x y) Lt eq (λ u :comparison, ¬ (ind_comparison (λ _, Dcomparison) Gt Lt Gt u = Eq)) _;
-  refine discr_Lt_Eq;
+  assume eq; rewrite eq; refine discr_Lt_Eq;
 
-  assume eq;
-  refine =_ind (pos_compare' x y) Gt eq (λ u :comparison, ¬ (ind_comparison (λ _, Dcomparison) Gt Lt Gt u = Eq)) _;
-  refine discr_Gt_Eq;
+  assume eq; rewrite eq; refine discr_Gt_Eq;
 
   reflexivity;
 end;
@@ -781,13 +771,11 @@ symbol remove_mod_discr x y acc : tEv (
   have e : tEv (pos_compare' (mod_left Lt x) (mod_right Lt y) =
                 ind_comparison (λ _, Dcomparison) Lt Lt Gt (pos_compare' x y));
   reflexivity; rewrite e;
-  refine =_ind (pos_compare' x y) Lt H (λ u, ind_comparison (λ _, Dcomparison) Lt Lt Gt u = Lt) _;
-  reflexivity;
+  rewrite H; reflexivity;
   have e : tEv (pos_compare' (mod_left Gt x) (mod_right Gt y) =
                 ind_comparison (λ _, Dcomparison) Gt Lt Gt (pos_compare' x y));
   reflexivity; rewrite e;
-  refine =_ind (pos_compare' x y) Lt H (λ u, ind_comparison (λ _, Dcomparison) Gt Lt Gt u = Lt) _;
-  reflexivity;
+  rewrite H; reflexivity;
 
   assume H _;
   refine ind_comparison (λ acc, pos_compare' (mod_left acc x) (mod_right acc y) = Gt)
@@ -796,13 +784,12 @@ symbol remove_mod_discr x y acc : tEv (
   have e : tEv (pos_compare' (mod_left Lt x) (mod_right Lt y) =
                 ind_comparison (λ _, Dcomparison) Lt Lt Gt (pos_compare' x y));
   reflexivity; rewrite e;
-  refine =_ind (pos_compare' x y) Gt H (λ u, ind_comparison (λ _, Dcomparison) Lt Lt Gt u = Gt) _;
-  reflexivity;
+  rewrite H; reflexivity;
+
   have e : tEv (pos_compare' (mod_left Gt x) (mod_right Gt y) =
                 ind_comparison (λ _, Dcomparison) Gt Lt Gt (pos_compare' x y));
   reflexivity; rewrite e;
-  refine =_ind (pos_compare' x y) Gt H (λ u, ind_comparison (λ _, Dcomparison) Gt Lt Gt u = Gt) _;
-  reflexivity;
+  rewrite H; reflexivity;
 
   reflexivity;
 end;
@@ -1061,8 +1048,8 @@ end;
 symbol pc'_succ_succ x y : tEv (
   pos_compare' (pos_succ x) (pos_succ y) = pos_compare' x y)
 ≔ begin assume x y;
-  rewrite left pcc' x y;
-  rewrite left pcc' (pos_succ x) (pos_succ y);
+  rewrite left pcc';
+  rewrite left pcc';
   refine pca_succ_succ x y Eq;
 end;
 
@@ -1084,7 +1071,7 @@ end;
 symbol pc'_add_Gt x y : tEv (pos_compare' (pos_add x y) x = Gt)
 ≔ begin
   refine ind_positive_peano (λ x, `∀ y, pos_compare' (pos_add x y) x = Gt) _ _ ;
-  assume y; rewrite pa_xH; rewrite left pcc' (pos_succ y) xH;
+  assume y; rewrite pa_xH; rewrite left pcc';
   refine pca_succ_xH Eq y;
 
   assume x xrec y;
@@ -1239,12 +1226,12 @@ symbol ps_opp x y : tEv (~ pos_sub x y = pos_sub y x)
   assume b _;
   have e : tEv (pos_sub (xI a) (xI b) = double (pos_sub a b));
   reflexivity; rewrite e;
-  rewrite left double_opp (pos_sub a b);
+  rewrite left double_opp;
   rewrite arec; reflexivity;
   assume b _;
   have e : tEv (pos_sub (xI a) (xO b) = succ_double (pos_sub a b));
   reflexivity; rewrite e;
-  rewrite left pred_double_opp (pos_sub a b);
+  rewrite left pred_double_opp;
   rewrite arec; reflexivity;
   reflexivity;
 
@@ -1253,12 +1240,12 @@ symbol ps_opp x y : tEv (~ pos_sub x y = pos_sub y x)
   assume b _;
   have e : tEv (pos_sub (xO a) (xI b) = pred_double (pos_sub a b));
   reflexivity; rewrite e;
-  rewrite left succ_double_opp (pos_sub a b);
+  rewrite left succ_double_opp;
   rewrite arec; reflexivity;
   assume b _;
   have e : tEv (pos_sub (xO a) (xO b) = double (pos_sub a b));
   reflexivity; rewrite e;
-  rewrite left double_opp (pos_sub a b);
+  rewrite left double_opp;
   rewrite arec; reflexivity;
   reflexivity;
 
@@ -1434,7 +1421,7 @@ symbol ps_succ x y : tEv (pos_sub (pos_succ x) y = succ (pos_sub x y))
   have e : tEv (pos_sub (pos_succ (xI p)) (xI q) = pred_double (pos_sub (pos_succ p) q));
   reflexivity; rewrite e;
   rewrite prec; rewrite pd_succ;
-  rewrite left succ_d (pos_sub p q);
+  rewrite left succ_d;
   reflexivity;
   // Case xI - xO
   assume q _;
@@ -1489,7 +1476,7 @@ symbol ps_Zpos a b c : tEv (pos_sub a b + Zpos c = pos_sub (pos_add a c) b)
   rewrite pa_succ_right; rewrite ps_succ;
   rewrite left prec;
   have e : tEv (Zpos (pos_succ p) = succ (Zpos p));
-  rewrite left pa_xH_right p; reflexivity; rewrite e;
+  rewrite left pa_xH_right; reflexivity; rewrite e;
   refine ind_Z (λ x, x + succ (Zpos p) = succ (x + Zpos p)) _ _ _ (pos_sub a b);
   reflexivity;
   assume q;
@@ -1498,23 +1485,23 @@ symbol ps_Zpos a b c : tEv (pos_sub a b + Zpos c = pos_sub (pos_add a c) b)
   rewrite pa_comm;
   rewrite pa_xH_right;
   rewrite pa_succ;
-  rewrite left pa_xH_right (pos_add p q);
+  rewrite left pa_xH_right;
   rewrite [pos_add p q] pa_comm;
   reflexivity;
   assume q;
   have e2 : tEv (Zneg q + Zpos p = pos_sub p q);
   reflexivity; rewrite e2;
-  rewrite left ps_succ p q;
-  rewrite left pa_xH_right p;
+  rewrite left ps_succ;
+  rewrite left pa_xH_right;
   reflexivity;
 end;
 
 symbol ps_Zneg a b c : tEv (pos_sub a b + Zneg c = pos_sub a (pos_add b c))
 ≔ begin assume a b c;
-  rewrite left ps_opp b a;
+  rewrite left ps_opp;
   have e : tEv (Zneg c = ~ Zpos c);
   reflexivity; rewrite e;
-  rewrite left distr_opp (pos_sub b a) (Zpos c);
+  rewrite left distr_opp;
   rewrite ps_Zpos;
   rewrite ps_opp;
   reflexivity;
@@ -1722,7 +1709,7 @@ symbol c_ps a b : tEv (compare (pos_sub a b) Z0 = pos_compare' a b)
   have e : tEv (pos_sub (xI a) (xO b) = succ_double (pos_sub a b));
   reflexivity; rewrite e;
   rewrite c_succ_double;
-  refine =_ind (compare (pos_sub a b) Z0) (pos_compare' a b) (arec b) (λ u, ind_comparison (λ _, Dcomparison) Gt Lt Gt u = pos_compare' (xI a) (xO b)) _;
+  rewrite arec;
   reflexivity;
   reflexivity;
 
@@ -1732,7 +1719,7 @@ symbol c_ps a b : tEv (compare (pos_sub a b) Z0 = pos_compare' a b)
   have e : tEv (pos_sub (xO a) (xI b) = pred_double (pos_sub a b));
   reflexivity; rewrite e;
   rewrite c_pred_double;
-  refine =_ind (compare (pos_sub a b) Z0) (pos_compare' a b) (arec b) (λ u, ind_comparison (λ _, Dcomparison) Lt Lt Gt u = pos_compare' (xO a) (xI b)) _;
+  rewrite arec;
   reflexivity;
   assume b _;
   have e : tEv (pos_sub (xO a) (xO b) = double (pos_sub a b));
@@ -1793,8 +1780,8 @@ symbol c_compat_add a b c : tEv (compare a b = compare (a + c) (b + c))
   rewrite distr_opp;
   rewrite add_assoc;
   rewrite [~ b + ~ c] add_comm;
-  rewrite left add_assoc c (~ c) (~ b);
-  rewrite left sub_def c c;
+  rewrite left add_assoc c;
+  rewrite left sub_def c;
   rewrite add_opp;
   reflexivity;
 end;
@@ -1808,29 +1795,6 @@ symbol leb x y ≔
 symbol leb_def x y : tEv (leb x y = (ind_comparison (λ _, Dboolean) True True False (compare x y)))
 ≔ begin reflexivity; end;
 
-symbol leb_eq x y : tEv (compare x y = Eq ⇒ leb x y = True)
-≔ begin
-  assume x y eq;
-  rewrite leb_def;
-  refine =_ind (compare x y) Eq eq (λ u, ind_comparison (λ _, Dboolean) True True False u = True) _;
-  reflexivity;
-end;
-
-symbol leb_lt x y : tEv (compare x y = Lt ⇒ leb x y = True)
-≔ begin
-  assume x y eq;
-  rewrite leb_def;
-  refine =_ind (compare x y) Lt eq (λ u, ind_comparison (λ _, Dboolean) True True False u = True) _;
-  reflexivity;
-end;
-symbol leb_gt x y : tEv (compare x y = Gt ⇒ leb x y = False)
-≔ begin
-  assume x y eq;
-  rewrite leb_def;
-  refine =_ind (compare x y) Gt eq (λ u, ind_comparison (λ _, Dboolean) True True False u = False) _;
-  reflexivity;
-end;
-
 symbol ltb x y ≔
   ind_comparison (λ _, Dboolean)
       False
@@ -1839,28 +1803,6 @@ symbol ltb x y ≔
       (compare x y);
 symbol ltb_def x y : tEv (ltb x y = (ind_comparison (λ _, Dboolean) False True False (compare x y)))
 ≔ begin reflexivity; end;
-
-symbol ltb_eq x y : tEv (compare x y = Eq ⇒ ltb x y = False)
-≔ begin
-  assume x y eq;
-  rewrite ltb_def;
-  refine =_ind (compare x y) Eq eq (λ u, ind_comparison (λ _, Dboolean) False True False u = False) _;
-  reflexivity;
-end;
-symbol ltb_lt x y : tEv (compare x y = Lt ⇒ ltb x y = True)
-≔ begin
-  assume x y eq;
-  rewrite ltb_def;
-  refine =_ind (compare x y) Lt eq (λ u, ind_comparison (λ _, Dboolean) False True False u = True) _;
-  reflexivity;
-end;
-symbol ltb_gt x y : tEv (compare x y = Gt ⇒ ltb x y = False)
-≔ begin
-  assume x y eq;
-  rewrite ltb_def;
-  refine =_ind (compare x y) Gt eq (λ u, ind_comparison (λ _, Dboolean) False True False u = False) _;
-  reflexivity;
-end;
 
 symbol geb x y ≔
   ind_comparison (λ _, Dboolean)
@@ -1871,28 +1813,6 @@ symbol geb x y ≔
 symbol geb_def x y : tEv (geb x y = (ind_comparison (λ _, Dboolean) True False True (compare x y)))
 ≔ begin reflexivity; end;
 
-symbol geb_eq x y : tEv (compare x y = Eq ⇒ geb x y = True)
-≔ begin
-  assume x y eq;
-  rewrite geb_def;
-  refine =_ind (compare x y) Eq eq (λ u, ind_comparison (λ _, Dboolean) True False True u = True) _;
-  reflexivity;
-end;
-symbol geb_lt x y : tEv (compare x y = Lt ⇒ geb x y = False)
-≔ begin
-  assume x y eq;
-  rewrite geb_def;
-  refine =_ind (compare x y) Lt eq (λ u, ind_comparison (λ _, Dboolean) True False True u = False) _;
-  reflexivity;
-end;
-symbol geb_gt x y : tEv (compare x y = Gt ⇒ geb x y = True)
-≔ begin
-  assume x y eq;
-  rewrite geb_def;
-  refine =_ind (compare x y) Gt eq (λ u, ind_comparison (λ _, Dboolean) True False True u = True) _;
-  reflexivity;
-end;
-
 symbol gtb x y ≔
   ind_comparison (λ _, Dboolean)
       False
@@ -1901,28 +1821,6 @@ symbol gtb x y ≔
       (compare x y);
 symbol gtb_def x y : tEv (gtb x y = (ind_comparison (λ _, Dboolean) False False True (compare x y)))
 ≔ begin reflexivity; end;
-
-symbol gtb_eq x y : tEv (compare x y = Eq ⇒ gtb x y = False)
-≔ begin
-  assume x y eq;
-  rewrite gtb_def;
-  refine =_ind (compare x y) Eq eq (λ u, ind_comparison (λ _, Dboolean) False False True u = False) _;
-  reflexivity;
-end;
-symbol gtb_lt x y : tEv (compare x y = Lt ⇒ gtb x y = False)
-≔ begin
-  assume x y eq;
-  rewrite gtb_def;
-  refine =_ind (compare x y) Lt eq (λ u, ind_comparison (λ _, Dboolean) False False True u = False) _;
-  reflexivity;
-end;
-symbol gtb_gt x y : tEv (compare x y = Gt ⇒ gtb x y = True)
-≔ begin
-  assume x y eq;
-  rewrite gtb_def;
-  refine =_ind (compare x y) Gt eq (λ u, ind_comparison (λ _, Dboolean) False False True u = True) _;
-  reflexivity;
-end;
 
 builtin "0"  ≔  zero;
 builtin "+1" ≔  succ;
@@ -1974,7 +1872,7 @@ symbol simpl_right x a : tEv (x + a - a = x)
 ≔ begin assume x a;
   rewrite sub_def;
   rewrite add_assoc;
-  rewrite left (sub_def a a);
+  rewrite left sub_def;
   rewrite add_opp;
   rewrite add_comm;
   reflexivity;
@@ -1988,7 +1886,7 @@ symbol simpl_inv_right x a : tEv (x - a + a = x)
   // have e : Π u v, tEv (u - v = u + ~ v);
   // refine sub_def;
   // apply sub_def ? (apply almost never works)
-  rewrite left (sub_def a a);
+  rewrite left sub_def;
   rewrite add_opp;
   rewrite add_comm;
   reflexivity;
@@ -1999,16 +1897,21 @@ symbol le_compat_add x y a : tEv (x ≤ y) → tEv (x + a ≤ y + a)
   refine ind_comparison (λ c, compare x y = c ⇒ x ≤ y ⇒ x + a ≤ y + a) _ _ _ (compare x y) _;
   assume exy _;
   refine eq_True_is_True (leb (x + a) (y + a)) _;
-  refine leb_eq (x + a) (y + a) _;
-  rewrite left c_compat_add x y a; refine exy;
+  have e : tEv (compare (x + a) (y + a) = Eq);
+  rewrite left c_compat_add; refine exy;
+  rewrite leb_def; rewrite e; reflexivity;
 
   assume lxy _;
   refine eq_True_is_True (leb (x + a) (y + a)) _;
-  refine leb_lt (x + a) (y + a) _;
-  rewrite left c_compat_add x y a; refine lxy;
+  have e : tEv (compare (x + a) (y + a) = Lt);
+  rewrite left c_compat_add; refine lxy;
+  rewrite leb_def; rewrite e; reflexivity;
 
   assume gxy H;
-  refine eq_False_not_is_True (leb x y) (leb_gt x y gxy) H _;
+  refine eq_False_not_is_True (leb x y) _ H _;
+  rewrite leb_def; rewrite gxy;
+  reflexivity;
+
   reflexivity;
 end;
 
@@ -2016,22 +1919,26 @@ symbol lt_compat_add x y a : tEv (x < y) → tEv (x + a < y + a)
 ≔ begin assume x y a;
   refine ind_comparison (λ c, compare x y = c ⇒ x < y ⇒ x + a < y + a) _ _ _ (compare x y) _;
   assume exy H;
-  refine eq_False_not_is_True (ltb x y) (ltb_eq x y exy) H _;
+  refine eq_False_not_is_True (ltb x y) _ H _;
+  rewrite ltb_def; rewrite exy; reflexivity;
 
   assume lxy _;
   refine eq_True_is_True (ltb (x + a) (y + a)) _;
-  refine ltb_lt (x + a) (y + a) _;
-  rewrite left c_compat_add x y a; refine lxy;
+  have e : tEv (compare (x + a) (y + a) = Lt);
+  rewrite left c_compat_add; refine lxy;
+  rewrite ltb_def; rewrite e; reflexivity;
 
   assume gxy H;
-  refine eq_False_not_is_True (ltb x y) (ltb_gt x y gxy) H _;
+  refine eq_False_not_is_True (ltb x y) _ H _;
+  rewrite ltb_def; rewrite gxy; reflexivity;
+
   reflexivity;
 end;
 
 symbol le_add_compat x y a : tEv (x + a ≤ y + a) → tEv (x ≤ y)
 ≔ begin assume x y a leq;
-  rewrite left (simpl_right x a);
-  rewrite left (simpl_right y a);
+  rewrite left simpl_right x a;
+  rewrite left simpl_right y a;
   rewrite sub_def;
   rewrite sub_def;
   refine le_compat_add (x + a) (y + a) (~ a) leq;
@@ -2039,8 +1946,8 @@ end;
 
 symbol lt_add_compat x y a : tEv (x + a < y + a) → tEv (x < y)
 ≔ begin assume x y a ltq;
-  rewrite left (simpl_right x a);
-  rewrite left (simpl_right y a);
+  rewrite left simpl_right x a;
+  rewrite left simpl_right y a;
   rewrite sub_def;
   rewrite sub_def;
   refine lt_compat_add (x + a) (y + a) (~ a) ltq;
@@ -2055,10 +1962,11 @@ symbol case u bound : tEv (u ≤ bound) → tEv (bound = u ∨ u < bound)
 
   assume ltuz; refine Right (z = u) (u < z) _;
   refine eq_True_is_True (ltb u z) _;
-  refine ltb_lt u z ltuz;
+  rewrite ltb_def; rewrite ltuz; reflexivity;
 
   assume gtuz;
-  refine eq_False_not_is_True (leb u z) (leb_gt u z gtuz) luz (z = u ∨ u < z);
+  refine eq_False_not_is_True (leb u z) _ luz (z = u ∨ u < z);
+  rewrite leb_def; rewrite gtuz; reflexivity;
 
   reflexivity;
 end;
@@ -2082,8 +1990,8 @@ end;
 symbol lt_le u z : tEv (u < succ z ⇒ u ≤ z)
 ≔ begin assume u z H;
   refine le_add_compat u z (~ u) _;
-  rewrite left sub_def z u;
-  rewrite left sub_def u u;
+  rewrite left sub_def;
+  rewrite left sub_def;
   rewrite add_opp;
   have e : tEv (0 < succ (z - u));
   refine lt_add_compat 0 (succ (z - u)) u _;
@@ -2108,12 +2016,12 @@ end;
 symbol le_lt u z : tEv (u ≤ z) → tEv (u < succ z)
 ≔ begin assume u z H;
   refine lt_add_compat u (succ z) (~ u) _;
-  rewrite left sub_def u u;
+  rewrite left sub_def;
   rewrite add_opp;
   rewrite succ_def;
   rewrite add_assoc;
   rewrite [one + ~ u] add_comm;
-  rewrite left add_assoc z (~ u) one;
+  rewrite left add_assoc;
   have e : tEv (0 ≤ z - u);
   refine le_add_compat 0 (z - u) u _;
   rewrite simpl_inv_right;
@@ -2139,7 +2047,7 @@ symbol max_is_greater_1 x y : tEv (x ≤ max x y)
   rewrite max_def;
   rewrite nlxy;
   refine le_add_compat x x (~ x) _;
-  rewrite left (sub_def x x);
+  rewrite left sub_def;
   rewrite add_opp; refine tt;
 
   reflexivity;
@@ -2152,20 +2060,20 @@ symbol max_is_greater_2 x y : tEv (y ≤ max x y)
   rewrite max_def;
   rewrite lxy;
   refine le_add_compat y y (~ y) _;
-  rewrite left (sub_def y y);
+  rewrite left sub_def;
   rewrite add_opp; refine tt;
 
   assume nlxy; rewrite max_def; rewrite nlxy; generalize nlxy;
   refine ind_comparison (λ c, compare x y = c ⇒ leb x y = False ⇒ y ≤ x)
          _ _ _ (compare x y) _;
-  assume eq; rewrite (leb_eq x y eq);
+  assume eq; rewrite leb_def; rewrite eq;
   assume f;
-  have e : tEv (False = True); rewrite f; reflexivity;
+  have e : tEv (False = True); symmetry; refine f;
   refine discr_False_True e _;
 
-  assume lt; rewrite (leb_lt x y lt);
+  assume lt; rewrite leb_def; rewrite lt;
   assume f;
-  have e : tEv (False = True); rewrite f; reflexivity;
+  have e : tEv (False = True); symmetry; refine f;
   refine discr_False_True e _;
 
   assume gt _;
@@ -2173,10 +2081,10 @@ symbol max_is_greater_2 x y : tEv (y ≤ max x y)
   rewrite gt; reflexivity;
   generalize lt;
   have g : tEv (CompOpp (compare x y) = Lt ⇒ y ≤ x);
-  rewrite left (c_comm y x);
+  rewrite left c_comm;
   assume lt;
   refine eq_True_is_True (leb y x) _;
-  refine leb_lt y x lt;
+  rewrite leb_def; rewrite lt; reflexivity;
   refine g;
 
   reflexivity;
