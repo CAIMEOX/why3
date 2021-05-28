@@ -60,17 +60,10 @@ let checker_ctrans
             forget_all hip;
             raise e
 
-
 let cchecker ?env trans =
   Trans.store (checker_ctrans ?env no_dbg checker_caml trans)
 let lchecker ?env trans =
   Trans.store (checker_ctrans ?env no_dbg checker_lambdapi trans)
-
-let compute_l specified steps where env =
-  lchecker ~env:env (ccompute specified steps where env)
-
-let induction_c x bound env = cchecker ~env:env (induction x bound env)
-let induction_l x bound env = lchecker ~env:env (induction x bound env)
 
 let print_c any every where = cchecker (tprint any every where)
 let assert_c t              = cchecker (cassert t)
@@ -99,7 +92,7 @@ let split_premise_full_c    = cchecker split_premise_full
 let split_premise_right_c   = cchecker split_premise_right
 let swap_c where            = cchecker (swap where)
 let trivial_c               = cchecker trivial
-
+let induction_c x bound env = cchecker ~env:env (induction x bound env)
 
 let assert_l t              = lchecker (cassert t)
 let assumption_l            = lchecker assumption
@@ -127,6 +120,9 @@ let split_premise_full_l    = lchecker split_premise_full
 let split_premise_right_l   = lchecker split_premise_right
 let swap_l where            = lchecker (swap where)
 let trivial_l               = lchecker trivial
+let induction_l x bound env = lchecker ~env:env (induction x bound env)
+let compute_l specified steps where env =
+  lchecker ~env:env (ccompute specified steps where env)
 
 (** Register certified transformations *)
 
@@ -206,8 +202,9 @@ let register_caml () =
   wrap_and_register"right_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) right_c
     ~desc:"A OCaml certified version of coq tactic [right]";
 
-  wrap_and_register "split_ccert" (Toptbool ("any", (Toptbool ("all",
-    Topt ("in", Tprsymbol Ttrans_l))))) split_c
+  wrap_and_register "split_ccert"
+    (Toptbool ("any", (Toptbool ("all", Topt ("in", Tprsymbol Ttrans_l)))))
+    split_c
     ~desc:"A OCaml certified version of (simplified) coq tactic [split]";
 
   register_transform_l "split_all_full_ccert" split_all_full_c
@@ -241,9 +238,10 @@ let register_lambdapi () =
   let open Trans in
 
   wrap_and_register
-    ~desc:"compute [upto int] [specified] [in <name>]@ performs@ computations@ \
-           in@ the@ given@ premise (default to the goal), using only@ using@ \
-           the@ user-specified@ rules@ if@ the@ flag <specified> is@ present"
+    ~desc:"compute_lcert [upto int] [specified] [in <name>]@ performs@ \
+           computations@ in@ the@ given@ premise (default to the goal), using \
+           only@ using@ the@ user-specified@ rules@ if@ the@ flag <specified> \
+           is@ present"
     "compute_lcert"
     (Toptbool ("specified", Topt ("upto", Tint (Topt ("in", Tprsymbol Tenvtrans_l)))))
     compute_l;
@@ -278,8 +276,8 @@ let register_lambdapi () =
 
   wrap_and_register "destruct_all_lcert"
     (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
-    destruct_all_l ~desc:"A Lambdapi certified transformation to destruct a \
-                          logical constructor";
+    destruct_all_l
+    ~desc:"A Lambdapi certified transformation to destruct a logical constructor";
 
   register_transform_l "exfalso_lcert" exfalso_l
     ~desc:"A Lambdapi certified version of coq tactic [exfalso]";
@@ -288,8 +286,9 @@ let register_lambdapi () =
     (Tterm (Topt ("in", Tprsymbol Ttrans_l))) instantiate_l
     ~desc:"A Lambdapi certified version of transformation instantiate";
 
-  wrap_and_register "intro_lcert" (Toptbool ("any", (Toptbool ("all",
-    Topt ("in", Tprsymbol Ttrans_l))))) intro_l
+  wrap_and_register "intro_lcert"
+    (Toptbool ("any", (Toptbool ("all",  Topt ("in", Tprsymbol Ttrans_l)))))
+    intro_l
     ~desc:"A Lambdapi certified version of (simplified) coq tactic [intro]";
 
   register_transform_l "intros_lcert" intros_l
@@ -307,8 +306,9 @@ let register_lambdapi () =
   wrap_and_register "revert_lcert" (Tlsymbol (Ttrans_l)) revert_l
     ~desc:"A Lambdapi certified transformation to generalize a variable";
 
-  wrap_and_register "rewrite_lcert" (Toptbool ("<-", (Tprsymbol (
-    Topt ("in", Tprsymbol (Topt ("with", Ttermlist (Ttrans_l)))))))) rewrite_l
+  wrap_and_register "rewrite_lcert"
+    (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol
+    (Topt ("with", Ttermlist (Ttrans_l)))))))) rewrite_l
     ~desc:"A Lambdapi certified version of transformation rewrite";
 
   wrap_and_register "right_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
