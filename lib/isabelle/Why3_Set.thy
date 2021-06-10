@@ -16,8 +16,8 @@ definition mapi :: "('a \<Rightarrow> 'b) \<Rightarrow> ('a \<Rightarrow> bool) 
 definition filteri :: " ('a \<Rightarrow> bool) \<Rightarrow> ('a \<Rightarrow> bool) \<Rightarrow> 'a \<Rightarrow> bool" where
   "filteri f s x = conj (s x) (f x)"
 
-definition product :: "('a \<Rightarrow> bool) \<Rightarrow> ('b \<Rightarrow> bool) \<Rightarrow> ('a \<times> 'b \<Rightarrow> bool)" where
-  "product s1 s2 p = conj (s1 (fst p)) (s2 (snd p))"
+definition producti :: "('a \<Rightarrow> bool) \<Rightarrow> ('b \<Rightarrow> bool) \<Rightarrow> ('a \<times> 'b \<Rightarrow> bool)" where
+  "producti s1 s2 p = conj (s1 (fst p)) (s2 (snd p))"
 
 why3_open "set/Set.xml"
   constants
@@ -32,7 +32,7 @@ why3_open "set/Set.xml"
     all = top
     map = mapi
     filter = filteri
-    product = product
+    product = producti
 
 why3_vc diffqtdef by (simp add: mem_def)
 
@@ -113,7 +113,7 @@ why3_vc subset_filter
   by (simp add: filter_def subset_def)
 
 why3_vc product_def
-  by (simp add: product_def mem_def)
+  by (simp add: producti_def mem_def)
 
 why3_end
 
@@ -132,6 +132,9 @@ definition is_empty :: "'a fset \<Rightarrow> bool" where
 definition filter :: "'a fset \<Rightarrow> ('a \<Rightarrow> bool) \<Rightarrow> 'a fset" where
   "filter S p = ffilter p S"
 
+definition product :: "'a fset \<Rightarrow> 'b fset \<Rightarrow> ('a * 'b) fset" where
+  "product s1 s2 = ffUnion (fimage (\<lambda> a. fimage (\<lambda> b. Pair a b) s2) s1)"
+
 why3_open "set/Fset.xml"
   constants
     mem = fmember
@@ -146,6 +149,7 @@ why3_open "set/Fset.xml"
     pick = fchoose
     filter = filter
     map = fimage
+    product = product
   types
     fset = fset
 
@@ -282,6 +286,12 @@ why3_vc disjoint_inter_empty
 
 why3_vc cardinal_inter_disjoint
   by (meson Fset.facts.disjoint_inter_empty assms cardinal_empty)
+
+why3_vc product_def
+proof-
+  assume  "(x, y) |\<in>| product s1 s2"
+  hence "\<exists> c. c |\<in>| fimage (\<lambda> a. fimage (\<lambda> b. Pair a b) s2) s1 \<and> (x, y) |\<in>| c"
+  
 
 why3_end
 
