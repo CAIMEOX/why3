@@ -278,6 +278,63 @@ split.
   constructor. 
 Qed.
 
+Lemma nodup_app {T} (l1 l2 : list T) :
+  (forall e, List.In e l1 -> ~ List.In e l2) ->
+  List.NoDup l1 -> List.NoDup l2 -> List.NoDup (l1 ++ l2).
+Proof.
+  induction l1.
+  intuition.
+  intros H h1 h2.
+  rewrite <- List.app_comm_cons.
+  apply List.NoDup_cons.
+  rewrite List.in_app_iff.
+  rewrite List.NoDup_cons_iff in h1.
+  intuition. apply (H a). apply List.in_eq. assumption.
+  apply IHl1. intros e H1. apply H. apply List.in_cons. assumption.
+  rewrite List.NoDup_cons_iff in h1. intuition.
+  assumption.
+Qed.
+
+Lemma nodup_prod {T1 T2} (l1 : list T1) (l2 : list T2):
+  List.NoDup l1 -> List.NoDup l2 ->
+  List.NoDup (List.list_prod l1 l2).
+Proof.
+  induction l1.
+  intros _ _. apply List.NoDup_nil.
+  intros h1 h2. simpl.
+  apply nodup_app.
+  intros e He. destruct e as [x1 x2].
+  rewrite List.in_prod_iff.
+  rewrite List.in_map_iff in He.
+  destruct He as [x [Ha _]].
+  rewrite pair_equal_spec in Ha.
+  destruct Ha as [Ha _]. rewrite <- Ha.
+  rewrite List.NoDup_cons_iff in h1.
+  intuition.
+  apply List.NoDup_map_inv with T2 (fun (p : T1 * T2) => let (a, y) := p in y).
+  rewrite List.map_map. rewrite List.map_id. assumption.
+  apply IHl1. rewrite List.NoDup_cons_iff in h1. intuition.
+  assumption.
+Qed.
+
+(* Why3 goal *)
+Lemma is_finite_product {a:Type} {a_WT:WhyType a} {b:Type} {b_WT:WhyType b} :
+  forall (s1:a -> Init.Datatypes.bool) (s2:b -> Init.Datatypes.bool),
+  is_finite s1 -> is_finite s2 -> is_finite (set.Set.product s1 s2).
+Proof.
+intros s1 s2 h1 h2.
+destruct h1 as [l1 [ndl1 h1]].
+destruct h2 as [l2 [ndl2 h2]].
+exists (List.list_prod l1 l2).
+split. apply nodup_prod. assumption. assumption.
+intro e.
+destruct e as [x y].
+fold (set.Set.mem (x, y) (set.Set.product s1 s2)).
+rewrite set.Set.product_def.
+rewrite List.in_prod_iff, h1, h2.
+intuition.
+Qed.
+
 (* Why3 goal *)
 Definition cardinal {a:Type} {a_WT:WhyType a} :
   (a -> Init.Datatypes.bool) -> Numbers.BinNums.Z.
