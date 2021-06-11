@@ -305,7 +305,7 @@ Proof.
   rewrite List.in_prod_iff.
   rewrite List.in_map_iff in He.
   destruct He as [x [Ha _]].
-  rewrite Datatypes.pair_equal_spec in Ha.
+  rewrite Init.Datatypes.pair_equal_spec in Ha.
   destruct Ha as [Ha _]. rewrite <- Ha.
   rewrite List.NoDup_cons_iff in h1.
   intuition.
