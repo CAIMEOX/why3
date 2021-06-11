@@ -305,8 +305,10 @@ Proof.
   rewrite List.in_prod_iff.
   rewrite List.in_map_iff in He.
   destruct He as [x [Ha _]].
-  rewrite Init.Datatypes.pair_equal_spec in Ha.
-  destruct Ha as [Ha _]. rewrite <- Ha.
+  assert (a = x1).
+  change a with (fst (a, x)). change x1 with (fst (x1, x2)).
+  rewrite Ha. reflexivity.
+  rewrite <- H.
   rewrite List.NoDup_cons_iff in h1.
   intuition.
   apply List.NoDup_map_inv with T2 (fun (p : T1 * T2) => let (a, y) := p in y).
