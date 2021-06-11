@@ -293,7 +293,7 @@ induction l; intros.
     assumption.
 Qed.
 
-Lemma nodup_prod {T1 T2} (l1 : list T1) (l2 : list T2):
+Lemma NoDup_prod {T1 T2} (l1 : list T1) (l2 : list T2):
   List.NoDup l1 -> List.NoDup l2 ->
   List.NoDup (List.list_prod l1 l2).
 Proof.
@@ -305,7 +305,7 @@ Proof.
   rewrite List.in_prod_iff.
   rewrite List.in_map_iff in He.
   destruct He as [x [Ha _]].
-  rewrite pair_equal_spec in Ha.
+  rewrite Datatypes.pair_equal_spec in Ha.
   destruct Ha as [Ha _]. rewrite <- Ha.
   rewrite List.NoDup_cons_iff in h1.
   intuition.
@@ -324,7 +324,7 @@ Proof.
   destruct h1 as [l1 [ndl1 h1]].
   destruct h2 as [l2 [ndl2 h2]].
   exists (List.list_prod l1 l2).
-  split. apply nodup_prod. assumption. assumption.
+  split. apply NoDup_prod. assumption. assumption.
   intro e.
   destruct e as [x y].
   fold (set.Set.mem (x, y) (set.Set.product s1 s2)).
@@ -827,7 +827,7 @@ Proof.
   destruct h2 as [l2 [ndl2 h2]].
   remember (List.list_prod l1 l2) as l.
   assert (List.NoDup l).
-  rewrite Heql. apply nodup_prod; assumption.
+  rewrite Heql. apply NoDup_prod; assumption.
   assert (forall e, List.In e l <-> set.Set.product s1 s2 e = true).
   intro e. fold (set.Set.mem e (set.Set.product s1 s2)).
   destruct e as [x1 x2]. rewrite set.Set.product_def.
