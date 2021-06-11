@@ -553,6 +553,9 @@ module SetApp
   val subset (s1 s2: set) : bool
     ensures { result <-> subset s1 s2 }
 
+  val filter (s: set) (p: elt -> bool) : set
+    ensures { result = filter s p }
+
   val empty () : set
     ensures { result.to_fset = empty }
     ensures { cardinal result = 0 }

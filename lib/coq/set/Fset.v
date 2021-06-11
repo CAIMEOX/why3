@@ -370,6 +370,27 @@ destruct s1, s2.
 eapply set.Set.disjoint_diff_s2.
 Qed.
 
+(* Why3 goal *)
+Definition product {a:Type} {a_WT:WhyType a} {b:Type} {b_WT:WhyType b} :
+  fset a -> fset b -> fset (a* b)%type.
+Proof.
+  intros s1 s2.
+  destruct s1,s2.
+  exists (set.Set.product x x0).
+  eapply Cardinal.is_finite_product; intuition.
+Defined.
+
+(* Why3 goal *)
+Lemma product_def {a:Type} {a_WT:WhyType a} {b:Type} {b_WT:WhyType b} :
+  forall (s1:fset a) (s2:fset b) (x:a) (y:b),
+  mem (x, y) (product s1 s2) <-> mem x s1 /\ mem y s2.
+Proof.
+  intros s1 s2 x y.
+  destruct s1,s2.
+  unfold mem. simpl.
+  apply set.Set.product_def.
+Qed.
+
 Lemma filter_NoDup: forall {A} (l: list A) f, List.NoDup l -> List.NoDup (List.filter f l).
 Proof.
 induction l; intros.
