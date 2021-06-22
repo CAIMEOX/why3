@@ -52,6 +52,20 @@ let pp_bindings ?(sep = Pp.semi) ?(pair_sep = Pp.arrow) ?(delims = Pp.(lbrace, r
   fprintf fmt "%a%a%a" (fst delims) ()
     (Pp.print_list sep pp_binding)
     l (snd delims) ()
+[@@warning "-32"]
+
+let pp_typed pp ty fmt x =
+  fprintf fmt "%a: %a" pp x print_ty (ty x)
+[@@warning "-32"]
+
+let pp_mt fmt mt =
+  pp_bindings print_tv print_ty fmt (Mtv.bindings mt)
+[@@warning "-32"]
+
+let pp_mv fmt mv =
+  pp_bindings (pp_typed print_vs (fun vs -> vs.vs_ty))
+    (pp_typed print_term t_type) fmt (Mvs.bindings mv)
+[@@warning "-32"]
 
 let pp_indent fmt =
   match Printexc.(backtrace_slots (get_callstack 100)) with
@@ -377,15 +391,28 @@ let rac_prover ~command driver limit =
   Rac_prover {command; driver; limit}
 
 type rac_reduce_config = {
+  rac_metas : (Theory.meta * Theory.meta_arg list) list;
   rac_trans: Task.task Trans.tlist option;
   rac_prover: rac_prover option;
   rac_try_negate: bool;
 }
 
-let rac_reduce_config ?trans:rac_trans ?prover:rac_prover ?try_negate:(rac_try_negate=false) () =
-  {rac_trans; rac_prover; rac_try_negate}
+let rac_reduce_config ?metas:(rac_metas=[]) ?trans:rac_trans
+    ?prover:rac_prover ?try_negate:(rac_try_negate=false) () =
+  {rac_metas; rac_trans; rac_prover; rac_try_negate}
 
-let rac_reduce_config_lit config env ?trans ?prover ?try_negate () =
+let rac_reduce_config_lit config env ?(metas=[]) ?trans ?prover ?try_negate () =
+  let metas =
+    let aux (meta, s) =
+      let open Theory in
+      let meta = lookup_meta meta in
+      let args = match meta.meta_type, s with
+        | [MTstring], Some s -> [MAstr s]
+        | [MTint], Some s -> [MAint (int_of_string s)]
+        | [], None -> []
+        | _ -> failwith "meta argument not implemented" in
+      meta, args in
+    List.map aux metas in
   let trans =
     let aux s = Trans.lookup_transform_l s env in
     Opt.map aux trans in
@@ -405,7 +432,7 @@ let rac_reduce_config_lit config env ?trans ?prover ?try_negate () =
       let limit = Call_provers.{empty_limit with limit_time; limit_mem} in
       rac_prover ~command driver limit in
     Opt.map aux prover in
-  rac_reduce_config ?trans ?prover ?try_negate ()
+  rac_reduce_config ~metas ?trans ?prover ?try_negate ()
 
 (******************************************************************************)
 (*                             Execution log                                  *)
@@ -1261,10 +1288,14 @@ let rec term_of_value ?(ty_mt=Mtv.empty) env vsenv v : (vsymbol * term) list * t
       let t = t_equ (fs_app ls [t_var vs] ty_x) t_x in
       vsenv, t_eps (t_close_bound vs t)
   | Vconstr (rs, field_rss, fs) -> (
+      let match_field mt pv f =
+        ty_match mt pv.pv_vs.vs_ty (ty_inst mt (field_get f).v_ty) in
+      let ty_mt = List.fold_left2 match_field ty_mt rs.rs_cty.cty_args fs in
       let term_of_field vsenv f = term_of_value ~ty_mt env vsenv (field_get f) in
       let vsenv, fs = Lists.map_fold_left term_of_field vsenv fs in
       match rs_kind rs with
-      | RKfunc -> vsenv, fs_app (ls_of_rs rs) fs v_ty
+      | RKfunc ->
+          vsenv, fs_app (ls_of_rs rs) fs v_ty
       | RKnone when Strings.has_suffix "'mk" rs.rs_name.id_string ->
           let vs = create_vsymbol (id_fresh "v") v_ty in
           let for_field rs = t_equ (t_app_infer (ls_of_rs rs) [t_var vs]) in
@@ -1345,12 +1376,13 @@ let add_premises ?post_res ?(vsenv=[]) ts env =
   let match_free_var env vs _ (vsenv, mt, mv) =
     let v = get_vs env vs in
     let vsenv, t = term_of_value env vsenv v in
-    let vs' = create_vsymbol (id_clone vs.vs_name) (v_ty v) in
-    let mt = ty_match mt vs.vs_ty (v_ty v) in
+    let ty = ty_inst mt (v_ty v) in
+    let vs' = create_vsymbol (id_clone vs.vs_name) ty in
+    let mt = ty_match mt (ty_inst mt vs.vs_ty) ty in
     let mv = Mvs.add vs (vs', t) mv in
     vsenv, mt, mv in
-  let bind_vs (vs, t1) t2 =
-    t_let_close vs t1 t2 in
+  let bind_vs mt mv (vs, t1) t2 =
+    t_let_close vs (t_ty_subst mt mv t1) t2 in
   let bind_fun env mt mv vs _ sofar =
     let matching_vs rs _ = id_equal rs.rs_name vs.vs_name in
     match Mrs.choose (Mrs.filter matching_vs env.funenv) with
@@ -1383,8 +1415,8 @@ let add_premises ?post_res ?(vsenv=[]) ts env =
     let mv_t = Mvs.map (fun (vs', _) -> t_var vs') mv in
     let vsenv = List.map (fun (vs, t) -> Mvs.find_def vs vs mv_vs, t_ty_subst mt mv_t t) vsenv in
     let t = t_ty_subst mt mv_t t in
-    let t = Mvs.fold (fun _ -> bind_vs) mv t in
-    let t = List.fold_left (fun t vs_t -> bind_vs vs_t t) t vsenv in
+    let t = Mvs.fold (fun _ -> bind_vs mt mv_t) mv t in
+    let t = List.fold_left (fun t vs_t -> bind_vs mt mv_t vs_t t) t vsenv in
     let t = Mvs.fold (bind_fun env mt mv_t) free_funs t in
     t in
   add_premises (List.map close_term ts) env.premises
@@ -1406,6 +1438,7 @@ type cntr_ctx = {
   c_attr   : attribute; (* From module [Vc] *)
   c_desc   : string option;
   c_loc    : Loc.position option;
+  c_attrs  : Sattr.t;
   c_vsenv  : value Mvs.t;
   c_log_uc : Log.log_uc;
 }
@@ -1453,11 +1486,12 @@ let report_cntr fmt (ctx, msg, term) =
     report_cntr_head (ctx, msg, term)
     report_cntr_body (ctx, term)
 
-let cntr_ctx ?loc attr ?desc () : pre_cntr_ctx =
+let cntr_ctx ?loc ?(attrs=Sattr.empty) ?desc attr () : pre_cntr_ctx =
   fun env -> {
       c_attr= attr;
       c_desc= desc;
       c_loc= loc;
+      c_attrs= attrs;
       c_vsenv= snapshot_vsenv env.vsenv;
       c_log_uc= env.rac.log_uc;
     }
@@ -1485,7 +1519,7 @@ let bind_value env vs v (task, ls_mt, ls_mv) =
     if ty_closed v.v_ty then
       v.v_ty, Mtv.empty, ty_match ls_mt vs.vs_ty v.v_ty
     else
-      vs.vs_ty, ty_match Mtv.empty v.v_ty vs.vs_ty, ls_mt in
+      ty_inst ls_mt vs.vs_ty, ty_match Mtv.empty v.v_ty vs.vs_ty, ls_mt in
   let ls = create_fsymbol (id_clone vs.vs_name) [] ty in
   let ls_mv = Mvs.add vs (fs_app ls [] ty) ls_mv in
   let vsenv, t = term_of_value ~ty_mt env [] v in
@@ -1532,7 +1566,7 @@ let bind_fun rs (cexp, _) (task, ls_mv) =
     task, ls_mv
   with Exit -> task, ls_mv
 
-let task_of_term ?(vsenv=[]) env t =
+let task_of_term ?(vsenv=[]) metas env t =
   let open Task in let open Decl in
   let th = env.pmodule.Pmodule.mod_theory in
   let rec t_free_sls sofar t =
@@ -1603,6 +1637,7 @@ let task_of_term ?(vsenv=[]) env t =
   let task, ls_mt, ls_mv = Mvs.fold (bind_value env) env.vsenv (task, ls_mt, ls_mv) in
   let task = fold_premises add_premise env.premises task in
   let t = t_ty_subst ls_mt ls_mv t in
+  let task = List.fold_left (fun t (m, a) -> Task.add_meta t m a) task metas in
   let task =
     if t.t_ty = None then (* Add a formula as goal directly ... *)
       let prs = create_prsymbol (id_fresh "goal") in
@@ -1692,7 +1727,7 @@ let compute_term ?vsenv env t =
   match env.rac.rac_reduce.rac_trans with
   | None -> t
   | Some trans ->
-      let task, ls_mv = task_of_term ?vsenv env t in
+      let task, ls_mv = task_of_term ?vsenv env.rac.rac_reduce.rac_metas env t in
       if t.t_ty = None then (* [t] is a formula *)
         let tasks = trans_and_bind_quants env trans task in
         match List.map Task.task_goal_fmla tasks with
@@ -1765,7 +1800,7 @@ let check_term ?vsenv env (ctx: pre_cntr_ctx) t =
   Debug.dprintf debug_rac_check_sat "@[<hv2>Check term: %a %a@]@." print_term t
     Pp.(print_list space (fun fmt vs -> fprintf fmt "@[%a=%a@]" print_vs vs print_value (get_vs env vs)))
     (Mvs.keys (t_freevars Mvs.empty t)) ;
-  let task, _ = task_of_term ?vsenv env t in
+  let task, _ = task_of_term ?vsenv env.rac.rac_reduce.rac_metas env t in
   let res = (* Try checking the term using computation first ... *)
     Opt.map (fun b -> Debug.dprintf debug_rac_check_sat "Computed %b.@." b; b)
       (Opt.bind env.rac.rac_reduce.rac_trans
@@ -1815,8 +1850,8 @@ let check_post env ctx v post =
   let env = {env with vsenv= Mvs.add vs v env.vsenv} in
   check_term env ctx t
 
-let check_posts env attr ?desc loc v posts =
-  let ctx = cntr_ctx attr ?desc ?loc () in
+let check_posts env attr ?desc ?attrs loc v posts =
+  let ctx = cntr_ctx attr ?desc ?loc ?attrs () in
   List.iter (check_post env ctx v) posts
 
 let check_type_invs ?loc env ity v =
@@ -1899,8 +1934,8 @@ let check_terms env ctx tl =
     register_failure env (opt_or ctx.c_loc t.t_loc) (describe_cntr_ctx ctx) mid;
     raise e
 
-let check_posts env attr ?desc loc v posts =
-  try check_posts env attr ?desc loc v posts with (Contr (ctx,t)) as e ->
+let check_posts env attr ?desc ?attrs loc v posts =
+  try check_posts env attr ?desc ?attrs loc v posts with (Contr (ctx,t)) as e ->
     let mid = value_of_free_vars env ctx t in
     register_failure env (opt_or ctx.c_loc t.t_loc) (describe_cntr_ctx ctx) mid;
     raise e
@@ -2391,7 +2426,8 @@ and eval_expr' env e =
           | [] ->
              if env.rac.rac_abstract then begin
                  register_call env e.e_loc None mvs Log.ExecAbstract;
-                 exec_call_abstract ~snapshot:cty.cty_oldies ?loc:e.e_loc env ce.c_cty [] e.e_ity
+                 exec_call_abstract ?loc:e.e_loc ~attrs:e.e_attrs
+                   ~snapshot:cty.cty_oldies env ce.c_cty [] e.e_ity
                end
              else begin
                  register_call env e.e_loc None mvs Log.ExecConcrete;
@@ -2415,7 +2451,8 @@ and eval_expr' env e =
       | Cany ->
          register_any_call env e.e_loc None Mvs.empty;
          if env.rac.do_rac then
-           exec_call_abstract ~snapshot:cty.cty_oldies ?loc:e.e_loc env cty [] e.e_ity
+           exec_call_abstract ?loc:e.e_loc ~attrs:e.e_attrs
+             ~snapshot:cty.cty_oldies env cty [] e.e_ity
          else (* We must check postconditions for abstract exec *)
            cannot_compute "cannot evaluate any-value with RAC disabled"
       | Capp (rs, pvsl) when
@@ -2435,7 +2472,7 @@ and eval_expr' env e =
             cannot_compute "no support for partial function applications (%a)"
               (Pp.print_option_or_default "unknown location" Pretty.print_loc')
               e.e_loc;
-          exec_call ?loc:e.e_loc env rs pvsl e.e_ity
+          exec_call ?loc:e.e_loc ~attrs:e.e_attrs env rs pvsl e.e_ity
     end
   | Eassign l ->
       let search_and_assign (pvs, rs, v) =
@@ -2763,7 +2800,7 @@ and exec_match env t ebl =
       with NoMatch -> iter rem ) in
   iter ebl
 
-and exec_call ?(main_function=false) ?loc env rs arg_pvs ity_result =
+and exec_call ?(main_function=false) ?loc ?attrs env rs arg_pvs ity_result =
   let arg_vs = List.map (get_pvs env) arg_pvs in
   Debug.dprintf debug_trace_exec "@[<h>%tExec call %a %a@]@."
     pp_indent print_rs rs Pp.(print_list space print_value) arg_vs;
@@ -2809,14 +2846,14 @@ and exec_call ?(main_function=false) ?loc env rs arg_pvs ity_result =
       | _ -> true in
     if env.rac.do_rac then (
       let desc = asprintf "of `%a`" print_rs rs in
-      let ctx = cntr_ctx ?loc:loc Vc.expl_pre ~desc () in
+      let ctx = cntr_ctx ?loc:loc ?attrs Vc.expl_pre ~desc () in
       let pre = List.filter not_DECR rs.rs_cty.cty_pre in
       (if main_function then check_assume_terms else check_terms) env ctx pre );
     add_premises (List.filter not_DECR rs.rs_cty.cty_pre) env in
   match exec_kind with
   | Log.ExecAbstract ->
       check_pre_and_register_call Log.ExecAbstract;
-      exec_call_abstract ?loc ~rs env rs.rs_cty arg_pvs ity_result
+      exec_call_abstract ?loc ?attrs ~rs env rs.rs_cty arg_pvs ity_result
   | Log.ExecConcrete ->
       let res =
         if rs_equal rs rs_func_app then begin
@@ -2847,7 +2884,7 @@ and exec_call ?(main_function=false) ?loc env rs arg_pvs ity_result =
                     Debug.dprintf debug_trace_exec "@[<h>%tEXEC CALL %a: Capp %a]@."
                       pp_indent print_rs rs print_rs rs';
                     check_pre_and_register_call Log.ExecConcrete;
-                    exec_call ?loc env rs' (pvl @ arg_pvs) ity_result
+                    exec_call ?loc ?attrs env rs' (pvl @ arg_pvs) ity_result
                 | Cfun body ->
                     Debug.dprintf debug_trace_exec "@[<hv2>%tEXEC CALL %a: FUN/%d %a@]@."
                       pp_indent print_rs rs (List.length ce.c_cty.cty_args) (pp_limited print_expr) body;
@@ -2857,7 +2894,7 @@ and exec_call ?(main_function=false) ?loc env rs arg_pvs ity_result =
                 | Cany ->
                     if env.rac.do_rac then (
                       check_pre_and_register_call ~any_function:true Log.ExecAbstract;
-                      exec_call_abstract ?loc ~rs env rs.rs_cty arg_pvs ity_result )
+                      exec_call_abstract ?loc ?attrs ~rs env rs.rs_cty arg_pvs ity_result )
                     else (* We can't check the postcondition *)
                       cannot_compute "cannot apply an any-function %a with RAC disabled"
                         print_rs rs
@@ -2872,8 +2909,10 @@ and exec_call ?(main_function=false) ?loc env rs arg_pvs ity_result =
             | Constructor its_def ->
                 Debug.dprintf debug_trace_exec "@[<hv2>%tEXEC CALL %a: CONSTRUCTOR@]@." pp_indent print_rs rs;
                 check_pre_and_register_call Log.ExecConcrete;
-                let mt = List.fold_left2 ty_match Mtv.empty
-                    (List.map (fun pv -> pv.pv_vs.vs_ty) rs.rs_cty.cty_args) (List.map v_ty arg_vs) in
+                let aux mt pv v =
+                  ty_match mt pv.pv_vs.vs_ty (ty_inst mt (v_ty v)) in
+                let mt =
+                  List.fold_left2 aux Mtv.empty rs.rs_cty.cty_args arg_vs in
                 let ty = ty_inst mt (ty_of_ity ity_result) in
                 let vs = List.map field arg_vs in
                 let v = value ty (Vconstr (rs, its_def.Pdecl.itd_fields, vs)) in
@@ -2905,17 +2944,17 @@ and exec_call ?(main_function=false) ?loc env rs arg_pvs ity_result =
         let loc = if main_function then None else loc in
         match res with
         | Normal v ->
-            check_posts env Vc.expl_post ~desc loc v rs.rs_cty.cty_post
+            check_posts env Vc.expl_post ~desc ?attrs loc v rs.rs_cty.cty_post
         | Excep (xs, v) ->
             let posts = Mxs.find xs rs.rs_cty.cty_xpost in
-            check_posts env Vc.expl_xpost ~desc loc v posts
+            check_posts env Vc.expl_xpost ~desc ?attrs loc v posts
         | Irred _ -> () );
       res
   ) in
   add_post_premises rs.rs_cty res env;
   res
 
-and exec_call_abstract ?snapshot ?loc ?rs env cty arg_pvs ity_result =
+and exec_call_abstract ?snapshot ?loc ?attrs ?rs env cty arg_pvs ity_result =
   (* let f (x1: ...) ... (xn: ...) = e
      ~>
      assert1 {f_pre};
@@ -2948,7 +2987,7 @@ and exec_call_abstract ?snapshot ?loc ?rs env cty arg_pvs ity_result =
   let desc = match rs with
     | None -> "of anonymous function"
     | Some rs -> asprintf "of `%a`" print_rs rs in
-  let ctx = cntr_ctx Vc.expl_post ~desc () in
+  let ctx = cntr_ctx Vc.expl_post ~desc ?attrs () in
   check_assume_posts env ctx res_v cty.cty_post;
   Normal res_v
   ) in
