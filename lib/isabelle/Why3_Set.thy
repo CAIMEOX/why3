@@ -133,7 +133,12 @@ definition filter :: "'a fset \<Rightarrow> ('a \<Rightarrow> bool) \<Rightarrow
   "filter S p = ffilter p S"
 
 definition product :: "'a fset \<Rightarrow> 'b fset \<Rightarrow> ('a * 'b) fset" where
-  "product s1 s2 = ffUnion (fimage (\<lambda> a. fimage (\<lambda> b. Pair a b) s2) s1)"
+  "product s1 s2 = ffold (\<lambda> a C. funion C (fimage (\<lambda> b. Pair a b) s2)) fempty s1"
+\<comment> \<open> 
+FIXME : use the following nicer definition. The issue is that it does not seem
+possible to prove product_def with it
+"product s1 s2 = ffUnion (fimage (\<lambda> a. fimage (\<lambda> b. Pair a b) s2) s1)"
+ \<close>
 
 why3_open "set/Fset.xml"
   constants
@@ -290,7 +295,8 @@ why3_vc cardinal_inter_disjoint
 why3_vc product_def
 proof-
   assume  "(x, y) |\<in>| product s1 s2"
-  hence "\<exists> c. c |\<in>| fimage (\<lambda> a. fimage (\<lambda> b. Pair a b) s2) s1 \<and> (x, y) |\<in>| c"
+  
+  hence "x |\<in>| s1 \<and> y |\<in>| s2"
   
 
 why3_end
