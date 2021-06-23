@@ -112,7 +112,8 @@ symbol DestructConj A B C : tEv (
 
 // Equality
 
-symbol eq T (x y : tEv T) ≔ `π P, P x ⇒ P y;
+symbol = {T} (x y : tEv T) ≔ `π P, P x ⇒ P y;
+notation = infix 22;
 
 symbol eq_fmla A B ≔ @π (DType ⇀ DType)
                       (λ P, P A ⇒ P B);
@@ -122,42 +123,17 @@ symbol iff_eq A B : tEv (
   (A ⇔ B) ⇒
   eq_fmla A B);
 
-symbol eq_refl {T} x : tEv (eq T x x)
+symbol =_refl {T} (x : tEv T) : tEv (x = x)
 ≔ λ P px, px;
 
-symbol eq_sym {T} x y : tEv (eq T x y) → tEv (eq T y x)
-≔ λ eqxy, eqxy (λ t, eq T t x) (eq_refl x);
+symbol =_sym {T} (x y: tEv T) : tEv (x = y) → tEv (y = x)
+≔ λ eqxy, eqxy (λ t, t = x) (=_refl x);
 
-symbol eq_trans {T} x y z: tEv (eq T x y) → tEv (eq T y z) → tEv (eq T x z)
-≔ λ eqxy eqyz, eqyz (λ t, eq T x t) eqxy;
+symbol =_trans {T} (x y z : tEv T) : tEv (x = y) → tEv (y = z) → tEv (x = z)
+≔ λ eqxy eqyz, eqyz (λ t, x = t) eqxy;
 
-symbol eq_ind T x y : tEv (eq T x y) → Π P, tEv (P y) → tEv (P x)
-≔ λ eq, eq_sym x y eq;
-
-// symbol exists (T : Kind) (P : kEv T → Type)  ≔
-// `π C, (`π x : kEv T, P x ⇒ C) ⇒ C;
-
-// opaque symbol eq_and_def :
-//   tEv (exists (kkPi DType (λ T, T ⇁ T ⇁ DType)) (λ eq,
-//        @π DType (λ C : Type,
-//           ((`π T : Type, `∀ x : tEv T, eq T x x) ⇒
-//            (`π T : Type, (`∀ x : tEv T, (`∀ y : tEv T, eq T x y ⇒
-//               (`π P : tEv T → Type, P y ⇒ P x)))) ⇒ C) ⇒ C)
-//       ))
-// ≔ begin
-//   assume C_ex p_ex;
-//   refine p_ex eq _;
-//   assume C_and p_and;
-//   refine p_and eq_refl eq_ind;
-// end;
-
-// TODO : remove opaque and prove =_refl and =_ind
-symbol = {T} : tEv T → tEv T → Type; // ≔ @eq T;
-notation = infix 22;
-
-symbol =_refl T (x : tEv T) : tEv (x = x);
-
-symbol =_ind {T} (x y : tEv T) : tEv (x = y) → Π P, tEv (P y) → tEv (P x);
+symbol =_ind {T} (x y : tEv T) : tEv (x = y) → Π P, tEv (P y) → tEv (P x)
+≔ λ eq, =_sym x y eq;
 
 builtin "T"     ≔ tEv;
 builtin "eq"    ≔ =;
@@ -336,7 +312,6 @@ symbol pos_succ ≔
     (λ p _, xI p)
     (xO xH);
 
-// TODO : how to unfold a definition ?
 opaque symbol pos_succ_xI p : tEv (pos_succ (xI p) = xO (pos_succ p))
 ≔ begin assume p; reflexivity; end;
 
@@ -420,16 +395,16 @@ symbol pos_add x y ≔ pos_add_carry x y False;
 symbol pa_xH y : tEv (pos_add xH y = pos_succ y)
 ≔ begin
   induction;
-  reflexivity;
-  reflexivity;
+  assume x _; reflexivity;
+  assume x _; reflexivity;
   reflexivity;
 end;
 
 symbol pa_xH_right y : tEv (pos_add y xH = pos_succ y)
 ≔ begin
   induction;
-  reflexivity;
-  reflexivity;
+  assume x _; reflexivity;
+  assume x _; reflexivity;
   reflexivity;
 end;
 
@@ -2188,7 +2163,7 @@ symbol TrivialGoal : tEv (
 
 symbol EqRefl T (t : tEv T) : tEv (
   ∅ ⊧ t = t ∙ ∅)
-≔ λ neqtt, neqtt (=_refl T t);
+≔ λ neqtt, neqtt (=_refl t);
 
 symbol Assert A : tEv (
   ∅ ⊧ A ∙ ∅ ⟹
