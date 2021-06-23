@@ -313,10 +313,10 @@ symbol pos_succ ≔
     (xO xH);
 
 opaque symbol pos_succ_xI p : tEv (pos_succ (xI p) = xO (pos_succ p))
-≔ begin assume p; reflexivity; end;
+≔ begin reflexivity; end;
 
 opaque symbol pos_succ_xO p : tEv (pos_succ (xO p) = xI p)
-≔ begin assume p; reflexivity; end;
+≔ begin reflexivity; end;
 
 opaque symbol pos_succ_xH : tEv (pos_succ xH = xO xH)
 ≔ begin reflexivity; end;
@@ -395,16 +395,16 @@ symbol pos_add x y ≔ pos_add_carry x y False;
 symbol pa_xH y : tEv (pos_add xH y = pos_succ y)
 ≔ begin
   induction;
-  assume x _; reflexivity;
-  assume x _; reflexivity;
+  reflexivity;
+  reflexivity;
   reflexivity;
 end;
 
 symbol pa_xH_right y : tEv (pos_add y xH = pos_succ y)
 ≔ begin
   induction;
-  assume x _; reflexivity;
-  assume x _; reflexivity;
+  reflexivity;
+  reflexivity;
   reflexivity;
 end;
 
@@ -413,7 +413,7 @@ symbol pac_succ x : tEv (`∀ y, pos_add_carry x y True = pos_succ (pos_add x y)
   induction;
   assume p prec y;
   refine ind_positive (λ y, pos_add_carry (xI p) y True = pos_succ (pos_add (xI p) y)) _ _ _ y;
-  assume q _; reflexivity;
+  reflexivity;
   assume q _;
   have e : tEv (pos_add_carry (xI p) (xO q) True = xO (pos_add_carry p q True));
   reflexivity; rewrite e; rewrite prec; reflexivity;
@@ -423,11 +423,11 @@ symbol pac_succ x : tEv (`∀ y, pos_add_carry x y True = pos_succ (pos_add x y)
   assume q _;
   have e : tEv (pos_add_carry (xO p) (xI q) True = xO (pos_add_carry p q True));
   reflexivity; rewrite e; rewrite prec; reflexivity;
-  assume q _; reflexivity;
+  reflexivity;
   reflexivity;
   refine ind_positive (λ y, pos_add_carry xH y True = pos_succ (pos_add xH y)) _ _ _;
-  assume y _; reflexivity;
-  assume y _; reflexivity;
+  reflexivity;
+  reflexivity;
   reflexivity;
 end;
 
@@ -575,7 +575,7 @@ symbol pos_compare_acc ≔
 
 symbol pos_compare x y ≔ pos_compare_acc x Eq y;
 symbol pc_def x y : tEv (pos_compare x y = pos_compare_acc x Eq y)
-≔ begin assume x y; reflexivity; end;
+≔ begin reflexivity; end;
 
 symbol pos_compare' ≔
   ind_positive (λ _, Dpositive ⇒ Dcomparison)
@@ -619,8 +619,8 @@ symbol pca_comm x y r : tEv (
   reflexivity;
 
   induction;
-  assume p _ r; reflexivity;
-  assume p _ r; reflexivity;
+  reflexivity;
+  reflexivity;
   assume r; rewrite left [in pos_compare_acc xH r xH] compopp_idem;
   reflexivity;
 end;
@@ -873,7 +873,7 @@ symbol pc'_xH y : tEv (pos_compare' xH y = Eq ⇒ xH = y)
   refine discr_Lt_Eq H _;
   assume q _ H;
   refine discr_Lt_Eq H _;
-  assume _; reflexivity;
+  reflexivity;
 end;
 
 symbol pc'_decides : tEv (`∀ x, `∀ y, pos_compare' x y = Eq ⇒ x = y)
@@ -954,9 +954,9 @@ symbol pca_succ_Lt x y : tEv (
   assume p _;
   induction;
   // Case xO - xI
-  assume q _; reflexivity;
+  reflexivity;
   // Case xO - xO
-  assume q _; reflexivity;
+  reflexivity;
   // Case xO - xH
   reflexivity;
 
@@ -1000,7 +1000,7 @@ symbol pca_succ_succ x y acc :
   // Case xO - xI
   assume q _ acc; refine pca_Gt_succ p q;
   // Case xO - xO
-  assume q _ acc; reflexivity;
+  reflexivity;
   // Case xO - xH
   assume acc; refine pca_Gt_xH p;
 
@@ -1337,7 +1337,7 @@ symbol - x y ≔ x + ~ y;
 notation - infix left 40;
 
 symbol sub_def x y : tEv (x - y = x + ~ y)
-≔ begin assume x y; reflexivity; end;
+≔ begin reflexivity; end;
 
 symbol add_opp a : tEv (a - a = zero)
 ≔ begin
