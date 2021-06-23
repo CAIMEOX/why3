@@ -31,7 +31,7 @@ let print_decl fmt id cty =
 let encode_neg (ct, pos) = if pos then CTnot ct else ct
 
 let print_task_type fmt {types; sigma; gamma_delta} =
-  fprintf fmt "tEv (@[<hv>";
+  fprintf fmt "εₜ (@[<hv>";
   Sid.iter (fun id -> print_decl fmt id CTprop) types;
   Mid.iter (print_decl fmt) sigma;
   Mid.iter (fun _ tp -> fprintf fmt "%a ⇒@ "

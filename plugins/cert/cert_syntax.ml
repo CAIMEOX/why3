@@ -126,7 +126,7 @@ let rec prty fmt ty = match ty with
 
 (* Prints a shallow type, protected with outside parentheses if needed *)
 and prty_paren fmt = function
-  | CTyvar v -> fprintf fmt "tEv %a" Pretty.print_tv v
+  | CTyvar v -> fprintf fmt "εₜ %a" Pretty.print_tv v
   | CTprop -> fprintf fmt "Type"
   | CTyapp (ts, []) -> prts fmt ts
   | cty -> fprintf fmt "(%a)" prty cty
@@ -134,7 +134,7 @@ and prty_paren fmt = function
 and prts fmt ts =
   if ts_equal ts ts_int then fprintf fmt "Z"
   else if ts_equal ts ts_bool then fprintf fmt "boolean"
-  else fprintf fmt "tEv %a" Pretty.print_ts ts
+  else fprintf fmt "εₜ %a" Pretty.print_ts ts
 
 (* pred functions know if we are printing the type of a predicate or not *)
 (* Prints a deep type, protected with outside parentheses if needed *)
@@ -156,7 +156,7 @@ and pred_pty pred fmt = function
   | cty -> fprintf fmt "(%a)" (pred_ty pred) cty
 
 and prarrow fmt pred =
-  if pred then fprintf fmt "↝"
+  if pred then fprintf fmt "⇁"
   else fprintf fmt "⇒"
 
 (* Prints a deep type without outside parentheses *)
@@ -282,21 +282,6 @@ let rec ct_fv_close x k ct = match ct with
   | _ -> ct_map (ct_fv_close x k) ct
 
 let ct_close x t = ct_fv_close x 0 t
-
-(* Find free variable with respect to a term *)
-(* let rec mem_cont x ctn cont = match ctn with
- *   | CTfvar (y, _) -> cont (id_equal x y)
- *   | CTapp (ct1, ct2)
- *   | CTbinop (_, ct1, ct2) ->
- *       mem_cont x ct1 (fun m1 ->
- *       mem_cont x ct2 (fun m2 ->
- *           cont (m1 || m2)))
- *   | CTquant (_, _, ct)
- *   | CTqtype (_, ct)
- *   | CTnot ct -> mem_cont x ct cont
- *   | CTint _ | CTbvar _ | CTtrue | CTfalse -> cont false
- * 
- * let mem x t = mem_cont x t (fun x -> x) *)
 
 let rec replace_cterm tl tr t =
   if ct_equal t tl
