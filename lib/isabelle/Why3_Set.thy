@@ -158,6 +158,37 @@ why3_open "set/Fset.xml"
   types
     fset = fset
 
+(*
+    assumes "x |\<in>| A"
+    shows "ffold f z A = f x (ffold f z (A |-| {|x|}))"
+"product s1 s2 = ffold (\<lambda> a C. funion C (fimage (\<lambda> b. Pair a b) s2)) fempty s1"
+*)
+
+lemma both_incl_prod : "x |\<in>| s1 \<and> y |\<in>| s2 \<Longrightarrow> (x, y) |\<in>| product s1 s2"
+(*proof-
+  assume xs12 : "x |\<in>| s1 \<and> y |\<in>| s2"
+  have xs1 : "x |\<in>| s1"
+    by (simp add: \<open>x |\<in>| s1 \<and> y |\<in>| s2\<close>)
+  have p3 : "\<And> f z A u. u |\<in>| A \<Longrightarrow> ffold f z A = f u (ffold f z (A |-| {|u|}))"
+    by (simp add: FSet.comp_fun_commute.ffold_rec) 
+  have p1 : "product s1 s2 = ffold (\<lambda> a C. funion C (fimage (Pair a) s2)) fempty s1"
+      by (simp add: Why3_Set.product_def)
+    have p2 : "... = funion (ffold (\<lambda> a C. funion C (fimage (Pair a) s2)) fempty (s1 |-| {|x|})) (fimage (Pair x) s2)"
+      by (meson p3 xs12) 
+  have  "(x, y) |\<in>| product s1 s2"
+    by (simp add: \<open>x |\<in>| s1 \<and> y |\<in>| s2\<close> p1 p2)
+end*)
+
+lemma prod_incl_both "(x, y) |\<in>| product s1 s2 \<Longrightarrow> x |\<in>| s1 \<and> y |\<in>| s2"
+
+lemma split : "((x \<longrightarrow> y) & (y \<longrightarrow> x)) \<Longrightarrow> x = y"
+  by blast
+
+
+why3_vc product_def
+  using both_incl_prod prod_incl_both split
+
+
 why3_vc add_def by auto
 
 why3_vc add_remove
@@ -292,12 +323,7 @@ why3_vc disjoint_inter_empty
 why3_vc cardinal_inter_disjoint
   by (meson Fset.facts.disjoint_inter_empty assms cardinal_empty)
 
-why3_vc product_def
-proof-
-  assume  "(x, y) |\<in>| product s1 s2"
-  
-  hence "x |\<in>| s1 \<and> y |\<in>| s2"
-  
+
 
 why3_end
 
