@@ -360,12 +360,6 @@ module Fset
   lemma disjoint_diff_s2:
     forall s1 s2: fset 'a. disjoint (diff s1 s2) s2
 
-  (** `{ (x, y) | x in s1 /\ y in s2 }` *)
-  function product (s1: fset 'a) (s2: fset 'b) : fset ('a, 'b)
-  axiom product_def:
-    forall s1: fset 'a, s2: fset 'b, x : 'a, y : 'b.
-    mem (x, y) (product s1 s2) <-> mem x s1 /\ mem y s2
-
   (** `{ x | x in s /\ p x }` *)
   function filter (s: fset 'a) (p: 'a -> bool) : fset 'a
   axiom filter_def:
@@ -436,6 +430,22 @@ module Fset
   lemma cardinal_map:
     forall f: 'a -> 'b, s: fset 'a.
     cardinal (map f s) <= cardinal s
+
+  (** `{ (x, y) | x in s1 /\ y in s2 }` *)
+  let rec ghost function product (s1 : fset 'a) (s2 : fset 'b)
+  variant { cardinal s1 }
+  ensures { forall x y. mem (x, y) result <-> mem x s1 /\ mem y s2 }
+  ensures { cardinal result = cardinal s1 * cardinal s2 }
+  =
+  if is_empty s1 then empty
+  else let x1 = pick s1 in
+       let m1 = map (fun y -> (x1, y)) s2 in
+       let p1 = product (remove x1 s1) s2 in
+       assert { disjoint m1 p1 };
+       assert { cardinal m1 = cardinal s2
+                by (forall y. mem y s2 -> mem (x1, y) m1)
+                so map (fun p -> let _, y = p in y) m1 == s2 };
+       union m1 p1
 
 end
 

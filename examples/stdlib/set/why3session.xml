@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="Z3" version="4.8.10" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="1" name="CVC4" version="1.7" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="2" name="Alt-Ergo" version="2.4.0" timelimit="5" steplimit="0" memlimit="1000"/>
+<file format="whyml">
+<path name=".."/><path name=".."/><path name=".."/><path name="stdlib"/>
+<path name="set.mlw"/>
+<theory name="Set" proved="true">
+ <goal name="extensionality" proved="true">
+ <proof prover="0"><result status="valid" time="0.01" steps="8369"/></proof>
+ </goal>
+ <goal name="subset_refl" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="2163"/></proof>
+ </goal>
+ <goal name="subset_trans" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="2768"/></proof>
+ </goal>
+ <goal name="is_empty_empty" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="2596"/></proof>
+ </goal>
+ <goal name="empty_is_empty" proved="true">
+ <proof prover="0"><result status="valid" time="0.01" steps="11313"/></proof>
+ </goal>
+ <goal name="mem_singleton" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="3042"/></proof>
+ </goal>
+ <goal name="add_remove" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="2899"/></proof>
+ </goal>
+ <goal name="remove_add" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="2739"/></proof>
+ </goal>
+ <goal name="subset_remove" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="4085"/></proof>
+ </goal>
+ <goal name="subset_union_1" proved="true">
+ <proof prover="1"><result status="valid" time="0.04" steps="4324"/></proof>
+ </goal>
+ <goal name="subset_union_2" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="4749"/></proof>
+ </goal>
+ <goal name="subset_inter_1" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="4803"/></proof>
+ </goal>
+ <goal name="subset_inter_2" proved="true">
+ <proof prover="1"><result status="valid" time="0.04" steps="5291"/></proof>
+ </goal>
+ <goal name="subset_diff" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="5294"/></proof>
+ </goal>
+ <goal name="disjoint_inter_empty" proved="true">
+ <proof prover="1"><result status="valid" time="0.10" steps="12998"/></proof>
+ </goal>
+ <goal name="disjoint_diff_eq" proved="true">
+ <proof prover="1"><result status="valid" time="0.04" steps="8968"/></proof>
+ </goal>
+ <goal name="disjoint_diff_s2" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="7950"/></proof>
+ </goal>
+ <goal name="subset_filter" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="6517"/></proof>
+ </goal>
+ <goal name="mem_map" proved="true">
+ <proof prover="1"><result status="valid" time="0.07" steps="13895"/></proof>
+ </goal>
+</theory>
+<theory name="Cardinal">
+ <goal name="is_finite_singleton" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="8147"/></proof>
+ </goal>
+ <goal name="is_finite_map">
+ </goal>
+ <goal name="is_finite_product">
+ </goal>
+ <goal name="subset_eq">
+ </goal>
+ <goal name="cardinal1">
+ </goal>
+ <goal name="cardinal_inter_disjoint" proved="true">
+ <proof prover="1"><result status="valid" time="0.07" steps="11894"/></proof>
+ </goal>
+ <goal name="cardinal_map">
+ </goal>
+ <goal name="cardinal_product">
+ </goal>
+</theory>
+<theory name="Fset">
+ <goal name="extensionality">
+ </goal>
+ <goal name="subset_refl" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="1522"/></proof>
+ </goal>
+ <goal name="subset_trans" proved="true">
+ <proof prover="1"><result status="valid" time="0.01" steps="1875"/></proof>
+ </goal>
+ <goal name="empty_is_empty">
+ </goal>
+ <goal name="mem_singleton" proved="true">
+ <proof prover="1"><result status="valid" time="0.01" steps="2419"/></proof>
+ </goal>
+ <goal name="add_remove" proved="true">
+ <proof prover="0"><result status="valid" time="0.06" steps="234924"/></proof>
+ </goal>
+ <goal name="remove_add">
+ </goal>
+ <goal name="subset_remove" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="3105"/></proof>
+ </goal>
+ <goal name="subset_union_1" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="3127"/></proof>
+ </goal>
+ <goal name="subset_union_2" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="3219"/></proof>
+ </goal>
+ <goal name="subset_inter_1" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="3446"/></proof>
+ </goal>
+ <goal name="subset_inter_2" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="3538"/></proof>
+ </goal>
+ <goal name="subset_diff" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="3775"/></proof>
+ </goal>
+ <goal name="disjoint_inter_empty" proved="true">
+ <proof prover="1"><result status="valid" time="0.06" steps="8440"/></proof>
+ </goal>
+ <goal name="disjoint_diff_eq">
+ </goal>
+ <goal name="disjoint_diff_s2" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="4254"/></proof>
+ </goal>
+ <goal name="subset_filter" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="4810"/></proof>
+ </goal>
+ <goal name="mem_map" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="9632"/></proof>
+ </goal>
+ <goal name="subset_eq">
+ </goal>
+ <goal name="cardinal1" proved="true">
+ <proof prover="1"><result status="valid" time="0.11" steps="12761"/></proof>
+ </goal>
+ <goal name="cardinal_inter_disjoint" proved="true">
+ <proof prover="1"><result status="valid" time="0.04" steps="7586"/></proof>
+ </goal>
+ <goal name="cardinal_filter" proved="true">
+ <proof prover="1"><result status="valid" time="0.06" steps="8517"/></proof>
+ </goal>
+ <goal name="cardinal_map">
+ </goal>
+ <goal name="product&#39;vc" expl="VC for product" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="product&#39;vc.0" expl="variant decrease" proved="true">
+  <proof prover="1"><result status="valid" time="0.04" steps="9127"/></proof>
+  </goal>
+  <goal name="product&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="1"><result status="valid" time="0.22" steps="34503"/></proof>
+  </goal>
+  <goal name="product&#39;vc.2" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="product&#39;vc.2.0" expl="assertion" proved="true">
+   <proof prover="1"><result status="valid" time="0.09" steps="24371"/></proof>
+   </goal>
+   <goal name="product&#39;vc.2.1" expl="VC for product" proved="true">
+   <proof prover="1"><result status="valid" time="1.60" steps="183227"/></proof>
+   </goal>
+   <goal name="product&#39;vc.2.2" expl="VC for product" proved="true">
+   <proof prover="1"><result status="valid" time="0.08" steps="24174"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="product&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="1"><result status="valid" time="0.25" steps="35978"/></proof>
+  </goal>
+  <goal name="product&#39;vc.4" expl="postcondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.02" steps="129"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+<theory name="FsetInduction">
+ <goal name="Induction">
+ </goal>
+</theory>
+<theory name="FsetInt">
+ <goal name="cardinal_interval">
+ </goal>
+</theory>
+<theory name="FsetSum">
+ <goal name="sum_union">
+ </goal>
+ <goal name="sum_eq">
+ </goal>
+</theory>
+<theory name="SetApp" proved="true">
+ <goal name="singleton&#39;vc" expl="VC for singleton" proved="true">
+ <proof prover="1"><result status="valid" time="0.05" steps="12341"/></proof>
+ </goal>
+</theory>
+<theory name="SetAppInt" proved="true">
+ <goal name="eq&#39;refn&#39;vc" expl="VC for eq&#39;refn" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="7055"/></proof>
+ </goal>
+</theory>
+<theory name="SetImp" proved="true">
+ <goal name="singleton&#39;vc" expl="VC for singleton" proved="true">
+ <proof prover="1"><result status="valid" time="0.04" steps="12300"/></proof>
+ </goal>
+</theory>
+<theory name="SetImpInt" proved="true">
+ <goal name="eq&#39;refn&#39;vc" expl="VC for eq&#39;refn" proved="true">
+ <proof prover="1"><result status="valid" time="0.02" steps="7055"/></proof>
+ </goal>
+</theory>
+</file>
+</why3session>
