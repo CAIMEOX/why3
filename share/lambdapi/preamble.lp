@@ -323,34 +323,84 @@ opaque symbol pos_succ_xH : εₜ (pos_succ xH = xO xH)
 
 symbol ind_positive_peano :
    εₜ (`π Q : positive → Type,
-        Q xH ⇒
-        (`∀ p, Q p ⇒ Q (pos_succ p)) ⇒
+       Q xH ⇒
+       (`∀ p, Q p ⇒ Q (pos_succ p)) ⇒
         `∀ p, Q p)
+≔ λ Q qH qS p,
+  ind_positive
+  (λ p, `π P, P xH ⇒ (`∀ x, P x ⇒ P (pos_succ x)) ⇒ P p)
+  (λ q rec_q P pH pS,
+   pS (xO q)
+      (rec_q (λ p, P (xO p)) (pS xH pH)
+             (λ x p2x,
+              pS (pos_succ (xO x)) (pS (xO x) p2x))))
+  (λ q rec_q P pH pS,
+   rec_q (λ p, P (xO p)) (pS xH pH)
+         (λ x p2x,
+          pS (pos_succ (xO x)) (pS (xO x) p2x)))
+  (λ P pH _, pH)
+  p Q qH qS;
+
+symbol ipp_xO Q qH qS p :
+  εₜ (ind_positive_peano Q qH qS (xO p) =
+      ind_positive_peano (λ x, Q (xO x)) (qS xH qH)
+      (λ x q2x, qS (pos_succ (xO x)) (qS (xO x) q2x)) p)
 ≔ begin
   assume Q qH qS p;
-
-  refine ind_positive (λ p, `π P, P xH ⇒ (`∀ x, P x ⇒ P (pos_succ x)) ⇒ P p)
-                 _ _ _ p Q qH qS;
-  assume q rec_q P pH pS;
-  rewrite left pos_succ_xO;
-  refine pS (xO q) _;
-  refine rec_q (λ p, P (xO p)) (pS xH pH) _;
-  assume x p2x;
-  rewrite left pos_succ_xI;
-  refine pS (pos_succ (xO x)) _;
-  refine pS (xO x) p2x;
-
-  assume q rec_q P pH pS;
-  refine rec_q (λ p, P (xO p)) (pS xH pH) _;
-  assume x p2x;
-  rewrite left pos_succ_xI;
-  refine pS (pos_succ (xO x)) _;
-  refine pS (xO x) p2x;
-
-  assume P pH pS;
-  refine pH;
+  reflexivity;
 end;
 
+// TODO: remove this
+symbol ipp_xO' Q qH qS p :
+  εₜ (ind_positive_peano Q qH qS (pos_succ (xI p)) =
+      ind_positive_peano (λ x, Q (xO x)) (qS xH qH)
+      (λ x q2x, qS (pos_succ (xO x)) (qS (xO x) q2x)) (pos_succ p))
+≔ begin
+  assume Q qH qS p;
+  reflexivity;
+end;
+
+symbol ipp_xI Q qH qS p :
+  εₜ (ind_positive_peano Q qH qS (xI p) =
+      qS (xO p) (ind_positive_peano (λ x, Q (xO x)) (qS xH qH)
+      (λ x q2x, qS (pos_succ (xO x)) (qS (xO x) q2x)) p))
+≔ begin
+  assume Q qH qS p;
+  reflexivity;
+end;
+
+// TODO: remove this
+symbol ipp_xI' Q qH qS p :
+  εₜ (ind_positive_peano Q qH qS (pos_succ (xO p)) =
+      qS (xO p) (ind_positive_peano (λ x, Q (xO x)) (qS xH qH)
+      (λ x q2x, qS (pos_succ (xO x)) (qS (xO x) q2x)) p))
+≔ begin
+  assume Q qH qS p;
+  reflexivity;
+end;
+
+symbol rew_ind_peano p Q qH qS :
+  εₜ (ind_positive_peano Q qH qS (pos_succ p) = qS p (ind_positive_peano Q qH qS p))
+≔ begin
+  refine ind_positive
+         (λ p, `π Q, `∀ qH, `∀ qS,
+          ind_positive_peano Q qH qS (pos_succ p) =
+          qS p (ind_positive_peano Q qH qS p))
+         _ _ _;
+
+  assume p prec Q qH qS;
+  rewrite ipp_xO' Q qH qS p;
+  rewrite ipp_xI Q qH qS p;
+  rewrite prec (λ x, Q (xO x)) (qS xH qH) ((λ x q2x, qS (pos_succ (xO x)) (qS (xO x) q2x)));
+  reflexivity;
+
+  assume p prec Q qH qS;
+  rewrite ipp_xI' Q qH qS p;
+  reflexivity;
+
+  assume Q qH qS;
+  reflexivity;
+end;
 
 symbol pos_add_carry ≔
   ind_positive (λ _, Dpositive ⇒ Dboolean ⇒ Dpositive)
