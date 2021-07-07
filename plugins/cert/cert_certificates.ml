@@ -35,7 +35,7 @@ type sc =
   | Rewrite of prsymbol * prsymbol * sc
   | Induction of prsymbol * prsymbol * prsymbol * prsymbol * term *
                    (term Mid.t -> term) * sc * sc
-  | Compute of prsymbol * sc
+  | Reduce of prsymbol * term * sc
 
 type scert = int * (sc list -> sc)
 
@@ -166,9 +166,9 @@ let induction g hi1 hi2 hr x a =
 (* From an integer a and a task with a goal g : t[x] with x being an integer,
    produces two new tasks: one with the added hypothesis hi1 : i ≤ a and the
    other with the added hypotheses hi2 : a < i and hr : ∀ n. n < i → t[n] *)
-let compute p =
-  newcert1 (fun a -> Compute (p, a))
-(* Returns the task where a computation has been done in p *)
+let reduce p t' =
+  newcert1 (fun a -> Reduce (p, t', a))
+(* Returns the task where a computation has been done in p, changing it to t' *)
 
 let llet pr (cont : ident -> scert) : scert =
   let ls = create_psymbol (id_fresh "Let_var") [] in
@@ -310,11 +310,15 @@ type ('v, 'h, 't, 'ty) kc =
    and x and a are of type int *)
 (* In the induction and rewrite rules f is a context and the notation f[t]
    stands for this context where the holes have been replaced with t *)
-  | KCompute of bool * 't * 'h * ('v, 'h, 't, 'ty) kc
-  (* KCompute (false, t, p, c) ⇓ (Γ, p : t ⊢ Δ) ≜ (Γ, p : c(t) ⊢ Δ)
-     KCompute (true, t, p, c)  ⇓ (Γ ⊢ Δ, p : t) ≜ (Γ ⊢ Δ, p : c(t))
-     where c(t) is obtained by doing some computations in t *)
+  | KReduce of bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc
+  (* KReduce (false, t, t', p, c) ⇓ (Γ, p : t ⊢ Δ) ≜
+     c ⇓ (Γ, p : t' ⊢ Δ)
+     and t ≡ t'
+     KReduce (true, t, t', p, c)  ⇓ (Γ ⊢ Δ, p : t) ≜
+     c ⇓ (Γ ⊢ Δ, p : t')
+     and t ≡ t' *)
 
+(* Why3 kernel certificates *)
 type wkc = (lsymbol, prsymbol, term, ty option) kc
 type kcert = (ident, ident, cterm, ctype) kc
 
@@ -359,7 +363,7 @@ and prc fmt c =
   | Induction (p1, p2, p3, p4, x, _, c1, c2) ->
       fprintf fmt "Induction (%a, %a, %a, %a, %a, <fun>,@ %a,@ %a)"
         prpr p1 prpr p2 prpr p3 prpr p4 prt x prc c1 prc c2
-  | Compute (p, c) -> fprintf fmt "Compute@ (%a,@ %a)" prpr p prc c
+  | Reduce (p, t, c) -> fprintf fmt "Reduce@ (%a,@ %a,@ %a)" prpr p prt t prc c
 
 and prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
 and prcertif fmt (n, c) =
@@ -403,7 +407,7 @@ let map_sc fc = function
   | Rewrite (p, h, c) -> Rewrite (p, h, fc c)
   | Induction (p1, p2, p3, p4, x, a, c1, c2) ->
       Induction (p1, p2, p3, p4, x, a, fc c1, fc c2)
-  | Compute (p, c) -> Compute (p, fc c)
+  | Reduce (p, t, c) -> Reduce (p, t, fc c)
 
 (* To define recursive functions on elements of type kc *)
 let map_kc fc fv fh ft fty = function
@@ -444,7 +448,7 @@ let map_kc fc fv fh ft fty = function
       KRewrite (pos, Opt.map ft topt, fty ty, ft t1, ft t2, ft f, fh p, fh h, fc c)
   | KInduction (p1, p2, p3, p4, x, a, f, c1, c2) ->
       KInduction (fh p1, fh p2, fh p3, fh p4, ft x, ft a, ft f, fc c1, fc c2)
-  | KCompute (pos, t, p, c) -> KCompute (pos, ft t, fh p, fc c)
+  | KReduce (pos, t, t', p, c) -> KReduce (pos, ft t, ft t',fh p, fc c)
 
 (** Compile chain.
     1. surface certificates: scert
@@ -709,9 +713,9 @@ let elaborate init_ct c =
                                       (t_replace x n t))),
                               false) in
         KInduction (g, hi1, hi2, hr, x, a, ctxt, elab cta1 c1, elab cta2 c2)
-    | Compute (p, c) ->
-        let t, pos = find_formula "Compute" p cta in
-        KClear (pos, t, p, elab cta c)
+    | Reduce (p, t', c) ->
+        let t, pos = find_formula "Reduce" p cta in
+        KReduce (pos, t, t', p, elab cta c)
   in
   elaborate Mid.empty init_ct c
 
