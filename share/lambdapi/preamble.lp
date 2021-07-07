@@ -326,11 +326,11 @@ symbol ind_positive_peano : εₜ (`π Q : positive → Type,
    pS (xO q)
       (rec_q (λ p, P (xO p)) (pS xH pH)
              (λ x p2x,
-              pS (pos_succ (xO x)) (pS (xO x) p2x))))
+              pS (xI x) (pS (xO x) p2x))))
   (λ q rec_q P pH pS,
    rec_q (λ p, P (xO p)) (pS xH pH)
          (λ x p2x,
-          pS (pos_succ (xO x)) (pS (xO x) p2x)))
+          pS (xI x) (pS (xO x) p2x)))
   (λ P pH _, pH)
   p Q qH qS;
 

@@ -12,8 +12,8 @@ let rec ccheck c cta =
   | KConstruct _ | KDuplicate _ | KFoldArr _
   | KFoldIff _  | KSwapNeg _| KEqSym _ | KEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/SwapNeg/Eq/Let left"
-  | KCompute _ ->
-      verif_failed "Compute is not implemented in the OCaml checker yet"
+  | KReduce _ ->
+      verif_failed "Reduce is not implemented in the OCaml checker yet"
   | KHole cta' -> if not (ctask_equal cta cta')
                   then begin
                       Format.eprintf "@[<v>Conflict of tasks: @ \

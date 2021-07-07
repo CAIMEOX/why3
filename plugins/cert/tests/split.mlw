@@ -5,12 +5,16 @@ predicate d
 
 axiom A : a
 axiom B : b
+axiom C : not c
+axiom D : not d
+
+lemma nnA : not not a
 
 goal G1 : a /\ b
-goal G : a \/ b -> false
-goal G2 : (c /\ (a \/ b)) -> false
-goal G3 : not (a \/ b)
-goal G4 : not (a \/ b) -> false
-goal G5 : not (a -> b)
-goal G6 : not (a -> b) -> false
-goal G7 : not ((a \/ b) /\ (c \/ d))
+goal G2 : c \/ d -> false
+goal G3 : (c /\ (a \/ b)) -> false
+goal G4 : not (c \/ d)
+goal G5 : not (a \/ b) -> false
+goal G6 : not (a -> c)
+goal G7 : not (a -> b) -> false
+goal G8 : not ((a \/ b) /\ (c \/ d))
