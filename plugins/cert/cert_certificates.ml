@@ -527,7 +527,7 @@ let elaborate init_ct c =
             KEqRefl (t1.t_ty, t1, p)
         | Tfalse, false | Ttrue, true ->
             KTrivial (pos, p)
-        | _ -> eprintf "not an equality or not same terms in eqrefl";
+        | _ -> eprintf "not an equality or not same terms in eqrefl@.";
                raise Elaboration_failed end
     | EqSym (p, c) ->
         let t, pos = find_formula "EqSym" p cta in
@@ -536,7 +536,8 @@ let elaborate init_ct c =
             let rev_eq = t_app ps_equ [t2; t1] t.t_ty in
             let cta = add p (rev_eq, pos) cta in
             KEqSym (pos, t1.t_ty, t1, t2, p, elab cta c)
-        | _ -> eprintf "not an equality"; raise Elaboration_failed end
+        | _ -> eprintf "not an equality@.";
+               raise Elaboration_failed end
     | EqTrans (p1, p2, i3, c) ->
         let t1, pos1 = find_formula "EqTrans" p1 cta in
         let t2, pos2 = find_formula "EqTrans" p2 cta in
@@ -547,7 +548,7 @@ let elaborate init_ct c =
             let new_eq = t_app ps_equ [t11; t22] t1.t_ty in
             let cta = add i3 (new_eq, false) cta in
             KEqTrans (t11.t_ty, t11, t12, t22, p1, p2, i3, elab cta c)
-        | _ -> eprintf "wrong hyps form in eqtrans";
+        | _ -> eprintf "wrong hyps form in eqtrans@.";
                raise Elaboration_failed end
     | Assert (p, t, c1, c2) ->
         let t = t map in
@@ -576,7 +577,7 @@ let elaborate init_ct c =
             let unfolded_imp = t_binary Tor (t_not t1) t2, pos in
             let cta = add p unfolded_imp cta in
             KUnfoldArr (pos, t1, t2, p, elab cta c)
-        | _ -> eprintf "Nothing to unfold";
+        | _ -> eprintf "Nothing to unfold@.";
                raise Elaboration_failed end
     | Fold (p, c) ->
         let t, pos = find_formula "Fold" p cta in
@@ -590,7 +591,7 @@ let elaborate init_ct c =
         | Tbinop (Tor, {t_node = Tnot t1}, t2) ->
             let cta = add p (t_binary Timplies t1 t2, pos) cta in
             KFoldArr (pos, t1, t2, p, elab cta c)
-        | _ -> eprintf "Nothing to fold";
+        | _ -> eprintf "Nothing to fold@.";
                raise Elaboration_failed end
     | Split (p, c1, c2) ->
         let t, pos = find_formula "Split" p cta in
@@ -659,7 +660,8 @@ let elaborate init_ct c =
               let cta = add p (t_applied, pos) cta
                         |> add_var ls.ls_name (abstract_otype ty_opt) in
               KIntroQuant (pos, ty_opt, t_fun, p, ls, elab cta c)
-          | _ -> raise Elaboration_failed end
+          | _ -> eprintf "trying to introduce a non-quantified hypothesis@.";
+                 raise Elaboration_failed end
     | InstQuant (p1, p2, t_inst, c) ->
         let t, pos = find_formula "InstQuant" p1 cta in
         begin match t.t_node with
@@ -715,6 +717,7 @@ let elaborate init_ct c =
         KInduction (g, hi1, hi2, hr, x, a, ctxt, elab cta1 c1, elab cta2 c2)
     | Reduce (p, t', c) ->
         let t, pos = find_formula "Reduce" p cta in
+        let cta = add p (t', pos) cta in
         KReduce (pos, t, t', p, elab cta c)
   in
   elaborate Mid.empty init_ct c
