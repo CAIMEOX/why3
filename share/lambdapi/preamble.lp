@@ -6,8 +6,8 @@
 symbol Type : TYPE;
 symbol Kind : TYPE;
 
-symbol tEv : Type → TYPE;
-symbol kEv : Kind → TYPE;
+injective symbol tEv : Type → TYPE;
+injective symbol kEv : Kind → TYPE;
 
 symbol DType : Kind;
 rule kEv DType ↪ Type;
@@ -38,15 +38,6 @@ notation ⇁ infix right 14;
 
 symbol ⇒ A B ≔  ttPi A (λ _, B);
 notation ⇒ infix right 14;
-
-// Help the unification algorithm so that we can use the shallow types
-// inside the deep terms
-
-unif_rule Type ≡ kEv $t ↪ [ $t ≡ DType ];
-unif_rule tEv $a ≡ tEv $b ↪ [ $a ≡ $b ];
-unif_rule kEv $a ≡ kEv $b ↪ [ $a ≡ $b ];
-unif_rule $a → $b ≡ kEv $c ↪ [ $a ≡ tEv $a'; $b ≡ kEv $b'; $c ≡ $a' ⇁ $b' ];
-unif_rule $a → $b ≡ tEv $c ↪ [ $a ≡ tEv $a'; $b ≡ tEv $b'; $c ≡ $a' ⇒ $b' ];
 
 // To use the inductive notation
 
@@ -2169,11 +2160,11 @@ symbol case u bound : tEv (u ≤ bound) → tEv (bound = u ∨ u < bound)
 ≔ begin
   assume u z luz;
   refine ind_comparison (λ c, compare u z = c ⇒ z = u ∨ u < z) _ _ _ (compare u z) _;
-  assume euz; refine or_intro_1 _ _ _;
+  assume euz; refine or_intro_1 (z = u) (u < z) _;
   symmetry;
   refine c_decides u z euz;
 
-  assume ltuz; refine or_intro_2 _ _ _;
+  assume ltuz; refine or_intro_2 (z = u) (u < z) _;
   refine eq_True_is_True (ltb u z) _;
   refine ltb_lt u z ltuz;
 
@@ -2392,7 +2383,7 @@ notation ∙ infix right 13;
 symbol ⊧  : kEv (ListDType ⇀ ListDType ⇀ DType);
 notation ⊧ infix 12;
 
-symbol ⟹  ≔ ⇒;
+symbol ⟹  ≔ @⇒;
 notation ⟹  infix right 11;
 
 rule $A ∙ $B ⊧ $C ↪ $A ⟹  $B ⊧ $C

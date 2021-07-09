@@ -21,12 +21,14 @@ Z3, CVC4 and Alt-Ergo.
 
 In any case, do:
 ```shell
-bin/why3 config --detect
+bin/why3 config detect
 ```
 
 To use the Lambdapi-checked transformations, you should have `lambdapi` in your
 PATH. To that end, follow the instructions from the [project
-repository](https://github.com/Deducteam/lambdapi).
+repository](https://github.com/Deducteam/lambdapi). The project has been tested
+to work with [commit
+`846f91f0dad7097206fb4796451b3db1a65f41a0`.](https://github.com/Deducteam/lambdapi/commit/846f91f0dad7097206fb4796451b3db1a65f41a0)
 
 
 Usage
