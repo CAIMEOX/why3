@@ -31,7 +31,7 @@ let print_decl fmt id cty =
 let encode_neg (ct, pos) = if pos then CTnot ct else ct
 
 let print_task_type fmt {types; sigma; gamma_delta} =
-  fprintf fmt "εₜ (@[<hv>";
+  fprintf fmt "@<6>%s@[<hv>" "  εₜ (";
   Sid.iter (fun id -> print_decl fmt id CTprop) types;
   Mid.iter (print_decl fmt) sigma;
   Mid.iter (fun _ tp -> fprintf fmt "%a ⇒@ "
@@ -156,9 +156,9 @@ let print fmt init res certif =
   fprintf fmt "@[<v>require open cert_lambdapi.preamble;@ @ \
                symbol to_verify :@ \
                @[<v>%a@]@ \
-               @<3>%s@[<v>%a@]@];@."
+               @<2>%s@[<v>%a@]@];@."
     p_type ()
-    "≔  "
+    "≔ "
     p_term ()
 
 
