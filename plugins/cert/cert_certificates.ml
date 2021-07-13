@@ -145,7 +145,7 @@ let swap p = newcert1 (fun a -> Swap (p, a))
 let clear p = newcert1 (fun a -> Clear (p, a))
 (* Removes a premise p from the task *)
 let forget ls = newcert1 (fun a -> Forget (ls, a))
-(* Removes an unused abstract type ls from the task *)
+(* Removes an unused variable ls from the task *)
 let duplicate p1 p2 =
   assert (not (pr_equal p1 p2));
   newcert1 (fun a -> Duplicate (p1, p2, a))
