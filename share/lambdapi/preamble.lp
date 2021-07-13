@@ -2167,15 +2167,15 @@ end;
 symbol UnfoldArrGoal A B H s ≔ UnfoldArrGoal' A B s H;
 
 symbol SwapHyp' A : εₜ (
-  ∅ ⊧ ¬ A ∙ ∅ ⟹
-  A ∙ ∅ ⊧ ∅)
-≔ λ nnna, from_nn (¬ A) nnna;
+  ∅ ⊧ A ∙ ∅ ⟹
+  ¬ A ∙ ∅ ⊧ ∅)
+≔ λ s, s;
 symbol SwapHyp A H s ≔ SwapHyp' A s H;
 
 symbol SwapGoal' A : εₜ (
-  ¬ A ∙ ∅ ⊧ ∅ ⟹
-  ∅ ⊧ A ∙ ∅)
-≔ λ s, s;
+  A ∙ ∅ ⊧ ∅ ⟹
+  ∅ ⊧ ¬ A ∙ ∅)
+≔ λ na, to_nn (¬ A) na;
 symbol SwapGoal A H s ≔ SwapGoal' A s H;
 
 symbol DestructHyp' A B : εₜ (

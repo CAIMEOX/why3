@@ -48,7 +48,7 @@ let print_certif fmt c =
   let rstr pos = if pos then "Goal" else "Hyp" in
   let rec pc fmt = function
   | KConstruct _ | KDuplicate _ | KFoldArr _
-  | KFoldIff _  | KSwapNeg _| KEqSym _ | KEqTrans _ ->
+  | KFoldIff _  | KSwapNegate _| KEqSym _ | KEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/SwapNeg/Eq/Let left"
   | KReduce (_, _, _, _, c) ->
       pc fmt c
