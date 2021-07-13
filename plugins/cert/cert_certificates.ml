@@ -141,7 +141,7 @@ let construct p1 p2 p = newcert1 (fun a -> Construct (p1, p2, p, a))
    with hypothesis p : t₁ ∧ t₂ (resp. goal p : t₁ ∨ t₂) *)
 let swap p = newcert1 (fun a -> Swap (p, a))
 (* Puts an hypothesis (resp. a goal) into the goals (resp. the hypotheses),
-   by negating it, removing a double negation after that *)
+   by negating it, then potentially removing a double negation *)
 let clear p = newcert1 (fun a -> Clear (p, a))
 (* Removes a premise p from the task *)
 let forget ls = newcert1 (fun a -> Forget (ls, a))
@@ -235,9 +235,9 @@ type ('v, 'h, 't, 'ty) kc =
   (* KTrivial (false, p) ⇓ (Γ, p : ⊥ ⊢ Δ) stands *)
   (* KTrivial (true, p) ⇓ (Γ ⊢ Δ, p : ⊤) stands *)
   | KSwap of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
-  (* KSwap (false, t, p, c) ⇓ (Γ, p : t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, p : ¬t) *)
-  (* KSwap (true, t, p, c) ⇓ (Γ ⊢ Δ, p : t) ≜ c ⇓ (Γ, p : ¬t ⊢ Δ) *)
-  | KSwapNeg of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  (* KSwap (false, t, p, c) ⇓ (Γ, p : ¬t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, p : t) *)
+  (* KSwap (true, t, p, c) ⇓ (Γ ⊢ Δ, p : ¬t) ≜ c ⇓ (Γ, p : t ⊢ Δ) *)
+  | KSwapNegate of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* not kernel *)
   | KUnfoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
   (* KUnfoldIff (false, t₁, t₂, p, c) ⇓ (Γ, p : t₁ ↔ t₂ ⊢ Δ) ≜
@@ -436,7 +436,7 @@ let map_kc fc fv fh ft fty = function
   | KConstruct (pos, t1, t2, p1, p2, j, c) ->
       KConstruct (pos, ft t1, ft t2, fh p1, fh p2, fh j, fc c)
   | KSwap (pos, t, p, c) -> KSwap (pos, ft t, fh p, fc c)
-  | KSwapNeg (pos, t, p, c) -> KSwapNeg (pos, ft t, fh p, fc c)
+  | KSwapNegate (pos, t, p, c) -> KSwapNegate (pos, ft t, fh p, fc c)
   | KClear (pos, t, p, c) -> KClear (pos, ft t, fh p, fc c)
   | KForget (p, c) -> KForget (fv p, fc c)
   | KDuplicate (pos, t, p1, p2, c) -> KDuplicate (pos, ft t, fh p1, fh p2, fc c)
@@ -629,13 +629,13 @@ let elaborate init_ct c =
         KConstruct (pos1, t1, t2, p1, p2, p, elab cta c)
     | Swap (p, c) ->
         let t, pos = find_formula "Swap" p cta in
-        let neg, underlying_t, neg_t = match t.t_node with
-          | Tnot t -> true, t, t
-          | _ -> false, t, t_not t in
+        let negate, underlying_t, neg_t = match t.t_node with
+          | Tnot t -> false, t, t
+          | _ -> true, t, t_not t in
         let cta = add p (neg_t, not pos) cta in
         let pack = pos, underlying_t, p, elab cta c in
-        if neg
-        then KSwapNeg pack
+        if negate
+        then KSwapNegate pack
         else KSwap pack
     | Clear (p, c) ->
         let t, pos = find_formula "Clear" p cta in
@@ -742,15 +742,15 @@ let krename pos t p1 p2 c =
 (* krename true t p₁ p₂ c ⇓ (Γ ⊢ Δ, p₁ : t) ≜ c ⇓ (Γ ⊢ Δ, p₂ : t) *)
 (* krename false t p₁ p₂ c ⇓ (Γ, p₁ : t ⊢ Δ) ≜ c ⇓ (Γ, p₂ : t ⊢ Δ) *)
 
-let kswapneg pos t p c =
+let kswapnegate pos t p c =
   let q = id_register (id_fresh "q") in
-  let c_closed = KSwap (pos, t, p, kaxiom pos (CTnot t) p q) in
-  let c_open = KClear (pos, CTnot t, q, c) in
+  let c_closed = KSwap (pos, t, p, kaxiom pos t p q) in
+  let c_open = KClear (pos, t, q, c) in
   let c1, c2 = if pos then c_closed, c_open else c_open, c_closed in
-  krename pos (CTnot t) p q @@
-    KAssert (p, t, c1, c2)
-(* kswapneg false t p c ⇓ (Γ, p : ¬ t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, p : t)  *)
-(* kswapneg true t i c ⇓ (Γ ⊢ Δ, p : ¬ t) ≜ c ⇓ (Γ, p : t ⊢ Δ)  *)
+  krename pos t p q @@
+    KAssert (p, CTnot t, c1, c2)
+(* kswapneg false t p c ⇓ (Γ, p : t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, p : ¬t)  *)
+(* kswapneg true t i c ⇓ (Γ ⊢ Δ, p : t) ≜ c ⇓ (Γ, p : ¬t ⊢ Δ)  *)
 
 let kconstruct pos t1 t2 p1 p2 p c =
   let p1' = id_register (id_fresh "p1") in
@@ -775,9 +775,9 @@ let rec trim c =
   | KDuplicate (pos, t, p1, p2, c) ->
       let c = trim c in
       kduplicate pos t p1 p2 c
-  | KSwapNeg (pos, t, p, c) ->
+  | KSwapNegate (pos, t, p, c) ->
       let c = trim c in
-      kswapneg pos t p c
+      kswapnegate pos t p c
   | KConstruct (pos, t1, t2, p1, p2, p, c) ->
       let c = trim c in
       kconstruct pos t1 t2 p1 p2 p c

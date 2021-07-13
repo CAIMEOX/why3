@@ -10,7 +10,7 @@ open Cert_certificates
 let rec ccheck c cta =
   match c with
   | KConstruct _ | KDuplicate _ | KFoldArr _
-  | KFoldIff _  | KSwapNeg _| KEqSym _ | KEqTrans _ ->
+  | KFoldIff _  | KSwapNegate _| KEqSym _ | KEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/SwapNeg/Eq/Let left"
   | KReduce _ ->
       verif_failed "Reduce is not implemented in the OCaml checker yet"
@@ -87,9 +87,12 @@ let rec ccheck c cta =
       | _ -> verif_failed "Nothing to unfold" end
   | KSwap (_, _, i, c) ->
       let t, pos = find_formula "Swap" i cta in
-      let neg_t = CTnot t in
-      let cta = add i (neg_t, not pos) cta in
-      ccheck c cta
+      begin match t with
+      | CTnot t ->
+          let cta = add i (t, not pos) cta in
+          ccheck c cta
+      | _ -> verif_failed "Not a negation"
+      end
   | KDestruct (_, _, _, i, j1, j2, c) ->
       let t, pos = find_formula "destruct" i cta in
       begin match t, pos with

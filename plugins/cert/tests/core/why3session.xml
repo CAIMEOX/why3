@@ -319,11 +319,11 @@
   </goal>
  </transf>
  </goal>
- <goal name="swap_neg_neg_hyp" proved="true">
+ <goal name="swap_hyp" proved="true">
  <transf name="intro_ccert" proved="true" >
-  <goal name="swap_neg_neg_hyp.0" proved="true">
+  <goal name="swap_hyp.0" proved="true">
   <transf name="swap_ccert" proved="true" arg1="in" arg2="H">
-   <goal name="swap_neg_neg_hyp.0.0" proved="true">
+   <goal name="swap_hyp.0.0" proved="true">
    <transf name="assumption_ccert" proved="true" >
    </transf>
    </goal>
@@ -331,9 +331,9 @@
   </goal>
  </transf>
  <transf name="intro_lcert" proved="true" >
-  <goal name="swap_neg_neg_hyp.0" proved="true">
+  <goal name="swap_hyp.0" proved="true">
   <transf name="swap_lcert" proved="true" arg1="in" arg2="H">
-   <goal name="swap_neg_neg_hyp.0.0" proved="true">
+   <goal name="swap_hyp.0.0" proved="true">
    <transf name="assumption_lcert" proved="true" >
    </transf>
    </goal>
@@ -341,28 +341,24 @@
   </goal>
  </transf>
  </goal>
- <goal name="exfalso" proved="true">
+ <goal name="swap_goal" proved="true">
  <transf name="intro_ccert" proved="true" >
-  <goal name="exfalso.0" proved="true">
+  <goal name="swap_goal.0" proved="true">
   <transf name="exfalso_ccert" proved="true" >
-   <goal name="exfalso.0.0" proved="true">
+   <goal name="swap_goal.0.0" proved="true">
    <transf name="assumption_ccert" proved="true" >
    </transf>
    </goal>
   </transf>
   </goal>
  </transf>
- </goal>
- <goal name="swap_neg_neg_goal" proved="true">
- <transf name="intro_ccert" proved="true" >
-  <goal name="swap_neg_neg_goal.0" proved="true">
-  <transf name="swap_ccert" proved="true" >
-  </transf>
-  </goal>
- </transf>
  <transf name="intro_lcert" proved="true" >
-  <goal name="swap_neg_neg_goal.0" proved="true">
-  <transf name="swap_lcert" proved="true" >
+  <goal name="swap_goal.0" proved="true">
+  <transf name="exfalso_lcert" proved="true" >
+   <goal name="swap_goal.0.0" proved="true">
+   <transf name="assumption_lcert" proved="true" >
+   </transf>
+   </goal>
   </transf>
   </goal>
  </transf>
@@ -371,7 +367,21 @@
  <transf name="intro_ccert" proved="true" >
   <goal name="swap_neg_goal.0" proved="true">
   <transf name="swap_ccert" proved="true" >
-   <goal name="swap_neg_goal.0.0" proved="true">
+  </transf>
+  </goal>
+ </transf>
+ <transf name="intro_lcert" proved="true" >
+  <goal name="swap_neg_goal.0" proved="true">
+  <transf name="swap_lcert" proved="true" >
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="swap_goal_negate" proved="true">
+ <transf name="intro_ccert" proved="true" >
+  <goal name="swap_goal_negate.0" proved="true">
+  <transf name="swap_ccert" proved="true" >
+   <goal name="swap_goal_negate.0.0" proved="true">
    <transf name="assumption_ccert" proved="true" >
    </transf>
    </goal>
@@ -379,9 +389,9 @@
   </goal>
  </transf>
  <transf name="intro_lcert" proved="true" >
-  <goal name="swap_neg_goal.0" proved="true">
+  <goal name="swap_goal_negate.0" proved="true">
   <transf name="swap_lcert" proved="true" >
-   <goal name="swap_neg_goal.0.0" proved="true">
+   <goal name="swap_goal_negate.0.0" proved="true">
    <transf name="assumption_lcert" proved="true" >
    </transf>
    </goal>
