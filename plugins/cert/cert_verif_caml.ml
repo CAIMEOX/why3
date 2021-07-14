@@ -1,5 +1,6 @@
 open Why3
 open Ident
+open Ty
 open Term (* only for binop *)
 
 open Cert_syntax
@@ -7,7 +8,7 @@ open Cert_certificates
 
 (* This is the main verification function : <ccheck> replays the certificate on
    a ctask *)
-let rec ccheck c cta =
+let rec ccheck (c : kcert) cta =
   match c with
   | KDuplicate _ | KFoldArr _
   | KFoldIff _  | KSwapNegate _| KEqSym _ | KEqTrans _ ->
@@ -130,6 +131,18 @@ let rec ccheck c cta =
           ccheck c cta
       | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
       end
+  | KIntroType (_, p, lts, c) ->
+      let t, pos = find_formula "KIntroType" p cta in
+      begin match t, pos with
+      | CTqtype (alphas, ct), true when List.length alphas = List.length lts ->
+          let lty = List.map (fun ts -> CTyapp (ts, [])) lts in
+          let subst = Mtv.of_list (List.combine alphas lty) in
+          let nt = ct_ty_subst subst ct in
+          let cta = List.fold_left (fun cta ts -> add_type ts.ts_name cta) cta lts in
+          let cta = add p (nt, pos) cta in
+          ccheck c cta
+      | _ -> verif_failed "Can't introduce a type variable here" end
+  | KInstType _ -> verif_failed "TODO"
   | KRewrite (_, is_eq, cty, _, _, ctxt, i1, i2, c) ->
       let a, b = match find_formula "rew" i1 cta, is_eq with
         | (CTbinop (Tiff, a, b), false), Some _ -> a, b

@@ -2241,6 +2241,12 @@ symbol InstQuantGoal' T (P : εₜ T → Type) t : εₜ (
 end;
 symbol InstQuantGoal {T} P t H s ≔ InstQuantGoal' T P t s H;
 
+symbol IntroType' (P : Type → Type) : εₜ (
+  (`π ι, ∅ ⊧ P ι ∙ ∅) ⟹
+  ∅ ⊧ (`π ι, P ι) ∙ ∅)
+≔ λ s nfp, nfp (λ t, from_nn (P t) (s t));
+symbol IntroType P H s ≔ IntroType' P s H;
+
 symbol RewriteHyp' T a b (P : εₜ T → Type) : εₜ (
   a = b ∙ P b ∙ ∅ ⊧ ∅ ⟹
   a = b ∙ P a ∙ ∅ ⊧ ∅)

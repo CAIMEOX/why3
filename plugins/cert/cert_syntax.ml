@@ -21,7 +21,7 @@ type cquant = CTforall | CTexists | CTlambda
 type ctype =
   | CTyvar of tvsymbol (* type variable *)
   | CTprop (* type of formulas *)
-  | CTyapp of tysymbol * ctype list (* (possibly) applied type constant *)
+  | CTyapp of tysymbol * ctype list (* (possibly) applied type symbol *)
   | CTarrow of ctype * ctype (* arrow type *)
 
 (* Interpreted types *)
@@ -41,10 +41,6 @@ let rec cty_equal ty1 ty2 = match ty1, ty2 with
       cty_equal f1 f2 && cty_equal a1 a2
   | (CTyvar _ | CTyapp _ | CTarrow _ | CTprop), _ -> false
 
-let sorted_vars s =
-  let compare tv1 tv2 = compare tv1.tv_name.id_string tv2.tv_name.id_string in
-  List.sort compare (Stv.elements s)
-
 let rec find_vars = function
   | CTyvar tv -> Stv.singleton tv
   | CTprop -> Stv.empty
@@ -54,11 +50,7 @@ let rec find_vars = function
   | CTarrow (ty1, ty2) ->
       Stv.union (find_vars ty1) (find_vars ty2)
 
-let create_subst ltv lty =
-  let add subst tv ty = Mtv.add tv ty subst in
-  List.fold_left2 add Mtv.empty ltv lty
-
-(* Warning: beware variable capture *)
+(* Beware variable capture when substituting types *)
 let rec cty_ty_subst subst = function
   | CTyvar tv' when Mtv.mem tv' subst -> Mtv.find tv' subst
   | CTarrow (cty1, cty2) ->
@@ -70,15 +62,15 @@ let rec cty_ty_subst subst = function
 let comparing_substs l1 l2 =
   let new_ctyvar _ = CTyvar (create_tvsymbol (id_fresh "dummy_comparing_substs")) in
   let lty = List.map new_ctyvar l1 in
-  let subst1 = create_subst l1 lty in
-  let subst2 = create_subst l2 lty in
+  let subst1 = Mtv.of_list (List.combine l1 lty) in
+  let subst2 = Mtv.of_list (List.combine l2 lty) in
   subst1, subst2
 
-(* Equality modulo α-conversion (only used for task equality) *)
+(* Equality of types modulo α-conversion (only used for task equality) *)
 let cty_same ty1 ty2 =
   try
-    let ltv1 = sorted_vars (find_vars ty1) in
-    let ltv2 = sorted_vars (find_vars ty2) in
+    let ltv1 = Stv.elements (find_vars ty1) in
+    let ltv2 = Stv.elements (find_vars ty2) in
     let subst1, subst2 = comparing_substs ltv1 ltv2 in
     let ty1 = cty_ty_subst subst1 ty1 in
     let ty2 = cty_ty_subst subst2 ty2 in
@@ -90,9 +82,8 @@ let rec is_predicate = function
   | CTarrow (_, ct) -> is_predicate ct
   | _ -> false
 
-
 (* We define two printers, <hip> for premises, <ip> for everything else. This is
-   needed because the logical definitions (via Dlogic) use the same ident for
+   needed because the logical definitions (via Dlogic) uses the same ident for
    the defined symbol and for its axiom's name. *)
 let san =
   let lower_h c = if c = 'H' then "h" else char_to_alnum c in
@@ -166,22 +157,20 @@ let prdty fmt ty =
 let prdty_paren fmt ty =
   pred_pty (is_predicate ty) fmt ty
 
-
 type cterm =
+  | CTqtype of tvsymbol list * cterm (* type quantifier binding, assumed to only
+                                        be in prenex form, written Π *)
   | CTbvar of int (* bound variables use De Bruijn indices *)
-  | CTfvar of ident * ctype list
-  (* free variables use a name and a list of types it is applied to *)
+  | CTfvar of ident * ctype list (* free variables use a name and a list of
+                                    types it is applied to *)
   | CTint of BigInt.t
   | CTapp of cterm * cterm (* binary application *)
-  | CTbinop of binop * cterm * cterm
-  (* application of a binary operator, written ∧, ∨, ⇒ and ⇔ *)
-  | CTquant of cquant * ctype * cterm
-  (* quantifier bindings, written ∃, ∀ and λ *)
-  | CTqtype of tvsymbol list * cterm
-  (* type quantifier binding, assumed to only be in prenex form, written Π *)
-  | CTnot of cterm (* négation, written ¬ *)
-  | CTtrue (* true formula, written ⊤ *)
-  | CTfalse (* false formula, written ⊥ *)
+  | CTbinop of binop * cterm * cterm (* application of a binary operator,
+                                        written ∧, ∨, ⇒ and ⇔ *)
+  | CTquant of cquant * ctype * cterm (* quantifier bindings: ∃, ∀ and λ *)
+  | CTnot of cterm (* négation: ¬ *)
+  | CTtrue (* true formula: ⊤ *)
+  | CTfalse (* false formula: ⊥ *)
 
 (* Interpreted terms *)
 let id_eq = ps_equ.ls_name
@@ -550,8 +539,8 @@ let infer_type cta t =
     | CTfvar (v, l) ->
         begin match Mid.find_opt v sigma with
         | Some ty ->
-            let formal_l = sorted_vars (find_vars ty) in
-            let subst = create_subst formal_l l in
+            let formal_l = Stv.elements (find_vars ty) in
+            let subst = Mtv.of_list (List.combine formal_l l) in
             cty_ty_subst subst ty
         | None -> failwith "Can't find variable in sigma" end
     | CTbvar _ -> failwith "unbound variable"
@@ -608,9 +597,6 @@ let instantiate_safe cta f a =
       ct_open f a
   | _ -> assert false
 
-
 (** We instrument existing transformations to produce a certificate *)
 
 type 'certif ctransformation = (task list * 'certif) Trans.trans
-
-

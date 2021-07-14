@@ -31,6 +31,8 @@ type sc =
   | Duplicate of prsymbol * prsymbol * sc
   | IntroQuant of prsymbol * lsymbol * sc
   | InstQuant of prsymbol * prsymbol * term * sc
+  | IntroType of prsymbol * tysymbol list * sc
+  | InstType of prsymbol * prsymbol * ty list * sc
   | Rewrite of prsymbol * prsymbol * sc
   | Induction of prsymbol * prsymbol * prsymbol * prsymbol * term *
                    term * sc * sc
@@ -153,6 +155,12 @@ let instquant p1 p2 t = newcert1 (fun a -> InstQuant (p1, p2, t, a))
 (* From a term t of type τ and a task with hypothesis p₁ : ∀ x : τ. q
    (resp. goal p₁ : ∃ x. q), produces a new task with the variable y of
    type τ and the added hypothesis (resp. goal) p₂ : q[x ↦ t] *)
+let introtype p il = newcert1 (fun a -> IntroType (p, il, a))
+(* From a list of fresh type symbols [ι₁; …; ιₙ] and a task with goal p : Π α₁ … αₙ. t
+   it produces a new task with the goal p modified as t[α₁ ↦ ι₁]…[αₙ ↦ ιₙ] *)
+let insttype p1 p2 tyl t = newcert1 (fun a -> InstType (p1, p2, tyl, a))
+(* From a list of types [τ₁; …; τₙ] and a task with hypothesis p₁ : p₁ : Π α₁ … αₙ. t
+   it produces a new task with the added hypothesis p₂ : p₂ : t[α₁ ↦ τ₁]…[αₙ ↦ τₙ] *)
 let rewrite h p = newcert1 (fun a -> Rewrite (h, p, a))
 (* From a task with hypothesis h : t₁ = t₂ and premise p : t[t₁],
    produces the tasks with p modified into p : t[t₂] *)
@@ -217,83 +225,95 @@ type ctrans = scert ctransformation
    For more details, take a look at the OCaml implementation
    <Cert_verif_caml.ccheck>. *)
 
-(* ('v, 'h, 't, 'ty) kc is the type of kernel certificates, where:
-   • 'v is used for variables
-   • 'h is used for premise names
-   • 't is used for terms
-   • 'ty is used for types *)
-type ('v, 'h, 't, 'ty) kc =
+(* ('ts, 'v, 'ty, 'h, 't) kc is the type of kernel certificates, where:
+   • 'ts is used for type symbols (LHS of I declarations)
+   • 'v is used for variables (LHS of Σ declarations)
+   • 'ty is used for types (RHS of Σ declarations)
+   • 'h is used for premise names (LHS of Γ and Δ declarations)
+   • 't is used for terms and formulas (RHS of Γ and Δ declarations)
+*)
+type ('ts, 'v, 'ty, 'h, 't) kc =
   | KHole of cterm ctask
   (* KHole cta ⇓ cta stands *)
-  | KClear of bool * 't * 'h * ('v, 'h, 't, 'ty) kc
+  | KClear of bool * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc
   (* KClear (true, t, p, c) ⇓ (Γ ⊢ Δ, p : t) ≜ c ⇓ (Γ ⊢ Δ) *)
   (* KClear (false, t, p, c) ⇓ (Γ, p : t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ) *)
-  | KDuplicate of bool * 't * 'h * 'h * ('v, 'h, 't, 'ty) kc
+  | KDuplicate of bool * 't * 'h * 'h * ('ts, 'v, 'ty, 'h, 't) kc
   (* not kernel *)
-  | KForget of 'v * ('v, 'h, 't, 'ty) kc
+  | KForget of 'v * ('ts, 'v, 'ty, 'h, 't) kc
   (* KForget (v, c) ⇓ (Σ, v : τ | Γ ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ) *)
-  | KAssert of 'h * 't * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
+  | KAssert of 'h * 't * ('ts, 'v, 'ty, 'h, 't) kc * ('ts, 'v, 'ty, 'h, 't) kc
   (* KAssert (p, t, c₁, c₂) ⇓ (Γ ⊢ Δ) ≜
      c₁ ⇓ (Γ ⊢ Δ, p : t) and
      c₂ ⇓ (Γ, p : t ⊢ Δ) *)
   | KAxiom of 't * 'h * 'h
-  (* KAxiom (t, p₁, p2) ⇓ (Γ, p₁ : t ⊢ Δ, p₂ : t) stands *)
+  (* KAxiom (t, p₁, p₂) ⇓ (Γ, p₁ : t ⊢ Δ, p₂ : t) stands *)
   | KTrivial of bool * 'h
   (* KTrivial (false, p) ⇓ (Γ, p : ⊥ ⊢ Δ) stands *)
   (* KTrivial (true, p) ⇓ (Γ ⊢ Δ, p : ⊤) stands *)
-  | KSwap of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  | KSwap of (bool * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc)
   (* KSwap (false, t, p, c) ⇓ (Γ, p : ¬t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, p : t) *)
   (* KSwap (true, t, p, c) ⇓ (Γ ⊢ Δ, p : ¬t) ≜ c ⇓ (Γ, p : t ⊢ Δ) *)
-  | KSwapNegate of (bool * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  | KSwapNegate of (bool * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc)
   (* not kernel *)
-  | KUnfoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  | KUnfoldIff of (bool * 't * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc)
   (* KUnfoldIff (false, t₁, t₂, p, c) ⇓ (Γ, p : t₁ ↔ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, p : (t₁ → t₂) ∧ (t₂ → t₁) ⊢ Δ) *)
   (* KUnfoldIff (true, t₁, t₂, p, c) ⇓ (Γ ⊢ Δ, p : t₁ ↔ t₂) ≜
      c ⇓ (Γ ⊢ Δ, p : (t₁ → t₂) ∧ (t₂ → t₁)) *)
-  | KUnfoldArr of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  | KUnfoldArr of (bool * 't * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc)
   (* KUnfoldArr (false, t₁, t₂, p, c) ⇓ (Γ, p : t₁ → t₂ ⊢ Δ) ≜
      c ⇓ (Γ, p : ¬t₁ ∨ t₂ ⊢ Δ)*)
   (* KUnfoldArr (true, t₁, t₂, p, c) ⇓ (Γ ⊢ Δ, p : t₁ → t₂) ≜
      c ⇓ (Γ ⊢ Δ, p : ¬t₁ ∨ t₂)*)
-  | KFoldIff of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  | KFoldIff of (bool * 't * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc)
   (* not kernel *)
-  | KFoldArr of (bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc)
+  | KFoldArr of (bool * 't * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc)
   (* not kernel *)
-  | KSplit of bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
+  | KSplit of bool * 't * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc * ('ts, 'v, 'ty, 'h, 't) kc
   (* KSplit (false, t₁, t₂, p, c₁, c₂) ⇓ (Γ, p : t₁ ∨ t₂ ⊢ Δ) ≜
      c₁ ⇓ (Γ, p : t₁ ⊢ Δ) and
      c₂ ⇓ (Γ, p : t₂ ⊢ Δ) *)
   (* KSplit (true, t₁, t₂, p, c₁, c₂) ⇓ (Γ ⊢ Δ, p : t₁ ∧ t₂) ≜
      c₁ ⇓ (Γ ⊢ Δ, p : t₁) and
      c₂ ⇓ (Γ ⊢ Δ, p : t₂) *)
-  | KDestruct of bool * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
+  | KDestruct of bool * 't * 't * 'h * 'h * 'h * ('ts, 'v, 'ty, 'h, 't) kc
   (* KDestruct (false, t₁, t₂, p, p₁, p₂, c) ⇓ (Γ, p : t₁ ∧ t₂ ⊢ Δ) ≜
      c ⇓ (Γ, p₁ : t₁, p₂ : t₂ ⊢ Δ) *)
   (* KDestruct (true, t₁, t₂, p, p₁, p₂, c) ⇓ (Γ ⊢ Δ, p : t₁ ∨ t₂) ≜
      c ⇓ (Γ ⊢ Δ, p₁ : t₁, p₂ : t₂) *)
-  | KIntroQuant of bool * 'ty * 't * 'h * 'v * ('v, 'h, 't, 'ty) kc
+  | KIntroQuant of bool * 'ty * 't * 'h * 'v * ('ts, 'v, 'ty, 'h, 't) kc
   (* KIntroQuant (false, τ, f, p, y, c) ⇓ (Σ | Γ, p : ∃ x : τ. f ⊢ Δ) ≜
      c ⇓ (Σ, y : τ | Γ, p : f[x ↦ y] ⊢ Δ)
      and y ∉ Σ *)
   (* KIntroQuant (true, τ, f, p, y, c) ⇓ (Σ | Γ ⊢ Δ, p : ∀ x : τ. f) ≜
      c ⇓ (Σ, y : τ | Γ ⊢ Δ, p : f[x ↦ y])
      and y ∉ Σ *)
-  | KInstQuant of bool * 'ty * 't * 'h * 'h * 't * ('v, 'h, 't, 'ty) kc
+  | KInstQuant of bool * 'ty * 't * 'h * 'h * 't * ('ts, 'v, 'ty, 'h, 't) kc
   (* KInstQuant (false, τ, f, p₁, p₂, t, c) ⇓ (Σ | Γ, p₁ : ∀ x : τ. f ⊢ Δ) ≜
      c ⇓ (Σ | Γ, p₁ : ∀ x : τ. f, p₂ : f[x ↦ t] ⊢ Δ)
      and Σ ⊩ t : τ *)
   (* KInstQuant (true, τ, f, p₁, p₂, t, c) ⇓ (Σ | Γ ⊢ Δ, p₁ : ∃ x : τ. f) ≜
      c ⇓ (Σ | Γ ⊢ Δ, p₁ : ∃ x : τ. f, p₂ : f[x ↦ t])
      and Σ ⊩ t : τ *)
+  | KIntroType of 't * 'h * 'ts list * ('ts, 'v, 'ty, 'h, 't) kc
+  (* KIntroType (Π α₁ … αₙ. t, p, [ι₁; …; ιₙ], c) ⇓
+     (I | Σ | Γ ⊢ Δ, p : Π α₁ … αₙ. t) ≜
+     c ⇓ (I, ι₁ : 0, …, ιₙ : 0 | Σ | Γ ⊢ Δ, p : t[α₁ ↦ ι₁]…[αₙ ↦ ιₙ])
+     and for all i, ιᵢ ∉ I *)
+  | KInstType of 't * 'h * 'h * 'ty list * ('ts, 'v, 'ty, 'h, 't) kc
+  (* KInstType (Π α₁ … αₙ. t, p₁, p₂, [τ₁; …; τₙ], c) ⇓
+     (Γ, p₁ : Π α₁ … αₙ. t ⊢ Δ) ≜
+     c ⇓ (Γ, p₁ : Π α₁ … αₙ. t, p₂ : t[α₁ ↦ τ₁]…[αₙ ↦ τₙ] ⊢ Δ)
+     and τ has no type variables *)
   | KEqRefl of 'ty * 't * 'h
   (* KEqRefl (τ, t, g) ⇓ (Γ ⊢ Δ, g : t = t) stands *)
-  | KEqSym of bool * 'ty * 't * 't * 'h * ('v, 'h, 't, 'ty) kc
+  | KEqSym of bool * 'ty * 't * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc
   (* not kernel *)
-  | KEqTrans of 'ty * 't * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
+  | KEqTrans of 'ty * 't * 't * 't * 'h * 'h * 'h * ('ts, 'v, 'ty, 'h, 't) kc
   (* not kernel *)
   | KRewrite of bool * 't option * 'ty * 't * 't * 't * 'h * 'h
-                * ('v, 'h, 't, 'ty) kc
+                * ('ts, 'v, 'ty, 'h, 't) kc
   (* KRewrite (true, None, τ, t₁, t₂, f, h, p, c) ⇓
      (Γ, h : t₁ = t₂ ⊢ Δ, p : f[t₁]) ≜
      c ⇓ (Γ, h : t₁ = t₂ ⊢ Δ, p : f[t₂]) *)
@@ -307,7 +327,7 @@ type ('v, 'h, 't, 'ty) kc =
      (Γ, h : t₁ ↔ t₂, p : f[t₁] ⊢ Δ) ≜
      c ⇓ (Γ, h : t₁ ↔ t₂, p : f[t₂] ⊢ Δ) *)
   | KInduction of 'h * 'h * 'h * 'h * 't * 't * 't
-                  * ('v, 'h, 't, 'ty) kc * ('v, 'h, 't, 'ty) kc
+                  * ('ts, 'v, 'ty, 'h, 't) kc * ('ts, 'v, 'ty, 'h, 't) kc
 (* KInduction (G, Hi₁, Hi₂, Hr, x, a, f, c₁, c₂) ⇓ (Γ ⊢ Δ, G : f[x]) ≜
    c₁ ⇓ (Γ, Hi₁ : i ≤ a ⊢ Δ, G : f[x]) and
    c₂ ⇓ (Γ, Hi₂ : a < i, Hr: ∀ n : int. n < i → f[n] ⊢ f[x])
@@ -315,7 +335,7 @@ type ('v, 'h, 't, 'ty) kc =
    and x and a are of type int *)
 (* In the induction and rewrite rules f is a context and the notation f[t]
    stands for this context where the holes have been replaced with t *)
-  | KReduce of bool * 't * 't * 'h * ('v, 'h, 't, 'ty) kc
+  | KReduce of bool * 't * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc
   (* KReduce (false, t, t', p, c) ⇓ (Γ, p : t ⊢ Δ) ≜
      c ⇓ (Γ, p : t' ⊢ Δ)
      and t ≡ t'
@@ -324,8 +344,8 @@ type ('v, 'h, 't, 'ty) kc =
      and t ≡ t' *)
 
 (* Why3 kernel certificates *)
-type wkc = (lsymbol, prsymbol, term, ty option) kc
-type kcert = (ident, ident, cterm, ctype) kc
+type wkc = (tysymbol, lsymbol, ty option, prsymbol, term) kc
+type kcert = (tysymbol, ident, ctype, ident, cterm) kc
 
 let rec print_certif filename cert =
   let oc = open_out filename in
@@ -335,6 +355,8 @@ let rec print_certif filename cert =
 
 and prc fmt c =
   let prt = Pretty.print_term in
+  let prty = Pretty.print_ty in
+  let prts = Pretty.print_ts in
   match c with
   | Nc -> fprintf fmt "No_certif"
   | Hole ct -> fprintf fmt "Hole %a" prid ct.uid
@@ -362,6 +384,14 @@ and prc fmt c =
                               prpr p prls y prc c
   | InstQuant (p1, p2, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)"
                                 prpr p1 prpr p2 prt t prc c
+  | IntroType (p, li, c) -> fprintf fmt "IntroType (%a, %a,@ %a)"
+                                prpr p
+                                (pp_print_list ~pp_sep:pp_print_space prts) li
+                                prc c
+  | InstType (p1, p2, ty, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)"
+                                  prpr p1 prpr p2
+                                  (pp_print_list ~pp_sep:pp_print_space prty) ty
+                                  prc c
   | Rewrite (p, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" prpr p prpr h prc c
   | Induction (p1, p2, p3, p4, x, _, c1, c2) ->
       fprintf fmt "Induction (%a, %a, %a, %a, %a, <fun>,@ %a,@ %a)"
@@ -382,38 +412,40 @@ let eprcertif c = eprintf "%a@." prcertif c
 
 (** Utility functions on certificates *)
 
-(* (\* To define recursive functions on elements of type sc *\)
- * let map_sc fc = function
- *   | (Hole _ | Nc) as c -> c
- *   | Axiom (h, g) -> Axiom (h, g)
- *   | Trivial p -> Trivial p
- *   | EqSym (p, c) -> EqSym (p, fc c)
- *   | EqTrans (p1, p2, p3, c) -> EqTrans (p1, p2, p3, fc c)
- *   | Assert (p, t, c1, c2) ->
- *       let f1 = fc c1 in
- *       let f2 = fc c2 in
- *       Assert (p, t, f1, f2)
- *   | Let (x, p, c) -> Let (x, p, fc c)
- *   | Unfold (p, c) -> Unfold (p, fc c)
- *   | Fold (p, c) -> Fold (p, fc c)
- *   | Split (p, c1, c2) ->
- *       let f1 = fc c1 in let f2 = fc c2 in
- *                         Split (p, f1, f2)
- *   | Destruct (p, p1, p2, c) -> Destruct (p, p1, p2, fc c)
- *   | Construct (p1, p2, p, c) -> Construct (p1, p2, p, fc c)
- *   | Swap (p, c) -> Swap (p, fc c)
- *   | Clear (p, c) -> Clear (p, fc c)
- *   | Forget (v, c) -> Forget (v, fc c)
- *   | Duplicate (p1, p2, c) -> Duplicate (p1, p2, fc c)
- *   | IntroQuant (p, y, c) -> IntroQuant (p, y, fc c)
- *   | InstQuant (p1, p2, t, c) -> InstQuant (p1, p2, t, fc c)
- *   | Rewrite (p, h, c) -> Rewrite (p, h, fc c)
- *   | Induction (p1, p2, p3, p4, x, a, c1, c2) ->
- *       Induction (p1, p2, p3, p4, x, a, fc c1, fc c2)
- *   | Reduce (p, t, c) -> Reduce (p, t, fc c) *)
+(* To define recursive functions on elements of type sc *)
+(* TODO: remove this function *)
+let map_sc fc = function
+  | (Hole _ | Nc) as c -> c
+  | Axiom (h, g) -> Axiom (h, g)
+  | Trivial p -> Trivial p
+  | EqSym (p, c) -> EqSym (p, fc c)
+  | EqTrans (p1, p2, p3, c) -> EqTrans (p1, p2, p3, fc c)
+  | Assert (p, t, c1, c2) ->
+      let f1 = fc c1 in
+      let f2 = fc c2 in
+      Assert (p, t, f1, f2)
+  | Let (p, c) -> Let (p, fun b t -> fc (c b t))
+  | Unfold (p, c) -> Unfold (p, fc c)
+  | Fold (p, c) -> Fold (p, fc c)
+  | Split (p, c1, c2) ->
+      let f1 = fc c1 in let f2 = fc c2 in
+                        Split (p, f1, f2)
+  | Destruct (p, p1, p2, c) -> Destruct (p, p1, p2, fc c)
+  | Swap (p, c) -> Swap (p, fc c)
+  | Clear (p, c) -> Clear (p, fc c)
+  | Forget (v, c) -> Forget (v, fc c)
+  | Duplicate (p1, p2, c) -> Duplicate (p1, p2, fc c)
+  | IntroQuant (p, y, c) -> IntroQuant (p, y, fc c)
+  | InstQuant (p1, p2, t, c) -> InstQuant (p1, p2, t, fc c)
+  | IntroType (p, li, c) -> IntroType (p, li, fc c)
+  | InstType (p1, p2, iota, c) -> InstType (p1, p2, iota, fc c)
+  | Rewrite (p, h, c) -> Rewrite (p, h, fc c)
+  | Induction (p1, p2, p3, p4, x, a, c1, c2) ->
+      Induction (p1, p2, p3, p4, x, a, fc c1, fc c2)
+  | Reduce (p, t, c) -> Reduce (p, t, fc c)
 
 (* To define recursive functions on elements of type kc *)
-let map_kc fc fv fh ft fty = function
+let map_kc fc fv fts fh ft fty = function
   | KHole _ as c -> c
   | KAssert (p, t, c1, c2) ->
       let f1 = fc c1 in
@@ -445,6 +477,10 @@ let map_kc fc fv fh ft fty = function
       KIntroQuant (pos, fty ty, ft f, fh p, fv y, fc c)
   | KInstQuant (pos, ty, f, p1, p2, t, c) ->
       KInstQuant (pos, fty ty, ft f, fh p1, fh p2, ft t, fc c)
+  | KIntroType (t, p, li, c) ->
+      KIntroType (ft t, fh p, List.map fts li, fc c)
+  | KInstType (t, p1, p2, ty, c) ->
+      KInstType (ft t, fh p1, fh p2, List.map fty ty, fc c)
   | KRewrite (pos, topt, ty, t1, t2, f, p, h, c) ->
       KRewrite (pos, Opt.map ft topt, fty ty, ft t1, ft t2, ft f, fh p, fh h, fc c)
   | KInduction (p1, p2, p3, p4, x, a, f, c1, c2) ->
@@ -485,8 +521,9 @@ let rec abstract_terms_types (l : wkc) : kcert = match l with
       let nb = abstract_term b in
       let nc = abstract_terms_types c in
       KRewrite (pos, Some ntls, CTprop, na, nb, nctxt, i.pr_name, h.pr_name, nc)
-  | c -> map_kc abstract_terms_types
-           (fun ls -> ls.ls_name) (fun pr -> pr.pr_name)
+  | c ->
+      map_kc abstract_terms_types
+           (fun ls -> ls.ls_name) (fun ts -> ts) (fun pr -> pr.pr_name)
            abstract_term abstract_otype c
 
 exception Elaboration_failed
@@ -656,6 +693,15 @@ let elaborate init_ct c =
               KInstQuant (pos, Some vs.vs_ty, t, p1, p2, t_inst, elab cta c)
           | _ -> eprintf "trying to instantiate a non-quantified hypothesis@.";
                  raise Elaboration_failed end
+    | IntroType (p, lts, c) ->
+        let t, pos = find_formula "IntroType" p cta in
+        let alphas = Stv.elements (t_ty_freevars Stv.empty t) in
+        let lty = List.map (fun ts -> ty_app ts []) lts in
+        let subst = Mtv.of_list (List.combine alphas lty) in
+        let _, nt = t_subst_types subst Mvs.empty t in
+        let cta = add p (nt, pos) cta in
+        KIntroType (t, p, lts, elab cta c)
+    | InstType _ -> verif_failed "TODO"
     | Rewrite (h, p, c) ->
         let rew_hyp, _ = find_formula "Finding rewrite hypothesis" h cta in
         let a, b, is_eq = match rew_hyp.t_node with
@@ -777,7 +823,8 @@ let rec trim c =
       let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq cty, t1), CTbvar 0)) in
       kduplicate false (CTapp (CTapp (eq cty, t1), t2)) i1 i3 @@
         KRewrite (false, None, cty, t2, t3, ctxt, i2, i3, c)
-  | _ -> map_kc trim (fun v -> v) (fun h -> h) (fun t -> t) (fun ty -> ty) c
+  | _ -> map_kc trim (fun v -> v) (fun ts -> ts) (fun h -> h) (fun t -> t)
+           (fun ty -> ty) c
 
 let make_kernel_cert init_ct res_ct (c : scert) : kcert =
   fill_tasks c res_ct
