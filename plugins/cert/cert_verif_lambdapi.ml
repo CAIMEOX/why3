@@ -44,7 +44,7 @@ let decl_hyp_ids ct =
   let hyp_ids = Mid.keys ct.gamma_delta in
   decl_ids, hyp_ids
 
-let print_certif fmt c =
+let print_certif fmt (c : kcert) =
   let rstr pos = if pos then "Goal" else "Hyp" in
   let rec pc fmt = function
   | KDuplicate _ | KFoldArr _
@@ -120,6 +120,13 @@ let print_certif fmt c =
                    @[<hv>%a@])"
         (rstr pos) prpv p prpv t prhyp i1 prhyp i1 prhyp i2
         pc c
+  | KIntroType (p, i, lts, c) ->
+      let y = List.hd lts in
+      fprintf fmt "IntroType %a %a (λ %a %a,@ \
+                   @[<hv>%a@])"
+        prpv p prhyp i Pretty.print_ts y prhyp i
+        pc c
+  | KInstType _ -> failwith "TODO"
   | KRewrite (pos, is_eq, _, t1, t2, ctxt, i1, i2, c) ->
       let str_fmla = match is_eq with None -> "" | _ -> "Fmla" in
       fprintf fmt "Rewrite%s%s %a %a %a %a %a (λ %a %a,@ \

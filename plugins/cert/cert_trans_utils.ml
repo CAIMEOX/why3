@@ -114,19 +114,13 @@ let revert_cert pr decls =
         | _ -> assert false in
   rc decls
 
+(* introduces generalized declarations *)
 let intro_cert pr decls =
   let rec ic decls = match decls with
-    |  [] -> idc
-    |  {d_node = Dparam _}::_ ->
-         let rec intro_decls_var acc = function
-           | {d_node = Dparam ls} :: l -> intro_decls_var (ls::acc) l
-           | l -> List.rev acc, l in
-         let lls, decls = intro_decls_var [] decls in
-         List.fold_right (fun ls c -> introquant pr ls ++ c)
-           lls (ic decls)
+    | [] -> idc
+    | {d_node = Dparam ls}::decls ->
+        introquant pr ls ++ ic decls
     | {d_node = Dprop (_, npr, _)}::decls ->
-        unfold pr ++
-          destruct pr npr pr ++
-            swap npr ++ ic decls
+        unfold pr ++ destruct pr npr pr ++ swap npr ++ ic decls
     | _ -> assert false in
   ic (List.rev decls)

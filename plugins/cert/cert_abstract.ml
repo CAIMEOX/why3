@@ -37,7 +37,7 @@ let type_lsymbol ls =
 
 let rec abstract_term t =
   let s = t_ty_freevars Stv.empty t in
-  let l = sorted_vars s in
+  let l = Stv.elements s in
   let t = abstract_term_rec Mid.empty 0 t in
   match l with
     | [] -> t
@@ -56,7 +56,7 @@ and abstract_term_rec bv_lvl lvl t =
       let actual_types = List.map (fun t -> abstract_otype t.t_ty) lt in
       let formal_types = List.map abstract_type ls.ls_args in
       let subst = for_all2_type_matching Mtv.empty formal_types actual_types in
-      let lv = sorted_vars (find_vars (type_lsymbol ls)) in
+      let lv = Stv.elements (find_vars (type_lsymbol ls)) in
       let lty = List.map (fun tv -> Mtv.find tv subst) lv in
       let cts = get_var bv_lvl lvl ls.ls_name lty in
       let ctapp ct t = CTapp (ct, abstract t) in

@@ -3,6 +3,7 @@ open Task
 open Decl
 open Term
 open Ident
+open Ty
 open Generic_arg_trans_utils
 
 open Cert_certificates
@@ -246,16 +247,24 @@ let ls_of_vs vs =
   let id = id_clone ~attrs:intro_attrs vs.vs_name in
   create_fsymbol id [] vs.vs_ty
 
-(* TODO: unsound, fix with type variables *)
 let intro_tg target =
   Trans.decl_acc (target, idc) update_tg_c (fun d (tg, _) ->
       match d.d_node with
       | Dprop (k, pr, t) when match_tg tg pr ->
+          let alphas = Stv.elements (t_ty_freevars Stv.empty t) in
+          let t, ldecla, cty_intro = match alphas with
+            | [] -> t, [], idc
+            | _ -> let lts = List.map (fun _ -> create_tysymbol (id_fresh "a") [] NoDef) alphas in
+                   let ldecla = List.map create_ty_decl lts in
+                   let lty = List.map (fun ts -> ty_app ts []) lts in
+                   let subst = Mtv.of_list (List.combine alphas lty) in
+                   let _, t = t_subst_types subst Mvs.empty t in
+                   t, ldecla, introtype pr lts in
           begin match t.t_node, k with
           | Tbinop (Timplies, f1, f2), Pgoal ->
               let hpr = create_prsymbol (id_fresh "H") in
-              [create_prop_decl Paxiom hpr f1; create_prop_decl Pgoal pr f2],
-              Some (unfold pr ++ destruct pr hpr pr ++ swap hpr)
+              ldecla @ [create_prop_decl Paxiom hpr f1; create_prop_decl Pgoal pr f2],
+              Some (cty_intro ++ unfold pr ++ destruct pr hpr pr ++ swap hpr)
           | Tquant ((Tforall as q), f), (Pgoal as k)
           | Tquant ((Texists as q), f), (Paxiom as k) ->
               let vsl, tg, f_t = t_open_quant f in
@@ -266,8 +275,8 @@ let intro_tg target =
                   let f = t_subst subst f_t
                           |> t_close_quant vsl tg
                           |> t_quant q in
-                  [create_param_decl ls; create_prop_decl k pr f],
-                  Some (introquant pr ls)
+                  ldecla @ [create_param_decl ls; create_prop_decl k pr f],
+                  Some (cty_intro ++ introquant pr ls)
               | [] -> assert false
               end
           | _ -> [d], None end
