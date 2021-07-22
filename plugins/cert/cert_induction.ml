@@ -278,14 +278,14 @@ let induction x bound env =
                 t_forall_close [n] []
                   (t_implies (Term.t_app_infer lt_int [t_var n; x])
                      (t_replace x (t_var n) t_ds)) in
-              (* x_gt_bound = bound < x *)
-              let x_gt_bound_t = t_app_infer lt_int [bound; x] in
+              (* bound_lt_x = bound < x *)
+              let bound_lt_x_t = t_app_infer lt_int [bound; x] in
               let pr_init = Decl.create_prsymbol (gen_ident "Init") in
-              let x_gt_bound = create_prop_decl Paxiom pr_init x_gt_bound_t in
+              let bound_lt_x = create_prop_decl Paxiom pr_init bound_lt_x_t in
               let pr_rec = create_prsymbol (gen_ident "Hrec") in
               let hrec = create_prop_decl Paxiom pr_rec t_ds in
               let d = create_goal ~expl:rec_case_expl pr t in
-              [x_gt_bound; hrec; d],
+              [bound_lt_x; hrec; d],
               { acc with g = Some pr; hi2 = Some pr_init;
                          hr = Some pr_rec; reverted = List.rev reverted }
         | Dprop (_, _, _) ->
