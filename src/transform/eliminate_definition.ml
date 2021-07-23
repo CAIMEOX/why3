@@ -154,6 +154,8 @@ let eliminate_definition_pred  =
   eliminate_definition_gen (fun ls -> ls.ls_value =  None)
 let eliminate_definition       =
   eliminate_definition_gen Util.ttrue
+let eliminate_const_definition       =
+  eliminate_definition_gen (fun ls -> ls.ls_args = [])
 
 let eliminate_recursion        = Trans.tdecl elim_recursion None
 let eliminate_non_struct_recursion = Trans.tdecl elim_non_struct_recursion None
@@ -169,6 +171,9 @@ let () =
   Trans.register_transform "eliminate_definition"
     eliminate_definition
     ~desc:"Transform@ function@ and@ predicate@ definitions@ into@ axioms.";
+  Trans.register_transform "eliminate_const_definition"
+    eliminate_const_definition
+    ~desc:"Transform@ constant@ definitions@ into@ axioms.";
   Trans.register_transform "eliminate_recursion"
     eliminate_recursion
     ~desc:"Same@ as@ eliminate_definition,@ but@ only@ for@ recursive@ \
@@ -199,7 +204,7 @@ let eliminate_definition_conditionally =
        Trans.on_meta Inlining.meta_get_counterexmp
          (function
           | [] -> eliminate_recursion
-          | _ -> eliminate_definition))
+          | _ -> eliminate_const_definition))
 
 let () =
   Trans.register_transform "eliminate_definition_conditionally"
