@@ -84,7 +84,7 @@ and abstract_term_rec bv_lvl lvl t =
   | Tlet _ -> invalid_arg "Does not handle Tlet yet"
   | Tcase _ -> invalid_arg "Does not handle Tcase yet"
 
-and get_var bv_lvl lvl id lty  = match Mid.find_opt id bv_lvl with
+and get_var bv_lvl lvl id lty = match Mid.find_opt id bv_lvl with
     | None -> CTfvar (id, lty)
     | Some lvl_id ->
         (* a variable should not appear before its declaration *)
