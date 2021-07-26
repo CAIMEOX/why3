@@ -47,7 +47,7 @@ let decl_hyp_ids ct =
 let print_certif fmt c =
   let rstr pos = if pos then "Goal" else "Hyp" in
   let rec pc fmt = function
-  | KConstruct _ | KDuplicate _ | KFoldArr _
+  | KDuplicate _ | KFoldArr _
   | KFoldIff _  | KSwapNegate _| KEqSym _ | KEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/SwapNeg/Eq/Let left"
   | KReduce (_, _, _, _, c) ->

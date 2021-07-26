@@ -9,7 +9,7 @@ open Cert_certificates
    a ctask *)
 let rec ccheck c cta =
   match c with
-  | KConstruct _ | KDuplicate _ | KFoldArr _
+  | KDuplicate _ | KFoldArr _
   | KFoldIff _  | KSwapNegate _| KEqSym _ | KEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/SwapNeg/Eq/Let left"
   | KReduce _ ->
