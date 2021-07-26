@@ -2,12 +2,12 @@
 <!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
-<prover id="0" name="Z3" version="4.8.10" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="1" name="Z3" version="4.8.12" alternative="counterexamples" timelimit="5" steplimit="0" memlimit="1000"/>
 <file format="whyml" proved="true">
 <path name=".."/><path name="split.mlw"/>
 <theory name="Top" proved="true">
  <goal name="nnA" proved="true">
- <proof prover="0"><result status="valid" time="0.03" steps="22"/></proof>
+ <proof prover="1"><result status="valid" time="0.03" steps="76"/></proof>
  </goal>
  <goal name="G1" proved="true">
  <transf name="split_all_full_ccert" proved="true" >
@@ -56,18 +56,18 @@
  <goal name="G3" proved="true">
  <transf name="split_all_full" proved="true" >
   <goal name="G3.0" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="33"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="88"/></proof>
   </goal>
   <goal name="G3.1" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="33"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="88"/></proof>
   </goal>
  </transf>
  <transf name="split_all_full_lcert" proved="true" >
   <goal name="G3.0" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="33"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="88"/></proof>
   </goal>
   <goal name="G3.1" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="33"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="88"/></proof>
   </goal>
  </transf>
  </goal>

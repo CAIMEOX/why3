@@ -308,7 +308,7 @@ let induction x bound env =
       let g = get acc.g and hi1 = get acc.hi1 and hi2 = get acc.hi2 and
           hr = get acc.hr and rev = acc.reverted in
       let c = revert_cert g rev ++
-                induction g hi1 hi2 hr x (thunk bound) ++
+                induction g hi1 hi2 hr x bound ++
                 intro_cert g rev in
       [ti; tr], c)
 
