@@ -5,11 +5,7 @@
 <file format="whyml">
 <path name=".."/><path name="debug.mlw"/>
 <theory name="Top">
- <goal name="G">
- <transf name="intro_ccert" >
-  <goal name="G.0">
-  </goal>
- </transf>
+ <goal name="G&#39;">
  </goal>
 </theory>
 </file>
