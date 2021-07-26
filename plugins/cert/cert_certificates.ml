@@ -180,17 +180,19 @@ let dir d p =
 (* Chose a direction for hypothesis p : t₁ ∨ t₂ or goal p : t₁ ∧ t₂ *)
 
 let construct p1 p2 p =
+  let p' = pr_clone p in
   newcert1 (fun a -> Let (p1, fun pos a1 ->
                      Let (p2, fun _   a2 ->
-                     if pos
-                     then assertion p (t_or a1 a2) +++
-                            [split p +++ [axiom p1 p; axiom p2 p];
-                             clear p1 ++ clear p2 ++ return a]
-                          |> apply
-                     else assertion p (t_and a1 a2) +++
-                            [clear p1 ++ clear p2 ++ return a;
-                             split p +++ [axiom p1 p; axiom p2 p]]
-                          |> apply)))
+                     let cons_p' =
+                       if pos
+                       then assertion p' (t_or a1 a2) +++
+                              [clear p1 ++ clear p2;
+                               split p' +++ [axiom p1 p'; axiom p2 p']]
+                       else assertion p' (t_and a1 a2) +++
+                            [split p' +++ [axiom p1 p'; axiom p2 p'];
+                             clear p1 ++ clear p2] in
+                     cons_p' ++ rename p' p ++ return a
+                     |> apply)))
 (* From a task with hypotheses (resp. goals) of the form p₁ : t₁ and p₂ : t₂,
    produces the same task where hypotheses (resp. goals) p₁ and p₂ are replaced
    with hypothesis p : t₁ ∧ t₂ (resp. goal p : t₁ ∨ t₂) *)
@@ -493,7 +495,8 @@ let t_open_quant_one q tq = match t_open_quant tq with
   | vs::vsl, trg, t_open ->
       let nt = t_quant q (t_close_quant vsl trg t_open) in
       vs, nt
-  | _ -> raise Elaboration_failed
+  | _ -> eprintf "not quantified";
+         raise Elaboration_failed
 
 let elaborate init_ct c =
   let find_formula s pr cta = find_formula s pr.pr_name cta in

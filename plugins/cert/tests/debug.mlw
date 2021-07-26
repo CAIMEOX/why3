@@ -52,5 +52,6 @@ predicate a
 predicate b
 predicate c
 
-goal G : a /\ (b \/ c) -> false
+(* goal G : a /\ (b \/ c) -> false *)
 
+goal G' : a \/ b
