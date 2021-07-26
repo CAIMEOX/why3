@@ -15,8 +15,8 @@ type sc =
   | Nc
   | Hole of cterm ctask
   (* You should never use the Hole certificate *)
-  | Assert of prsymbol * (term Mid.t -> term) * sc * sc
-  | Let of term * prsymbol * sc
+  | Assert of prsymbol * term * sc * sc
+  | Let of prsymbol * (bool -> term -> sc)
   | Axiom of prsymbol * prsymbol
   | Trivial of prsymbol
   | EqSym of prsymbol * sc
@@ -25,7 +25,6 @@ type sc =
   | Fold of prsymbol * sc
   | Split of prsymbol * sc * sc
   | Destruct of prsymbol * prsymbol * prsymbol * sc
-  | Construct of prsymbol * prsymbol * prsymbol * sc
   | Swap of prsymbol * sc
   | Clear of prsymbol * sc
   | Forget of lsymbol * sc
@@ -34,7 +33,7 @@ type sc =
   | InstQuant of prsymbol * prsymbol * term * sc
   | Rewrite of prsymbol * prsymbol * sc
   | Induction of prsymbol * prsymbol * prsymbol * prsymbol * term *
-                   (term Mid.t -> term) * sc * sc
+                   term * sc * sc
   | Reduce of prsymbol * term * sc
 
 type scert = int * (sc list -> sc)
@@ -135,10 +134,6 @@ let destruct p p1 p2 = newcert1 (fun a -> Destruct (p, p1, p2, a))
 (* From a task with an hypothesis of the form p : t₁ ∧ t₂ (resp. a goal of
    the form p : t₁ ∨ t₂), produces the same task where hypothesis (resp. goal) p
    is replaced by two hypotheses (resp. goals) p₁ : t₁ and p₂ : t₂ *)
-let construct p1 p2 p = newcert1 (fun a -> Construct (p1, p2, p, a))
-(* From a task with hypotheses (resp. goals) of the form p₁ : t₁ and p₂ : t₂,
-   produces the same task where hypotheses (resp. goals) p₁ and p₂ are replaced
-   with hypothesis p : t₁ ∧ t₂ (resp. goal p : t₁ ∨ t₂) *)
 let swap p = newcert1 (fun a -> Swap (p, a))
 (* Puts an hypothesis (resp. a goal) into the goals (resp. the hypotheses),
    by negating it, then potentially removing a double negation *)
@@ -170,15 +165,8 @@ let reduce p t' =
   newcert1 (fun a -> Reduce (p, t', a))
 (* Returns the task where a computation has been done in p, changing it to t' *)
 
-let llet pr (cont : ident -> scert) : scert =
-  let ls = create_psymbol (id_fresh "Let_var") [] in
-  let t = t_app ls [] None in
-  newcert1 (fun u -> Let (t, pr, u)) ++ cont ls.ls_name
-(* From a task with premise pr : t, produces the same tasks as cont i,
-   where i is mapped to t *)
-
 let create_eqrefl h (t : term) =
-  assertion h (fun _ -> t_app_infer ps_equ [t; t]) +++ [trivial h; idc]
+  assertion h (t_app_infer ps_equ [t; t]) +++ [trivial h; idc]
 (* Produces a task with the added hypothesis h : t = t *)
 
 let rename p1 p2 =
@@ -191,6 +179,22 @@ let dir d p =
   destruct p left right ++ clear q
 (* Chose a direction for hypothesis p : t₁ ∨ t₂ or goal p : t₁ ∧ t₂ *)
 
+let construct p1 p2 p =
+  newcert1 (fun a -> Let (p1, fun pos a1 ->
+                     Let (p2, fun _   a2 ->
+                     if pos
+                     then assertion p (t_or a1 a2) +++
+                            [split p +++ [axiom p1 p; axiom p2 p];
+                             clear p1 ++ clear p2 ++ return a]
+                          |> apply
+                     else assertion p (t_and a1 a2) +++
+                            [clear p1 ++ clear p2 ++ return a;
+                             split p +++ [axiom p1 p; axiom p2 p]]
+                          |> apply)))
+(* From a task with hypotheses (resp. goals) of the form p₁ : t₁ and p₂ : t₂,
+   produces the same task where hypotheses (resp. goals) p₁ and p₂ are replaced
+   with hypothesis p : t₁ ∧ t₂ (resp. goal p : t₁ ∨ t₂) *)
+
 let iffsym_hyp h =
   let h1 = pr_clone h in
   let h2 = pr_clone h in
@@ -200,6 +204,7 @@ let iffsym_hyp h =
         fold h
 (* From a task with an hypothesis of the form h : t₁ ↔ t₂, produces the
    same task with premise h modified into h : t₂ ↔ t₁ *)
+
 
 type ctrans = scert ctransformation
 
@@ -265,8 +270,6 @@ type ('v, 'h, 't, 'ty) kc =
      c ⇓ (Γ, p₁ : t₁, p₂ : t₂ ⊢ Δ) *)
   (* KDestruct (true, t₁, t₂, p, p₁, p₂, c) ⇓ (Γ ⊢ Δ, p : t₁ ∨ t₂) ≜
      c ⇓ (Γ ⊢ Δ, p₁ : t₁, p₂ : t₂) *)
-  | KConstruct of bool * 't * 't * 'h * 'h * 'h * ('v, 'h, 't, 'ty) kc
-  (* not kernel *)
   | KIntroQuant of bool * 'ty * 't * 'h * 'v * ('v, 'h, 't, 'ty) kc
   (* KIntroQuant (false, τ, f, p, y, c) ⇓ (Σ | Γ, p : ∃ x : τ. f ⊢ Δ) ≜
      c ⇓ (Σ, y : τ | Γ, p : f[x ↦ y] ⊢ Δ)
@@ -336,7 +339,7 @@ and prc fmt c =
   | Assert (p, _, c1, c2) ->
       fprintf fmt "Assert (@[%a, <fun>,@ @[<4>%a@],@ @[<4>%a@])@]"
         prpr p prc c1 prc c2
-  | Let (x, p, c) -> fprintf fmt "Let (%a, %a,@ %a)" prt x prpr p prc c
+  | Let (p, _) -> fprintf fmt "Let (%a, <cont>)" prpr p
   | Axiom (p1, p2) -> fprintf fmt "Axiom (%a, %a)" prpr p1 prpr p2
   | Trivial p -> fprintf fmt "Trivial %a" prpr p
   | EqSym (p, c) -> fprintf fmt "EqSym (%a,@ %a)" prpr p prc c
@@ -348,8 +351,6 @@ and prc fmt c =
                            prpr p prc c1 prc c2
   | Destruct (p, p1, p2, c) ->
       fprintf fmt "Destruct (%a, %a, %a,@ %a)" prpr p prpr p1 prpr p2 prc c
-  | Construct (p1, p2, p, c) ->
-      fprintf fmt "Construct (%a, %a, %a,@ %a)" prpr p1 prpr p2 prpr p prc c
   | Swap (p, c) -> fprintf fmt "Swap (%a,@ %a)" prpr p prc c
   | Clear (p, c) -> fprintf fmt "Clear@ (%a,@ %a)" prpr p prc c
   | Forget (v, c) -> fprintf fmt "Forget@ (%a,@ %a)" prls v prc c
@@ -379,35 +380,35 @@ let eprcertif c = eprintf "%a@." prcertif c
 
 (** Utility functions on certificates *)
 
-(* To define recursive functions on elements of type sc *)
-let map_sc fc = function
-  | (Hole _ | Nc) as c -> c
-  | Axiom (h, g) -> Axiom (h, g)
-  | Trivial p -> Trivial p
-  | EqSym (p, c) -> EqSym (p, fc c)
-  | EqTrans (p1, p2, p3, c) -> EqTrans (p1, p2, p3, fc c)
-  | Assert (p, t, c1, c2) ->
-      let f1 = fc c1 in
-      let f2 = fc c2 in
-      Assert (p, t, f1, f2)
-  | Let (x, p, c) -> Let (x, p, fc c)
-  | Unfold (p, c) -> Unfold (p, fc c)
-  | Fold (p, c) -> Fold (p, fc c)
-  | Split (p, c1, c2) ->
-      let f1 = fc c1 in let f2 = fc c2 in
-                        Split (p, f1, f2)
-  | Destruct (p, p1, p2, c) -> Destruct (p, p1, p2, fc c)
-  | Construct (p1, p2, p, c) -> Construct (p1, p2, p, fc c)
-  | Swap (p, c) -> Swap (p, fc c)
-  | Clear (p, c) -> Clear (p, fc c)
-  | Forget (v, c) -> Forget (v, fc c)
-  | Duplicate (p1, p2, c) -> Duplicate (p1, p2, fc c)
-  | IntroQuant (p, y, c) -> IntroQuant (p, y, fc c)
-  | InstQuant (p1, p2, t, c) -> InstQuant (p1, p2, t, fc c)
-  | Rewrite (p, h, c) -> Rewrite (p, h, fc c)
-  | Induction (p1, p2, p3, p4, x, a, c1, c2) ->
-      Induction (p1, p2, p3, p4, x, a, fc c1, fc c2)
-  | Reduce (p, t, c) -> Reduce (p, t, fc c)
+(* (\* To define recursive functions on elements of type sc *\)
+ * let map_sc fc = function
+ *   | (Hole _ | Nc) as c -> c
+ *   | Axiom (h, g) -> Axiom (h, g)
+ *   | Trivial p -> Trivial p
+ *   | EqSym (p, c) -> EqSym (p, fc c)
+ *   | EqTrans (p1, p2, p3, c) -> EqTrans (p1, p2, p3, fc c)
+ *   | Assert (p, t, c1, c2) ->
+ *       let f1 = fc c1 in
+ *       let f2 = fc c2 in
+ *       Assert (p, t, f1, f2)
+ *   | Let (x, p, c) -> Let (x, p, fc c)
+ *   | Unfold (p, c) -> Unfold (p, fc c)
+ *   | Fold (p, c) -> Fold (p, fc c)
+ *   | Split (p, c1, c2) ->
+ *       let f1 = fc c1 in let f2 = fc c2 in
+ *                         Split (p, f1, f2)
+ *   | Destruct (p, p1, p2, c) -> Destruct (p, p1, p2, fc c)
+ *   | Construct (p1, p2, p, c) -> Construct (p1, p2, p, fc c)
+ *   | Swap (p, c) -> Swap (p, fc c)
+ *   | Clear (p, c) -> Clear (p, fc c)
+ *   | Forget (v, c) -> Forget (v, fc c)
+ *   | Duplicate (p1, p2, c) -> Duplicate (p1, p2, fc c)
+ *   | IntroQuant (p, y, c) -> IntroQuant (p, y, fc c)
+ *   | InstQuant (p1, p2, t, c) -> InstQuant (p1, p2, t, fc c)
+ *   | Rewrite (p, h, c) -> Rewrite (p, h, fc c)
+ *   | Induction (p1, p2, p3, p4, x, a, c1, c2) ->
+ *       Induction (p1, p2, p3, p4, x, a, fc c1, fc c2)
+ *   | Reduce (p, t, c) -> Reduce (p, t, fc c) *)
 
 (* To define recursive functions on elements of type kc *)
 let map_kc fc fv fh ft fty = function
@@ -433,8 +434,6 @@ let map_kc fc fv fh ft fty = function
   | KFoldArr (pos, t1, t2, p, c) -> KFoldArr (pos, ft t1, ft t2, fh p, fc c)
   | KDestruct (pos, t1, t2, p, j1, j2, c) ->
       KDestruct (pos, ft t1, ft t2, fh p, fh j1, fh j2, fc c)
-  | KConstruct (pos, t1, t2, p1, p2, j, c) ->
-      KConstruct (pos, ft t1, ft t2, fh p1, fh p2, fh j, fc c)
   | KSwap (pos, t, p, c) -> KSwap (pos, ft t, fh p, fc c)
   | KSwapNegate (pos, t, p, c) -> KSwapNegate (pos, ft t, fh p, fc c)
   | KClear (pos, t, p, c) -> KClear (pos, ft t, fh p, fc c)
@@ -501,10 +500,7 @@ let elaborate init_ct c =
   let add pr t cta = add pr.pr_name t cta in
   let remove pr cta = remove pr.pr_name cta in
   let remove_var ls cta = remove_var ls.ls_name cta in
-  let rec elaborate (map : term Mid.t) (cta : term ctask) (c : sc) : wkc =
-    (* the map argument registers Let-defined variables and is used
-       to substitute user-provided terms that appear in certificates *)
-    let elab = elaborate map in
+  let rec elab (cta : term ctask) (c : sc) : wkc =
     match c with
     | Nc -> eprintf "No certificates@.";
             raise Elaboration_failed
@@ -551,19 +547,14 @@ let elaborate init_ct c =
         | _ -> eprintf "wrong hyps form in eqtrans@.";
                raise Elaboration_failed end
     | Assert (p, t, c1, c2) ->
-        let t = t map in
         let cta1 = add p (t, true) cta in
         let cta2 = add p (t, false) cta in
         let c1 = elab cta1 c1 in
         let c2 = elab cta2 c2 in
         KAssert (p, t, c1, c2)
-    | Let (x, p, c) ->
-        let y, _ = find_formula "Let" p cta in
-        let ix = match x.t_node with
-          | Tapp (ls, []) -> ls.ls_name
-          | _ -> assert false in
-        let map = Mid.add ix y map in
-        elaborate map cta c
+    | Let (p, f) ->
+        let t, pos = find_formula "Let" p cta in
+        elab cta (f pos t)
     | Unfold (p, c) ->
         let t, pos = find_formula "Unfold" p cta in
         begin match t.t_node with
@@ -616,17 +607,6 @@ let elaborate init_ct c =
                   |> add p1 (t1, pos)
                   |> add p2 (t2, pos) in
         KDestruct (pos, t1, t2, p, p1, p2, elab cta c)
-    | Construct (p1, p2, p, c) ->
-        let t1, pos1 = find_formula "Construct1" p1 cta in
-        let t2, pos2 = find_formula "Construct2" p2 cta in
-        assert (pos1 = pos2);
-        let t = if pos1
-                then t_binary Tor t1 t2
-                else t_binary Tand t1 t2 in
-        let cta = remove p1 cta
-                  |> remove p2
-                  |> add p (t, pos1) in
-        KConstruct (pos1, t1, t2, p1, p2, p, elab cta c)
     | Swap (p, c) ->
         let t, pos = find_formula "Swap" p cta in
         let negate, underlying_t, neg_t = match t.t_node with
@@ -698,7 +678,6 @@ let elaborate init_ct c =
           KRewrite (pos, Some t_r, None, a, b, ctxt, h, p, c)
 
     | Induction (g, hi1, hi2, hr, x, a, c1, c2) ->
-        let a = a map in
         let le = cta.get_ls le_str in
         let lt = cta.get_ls lt_str in
         let t, _ = find_formula "induction" g cta in
@@ -720,7 +699,7 @@ let elaborate init_ct c =
         let cta = add p (t', pos) cta in
         KReduce (pos, t, t', p, elab cta c)
   in
-  elaborate Mid.empty init_ct c
+  elab init_ct c
 
 let kaxiom pos t p1 p2 =
   if pos then KAxiom (t, p1, p2)
@@ -752,24 +731,6 @@ let kswapnegate pos t p c =
 (* kswapneg false t p c ⇓ (Γ, p : t ⊢ Δ) ≜ c ⇓ (Γ ⊢ Δ, p : ¬t)  *)
 (* kswapneg true t i c ⇓ (Γ ⊢ Δ, p : t) ≜ c ⇓ (Γ, p : ¬t ⊢ Δ)  *)
 
-let kconstruct pos t1 t2 p1 p2 p c =
-  let p1' = id_register (id_fresh "p1") in
-  let p2' = id_register (id_fresh "p2") in
-  let c_open = KClear (pos, t1, p1', KClear (pos, t2, p2', c)) in
-  let c_closed = KSplit (not pos, t1, t2, p,
-                         kaxiom pos t1 p p1',
-                         kaxiom pos t2 p p2') in
-  let c1, c2, cut = if pos
-                    then c_open, c_closed, CTbinop (Tor, t1, t2)
-                    else c_closed, c_open, CTbinop (Tand, t1, t2) in
-  krename pos t1 p1 p1' @@
-    krename pos t2 p2 p2' @@
-      KAssert (p, cut, c1, c2)
-(* kconstruct false t₁ t₂ p₁ p₂ p c ⇓ (Γ, p₁ : t₁, p₂ : t₂ ⊢ Δ) ≜
-   c ⇓ (Γ, p : t₁ ∧ t₂ ⊢ Δ)  *)
-(* kconstruct true t₁ t₂ p₁ p₂ p c ⇓ (Γ ⊢ Δ, p₁ : t₁, p₂ : t₂) ≜
-   c ⇓ (Γ ⊢ Δ, p : t₁ ∨ t₂)  *)
-
 let rec trim c =
   match c with
   | KDuplicate (pos, t, p1, p2, c) ->
@@ -778,9 +739,6 @@ let rec trim c =
   | KSwapNegate (pos, t, p, c) ->
       let c = trim c in
       kswapnegate pos t p c
-  | KConstruct (pos, t1, t2, p1, p2, p, c) ->
-      let c = trim c in
-      kconstruct pos t1 t2 p1 p2 p c
   | KFoldArr (pos, t1, t2, i, c') | KFoldIff (pos, t1, t2, i, c') ->
       let is_arr = match c with KFoldArr _ -> true | _ -> false in
       let c = trim c' in

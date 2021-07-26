@@ -101,16 +101,16 @@ let revert_cert pr decls =
                   rc tail
         | Dparam ls ->
             let pr' = pr_clone pr in
-            llet pr (fun g ->
+            newcert1 (fun a -> (Let (pr, fun _ g ->
                 let tx = t_app_infer ls [] in
                 let ix' = id_fresh ls.ls_name.id_string in
                 let x' = create_vsymbol ix' (Opt.get ls.ls_value) in
-                let closed_t map =
-                  let g = t_replace tx (t_var x') (Mid.find g map) in
-                  t_forall_close [x'] [] g in
+                let g = t_replace tx (t_var x') g in
+                let closed_t = t_forall_close [x'] [] g in
                 assertion pr' closed_t +++
-                  [clear pr ++ forget ls ++ rename pr' pr ++ (rc tail);
-                   instquant pr' pr' tx ++ axiom pr' pr])
+                  [clear pr ++ forget ls ++ rename pr' pr ++ rc tail ++ return a;
+                   instquant pr' pr' tx ++ axiom pr' pr]
+                |> apply)))
         | _ -> assert false in
   rc decls
 

@@ -189,7 +189,7 @@ let neg_decompose_tg target =
                   Some (swap pr ++ split pr ++ swap pr)
               | Pgoal, Ttrue -> (* ⊥ and ⊤ *)
                   [[create_prop_decl Pgoal pr t_false]],
-                  Some (clear pr ++ assertion pr (thunk t_false) +++
+                  Some (clear pr ++ assertion pr t_false +++
                           [idc; trivial pr])
               | Pgoal, Tfalse ->
                   [], Some (swap pr ++ trivial pr)
@@ -320,7 +320,7 @@ let cassert t : ctrans =
       let h = create_prsymbol (gen_ident "H") in
       let prg = task_goal task in
       Trans.apply (assert_h_t h t) task,
-      assertion h (thunk t) +++ [clear prg; idc])
+      assertion h t +++ [clear prg; idc])
 
 (* Instantiate with certificate *)
 
@@ -360,7 +360,7 @@ let exfalso : ctrans =
             | _ -> [decl]) None in
       let g = task_goal task in
       [Trans.apply trans task],
-      assertion h (thunk t_false) +++ [clear g; trivial h])
+      assertion h t_false +++ [clear g; trivial h])
 
 let case t : ctrans = Trans.store (fun task ->
   let h = create_prsymbol (gen_ident "H") in
@@ -372,7 +372,7 @@ let case t : ctrans = Trans.store (fun task ->
               [create_prop_decl Paxiom h (t_not t); decl] ]
         | _ -> [[decl]]) None in
   Trans.apply trans task,
-  assertion h (thunk (t_not t)) +++ [swap h; idc])
+  assertion h (t_not t) +++ [swap h; idc])
 
 (* if formula <f> designed by <where> is a premise, dismiss the old
  goal and put <not f> in its place *)
@@ -414,7 +414,7 @@ let revert ls : ctrans =
       let close_t = t_forall_close [new_var] [] t in
       let task = add_decl hyp (create_prop_decl Pgoal gpr close_t) in
       let prinst = create_prsymbol (gen_ident "Hinst") in
-      let cert = assertion gpr (thunk close_t) +++
+      let cert = assertion gpr close_t +++
                    [clear idg;
                     instquant gpr prinst x ++ axiom prinst idg] in
       [task], cert)

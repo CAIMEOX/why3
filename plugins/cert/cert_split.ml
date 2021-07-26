@@ -6,7 +6,6 @@ open Term
 open Decl
 
 open Cert_certificates
-open Cert_trans_utils
 
 type split = {
   right_only : bool;
@@ -281,7 +280,7 @@ let add find_a find_b what is_a (pr, t) =
     | AddAnd -> idc, dest
     | AddOr  -> dest, idc
     | AddImplies -> unfold pr ++ dest, idc in
-  assertion pr (thunk t) +++ [c1; c2]
+  assertion pr t +++ [c1; c2]
 
 let add_all mon_a mon_b mon_res what is_a =
   let find_a = find_pr mon_a in
