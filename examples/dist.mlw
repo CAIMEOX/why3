@@ -1,0 +1,31 @@
+use int.Int
+
+constant n : int
+
+axiom n_pos : n >= 1
+
+
+type t = { f : int -> int }
+invariant { forall i. 1 <= i <= n -> 1 <= f i <= n }
+invariant { forall i j. 1 <= i < j <= n -> f i <> f j }
+invariant { forall k. k < 1 \/ k > n -> f k = k }
+by { f = fun i -> i }
+
+let function id : t = { f = fun (i : int) -> i }
+
+let function (*) (t1 t2 : t) : t =
+    let f1 = t1.f in
+    let f2 = t2.f in
+    { f = fun i -> f1 (f2 i) }
+
+
+predicate (==) (t1 t2 : t) = forall i. 1 <= i <= n -> t1.f i = t2.f i
+
+
+lemma t_ext : forall t1 t2. t1 == t2 ->
+              forall i. t1.f i = t2.f i
+
+
+
+
+clone algebra.Group with type t = t, function op = (*), constant unit = id
