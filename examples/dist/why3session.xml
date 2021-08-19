@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="Alt-Ergo" version="2.4.0" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="1" name="CVC4" version="1.8" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="2" name="Z3" version="4.8.10" timelimit="5" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
+<path name=".."/><path name="dist.mlw"/>
+<theory name="Top" proved="true">
+ <goal name="t&#39;vc" expl="VC for t" proved="true">
+ <proof prover="2"><result status="valid" time="0.03" steps="6234"/></proof>
+ </goal>
+ <goal name="ext" proved="true">
+ <proof prover="0"><result status="valid" time="0.02" steps="69"/></proof>
+ </goal>
+ <goal name="id&#39;vc" expl="VC for id" proved="true">
+ <proof prover="2"><result status="valid" time="0.02" steps="9034"/></proof>
+ </goal>
+ <goal name="infix *&#39;vc" expl="VC for infix *" proved="true">
+ <proof prover="1"><result status="valid" time="0.07" steps="12775"/></proof>
+ </goal>
+ <goal name="bounded&#39;vc" expl="VC for bounded" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="bounded&#39;vc.0" expl="variant decrease" proved="true">
+  <proof prover="2"><result status="valid" time="0.04" steps="37417"/></proof>
+  </goal>
+  <goal name="bounded&#39;vc.1" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.03" steps="37401"/></proof>
+  </goal>
+  <goal name="bounded&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="1"><result status="valid" time="0.08" steps="16431"/></proof>
+  </goal>
+  <goal name="bounded&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="1"><result status="valid" time="0.07" steps="15697"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="find_pre&#39;vc" expl="VC for find_pre" proved="true">
+ <proof prover="2"><result status="valid" time="0.05" steps="125855"/></proof>
+ </goal>
+ <goal name="inv_fun&#39;vc" expl="VC for inv_fun" proved="true">
+ <proof prover="1"><result status="valid" time="0.53" steps="64899"/></proof>
+ </goal>
+ <goal name="inv&#39;vc" expl="VC for inv" proved="true">
+ <proof prover="2"><result status="valid" time="0.05" steps="54828"/></proof>
+ </goal>
+ <goal name="assoc" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="assoc.0" proved="true">
+  <proof prover="0" timelimit="10"><result status="valid" time="0.02" steps="183"/></proof>
+  </goal>
+  <goal name="assoc.1" proved="true">
+  <proof prover="2"><result status="valid" time="0.06" steps="42778"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="unit_def_l" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="unit_def_l.0" proved="true">
+  <proof prover="0"><result status="valid" time="0.02" steps="160"/></proof>
+  </goal>
+  <goal name="unit_def_l.1" proved="true">
+  <proof prover="2"><result status="valid" time="0.02" steps="42950"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="unit_def_r" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="unit_def_r.0" proved="true">
+  <proof prover="2"><result status="valid" time="0.02" steps="46610"/></proof>
+  </goal>
+  <goal name="unit_def_r.1" proved="true">
+  <proof prover="2"><result status="valid" time="0.02" steps="43138"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="inv_def_l" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="inv_def_l.0" proved="true">
+  <proof prover="1"><result status="valid" time="0.03" steps="9929"/></proof>
+  </goal>
+  <goal name="inv_def_l.1" proved="true">
+  <proof prover="1"><result status="valid" time="0.04" steps="11558"/></proof>
+  </goal>
+  <goal name="inv_def_l.2" proved="true">
+  <proof prover="1"><result status="valid" time="0.02" steps="9903"/></proof>
+  </goal>
+  <goal name="inv_def_l.3" proved="true">
+  <proof prover="2"><result status="valid" time="0.03" steps="44316"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="inv_def_r" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="inv_def_r.0" proved="true">
+  <proof prover="1"><result status="valid" time="0.10" steps="23818"/></proof>
+  </goal>
+  <goal name="inv_def_r.1" proved="true">
+  <proof prover="2"><result status="valid" time="0.03" steps="43659"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="Group.Assoc" proved="true">
+ <proof prover="2"><result status="valid" time="0.05" steps="3036"/></proof>
+ </goal>
+ <goal name="Group.Unit_def_l" proved="true">
+ <proof prover="2"><result status="valid" time="0.07" steps="3049"/></proof>
+ </goal>
+ <goal name="Group.Unit_def_r" proved="true">
+ <proof prover="2"><result status="valid" time="0.05" steps="3062"/></proof>
+ </goal>
+ <goal name="Group.Inv_def_l" proved="true">
+ <proof prover="2"><result status="valid" time="0.01" steps="3079"/></proof>
+ </goal>
+ <goal name="Group.Inv_def_r" proved="true">
+ <proof prover="2"><result status="valid" time="0.03" steps="3096"/></proof>
+ </goal>
+</theory>
+</file>
+</why3session>

@@ -1,9 +1,8 @@
 use int.Int
 
-constant n : int
+val constant n : int
 
 axiom n_pos : n >= 1
-
 
 type t = { f : int -> int }
 invariant { forall i. 1 <= i <= n -> 1 <= f i <= n }
@@ -13,6 +12,10 @@ by { f = fun i -> i }
 
 axiom t_inj : forall t1 t2. t1.f = t2.f -> t1 = t2
 
+predicate (==) (t1 t2 : t) = forall i. t1.f i = t2.f i
+
+lemma ext : forall t1 t2. t1 == t2 -> t1 = t2
+
 let function id : t = { f = fun (i : int) -> i }
 
 let function (*) (p1 p2 : t) : t =
@@ -20,17 +23,55 @@ let function (*) (p1 p2 : t) : t =
     let f2 = p2.f in
     { f = fun i -> f1 (f2 i) }
 
-let rec find_pre (s : t) (i k : int)
-    requires { 1 <= k <= i <= n }
-    requires { forall j. j < k -> 
+use set.Fset as Fset
+
+let rec ghost function bounded (k : int) : Fset.fset int
+    requires { k >= 1 }
+    variant { k }
+    ensures { Fset.cardinal result = k }
+    ensures { forall i. 1 <= i <= k <-> Fset.mem i result }
+    =
+    if k = 1 then Fset.singleton 1
+    else Fset.add k (bounded (k-1))
+
+let rec find_pre (s : t) (i : int) (k : int) (ghost targets : Fset.fset int)
+    requires { 1 <= i <= n }
+    requires { 1 <= k <= n }
+    requires { forall j. k <= j <= n -> Fset.mem (s.f j) targets }
+    requires { Fset.mem i targets }
+    requires { Fset.cardinal targets = n - k + 1 }
+    variant { n - k }
+    ensures { 1 <= result <= n }
     ensures { s.f result = i }
     =
-    if s.f k = i then 
+    if s.f k = i then k
+    else find_pre s i (k+1) (Fset.remove (s.f k) targets)
 
 
-let rec function inv (s : t) (i : int) =
+let function inv_fun (s : t) (i : int)
+    ensures { s.f result = i }
+    =
     if i < 1 || i > n then i
-    else find_pre s i 1
+    else find_pre s i 1 (bounded n)
 
+let function inv (s : t) : t = { f = inv_fun s }
 
-clone algebra.Group with type t = t, function op = (*), constant unit = id
+lemma assoc : forall x, y, z : t. (x * y) * z = x * (y * z)
+              by (x * y) * z == x * (y * z)
+
+lemma unit_def_l : forall x : t. id * x = x
+                   by id * x == x
+
+lemma unit_def_r : forall x : t. x * id = x
+                   by x * id == x
+
+lemma inv_def_l : forall x : t. inv x * x = id
+                  by (forall i. x.f ((inv x).f (x.f i)) = x.f i
+                     so (inv x).f (x.f i) = i)
+                  so inv x * x == id
+
+lemma inv_def_r : forall x : t. x * inv x = id
+                  by x * inv x == id
+
+clone algebra.Group with type t = t, function op = (*),
+  function inv, constant unit = id
