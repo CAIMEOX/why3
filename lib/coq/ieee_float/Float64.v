@@ -424,6 +424,45 @@ Proof.
   now apply Exact_rounding_for_integers.
 Qed.
 
+(* Why3 goal *)
+Definition from_real :
+  ieee_float.RoundingMode.mode -> Reals.Rdefinitions.R -> t.
+Proof.
+  now apply from_real.
+Defined.
+
+(* Why3 goal *)
+Lemma from_real_in_range :
+  forall (m:ieee_float.RoundingMode.mode) (r:Reals.Rdefinitions.R),
+  in_range (round m r) ->
+  let f := from_real m r in t'isFinite f /\ ((t'real f) = (round m r)).
+Proof.
+intros m r h1 f.
+apply from_real_in_range; auto.
+Admitted.
+
+(* Why3 goal *)
+Lemma from_real_large_neg :
+  forall (m:ieee_float.RoundingMode.mode) (r:Reals.Rdefinitions.R),
+  ((round m r) <
+   (-(9007199254740991 * 19958403095347198116563727130368385660674512604354575415025472424372118918689640657849579654926357010893424468441924952439724379883935936607391717982848314203200056729510856765175377214443629871826533567445439239933308104551208703888888552684480441575071209068757560416423584952303440099278848)%R)%R)%R ->
+  let f := from_real m r in is_infinite f /\ is_negative f.
+Proof.
+intros m r h1 f.
+apply from_real_large_neg; auto.
+Admitted.
+
+(* Why3 goal *)
+Lemma from_real_large_pos :
+  forall (m:ieee_float.RoundingMode.mode) (r:Reals.Rdefinitions.R),
+  ((9007199254740991 * 19958403095347198116563727130368385660674512604354575415025472424372118918689640657849579654926357010893424468441924952439724379883935936607391717982848314203200056729510856765175377214443629871826533567445439239933308104551208703888888552684480441575071209068757560416423584952303440099278848)%R
+   < (round m r))%R ->
+  let f := from_real m r in is_infinite f /\ is_positive f.
+Proof.
+intros m r h1 f.
+apply from_real_large_pos; auto.
+Admitted.
+
 (* Why3 assumption *)
 Definition same_sign (x:t) (y:t) : Prop :=
   is_positive x /\ is_positive y \/ is_negative x /\ is_negative y.
