@@ -349,14 +349,13 @@ module Sorted
   clone relations.Transitive with
     type t = t, predicate rel = le, axiom Trans
 
-  inductive sorted (l: list t) =
-    | Sorted_Nil:
-        sorted Nil
-    | Sorted_One:
-        forall x: t. sorted (Cons x Nil)
-    | Sorted_Two:
-        forall x y: t, l: list t.
-        le x y -> sorted (Cons y l) -> sorted (Cons x (Cons y l))
+  let rec ghost predicate sorted (l: list t)
+    variant { l }
+  = match l with
+    | Nil | Cons _ Nil -> true
+    | Cons x (Cons y l) ->
+        le x y && sorted (Cons y l)
+    end
 
   use Mem
 
