@@ -5,9 +5,9 @@
 <prover id="0" name="Alt-Ergo" version="2.4.0" timelimit="5" steplimit="0" memlimit="1000"/>
 <prover id="1" name="CVC4" version="1.8" timelimit="5" steplimit="0" memlimit="1000"/>
 <prover id="2" name="Z3" version="4.8.10" timelimit="5" steplimit="0" memlimit="1000"/>
-<file format="whyml" proved="true">
+<file format="whyml">
 <path name=".."/><path name="dist.mlw"/>
-<theory name="Top" proved="true">
+<theory name="Top">
  <goal name="t&#39;vc" expl="VC for t" proved="true">
  <proof prover="2"><result status="valid" time="0.03" steps="6234"/></proof>
  </goal>
@@ -115,6 +115,81 @@
  </goal>
  <goal name="Group.Inv_def_r" proved="true">
  <proof prover="2"><result status="valid" time="0.03" steps="3096"/></proof>
+ </goal>
+ <goal name="cycle_loop&#39;vc" expl="VC for cycle_loop" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="cycle_loop&#39;vc.0" expl="variant decrease" proved="true">
+  <proof prover="2"><result status="valid" time="0.02" steps="57384"/></proof>
+  </goal>
+  <goal name="cycle_loop&#39;vc.1" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.05" steps="102709"/></proof>
+  </goal>
+  <goal name="cycle_loop&#39;vc.2" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.04" steps="103439"/></proof>
+  </goal>
+  <goal name="cycle_loop&#39;vc.3" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.05" steps="110777"/></proof>
+  </goal>
+  <goal name="cycle_loop&#39;vc.4" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.03" steps="104741"/></proof>
+  </goal>
+  <goal name="cycle_loop&#39;vc.5" expl="postcondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.04" steps="112406"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="cycle&#39;vc" expl="VC for cycle">
+ <proof prover="0" obsolete="true"><result status="timeout" time="5.00"/></proof>
+ <proof prover="1" obsolete="true"><result status="timeout" time="5.00" steps="319479"/></proof>
+ <proof prover="2" obsolete="true"><result status="timeout" time="5.00"/></proof>
+ <transf name="split_vc" >
+  <goal name="cycle&#39;vc.0" expl="precondition">
+  <proof prover="2" obsolete="true"><result status="valid" time="0.05" steps="106338"/></proof>
+  </goal>
+  <goal name="cycle&#39;vc.1" expl="precondition">
+  <proof prover="2" obsolete="true"><result status="valid" time="0.03" steps="7435"/></proof>
+  </goal>
+  <goal name="cycle&#39;vc.2" expl="precondition">
+  <proof prover="0" obsolete="true"><result status="timeout" time="5.00"/></proof>
+  <proof prover="1" obsolete="true"><result status="timeout" time="5.00" steps="495484"/></proof>
+  <proof prover="2" obsolete="true"><result status="valid" time="0.04" steps="113646"/></proof>
+  </goal>
+  <goal name="cycle&#39;vc.3" expl="precondition">
+  <proof prover="0" obsolete="true"><result status="timeout" time="5.00"/></proof>
+  <proof prover="1" obsolete="true"><result status="timeout" time="5.00" steps="532925"/></proof>
+  <proof prover="2" obsolete="true"><result status="valid" time="0.04" steps="107450"/></proof>
+  </goal>
+  <goal name="cycle&#39;vc.4" expl="precondition">
+  <proof prover="0" obsolete="true"><result status="timeout" time="5.00"/></proof>
+  <proof prover="1" obsolete="true"><result status="timeout" time="5.00" steps="371297"/></proof>
+  <proof prover="2" obsolete="true"><result status="valid" time="0.04" steps="117280"/></proof>
+  </goal>
+  <goal name="cycle&#39;vc.5" expl="precondition">
+  <proof prover="0" obsolete="true"><result status="timeout" time="5.00"/></proof>
+  <proof prover="1" obsolete="true"><result status="timeout" time="5.00" steps="771688"/></proof>
+  <proof prover="2" obsolete="true"><result status="timeout" time="5.00"/></proof>
+  </goal>
+  <goal name="cycle&#39;vc.6" expl="precondition">
+  <proof prover="0" obsolete="true"><result status="timeout" time="5.00"/></proof>
+  <proof prover="1" obsolete="true"><result status="timeout" time="5.00" steps="370632"/></proof>
+  <proof prover="2" obsolete="true"><result status="valid" time="0.04" steps="122787"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="cycle_in">
+ <proof prover="0" obsolete="true"><result status="timeout" time="5.00"/></proof>
+ <proof prover="1" obsolete="true"><result status="timeout" time="5.00" steps="319348"/></proof>
+ <proof prover="2" obsolete="true"><result status="timeout" time="5.00"/></proof>
+ </goal>
+ <goal name="cycle_end">
+ <proof prover="0" obsolete="true"><result status="timeout" time="5.00"/></proof>
+ <proof prover="1" obsolete="true"><result status="timeout" time="5.00" steps="496311"/></proof>
+ <proof prover="2" obsolete="true"><result status="timeout" time="5.00"/></proof>
+ </goal>
+ <goal name="cycle_out">
+ <proof prover="0" obsolete="true"><result status="timeout" time="5.00"/></proof>
+ <proof prover="1" obsolete="true"><result status="timeout" time="5.00" steps="401033"/></proof>
+ <proof prover="2" obsolete="true"><result status="timeout" time="5.00"/></proof>
  </goal>
 </theory>
 </file>

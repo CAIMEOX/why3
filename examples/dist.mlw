@@ -75,3 +75,30 @@ lemma inv_def_r : forall x : t. x * inv x = id
 
 clone algebra.Group with type t = t, function op = (*),
   function inv, constant unit = id
+
+use seq.Seq
+
+let rec ghost function cycle_loop (s : seq int) (k : int) (l : int)
+    requires { 0 <= l <= length s }
+    requires { forall i. 0 <= i < l -> k <> s[i] }
+    requires { forall i. 0 <= i < length s -> 1 <= s[i] <= n }
+    requires { forall i, j. 0 <= i < j < length s -> s[i] <> s[j] }
+    variant { length s - l }
+    ensures { k = s[length s - 1] /\ result = s[0] \/
+              exists i. 0 <= i < length s - 1 /\ k = s[i] /\ result = s[i+1] \/
+              result = k }
+    =
+    if l = length s then k
+    else if s[l] = k
+         then if l = length s - 1 then s[0] else s[l+1]
+         else cycle_loop s k (l+1)
+
+let ghost function cycle s
+    requires { forall i. 0 <= i < length s -> 1 <= s[i] <= n }
+    requires { forall i, j. 0 <= i < j < length s -> s[i] <> s[j] }
+    = { f = fun k -> cycle_loop s k 0 }
+
+lemma cycle_in : forall s k. 0 <= k < length s - 1 -> (cycle s).f s[k] = s[k+1]
+lemma cycle_end : forall s. (cycle s).f s[length s - 1] = s[0]
+lemma cycle_out : forall s k. (forall j. s[j] <> k) -> (cycle s).f k = k
+
