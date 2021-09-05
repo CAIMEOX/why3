@@ -3,193 +3,171 @@
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
 <prover id="0" name="Alt-Ergo" version="2.4.0" timelimit="5" steplimit="0" memlimit="1000"/>
-<prover id="3" name="Alt-Ergo" version="2.3.3" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="1" name="Z3" version="4.8.10" timelimit="5" steplimit="0" memlimit="1000"/>
 <prover id="4" name="CVC4" version="1.8" timelimit="5" steplimit="0" memlimit="1000"/>
-<prover id="5" name="Z3" version="4.8.6" timelimit="10" steplimit="0" memlimit="4000"/>
-<prover id="6" name="CVC4" version="1.7" timelimit="1" steplimit="0" memlimit="1000"/>
-<file format="whyml">
+<file format="whyml" proved="true">
 <path name=".."/><path name="verifythis_2019_ghc_sort.mlw"/>
-<theory name="Top">
- <goal name="StrictIncr.Transitive.Trans" proved="true">
- <proof prover="3"><result status="valid" time="0.01" steps="4"/></proof>
- </goal>
- <goal name="RevSorted.Transitive.Trans" proved="true">
- <proof prover="0"><result status="valid" time="0.01" steps="6"/></proof>
- </goal>
+<theory name="Top" proved="true">
  <goal name="eqb&#39;vc" expl="VC for eqb" proved="true">
- <proof prover="0"><result status="valid" time="0.03" steps="221"/></proof>
+ <proof prover="0"><result status="valid" time="0.03" steps="117"/></proof>
  </goal>
  <goal name="list_seq&#39;vc" expl="VC for list_seq" proved="true">
- <proof prover="0"><result status="valid" time="0.02" steps="13"/></proof>
+ <proof prover="0"><result status="valid" time="0.02" steps="9"/></proof>
  </goal>
  <goal name="nil&#39;vc" expl="VC for nil" proved="true">
- <proof prover="0"><result status="valid" time="0.02" steps="13"/></proof>
+ <proof prover="0"><result status="valid" time="0.02" steps="9"/></proof>
  </goal>
  <goal name="extend&#39;vc" expl="VC for extend" proved="true">
- <proof prover="0"><result status="valid" time="0.06" steps="589"/></proof>
+ <proof prover="0"><result status="valid" time="0.06" steps="506"/></proof>
  </goal>
- <goal name="cutpoints&#39;vc" expl="VC for cutpoints">
- <transf name="split_vc" >
+ <goal name="cutpoints&#39;vc" expl="VC for cutpoints" proved="true">
+ <transf name="split_vc" proved="true" >
   <goal name="cutpoints&#39;vc.0" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.01" steps="14"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="8"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.1" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="15"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="9"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.2" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="115"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="87"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.3" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="300"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="239"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.4" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="124"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="95"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.5" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="156"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="120"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.6" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="156"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="127"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.7" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="169"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="209"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.8" expl="index in array bounds" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="28"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="22"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.9" expl="index in array bounds" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="28"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="22"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.10" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="28"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="22"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.11" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="30"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="24"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.12" expl="index in array bounds" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="34"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="28"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.13" expl="index in array bounds" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="34"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="28"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.14" expl="loop variant decrease" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="38"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="32"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.15" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="38"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="32"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.16" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.08" steps="797"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="749"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.17" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="251"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="245"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.18" expl="assertion" proved="true">
-  <proof prover="4"><result status="valid" time="0.73" steps="116965"/></proof>
+  <proof prover="4"><result status="valid" time="1.03" steps="215768"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.19" expl="loop variant decrease" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="40"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="36"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.20" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="40"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.21" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="40"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.22" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="271"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.23" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.43" steps="71197"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.24" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.17" steps="1865"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.25" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.09" steps="539"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.26" expl="loop invariant preservation">
-  <proof prover="0" timelimit="1"><result status="timeout" time="1.00"/></proof>
-  <proof prover="5" timelimit="1" memlimit="1000"><result status="timeout" time="1.00" steps="2202055"/></proof>
-  <proof prover="6"><result status="timeout" time="1.00" steps="237261"/></proof>
-  <transf name="split_vc" >
-   <goal name="cutpoints&#39;vc.26.0" expl="loop invariant preservation">
-   <proof prover="0" timelimit="10" memlimit="4000"><result status="timeout" time="10.00"/></proof>
-   <proof prover="5"><result status="timeout" time="10.00" steps="16110616"/></proof>
-   <proof prover="6" timelimit="10" memlimit="4000"><result status="timeout" time="10.00" steps="906552"/></proof>
-   </goal>
-  </transf>
-  </goal>
-  <goal name="cutpoints&#39;vc.27" expl="loop invariant preservation">
-  <proof prover="0" timelimit="1"><result status="timeout" time="1.00"/></proof>
-  <proof prover="5" timelimit="1" memlimit="1000"><result status="timeout" time="1.00" steps="2271764"/></proof>
-  <proof prover="6"><result status="timeout" time="1.00" steps="152057"/></proof>
-  <transf name="split_vc" >
-   <goal name="cutpoints&#39;vc.27.0" expl="loop invariant preservation">
-   <proof prover="0" timelimit="10" memlimit="4000"><result status="timeout" time="10.00"/></proof>
-   <proof prover="5"><result status="timeout" time="10.00" steps="13758781"/></proof>
-   <proof prover="6" timelimit="10" memlimit="4000"><result status="timeout" time="10.00" steps="595539"/></proof>
-   </goal>
-  </transf>
-  </goal>
-  <goal name="cutpoints&#39;vc.28" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.50" steps="4572"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.29" expl="assertion" proved="true">
-  <proof prover="4"><result status="valid" time="0.53" steps="97106"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.30" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.37" steps="60366"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.31" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="41"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.32" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="327"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.33" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="553"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.34" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="3.18" steps="39017"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.35" expl="postcondition">
-  <proof prover="0" timelimit="1"><result status="timeout" time="1.00"/></proof>
-  <proof prover="5" timelimit="1" memlimit="1000"><result status="timeout" time="1.00" steps="2223647"/></proof>
-  <proof prover="6"><result status="timeout" time="1.00" steps="141287"/></proof>
-  <transf name="split_vc" >
-   <goal name="cutpoints&#39;vc.35.0" expl="postcondition">
-   <proof prover="0" timelimit="10" memlimit="4000"><result status="timeout" time="10.00"/></proof>
-   <proof prover="5"><result status="timeout" time="10.00" steps="18287730"/></proof>
-   <proof prover="6" timelimit="10" memlimit="4000"><result status="timeout" time="10.00" steps="577169"/></proof>
-   </goal>
-  </transf>
-  </goal>
-  <goal name="cutpoints&#39;vc.36" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="30"/></proof>
-  </goal>
-  <goal name="cutpoints&#39;vc.37" expl="assertion" proved="true">
   <proof prover="0"><result status="valid" time="0.02" steps="35"/></proof>
   </goal>
+  <goal name="cutpoints&#39;vc.21" expl="loop invariant preservation" proved="true">
+  <proof prover="0"><result status="valid" time="0.02" steps="36"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.22" expl="loop invariant preservation" proved="true">
+  <proof prover="0"><result status="valid" time="0.05" steps="264"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.23" expl="loop invariant preservation" proved="true">
+  <proof prover="4"><result status="valid" time="0.26" steps="41342"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.24" expl="loop invariant preservation" proved="true">
+  <proof prover="0"><result status="valid" time="0.32" steps="2993"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.25" expl="loop invariant preservation" proved="true">
+  <proof prover="0"><result status="valid" time="0.09" steps="679"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.26" expl="loop invariant preservation" proved="true">
+  <transf name="case" proved="true" arg1="(k = length2 (seq cut) - 2)">
+   <goal name="cutpoints&#39;vc.26.0" expl="true case (loop invariant preservation)" proved="true">
+   <proof prover="0"><result status="valid" time="0.05" steps="294"/></proof>
+   </goal>
+   <goal name="cutpoints&#39;vc.26.1" expl="false case (loop invariant preservation)" proved="true">
+   <proof prover="0" timelimit="10"><result status="valid" time="1.79" steps="18101"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="cutpoints&#39;vc.27" expl="loop invariant preservation" proved="true">
+  <proof prover="0"><result status="valid" time="1.30" steps="17547"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.28" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.34" steps="3597"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.29" expl="assertion" proved="true">
+  <proof prover="4"><result status="valid" time="0.68" steps="81959"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.30" expl="postcondition" proved="true">
+  <proof prover="4"><result status="valid" time="0.35" steps="37414"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.31" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.02" steps="39"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.32" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.06" steps="287"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.33" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.07" steps="531"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.34" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="1.24" steps="11569"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.35" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.25" steps="1945"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.36" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.02" steps="28"/></proof>
+  </goal>
+  <goal name="cutpoints&#39;vc.37" expl="assertion" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="11842"/></proof>
+  </goal>
   <goal name="cutpoints&#39;vc.38" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="31"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="28"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.39" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="31"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="28"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.40" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="240"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="258"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.41" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="57"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="57"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.42" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="489"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="514"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.43" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="77"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="105"/></proof>
   </goal>
  </transf>
+ </goal>
+ <goal name="StrictIncr.Transitive.Trans" proved="true">
+ <proof prover="0"><result status="valid" time="0.01" steps="8"/></proof>
+ </goal>
+ <goal name="RevSorted.Transitive.Trans" proved="true">
+ <proof prover="0"><result status="valid" time="0.01" steps="10"/></proof>
  </goal>
  <goal name="reverse_sorted_incr" proved="true">
  <transf name="split_vc" proved="true" >
@@ -200,7 +178,7 @@
   <proof prover="0"><result status="valid" time="0.02" steps="12"/></proof>
   </goal>
   <goal name="reverse_sorted_incr.2" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="74"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="75"/></proof>
   </goal>
   <goal name="reverse_sorted_incr.3" proved="true">
   <proof prover="0"><result status="valid" time="0.03" steps="118"/></proof>
@@ -208,10 +186,10 @@
  </transf>
  </goal>
  <goal name="lt_le_sorted&#39;vc" expl="VC for lt_le_sorted" proved="true">
- <proof prover="0"><result status="valid" time="0.06" steps="356"/></proof>
+ <proof prover="0"><result status="valid" time="0.06" steps="358"/></proof>
  </goal>
  <goal name="order&#39;vc" expl="VC for order" proved="true">
- <proof prover="0"><result status="valid" time="0.06" steps="614"/></proof>
+ <proof prover="0"><result status="valid" time="0.06" steps="613"/></proof>
  </goal>
  <goal name="list_from&#39;vc" expl="VC for list_from" proved="true">
  <transf name="split_vc" proved="true" >
@@ -225,25 +203,25 @@
   <proof prover="0"><result status="valid" time="0.02" steps="25"/></proof>
   </goal>
   <goal name="list_from&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="87"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="88"/></proof>
   </goal>
   <goal name="list_from&#39;vc.4" expl="index in array bounds" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="22"/></proof>
   </goal>
   <goal name="list_from&#39;vc.5" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.13" steps="561"/></proof>
+  <proof prover="0"><result status="valid" time="0.13" steps="709"/></proof>
   </goal>
   <goal name="list_from&#39;vc.6" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="339"/></proof>
+  <proof prover="0"><result status="valid" time="0.06" steps="349"/></proof>
   </goal>
   <goal name="list_from&#39;vc.7" expl="postcondition" proved="true">
   <proof prover="0"><result status="valid" time="0.18" steps="345"/></proof>
   </goal>
   <goal name="list_from&#39;vc.8" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.11" steps="867"/></proof>
+  <proof prover="0"><result status="valid" time="0.26" steps="868"/></proof>
   </goal>
   <goal name="list_from&#39;vc.9" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="297"/></proof>
+  <proof prover="0"><result status="valid" time="0.06" steps="296"/></proof>
   </goal>
  </transf>
  </goal>
@@ -256,55 +234,59 @@
   <proof prover="0"><result status="valid" time="0.02" steps="22"/></proof>
   </goal>
   <goal name="occ_slice&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="62"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="83"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="sorted_lists&#39;vc" expl="VC for sorted_lists" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="sorted_lists&#39;vc.0" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.41" steps="4542"/></proof>
+  <transf name="remove" proved="true" arg1="zero,one,(-),(&gt;),(&lt;=),(&gt;=),get,set,([]&#39;),([&lt;-]&#39;),andb,orb,notb,xorb,implb,is_nil,length1,mem,is_none,nth,hd,tl,(++),reverse,rev_append,num_occ,permut,fold_right,singleton,cons,snoc,(++&#39;),of_list,point_wise,([]),eqb,ge,compat,seq,Assoc1,Unit_def_l,Unit_def_r,Inv_def_l,Inv_def_r,Comm1,Assoc,Mul_distr_l,Mul_distr_r,Comm,Unitary,NonTrivialRing,Refl,Trans2,Antisymm,Total,ZeroLessOne,CompatOrderAdd,CompatOrderMult,occ_empty,occ_right_no_add,occ_right_add,occ_left_no_add,occ_left_add,occ_bounds,occ_append,occ_neq,occ_exists,occ_pos,occ_eq,occ_exchange,is_nil&#39;spec,Length_nonnegative,Length_nil,is_none&#39;spec,Nth_tl,Nth0_head,Append_assoc,Append_l_nil,Append_length,mem_append,mem_decomp,reverse_append,cons_reverse,reverse_reverse,reverse_mem,Reverse_length,rev_append_append_l,rev_append_length,rev_append_def,rev_append_append_r,Num_Occ_NonNeg,Mem_Num_Occ,Append_Num_Occ,reverse_num_occ,Permut_refl,Permut_sym,Permut_trans,Permut_cons,Permut_swap,Permut_cons_append,Permut_assoc,Permut_append,Permut_append_swap,Permut_mem,Permut_length,fold_right_append,create&#39;spec,empty&#39;def,set&#39;spec,set&#39;def,([&lt;-])&#39;def,singleton&#39;spec,([..])&#39;spec,([_..])&#39;def,([.._])&#39;def,(++)&#39;spec,associative,left_neutral,right_neutral,cons_def,snoc_def,double_sub_sequence,cons_back,snoc_back,cat_back,cons_dec,snoc_dec,cat_dec,empty_dec,singleton_dec,to_list_empty,to_list_cons,to_list_length,to_list_nth,to_list_def_cons,length_of_list,elts_seq_of_list,is_of_list,of_list_app,of_list_app_length,convolution_to_of_list,array&#39;invariant,([&lt;-])&#39;spec,make_spec,eqb&#39;spec,nil&#39;def,Trans1,sorted&#39;def2,sorted_mem2,sorted_append2,Trans,sorted&#39;def1,sorted_mem1,sorted_append1,sorted&#39;def,sorted_mem,sorted_append,rev_append_sorted_incr,rev_append_sorted_decr,reverse_sorted_incr,lt_le_sorted,order&#39;spec,order&#39;def,occ_slice,Requires3,Requires2,Requires1,Requires">
+   <goal name="sorted_lists&#39;vc.0.0" expl="assertion" proved="true">
+   <proof prover="0" timelimit="1"><result status="valid" time="0.01" steps="149"/></proof>
+   </goal>
+  </transf>
   </goal>
   <goal name="sorted_lists&#39;vc.1" expl="precondition" proved="true">
   <transf name="remove" proved="true" arg1="zero,one,(-),(&gt;),(&lt;=),(&gt;=),get,set,([]&#39;),([&lt;-]&#39;),andb,orb,notb,xorb,implb,is_nil,length1,is_none,nth,hd,tl,(++),reverse,rev_append,num_occ,permut,fold_right,([]&#39;&#39;),singleton,cons,snoc,(++&#39;),of_list,point_wise,([]),sorted2,ge,sorted1,sorted,compat,eqb,seq,Assoc1,Unit_def_l,Unit_def_r,Inv_def_l,Inv_def_r,Comm1,Assoc,Mul_distr_l,Mul_distr_r,Comm,Unitary,NonTrivialRing,Refl,Trans2,Antisymm,Total,ZeroLessOne,CompatOrderAdd,CompatOrderMult,occ_empty,occ_right_no_add,occ_right_add,occ_left_no_add,occ_left_add,occ_bounds,occ_append,occ_neq,occ_exists,occ_pos,occ_eq,occ_exchange,is_nil&#39;spec,Length_nonnegative,Length_nil,is_none&#39;spec,Nth_tl,Nth0_head,Append_assoc,Append_l_nil,Append_length,mem_append,mem_decomp,reverse_append,reverse_cons,cons_reverse,reverse_reverse,reverse_mem,Reverse_length,rev_append_append_l,rev_append_length,rev_append_def,rev_append_append_r,Num_Occ_NonNeg,Mem_Num_Occ,Append_Num_Occ,reverse_num_occ,Permut_refl,Permut_sym,Permut_trans,Permut_cons,Permut_swap,Permut_cons_append,Permut_assoc,Permut_append,Permut_append_swap,Permut_mem,Permut_length,fold_right_append,length_nonnegative,(==)&#39;spec,create&#39;spec,empty&#39;def,set&#39;spec,set&#39;def,([&lt;-])&#39;def,singleton&#39;spec,cons&#39;spec,snoc&#39;spec,([..])&#39;spec,([..])&#39;def,([_..])&#39;def,([.._])&#39;def,(++)&#39;spec,associative,left_neutral,right_neutral,cons_def,snoc_def,double_sub_sequence,cons_back,snoc_back,cat_back,cons_dec,snoc_dec,cat_dec,empty_dec,singleton_dec,to_list_empty,to_list_cons,to_list_length,to_list_nth,to_list_def_cons,length_of_list,elts_seq_of_list,is_of_list,of_list_app,of_list_app_length,of_list_snoc,convolution_to_of_list,array&#39;invariant,([&lt;-])&#39;spec,make_spec,Trans1,sorted_mem2,sorted_append2,Trans,sorted_mem1,sorted_append1,sorted_mem,sorted_append,rev_append_sorted_incr,rev_append_sorted_decr,eqb&#39;spec,list_seq&#39;invariant,nil&#39;def,reverse_sorted_incr,lt_le_sorted,order&#39;spec,order&#39;def,occ_slice,Requires3,Requires2,Requires,Assert">
    <goal name="sorted_lists&#39;vc.1.0" expl="precondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.02" steps="530"/></proof>
+   <proof prover="0"><result status="valid" time="0.02" steps="543"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="sorted_lists&#39;vc.2" expl="precondition" proved="true">
   <transf name="remove" proved="true" arg1="zero,one,(-),(&gt;),(&lt;=),(&gt;=),get,set,([]&#39;),([&lt;-]&#39;),andb,orb,notb,xorb,implb,is_nil,length1,mem,is_none,nth,tl,(++),reverse,rev_append,permut,fold_right,([]&#39;&#39;),singleton,cons,snoc,(++&#39;),of_list,point_wise,([]),sorted2,ge,sorted1,sorted,compat,eqb,seq,Assoc1,Unit_def_l,Unit_def_r,Inv_def_l,Inv_def_r,Comm1,Assoc,Mul_distr_l,Mul_distr_r,Comm,Unitary,NonTrivialRing,Refl,Trans2,Antisymm,Total,ZeroLessOne,CompatOrderAdd,CompatOrderMult,occ_empty,occ_right_no_add,occ_right_add,occ_left_no_add,occ_left_add,occ_bounds,occ_append,occ_neq,occ_exists,occ_pos,occ_eq,is_nil&#39;spec,Length_nonnegative,Length_nil,is_none&#39;spec,Nth_tl,Nth0_head,Append_assoc,Append_l_nil,Append_length,mem_append,mem_decomp,reverse_append,reverse_cons,cons_reverse,reverse_reverse,reverse_mem,Reverse_length,rev_append_append_l,rev_append_length,rev_append_def,rev_append_append_r,Append_Num_Occ,reverse_num_occ,Permut_refl,Permut_sym,Permut_trans,Permut_cons,Permut_swap,Permut_cons_append,Permut_assoc,Permut_append,Permut_append_swap,Permut_mem,Permut_length,fold_right_append,length_nonnegative,(==)&#39;spec,create&#39;spec,empty&#39;def,set&#39;spec,set&#39;def,([&lt;-])&#39;def,singleton&#39;spec,cons&#39;spec,snoc&#39;spec,([..])&#39;spec,([..])&#39;def,([_..])&#39;def,([.._])&#39;def,(++)&#39;spec,associative,left_neutral,right_neutral,cons_def,snoc_def,double_sub_sequence,cons_back,snoc_back,cat_back,cons_dec,snoc_dec,cat_dec,empty_dec,singleton_dec,to_list_empty,to_list_cons,to_list_length,to_list_nth,to_list_def_cons,length_of_list,elts_seq_of_list,is_of_list,of_list_app,of_list_app_length,of_list_snoc,convolution_to_of_list,array&#39;invariant,([&lt;-])&#39;spec,make_spec,Trans1,sorted_mem2,sorted_append2,Trans,sorted_mem1,sorted_append1,sorted_mem,sorted_append,rev_append_sorted_incr,rev_append_sorted_decr,eqb&#39;spec,list_seq&#39;invariant,nil&#39;def,reverse_sorted_incr,lt_le_sorted,order&#39;spec,order&#39;def,occ_slice,Requires4,Requires3,Requires1,Assert,Requires">
    <goal name="sorted_lists&#39;vc.2.0" expl="precondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.03" steps="1288"/></proof>
+   <proof prover="0"><result status="valid" time="0.03" steps="1286"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="sorted_lists&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="420"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="512"/></proof>
   </goal>
   <goal name="sorted_lists&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="176"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="184"/></proof>
   </goal>
   <goal name="sorted_lists&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.30" steps="3157"/></proof>
+  <proof prover="0"><result status="valid" time="0.85" steps="9249"/></proof>
   </goal>
   <goal name="sorted_lists&#39;vc.6" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="53"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="58"/></proof>
   </goal>
   <goal name="sorted_lists&#39;vc.7" expl="variant decrease" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="276"/></proof>
+  <proof prover="0"><result status="valid" time="0.06" steps="300"/></proof>
   </goal>
   <goal name="sorted_lists&#39;vc.8" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="142"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="166"/></proof>
   </goal>
   <goal name="sorted_lists&#39;vc.9" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.08" steps="290"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="332"/></proof>
   </goal>
   <goal name="sorted_lists&#39;vc.10" expl="precondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.84" steps="159665"/></proof>
+  <proof prover="4"><result status="valid" time="1.56" steps="159688"/></proof>
   </goal>
   <goal name="sorted_lists&#39;vc.11" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.21" steps="1730"/></proof>
+  <proof prover="0"><result status="valid" time="0.57" steps="2630"/></proof>
   </goal>
   <goal name="sorted_lists&#39;vc.12" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.02" steps="28"/></proof>
@@ -315,28 +297,28 @@
    <proof prover="0"><result status="valid" time="0.02" steps="24"/></proof>
    </goal>
    <goal name="sorted_lists&#39;vc.13.1" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.03" steps="26"/></proof>
+   <proof prover="0"><result status="valid" time="0.02" steps="26"/></proof>
    </goal>
    <goal name="sorted_lists&#39;vc.13.2" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.02" steps="74"/></proof>
+   <proof prover="0"><result status="valid" time="0.03" steps="78"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="sorted_lists&#39;vc.14" expl="postcondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="sorted_lists&#39;vc.14.0" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.03" steps="55"/></proof>
+   <proof prover="0"><result status="valid" time="0.03" steps="69"/></proof>
    </goal>
    <goal name="sorted_lists&#39;vc.14.1" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.05" steps="257"/></proof>
+   <proof prover="0"><result status="valid" time="0.05" steps="296"/></proof>
    </goal>
    <goal name="sorted_lists&#39;vc.14.2" expl="postcondition" proved="true">
    <transf name="assert" proved="true" arg1="(occ x (elts s) (get1 (seq1 cutp) 0) (get1 (seq1 cutp) (length2 (seq1 cutp) - 1)) = occ x (elts s) (get1 (seq1 cutp) 0) (get1 (seq1 lseq) (length2 (seq1 lseq) - 1)) + occ x (elts s) (get1 (seq1 lseq) (length2 (seq1 lseq) - 1)) (get1 (seq1 cutp) (length2 (seq1 cutp) - 1)))">
     <goal name="sorted_lists&#39;vc.14.2.0" expl="asserted formula" proved="true">
-    <proof prover="0"><result status="valid" time="0.18" steps="854"/></proof>
+    <proof prover="0"><result status="valid" time="0.18" steps="1218"/></proof>
     </goal>
     <goal name="sorted_lists&#39;vc.14.2.1" expl="postcondition" proved="true">
-    <proof prover="0"><result status="valid" time="0.49" steps="4145"/></proof>
+    <proof prover="0"><result status="valid" time="0.68" steps="7096"/></proof>
     </goal>
    </transf>
    </goal>
@@ -347,7 +329,7 @@
  <goal name="merge&#39;vc" expl="VC for merge" proved="true">
  <transf name="split_all_full" proved="true" >
   <goal name="merge&#39;vc.0" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.15" steps="893"/></proof>
+  <proof prover="0"><result status="valid" time="0.15" steps="895"/></proof>
   </goal>
   <goal name="merge&#39;vc.1" expl="variant decrease" proved="true">
   <proof prover="0"><result status="valid" time="0.03" steps="77"/></proof>
@@ -359,7 +341,7 @@
   <proof prover="0"><result status="valid" time="0.02" steps="24"/></proof>
   </goal>
   <goal name="merge&#39;vc.4" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.12" steps="741"/></proof>
+  <proof prover="0"><result status="valid" time="0.12" steps="740"/></proof>
   </goal>
   <goal name="merge&#39;vc.5" expl="variant decrease" proved="true">
   <proof prover="0"><result status="valid" time="0.03" steps="77"/></proof>
@@ -389,16 +371,16 @@
   <proof prover="0"><result status="valid" time="0.04" steps="83"/></proof>
   </goal>
   <goal name="merge&#39;vc.14" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.26" steps="1608"/></proof>
+  <proof prover="0"><result status="valid" time="0.39" steps="1611"/></proof>
   </goal>
   <goal name="merge&#39;vc.15" expl="postcondition" proved="true">
   <proof prover="0"><result status="valid" time="0.03" steps="244"/></proof>
   </goal>
   <goal name="merge&#39;vc.16" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.33" steps="2128"/></proof>
+  <proof prover="0"><result status="valid" time="0.33" steps="2126"/></proof>
   </goal>
   <goal name="merge&#39;vc.17" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.14" steps="776"/></proof>
+  <proof prover="0"><result status="valid" time="0.14" steps="777"/></proof>
   </goal>
  </transf>
  </goal>
@@ -408,13 +390,13 @@
   <proof prover="0"><result status="valid" time="0.02" steps="29"/></proof>
   </goal>
   <goal name="merge_pair&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="318"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="319"/></proof>
   </goal>
   <goal name="merge_pair&#39;vc.2" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.05" steps="135"/></proof>
   </goal>
   <goal name="merge_pair&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="275"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="272"/></proof>
   </goal>
   <goal name="merge_pair&#39;vc.4" expl="postcondition" proved="true">
   <proof prover="0"><result status="valid" time="0.04" steps="16"/></proof>
@@ -444,34 +426,34 @@
   <proof prover="0"><result status="valid" time="0.02" steps="59"/></proof>
   </goal>
   <goal name="merge_pair&#39;vc.13" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="94"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="100"/></proof>
   </goal>
   <goal name="merge_pair&#39;vc.14" expl="postcondition" proved="true">
   <proof prover="0"><result status="valid" time="0.03" steps="56"/></proof>
   </goal>
   <goal name="merge_pair&#39;vc.15" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.48" steps="3060"/></proof>
+  <proof prover="0"><result status="valid" time="0.48" steps="3070"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="mergerec&#39;vc" expl="VC for mergerec" proved="true">
- <proof prover="0"><result status="valid" time="0.16" steps="1482"/></proof>
+ <proof prover="0"><result status="valid" time="0.16" steps="1483"/></proof>
  </goal>
  <goal name="find&#39;vc" expl="VC for find" proved="true">
- <proof prover="0"><result status="valid" time="0.10" steps="445"/></proof>
+ <proof prover="0"><result status="valid" time="0.10" steps="584"/></proof>
  </goal>
  <goal name="same_occs_same_lengths&#39;vc" expl="VC for same_occs_same_lengths" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="same_occs_same_lengths&#39;vc.0" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.11" steps="651"/></proof>
+  <proof prover="0"><result status="valid" time="0.11" steps="922"/></proof>
   </goal>
   <goal name="same_occs_same_lengths&#39;vc.1" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="same_occs_same_lengths&#39;vc.1.0" expl="assertion" proved="true">
-   <proof prover="0"><result status="valid" time="0.04" steps="109"/></proof>
+   <proof prover="0"><result status="valid" time="0.04" steps="123"/></proof>
    </goal>
    <goal name="same_occs_same_lengths&#39;vc.1.1" expl="VC for same_occs_same_lengths" proved="true">
-   <proof prover="0"><result status="valid" time="0.04" steps="108"/></proof>
+   <proof prover="0"><result status="valid" time="0.04" steps="123"/></proof>
    </goal>
   </transf>
   </goal>
@@ -482,7 +464,7 @@
   <proof prover="0"><result status="valid" time="0.02" steps="22"/></proof>
   </goal>
   <goal name="same_occs_same_lengths&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="109"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="123"/></proof>
   </goal>
   <goal name="same_occs_same_lengths&#39;vc.5" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.02" steps="26"/></proof>
@@ -493,19 +475,19 @@
   <goal name="same_occs_same_lengths&#39;vc.7" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="same_occs_same_lengths&#39;vc.7.0" expl="assertion" proved="true">
-   <proof prover="0"><result status="valid" time="0.23" steps="1872"/></proof>
+   <proof prover="0"><result status="valid" time="0.23" steps="1877"/></proof>
    </goal>
    <goal name="same_occs_same_lengths&#39;vc.7.1" expl="VC for same_occs_same_lengths" proved="true">
-   <proof prover="0"><result status="valid" time="0.29" steps="1257"/></proof>
+   <proof prover="0"><result status="valid" time="0.29" steps="1901"/></proof>
    </goal>
    <goal name="same_occs_same_lengths&#39;vc.7.2" expl="VC for same_occs_same_lengths" proved="true">
-   <proof prover="0"><result status="valid" time="0.06" steps="330"/></proof>
+   <proof prover="0"><result status="valid" time="0.06" steps="371"/></proof>
    </goal>
    <goal name="same_occs_same_lengths&#39;vc.7.3" expl="VC for same_occs_same_lengths" proved="true">
-   <proof prover="0"><result status="valid" time="0.09" steps="491"/></proof>
+   <proof prover="0"><result status="valid" time="0.09" steps="533"/></proof>
    </goal>
    <goal name="same_occs_same_lengths&#39;vc.7.4" expl="VC for same_occs_same_lengths" proved="true">
-   <proof prover="0"><result status="valid" time="0.08" steps="483"/></proof>
+   <proof prover="0"><result status="valid" time="0.08" steps="527"/></proof>
    </goal>
   </transf>
   </goal>
@@ -516,26 +498,26 @@
   <proof prover="0"><result status="valid" time="0.02" steps="34"/></proof>
   </goal>
   <goal name="same_occs_same_lengths&#39;vc.10" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.09" steps="554"/></proof>
+  <proof prover="0"><result status="valid" time="0.09" steps="576"/></proof>
   </goal>
   <goal name="same_occs_same_lengths&#39;vc.11" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="158"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="173"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="num_occ_seq_occ&#39;vc" expl="VC for num_occ_seq_occ" proved="true">
  <transf name="split_all_full" proved="true" >
   <goal name="num_occ_seq_occ&#39;vc.0" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.11" steps="1064"/></proof>
+  <proof prover="0"><result status="valid" time="0.11" steps="1313"/></proof>
   </goal>
   <goal name="num_occ_seq_occ&#39;vc.1" expl="variant decrease" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="217"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="223"/></proof>
   </goal>
   <goal name="num_occ_seq_occ&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="128"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="136"/></proof>
   </goal>
   <goal name="num_occ_seq_occ&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.30" steps="2823"/></proof>
+  <proof prover="0"><result status="valid" time="0.30" steps="3925"/></proof>
   </goal>
  </transf>
  </goal>
@@ -548,31 +530,31 @@
   <proof prover="0"><result status="valid" time="0.02" steps="20"/></proof>
   </goal>
   <goal name="sort_to_list&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="49"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="67"/></proof>
   </goal>
   <goal name="sort_to_list&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="35"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="43"/></proof>
   </goal>
   <goal name="sort_to_list&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="294"/></proof>
+  <proof prover="0"><result status="valid" time="0.07" steps="363"/></proof>
   </goal>
   <goal name="sort_to_list&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="34"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="44"/></proof>
   </goal>
   <goal name="sort_to_list&#39;vc.6" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.02" steps="24"/></proof>
   </goal>
   <goal name="sort_to_list&#39;vc.7" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="284"/></proof>
+  <proof prover="0"><result status="valid" time="0.06" steps="441"/></proof>
   </goal>
   <goal name="sort_to_list&#39;vc.8" expl="postcondition" proved="true">
   <proof prover="0"><result status="valid" time="0.02" steps="26"/></proof>
   </goal>
   <goal name="sort_to_list&#39;vc.9" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="194"/></proof>
+  <proof prover="0"><result status="valid" time="0.06" steps="313"/></proof>
   </goal>
   <goal name="sort_to_list&#39;vc.10" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="40"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="50"/></proof>
   </goal>
  </transf>
  </goal>
@@ -585,7 +567,7 @@
   <proof prover="0"><result status="valid" time="0.02" steps="22"/></proof>
   </goal>
   <goal name="copy_list&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.03" steps="88"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="102"/></proof>
   </goal>
   <goal name="copy_list&#39;vc.3" expl="index in array bounds" proved="true">
   <proof prover="0"><result status="valid" time="0.03" steps="67"/></proof>
@@ -606,12 +588,12 @@
   <proof prover="0"><result status="valid" time="0.04" steps="189"/></proof>
   </goal>
   <goal name="copy_list&#39;vc.9" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.11" steps="701"/></proof>
+  <proof prover="0"><result status="valid" time="0.11" steps="818"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="mem_nth_in_bounds&#39;vc" expl="VC for mem_nth_in_bounds" proved="true">
- <proof prover="0"><result status="valid" time="0.04" steps="341"/></proof>
+ <proof prover="0"><result status="valid" time="0.04" steps="342"/></proof>
  </goal>
  <goal name="sorted_list_nth&#39;vc" expl="VC for sorted_list_nth" proved="true">
  <transf name="split_vc" proved="true" >
@@ -627,13 +609,13 @@
   <goal name="sorted_list_nth&#39;vc.3" expl="postcondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="sorted_list_nth&#39;vc.3.0" expl="postcondition" proved="true">
-   <proof prover="6"><result status="valid" time="0.15" steps="35919"/></proof>
+   <proof prover="4" timelimit="1"><result status="valid" time="0.21" steps="37669"/></proof>
    </goal>
    <goal name="sorted_list_nth&#39;vc.3.1" expl="postcondition" proved="true">
-   <proof prover="6"><result status="valid" time="0.24" steps="44138"/></proof>
+   <proof prover="4" timelimit="1"><result status="valid" time="0.24" steps="45567"/></proof>
    </goal>
    <goal name="sorted_list_nth&#39;vc.3.2" expl="postcondition" proved="true">
-   <proof prover="6"><result status="valid" time="0.21" steps="44770"/></proof>
+   <proof prover="4" timelimit="1"><result status="valid" time="0.15" steps="46213"/></proof>
    </goal>
   </transf>
   </goal>
@@ -663,7 +645,7 @@
   <proof prover="0"><result status="valid" time="0.12" steps="139"/></proof>
   </goal>
   <goal name="ghc_sort&#39;vc.7" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="137"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="152"/></proof>
   </goal>
  </transf>
  </goal>

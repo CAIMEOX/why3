@@ -18,9 +18,6 @@ use exn.Exn
 (** {2 PART A : Monotonic Segments} *)
 
 
-clone list.Sorted as StrictIncr with type t = int, predicate le = (<)
-clone list.RevSorted with type t = int, predicate le = (<=)
-
 use list.FoldRight
 
 let function eqb (b1 b2 : bool) : bool
@@ -103,22 +100,23 @@ let cutpoints (s : array int)
         done;
         cut <- extend y cut;
         assert { get (cut.seq at StartLoop) (Seq.length cut.seq - 2) = x };
-        assert { forall k. 0 <= k < Seq.length cut.seq - 2 ->
-                 get cut.seq k at StartLoop = get cut.seq k /\
-                 get cut.seq (k+1) at StartLoop = get cut.seq (k+1) };
+        assert { forall k. 0 <= k < Seq.length cut.seq - 1 ->
+                 get cut.seq k at StartLoop = get cut.seq k };
         x <- y;
         y <- x+1;
   done;
   label AfterLoop in
   if x < n then cut <- extend n cut;
   assert { get cut.seq (Seq.length cut.seq - 1) = n };
-  assert { forall k. 0 <= k < Seq.length cut.seq - 2 ->
-           get cut.seq k at AfterLoop = get cut.seq k /\
-           get cut.seq (k+1) at AfterLoop = get cut.seq (k+1) };
+  assert { forall k. 0 <= k < Seq.length cut.seq - 1 ->
+           get cut.seq k = get cut.seq k at AfterLoop };
   cut
 
 
 (** {2 PART B : GHC Sort} *)
+
+clone list.Sorted as StrictIncr with type t = int, predicate le = (<)
+clone list.RevSorted with type t = int, predicate le = (<=)
 
 
 lemma reverse_sorted_incr :

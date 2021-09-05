@@ -3,514 +3,340 @@
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
 <prover id="0" name="Alt-Ergo" version="2.4.0" timelimit="1" steplimit="0" memlimit="1000"/>
-<prover id="1" name="Alt-Ergo" version="2.3.2" timelimit="5" steplimit="0" memlimit="1000"/>
-<prover id="2" name="Z3" version="4.8.6" timelimit="1" steplimit="0" memlimit="1000"/>
-<prover id="4" name="CVC4" version="1.8" timelimit="5" steplimit="0" memlimit="1000"/>
-<prover id="5" name="CVC4" version="1.7" timelimit="1" steplimit="0" memlimit="1000"/>
-<file format="whyml">
+<prover id="3" name="Z3" version="4.8.10" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="4" name="CVC4" version="1.8" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
 <path name=".."/><path name="verifythis_2019_cartesian_trees.mlw"/>
-<theory name="Top">
+<theory name="Top" proved="true">
  <goal name="Decr.Transitive.Trans" proved="true">
- <proof prover="1"><result status="failure" time="0.00"/></proof>
- <proof prover="5"><result status="valid" time="0.04" steps="8089"/></proof>
+ <proof prover="4"><result status="valid" time="0.04" steps="8623"/></proof>
  </goal>
  <goal name="destruct&#39;vc" expl="VC for destruct" proved="true">
- <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
- <proof prover="5"><result status="valid" time="0.03" steps="10568"/></proof>
+ <proof prover="4"><result status="valid" time="0.03" steps="11856"/></proof>
  </goal>
  <goal name="peek&#39;vc" expl="VC for peek" proved="true">
  <proof prover="0"><result status="valid" time="0.02" steps="44"/></proof>
- <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
- <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="4612538"/></proof>
- <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="436827"/></proof>
  </goal>
  <goal name="tail&#39;vc" expl="VC for tail" proved="true">
- <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
- <proof prover="5"><result status="valid" time="0.03" steps="9302"/></proof>
+ <proof prover="4"><result status="valid" time="0.03" steps="10185"/></proof>
  </goal>
  <goal name="destruct_peek_tail" proved="true">
- <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
- <proof prover="5"><result status="valid" time="0.17" steps="33556"/></proof>
+ <proof prover="4"><result status="valid" time="0.17" steps="39731"/></proof>
  </goal>
  <goal name="smaller_left&#39;vc" expl="VC for smaller_left" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="smaller_left&#39;vc.0" expl="array creation size" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="11754"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="12499"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.1" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="14574"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="15754"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.2" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="13995"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="15610"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.3" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="14005"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="15627"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.4" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="14012"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="15636"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.5" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="14071"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="15698"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.6" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="14175"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="15807"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.7" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="14359"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="15986"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.8" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="14509"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="16136"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.9" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="14992"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="15845"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.10" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="13192"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="14427"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.11" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="13250"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="14492"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.12" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="15548"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="16418"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.13" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="14729"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="15623"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.14" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="14763"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="15658"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.15" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="15444"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="17093"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.16" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="15426"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="17068"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.17" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="18097"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="19220"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.18" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="15477"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="17119"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.19" expl="loop variant decrease" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="169"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="2281817"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="175776"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="168"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.20" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.49" steps="79864"/></proof>
+  <proof prover="4" timelimit="5"><result status="valid" time="0.69" steps="80042"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.21" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.10" steps="22226"/></proof>
+  <proof prover="4"><result status="valid" time="0.10" steps="23398"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.22" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.08" steps="18765"/></proof>
+  <proof prover="4"><result status="valid" time="0.08" steps="20032"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.23" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.46" steps="4034"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1772702"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="251111"/></proof>
+  <proof prover="0"><result status="valid" time="0.46" steps="4084"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.24" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.71" steps="4604"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2"><result status="timeout" time="1.00" steps="1821029"/></proof>
-  <proof prover="5"><result status="timeout" time="1.00" steps="140059"/></proof>
+  <proof prover="0"><result status="valid" time="0.71" steps="4598"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.25" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.20" steps="1878"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="2286771"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="160139"/></proof>
+  <proof prover="0"><result status="valid" time="0.20" steps="1880"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.26" expl="assertion" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="15499"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="17148"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.27" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="16962"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="18213"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.28" expl="assertion" proved="true">
   <proof prover="0"><result status="valid" time="0.03" steps="55"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1233216"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="232581"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.29" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="19504"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="20683"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.30" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.08" steps="17588"/></proof>
+  <proof prover="4"><result status="valid" time="0.08" steps="18800"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.31" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="19600"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="20813"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.32" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="17673"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="18900"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.33" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="553"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1173104"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="200984"/></proof>
+  <proof prover="0"><result status="valid" time="0.06" steps="565"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.34" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.11" steps="1211"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1300853"/></proof>
-  <proof prover="4" obsolete="true"><result status="timeout" time="5.00" steps="1981583"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="183211"/></proof>
+  <proof prover="0"><result status="valid" time="0.11" steps="1204"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.35" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.02" steps="167"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.36" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.05" steps="405"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1387242"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="190937"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.37" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="15511"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="17165"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.38" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="16684"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="17856"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.39" expl="assertion" proved="true">
   <proof prover="0"><result status="valid" time="0.02" steps="62"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1927264"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="259232"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.40" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.08" steps="25820"/></proof>
+  <proof prover="4"><result status="valid" time="0.08" steps="27055"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.41" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="17295"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="18418"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.42" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.09" steps="19334"/></proof>
+  <proof prover="4"><result status="valid" time="0.09" steps="20450"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.43" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.10" steps="24659"/></proof>
+  <proof prover="4"><result status="valid" time="0.10" steps="25937"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.44" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.10" steps="966"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1390255"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="239060"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.45" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.36" steps="3446"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1622571"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="236006"/></proof>
+  <proof prover="0"><result status="valid" time="0.63" steps="3794"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.46" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.62" steps="3185"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2"><result status="timeout" time="1.00" steps="2283789"/></proof>
-  <proof prover="5"><result status="timeout" time="1.00" steps="123131"/></proof>
+  <proof prover="0"><result status="valid" time="0.62" steps="3246"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.47" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.09" steps="1271"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1684185"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="272547"/></proof>
+  <proof prover="0"><result status="valid" time="0.22" steps="1289"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.48" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="14929"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="15771"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.49" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="14814"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="15688"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.50" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="15496"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="16281"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.51" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="14339"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="15215"/></proof>
   </goal>
   <goal name="smaller_left&#39;vc.52" expl="out of loop bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="12187"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="12949"/></proof>
   </goal>
  </transf>
  </goal>
- <goal name="construct_dirs&#39;vc" expl="VC for construct_dirs">
- <transf name="split_vc" >
+ <goal name="construct_dirs&#39;vc" expl="VC for construct_dirs" proved="true">
+ <transf name="split_vc" proved="true" >
   <goal name="construct_dirs&#39;vc.0" expl="array creation size" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="14582"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="15316"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.1" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="16990"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="18001"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.2" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="15238"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="16734"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.3" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="18922"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="19870"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.4" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="16901"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="17888"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.5" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="16901"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="17888"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.6" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="18533"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="19422"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.7" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="18545"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="19434"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.8" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.09" steps="18352"/></proof>
+  <proof prover="4"><result status="valid" time="0.09" steps="19328"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.9" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.09" steps="18352"/></proof>
+  <proof prover="4"><result status="valid" time="0.09" steps="19328"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.10" expl="loop invariant preservation" proved="true">
   <transf name="case" proved="true" arg1="(j = li)">
    <goal name="construct_dirs&#39;vc.10.0" expl="true case (loop invariant preservation)" proved="true">
-   <proof prover="0"><result status="valid" time="0.17" steps="1302"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1465960"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="190391"/></proof>
+   <proof prover="0"><result status="valid" time="0.17" steps="1301"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.10.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="0"><result status="timeout" time="2.00"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2"><result status="valid" time="0.48" steps="1843912"/></proof>
-   <proof prover="5"><result status="timeout" time="1.00" steps="292459"/></proof>
+   <proof prover="3" timelimit="1"><result status="valid" time="0.30" steps="1374735"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="construct_dirs&#39;vc.11" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="timeout" time="2.00"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1489727"/></proof>
-  <proof prover="5"><result status="valid" time="0.14" steps="28654"/></proof>
+  <proof prover="4"><result status="valid" time="0.14" steps="30058"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.12" expl="loop invariant preservation" proved="true">
   <transf name="case" proved="true" arg1="(p = ri)">
    <goal name="construct_dirs&#39;vc.12.0" expl="true case (loop invariant preservation)" proved="true">
-   <proof prover="0"><result status="timeout" time="1.00"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1495156"/></proof>
-   <proof prover="5"><result status="valid" time="0.11" steps="27745"/></proof>
+   <proof prover="4"><result status="valid" time="0.11" steps="28755"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.12.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="0"><result status="timeout" time="2.00"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1504796"/></proof>
-   <proof prover="5"><result status="valid" time="0.35" steps="60458"/></proof>
+   <proof prover="4"><result status="valid" time="0.35" steps="63971"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="construct_dirs&#39;vc.13" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="18476"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="19452"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.14" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="18476"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="19452"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.15" expl="loop invariant preservation" proved="true">
   <transf name="case" proved="true" arg1="(j = ri)">
    <goal name="construct_dirs&#39;vc.15.0" expl="true case (loop invariant preservation)" proved="true">
-   <proof prover="0"><result status="valid" time="0.21" steps="1268"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1272041"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="158028"/></proof>
+   <proof prover="0"><result status="valid" time="0.21" steps="1259"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.15.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="0"><result status="valid" time="0.37" steps="2905"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1264717"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="185503"/></proof>
+   <proof prover="0"><result status="valid" time="0.58" steps="2873"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="construct_dirs&#39;vc.16" expl="loop invariant preservation" proved="true">
-  <proof prover="0" obsolete="true"><result status="timeout" time="1.00"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1480970"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="189129"/></proof>
   <transf name="split_vc" proved="true" >
    <goal name="construct_dirs&#39;vc.16.0" expl="loop invariant preservation" proved="true">
-   <proof prover="0"><result status="valid" time="0.15" steps="1162"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1546818"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="129508"/></proof>
+   <proof prover="0"><result status="valid" time="0.15" steps="1159"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.16.1" expl="loop invariant preservation" proved="true">
-   <proof prover="0"><result status="valid" time="0.18" steps="1630"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1509216"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="117776"/></proof>
+   <proof prover="0"><result status="valid" time="0.18" steps="1601"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.16.2" expl="loop invariant preservation" proved="true">
-   <proof prover="0"><result status="valid" time="0.40" steps="2848"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1248580"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="154671"/></proof>
+   <proof prover="0"><result status="valid" time="0.40" steps="2911"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.16.3" expl="loop invariant preservation" proved="true">
-   <proof prover="0"><result status="timeout" time="1.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1250291"/></proof>
-   <proof prover="5"><result status="valid" time="0.19" steps="36753"/></proof>
+   <proof prover="4"><result status="valid" time="0.19" steps="40229"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="construct_dirs&#39;vc.17" expl="loop invariant preservation" proved="true">
   <transf name="case" proved="true" arg1="(p = li)">
    <goal name="construct_dirs&#39;vc.17.0" expl="true case (loop invariant preservation)" proved="true">
-   <proof prover="0"><result status="timeout" time="1.00"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1522561"/></proof>
-   <proof prover="5"><result status="valid" time="0.18" steps="28787"/></proof>
+   <proof prover="4"><result status="valid" time="0.18" steps="29830"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.17.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="0"><result status="timeout" time="2.00"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1521381"/></proof>
-   <proof prover="5"><result status="valid" time="0.38" steps="82086"/></proof>
+   <proof prover="4"><result status="valid" time="0.38" steps="85797"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="construct_dirs&#39;vc.18" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="18484"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="19392"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.19" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="18484"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="19392"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.20" expl="loop invariant preservation" proved="true">
   <transf name="case" proved="true" arg1="(j = li)">
    <goal name="construct_dirs&#39;vc.20.0" expl="true case (loop invariant preservation)" proved="true">
-   <proof prover="0"><result status="valid" time="0.08" steps="743"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1276543"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="205895"/></proof>
+   <proof prover="0"><result status="valid" time="0.08" steps="744"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.20.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="0" obsolete="true"><result status="timeout" time="1.00"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1295198"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="181776"/></proof>
    <transf name="split_vc" proved="true" >
     <goal name="construct_dirs&#39;vc.20.1.0" expl="VC for construct_dirs" proved="true">
     <proof prover="0"><result status="valid" time="0.14" steps="300"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1564535"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="231604"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.20.1.1" expl="VC for construct_dirs" proved="true">
     <proof prover="0"><result status="valid" time="0.06" steps="162"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1756159"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="226636"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.20.1.2" expl="VC for construct_dirs" proved="true">
-    <proof prover="0"><result status="valid" time="0.07" steps="159"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1698043"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="216866"/></proof>
+    <proof prover="0"><result status="valid" time="0.07" steps="158"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.20.1.3" expl="VC for construct_dirs" proved="true">
     <proof prover="0"><result status="valid" time="0.15" steps="1044"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1347415"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="246563"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.20.1.4" expl="VC for construct_dirs" proved="true">
     <proof prover="0"><result status="valid" time="0.15" steps="300"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1591983"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="259247"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.20.1.5" expl="VC for construct_dirs" proved="true">
     <proof prover="0"><result status="valid" time="0.08" steps="157"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1528843"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="200921"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.20.1.6" expl="VC for construct_dirs" proved="true">
     <proof prover="0"><result status="valid" time="0.09" steps="158"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1532024"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="233767"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.20.1.7" expl="VC for construct_dirs" proved="true">
-    <proof prover="0"><result status="valid" time="0.11" steps="744"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1354172"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="246103"/></proof>
+    <proof prover="0"><result status="valid" time="0.11" steps="742"/></proof>
     </goal>
    </transf>
    </goal>
   </transf>
   </goal>
   <goal name="construct_dirs&#39;vc.21" expl="loop invariant preservation" proved="true">
-  <proof prover="0" obsolete="true"><result status="timeout" time="1.00"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1277122"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="180300"/></proof>
   <transf name="split_vc" proved="true" >
    <goal name="construct_dirs&#39;vc.21.0" expl="loop invariant preservation" proved="true">
-   <proof prover="0"><result status="valid" time="0.11" steps="740"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1646836"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="174439"/></proof>
+   <proof prover="0"><result status="valid" time="0.11" steps="741"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.21.1" expl="loop invariant preservation" proved="true">
-   <proof prover="0" timelimit="10" memlimit="4000"><result status="valid" time="0.09" steps="605"/></proof>
-   <proof prover="2" timelimit="10" memlimit="4000" obsolete="true"><result status="timeout" time="10.00" steps="10029644"/></proof>
-   <proof prover="5" timelimit="10" memlimit="4000" obsolete="true"><result status="timeout" time="10.00" steps="2659649"/></proof>
+   <proof prover="0" timelimit="10" memlimit="4000"><result status="valid" time="0.09" steps="604"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.21.2" expl="loop invariant preservation" proved="true">
-   <proof prover="0"><result status="valid" time="0.25" steps="1790"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1621693"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="210374"/></proof>
+   <proof prover="0"><result status="valid" time="0.25" steps="1834"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.21.3" expl="loop invariant preservation" proved="true">
-   <proof prover="0"><result status="valid" time="0.44" steps="3583"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1616020"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="206536"/></proof>
+   <proof prover="0"><result status="valid" time="0.44" steps="3581"/></proof>
    </goal>
   </transf>
   </goal>
@@ -518,76 +344,54 @@
   <transf name="case" proved="true" arg1="(p = ri)">
    <goal name="construct_dirs&#39;vc.22.0" expl="true case (loop invariant preservation)" proved="true">
    <proof prover="0"><result status="valid" time="0.09" steps="34"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1240901"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="159585"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.22.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="0" obsolete="true"><result status="timeout" time="1.00"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1266975"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="186041"/></proof>
    <transf name="split_vc" proved="true" >
     <goal name="construct_dirs&#39;vc.22.1.0" expl="VC for construct_dirs" proved="true">
-    <proof prover="0"><result status="valid" time="0.25" steps="1819"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1590666"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="242673"/></proof>
+    <proof prover="0"><result status="valid" time="0.25" steps="1818"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.22.1.1" expl="VC for construct_dirs" proved="true">
-    <proof prover="0"><result status="valid" time="1.34" steps="8741"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1417877"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="253459"/></proof>
+    <proof prover="0"><result status="valid" time="1.34" steps="8744"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.22.1.2" expl="VC for construct_dirs" proved="true">
-    <proof prover="0"><result status="valid" time="0.33" steps="2524"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1533265"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="217204"/></proof>
+    <proof prover="0"><result status="valid" time="0.49" steps="2486"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.22.1.3" expl="VC for construct_dirs" proved="true">
-    <proof prover="0"><result status="timeout" time="2.00"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1507724"/></proof>
-    <proof prover="5"><result status="valid" time="0.37" steps="76245"/></proof>
+    <proof prover="4"><result status="valid" time="0.60" steps="87808"/></proof>
     </goal>
    </transf>
    </goal>
   </transf>
   </goal>
   <goal name="construct_dirs&#39;vc.23" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.10" steps="18542"/></proof>
+  <proof prover="4"><result status="valid" time="0.10" steps="19448"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.24" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="18542"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="19448"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.25" expl="loop invariant preservation" proved="true">
   <transf name="case" proved="true" arg1="(j = ri)">
    <goal name="construct_dirs&#39;vc.25.0" expl="true case (loop invariant preservation)" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2"><result status="valid" time="0.31" steps="1248290"/></proof>
-   <proof prover="5"><result status="timeout" time="1.00" steps="241364"/></proof>
+   <proof prover="3" timelimit="1"><result status="valid" time="0.64" steps="1992933"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.25.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="0"><result status="valid" time="0.49" steps="2681"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1064871"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="152974"/></proof>
+   <proof prover="0"><result status="valid" time="0.49" steps="2617"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="construct_dirs&#39;vc.26" expl="loop invariant preservation" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="construct_dirs&#39;vc.26.0" expl="loop invariant preservation" proved="true">
-   <proof prover="0" timelimit="10" memlimit="4000"><result status="valid" time="0.10" steps="253"/></proof>
+   <proof prover="0" timelimit="10" memlimit="4000"><result status="valid" time="0.10" steps="254"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.26.1" expl="loop invariant preservation" proved="true">
    <proof prover="0" timelimit="10" memlimit="4000"><result status="valid" time="0.12" steps="501"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.26.2" expl="loop invariant preservation" proved="true">
-   <proof prover="0"><result status="valid" time="0.34" steps="959"/></proof>
+   <proof prover="0"><result status="valid" time="0.19" steps="958"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.26.3" expl="loop invariant preservation" proved="true">
-   <proof prover="0"><result status="valid" time="0.20" steps="879"/></proof>
+   <proof prover="0"><result status="valid" time="0.20" steps="874"/></proof>
    </goal>
   </transf>
   </goal>
@@ -595,35 +399,20 @@
   <transf name="case" proved="true" arg1="(p = li)">
    <goal name="construct_dirs&#39;vc.27.0" expl="true case (loop invariant preservation)" proved="true">
    <proof prover="0"><result status="valid" time="0.10" steps="34"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1303451"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="180910"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.27.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="0" obsolete="true"><result status="timeout" time="1.00"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1306592"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="152416"/></proof>
    <transf name="split_vc" proved="true" >
     <goal name="construct_dirs&#39;vc.27.1.0" expl="VC for construct_dirs" proved="true">
-    <proof prover="0"><result status="valid" time="0.23" steps="1216"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1592414"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="241571"/></proof>
+    <proof prover="0"><result status="valid" time="0.23" steps="1181"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.27.1.1" expl="VC for construct_dirs" proved="true">
-    <proof prover="0"><result status="timeout" time="2.00"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1597168"/></proof>
-    <proof prover="5"><result status="valid" time="0.39" steps="77513"/></proof>
+    <proof prover="4"><result status="valid" time="0.39" steps="79943"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.27.1.2" expl="VC for construct_dirs" proved="true">
-    <proof prover="0"><result status="valid" time="0.73" steps="3878"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1547032"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="221515"/></proof>
+    <proof prover="0"><result status="valid" time="0.73" steps="3860"/></proof>
     </goal>
     <goal name="construct_dirs&#39;vc.27.1.3" expl="VC for construct_dirs" proved="true">
-    <proof prover="0"><result status="timeout" time="2.00"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1562041"/></proof>
-    <proof prover="5"><result status="valid" time="0.12" steps="28656"/></proof>
+    <proof prover="4"><result status="valid" time="0.12" steps="29679"/></proof>
     </goal>
    </transf>
    </goal>
@@ -633,42 +422,30 @@
   <transf name="case" proved="true" arg1="(j = ri)">
    <goal name="construct_dirs&#39;vc.28.0" expl="true case (loop invariant preservation)" proved="true">
    <proof prover="0"><result status="valid" time="0.02" steps="24"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1482114"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="180241"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.28.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="0"><result status="valid" time="0.07" steps="318"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1486728"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="203565"/></proof>
+   <proof prover="0"><result status="valid" time="0.07" steps="317"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="construct_dirs&#39;vc.29" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.11" steps="20161"/></proof>
+  <proof prover="4"><result status="valid" time="0.11" steps="21133"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.30" expl="loop invariant preservation" proved="true">
   <transf name="case" proved="true" arg1="(p = ri)">
    <goal name="construct_dirs&#39;vc.30.0" expl="true case (loop invariant preservation)" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="5"><result status="valid" time="0.06" steps="18255"/></proof>
+   <proof prover="4"><result status="valid" time="0.06" steps="19280"/></proof>
    </goal>
    <goal name="construct_dirs&#39;vc.30.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="5"><result status="valid" time="0.20" steps="20745"/></proof>
+   <proof prover="4"><result status="valid" time="0.20" steps="21710"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="construct_dirs&#39;vc.31" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="16793"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="17779"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.32" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2"><result status="valid" time="0.21" steps="513831"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="151852"/></proof>
+  <proof prover="3" timelimit="1"><result status="valid" time="0.21" steps="531715"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.33" expl="postcondition" proved="true">
   <transf name="revert" proved="true" arg1="p">
@@ -677,16 +454,13 @@
     <goal name="construct_dirs&#39;vc.33.0.0" expl="postcondition" proved="true">
     <transf name="induction_pr" proved="true" >
      <goal name="construct_dirs&#39;vc.33.0.0.0" expl="postcondition" proved="true">
-     <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-     <proof prover="5"><result status="valid" time="0.07" steps="17966"/></proof>
+     <proof prover="4"><result status="valid" time="0.07" steps="18952"/></proof>
      </goal>
      <goal name="construct_dirs&#39;vc.33.0.0.1" expl="postcondition" proved="true">
-     <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-     <proof prover="5"><result status="valid" time="0.07" steps="20164"/></proof>
+     <proof prover="4"><result status="valid" time="0.07" steps="21142"/></proof>
      </goal>
      <goal name="construct_dirs&#39;vc.33.0.0.2" expl="postcondition" proved="true">
-     <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-     <proof prover="5"><result status="valid" time="0.09" steps="20171"/></proof>
+     <proof prover="4"><result status="valid" time="0.09" steps="21149"/></proof>
      </goal>
     </transf>
     </goal>
@@ -701,26 +475,20 @@
     <goal name="construct_dirs&#39;vc.34.0.0" expl="postcondition" proved="true">
     <transf name="induction_pr" proved="true" >
      <goal name="construct_dirs&#39;vc.34.0.0.0" expl="postcondition" proved="true">
-     <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-     <proof prover="5"><result status="valid" time="0.25" steps="24323"/></proof>
+     <proof prover="4"><result status="valid" time="0.10" steps="25358"/></proof>
      </goal>
      <goal name="construct_dirs&#39;vc.34.0.0.1" expl="postcondition" proved="true">
      <transf name="split_vc" proved="true" >
       <goal name="construct_dirs&#39;vc.34.0.0.1.0" expl="VC for construct_dirs" proved="true">
-      <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-      <proof prover="5"><result status="valid" time="0.13" steps="26571"/></proof>
+      <proof prover="4"><result status="valid" time="0.13" steps="27622"/></proof>
       </goal>
       <goal name="construct_dirs&#39;vc.34.0.0.1.1" expl="VC for construct_dirs" proved="true">
-      <proof prover="0"><result status="valid" time="0.08" steps="366"/></proof>
-      <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-      <proof prover="2"><result status="timeout" time="1.00" steps="4634063"/></proof>
-      <proof prover="5"><result status="timeout" time="1.00" steps="239064"/></proof>
+      <proof prover="0"><result status="valid" time="0.08" steps="368"/></proof>
       </goal>
      </transf>
      </goal>
      <goal name="construct_dirs&#39;vc.34.0.0.2" expl="postcondition" proved="true">
-     <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-     <proof prover="5"><result status="valid" time="0.27" steps="38479"/></proof>
+     <proof prover="0" timelimit="10"><result status="valid" time="0.05" steps="365"/></proof>
      </goal>
     </transf>
     </goal>
@@ -728,306 +496,210 @@
    </goal>
   </transf>
   </goal>
-  <goal name="construct_dirs&#39;vc.35" expl="postcondition">
-  <proof prover="0"><result status="timeout" time="1.00"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2"><result status="timeout" time="1.00" steps="4195650"/></proof>
-  <proof prover="5"><result status="timeout" time="1.00" steps="252413"/></proof>
-  </goal>
-  <goal name="construct_dirs&#39;vc.36" expl="postcondition" proved="true">
+  <goal name="construct_dirs&#39;vc.35" expl="postcondition" proved="true">
   <transf name="unfold" proved="true" arg1="parent">
-   <goal name="construct_dirs&#39;vc.36.0" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.05" steps="106"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1289036"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="147508"/></proof>
+   <goal name="construct_dirs&#39;vc.35.0" expl="postcondition" proved="true">
+   <proof prover="0"><result status="valid" time="0.15" steps="989"/></proof>
    </goal>
   </transf>
   </goal>
+  <goal name="construct_dirs&#39;vc.36" expl="postcondition" proved="true">
+  <proof prover="3"><result status="valid" time="0.03" steps="103594"/></proof>
+  </goal>
   <goal name="construct_dirs&#39;vc.37" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.10" steps="22867"/></proof>
+  <proof prover="4"><result status="valid" time="0.10" steps="23809"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.38" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.08" steps="22251"/></proof>
+  <proof prover="4"><result status="valid" time="0.08" steps="23205"/></proof>
   </goal>
   <goal name="construct_dirs&#39;vc.39" expl="out of loop bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="18545"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="19533"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="par&#39;vc" expl="VC for par" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="par&#39;vc.0" expl="assertion" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="13847"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="15247"/></proof>
   </goal>
   <goal name="par&#39;vc.1" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="14845"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="15807"/></proof>
   </goal>
   <goal name="par&#39;vc.2" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="14950"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="15912"/></proof>
   </goal>
   <goal name="par&#39;vc.3" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="15076"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="16036"/></proof>
   </goal>
   <goal name="par&#39;vc.4" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="15208"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="16202"/></proof>
   </goal>
   <goal name="par&#39;vc.5" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="15200"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="16185"/></proof>
   </goal>
   <goal name="par&#39;vc.6" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="15525"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="16519"/></proof>
   </goal>
   <goal name="par&#39;vc.7" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="15204"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="16178"/></proof>
   </goal>
   <goal name="par&#39;vc.8" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.05" steps="43"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1063879"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="205227"/></proof>
   </goal>
   <goal name="par&#39;vc.9" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="15411"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="16418"/></proof>
   </goal>
   <goal name="par&#39;vc.10" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.05" steps="38"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1483858"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="177321"/></proof>
   </goal>
   <goal name="par&#39;vc.11" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="15163"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="16122"/></proof>
   </goal>
   <goal name="par&#39;vc.12" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="15204"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="16178"/></proof>
   </goal>
   <goal name="par&#39;vc.13" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.05" steps="43"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1245653"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="231829"/></proof>
   </goal>
   <goal name="par&#39;vc.14" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="14128"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="15577"/></proof>
   </goal>
   <goal name="par&#39;vc.15" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="16741"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="17668"/></proof>
   </goal>
   <goal name="par&#39;vc.16" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="14240"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="15713"/></proof>
   </goal>
   <goal name="par&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="16786"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="17747"/></proof>
   </goal>
   <goal name="par&#39;vc.18" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="15357"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="16349"/></proof>
   </goal>
   <goal name="par&#39;vc.19" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="15416"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="16423"/></proof>
   </goal>
   <goal name="par&#39;vc.20" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.04" steps="36"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1011572"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="231930"/></proof>
   </goal>
   <goal name="par&#39;vc.21" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="14240"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="15713"/></proof>
   </goal>
   <goal name="par&#39;vc.22" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="16806"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="17767"/></proof>
   </goal>
   <goal name="par&#39;vc.23" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="14220"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="15691"/></proof>
   </goal>
   <goal name="par&#39;vc.24" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="16636"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="17603"/></proof>
   </goal>
   <goal name="par&#39;vc.25" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="13988"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="15411"/></proof>
   </goal>
   <goal name="par&#39;vc.26" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="13992"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="15413"/></proof>
   </goal>
   <goal name="par&#39;vc.27" expl="out of loop bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.08" steps="14923"/></proof>
+  <proof prover="4"><result status="valid" time="0.08" steps="15884"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="all_descendant_root&#39;vc" expl="VC for all_descendant_root" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="all_descendant_root&#39;vc.0" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="14100"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="15531"/></proof>
   </goal>
   <goal name="all_descendant_root&#39;vc.1" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="14100"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="15531"/></proof>
   </goal>
   <goal name="all_descendant_root&#39;vc.2" expl="precondition" proved="true">
   <transf name="assert" proved="true" arg1="(not is_smallest a j)">
    <goal name="all_descendant_root&#39;vc.2.0" expl="asserted formula" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="5"><result status="valid" time="0.06" steps="16628"/></proof>
+   <proof prover="4"><result status="valid" time="0.06" steps="17605"/></proof>
    </goal>
    <goal name="all_descendant_root&#39;vc.2.1" expl="precondition" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="5"><result status="valid" time="0.05" steps="16134"/></proof>
+   <proof prover="4"><result status="valid" time="0.05" steps="17086"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="all_descendant_root&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="14218"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="15645"/></proof>
   </goal>
   <goal name="all_descendant_root&#39;vc.4" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.06" steps="223"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1206727"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="143330"/></proof>
   </goal>
   <goal name="all_descendant_root&#39;vc.5" expl="variant decrease" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.08" steps="17132"/></proof>
+  <proof prover="4"><result status="valid" time="0.08" steps="18072"/></proof>
   </goal>
   <goal name="all_descendant_root&#39;vc.6" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="14159"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="15599"/></proof>
   </goal>
   <goal name="all_descendant_root&#39;vc.7" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.09" steps="222"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1323723"/></proof>
-  <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="142202"/></proof>
   </goal>
   <goal name="all_descendant_root&#39;vc.8" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.37" steps="42148"/></proof>
+  <proof prover="4"><result status="valid" time="0.19" steps="39971"/></proof>
   </goal>
   <goal name="all_descendant_root&#39;vc.9" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="14986"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="16437"/></proof>
   </goal>
   <goal name="all_descendant_root&#39;vc.10" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="14990"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="16439"/></proof>
   </goal>
   <goal name="all_descendant_root&#39;vc.11" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="17276"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="18215"/></proof>
   </goal>
   <goal name="all_descendant_root&#39;vc.12" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.09" steps="17434"/></proof>
+  <proof prover="4"><result status="valid" time="0.09" steps="18376"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="find_smaller&#39;vc" expl="VC for find_smaller" proved="true">
  <transf name="split_all_full" proved="true" >
   <goal name="find_smaller&#39;vc.0" expl="loop invariant init" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="14666"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="15440"/></proof>
   </goal>
   <goal name="find_smaller&#39;vc.1" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="17982"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="18609"/></proof>
   </goal>
   <goal name="find_smaller&#39;vc.2" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.08" steps="19255"/></proof>
+  <proof prover="4"><result status="valid" time="0.08" steps="19781"/></proof>
   </goal>
   <goal name="find_smaller&#39;vc.3" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.20" steps="20868"/></proof>
+  <proof prover="4"><result status="valid" time="0.08" steps="21574"/></proof>
   </goal>
   <goal name="find_smaller&#39;vc.4" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="20174"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="20800"/></proof>
   </goal>
   <goal name="find_smaller&#39;vc.5" expl="loop invariant preservation" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.11" steps="19715"/></proof>
+  <proof prover="4"><result status="valid" time="0.11" steps="20427"/></proof>
   </goal>
   <goal name="find_smaller&#39;vc.6" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="19782"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="20337"/></proof>
   </goal>
   <goal name="find_smaller&#39;vc.7" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="16274"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="16719"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="other_descendant" proved="true">
  <transf name="induction_pr" proved="true" >
   <goal name="other_descendant.0" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="16402"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="17247"/></proof>
   </goal>
   <goal name="other_descendant.1" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="15022"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="15835"/></proof>
   </goal>
   <goal name="other_descendant.2" proved="true">
-  <proof prover="4"><result status="valid" time="0.08" steps="15835"/></proof>
+  <proof prover="4" timelimit="5"><result status="valid" time="0.08" steps="15835"/></proof>
   </goal>
  </transf>
  </goal>
- <goal name="inv_other_descendant">
- <transf name="induction_pr" >
-  <goal name="inv_other_descendant.0">
-  <transf name="split_vc" >
-   <goal name="inv_other_descendant.0.0">
-   <transf name="case" arg1="(p1 = s1)">
-    <goal name="inv_other_descendant.0.0.0" expl="true case">
-    <transf name="right" >
-     <goal name="inv_other_descendant.0.0.0.0" expl="right case">
-     <transf name="exists" arg1="s">
-      <goal name="inv_other_descendant.0.0.0.0.0">
-      <proof prover="0"><result status="timeout" time="1.00"/></proof>
-      <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-      <proof prover="2"><result status="timeout" time="1.00" steps="4452048"/></proof>
-      <proof prover="5"><result status="timeout" time="1.00" steps="499949"/></proof>
-      </goal>
-     </transf>
-     </goal>
-    </transf>
-    </goal>
-    <goal name="inv_other_descendant.0.0.1" expl="false case" proved="true">
-    <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-    <proof prover="5"><result status="valid" time="0.07" steps="12817"/></proof>
-    </goal>
-   </transf>
-   </goal>
-  </transf>
+ <goal name="inv_other_descendant" proved="true">
+ <transf name="induction_pr" proved="true" >
+  <goal name="inv_other_descendant.0" proved="true">
+  <proof prover="3"><result status="valid" time="0.10" steps="372271"/></proof>
   </goal>
   <goal name="inv_other_descendant.1" proved="true">
   <transf name="split_vc" proved="true" >
@@ -1038,129 +710,119 @@
      <goal name="inv_other_descendant.1.0.0.0" expl="right case" proved="true">
      <transf name="exists" proved="true" arg1="s">
       <goal name="inv_other_descendant.1.0.0.0.0" proved="true">
-      <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-      <proof prover="5"><result status="valid" time="0.07" steps="14933"/></proof>
+      <proof prover="4"><result status="valid" time="0.07" steps="15761"/></proof>
       </goal>
      </transf>
      </goal>
     </transf>
     </goal>
     <goal name="inv_other_descendant.1.0.1" expl="false case" proved="true">
-    <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-    <proof prover="5"><result status="valid" time="0.06" steps="16295"/></proof>
+    <proof prover="4"><result status="valid" time="0.06" steps="17112"/></proof>
     </goal>
    </transf>
    </goal>
   </transf>
   </goal>
-  <goal name="inv_other_descendant.2">
-  <proof prover="0"><result status="timeout" time="1.00"/></proof>
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="2"><result status="timeout" time="1.00" steps="3241441"/></proof>
-  <proof prover="5"><result status="timeout" time="1.00" steps="272419"/></proof>
+  <goal name="inv_other_descendant.2" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="inv_other_descendant.2.0" proved="true">
+   <transf name="case" proved="true" arg1="(p1 = s1)">
+    <goal name="inv_other_descendant.2.0.0" expl="true case" proved="true">
+    <transf name="right" proved="true" >
+     <goal name="inv_other_descendant.2.0.0.0" expl="right case" proved="true">
+     <transf name="exists" proved="true" arg1="s">
+      <goal name="inv_other_descendant.2.0.0.0.0" proved="true">
+      <proof prover="0" timelimit="5"><result status="valid" time="0.01" steps="23"/></proof>
+      <proof prover="3"><result status="valid" time="0.25" steps="1068821"/></proof>
+      <proof prover="4" timelimit="5"><result status="valid" time="0.05" steps="15787"/></proof>
+      </goal>
+     </transf>
+     </goal>
+    </transf>
+    </goal>
+    <goal name="inv_other_descendant.2.0.1" expl="false case" proved="true">
+    <proof prover="4"><result status="valid" time="0.07" steps="17112"/></proof>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
   </goal>
  </transf>
  </goal>
  <goal name="StrictIncr.Transitive.Trans" proved="true">
- <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
- <proof prover="5"><result status="valid" time="0.04" steps="13800"/></proof>
+ <proof prover="4"><result status="valid" time="0.04" steps="14488"/></proof>
  </goal>
- <goal name="traversal&#39;vc" expl="VC for traversal">
- <transf name="split_vc" >
+ <goal name="traversal&#39;vc" expl="VC for traversal" proved="true">
+ <transf name="split_vc" proved="true" >
   <goal name="traversal&#39;vc.0" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="traversal&#39;vc.0.0" expl="assertion" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="5"><result status="valid" time="0.05" steps="17178"/></proof>
+   <proof prover="4"><result status="valid" time="0.05" steps="18268"/></proof>
    </goal>
    <goal name="traversal&#39;vc.0.1" expl="VC for traversal" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="5"><result status="valid" time="0.09" steps="18100"/></proof>
+   <proof prover="4"><result status="valid" time="0.09" steps="19138"/></proof>
    </goal>
    <goal name="traversal&#39;vc.0.2" expl="VC for traversal" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="5"><result status="valid" time="0.07" steps="18096"/></proof>
+   <proof prover="4"><result status="valid" time="0.07" steps="19134"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="traversal&#39;vc.1" expl="index in array bounds" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="17240"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="18326"/></proof>
   </goal>
   <goal name="traversal&#39;vc.2" expl="variant decrease" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="16012"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="17579"/></proof>
   </goal>
   <goal name="traversal&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="15960"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="17520"/></proof>
   </goal>
   <goal name="traversal&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="17231"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="18321"/></proof>
   </goal>
   <goal name="traversal&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="18481"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="19562"/></proof>
   </goal>
   <goal name="traversal&#39;vc.6" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="18709"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="19730"/></proof>
   </goal>
-  <goal name="traversal&#39;vc.7" expl="precondition">
-  <transf name="split_vc" >
+  <goal name="traversal&#39;vc.7" expl="precondition" proved="true">
+  <transf name="split_vc" proved="true" >
    <goal name="traversal&#39;vc.7.0" expl="precondition" proved="true">
    <transf name="unfold" proved="true" arg1="parent" arg2="in" arg3="other_descendant">
     <goal name="traversal&#39;vc.7.0.0" expl="precondition" proved="true">
-    <proof prover="4"><result status="valid" time="0.18" steps="20054"/></proof>
+    <proof prover="4" timelimit="5"><result status="valid" time="0.18" steps="20054"/></proof>
     </goal>
    </transf>
    </goal>
    <goal name="traversal&#39;vc.7.1" expl="precondition" proved="true">
    <transf name="unfold" proved="true" arg1="parent" arg2="in" arg3="other_descendant">
     <goal name="traversal&#39;vc.7.1.0" expl="precondition" proved="true">
-    <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-    <proof prover="5"><result status="valid" time="0.21" steps="23261"/></proof>
+    <proof prover="4"><result status="valid" time="0.21" steps="24419"/></proof>
     </goal>
    </transf>
    </goal>
    <goal name="traversal&#39;vc.7.2" expl="precondition" proved="true">
    <transf name="assert" proved="true" arg1="(descendant dirs x1 son)">
     <goal name="traversal&#39;vc.7.2.0" expl="asserted formula" proved="true">
-    <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-    <proof prover="5"><result status="valid" time="0.09" steps="18432"/></proof>
+    <proof prover="4"><result status="valid" time="0.09" steps="19517"/></proof>
     </goal>
     <goal name="traversal&#39;vc.7.2.1" expl="precondition" proved="true">
     <proof prover="0"><result status="valid" time="0.07" steps="184"/></proof>
-    <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1386827"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="175005"/></proof>
     </goal>
    </transf>
    </goal>
-   <goal name="traversal&#39;vc.7.3" expl="precondition">
-   <transf name="case" arg1="(s = x)">
-    <goal name="traversal&#39;vc.7.3.0" expl="true case (precondition)">
-    <proof prover="0"><result status="timeout" time="1.00"/></proof>
-    <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-    <proof prover="2"><result status="timeout" time="1.00" steps="3042211"/></proof>
-    <proof prover="5"><result status="timeout" time="1.00" steps="364712"/></proof>
+   <goal name="traversal&#39;vc.7.3" expl="precondition" proved="true">
+   <transf name="case" proved="true" arg1="(x + 1 = e)">
+    <goal name="traversal&#39;vc.7.3.0" expl="true case (precondition)" proved="true">
+    <proof prover="0"><result status="valid" time="0.01" steps="24"/></proof>
     </goal>
-    <goal name="traversal&#39;vc.7.3.1" expl="false case (precondition)">
-    <transf name="assert" arg1="(descendant dirs x s)">
+    <goal name="traversal&#39;vc.7.3.1" expl="false case (precondition)" proved="true">
+    <transf name="assert" proved="true" arg1="(descendant dirs x (x+1))">
      <goal name="traversal&#39;vc.7.3.1.0" expl="asserted formula" proved="true">
-     <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-     <proof prover="5"><result status="valid" time="0.07" steps="18719"/></proof>
+     <proof prover="4"><result status="valid" time="0.07" steps="19817"/></proof>
      </goal>
-     <goal name="traversal&#39;vc.7.3.1.1" expl="false case (precondition)">
-     <transf name="split_all_full" >
-      <goal name="traversal&#39;vc.7.3.1.1.0" expl="false case (precondition)">
-      <proof prover="0"><result status="timeout" time="1.00"/></proof>
-      <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-      <proof prover="2"><result status="timeout" time="1.00" steps="2918793"/></proof>
-      <proof prover="5"><result status="timeout" time="1.00" steps="161476"/></proof>
-      </goal>
-     </transf>
+     <goal name="traversal&#39;vc.7.3.1.1" expl="false case (precondition)" proved="true">
+     <proof prover="0"><result status="valid" time="0.02" steps="90"/></proof>
      </goal>
     </transf>
     </goal>
@@ -1169,75 +831,62 @@
   </transf>
   </goal>
   <goal name="traversal&#39;vc.8" expl="variant decrease" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="16630"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="18268"/></proof>
   </goal>
   <goal name="traversal&#39;vc.9" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="16589"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="18220"/></proof>
   </goal>
   <goal name="traversal&#39;vc.10" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="17890"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="19029"/></proof>
   </goal>
   <goal name="traversal&#39;vc.11" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.08" steps="19144"/></proof>
+  <proof prover="4"><result status="valid" time="0.08" steps="20274"/></proof>
   </goal>
   <goal name="traversal&#39;vc.12" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.18" steps="19382"/></proof>
+  <proof prover="4"><result status="valid" time="0.18" steps="20452"/></proof>
   </goal>
-  <goal name="traversal&#39;vc.13" expl="precondition">
-  <transf name="split_vc" >
+  <goal name="traversal&#39;vc.13" expl="precondition" proved="true">
+  <transf name="split_vc" proved="true" >
    <goal name="traversal&#39;vc.13.0" expl="precondition" proved="true">
    <transf name="unfold" proved="true" arg1="parent" arg2="in" arg3="other_descendant">
     <goal name="traversal&#39;vc.13.0.0" expl="precondition" proved="true">
-    <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-    <proof prover="5"><result status="valid" time="0.10" steps="23847"/></proof>
+    <proof prover="4"><result status="valid" time="0.10" steps="25054"/></proof>
     </goal>
    </transf>
    </goal>
    <goal name="traversal&#39;vc.13.1" expl="precondition" proved="true">
    <transf name="unfold" proved="true" arg1="parent" arg2="in" arg3="other_descendant">
     <goal name="traversal&#39;vc.13.1.0" expl="precondition" proved="true">
-    <proof prover="4"><result status="valid" time="0.14" steps="20713"/></proof>
+    <proof prover="4" timelimit="5"><result status="valid" time="0.14" steps="20713"/></proof>
     </goal>
    </transf>
    </goal>
    <goal name="traversal&#39;vc.13.2" expl="precondition" proved="true">
    <transf name="assert" proved="true" arg1="(descendant dirs x1 son)">
     <goal name="traversal&#39;vc.13.2.0" expl="asserted formula" proved="true">
-    <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-    <proof prover="5"><result status="valid" time="0.08" steps="19455"/></proof>
+    <proof prover="4"><result status="valid" time="0.08" steps="20541"/></proof>
     </goal>
     <goal name="traversal&#39;vc.13.2.1" expl="precondition" proved="true">
     <proof prover="0"><result status="valid" time="0.06" steps="184"/></proof>
-    <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-    <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1375569"/></proof>
-    <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="281651"/></proof>
     </goal>
    </transf>
    </goal>
-   <goal name="traversal&#39;vc.13.3" expl="precondition">
-   <transf name="case" arg1="(x + 1 = e)">
-    <goal name="traversal&#39;vc.13.3.0" expl="true case (precondition)">
-    <proof prover="0"><result status="timeout" time="1.00"/></proof>
-    <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-    <proof prover="2"><result status="timeout" time="1.00" steps="2899292"/></proof>
-    <proof prover="5"><result status="timeout" time="1.00" steps="372851"/></proof>
+   <goal name="traversal&#39;vc.13.3" expl="precondition" proved="true">
+   <transf name="case" proved="true" arg1="(s = x)">
+    <goal name="traversal&#39;vc.13.3.0" expl="true case (precondition)" proved="true">
+    <proof prover="0"><result status="valid" time="0.01" steps="26"/></proof>
     </goal>
-    <goal name="traversal&#39;vc.13.3.1" expl="false case (precondition)">
-    <transf name="assert" arg1="(descendant dirs x (x+1))">
+    <goal name="traversal&#39;vc.13.3.1" expl="false case (precondition)" proved="true">
+    <transf name="assert" proved="true" arg1="(descendant dirs x s)">
      <goal name="traversal&#39;vc.13.3.1.0" expl="asserted formula" proved="true">
-     <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-     <proof prover="5"><result status="valid" time="0.09" steps="19436"/></proof>
+     <proof prover="4"><result status="valid" time="0.07" steps="20471"/></proof>
      </goal>
-     <goal name="traversal&#39;vc.13.3.1.1" expl="false case (precondition)">
-     <proof prover="0"><result status="timeout" time="1.00"/></proof>
-     <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-     <proof prover="2"><result status="timeout" time="1.00" steps="2719971"/></proof>
-     <proof prover="5"><result status="timeout" time="1.00" steps="137272"/></proof>
+     <goal name="traversal&#39;vc.13.3.1.1" expl="false case (precondition)" proved="true">
+     <transf name="split_all_full" proved="true" >
+      <goal name="traversal&#39;vc.13.3.1.1.0" expl="false case (precondition)" proved="true">
+      <proof prover="0"><result status="valid" time="0.03" steps="90"/></proof>
+      </goal>
+     </transf>
      </goal>
     </transf>
     </goal>
@@ -1248,49 +897,20 @@
   <goal name="traversal&#39;vc.14" expl="postcondition" proved="true">
   <transf name="destruct" proved="true" arg1="H">
    <goal name="traversal&#39;vc.14.0" expl="postcondition" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="5"><result status="valid" time="0.05" steps="20129"/></proof>
+   <proof prover="4"><result status="valid" time="0.05" steps="21607"/></proof>
    </goal>
    <goal name="traversal&#39;vc.14.1" expl="postcondition" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="5"><result status="valid" time="0.35" steps="46641"/></proof>
+   <proof prover="4"><result status="valid" time="0.35" steps="48476"/></proof>
    </goal>
   </transf>
   </goal>
-  <goal name="traversal&#39;vc.15" expl="postcondition">
-  <transf name="destruct_term" arg1="top">
+  <goal name="traversal&#39;vc.15" expl="postcondition" proved="true">
+  <transf name="destruct_term" proved="true" arg1="top">
    <goal name="traversal&#39;vc.15.0" expl="postcondition" proved="true">
    <proof prover="0"><result status="valid" time="0.09" steps="543"/></proof>
-   <proof prover="2"><result status="timeout" time="1.00" steps="1777283"/></proof>
-   <proof prover="5"><result status="timeout" time="1.00" steps="908224"/></proof>
    </goal>
-   <goal name="traversal&#39;vc.15.1" expl="postcondition">
-   <transf name="assert" arg1="(sorted o)">
-    <goal name="traversal&#39;vc.15.1.0" expl="asserted formula">
-    <proof prover="0"><result status="timeout" time="1.00"/></proof>
-    <proof prover="2"><result status="timeout" time="1.00" steps="2542017"/></proof>
-    <proof prover="5"><result status="timeout" time="1.00" steps="711213"/></proof>
-    </goal>
-    <goal name="traversal&#39;vc.15.1.1" expl="postcondition">
-    <transf name="assert" arg1="(sorted (Cons x o1))">
-     <goal name="traversal&#39;vc.15.0.1.0" expl="asserted formula">
-     <proof prover="2"><result status="valid" time="0.08" steps="117706"/></proof>
-     <proof prover="5"><undone/></proof>
-     </goal>
-     <goal name="traversal&#39;vc.15.0.1.1" expl="postcondition">
-     <transf name="assert" arg1="(sorted (Cons x o1))">
-      <goal name="traversal&#39;vc.15.0.1.1.0" expl="asserted formula">
-      <proof prover="5"><undone/></proof>
-      </goal>
-      <goal name="traversal&#39;vc.15.0.1.1.1" expl="postcondition">
-      <proof prover="0"><result status="valid" time="0.96" steps="10929"/></proof>
-      <proof prover="5"><undone/></proof>
-      </goal>
-     </transf>
-     </goal>
-    </transf>
-    </goal>
-   </transf>
+   <goal name="traversal&#39;vc.15.1" expl="postcondition" proved="true">
+   <proof prover="0" timelimit="10"><result status="valid" time="0.01" steps="18"/></proof>
    </goal>
   </transf>
   </goal>
@@ -1299,54 +919,41 @@
  <goal name="in_order&#39;vc" expl="VC for in_order" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="in_order&#39;vc.0" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.05" steps="17189"/></proof>
+  <proof prover="4"><result status="valid" time="0.05" steps="18143"/></proof>
   </goal>
   <goal name="in_order&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="17501"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="19064"/></proof>
   </goal>
   <goal name="in_order&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="19642"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="20681"/></proof>
   </goal>
   <goal name="in_order&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.07" steps="20377"/></proof>
+  <proof prover="4"><result status="valid" time="0.07" steps="21410"/></proof>
   </goal>
   <goal name="in_order&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.09" steps="20335"/></proof>
+  <proof prover="4"><result status="valid" time="0.09" steps="21357"/></proof>
   </goal>
   <goal name="in_order&#39;vc.5" expl="precondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="in_order&#39;vc.5.0" expl="precondition" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="5"><result status="valid" time="0.08" steps="19928"/></proof>
+   <proof prover="4"><result status="valid" time="0.08" steps="20949"/></proof>
    </goal>
    <goal name="in_order&#39;vc.5.1" expl="precondition" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="5"><result status="valid" time="0.09" steps="19924"/></proof>
+   <proof prover="4"><result status="valid" time="0.09" steps="20946"/></proof>
    </goal>
    <goal name="in_order&#39;vc.5.2" expl="precondition" proved="true">
    <proof prover="0"><result status="valid" time="0.06" steps="219"/></proof>
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="2" obsolete="true"><result status="timeout" time="1.00" steps="1674042"/></proof>
-   <proof prover="5" obsolete="true"><result status="timeout" time="1.00" steps="227154"/></proof>
    </goal>
    <goal name="in_order&#39;vc.5.3" expl="precondition" proved="true">
-   <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-   <proof prover="5"><result status="valid" time="0.03" steps="17686"/></proof>
+   <proof prover="4"><result status="valid" time="0.03" steps="19215"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="in_order&#39;vc.6" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.06" steps="20435"/></proof>
+  <proof prover="4"><result status="valid" time="0.06" steps="21517"/></proof>
   </goal>
   <goal name="in_order&#39;vc.7" expl="postcondition" proved="true">
-  <proof prover="1" obsolete="true"><result status="failure" time="0.00"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="18149"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="19821"/></proof>
   </goal>
  </transf>
  </goal>
