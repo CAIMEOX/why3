@@ -148,7 +148,7 @@ let duplicate p1 p2 =
 let introquant p y = newcert1 (fun a -> IntroQuant (p, y, a))
 (* From a fresh variable y and a task with hypothesis p : ∃ x : τ. q
    (resp. goal p : ∀ x. q), produces a new task with the variable y of
-   type \τ and hypothesis (resp. goal) p modified into p : q[x ↦ y] *)
+   type τ and hypothesis (resp. goal) p modified into p : q[x ↦ y] *)
 let instquant p1 p2 t = newcert1 (fun a -> InstQuant (p1, p2, t, a))
 (* From a term t of type τ and a task with hypothesis p₁ : ∀ x : τ. q
    (resp. goal p₁ : ∃ x. q), produces a new task with the variable y of
@@ -495,7 +495,7 @@ let t_open_quant_one q tq = match t_open_quant tq with
   | vs::vsl, trg, t_open ->
       let nt = t_quant q (t_close_quant vsl trg t_open) in
       vs, nt
-  | _ -> eprintf "not quantified";
+  | _ -> eprintf "Not a quantified formula@.";
          raise Elaboration_failed
 
 let elaborate init_ct c =
