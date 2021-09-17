@@ -316,45 +316,51 @@ let parse_prover_name config name args : command_prover =
 (* Prover command line parsing *)
 (*******************************)
 
+type split_args_state =
+  | Normal
+  | In_string
+  | In_parenthesis of int
 
 (* splits input string [s] into substrings separated by space
    spaces inside quotes or parentheses are not separator.
-   implemented as a hardcoded automaton:
-*)
+   implemented as a hardcoded automaton: *)
 let split_args s =
   let args = ref [] in
-  let par_depth = ref 0 in
-  let b = Buffer.create 17 in
-  let push_arg () =
-    let x = Buffer.contents b in
-    if String.length x > 0 then (args := x :: !args; Buffer.clear b)
-  in
-  let push_char c = Buffer.add_char b c in
-  let state = ref 0 in
-  (* state 0 : normal mode (no '"' and no ",")
-     state 1 : encountered one '"' waiting for another one to go back to 0
-     state 2 : encountered one ',': immediately followed whitespace are not
-               argument separations
-     par_depth : number of nested opened parenthesis *)
-  for i = 0 to String.length s - 1 do
-    let c = s.[i] in
-    match !state, c with
-    | 0,' ' -> if !par_depth > 0 then push_char c else push_arg ()
-    | 0,',' -> push_char c; if !par_depth > 0 then () else state := 2
-    | 0,'(' -> incr par_depth; push_char c
-    | 0,')' -> decr par_depth; push_char c
-    | 0,'"' -> state := 1; if !par_depth > 0 then push_char c
-    | 0,_   -> push_char c
-    | 1,'"' -> state := 0; if !par_depth > 0 then push_char c
-    | 1,_   -> push_char c
-    | 2,' ' -> push_char c
-    | 2,_   -> push_char c; state := 0
-    | _     -> assert false
-  done;
-  push_arg ();
-  match List.rev !args with
-    | a::b -> a,b
-    | [] -> "",[]
+  let buf = Buffer.create 13 in
+  let state = ref Normal in
+  let for_char c =
+    if not (!state = Normal && c = ' ') then
+      Buffer.add_char buf c;
+    match !state with
+    | Normal ->
+        ( match c with
+          | '"' ->
+              state := In_string
+          | '(' ->
+              state := In_parenthesis 0
+          | ' ' ->
+              args := Buffer.contents buf :: !args;
+              Buffer.reset buf
+          | _ -> () )
+    | In_string ->
+        if c = '"' then
+          state := Normal
+    | In_parenthesis n ->
+        ( match c with
+          | '(' ->
+              state := In_parenthesis (succ n)
+          | ')' ->
+              if n = 0 then
+                state := Normal
+              else if n > 0 then
+                state := In_parenthesis (pred n)
+              else
+                assert false
+          | _->  () ) in
+  String.iter for_char s;
+  match List.rev (Buffer.contents buf :: !args) with
+  | [] -> "", []
+  | cmd :: args -> cmd, args
 
 type command =
   | Transform    of string * Trans.gentrans * string list
