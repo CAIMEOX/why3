@@ -1,0 +1,8 @@
+<theory name="Top" proved="true">
+ <goal name="G" proved="true">
+ <transf name="blast_ccert" proved="true" >
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>
