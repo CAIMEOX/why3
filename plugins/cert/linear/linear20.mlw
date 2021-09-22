@@ -1,0 +1,27 @@
+predicate p1p
+predicate p2p
+predicate p3p
+predicate p4p
+predicate p5p
+predicate p6p
+predicate p7p
+predicate p8p
+predicate p9p
+predicate p10p
+predicate p11p
+predicate p12p
+predicate p13p
+predicate p14p
+predicate p15p
+predicate p16p
+predicate p17p
+predicate p18p
+predicate p19p
+predicate p20p
+ 
+goal G : p1p -> (p1p -> p2p) -> (p2p -> p3p) -> (p3p -> p4p) ->
+         (p4p -> p5p) -> (p5p -> p6p) -> (p6p -> p7p) -> (p7p -> p8p) ->
+         (p8p -> p9p) -> (p9p -> p10p) -> (p10p -> p11p) -> (p11p -> p12p) ->
+         (p12p -> p13p) -> (p13p -> p14p) -> (p14p -> p15p) ->
+         (p15p -> p16p) -> (p16p -> p17p) -> (p17p -> p18p) ->
+         (p18p -> p19p) -> (p19p -> p20p) -> p20p

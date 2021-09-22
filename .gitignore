@@ -207,6 +207,12 @@ pvsbin/
 /plugins/cfg/cfg_parser.mli
 /plugins/cfg/cfg_parser.conflicts
 
+# /plugins/cert/
+/plugins/cert/linear/temp
+/plugins/cert/linear/surface_certificate.txt
+/plugins/cert/linear/kernel_certificate.txt
+
+
 # /drivers
 /drivers/coq-realizations.aux
 /drivers/pvs-realizations.aux

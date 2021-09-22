@@ -1,0 +1,8 @@
+predicate p1p
+predicate p2p
+predicate p3p
+predicate p4p
+predicate p5p
+ 
+goal G : p1p -> (p1p -> p2p) -> (p2p -> p3p) -> (p3p -> p4p) ->
+         (p4p -> p5p) -> p5p

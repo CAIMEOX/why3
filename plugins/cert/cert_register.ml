@@ -34,12 +34,14 @@ let checker_ctrans
     let dbg_cert, dbg_cta = debug in
     let t1 = Unix.times () in
     let res_t, certif = Trans.apply ctr init_t in
+    Cert_certificates.print_certif "surface_certificate.txt" certif;
     let t2 = Unix.times () in
     Opt.iter (fun eprcertif -> eprcertif certif) dbg_cert;
     let abstract_task = abstract_task env in
     let init_ct = abstract_task init_t in
     let res_ct = List.map (fun t -> abstract_terms_task (abstract_task t)) res_t in
     let kernel_certif = make_kernel_cert init_ct res_ct certif in
+    Cert_certificates.print_kcertif "kernel_certificate.txt" kernel_certif;
     let init_ct = abstract_terms_task init_ct in
     Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_cta;
     checker kernel_certif init_ct res_ct;
