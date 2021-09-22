@@ -204,6 +204,61 @@ let iffsym_hyp h =
     destruct h h1 h2 ++
       construct h2 h1 h ++
         fold h
+
+let rec prc fmt c =
+  let prt = Pretty.print_term in
+  match c with
+  | Nc -> fprintf fmt "No_certif"
+  | Hole ct -> fprintf fmt "Hole %a" prid ct.uid
+  | Assert (p, t, c1, c2) ->
+      fprintf fmt "Assert (@[%a, %a,@ @[<4>%a@],@ @[<4>%a@])@]"
+        prpr p prt t
+        prc c1 prc c2
+  | Let (_, _) -> failwith "SURFACE CERTIFICATE CONTAINS LET"
+  | Axiom (p1, p2) -> fprintf fmt "Axiom (%a, %a)" prpr p1 prpr p2
+  | Trivial p -> fprintf fmt "Trivial %a" prpr p
+  | EqSym (p, c) -> fprintf fmt "EqSym (%a,@ %a)" prpr p prc c
+  | EqTrans (p1, p2, p3, c) -> fprintf fmt "EqTrans (%a, %a, %a, @ %a)"
+                                 prpr p1 prpr p2 prpr p3 prc c
+  | Unfold (p, c) -> fprintf fmt "Unfold (%a,@ %a)" prpr p prc c
+  | Fold (p, c) -> fprintf fmt "Fold (%a,@ %a)" prpr p prc c
+  | Split (p, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]"
+                           prpr p prc c1 prc c2
+  | Destruct (p, p1, p2, c) ->
+      fprintf fmt "Destruct (%a, %a, %a,@ %a)" prpr p prpr p1 prpr p2 prc c
+  | Swap (p, c) -> fprintf fmt "Swap (%a,@ %a)" prpr p prc c
+  | Clear (p, c) -> fprintf fmt "Clear@ (%a,@ %a)" prpr p prc c
+  | Forget (v, c) -> fprintf fmt "Forget@ (%a,@ %a)" prls v prc c
+  | Duplicate (p1, p2, c) -> fprintf fmt "Duplicate@ (%a, %a, @ %a)"
+                               prpr p1 prpr p2 prc c
+  | IntroQuant (p, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)"
+                              prpr p prls y prc c
+  | InstQuant (p1, p2, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)"
+                                prpr p1 prpr p2 prt t prc c
+  | Rewrite (p, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" prpr p prpr h prc c
+  | Induction (p1, p2, p3, p4, x, f, c1, c2) ->
+      fprintf fmt "Induction (%a, %a, %a, %a, %a, %a,@ %a,@ %a)"
+        prpr p1 prpr p2 prpr p3 prpr p4 prt x prt f prc c1 prc c2
+  | Reduce (p, t, c) -> fprintf fmt "Reduce@ (%a,@ %a,@ %a)" prpr p prt t prc c
+
+and prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
+
+and prcertif fmt (n, c) =
+  let cts = Lists.init n dummy_ctask in
+  let lid = List.map (fun ct -> ct.uid) cts in
+  let c = fill_tasks (n, c) cts in
+  fprintf fmt "@[<v>[%a],@ @[%a@]@]"
+    prlid lid prc c;
+  List.iter (forget_id ip) lid
+
+and print_certif filename (cert : scert) =
+  let oc = open_out filename in
+  let fmt = formatter_of_out_channel oc in
+  fprintf fmt "%a@." prcertif cert;
+  close_out oc
+
+let eprcertif c = eprintf "%a@." prcertif c
+
 (* From a task with an hypothesis of the form h : t₁ ↔ t₂, produces the
    same task with premise h modified into h : t₂ ↔ t₁ *)
 
@@ -327,58 +382,52 @@ type ('v, 'h, 't, 'ty) kc =
 type wkc = (lsymbol, prsymbol, term, ty option) kc
 type kcert = (ident, ident, cterm, ctype) kc
 
-let rec print_certif filename cert =
-  let oc = open_out filename in
-  let fmt = formatter_of_out_channel oc in
-  fprintf fmt "%a@." prcertif cert;
-  close_out oc
 
-and prc fmt c =
-  let prt = Pretty.print_term in
+let rec prkc fmt c =
+  let prpr = prid in
+  let prt = pcte in
   match c with
-  | Nc -> fprintf fmt "No_certif"
-  | Hole ct -> fprintf fmt "Hole %a" prid ct.uid
-  | Assert (p, _, c1, c2) ->
+  | KHole ct -> fprintf fmt "Hole %a" prid ct.uid
+  | KClear (b, t, h, c) -> fprintf fmt "Clear@ (%b, %a, %a,@ %a)"
+                             b prt t prpr h prkc c
+  (* | KDuplicate (b, t, h1, h2, c) ->
+   *     fprintf fmt "Duplicate@ (%b, %a, %a, %a, @ %a)"
+   *       b prt t prpr h1 prpr h2 prkc c *)
+  | KForget (v, c) -> fprintf fmt "Forget@ (%a,@ %a)" prpr v prkc c
+  | KAssert (p, _, c1, c2) ->
       fprintf fmt "Assert (@[%a, <fun>,@ @[<4>%a@],@ @[<4>%a@])@]"
-        prpr p prc c1 prc c2
-  | Let (p, _) -> fprintf fmt "Let (%a, <cont>)" prpr p
-  | Axiom (p1, p2) -> fprintf fmt "Axiom (%a, %a)" prpr p1 prpr p2
-  | Trivial p -> fprintf fmt "Trivial %a" prpr p
-  | EqSym (p, c) -> fprintf fmt "EqSym (%a,@ %a)" prpr p prc c
-  | EqTrans (p1, p2, p3, c) -> fprintf fmt "EqTrans (%a, %a, %a, @ %a)"
-                                 prpr p1 prpr p2 prpr p3 prc c
-  | Unfold (p, c) -> fprintf fmt "Unfold (%a,@ %a)" prpr p prc c
-  | Fold (p, c) -> fprintf fmt "Fold (%a,@ %a)" prpr p prc c
-  | Split (p, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]"
-                           prpr p prc c1 prc c2
-  | Destruct (p, p1, p2, c) ->
-      fprintf fmt "Destruct (%a, %a, %a,@ %a)" prpr p prpr p1 prpr p2 prc c
-  | Swap (p, c) -> fprintf fmt "Swap (%a,@ %a)" prpr p prc c
-  | Clear (p, c) -> fprintf fmt "Clear@ (%a,@ %a)" prpr p prc c
-  | Forget (v, c) -> fprintf fmt "Forget@ (%a,@ %a)" prls v prc c
-  | Duplicate (p1, p2, c) -> fprintf fmt "Duplicate@ (%a, %a, @ %a)"
-                               prpr p1 prpr p2 prc c
-  | IntroQuant (p, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)"
-                              prpr p prls y prc c
-  | InstQuant (p1, p2, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)"
-                                prpr p1 prpr p2 prt t prc c
-  | Rewrite (p, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" prpr p prpr h prc c
-  | Induction (p1, p2, p3, p4, x, _, c1, c2) ->
-      fprintf fmt "Induction (%a, %a, %a, %a, %a, <fun>,@ %a,@ %a)"
-        prpr p1 prpr p2 prpr p3 prpr p4 prt x prc c1 prc c2
-  | Reduce (p, t, c) -> fprintf fmt "Reduce@ (%a,@ %a,@ %a)" prpr p prt t prc c
+        prpr p prkc c1 prkc c2
+  | KAxiom (t, p1, p2) -> fprintf fmt "Axiom (%a, %a, %a)" prt t prpr p1 prpr p2
+  | KTrivial (b, p) -> fprintf fmt "Trivial (%b, %a)" b prpr p
+  | KSwap (b, t, p, c) -> fprintf fmt "Swap (%b, %a, %a,@ %a)" b prt t prpr p prkc c
+  | KUnfoldIff (b, t1, t2, p, c) -> fprintf fmt "Unfold (%b, %a, %a, %a,@ %a)" b prt t1 prt t2 prpr p prkc c
+  | KUnfoldArr (b, t1, t2, p, c) -> fprintf fmt "Unfold (%b, %a, %a, %a,@ %a)" b prt t1 prt t2 prpr p prkc c
+  | KSplit (b, t1, t2, p, c1, c2) -> fprintf fmt "Split (%b, %a, %a, @[%a,@ @[<4>%a@],@ @[<4>%a@])@]"
+                                       b prt t1 prt t2 prpr p prkc c1 prkc c2
+  | KDestruct (b, t1, t2, p, p1, p2, c) ->
+      fprintf fmt "Destruct (%b, %a, %a, %a, %a, %a,@ %a)" b prt t1 prt t2 prpr p prpr p1 prpr p2 prkc c
+  | KIntroQuant (b, ty, t, p, y, c) -> fprintf fmt "IntroQuant (%b, %a, %a, ,%a, %a,@ %a)"
+                                         b prty ty prt t prpr p prpr y prkc c
+  | KInstQuant (b, ty, t', p1, p2, t, c) -> fprintf fmt "InstQuant (%b, %a, %a, %a, %a, %a,@ %a)"
+                                             b prty ty prt t' prpr p1 prpr p2 prt t prkc c
+  | KEqRefl (ty, t, g) -> fprintf fmt "EqRefl (%a, %a, %a)" prty ty prt t prpr g
+  | KRewrite (b, _, ty, t1, t2, t3, p, h, c) -> fprintf fmt "Rewrite (%b, %a, %a, %a, , %a, %a, %a,@ %a)" b prty ty prt t1 prt t2 prt t3 prpr p prpr h prkc c
+  | KInduction (p1, p2, p3, p4, x, a, f, c1, c2) ->
+      fprintf fmt "Induction (%a, %a, %a, %a, %a, %a, %a,@ %a,@ %a)"
+        prpr p1 prpr p2 prpr p3 prpr p4 prt x prt a prt f prkc c1 prkc c2
+  | _ -> failwith "WRONG KERNEL CERTIFICATE"
 
 and prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
-and prcertif fmt (n, c) =
-  let cts = Lists.init n dummy_ctask in
-  let lid = List.map (fun ct -> ct.uid) cts in
-  let c = fill_tasks (n, c) cts in
-  fprintf fmt "@[<v>[%a],@ @[%a@]@]"
-    prlid lid prc c;
-  List.iter (forget_id ip) lid
 
-let eprcertif c = eprintf "%a@." prcertif c
+and prkcertif fmt (cert : kcert) = prkc fmt cert
 
+and print_kcertif filename (cert : kcert) =
+  let oc = open_out filename in
+  let fmt = formatter_of_out_channel oc in
+  fprintf fmt "%a@." prkcertif cert;
+  close_out oc
+
+let eprkcertif c = eprintf "%a@." prkcertif c
 
 (** Utility functions on certificates *)
 
