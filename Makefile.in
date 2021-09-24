@@ -1962,6 +1962,28 @@ clean::
 	rm -f doc/apidoc/*
 
 ##########
+# API DOC V2
+##########
+
+.PHONY: apidoc2
+
+ODOCDIRS = util core parser driver transform session mlw
+
+FILESTODOC2 = $(subst .ml.cmti,.cmt,$(MODULESTODOC:%=src/%.cmti))
+FILESTODOC3 = $(subst .ml.odoc,.odoc,$(MODULESTODOC:%=src/%.odoc))
+
+apidoc2: $(FILESTODOC)
+	for f in $(FILESTODOC2); do odoc compile $(ODOCDIRS:%=-I src/%) --package=Why3 $$f; done
+	for f in $(FILESTODOC3); do odoc html $(ODOCDIRS:%=-I src/%) --output-dir=doc/apidoc2 $$f; done
+	odoc support-files --output-dir=doc/apidoc2
+
+clean-apidoc2:
+	rm -f $(FILESTODOC3)
+	rm -rf doc/apidoc2
+
+clean:: clean-apidoc2
+
+##########
 # Install rules for bash completions
 ##########
 
