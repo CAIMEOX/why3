@@ -3,7 +3,8 @@
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
 <file format="whyml" proved="true">
-<path name=".."/><path name="linear50.mlw"/>
+<path name=".."/>
+<path name="linear50.mlw"/>
 <theory name="Top" proved="true">
  <goal name="G" proved="true">
  <transf name="blast_ccert" proved="true" >
