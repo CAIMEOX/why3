@@ -6,7 +6,7 @@ constant x : int
 
 axiom x_zero : x = -1
 
-goal G1 : x + 1 = 0
+goal rew_one : x + 1 = 0
 
 end
 
