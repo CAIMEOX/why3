@@ -40,7 +40,7 @@ They come with the following naming conventions:
   - Lambdapi-checked transformations end with `_lcert`.
 
 In this way, to know which checked transformations are available, simply type
-`_ccert` or `_dcert` in Why3's prompt.
+`_ccert` or `_lcert` in Why3's prompt.
 
 
 Run the IDE on test files. For example, do one of the following:
