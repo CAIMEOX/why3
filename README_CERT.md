@@ -1,5 +1,5 @@
 Cette branche contient le code source du greffon associé à ma thèse intitulée
-'Certification de la transformation d'obligations de preuve'.
+'Certification de la transformation de tâches de preuve'.
 
 Compilation
 -----------
@@ -7,7 +7,7 @@ Compilation
 Voici les instructions à suivre pour compiler Why3 et tester le greffon.
 Cela demande d'avoir accès à une version récente d'OCaml.
 
-À la racine du projet, faire:
+À la racine du dépôt, faire:
 ```shell
 autoconf
 ./configure --enable-local
@@ -31,19 +31,19 @@ et fonctionne pour la version Lambdapi du [commit
 `6b453ab1f1fd0c48bb18ce077009e038c649cf04`.](https://github.com/Deducteam/lambdapi/commit/6b453ab1f1fd0c48bb18ce077009e038c649cf04)
 
 
-Utilisation
------
+Utilisation et tests
+--------------------
 
 Les transformations certifiantes sont disponibles dans Why3 lorsqu'on lui passe l'option `--cert`.
 Elles suivent les conventions de nom suivantes:
-  - le nom d'une transformation vérifiée par le vérificateur OCaml se termine par `_ccert`.
+  - le nom d'une transformation vérifiée par le vérificateur OCaml se termine par `_ccert`,
   - le nom d'une transformation vérifiée par le vérificateur Lambdapi se termine par `_lcert`.
 
 Ainsi, pour obtenir la liste des transformations certifiantes, il suffit de taper
 `_ccert` or `_lcert` dans l'invite de commande de Why3.
 
 
-Pour lancer l'IDE sur les fichiers de test, on peut faire:
+Pour lancer l'IDE Why3 sur les fichiers de test, on peut faire:
 ```shell
 bin/why3 ide --cert plugins/cert/tests/core
 bin/why3 ide --cert plugins/cert/tests/rewrite
@@ -51,11 +51,23 @@ bin/why3 ide --cert plugins/cert/tests/induction
 ```
 Le chargement peut prendre quelques secondes en fonction du fichier à charger.
 
+Pour lancer tous les tests, on peut faire, dans le répertoire `plugins/cert`:
+```shell
+make test
+```
+
+Certains tests utilisent le prouveur Z3 (version 4.8.10) afin de clore les
+tâches résultantes obtenues par application de transformations certifiantes.
+Cette dépendance est optionnelle et peut être remplacée, au choix, par un autre
+prouveur automatique.
+
+
 Code source
 -----------
+
 Le code source est disponible dans le répertoire `plugin/cert` est est composé, principalement, des fichiers suivants:
    - le fichier `cert_syntax.ml` définit la représentation des termes, des types et des tâches
-   - le fichier `cert_abstract.ml` implémente la traduction des tâches de Why3 dans cette représentations
+   - le fichier `cert_abstract.ml` implémente la traduction des tâches de Why3 dans cette représentation
    - le fichier `cert_certificates.ml` définit les certificats et implémente l'élaboration
    - le fichier `cert_trans_util.ml` définit des fonctions utiles pour implémenter des transformations certifiantes
    - le fichier `cert_trans_core.ml` définit diverses transformations certifiantes

@@ -2,19 +2,19 @@
 <!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
-<prover id="1" name="CVC4" version="1.8" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="0" name="Z3" version="4.8.10" timelimit="5" steplimit="0" memlimit="1000"/>
 <file format="whyml" proved="true">
 <path name=".."/><path name="compute.mlw"/>
 <theory name="Top" proved="true">
  <goal name="G1" proved="true">
  <transf name="compute_in_goal" proved="true" >
   <goal name="G1.0" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="177"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="48"/></proof>
   </goal>
  </transf>
  <transf name="compute_lcert" proved="true" >
   <goal name="G1.0" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="177"/></proof>
+  <proof prover="0"><result status="valid" time="0.03" steps="48"/></proof>
   </goal>
  </transf>
  </goal>
