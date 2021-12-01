@@ -102,9 +102,21 @@ let prls fmt ls = prid fmt ls.ls_name
 
 let prpr fmt pr = prhyp fmt pr.pr_name
 
+let rec collect acc = function
+  | CTyapp (_, l) -> List.fold_left collect acc l
+  | CTarrow (t1, t2) -> collect (collect acc t1) t2
+  | CTprop -> acc
+  | CTyvar v -> Stv.add v acc
+
 (** Pretty printing of ctype (compatible with lambdapi) *)
 (* Prints a shallow type without outside parentheses *)
-let rec prty fmt ty = match ty with
+let rec prty fmt ty =
+  let ltv = Stv.elements (collect Stv.empty ty) in
+  pp_print_list ~pp_sep:pp_print_space
+    (fun fmt tv -> fprintf fmt "Π %a : Type," Pretty.print_tv tv) fmt ltv;
+  prty_comp fmt ty
+
+and prty_comp fmt = function
   | CTyapp (ts, l) when l <> [] ->
       fprintf fmt "@[<2>%a@ %a@]"
         prts ts
@@ -112,15 +124,15 @@ let rec prty fmt ty = match ty with
   | CTarrow (t1, t2) ->
       fprintf fmt "@[%a →@ %a@]"
         prty_paren t1
-        prty t2
-  | _ -> prty_paren fmt ty
+        prty_comp t2
+  | ty -> prty_paren fmt ty
 
 (* Prints a shallow type, protected with outside parentheses if needed *)
 and prty_paren fmt = function
   | CTyvar v -> fprintf fmt "εₜ %a" Pretty.print_tv v
   | CTprop -> fprintf fmt "Type"
   | CTyapp (ts, []) -> prts fmt ts
-  | cty -> fprintf fmt "(%a)" prty cty
+  | cty -> fprintf fmt "(%a)" prty_comp cty
 
 and prts fmt ts =
   if ts_equal ts ts_int then fprintf fmt "Z"
@@ -129,6 +141,7 @@ and prts fmt ts =
 
 (* pred functions know if we are printing the type of a predicate or not *)
 (* Prints a deep type, protected with outside parentheses if needed *)
+(* TODO: print quantification on type variables *)
 let rec pred_ty pred fmt ty = match ty with
   | CTyapp (ts, l) when l <> [] ->
       fprintf fmt "@[<2>%a@ %a@]"
@@ -281,6 +294,15 @@ let rec replace_cterm tl tr t =
 (** Pretty printing of terms (compatible with lambdapi) *)
 
 let rec pcte fmt = function
+  | CTqtype (tv::l, t) ->
+      fprintf fmt "`π %a : Type, %a"
+        prid tv.tv_name
+        pcte (CTqtype(l, t))
+  | CTqtype ([], t) ->
+      pquant fmt t
+  | t -> pquant fmt t
+
+and pquant fmt = function
   | CTquant (q, cty, t) ->
       let x = id_register (id_fresh "x") in
       let t_open = ct_open t (CTfvar (x, [])) in
@@ -291,7 +313,7 @@ let rec pcte fmt = function
         q_str
         prid x
         prty cty
-        pcte t_open;
+        pquant t_open;
       forget_id ip x
   | ct -> prarr fmt ct
 

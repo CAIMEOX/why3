@@ -158,7 +158,7 @@ let instquant p1 p2 t = newcert1 (fun a -> InstQuant (p1, p2, t, a))
 let introtype p il = newcert1 (fun a -> IntroType (p, il, a))
 (* From a list of fresh type symbols [ι₁; …; ιₙ] and a task with goal p : Π α₁ … αₙ. t
    it produces a new task with the goal p modified as t[α₁ ↦ ι₁]…[αₙ ↦ ιₙ] *)
-let insttype p1 p2 tyl t = newcert1 (fun a -> InstType (p1, p2, tyl, a))
+let insttype p1 p2 tyl = newcert1 (fun a -> InstType (p1, p2, tyl, a))
 (* From a list of types [τ₁; …; τₙ] and a task with hypothesis p₁ : p₁ : Π α₁ … αₙ. t
    it produces a new task with the added hypothesis p₂ : p₂ : t[α₁ ↦ τ₁]…[αₙ ↦ τₙ] *)
 let rewrite h p = newcert1 (fun a -> Rewrite (h, p, a))

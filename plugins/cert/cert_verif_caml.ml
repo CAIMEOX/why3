@@ -12,7 +12,7 @@ let rec ccheck (c : kcert) cta =
   match c with
   | KDuplicate _ | KFoldArr _
   | KFoldIff _  | KSwapNegate _| KEqSym _ | KEqTrans _ ->
-      verif_failed "Construct/Duplicate/Fold/SwapNeg/Eq/Let left"
+      verif_failed "Found Construct/Duplicate/Fold/SwapNeg/Eq/Let"
   | KReduce _ ->
       verif_failed "Reduce is not implemented in the OCaml checker yet"
   | KHole cta' -> if not (ctask_equal cta cta')
@@ -42,12 +42,12 @@ let rec ccheck (c : kcert) cta =
                   pcte t2;
                 verif_failed "The hypothesis and goal given do not match"
               end)
-      else verif_failed "Terms have wrong positivities in the task"
+      else verif_failed "Formulas have wrong positivities in the task"
   | KTrivial (_, i) ->
       let t, pos = find_formula "trivial" i cta in
       begin match t, pos with
       | CTfalse, false | CTtrue, true -> ()
-      | _ -> verif_failed "Non trivial hypothesis"
+      | _ -> verif_failed "Non trivial formula"
       end
   | KEqRefl (cty, _, i) ->
       let t, pos = find_formula "eqrefl" i cta in
@@ -116,7 +116,7 @@ let rec ccheck (c : kcert) cta =
                 prhyp i
                 prid y
                 pacta cta;
-              verif_failed "non-free variable"
+              verif_failed "Non-free variable"
             end
           else let cta = add i (ct_open t (CTfvar (y, [])), pos) cta
                          |> add_var y cty in
@@ -129,7 +129,7 @@ let rec ccheck (c : kcert) cta =
           infers_into ~e_str:"KInstquant" cta t_inst ty;
           let cta = add j (ct_open t t_inst, pos) cta in
           ccheck c cta
-      | _ -> verif_failed "trying to instantiate a non-quantified hypothesis"
+      | _ -> verif_failed "Can't instantiate formula"
       end
   | KIntroType (_, p, lts, c) ->
       let t, pos = find_formula "KIntroType" p cta in
@@ -141,13 +141,13 @@ let rec ccheck (c : kcert) cta =
           let cta = List.fold_left (fun cta ts -> add_type ts.ts_name cta) cta lts in
           let cta = add p (nt, pos) cta in
           ccheck c cta
-      | _ -> verif_failed "Can't introduce a type variable here" end
+      | _ -> verif_failed "Can't introduce type variable" end
   | KInstType _ -> verif_failed "TODO"
   | KRewrite (_, is_eq, cty, _, _, ctxt, i1, i2, c) ->
       let a, b = match find_formula "rew" i1 cta, is_eq with
         | (CTbinop (Tiff, a, b), false), Some _ -> a, b
         | (CTapp (CTapp (f, a), b), false), None when ct_equal f (eq cty) -> a, b
-        | _ -> verif_failed "Non-rewritable proposition" in
+        | _ -> verif_failed "Non-rewritable formula" in
       let t, pos = find_formula "rew" i2 cta in
       assert (ct_equal t (instantiate_safe cta ctxt a));
       let cta =  add i2 (instantiate ctxt b, pos) cta in
@@ -159,8 +159,8 @@ let rec ccheck (c : kcert) cta =
       let ix =  match x with CTfvar (ix, _) -> ix | _ -> assert false in
        (* check that we are in the case of application and that we preserve
          typing *)
-      infers_into ~e_str:"KInduction, var" cta x ctint;
-      infers_into ~e_str:"KInduction, bound" cta a ctint;
+      infers_into cta x ctint;
+      infers_into cta a ctint;
       assert (ct_equal t (instantiate_safe cta ctxt x));
       assert (not (has_ident_context ix (remove g cta).gamma_delta) && pos);
       let cta1 = add hi1 (CTapp (CTapp (le, x), a), false) cta in
