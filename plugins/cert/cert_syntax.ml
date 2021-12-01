@@ -202,6 +202,7 @@ let rec ct_ty_subst subst = function
   | CTquant (q, qcty, ct) ->
       CTquant (q, cty_ty_subst subst qcty,
                ct_ty_subst subst ct)
+  | CTfvar (i, l) -> CTfvar (i, List.map (cty_ty_subst subst) l)
   | ct -> ct_map (ct_ty_subst subst) ct
 
 let ct_equal t1 t2 =
