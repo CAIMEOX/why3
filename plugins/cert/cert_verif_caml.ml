@@ -138,7 +138,7 @@ let rec ccheck (c : kcert) cta =
           let lty = List.map (fun ts -> CTyapp (ts, [])) lts in
           let subst = Mtv.of_list (List.combine alphas lty) in
           let nt = ct_ty_subst subst ct in
-          let cta = List.fold_left (fun cta ts -> add_type ts.ts_name cta) cta lts in
+          let cta = List.fold_left (fun cta ts -> add_type ts cta) cta lts in
           let cta = add p (nt, pos) cta in
           ccheck c cta
       | _ -> verif_failed "Can't introduce type variable" end

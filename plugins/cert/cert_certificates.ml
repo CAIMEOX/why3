@@ -345,7 +345,7 @@ type ('ts, 'v, 'ty, 'h, 't) kc =
 
 (* Why3 kernel certificates *)
 type wkc = (tysymbol, lsymbol, ty option, prsymbol, term) kc
-type kcert = (tysymbol, ident, ctype, ident, cterm) kc
+type kcert = (ident, ident, ctype, ident, cterm) kc
 
 let rec print_certif filename cert =
   let oc = open_out filename in
@@ -525,7 +525,7 @@ let rec abstract_terms_types (l : wkc) : kcert = match l with
       KRewrite (pos, Some ntls, CTprop, na, nb, nctxt, i.pr_name, h.pr_name, nc)
   | c ->
       map_kc abstract_terms_types
-           (fun ls -> ls.ls_name) (fun ts -> ts) (fun pr -> pr.pr_name)
+           (fun ls -> ls.ls_name) (fun ts -> ts.ts_name) (fun pr -> pr.pr_name)
            abstract_term abstract_otype c
 
 let t_open_quant_one q tq = match t_open_quant tq with

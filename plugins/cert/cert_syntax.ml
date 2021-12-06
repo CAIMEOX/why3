@@ -21,13 +21,13 @@ type cquant = CTforall | CTexists | CTlambda
 type ctype =
   | CTyvar of tvsymbol (* type variable *)
   | CTprop (* type of formulas *)
-  | CTyapp of tysymbol * ctype list (* (possibly) applied type symbol *)
+  | CTyapp of ident * ctype list (* (possibly) applied type symbol *)
   | CTarrow of ctype * ctype (* arrow type *)
 
 (* Interpreted types *)
-let ctint = CTyapp (ts_int, [])
-let ctreal = CTyapp (ts_real, [])
-let ctbool = CTyapp (ts_bool, [])
+let ctint = CTyapp (ts_int.ts_name, [])
+let ctreal = CTyapp (ts_real.ts_name, [])
+let ctbool = CTyapp (ts_bool.ts_name, [])
 
 (** Utility functions on ctype *)
 
@@ -36,7 +36,7 @@ let rec cty_equal ty1 ty2 = match ty1, ty2 with
   | CTprop, CTprop -> true
   | CTyvar v1, CTyvar v2 -> Ty.tv_equal v1 v2
   | CTyapp (ty1, l1), CTyapp (ty2, l2) ->
-      ts_equal ty1 ty2 && List.for_all2 cty_equal l1 l2
+      id_equal ty1 ty2 && List.for_all2 cty_equal l1 l2
   | CTarrow (f1, a1), CTarrow (f2, a2) ->
       cty_equal f1 f2 && cty_equal a1 a2
   | (CTyvar _ | CTyapp _ | CTarrow _ | CTprop), _ -> false
@@ -112,9 +112,11 @@ let rec collect acc = function
 (* Prints a shallow type without outside parentheses *)
 let rec prty fmt ty =
   let ltv = Stv.elements (collect Stv.empty ty) in
+  fprintf fmt "@[";
   pp_print_list ~pp_sep:pp_print_space
     (fun fmt tv -> fprintf fmt "Π %a : Type,@ " Pretty.print_tv tv) fmt ltv;
-  prty_comp fmt ty
+  prty_comp fmt ty;
+  fprintf fmt "@]"
 
 and prty_comp fmt = function
   | CTyapp (ts, l) when l <> [] ->
@@ -135,9 +137,9 @@ and prty_paren fmt = function
   | cty -> fprintf fmt "(%a)" prty_comp cty
 
 and prts fmt ts =
-  if ts_equal ts ts_int then fprintf fmt "Z"
-  else if ts_equal ts ts_bool then fprintf fmt "boolean"
-  else fprintf fmt "εₜ %a" Pretty.print_ts ts
+  if id_equal ts ts_int.ts_name then fprintf fmt "Z"
+  else if id_equal ts ts_bool.ts_name then fprintf fmt "boolean"
+  else fprintf fmt "εₜ %a" prid ts
 
 (* pred functions know if we are printing the type of a predicate or not *)
 (* Prints a deep type, protected with outside parentheses if needed *)
@@ -145,7 +147,7 @@ and prts fmt ts =
 let rec pred_ty pred fmt ty = match ty with
   | CTyapp (ts, l) when l <> [] ->
       fprintf fmt "@[<2>%a@ %a@]"
-        Pretty.print_ts ts
+        prid ts
         (print_list (pred_pty pred)) l
   | CTarrow (t1, t2) ->
       fprintf fmt "@[%a %a@ %a@]"
@@ -156,7 +158,7 @@ let rec pred_ty pred fmt ty = match ty with
 and pred_pty pred fmt = function
   | CTyvar v -> Pretty.print_tv fmt v
   | CTprop -> fprintf fmt "DType"
-  | CTyapp (ts, []) -> Pretty.print_ts fmt ts
+  | CTyapp (ts, []) -> prid fmt ts
   | cty -> fprintf fmt "(%a)" (pred_ty pred) cty
 
 and prarrow fmt pred =
@@ -542,7 +544,7 @@ let rec type_matching subst ty1 ty2 = match ty1, ty2 with
       | None -> Mtv.add v ty2 subst
       | Some ty2' -> assert (cty_equal ty2 ty2'); subst end
   | CTyapp (ts1, l1), CTyapp (ts2, l2) ->
-      assert (ts_equal ts1 ts2);
+      assert (id_equal ts1 ts2);
       for_all2_type_matching subst l1 l2
   | CTarrow (f1, a1), CTarrow (f2, a2) ->
       for_all2_type_matching subst [f1; a1] [f2; a2]

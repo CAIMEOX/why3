@@ -123,10 +123,10 @@ let print_certif fmt (c : kcert) =
   | KIntroType (t, p, ts::lts, c) ->
       begin match t with
       | CTqtype (tv::ltv, t') ->
-          fprintf fmt "IntroType (λ %a,@ %a) %a (λ %a %a,@ \
+          fprintf fmt "IntroType (λ %a, %a) %a (λ %a %a,@ \
                        @[<hv>%a@])"
             Pretty.print_tv tv prpv (CTqtype (ltv, t')) prhyp p
-            Pretty.print_ts ts prhyp p
+            prid ts prhyp p
             pc (KIntroType (t, p, lts, c))
       | _ -> failwith "IntroType different length"
       end
