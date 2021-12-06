@@ -512,6 +512,8 @@ let map_kc fc fv fts fh ft fty = function
        checkers.
  *)
 
+exception Elaboration_failed
+
 let rec abstract_terms_types (l : wkc) : kcert = match l with
   | KRewrite (pos, Some {t_node = Tapp (ls, [])}, None, a, b, ctxt, i, h, c) ->
       let ntls = CTfvar (ls.ls_name, []) in
@@ -525,8 +527,6 @@ let rec abstract_terms_types (l : wkc) : kcert = match l with
       map_kc abstract_terms_types
            (fun ls -> ls.ls_name) (fun ts -> ts) (fun pr -> pr.pr_name)
            abstract_term abstract_otype c
-
-exception Elaboration_failed
 
 let t_open_quant_one q tq = match t_open_quant tq with
   | vs::vsl, trg, t_open ->

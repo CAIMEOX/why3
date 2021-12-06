@@ -113,7 +113,7 @@ let rec collect acc = function
 let rec prty fmt ty =
   let ltv = Stv.elements (collect Stv.empty ty) in
   pp_print_list ~pp_sep:pp_print_space
-    (fun fmt tv -> fprintf fmt "Π %a : Type," Pretty.print_tv tv) fmt ltv;
+    (fun fmt tv -> fprintf fmt "Π %a : Type,@ " Pretty.print_tv tv) fmt ltv;
   prty_comp fmt ty
 
 and prty_comp fmt = function
@@ -296,7 +296,7 @@ let rec replace_cterm tl tr t =
 let rec pcte fmt = function
   | CTqtype (tv::l, t) ->
       fprintf fmt "`π %a : Type, %a"
-        prid tv.tv_name
+        Pretty.print_tv tv
         pcte (CTqtype(l, t))
   | CTqtype ([], t) ->
       pquant fmt t
@@ -312,7 +312,7 @@ and pquant fmt = function
       fprintf fmt "%s %a : %a, %a"
         q_str
         prid x
-        prty cty
+        prty_paren cty
         pquant t_open;
       forget_id ip x
   | ct -> prarr fmt ct
