@@ -24,6 +24,11 @@
   <proof prover="0"><result status="valid" time="0.02" steps="1967"/></proof>
   </goal>
  </transf>
+ <transf name="intro_lcert" proved="true" >
+  <goal name="G2.0" proved="true">
+  <proof prover="0"><result status="valid" time="0.03" steps="1967"/></proof>
+  </goal>
+ </transf>
  </goal>
 </theory>
 </file>

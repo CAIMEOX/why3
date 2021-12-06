@@ -25,7 +25,7 @@ let rec abstract_type { ty_node } =
              | [l1; l2] -> l1, l2
              | _ -> assert false in
            CTarrow (abstract_type l1, abstract_type l2)
-      else CTyapp (ts, List.map abstract_type lts)
+      else CTyapp (ts.ts_name, List.map abstract_type lts)
 
 let abstract_otype = function
   | None -> CTprop
