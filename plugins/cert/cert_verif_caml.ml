@@ -142,7 +142,15 @@ let rec ccheck (c : kcert) cta =
           let cta = add p (nt, pos) cta in
           ccheck c cta
       | _ -> verif_failed "Can't introduce type variable" end
-  | KInstType _ -> verif_failed "TODO"
+  | KInstType (_, p1, p2, lty, c) ->
+      let t, pos = find_formula "KInstType" p1 cta in
+      begin match t, pos with
+      | CTqtype (alphas, ct), false when List.length alphas = List.length lty ->
+          let subst = Mtv.of_list (List.combine alphas lty) in
+          let nt = ct_ty_subst subst ct in
+          let cta = add p2 (nt, pos) cta in
+          ccheck c cta
+      | _ -> verif_failed "Can't instantiate type variable" end
   | KRewrite (_, is_eq, cty, _, _, ctxt, i1, i2, c) ->
       let a, b = match find_formula "rew" i1 cta, is_eq with
         | (CTbinop (Tiff, a, b), false), Some _ -> a, b

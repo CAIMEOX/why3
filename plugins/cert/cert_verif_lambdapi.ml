@@ -123,15 +123,29 @@ let print_certif fmt (c : kcert) =
   | KIntroType (t, p, ts::lts, c) ->
       begin match t with
       | CTqtype (tv::ltv, t') ->
+          let nt = CTqtype (ltv, t') in
+          let nt_subst = ct_ty_subst (Ty.Mtv.singleton tv (CTyapp (ts, []))) nt in
           fprintf fmt "IntroType (λ %a, %a) %a (λ %a %a,@ \
                        @[<hv>%a@])"
-            Pretty.print_tv tv prpv (CTqtype (ltv, t')) prhyp p
+            Pretty.print_tv tv prpv nt prhyp p
             prid ts prhyp p
-            pc (KIntroType (t, p, lts, c))
-      | _ -> failwith "IntroType different length"
+            pc (KIntroType (nt_subst, p, lts, c))
+      | _ -> assert false
       end
   | KIntroType (_, _, [], c) -> pc fmt c
-  | KInstType _ -> failwith "TODO"
+  | KInstType (t, p1, p2, ty::lty, c) ->
+      begin match t with
+      | CTqtype (tv::ltv, t') ->
+          let nt = CTqtype (ltv, t') in
+          let nt_subst = ct_ty_subst (Ty.Mtv.singleton tv ty) nt in
+          fprintf fmt "InstType (λ %a, %a) %a (λ %a %a,@ \
+                       @[<hv>%a@])"
+            Pretty.print_tv tv prpv (CTqtype (ltv, t')) prty_paren ty
+            prhyp p1 prhyp p2
+            pc (KInstType (nt_subst, p2, p2, lty, c))
+      | _ -> assert false
+      end
+  | KInstType (_, _, _, [], c) -> pc fmt c
   | KRewrite (pos, is_eq, _, t1, t2, ctxt, i1, i2, c) ->
       let str_fmla = match is_eq with None -> "" | _ -> "Fmla" in
       fprintf fmt "Rewrite%s%s %a %a %a %a %a (λ %a %a,@ \

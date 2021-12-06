@@ -2245,7 +2245,13 @@ symbol IntroType' (P : Type → Type) : εₜ (
   (`π ι, ∅ ⊧ P ι ∙ ∅) ⟹
   ∅ ⊧ (`π ι, P ι) ∙ ∅)
 ≔ λ s nfp, nfp (λ t, from_nn (P t) (s t));
-symbol IntroType P H s ≔ IntroType' P s H;
+symbol IntroType P G s ≔ IntroType' P s G;
+
+symbol InstType' (P : Type → Type) (τ : Type) : εₜ (
+  ((`π ι, P ι) ∙ P τ ∙ ∅ ⊧ ∅) ⟹
+  (`π ι, P ι) ∙ ∅ ⊧ ∅)
+≔ λ s fp, s fp (fp τ);
+symbol InstType P τ H s ≔ InstType' P τ s H;
 
 symbol RewriteHyp' T a b (P : εₜ T → Type) : εₜ (
   a = b ∙ P b ∙ ∅ ⊧ ∅ ⟹
