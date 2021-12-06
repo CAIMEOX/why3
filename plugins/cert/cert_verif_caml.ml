@@ -6,15 +6,15 @@ open Term (* only for binop *)
 open Cert_syntax
 open Cert_certificates
 
-(* This is the main verification function : <ccheck> replays the certificate on
+(* This is the main verification function: <ccheck> replays the certificate on
    a ctask *)
 let rec ccheck (c : kcert) cta =
   match c with
   | KDuplicate _ | KFoldArr _
   | KFoldIff _  | KSwapNegate _| KEqSym _ | KEqTrans _ ->
       verif_failed "Found Construct/Duplicate/Fold/SwapNeg/Eq/Let"
-  | KReduce _ ->
-      verif_failed "Reduce is not implemented in the OCaml checker yet"
+  | KConv _ ->
+      verif_failed "Conv is not implemented in the OCaml checker yet"
   | KHole cta' -> if not (ctask_equal cta cta')
                   then begin
                       Format.eprintf "@[<v>Conflict of tasks: @ \

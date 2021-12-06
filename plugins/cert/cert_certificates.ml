@@ -36,7 +36,7 @@ type sc =
   | Rewrite of prsymbol * prsymbol * sc
   | Induction of prsymbol * prsymbol * prsymbol * prsymbol * term *
                    term * sc * sc
-  | Reduce of prsymbol * term * sc
+  | Conv of prsymbol * term * sc
 
 type scert = int * (sc list -> sc)
 
@@ -169,8 +169,8 @@ let induction g hi1 hi2 hr x a =
 (* From an integer a and a task with a goal g : t[x] with x being an integer,
    produces two new tasks: one with the added hypothesis hi1 : i ≤ a and the
    other with the added hypotheses hi2 : a < i and hr : ∀ n. n < i → t[n] *)
-let reduce p t' =
-  newcert1 (fun a -> Reduce (p, t', a))
+let conv p t' =
+  newcert1 (fun a -> Conv (p, t', a))
 (* Returns the task where a computation has been done in p, changing it to t' *)
 
 let create_eqrefl h (t : term) =
@@ -335,11 +335,11 @@ type ('ts, 'v, 'ty, 'h, 't) kc =
    and x and a are of type int *)
 (* In the induction and rewrite rules f is a context and the notation f[t]
    stands for this context where the holes have been replaced with t *)
-  | KReduce of bool * 't * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc
-  (* KReduce (false, t, t', p, c) ⇓ (Γ, p : t ⊢ Δ) ≜
+  | KConv of bool * 't * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc
+  (* KConv (false, t, t', p, c) ⇓ (Γ, p : t ⊢ Δ) ≜
      c ⇓ (Γ, p : t' ⊢ Δ)
      and t ≡ t'
-     KReduce (true, t, t', p, c)  ⇓ (Γ ⊢ Δ, p : t) ≜
+     KConv (true, t, t', p, c)  ⇓ (Γ ⊢ Δ, p : t) ≜
      c ⇓ (Γ ⊢ Δ, p : t')
      and t ≡ t' *)
 
@@ -396,7 +396,7 @@ and prc fmt c =
   | Induction (p1, p2, p3, p4, x, _, c1, c2) ->
       fprintf fmt "Induction (%a, %a, %a, %a, %a, <fun>,@ %a,@ %a)"
         prpr p1 prpr p2 prpr p3 prpr p4 prt x prc c1 prc c2
-  | Reduce (p, t, c) -> fprintf fmt "Reduce@ (%a,@ %a,@ %a)" prpr p prt t prc c
+  | Conv (p, t, c) -> fprintf fmt "Conv@ (%a,@ %a,@ %a)" prpr p prt t prc c
 
 and prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
 and prcertif fmt (n, c) =
@@ -442,7 +442,7 @@ let map_sc fc = function
   | Rewrite (p, h, c) -> Rewrite (p, h, fc c)
   | Induction (p1, p2, p3, p4, x, a, c1, c2) ->
       Induction (p1, p2, p3, p4, x, a, fc c1, fc c2)
-  | Reduce (p, t, c) -> Reduce (p, t, fc c)
+  | Conv (p, t, c) -> Conv (p, t, fc c)
 
 (* To define recursive functions on elements of type kc *)
 let map_kc fc fv fts fh ft fty = function
@@ -485,7 +485,7 @@ let map_kc fc fv fts fh ft fty = function
       KRewrite (pos, Opt.map ft topt, fty ty, ft t1, ft t2, ft f, fh p, fh h, fc c)
   | KInduction (p1, p2, p3, p4, x, a, f, c1, c2) ->
       KInduction (fh p1, fh p2, fh p3, fh p4, ft x, ft a, ft f, fc c1, fc c2)
-  | KReduce (pos, t, t', p, c) -> KReduce (pos, ft t, ft t',fh p, fc c)
+  | KConv (pos, t, t', p, c) -> KConv (pos, ft t, ft t',fh p, fc c)
 
 (** Compile chain.
     1. surface certificates: scert
@@ -749,10 +749,10 @@ let elaborate init_ct c =
                                       (t_replace x n t))),
                               false) in
         KInduction (g, hi1, hi2, hr, x, a, ctxt, elab cta1 c1, elab cta2 c2)
-    | Reduce (p, t', c) ->
-        let t, pos = find_formula "Reduce" p cta in
+    | Conv (p, t', c) ->
+        let t, pos = find_formula "Conv" p cta in
         let cta = add p (t', pos) cta in
-        KReduce (pos, t, t', p, elab cta c)
+        KConv (pos, t, t', p, elab cta c)
   in
   elab init_ct c
 
