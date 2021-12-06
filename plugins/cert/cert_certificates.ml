@@ -159,8 +159,8 @@ let introtype p il = newcert1 (fun a -> IntroType (p, il, a))
 (* From a list of fresh type symbols [ι₁; …; ιₙ] and a task with goal p : Π α₁ … αₙ. t
    it produces a new task with the goal p modified as t[α₁ ↦ ι₁]…[αₙ ↦ ιₙ] *)
 let insttype p1 p2 tyl = newcert1 (fun a -> InstType (p1, p2, tyl, a))
-(* From a list of types [τ₁; …; τₙ] and a task with hypothesis p₁ : p₁ : Π α₁ … αₙ. t
-   it produces a new task with the added hypothesis p₂ : p₂ : t[α₁ ↦ τ₁]…[αₙ ↦ τₙ] *)
+(* From a list of types [τ₁; …; τₙ] and a task with hypothesis p₁ : Π α₁ … αₙ. t
+   it produces a new task with the added hypothesis p₂ : t[α₁ ↦ τ₁]…[αₙ ↦ τₙ] *)
 let rewrite h p = newcert1 (fun a -> Rewrite (h, p, a))
 (* From a task with hypothesis h : t₁ = t₂ and premise p : t[t₁],
    produces the tasks with p modified into p : t[t₂] *)
@@ -701,7 +701,13 @@ let elaborate init_ct c =
         let _, nt = t_subst_types subst Mvs.empty t in
         let cta = add p (nt, pos) cta in
         KIntroType (t, p, lts, elab cta c)
-    | InstType _ -> verif_failed "TODO"
+    | InstType (p1, p2, lty, c) ->
+        let t, pos = find_formula "InstType" p1 cta in
+        let alphas = Stv.elements (t_ty_freevars Stv.empty t) in
+        let subst = Mtv.of_list (List.combine alphas lty) in
+        let _, nt = t_subst_types subst Mvs.empty t in
+        let cta = add p2 (nt, pos) cta in
+        KInstType (t, p1, p2, List.map (fun ty -> Some ty) lty, elab cta c)
     | Rewrite (h, p, c) ->
         let rew_hyp, _ = find_formula "Finding rewrite hypothesis" h cta in
         let a, b, is_eq = match rew_hyp.t_node with
