@@ -12,6 +12,11 @@
   <proof prover="0"><result status="valid" time="0.02" steps="151"/></proof>
   </goal>
  </transf>
+ <transf name="intro_lcert" proved="true" >
+  <goal name="G1.0" proved="true">
+  <proof prover="0"><result status="valid" time="0.01" steps="151"/></proof>
+  </goal>
+ </transf>
  </goal>
  <goal name="G2" proved="true">
  <transf name="intro_ccert" proved="true" >

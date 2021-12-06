@@ -120,12 +120,17 @@ let print_certif fmt (c : kcert) =
                    @[<hv>%a@])"
         (rstr pos) prpv p prpv t prhyp i1 prhyp i1 prhyp i2
         pc c
-  | KIntroType (p, i, lts, c) ->
-      let y = List.hd lts in
-      fprintf fmt "IntroType %a %a (λ %a %a,@ \
-                   @[<hv>%a@])"
-        prpv p prhyp i Pretty.print_ts y prhyp i
-        pc c
+  | KIntroType (t, p, ts::lts, c) ->
+      begin match t with
+      | CTqtype (tv::ltv, t') ->
+          fprintf fmt "IntroType (λ %a,@ %a) %a (λ %a %a,@ \
+                       @[<hv>%a@])"
+            Pretty.print_tv tv prpv (CTqtype (ltv, t')) prhyp p
+            Pretty.print_ts ts prhyp p
+            pc (KIntroType (t, p, lts, c))
+      | _ -> failwith "IntroType different length"
+      end
+  | KIntroType (_, _, [], c) -> pc fmt c
   | KInstType _ -> failwith "TODO"
   | KRewrite (pos, is_eq, _, t1, t2, ctxt, i1, i2, c) ->
       let str_fmla = match is_eq with None -> "" | _ -> "Fmla" in
