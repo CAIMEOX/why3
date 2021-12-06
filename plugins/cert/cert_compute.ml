@@ -19,4 +19,4 @@ let ccompute specified steps where env =
       let nt = match decl.d_node with
         | Dprop (_, pr', t) when pr_equal pr' pr -> t
         | _ -> assert false in
-      ntask , reduce pr nt)
+      ntask , conv pr nt)

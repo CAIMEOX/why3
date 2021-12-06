@@ -50,7 +50,7 @@ let print_certif fmt (c : kcert) =
   | KDuplicate _ | KFoldArr _
   | KFoldIff _  | KSwapNegate _| KEqSym _ | KEqTrans _ ->
       verif_failed "Construct/Duplicate/Fold/SwapNeg/Eq/Let left"
-  | KReduce (_, _, _, _, c) ->
+  | KConv (_, _, _, _, c) ->
       pc fmt c
   | KHole ct ->
       let decl_ids, hyp_ids = decl_hyp_ids ct in
