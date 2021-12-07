@@ -75,9 +75,9 @@ let newcertn n f = n, f
 
 let apply ((_, f) : scert) : sc = f []
 
-let lambda1 f = newcert1 (fun t -> apply (f t))
-let lambda2 f = newcert2 (fun t1 t2 -> apply (f t1 t2))
-let lambdan n f = newcertn n (fun l -> apply (f l))
+let lambda1 f = newcert1 (fun t -> apply (f (return t)))
+let lambda2 f = newcert2 (fun t1 t2 -> apply (f (return t1) (return t2)))
+let lambdan n f = newcertn n (fun l -> apply (f (List.map return l)))
 
 let rec cut n = function
   | h::t when n > 0 ->
@@ -100,6 +100,12 @@ let (++) (n1, f1) c2 : scert =
   let lc2 = Lists.init n1 (fun _ -> c2) in
   (n1, f1) +++ lc2
 
+let letc n pr f =
+  newcertn n (fun l -> Let (pr, fun pos t -> apply (f (List.map return l) pos t)))
+(* Use letc n pr f when you need a certificate of arity n and want to have
+   access to the position and formula associated with pr. The first argument of
+   f should be a list of size n containing the resulting certificates, the
+   second is the position of pr and the third is the formula of pr *)
 let nc : scert = return Nc
 (* "no certificate", makes verification fail: use it as a placeholder *)
 let idc : scert = newcert1 (fun t -> t)
@@ -411,38 +417,6 @@ let eprcertif c = eprintf "%a@." prcertif c
 
 
 (** Utility functions on certificates *)
-
-(* To define recursive functions on elements of type sc *)
-(* TODO: remove this function *)
-let map_sc fc = function
-  | (Hole _ | Nc) as c -> c
-  | Axiom (h, g) -> Axiom (h, g)
-  | Trivial p -> Trivial p
-  | EqSym (p, c) -> EqSym (p, fc c)
-  | EqTrans (p1, p2, p3, c) -> EqTrans (p1, p2, p3, fc c)
-  | Assert (p, t, c1, c2) ->
-      let f1 = fc c1 in
-      let f2 = fc c2 in
-      Assert (p, t, f1, f2)
-  | Let (p, c) -> Let (p, fun b t -> fc (c b t))
-  | Unfold (p, c) -> Unfold (p, fc c)
-  | Fold (p, c) -> Fold (p, fc c)
-  | Split (p, c1, c2) ->
-      let f1 = fc c1 in let f2 = fc c2 in
-                        Split (p, f1, f2)
-  | Destruct (p, p1, p2, c) -> Destruct (p, p1, p2, fc c)
-  | Swap (p, c) -> Swap (p, fc c)
-  | Clear (p, c) -> Clear (p, fc c)
-  | Forget (v, c) -> Forget (v, fc c)
-  | Duplicate (p1, p2, c) -> Duplicate (p1, p2, fc c)
-  | IntroQuant (p, y, c) -> IntroQuant (p, y, fc c)
-  | InstQuant (p1, p2, t, c) -> InstQuant (p1, p2, t, fc c)
-  | IntroType (p, li, c) -> IntroType (p, li, fc c)
-  | InstType (p1, p2, iota, c) -> InstType (p1, p2, iota, fc c)
-  | Rewrite (p, h, c) -> Rewrite (p, h, fc c)
-  | Induction (p1, p2, p3, p4, x, a, c1, c2) ->
-      Induction (p1, p2, p3, p4, x, a, fc c1, fc c2)
-  | Conv (p, t, c) -> Conv (p, t, fc c)
 
 (* To define recursive functions on elements of type kc *)
 let map_kc fc fv fts fh ft fty = function

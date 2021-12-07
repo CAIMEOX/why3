@@ -6,8 +6,6 @@ open Task
 
 open Cert_certificates
 
-let thunk t _ = t
-
 let decl_cert f = Trans.decl_acc idc (++) (fun d _ -> f d)
 let decl_l_cert f = Trans.decl_l_acc idc (++) (fun d _ -> f d)
 
@@ -101,16 +99,15 @@ let revert_cert pr decls =
                   rc tail
         | Dparam ls ->
             let pr' = pr_clone pr in
-            newcert1 (fun a -> (Let (pr, fun _ g ->
+            letc 1 pr (fun l _ g -> let a = List.hd l in
                 let tx = t_app_infer ls [] in
                 let ix' = id_fresh ls.ls_name.id_string in
                 let x' = create_vsymbol ix' (Opt.get ls.ls_value) in
                 let g = t_replace tx (t_var x') g in
                 let closed_t = t_forall_close [x'] [] g in
                 assertion pr' closed_t +++
-                  [clear pr ++ forget ls ++ rename pr' pr ++ rc tail ++ return a;
-                   instquant pr' pr' tx ++ axiom pr' pr]
-                |> apply)))
+                  [clear pr ++ forget ls ++ rename pr' pr ++ rc tail ++ a;
+                   instquant pr' pr' tx ++ axiom pr' pr])
         | _ -> assert false in
   rc decls
 

@@ -1,7 +1,6 @@
 (* From Split_goal *)
 open Why3
 open Ident
-open Ty
 open Term
 open Decl
 
@@ -38,8 +37,6 @@ let asym f = Sattr.mem Term.asym_split f.t_attrs
 
 let case_split = Ident.create_attribute "case_split"
 let case f = Sattr.mem case_split f.t_attrs
-
-let compiled = Ident.create_attribute "split_goal: compiled match"
 
 let unstop f =
   t_attr_set ?loc:f.t_loc (Sattr.remove stop_split f.t_attrs) f
@@ -194,6 +191,7 @@ let print_ret_err { conj; cp; cn; disj; dn; dp; bwd; fwd; side; cpos; cneg } =
     (M.print_mon " /\\ ") side
     cpos
     cneg
+[@@ocaml.warning "-32"] (* only needed for debugging purposes *)
 
 let rec drop_byso f = match f.t_node with
   | Tbinop (Timplies,{ t_node = Tbinop (Tor,_,{ t_node = Ttrue }) },f) ->
@@ -204,40 +202,6 @@ let rec drop_byso f = match f.t_node with
 
 
 open M
-
-let pat_condition kn tv cseen p =
-  match p.pat_node with
-  | Pwild ->
-      let csl,sbs = match p.pat_ty.ty_node with
-        | Tyapp (ts,_) ->
-            Decl.find_constructors kn ts,
-            let ty = ty_app ts (List.map ty_var ts.ts_args) in
-            ty_match Mtv.empty ty p.pat_ty
-        | _ -> assert false in
-      let csall = Sls.of_list (List.rev_map fst csl) in
-      let csnew = Sls.diff csall cseen in
-      assert (not (Sls.is_empty csnew));
-      let add_cs cs g =
-        let mk_v ty = create_vsymbol (id_fresh "w") (ty_inst sbs ty) in
-        let vl = List.map mk_v cs.ls_args in
-        let f = t_equ tv (fs_app cs (List.map t_var vl) p.pat_ty) in
-        g ++! !+ (t_exists_close_simp vl [] f) in
-      let g = Sls.fold add_cs csnew Unit in
-      csall, [], g
-  | Papp (cs, pl) ->
-      let vl = List.map (function
-        | {pat_node = Pvar v} -> v | _ -> assert false) pl in
-      let g = t_equ tv (fs_app cs (List.map t_var vl) p.pat_ty) in
-      Sls.add cs cseen, vl, !+g
-  | _ -> assert false
-
-let rec fold_cond = function
-  | Base a -> a
-  | Op (a,b) -> t_or (fold_cond a) (fold_cond b)
-
-let fold_cond = function
-  | Comb c -> !+(fold_cond c)
-  | x -> x
 
 let luop op (pr, t) = pr, op t
 
@@ -402,8 +366,8 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
                      split pr +++
                        [rename pr pr1; rename pr pr2] +++
                        [sf1.dp ; sf2.dp] +++
-                       [add_all true  ++ remove_all true  ++ return t;
-                        add_all false ++ remove_all false ++ return t]) in
+                       [add_all true  ++ remove_all true  ++ t;
+                        add_all false ++ remove_all false ++ t]) in
         ret conj cp cn
           disj dn dp
           bwd fwd side false (cn1 || cn2)
@@ -449,8 +413,8 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
                      unfold pr ++ split pr +++
                        [swap pr ++ sf1.dp ++ swap_all sf1.disj;
                         sf2.cn ] +++
-                       [add_all true  ++ remove_all true  ++ return t;
-                        add_all false ++ remove_all false ++ return t]) in
+                       [add_all true  ++ remove_all true  ++ t;
+                        add_all false ++ remove_all false ++ t]) in
         let dn = unfold pr ++ split pr +++
                    [swap pr ++ sf1.cp ++ swap pr;
                     sf2.dn] in
@@ -486,8 +450,8 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
         let cn = lambda1 (fun t ->
                      split pr +++
                        [sf1.cn ; sf2.cn] +++
-                       [add_all true  ++ remove_all true  ++ return t;
-                        add_all false ++ remove_all false ++ return t]) in
+                       [add_all true  ++ remove_all true  ++ t;
+                        add_all false ++ remove_all false ++ t]) in
         let dn = split pr +++ [sf1.dn; sf2.dn] in
         let dp = destruct pr pr1 pr2 ++ sf1.dp ++ sf2.dp in
         ret conj cp cn
@@ -671,15 +635,9 @@ let full_split kn = {
   comp_match = kn;
 }
 
-let right_split kn = { (full_split kn) with right_only = true }
 let full_proof  kn = { (full_split kn) with stop_split = true;
                                             byso_split = true }
 let right_proof kn = { (full_proof kn) with right_only = true }
-let full_intro  kn = { (full_split kn) with asym_split = false;
-                                            intro_mode = true;
-                                            stop_split = true }
-let right_intro kn = { (full_intro kn) with right_only = true }
-
 
 let clues = ref []
 

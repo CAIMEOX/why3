@@ -16,18 +16,18 @@ open Cert_verif_lambdapi
 (** Certified transformations *)
 
 let no_dbg = None, None
-let cert_dbg = Some eprcertif, None
-let cta_dbg = None, Some eplcta
-let all_dbg = Some eprcertif, Some eplcta
+(* let cert_dbg = Some eprcertif, None
+ * let cta_dbg = None, Some eplcta
+ * let all_dbg = Some eprcertif, Some eplcta *)
 
 (** Get a certified transformation from a transformation with a certificate *)
 
 let checker_ctrans
       ?env
       (debug :   (scert -> unit) option *
-                 (kernel_ctask -> kernel_ctask list -> unit) option )
+                 (cterm ctask -> cterm ctask list -> unit) option )
       (* is_lp *)
-      (checker : kcert -> kernel_ctask -> kernel_ctask list -> unit)
+      (checker : kcert -> cterm ctask -> cterm ctask list -> unit)
       (ctr : ctrans)
       (init_t : task) =
   try
@@ -344,7 +344,7 @@ let register_lambdapi () =
   register_transform_l "trivial_lcert" trivial_l
     ~desc:"A Lambdapi certified version of (simplified) coq tactic [trivial]"
 
-let register_all : unit =
+let _ : unit =
   if !Whyconf.Args.opt_cert_trans then begin
       register_caml ();
 
