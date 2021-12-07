@@ -148,14 +148,14 @@ let rec pred_ty pred fmt ty = match ty with
   | CTyapp (ts, l) when l <> [] ->
       fprintf fmt "@[<2>%a@ %a@]"
         prid ts
-        (print_list (pred_pty pred)) l
+        (print_list (pred_ty_paren pred)) l
   | CTarrow (t1, t2) ->
       fprintf fmt "@[%a %a@ %a@]"
-        (pred_pty pred) t1
+        (pred_ty_paren pred) t1
         prarrow pred
         (pred_ty pred) t2
-  | _ -> pred_pty pred fmt ty
-and pred_pty pred fmt = function
+  | _ -> pred_ty_paren pred fmt ty
+and pred_ty_paren pred fmt = function
   | CTyvar v -> Pretty.print_tv fmt v
   | CTprop -> fprintf fmt "DType"
   | CTyapp (ts, []) -> prid fmt ts
@@ -170,7 +170,7 @@ let prdty fmt ty =
   pred_ty (is_predicate ty) fmt ty
 (* Prints a deep type, protected with outside parentheses if needed *)
 let prdty_paren fmt ty =
-  pred_pty (is_predicate ty) fmt ty
+  pred_ty_paren (is_predicate ty) fmt ty
 
 type cterm =
   | CTqtype of tvsymbol list * cterm (* type quantifier binding, assumed to only
@@ -212,14 +212,6 @@ let ct_map f ct = match ct with
   | CTbinop (op, ct1, ct2) ->  CTbinop (op, f ct1, f ct2)
   | CTnot ct -> CTnot (f ct)
 
-(* Warning: beware variable capture *)
-let rec ct_ty_subst subst = function
-  | CTquant (q, qcty, ct) ->
-      CTquant (q, cty_ty_subst subst qcty,
-               ct_ty_subst subst ct)
-  | CTfvar (i, l) -> CTfvar (i, List.map (cty_ty_subst subst) l)
-  | ct -> ct_map (ct_ty_subst subst) ct
-
 let ct_equal t1 t2 =
   let rec ct_equal subst1 subst2 t1 t2 =
     let ct_eq t1 t2 = ct_equal subst1 subst2 t1 t2 in
@@ -246,6 +238,19 @@ let ct_equal t1 t2 =
           let subst1, subst2 = comparing_substs l1 l2 in
           ct_equal subst1 subst2 t1 t2
       | _, _ -> ct_equal Mtv.empty Mtv.empty t1 t2
+
+let rec replace_cterm tl tr t =
+  if ct_equal t tl
+  then tr
+  else ct_map (replace_cterm tl tr) t
+
+(* Warning: beware variable capture *)
+let rec ct_ty_subst subst = function
+  | CTquant (q, qcty, ct) ->
+      CTquant (q, cty_ty_subst subst qcty,
+               ct_ty_subst subst ct)
+  | CTfvar (i, l) -> CTfvar (i, List.map (cty_ty_subst subst) l)
+  | ct -> ct_map (ct_ty_subst subst) ct
 
 (* Bound variable substitution *)
 let rec ct_bv_subst k u ctn = match ctn with
@@ -287,11 +292,6 @@ let rec ct_fv_close x k ct = match ct with
   | _ -> ct_map (ct_fv_close x k) ct
 
 let ct_close x t = ct_fv_close x 0 t
-
-let rec replace_cterm tl tr t =
-  if ct_equal t tl
-  then tr
-  else ct_map (replace_cterm tl tr) t
 
 (** Pretty printing of terms (compatible with lambdapi) *)
 
@@ -384,13 +384,7 @@ type 't ctask =
     their positivity (false means it's an hypothesis, true means it's a goal) *)
   }
 
-type kernel_ctask = cterm ctask
-
 (** Pretty printing of ctask *)
-
-let po p fmt = function
-  | None -> fprintf fmt "None"
-  | Some x -> fprintf fmt "%a" p x
 
 let prt fmt sid =
   Sid.iter (fun i -> fprintf fmt "%a@ " prid i) sid
@@ -435,15 +429,6 @@ let eplcta cta lcta =
            %a@]@."
     pacta cta
     plcta lcta
-
-let print_ctasks filename lcta =
-  let filename = Sysutil.uniquify filename in
-  let oc = open_out filename in
-  let fmt = formatter_of_out_channel oc in
-  fprintf fmt "@[<v>RESULTING TASKS:@ @ \
-               %a@]@."
-    plcta lcta;
-  close_out oc
 
 (** Utility functions on ctask (used notably in caml checker) *)
 
@@ -500,30 +485,6 @@ let remove_var i cta =
 let remove i cta = lift_mid_cta (Mid.remove i) cta
 
 let add i ct cta = lift_mid_cta (Mid.add i ct) cta
-
-
-(* Separates hypotheses and goals *)
-let split_hyp_goal cta =
-  let open Mid in
-  fold (fun h (ct, pos) (gamma, delta) ->
-      if pos then gamma, add h (ct, pos) delta
-      else add h (ct, pos) gamma, delta)
-    cta (empty, empty)
-
-(* Creates a new ctask with the same hypotheses but sets the goal with the
-   second argument *)
-let set_goal cta =
-  let gamma, delta = split_hyp_goal cta.gamma_delta in
-  let gpr, _ = Mid.choose gamma in
-  fun ct ->
-  { cta with
-    gamma_delta = Mid.add gpr (ct, true) delta }
-
-
-let instantiate f a =
-  match f with
-  | CTquant (CTlambda, _, f) -> ct_open f a
-  | _ -> assert false
 
 (* Verify that an ident is fresh in relation to a context of propositions *)
 exception Found
@@ -613,6 +574,11 @@ let infers_into ?e_str:(s="") cta t ty =
     eprintf "@[<v>Checking %s: wrong type for %a@ \
              expected: %a@]@." s pcte t prty ty;
             raise e
+
+let instantiate f a =
+  match f with
+  | CTquant (CTlambda, _, f) -> ct_open f a
+  | _ -> assert false
 
 let instantiate_safe cta f a =
   well_typed cta f;

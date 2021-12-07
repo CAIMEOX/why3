@@ -117,7 +117,7 @@ let rewrite_in rev with_terms prh pri task =
               let rec app_inst trew lid lv = match trew.t_node, lid with
                 | Tbinop (Timplies, _, trew), id::lid ->
                     unfold nprh ++ split nprh +++
-                      [clear pr ++ swap nprh ++ rename nprh pr ++ return id;
+                      [clear pr ++ swap nprh ++ rename nprh pr ++ id;
                        app_inst trew lid lv]
                 | Tquant (Tforall, fq), _ ->
                     let vsl, _, trew = t_open_quant fq in
@@ -133,7 +133,7 @@ let rewrite_in rev with_terms prh pri task =
               let id, lid = match l with
                 | [] -> assert false
                 | h::t -> h, t in
-              let rew_cert = rewrite nprh pri ++ clear nprh ++ return id in
+              let rew_cert = rewrite nprh pri ++ clear nprh ++ id in
               duplicate prh nprh ++
                 app_inst trew lid lv ++ revert ++ rew_cert) in
 
