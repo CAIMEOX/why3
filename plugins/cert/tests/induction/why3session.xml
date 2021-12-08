@@ -10,25 +10,25 @@
  <proof prover="1"><result status="valid" time="0.01" steps="917"/></proof>
  </goal>
  <goal name="G1" proved="true">
- <transf name="intro_ccert" proved="true" >
+ <transf name="cintro" proved="true" arg1="verif" arg2="ml">
   <goal name="G1.0" proved="true">
+  <transf name="cinduction" proved="true" arg1="verif" arg2="ml" arg3="n">
+   <goal name="G1.0.0" expl="base case" proved="true">
+   <proof prover="1"><result status="valid" time="0.01" steps="1760"/></proof>
+   </goal>
+   <goal name="G1.0.1" expl="recursive case" proved="true">
+   <proof prover="1"><result status="valid" time="0.01" steps="2415"/></proof>
+   </goal>
+  </transf>
+  <transf name="cinduction" proved="true" arg1="verif" arg2="lp" arg3="n">
+   <goal name="G1.0.0" expl="base case" proved="true">
+   <proof prover="1"><result status="valid" time="0.01" steps="1760"/></proof>
+   </goal>
+   <goal name="G1.0.1" expl="recursive case" proved="true">
+   <proof prover="1"><result status="valid" time="0.01" steps="2415"/></proof>
+   </goal>
+  </transf>
   <transf name="induction" proved="true" arg1="n">
-   <goal name="G1.0.0" expl="base case" proved="true">
-   <proof prover="1"><result status="valid" time="0.01" steps="1760"/></proof>
-   </goal>
-   <goal name="G1.0.1" expl="recursive case" proved="true">
-   <proof prover="1"><result status="valid" time="0.01" steps="2415"/></proof>
-   </goal>
-  </transf>
-  <transf name="induction_ccert" proved="true" arg1="n">
-   <goal name="G1.0.0" expl="base case" proved="true">
-   <proof prover="1"><result status="valid" time="0.01" steps="1760"/></proof>
-   </goal>
-   <goal name="G1.0.1" expl="recursive case" proved="true">
-   <proof prover="1"><result status="valid" time="0.01" steps="2415"/></proof>
-   </goal>
-  </transf>
-  <transf name="induction_lcert" proved="true" arg1="n">
    <goal name="G1.0.0" expl="base case" proved="true">
    <proof prover="1"><result status="valid" time="0.01" steps="1760"/></proof>
    </goal>
@@ -40,6 +40,22 @@
  </transf>
  </goal>
  <goal name="G2" proved="true">
+ <transf name="cinduction" proved="true" arg1="verif" arg2="ml" arg3="i">
+  <goal name="G2.0" expl="base case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="49"/></proof>
+  </goal>
+  <goal name="G2.1" expl="recursive case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="50"/></proof>
+  </goal>
+ </transf>
+ <transf name="cinduction" proved="true" arg1="verif" arg2="lp" arg3="i">
+  <goal name="G2.0" expl="base case" proved="true">
+  <proof prover="1"><result status="valid" time="0.02" steps="49"/></proof>
+  </goal>
+  <goal name="G2.1" expl="recursive case" proved="true">
+  <proof prover="1"><result status="valid" time="0.02" steps="50"/></proof>
+  </goal>
+ </transf>
  <transf name="induction" proved="true" arg1="i">
   <goal name="G2.0" expl="base case" proved="true">
   <proof prover="1"><result status="valid" time="0.02" steps="49"/></proof>
@@ -48,24 +64,24 @@
   <proof prover="1"><result status="valid" time="0.01" steps="50"/></proof>
   </goal>
  </transf>
- <transf name="induction_ccert" proved="true" arg1="i">
-  <goal name="G2.0" expl="base case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="49"/></proof>
-  </goal>
-  <goal name="G2.1" expl="recursive case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="50"/></proof>
-  </goal>
- </transf>
- <transf name="induction_lcert" proved="true" arg1="i">
-  <goal name="G2.0" expl="base case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="49"/></proof>
-  </goal>
-  <goal name="G2.1" expl="recursive case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="50"/></proof>
-  </goal>
- </transf>
  </goal>
  <goal name="G3" proved="true">
+ <transf name="cinduction" proved="true" arg1="verif" arg2="ml" arg3="i">
+  <goal name="G3.0" expl="base case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="50"/></proof>
+  </goal>
+  <goal name="G3.1" expl="recursive case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="51"/></proof>
+  </goal>
+ </transf>
+ <transf name="cinduction" proved="true" arg1="verif" arg2="lp" arg3="i">
+  <goal name="G3.0" expl="base case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="50"/></proof>
+  </goal>
+  <goal name="G3.1" expl="recursive case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="51"/></proof>
+  </goal>
+ </transf>
  <transf name="induction" proved="true" arg1="i">
   <goal name="G3.0" expl="base case" proved="true">
   <proof prover="1"><result status="valid" time="0.02" steps="50"/></proof>
@@ -74,24 +90,32 @@
   <proof prover="1"><result status="valid" time="0.02" steps="51"/></proof>
   </goal>
  </transf>
- <transf name="induction_ccert" proved="true" arg1="i">
-  <goal name="G3.0" expl="base case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="50"/></proof>
-  </goal>
-  <goal name="G3.1" expl="recursive case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="51"/></proof>
-  </goal>
- </transf>
- <transf name="induction_lcert" proved="true" arg1="i">
-  <goal name="G3.0" expl="base case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="50"/></proof>
-  </goal>
-  <goal name="G3.1" expl="recursive case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="51"/></proof>
-  </goal>
- </transf>
  </goal>
  <goal name="G4" proved="true">
+ <transf name="cinduction" proved="true" arg1="verif" arg2="ml" arg3="i">
+  <goal name="G4.0" expl="base case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="51"/></proof>
+  </goal>
+  <goal name="G4.1" expl="recursive case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="52"/></proof>
+  </goal>
+ </transf>
+ <transf name="cinduction" proved="true" arg1="verif" arg2="ml" arg3="i" arg4="from" arg5="2">
+  <goal name="G4.0" expl="base case" proved="true">
+  <proof prover="1"><result status="valid" time="0.03" steps="51"/></proof>
+  </goal>
+  <goal name="G4.1" expl="recursive case" proved="true">
+  <proof prover="1"><result status="valid" time="0.03" steps="52"/></proof>
+  </goal>
+ </transf>
+ <transf name="cinduction" proved="true" arg1="verif" arg2="lp" arg3="i">
+  <goal name="G4.0" expl="base case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="51"/></proof>
+  </goal>
+  <goal name="G4.1" expl="recursive case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="52"/></proof>
+  </goal>
+ </transf>
  <transf name="induction" proved="true" arg1="i">
   <goal name="G4.0" expl="base case" proved="true">
   <proof prover="1"><result status="valid" time="0.02" steps="51"/></proof>
@@ -100,49 +124,25 @@
   <proof prover="1"><result status="valid" time="0.03" steps="52"/></proof>
   </goal>
  </transf>
- <transf name="induction_ccert" proved="true" arg1="i">
-  <goal name="G4.0" expl="base case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="51"/></proof>
-  </goal>
-  <goal name="G4.1" expl="recursive case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="52"/></proof>
-  </goal>
- </transf>
- <transf name="induction_ccert" proved="true" arg1="i" arg2="from" arg3="2">
-  <goal name="G4.0" expl="base case" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="51"/></proof>
-  </goal>
-  <goal name="G4.1" expl="recursive case" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="52"/></proof>
-  </goal>
- </transf>
- <transf name="induction_lcert" proved="true" arg1="i">
-  <goal name="G4.0" expl="base case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="51"/></proof>
-  </goal>
-  <goal name="G4.1" expl="recursive case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="52"/></proof>
-  </goal>
- </transf>
  </goal>
  <goal name="G5" proved="true">
+ <transf name="cinduction" proved="true" arg1="verif" arg2="ml" arg3="i">
+  <goal name="G5.0" expl="base case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="52"/></proof>
+  </goal>
+  <goal name="G5.1" expl="recursive case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="53"/></proof>
+  </goal>
+ </transf>
+ <transf name="cinduction" proved="true" arg1="verif" arg2="lp" arg3="i">
+  <goal name="G5.0" expl="base case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="52"/></proof>
+  </goal>
+  <goal name="G5.1" expl="recursive case" proved="true">
+  <proof prover="1"><result status="valid" time="0.01" steps="53"/></proof>
+  </goal>
+ </transf>
  <transf name="induction" proved="true" arg1="i">
-  <goal name="G5.0" expl="base case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="52"/></proof>
-  </goal>
-  <goal name="G5.1" expl="recursive case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="53"/></proof>
-  </goal>
- </transf>
- <transf name="induction_ccert" proved="true" arg1="i">
-  <goal name="G5.0" expl="base case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="52"/></proof>
-  </goal>
-  <goal name="G5.1" expl="recursive case" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="53"/></proof>
-  </goal>
- </transf>
- <transf name="induction_lcert" proved="true" arg1="i">
   <goal name="G5.0" expl="base case" proved="true">
   <proof prover="1"><result status="valid" time="0.01" steps="52"/></proof>
   </goal>

@@ -323,8 +323,6 @@ module Args : sig
 
   val opt_config : string option ref
 
-  val opt_cert_trans : bool ref
-
   val add_command : string -> unit
 
   val all_options : Getopt.opt list -> string -> string -> Getopt.opt list

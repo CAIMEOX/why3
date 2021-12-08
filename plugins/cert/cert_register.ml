@@ -13,6 +13,8 @@ open Cert_compute
 open Cert_verif_caml
 open Cert_verif_lambdapi
 
+let checker_nothing (_ : kcert) (_ : cterm ctask) (_ : cterm ctask list) = ()
+
 (** Certified transformations *)
 
 let no_dbg = None, None
@@ -60,305 +62,183 @@ let checker_ctrans
             forget_all hip;
             raise e
 
-let cchecker ?env trans =
-  Trans.store (checker_ctrans ?env no_dbg checker_caml trans)
-let lchecker ?env trans =
-  Trans.store (checker_ctrans ?env no_dbg checker_lambdapi trans)
+exception Unrecognized_checker of string
 
-let print_c any every where = cchecker (tprint any every where)
-let assert_c t              = cchecker (cassert t)
-let assumption_c            = cchecker assumption
-let blast_c                 = cchecker blast
-let case_c t                = cchecker (case t)
-let clear_c l               = cchecker (clear l)
-let contradict_c            = cchecker contradict
-let destruct_all_c any every where = cchecker (destruct_all any every where)
-let exfalso_c               = cchecker exfalso
-let instantiate_c t what    = cchecker (inst t what)
-let intro_c any every where = cchecker (intro any every where)
-let intros_c                = cchecker intros
-let left_c where            = cchecker (cdir false where)
-(* let pose_c name t           = cchecker (pose name t) *)
-let rename_c pr1            = cchecker (crename pr1)
-let revert_c ls             = cchecker (revert ls)
-let rewrite_c rev g where wt= cchecker (rewrite g rev wt where)
-let right_c where           = cchecker (cdir true where)
-let split_c any every where = cchecker (split_logic any every where)
-let split_all_full_c        = cchecker split_all_full
-let split_all_right_c       = cchecker split_all_right
-let split_goal_full_c       = cchecker split_goal_full
-let split_goal_right_c      = cchecker split_goal_right
-let split_premise_full_c    = cchecker split_premise_full
-let split_premise_right_c   = cchecker split_premise_right
-let swap_c where            = cchecker (swap where)
-let trivial_c               = cchecker trivial
-let induction_c x bound env = cchecker ~env:env (induction x bound env)
+let make_certifying ?env checker trans = match checker with
+  | None -> Trans.store (checker_ctrans ?env no_dbg checker_nothing trans)
+  | Some "lp" -> Trans.store (checker_ctrans ?env no_dbg checker_lambdapi trans)
+  | Some "ml" -> Trans.store (checker_ctrans ?env no_dbg checker_caml trans)
+  | Some s -> raise (Unrecognized_checker s)
 
-let assert_l t              = lchecker (cassert t)
-let assumption_l            = lchecker assumption
-let blast_l                 = lchecker blast
-let case_l t                = lchecker (case t)
-let clear_l l               = lchecker (clear l)
-let contradict_l            = lchecker contradict
-let destruct_all_l any every where = lchecker (destruct_all any every where)
-let exfalso_l               = lchecker exfalso
-let instantiate_l t what    = lchecker (inst t what)
-let intro_l any every where = lchecker (intro any every where)
-let intros_l                = lchecker intros
-let left_l where            = lchecker (cdir false where)
-(* let pose_l name t           = lchecker (pose name t) *)
-let rename_l pr1            = lchecker (crename pr1)
-let revert_l ls             = lchecker (revert ls)
-let rewrite_l rev g where wt= lchecker (rewrite g rev wt where)
-let right_l where           = lchecker (cdir true where)
-let split_l any every where = lchecker (split_logic any every where)
-let split_all_full_l        = lchecker split_all_full
-let split_all_right_l       = lchecker split_all_right
-let split_goal_full_l       = lchecker split_goal_full
-let split_goal_right_l      = lchecker split_goal_right
-let split_premise_full_l    = lchecker split_premise_full
-let split_premise_right_l   = lchecker split_premise_right
-let swap_l where            = lchecker (swap where)
-let trivial_l               = lchecker trivial
-let induction_l x bound env = lchecker ~env:env (induction x bound env)
-let compute_l specified steps where env =
-  lchecker ~env:env (ccompute specified steps where env)
+let cassert chk t              = make_certifying chk (cassert t)
+let cassumption chk            = make_certifying chk assumption
+let cblast chk                 = make_certifying chk blast
+let ccase chk t                = make_certifying chk (case t)
+let cclear chk l               = make_certifying chk (clear l)
+let ccompute chk specified steps where env =
+  make_certifying ~env:env chk (ccompute specified steps where env)
+let ccontradict chk            = make_certifying chk contradict
+let cdestruct_all chk any every where =
+  make_certifying chk (destruct_all any every where)
+let cexfalso chk               = make_certifying chk exfalso
+let cinduction chk x bound env = make_certifying chk ~env:env (induction x bound env)
+let cinstantiate chk t what    = make_certifying chk (inst t what)
+let cintro chk any every where = make_certifying chk (intro any every where)
+let cintros chk                = make_certifying chk intros
+let cleft chk where            = make_certifying chk (cdir false where)
+let cprint chk any every where = make_certifying chk (tprint any every where)
+let crename chk pr1            = make_certifying chk (crename pr1)
+let crevert chk ls             = make_certifying chk (revert ls)
+let crewrite chk rev g where wt= make_certifying chk (rewrite g rev wt where)
+let cright chk where           = make_certifying chk (cdir true where)
+let csplit chk any every where = make_certifying chk (split_logic any every where)
+let csplit_all_full chk        = make_certifying chk split_all_full
+let csplit_all_right chk       = make_certifying chk split_all_right
+let csplit_goal_full chk       = make_certifying chk split_goal_full
+let csplit_goal_right chk      = make_certifying chk split_goal_right
+let csplit_premise_full chk    = make_certifying chk split_premise_full
+let csplit_premise_right chk   = make_certifying chk split_premise_right
+let cswap chk where            = make_certifying chk (swap where)
+let ctrivial chk               = make_certifying chk trivial
 
 (** Register certified transformations *)
 
-let register_caml () =
+let register () =
   let open Args_wrapper in
-  let open Trans in
-  wrap_and_register
-    ~desc:"induction <term1> [from] <term2>@ \
-           performs@ a@ strong@ induction@ on@ the@ integer@ <term1>@ \
-           starting@ from@ the@ integer@ <term2>.@ <term2>@ is@ optional@ \
-           and@ defaults@ to@ 0."
-    "induction_ccert"
-    (Tterm (Topt ("from", Tterm Tenvtrans_l))) induction_c;
-
-  wrap_and_register ~desc:"print given term to debug" "print_ccert"
-    (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
-    print_c;
-
-  wrap_and_register ~desc:"A OCaml certified version of transformation assert"
-    "assert_ccert" (Tformula Ttrans_l) assert_c;
-
-  register_transform_l "assumption_ccert" assumption_c
-    ~desc:"A OCaml certified version of coq tactic [assumption]";
-
-  register_transform_l "blast_ccert" blast_c
-    ~desc:"A OCaml certified transformation that decomposes structurally \
-           logical formulas";
-
-  wrap_and_register "case_ccert" (Tformula Ttrans_l) case_c
-    ~desc:"A OCaml certified version of transformation case";
-
-  wrap_and_register  "clear_ccert" (Tprlist Ttrans_l) clear_c
-    ~desc:"A OCaml certified version of (simplified) coq tactic [clear]";
-
-
-  register_transform_l "contradict_ccert" contradict_c
-    ~desc:"A OCaml certified transformation that closes some contradictory \
-           goals";
-
-  wrap_and_register "destruct_all_ccert"
-    (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
-    destruct_all_c
-    ~desc:"A OCaml certified transformation to destruct a logical constructor";
-
-  register_transform_l "exfalso_ccert" exfalso_c
-    ~desc:"A OCaml certified version of coq tactic [exfalso]";
-
-  wrap_and_register "instantiate_ccert"
-    (Tterm (Topt ("in", Tprsymbol Ttrans_l))) instantiate_c
-    ~desc:"A OCaml certified version of transformation instantiate";
-
-  wrap_and_register "intro_ccert"
-    (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
-    intro_c
-    ~desc:"A OCaml certified version of (simplified) coq tactic [intro]";
-
-  register_transform_l "intros_ccert" intros_c
-    ~desc:"A OCaml certified version of coq tactic [intros]";
-
-  wrap_and_register "left_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) left_c
-    ~desc:"A OCaml certified version of coq tactic [left]";
-
-  (* wrap_and_register "pose_ccert" (Tstring (Tformula Ttrans_l)) pose_c
-   *   ~desc:"A OCaml certified version of (simplified) coq tactic [pose]"; *)
-
-  wrap_and_register "rename_ccert" (Tprsymbol (Ttrans_l)) rename_c
-    ~desc:"A OCaml certified transformation to rename an hypothesis";
-
-  wrap_and_register "revert_ccert" (Tlsymbol (Ttrans_l)) revert_c
-    ~desc:"A OCaml certified transformation to generalize a variable";
-
-  wrap_and_register "rewrite_ccert"
-    (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol
-    (Topt ("with", Ttermlist (Ttrans_l)))))))) rewrite_c
-    ~desc:"A OCaml certified version of transformation rewrite";
-
-  wrap_and_register"right_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) right_c
-    ~desc:"A OCaml certified version of coq tactic [right]";
-
-  wrap_and_register "split_ccert"
-    (Toptbool ("any", (Toptbool ("all", Topt ("in", Tprsymbol Ttrans_l)))))
-    split_c
-    ~desc:"A OCaml certified version of (simplified) coq tactic [split]";
-
-  register_transform_l "split_all_full_ccert" split_all_full_c
-    ~desc:"The OCaml certified version of split_all_full";
-
-  register_transform_l "split_all_right_ccert" split_all_right_c
-    ~desc:"The OCaml certified version of split_all_right";
-
-  register_transform_l "split_goal_full_ccert" split_goal_full_c
-    ~desc:"The OCaml certified version of split_goal_full";
-
-  register_transform_l "split_goal_right_ccert" split_goal_right_c
-    ~desc:"The OCaml certified version of split_goal_right";
-
-  register_transform_l "split_premise_full_ccert" split_premise_full_c
-    ~desc:"The OCaml certified version of split_premise_full";
-
-  register_transform_l "split_premise_right_ccert" split_premise_right_c
-    ~desc:"The OCaml certified version of split_premise_right";
-
-  wrap_and_register "swap_ccert" (Topt ("in", Tprsymbol (Ttrans_l))) swap_c
-    ~desc:"A OCaml certified transformation that negates and swaps an \
-           hypothesis from the context to the goal";
-
-  register_transform_l "trivial_ccert" trivial_c
-    ~desc:"A OCaml certified version of (simplified) coq tactic [trivial]"
-
-
-let register_lambdapi () =
-  let open Args_wrapper in
-  let open Trans in
 
   wrap_and_register
-    ~desc:"compute_lcert [upto int] [specified] [in <name>]@ performs@ \
-           computations@ in@ the@ given@ premise (default to the goal), using \
-           only@ using@ the@ user-specified@ rules@ if@ the@ flag <specified> \
-           is@ present"
-    "compute_lcert"
-    (Toptbool ("specified", Topt ("upto", Tint (Topt ("in", Tprsymbol Tenvtrans_l)))))
-    compute_l;
+    "cassert" (Topt ("verif", (Tstring (Tformula Ttrans_l)))) cassert
+    ~desc:"A@ certifying@ version@ of@ transformation@ assert";
+
+  wrap_and_register "cassumption" (Topt ("verif", (Tstring Ttrans_l))) cassumption
+    ~desc:"A@ certifying@ transformation@ inspired@ by@ Coq@ tactic@ [assumption]";
+
+  wrap_and_register "cblast" (Topt ("verif", (Tstring Ttrans_l))) cblast
+    ~desc:"A@ certifying@ transformation@ that@ decomposes@ logical@ formulas@ \
+           structurally";
+
+  wrap_and_register "ccase" (Topt ("verif", (Tstring (Tformula Ttrans_l)))) ccase
+    ~desc:"A@ certifying@ version@ of@ transformation@ case";
+
+  wrap_and_register "cclear" (Topt ("verif", (Tstring (Tprlist Ttrans_l)))) cclear
+    ~desc:"A@ certifying@ transformation@ inspired@ by@ Coq@ tactic@ [clear]";
 
   wrap_and_register
-    ~desc:"induction <term1> [from] <term2>@ \
-           performs@ a@ strong@ induction@ on@ the@ integer@ <term1>@ \
-           starting@ from@ the@ integer@ <term2>.@ <term2>@ is@ optional@ \
-           and@ defaults@ to@ 0."
-    "induction_lcert"
-    (Tterm (Topt ("from", Tterm Tenvtrans_l))) induction_l;
+    "ccompute"
+    (Topt ("verif", (Tstring (Toptbool ("specified", Topt ("upto", Tint (Topt ("in", Tprsymbol Tenvtrans_l))))))))
+    ccompute
+    ~desc:"ccompute [upto int] [specified] [in <name>]@ performs@ computations@ \
+           in@ the@ given@ premise (default to the goal), using only@ using@ \
+           the@ user-specified@ rules@ if@ the@ flag <specified> is@ present";
 
-  wrap_and_register "assert_lcert" (Tformula Ttrans_l) assert_l
-    ~desc:"A Lambdapi certified version of transformation assert";
+  wrap_and_register "ccontradict" (Topt ("verif", (Tstring Ttrans_l))) ccontradict
+    ~desc:"A@ certifying@ transformation@ that@ closes@ some@ contradictory@ goals";
 
-  register_transform_l "assumption_lcert" assumption_l
-    ~desc:"A Lambdapi certified version of coq tactic [assumption]";
+  wrap_and_register "cdestruct_all"
+    (Topt ("verif", Tstring (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))))
+    cdestruct_all
+    ~desc:"A@ certifying@ transformation@ to@ destruct@ a@ logical@ constructor";
 
-  register_transform_l "blast_lcert" blast_l
-    ~desc:"A Lambdapi certified transformation that decomposes structurally \
-           logical formulas";
+  wrap_and_register "cexfalso" (Topt ("verif", (Tstring Ttrans_l))) cexfalso
+    ~desc:"A@ certifying@ transformation@ inspired@ by@ Coq@ tactic@ [exfalso]";
 
-  wrap_and_register "case_lcert" (Tformula Ttrans_l) case_l
-    ~desc:"A Lambdapi certified version of transformation case";
+  wrap_and_register
+    "cinduction"
+    (Topt ("verif", (Tstring (Tterm (Topt ("from", Tterm Tenvtrans_l))))))
+    cinduction
+    ~desc:"cinduction@ <term1>@ [from]@ <term2>@ performs@ a@ strong@ induction@ \
+           on@ the@ integer@ <term1>@ starting@ from@ the@ integer@ <term2>.@ \
+           <term2>@ is@ optional@ and@ defaults@ to@ 0.";
 
-  wrap_and_register "clear_lcert" (Tprlist Ttrans_l) clear_l
-    ~desc:"A Lambdapi certified version of (simplified) coq tactic [clear]";
+  wrap_and_register "cinstantiate"
+    (Topt ("verif", Tstring (Tterm (Topt ("in", Tprsymbol Ttrans_l)))))
+    cinstantiate
+    ~desc:"A@ certifying@ version@ of@ transformation@ instantiate";
 
-  register_transform_l "contradict_lcert" contradict_l
-    ~desc:"A Lambdapi certified transformation that closes some contradictory \
-           goals";
+  wrap_and_register "cintro"
+    (Topt ("verif", Tstring (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))))
+    cintro
+    ~desc:"A@ certifying@ transformation@ inspired by@ Coq@ tactic@ [intro]";
 
-  wrap_and_register "destruct_all_lcert"
-    (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l)))))))
-    destruct_all_l
-    ~desc:"A Lambdapi certified transformation to destruct a logical constructor";
+  wrap_and_register "cintros" (Topt ("verif", Tstring Ttrans_l)) cintros
+    ~desc:"A@ certifying@ transformation@ inspired@ by@ Coq@ tactic@ [intros]";
 
-  register_transform_l "exfalso_lcert" exfalso_l
-    ~desc:"A Lambdapi certified version of coq tactic [exfalso]";
+  wrap_and_register "cleft"
+    (Topt ("verif", Tstring (Topt ("in", Tprsymbol (Ttrans_l))))) cleft
+    ~desc:"A@ certifying@ transformation@ inspired@ by@ Coq@ tactic@ [left]";
 
-  wrap_and_register "instantiate_lcert"
-    (Tterm (Topt ("in", Tprsymbol Ttrans_l))) instantiate_l
-    ~desc:"A Lambdapi certified version of transformation instantiate";
+  wrap_and_register "cprint"
+    (Topt ("verif", (Tstring (Toptbool ("any", (Toptbool ("all", (Topt ("in", Tprsymbol (Ttrans_l))))))))))
+    cprint
+    ~desc:"Prints@ a@ given@ term,@ useful@ for@ debugging";
 
-  wrap_and_register "intro_lcert"
-    (Toptbool ("any", (Toptbool ("all",  Topt ("in", Tprsymbol Ttrans_l)))))
-    intro_l
-    ~desc:"A Lambdapi certified version of (simplified) coq tactic [intro]";
+  wrap_and_register "crename" (Topt ("verif", Tstring (Tprsymbol (Ttrans_l))))
+    crename
+    ~desc:"A@ certifying@ transformation@ to@ rename@ an@ hypothesis";
 
-  register_transform_l "intros_lcert" intros_l
-    ~desc:"A Lambdapi certified version of coq tactic [intros]";
+  wrap_and_register "crevert" (Topt ("verif", Tstring (Tlsymbol (Ttrans_l))))
+    crevert
+    ~desc:"A@ certifying@ transformation@ to@ generalize@ a@ variable";
 
-  wrap_and_register "left_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
-    left_l  ~desc:"A Lambdapi certified version of coq tactic [left]";
+  wrap_and_register "crewrite"
+    (Topt ("verif", Tstring (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol (Topt ("with", Ttermlist (Ttrans_l)))))))))) crewrite
+    ~desc:"A@ certifying@ version@ of@ transformation@ rewrite";
 
-  (* wrap_and_register "pose_lcert" (Tstring (Tformula Ttrans_l)) pose_l
-   *  ~desc:"A Lambdapi certified version of (simplified) coq tactic [pose]"; *)
+  wrap_and_register"cright" (Topt ("verif", Tstring (Topt ("in", Tprsymbol (Ttrans_l))))) cright
+    ~desc:"A@ certifying@ transformation@ inspired@ by@ Coq@ tactic@ [right]";
 
-  wrap_and_register "rename_lcert" (Tprsymbol (Ttrans_l)) rename_l
-    ~desc:"A Lambdapi certified transformation to rename an hypothesis";
+  wrap_and_register "csplit"
+    (Topt ("verif", Tstring (Toptbool ("any", (Toptbool ("all", Topt ("in", Tprsymbol Ttrans_l)))))))
+    csplit
+    ~desc:"A@ certifying@ transformation@ inspired@ by@ Coq@ tactic@ [split]";
 
-  wrap_and_register "revert_lcert" (Tlsymbol (Ttrans_l)) revert_l
-    ~desc:"A Lambdapi certified transformation to generalize a variable";
+  wrap_and_register "csplit_all_full" (Topt ("verif", Tstring Ttrans_l))
+    csplit_all_full
+    ~desc:"A@ certifying@ version@ of@ transformation@ split_all_full";
 
-  wrap_and_register "rewrite_lcert"
-    (Toptbool ("<-", (Tprsymbol (Topt ("in", Tprsymbol
-    (Topt ("with", Ttermlist (Ttrans_l)))))))) rewrite_l
-    ~desc:"A Lambdapi certified version of transformation rewrite";
+  wrap_and_register "csplit_all_right" (Topt ("verif", Tstring Ttrans_l))
+    csplit_all_right
+    ~desc:"A@ certifying@ version@ of@ transformation@ split_all_right";
 
-  wrap_and_register "right_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
-    right_l ~desc:"A Lambdapi certified version of coq tactic [right]";
+  wrap_and_register "csplit_goal_full" (Topt ("verif", Tstring Ttrans_l))
+    csplit_goal_full
+    ~desc:"A@ certifying@ version@ of@ transformation@ split_goal_full";
 
-  wrap_and_register "split_lcert"
-    (Toptbool ("any", (Toptbool ("all", Topt ("in", Tprsymbol Ttrans_l)))))
-    split_l
-    ~desc:"A Lambdapi certified version of (simplified) coq tactic [split]";
+  wrap_and_register "csplit_goal_right" (Topt ("verif", Tstring Ttrans_l))
+    csplit_goal_right
+    ~desc:"A@ certifying@ version@ of@ transformation@ split_goal_right";
 
-  register_transform_l "split_all_full_lcert" split_all_full_l
-    ~desc:"The Lambdapi certified version of split_all_full";
+  wrap_and_register "csplit_premise_full" (Topt ("verif", Tstring Ttrans_l))
+    csplit_premise_full
+    ~desc:"A@ certifying@ version@ of@ transformation@ split_premise_full";
 
-  register_transform_l "split_all_right_lcert" split_all_right_l
-    ~desc:"The Lambdapi certified version of split_all_right";
+  wrap_and_register "csplit_premise_right" (Topt ("verif", Tstring Ttrans_l))
+    csplit_premise_right
+    ~desc:"A@ certifying@ version@ of@ transformation@ split_premise_right";
 
-  register_transform_l "split_goal_full_lcert" split_goal_full_l
-    ~desc:"The Lambdapi certified version of split_goal_full";
+  wrap_and_register "cswap"
+    (Topt ("verif", Tstring (Topt ("in", Tprsymbol (Ttrans_l))))) cswap
+    ~desc:"A@ certifying@ transformation@ that@ negates@ and@ swaps@ an@ \
+           hypothesis@ from@ the@ context@ to@ the@ goal";
 
-  register_transform_l "split_goal_right_lcert" split_goal_right_l
-    ~desc:"The Lambdapi certified version of split_goal_right";
+  wrap_and_register "ctrivial" (Topt ("verif", Tstring Ttrans_l)) ctrivial
+    ~desc:"A@ certifying@ transformation@ inspired by@ Coq@ tactic@ [trivial]"
 
-  register_transform_l "split_premise_full_lcert" split_premise_full_l
-    ~desc:"The Lambdapi certified version of split_premise_full";
-
-  register_transform_l "split_premise_right_lcert" split_premise_right_l
-    ~desc:"The Lambdapi certified version of split_premise_right";
-
-  wrap_and_register "swap_lcert" (Topt ("in", Tprsymbol (Ttrans_l)))
-    swap_l ~desc:"A OCaml certified transformation that negates and swaps an \
-                  hypothesis from the context to the goal";
-
-  register_transform_l "trivial_lcert" trivial_l
-    ~desc:"A Lambdapi certified version of (simplified) coq tactic [trivial]"
 
 let _ : unit =
-  if !Whyconf.Args.opt_cert_trans then begin
-      register_caml ();
+  let open Format in
+  begin try
+    printf "Checking for lambdapi...@.";
+    let lpv = Sysutil.uniquify "/tmp/lambdapi_version.txt" in
+    let lp_version = sprintf "lambdapi --version > %s 2> /dev/null" lpv in
+    assert (Sys.command lp_version = 0);
+    let vers = Sysutil.file_contents lpv in
+    let _ = Sys.remove lpv in
+    let _ = printf "Found version: %s@." vers in
+    let lp_folder = Filename.(concat Config.datadir "lambdapi") in
+    let lp_install = sprintf "make install -C %s > /dev/null 2>&1" lp_folder in
+    assert (Sys.command lp_install = 0)
+  with _ -> printf "Can't find or install lambdapi... continuing without lambdapi checker@."
+  end;
 
-      let open Format in
-      printf "Checking for lambdapi...@.";
-      let lpv = Sysutil.uniquify "/tmp/lambdapi_version.txt" in
-      let comm = sprintf "lambdapi --version > %s 2> /dev/null" lpv in
-      if Sys.command comm = 0
-      then let vers = Sysutil.file_contents lpv in
-           let _ = Sys.remove lpv in
-           let _ = printf "Found version: %s@." vers in
-           let lp_folder = Filename.(concat Config.datadir "lambdapi") in
-           let comm = sprintf "make install -C %s > /dev/null 2>&1" lp_folder in
-           let _ = Sys.command comm in
-           register_lambdapi ()
-      else printf "Can't find lambdapi... continuing without lambdapi checker@."
-    end
+  register ()
