@@ -10,23 +10,23 @@
  <proof prover="0"><result status="valid" time="0.03" steps="22"/></proof>
  </goal>
  <goal name="G1" proved="true">
- <transf name="split_all_full_ccert" proved="true" >
+ <transf name="csplit_all_full" arg1="verif" arg2="ml" proved="true" >
   <goal name="G1.0" proved="true">
-  <transf name="assumption_ccert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="ml" proved="true" >
   </transf>
   </goal>
   <goal name="G1.1" proved="true">
-  <transf name="assumption_ccert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="ml" proved="true" >
   </transf>
   </goal>
  </transf>
- <transf name="split_all_full_lcert" proved="true" >
+ <transf name="csplit_all_full" arg1="verif" arg2="lp" proved="true" >
   <goal name="G1.0" proved="true">
-  <transf name="assumption_lcert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="lp" proved="true" >
   </transf>
   </goal>
   <goal name="G1.1" proved="true">
-  <transf name="assumption_lcert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="lp" proved="true" >
   </transf>
   </goal>
  </transf>
@@ -34,21 +34,21 @@
  <goal name="G2" proved="true">
  <transf name="split_all_full" proved="true" >
   <goal name="G2.0" proved="true">
-  <transf name="assumption_ccert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="ml" proved="true" >
   </transf>
   </goal>
   <goal name="G2.1" proved="true">
-  <transf name="assumption_lcert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="lp" proved="true" >
   </transf>
   </goal>
  </transf>
- <transf name="split_all_full_lcert" proved="true" >
+ <transf name="csplit_all_full" arg1="verif" arg2="lp" proved="true" >
   <goal name="G2.0" proved="true">
-  <transf name="assumption_lcert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="lp" proved="true" >
   </transf>
   </goal>
   <goal name="G2.1" proved="true">
-  <transf name="assumption_ccert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="ml" proved="true" >
   </transf>
   </goal>
  </transf>
@@ -62,7 +62,7 @@
   <proof prover="0"><result status="valid" time="0.02" steps="33"/></proof>
   </goal>
  </transf>
- <transf name="split_all_full_lcert" proved="true" >
+ <transf name="csplit_all_full" arg1="verif" arg2="lp" proved="true" >
   <goal name="G3.0" proved="true">
   <proof prover="0"><result status="valid" time="0.03" steps="33"/></proof>
   </goal>
@@ -74,53 +74,53 @@
  <goal name="G4" proved="true">
  <transf name="split_all_full" proved="true" >
   <goal name="G4.0" proved="true">
-  <transf name="assumption_ccert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="ml" proved="true" >
   </transf>
   </goal>
   <goal name="G4.1" proved="true">
-  <transf name="assumption_ccert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="ml" proved="true" >
   </transf>
   </goal>
  </transf>
- <transf name="split_all_full_ccert" proved="true" >
+ <transf name="csplit_all_full" arg1="verif" arg2="ml" proved="true" >
   <goal name="G4.0" proved="true">
-  <transf name="assumption_ccert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="ml" proved="true" >
   </transf>
   </goal>
   <goal name="G4.1" proved="true">
-  <transf name="assumption_ccert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="ml" proved="true" >
   </transf>
   </goal>
  </transf>
- <transf name="split_all_full_lcert" proved="true" >
+ <transf name="csplit_all_full" arg1="verif" arg2="lp" proved="true" >
   <goal name="G4.0" proved="true">
-  <transf name="assumption_lcert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="lp" proved="true" >
   </transf>
   </goal>
   <goal name="G4.1" proved="true">
-  <transf name="assumption_lcert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="lp" proved="true" >
   </transf>
   </goal>
  </transf>
  </goal>
  <goal name="G5" proved="true">
- <transf name="intro_ccert" proved="true" >
+ <transf name="cintro" arg1="verif" arg2="ml" proved="true" >
   <goal name="G5.0" proved="true">
   <transf name="split_all_full" proved="true" >
    <goal name="G5.0.0" proved="true">
-   <transf name="contradict_lcert" proved="true" >
+   <transf name="ccontradict" arg1="verif" arg2="lp" proved="true" >
    </transf>
    </goal>
   </transf>
-  <transf name="split_all_full_ccert" proved="true" >
+  <transf name="csplit_all_full" arg1="verif" arg2="ml" proved="true" >
    <goal name="G5.0.0" proved="true">
-   <transf name="contradict_ccert" proved="true" >
+   <transf name="ccontradict" arg1="verif" arg2="ml" proved="true" >
    </transf>
    </goal>
   </transf>
-  <transf name="split_all_full_lcert" proved="true" >
+  <transf name="csplit_all_full" arg1="verif" arg2="lp" proved="true" >
    <goal name="G5.0.0" proved="true">
-   <transf name="contradict_lcert" proved="true" >
+   <transf name="ccontradict" arg1="verif" arg2="lp" proved="true" >
    </transf>
    </goal>
   </transf>
@@ -130,53 +130,53 @@
  <goal name="G6" proved="true">
  <transf name="split_all_full" proved="true" >
   <goal name="G6.0" proved="true">
-  <transf name="assumption_ccert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="ml" proved="true" >
   </transf>
   </goal>
   <goal name="G6.1" proved="true">
-  <transf name="assumption_ccert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="ml" proved="true" >
   </transf>
   </goal>
  </transf>
- <transf name="split_all_full_ccert" proved="true" >
+ <transf name="csplit_all_full" arg1="verif" arg2="ml" proved="true" >
   <goal name="G6.0" proved="true">
-  <transf name="assumption_ccert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="ml" proved="true" >
   </transf>
   </goal>
   <goal name="G6.1" proved="true">
-  <transf name="assumption_ccert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="ml" proved="true" >
   </transf>
   </goal>
  </transf>
- <transf name="split_all_full_lcert" proved="true" >
+ <transf name="csplit_all_full" arg1="verif" arg2="lp" proved="true" >
   <goal name="G6.0" proved="true">
-  <transf name="assumption_lcert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="lp" proved="true" >
   </transf>
   </goal>
   <goal name="G6.1" proved="true">
-  <transf name="assumption_lcert" proved="true" >
+  <transf name="cassumption" arg1="verif" arg2="lp" proved="true" >
   </transf>
   </goal>
  </transf>
  </goal>
  <goal name="G7" proved="true">
- <transf name="intro_ccert" proved="true" >
+ <transf name="cintro" arg1="verif" arg2="ml" proved="true" >
   <goal name="G7.0" proved="true">
   <transf name="split_all_full" proved="true" >
    <goal name="G7.0.0" proved="true">
-   <transf name="contradict_ccert" proved="true" >
+   <transf name="ccontradict" arg1="verif" arg2="ml" proved="true" >
    </transf>
    </goal>
   </transf>
-  <transf name="split_all_full_ccert" proved="true" >
+  <transf name="csplit_all_full" arg1="verif" arg2="ml" proved="true" >
    <goal name="G7.0.0" proved="true">
-   <transf name="contradict_ccert" proved="true" >
+   <transf name="ccontradict" arg1="verif" arg2="ml" proved="true" >
    </transf>
    </goal>
   </transf>
-  <transf name="split_all_full_lcert" proved="true" >
+  <transf name="csplit_all_full" arg1="verif" arg2="lp" proved="true" >
    <goal name="G7.0.0" proved="true">
-   <transf name="contradict_lcert" proved="true" >
+   <transf name="ccontradict" arg1="verif" arg2="lp" proved="true" >
    </transf>
    </goal>
   </transf>
@@ -186,11 +186,11 @@
  <goal name="G8" proved="true">
  <transf name="split_all_full" proved="true" >
   <goal name="G8.0" proved="true">
-  <transf name="swap_ccert" proved="true" >
+  <transf name="cswap" arg1="verif" arg2="ml" proved="true" >
    <goal name="G8.0.0" proved="true">
-   <transf name="right_ccert" proved="true" arg1="in" arg2="H1">
+   <transf name="cright" arg1="verif" arg2="ml" proved="true" arg1="in" arg2="H1">
     <goal name="G8.0.0.0" proved="true">
-    <transf name="contradict_ccert" proved="true" >
+    <transf name="ccontradict" arg1="verif" arg2="ml" proved="true" >
     </transf>
     </goal>
    </transf>
@@ -198,11 +198,11 @@
   </transf>
   </goal>
   <goal name="G8.1" proved="true">
-  <transf name="swap_ccert" proved="true" >
+  <transf name="cswap" arg1="verif" arg2="ml" proved="true" >
    <goal name="G8.1.0" proved="true">
-   <transf name="right_ccert" proved="true" arg1="in" arg2="H1">
+   <transf name="cright" arg1="verif" arg2="ml" proved="true" arg1="in" arg2="H1">
     <goal name="G8.1.0.0" proved="true">
-    <transf name="contradict_ccert" proved="true" >
+    <transf name="ccontradict" arg1="verif" arg2="ml" proved="true" >
     </transf>
     </goal>
    </transf>
@@ -210,11 +210,11 @@
   </transf>
   </goal>
   <goal name="G8.2" proved="true">
-  <transf name="swap_ccert" proved="true" >
+  <transf name="cswap" arg1="verif" arg2="ml" proved="true" >
    <goal name="G8.2.0" proved="true">
-   <transf name="right_ccert" proved="true" arg1="in" arg2="H1">
+   <transf name="cright" arg1="verif" arg2="ml" proved="true" arg1="in" arg2="H1">
     <goal name="G8.2.0.0" proved="true">
-    <transf name="contradict_ccert" proved="true" >
+    <transf name="ccontradict" arg1="verif" arg2="ml" proved="true" >
     </transf>
     </goal>
    </transf>
@@ -222,11 +222,11 @@
   </transf>
   </goal>
   <goal name="G8.3" proved="true">
-  <transf name="swap_ccert" proved="true" >
+  <transf name="cswap" arg1="verif" arg2="ml" proved="true" >
    <goal name="G8.3.0" proved="true">
-   <transf name="right_ccert" proved="true" arg1="in" arg2="H1">
+   <transf name="cright" arg1="verif" arg2="ml" proved="true" arg1="in" arg2="H1">
     <goal name="G8.3.0.0" proved="true">
-    <transf name="contradict_ccert" proved="true" >
+    <transf name="ccontradict" arg1="verif" arg2="ml" proved="true" >
     </transf>
     </goal>
    </transf>
@@ -234,13 +234,13 @@
   </transf>
   </goal>
  </transf>
- <transf name="split_all_full_ccert" proved="true" >
+ <transf name="csplit_all_full" arg1="verif" arg2="ml" proved="true" >
   <goal name="G8.0" proved="true">
-  <transf name="swap_ccert" proved="true" >
+  <transf name="cswap" arg1="verif" arg2="ml" proved="true" >
    <goal name="G8.0.0" proved="true">
-   <transf name="right_ccert" proved="true" arg1="in" arg2="H1">
+   <transf name="cright" arg1="verif" arg2="ml" proved="true" arg1="in" arg2="H1">
     <goal name="G8.0.0.0" proved="true">
-    <transf name="contradict_ccert" proved="true" >
+    <transf name="ccontradict" arg1="verif" arg2="ml" proved="true" >
     </transf>
     </goal>
    </transf>
@@ -248,11 +248,11 @@
   </transf>
   </goal>
   <goal name="G8.1" proved="true">
-  <transf name="swap_ccert" proved="true" >
+  <transf name="cswap" arg1="verif" arg2="ml" proved="true" >
    <goal name="G8.1.0" proved="true">
-   <transf name="right_ccert" proved="true" arg1="in" arg2="H1">
+   <transf name="cright" arg1="verif" arg2="ml" proved="true" arg1="in" arg2="H1">
     <goal name="G8.1.0.0" proved="true">
-    <transf name="contradict_ccert" proved="true" >
+    <transf name="ccontradict" arg1="verif" arg2="ml" proved="true" >
     </transf>
     </goal>
    </transf>
@@ -260,11 +260,11 @@
   </transf>
   </goal>
   <goal name="G8.2" proved="true">
-  <transf name="swap_ccert" proved="true" >
+  <transf name="cswap" arg1="verif" arg2="ml" proved="true" >
    <goal name="G8.2.0" proved="true">
-   <transf name="right_ccert" proved="true" arg1="in" arg2="H1">
+   <transf name="cright" arg1="verif" arg2="ml" proved="true" arg1="in" arg2="H1">
     <goal name="G8.2.0.0" proved="true">
-    <transf name="contradict_ccert" proved="true" >
+    <transf name="ccontradict" arg1="verif" arg2="ml" proved="true" >
     </transf>
     </goal>
    </transf>
@@ -272,11 +272,11 @@
   </transf>
   </goal>
   <goal name="G8.3" proved="true">
-  <transf name="swap_ccert" proved="true" >
+  <transf name="cswap" arg1="verif" arg2="ml" proved="true" >
    <goal name="G8.3.0" proved="true">
-   <transf name="right_ccert" proved="true" arg1="in" arg2="H1">
+   <transf name="cright" arg1="verif" arg2="ml" proved="true" arg1="in" arg2="H1">
     <goal name="G8.3.0.0" proved="true">
-    <transf name="contradict_ccert" proved="true" >
+    <transf name="ccontradict" arg1="verif" arg2="ml" proved="true" >
     </transf>
     </goal>
    </transf>
@@ -284,13 +284,13 @@
   </transf>
   </goal>
  </transf>
- <transf name="split_all_full_lcert" proved="true" >
+ <transf name="csplit_all_full" arg1="verif" arg2="lp" proved="true" >
   <goal name="G8.0" proved="true">
-  <transf name="swap_lcert" proved="true" >
+  <transf name="cswap" arg1="verif" arg2="lp" proved="true" >
    <goal name="G8.0.0" proved="true">
-   <transf name="right_lcert" proved="true" arg1="in" arg2="H1">
+   <transf name="cright" arg1="verif" arg2="lp" proved="true" arg1="in" arg2="H1">
     <goal name="G8.0.0.0" proved="true">
-    <transf name="contradict_lcert" proved="true" >
+    <transf name="ccontradict" arg1="verif" arg2="lp" proved="true" >
     </transf>
     </goal>
    </transf>
@@ -298,11 +298,11 @@
   </transf>
   </goal>
   <goal name="G8.1" proved="true">
-  <transf name="swap_lcert" proved="true" >
+  <transf name="cswap" arg1="verif" arg2="lp" proved="true" >
    <goal name="G8.1.0" proved="true">
-   <transf name="right_lcert" proved="true" arg1="in" arg2="H1">
+   <transf name="cright" arg1="verif" arg2="lp" proved="true" arg1="in" arg2="H1">
     <goal name="G8.1.0.0" proved="true">
-    <transf name="contradict_lcert" proved="true" >
+    <transf name="ccontradict" arg1="verif" arg2="lp" proved="true" >
     </transf>
     </goal>
    </transf>
@@ -310,11 +310,11 @@
   </transf>
   </goal>
   <goal name="G8.2" proved="true">
-  <transf name="swap_lcert" proved="true" >
+  <transf name="cswap" arg1="verif" arg2="lp" proved="true" >
    <goal name="G8.2.0" proved="true">
-   <transf name="right_lcert" proved="true" arg1="in" arg2="H1">
+   <transf name="cright" arg1="verif" arg2="lp" proved="true" arg1="in" arg2="H1">
     <goal name="G8.2.0.0" proved="true">
-    <transf name="contradict_lcert" proved="true" >
+    <transf name="ccontradict" arg1="verif" arg2="lp" proved="true" >
     </transf>
     </goal>
    </transf>
@@ -322,11 +322,11 @@
   </transf>
   </goal>
   <goal name="G8.3" proved="true">
-  <transf name="swap_lcert" proved="true" >
+  <transf name="cswap" arg1="verif" arg2="lp" proved="true" >
    <goal name="G8.3.0" proved="true">
-   <transf name="right_lcert" proved="true" arg1="in" arg2="H1">
+   <transf name="cright" arg1="verif" arg2="lp" proved="true" arg1="in" arg2="H1">
     <goal name="G8.3.0.0" proved="true">
-    <transf name="contradict_lcert" proved="true" >
+    <transf name="ccontradict" arg1="verif" arg2="lp" proved="true" >
     </transf>
     </goal>
    </transf>

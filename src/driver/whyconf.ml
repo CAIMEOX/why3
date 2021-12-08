@@ -1079,7 +1079,6 @@ module Args = struct
   let opt_extra = ref []
   let opt_loadpath = ref []
   let opt_stdlib = ref true
-  let opt_cert_trans = ref false
   let opt_load_default_plugins = ref true
 
   let add_command s =
@@ -1095,8 +1094,6 @@ module Args = struct
       "<dir> add <dir> to the library search path";
       KLong "no-stdlib", Hnd0 (fun () -> opt_stdlib := false),
       " do not add the standard library to the loadpath";
-      KLong "cert", Hnd0 (fun () -> opt_cert_trans := true),
-      " register the certifying transformations";
       KLong "no-load-default-plugins", Hnd0 (fun () -> opt_load_default_plugins := false),
       " do not load the plugins from the standard path";
       Debug.Args.desc_debug;

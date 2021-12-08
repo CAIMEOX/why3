@@ -8,7 +8,7 @@
  <goal name="H">
  </goal>
  <goal name="G">
- <transf name="intro_ccert" >
+ <transf name="cintro" arg1="verif" arg2="ml" >
   <goal name="G.0">
   </goal>
  </transf>
