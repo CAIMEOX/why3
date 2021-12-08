@@ -228,17 +228,16 @@ let register () =
 let _ : unit =
   let open Format in
   begin try
-    printf "Checking for lambdapi...@.";
     let lpv = Sysutil.uniquify "/tmp/lambdapi_version.txt" in
     let lp_version = sprintf "lambdapi --version > %s 2> /dev/null" lpv in
     assert (Sys.command lp_version = 0);
     let vers = Sysutil.file_contents lpv in
     let _ = Sys.remove lpv in
-    let _ = printf "Found version: %s@." vers in
     let lp_folder = Filename.(concat Config.datadir "lambdapi") in
     let lp_install = sprintf "make install -C %s > /dev/null 2>&1" lp_folder in
-    assert (Sys.command lp_install = 0)
-  with _ -> printf "Can't find or install lambdapi... continuing without lambdapi checker@."
+    assert (Sys.command lp_install = 0);
+    printf "Found lambdapi version %s@." vers
+  with _ -> ()
   end;
 
   register ()
