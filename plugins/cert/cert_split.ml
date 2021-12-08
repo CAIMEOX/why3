@@ -3,6 +3,7 @@ open Why3
 open Ident
 open Term
 open Decl
+open Ty
 
 open Cert_certificates
 
@@ -37,6 +38,8 @@ let asym f = Sattr.mem Term.asym_split f.t_attrs
 
 let case_split = Ident.create_attribute "case_split"
 let case f = Sattr.mem case_split f.t_attrs
+
+let compiled = Ident.create_attribute "split_goal: compiled match"
 
 let unstop f =
   t_attr_set ?loc:f.t_loc (Sattr.remove stop_split f.t_attrs) f
@@ -209,6 +212,43 @@ let lbop op (pr1, t1) (pr2, t2) =
   let pr = if pr_equal pr1 pr2 then pr1
            else create_prsymbol (id_fresh "binop") in
   pr, op t1 t2
+
+let pat_condition kn tv cseen p : Sls.t * vsymbol list * (prsymbol * term) monoid =
+  match p.pat_node with
+  | Pwild ->
+      let csl,sbs = match p.pat_ty.ty_node with
+        | Tyapp (ts,_) ->
+            Decl.find_constructors kn ts,
+            let ty = ty_app ts (List.map ty_var ts.ts_args) in
+            ty_match Mtv.empty ty p.pat_ty
+        | _ -> assert false in
+      let csall = Sls.of_list (List.rev_map fst csl) in
+      let csnew = Sls.diff csall cseen in
+      assert (not (Sls.is_empty csnew));
+      let add_cs cs g =
+        let mk_v ty = create_vsymbol (id_fresh "w") (ty_inst sbs ty) in
+        let vl = List.map mk_v cs.ls_args in
+        let f = t_equ tv (fs_app cs (List.map t_var vl) p.pat_ty) in
+        let pr = create_prsymbol (id_fresh "pat_wild") in
+        g ++! !+(pr, t_exists_close_simp vl [] f) in
+      let g = Sls.fold add_cs csnew Unit in
+      csall, [], g
+  | Papp (cs, pl) ->
+      let vl = List.map (function
+                   | {pat_node = Pvar v} -> v | _ -> assert false) pl in
+      let g = t_equ tv (fs_app cs (List.map t_var vl) p.pat_ty) in
+      let pr = create_prsymbol (id_fresh "pat_app") in
+      Sls.add cs cseen, vl, !+(pr, g)
+  | _ -> assert false
+
+let rec fold_cond  = function
+  | Base a -> a
+  | Op (a,b) -> lbop t_or (fold_cond a) (fold_cond b)
+
+let fold_cond = function
+  | Comb c -> !+(fold_cond c)
+  | x -> x
+
 
 let destruct_reconstruct pr c1 c2 =
   let pr1 = create_prsymbol (id_fresh "pr1") in
@@ -513,85 +553,91 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
         let (!!) = map (fun t -> Zero t) (!) in
         ret !!(sf.conj) nc nc !!(sf.disj) nc nc
           !(sf.bwd) !(sf.fwd) !!(sf.side) sf.cpos sf.cneg
-    (* | Tcase (t,bl) ->
-     *     let rc = match bl with
-     *       | [_] -> split_core sp
-     *       | _   -> split_core (no_csp sp) in
-     *     let k join =
-     *       let case_close bl2 =
-     *         if Lists.equal (==) bl bl2 then f else - t_case t bl2 in
-     *       let sbl = List.map (fun b ->
-     *         let p, f, close = t_open_branch_cb b in
-     *         p, close, rc pr f) bl in
-     *       let blfwd = List.map (fun (p, close, sf) -> close p (snd sf.fwd)) sbl in
-     *       let fwd = case_close blfwd in
-     *       let blbwd = List.map (fun (p, close, sf) -> close p (snd sf.bwd)) sbl in
-     *       let bwd = case_close blbwd in
-     *       let conj, disj, side = join sbl in
-     *       ret conj nc nc disj nc nc bwd fwd side false false
-     *     in
-     *     begin match sp.comp_match with
-     *     | None ->
-     *         let join sbl =
-     *           let rec zip_all bf_top bf_bot = function
-     *             | [] -> Unit, Unit, Unit, [], []
-     *             | (p, close, sf) :: q ->
-     *               let c_top = close p t_true and c_bot = close p t_false in
-     *               let dp_top = c_top :: bf_top and dp_bot = c_bot :: bf_bot in
-     *               let conj, disj, side, af_top, af_bot = zip_all dp_top dp_bot q in
-     *               let fzip bf af mid =
-     *                 - t_case t (List.rev_append bf (close p mid::af)) in
-     *               let zip bf mid af =
-     *                 map (fun t -> !+(fzip bf af t)) (fzip bf af) mid in
-     *               zip bf_top sf.conj af_top ++ conj,
-     *               zip bf_bot sf.disj af_bot ++ disj,
-     *               zip bf_top sf.side af_top ++ side,
-     *               c_top :: af_top,
-     *               c_bot :: af_bot
-     *           in
-     *           let conj, disj, side, _, _ = zip_all [] [] sbl in
-     *           conj, disj, side
-     *         in
-     *         k join
-     *     | Some kn ->
-     *         if Sattr.mem compiled f.t_attrs
-     *         then
-     *           (\* keep the attributes for single-case match *\)
-     *           let attrs = match bl with
-     *             | [_] -> Sattr.remove case_split
-     *                   (Sattr.remove compiled f.t_attrs)
-     *             | _ -> Sattr.empty in
-     *           let join sbl =
-     *             let vs = create_vsymbol (id_fresh "q") (t_type t) in
-     *             let tv = t_var vs in
-     *             let (~-) fb =
-     *               t_attr_set ?loc:f.t_loc attrs (t_let_close_simp vs t fb) in
-     *             let _, conj, disj, side =
-     *               List.fold_left (fun (cseen, conj, disj, side) (p, _, sf) ->
-     *                 let cseen, vl, cond = pat_condition kn tv cseen p in
-     *                 let cond = if ro then fold_cond cond else cond in
-     *                 let fcl t = - t_forall_close_simp vl [] t in
-     *                 let ecl t = - t_exists_close_simp vl [] t in
-     *                 let ps cond f = fcl (t_implies cond f) in
-     *                 let ng cond f = ecl (t_and cond f) in
-     *                 let ngt _ a = fcl (t_not a) and tag _ a = ecl a in
-     *                 let conj  = conj ++ bimap ngt ps cond sf.conj  in
-     *                 let disj  = disj ++ bimap tag ng cond sf.disj  in
-     *                 let side = side ++ bimap ngt ps cond sf.side in
-     *                 cseen, conj, disj, side
-     *               ) (Sls.empty, Unit, Unit, Unit) sbl
-     *             in
-     *             conj, disj, side
-     *           in
-     *           k join
-     *         else
-     *           let mk_let = t_let_close_simp in
-     *           let mk_case t bl = t_attr_add compiled (t_case_close t bl) in
-     *           let mk_b b = let p, f = t_open_branch b in [p], f in
-     *           let bl = List.map mk_b bl in
-     *           rc (- Pattern.compile_bare ~mk_case ~mk_let [t] bl)
-     *     end *)
-    | Tcase _ -> failwith "TODO"
+    | Tcase (t,bl) ->
+        let rc = match bl with
+          | [_] -> split_core sp
+          | _   -> split_core (no_csp sp) in
+        let k join : (prsymbol * term) split_ret =
+          let case_close bl2 =
+            if Lists.equal (==) bl bl2 then pr, f else pr, - t_case t bl2 in
+          let sbl = List.map (fun b ->
+            let p, f, close = t_open_branch_cb b in
+            p, close, rc pr f) bl in
+          let blfwd = List.map (fun (p, close, sf) -> close p (snd sf.fwd)) sbl in
+          let fwd = case_close blfwd in
+          let blbwd = List.map (fun (p, close, sf) -> close p (snd sf.bwd)) sbl in
+          let bwd = case_close blbwd in
+          let conj, disj, side = join sbl in
+          ret conj nc nc disj nc nc bwd fwd side false false
+        in
+        begin match sp.comp_match with
+        | None ->
+            let join (sbl : (pattern *
+                               (pattern -> term -> term_branch) *
+                                 (prsymbol * Mterm.key) split_ret) list) :
+                  (prsymbol * Mterm.key) M.monoid *
+                    (prsymbol * Mterm.key) M.monoid *
+                    (prsymbol * Mterm.key) M.monoid =
+              let rec zip_all bf_top bf_bot : (pattern *
+                               (pattern -> term -> term_branch) *
+                                 (prsymbol * Mterm.key) split_ret) list -> 'a = function
+                | [] -> Unit, Unit, Unit, [], []
+                | (p, close, sf) :: q ->
+                  let c_top = close p t_true and c_bot = close p t_false in
+                  let dp_top = c_top :: bf_top and dp_bot = c_bot :: bf_bot in
+                  let conj, disj, side, af_top, af_bot = zip_all dp_top dp_bot q in
+                  let fzip bf af (pr, mid) =
+                    pr, - t_case t (List.rev_append bf (close p mid::af)) in
+                  let zip bf mid af =
+                    map (fun t -> !+(fzip bf af t)) (fzip bf af) mid in
+                  zip bf_top sf.conj af_top ++! conj,
+                  zip bf_bot sf.disj af_bot ++! disj,
+                  zip bf_top sf.side af_top ++! side,
+                  c_top :: af_top,
+                  c_bot :: af_bot
+              in
+              let conj, disj, side, _, _ = zip_all [] [] sbl in
+              conj, disj, side
+            in
+            k join
+        | Some kn ->
+            if Sattr.mem compiled f.t_attrs
+            then
+              (* keep the attributes for single-case match *)
+              let attrs = match bl with
+                | [_] -> Sattr.remove case_split
+                      (Sattr.remove compiled f.t_attrs)
+                | _ -> Sattr.empty in
+              let join sbl =
+                let vs = create_vsymbol (id_fresh "q") (t_type t) in
+                let tv = t_var vs in
+                let (~-) fb =
+                  t_attr_set ?loc:f.t_loc attrs (t_let_close_simp vs t fb) in
+                let _, conj, disj, side =
+                  List.fold_left (fun (cseen, conj, disj, side) (p, _, sf) ->
+                    let cseen, vl, cond = pat_condition kn tv cseen p in
+                    let cond = if ro then fold_cond cond else cond in
+                    let fcl t = - t_forall_close_simp vl [] t in
+                    let ecl t = - t_exists_close_simp vl [] t in
+                    let ps cond f = fcl (t_implies cond f) in
+                    let ng cond f = ecl (t_and cond f) in
+                    let ngt _ a = fcl (t_not a) and tag _ a = ecl a in
+                    let conj  = conj ++! bimap (lbop ngt) (lbop ps) cond sf.conj  in
+                    let disj  = disj ++! bimap (lbop tag) (lbop ng) cond sf.disj  in
+                    let side = side ++! bimap (lbop ngt) (lbop ps) cond sf.side in
+                    cseen, conj, disj, side
+                  ) (Sls.empty, Unit, Unit, Unit) sbl
+                in
+                conj, disj, side
+              in
+              k join
+            else
+              let mk_let = t_let_close_simp in
+              let mk_case t bl = t_attr_add compiled (t_case_close t bl) in
+              let mk_b b = let p, f = t_open_branch b in [p], f in
+              let bl = List.map mk_b bl in
+              rc pr (- Pattern.compile_bare ~mk_case ~mk_let [t] bl)
+        end
     | Tquant (qn,fq) ->
         let vsl, trl, f1 = t_open_quant fq in
         let close = luop (alias f1 (t_quant_close qn vsl trl)) in
@@ -647,20 +693,11 @@ let pop () = match !clues with
   | h::t -> clues := t; h
   | _ -> assert false
 
-(* let split_conj sp f =
- *   let core = split_core sp f in
- *   assert (core.side = Unit);
- *   to_list core.conj *)
-
 let split_conj sp pr f = (* only used by split_axiom *)
   let core = split_core sp pr f in
   assert (core.side = Unit);
   add (core.cn);
   to_list core.conj
-
-(* let split_proof sp f =
- *   let core = split_core sp f in
- *   to_list (core.conj ++ core.side) *)
 
 let split_proof sp pr f =
   let core = split_core sp pr f in
@@ -689,11 +726,6 @@ let split_premise sp d = match d.d_node with
   | Dprop (Paxiom,pr,f) -> split_axiom sp pr f
   | _ -> [d]
 
-(* let prep_goal split = Trans.store (fun t ->
- *   let split = split (Some (Task.task_known t)) in
- *   let trans = Trans.goal_l (split_goal split) in
- *   Trans.apply trans t) *)
-
 let rev_append_cert lc =
   List.fold_left (++) idc (List.rev lc)
 
@@ -705,11 +737,6 @@ let prep_goal split = Trans.store (fun t ->
   let cert = rev_append_cert !clues in
   nt, cert)
 
-(* let prep_all split = Trans.store (fun t ->
- *   let split = split (Some (Task.task_known t)) in
- *   let trans = Trans.decl_l (split_all split) None in
- *   Trans.apply trans t) *)
-
 let prep_all split = Trans.store (fun t ->
   let split = split (Some (Task.task_known t)) in
   reset ();
@@ -719,11 +746,6 @@ let prep_all split = Trans.store (fun t ->
   (* prc err_formatter cert; *)
   (* Format.printf "NUMBER OF CLUES : %d@." (List.length !clues); *)
   nt, rev_append_cert !clues)
-
-(* let prep_premise split = Trans.store (fun t ->
- *   let split = split (Some (Task.task_known t)) in
- *   let trans = Trans.decl (split_premise split) None in
- *   Trans.apply trans t) *)
 
 let prep_premise split = Trans.store (fun t ->
   let split = split (Some (Task.task_known t)) in
