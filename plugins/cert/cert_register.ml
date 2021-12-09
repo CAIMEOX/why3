@@ -15,20 +15,18 @@ open Cert_verif_lambdapi
 
 let checker_nothing (_ : kcert) (_ : cterm ctask) (_ : cterm ctask list) = ()
 
-(** Certified transformations *)
-
-let no_dbg = None, None
-(* let cert_dbg = Some eprcertif, None
- * let cta_dbg = None, Some eplcta
- * let all_dbg = Some eprcertif, Some eplcta *)
+let _no_dbg = None, None
+let _cert_dbg = Some eprcertif, None
+let _cta_dbg = None, Some eplcta
+let _all_dbg = Some eprcertif, Some eplcta
 
 (** Get a certified transformation from a transformation with a certificate *)
 
 let checker_ctrans
-      ?env
-      (debug :   (scert -> unit) option *
+      ?(env : Env.env option)
+      (debug : (scert -> unit) option *
                  (cterm ctask -> cterm ctask list -> unit) option )
-      (* is_lp *)
+      (* (is_lp : bool) *)
       (checker : kcert -> cterm ctask -> cterm ctask list -> unit)
       (ctr : ctrans)
       (init_t : task) =
@@ -47,10 +45,10 @@ let checker_ctrans
     checker kernel_certif init_ct res_ct;
     (* let t3 = Unix.times () in *)
     (* let syst = if is_lp then "Lambdapi" else "OCaml" in *)
-    (* eprintf "@[<v>temps de la transformation : %f@ \
-     *          temps de la transformation (fils) : %f@ \
-     *          temps du %s-checker : %f@ \
-     *          temps du %s-checker (fils): %f@ @]"
+    (* eprintf "@[<v>transformation time: %f@ \
+     *          transformation time (children): %f@ \
+     *          %s-checker time: %f@ \
+     *          %s-checker time (children): %f@ @]"
      *          (t2.Unix.tms_utime-.t1.Unix.tms_utime +. t2.Unix.tms_stime -. t1.Unix.tms_stime)
      *          (t2.Unix.tms_cutime-.t1.Unix.tms_cutime +. t2.Unix.tms_cstime -. t1.Unix.tms_cstime)
      *          syst (t3.Unix.tms_utime-.t2.Unix.tms_utime +. t3.Unix.tms_stime -. t2.Unix.tms_stime)
@@ -65,9 +63,9 @@ let checker_ctrans
 exception Unrecognized_checker of string
 
 let make_certifying ?env checker trans = match checker with
-  | None -> Trans.store (checker_ctrans ?env no_dbg checker_nothing trans)
-  | Some "lp" -> Trans.store (checker_ctrans ?env no_dbg checker_lambdapi trans)
-  | Some "ml" -> Trans.store (checker_ctrans ?env no_dbg checker_caml trans)
+  | None -> Trans.store (checker_ctrans ?env _no_dbg checker_nothing trans)
+  | Some "lp" -> Trans.store (checker_ctrans ?env _no_dbg checker_lambdapi trans)
+  | Some "ml" -> Trans.store (checker_ctrans ?env _no_dbg checker_caml trans)
   | Some s -> raise (Unrecognized_checker s)
 
 let cassert chk t              = make_certifying chk (cassert t)
@@ -225,7 +223,7 @@ let register () =
     ~desc:"A@ certifying@ transformation@ inspired by@ Coq@ tactic@ [trivial]"
 
 
-let _ : unit =
+let _main : unit =
   let open Format in
   begin try
     let lpv = Sysutil.uniquify "/tmp/lambdapi_version.txt" in

@@ -169,8 +169,8 @@ type 'a split_ret = {
   cneg : bool;
 }
 
-let print_ret_err { conj; cp; cn; disj; dn; dp; bwd; fwd; side; cpos; cneg } =
-  Format.fprintf Format.err_formatter
+let _print_ret_err { conj; cp; cn; disj; dn; dp; bwd; fwd; side; cpos; cneg } =
+  Format.eprintf
     "@[<v>\
      conj  : @[%a@]@ \
      cp    : @[%a@]@ \
@@ -194,7 +194,6 @@ let print_ret_err { conj; cp; cn; disj; dn; dp; bwd; fwd; side; cpos; cneg } =
     (M.print_mon " /\\ ") side
     cpos
     cneg
-[@@ocaml.warning "-32"] (* only needed for debugging purposes *)
 
 let rec drop_byso f = match f.t_node with
   | Tbinop (Timplies,{ t_node = Tbinop (Tor,_,{ t_node = Ttrue }) },f) ->
@@ -663,9 +662,10 @@ let rec split_core sp pr f : (prsymbol * term) split_ret =
       { r with conj = Unit; disj = Unit; fwd = pr, t_false; bwd = pr, t_true }
   | _ -> r
 
+(* Uncomment the following definition to debug split_core *)
 (* let split_core sp pr t =
  *   let res = split_core sp pr t in
- *   print_ret_err res;
+ *   _print_ret_err res;
  *   res *)
 
 let full_split kn = {
