@@ -8,28 +8,31 @@ open Cert_certificates
 
 (* This is the main verification function: <ccheck> replays the certificate on
    a ctask *)
-let rec ccheck (c : kcert) cta =
+let ccheck (c : kcert) cta res =
+  let res_mid = Mid.(List.fold_left (fun acc cta -> add cta.uid cta acc) empty res) in
+  let rec cc c cta =
   match c with
   | KDuplicate _ | KFoldArr _
   | KFoldIff _  | KSwapNegate _| KEqSym _ | KEqTrans _ ->
       verif_failed "Found Construct/Duplicate/Fold/SwapNeg/Eq/Let"
   | KConv _ ->
       verif_failed "Conv is not implemented in the OCaml checker yet"
-  | KHole cta' -> if not (ctask_equal cta cta')
-                  then begin
-                      Format.eprintf "@[<v>Conflict of tasks: @ \
-                                      Actual task: %a@ \
-                                      Certif task: %a@]@."
-                        pacta cta'
-                        pacta cta;
-                      verif_failed "Tasks differ, look at std_err" end
+  | KHole cta' ->
+      if not (ctask_equal cta (Mid.find cta'.uid res_mid))
+      then begin
+          Format.eprintf "@[<v>Conflict of tasks: @ \
+                          Actual task: %a@ \
+                          Certif task: %a@]@."
+            pacta cta'
+            pacta cta;
+          verif_failed "Tasks differ, look at std_err" end
   | KClear (_, _, i, c) ->
       let cta = remove i cta in
-      ccheck c cta
+      cc c cta
   | KForget (i, c) ->
       assert (not (has_ident_context i cta.gamma_delta));
       let cta = remove_var i cta in
-      ccheck c cta
+      cc c cta
   | KAxiom (_, i1, i2) ->
       let t1, pos1 = find_formula "axiom1" i1 cta in
       let t2, pos2 = find_formula "axiom2" i2 cta in
@@ -59,14 +62,14 @@ let rec ccheck (c : kcert) cta =
       infers_into ~e_str:"KAssert" cta a CTprop;
       let cta1 = add i (a, true) cta in
       let cta2 = add i (a, false) cta in
-      ccheck c1 cta1; ccheck c2 cta2
+      cc c1 cta1; cc c2 cta2
   | KSplit (_, _, _, i, c1, c2) ->
       let t, pos = find_formula "split" i cta in
       begin match t, pos with
       | CTbinop (Tand, t1, t2), true | CTbinop (Tor, t1, t2), false ->
           let cta1 = add i (t1, pos) cta in
           let cta2 = add i (t2, pos) cta in
-          ccheck c1 cta1; ccheck c2 cta2
+          cc c1 cta1; cc c2 cta2
       | _ -> verif_failed "Not splittable" end
   | KUnfoldIff (_, _, _, i, c) ->
       let t, pos = find_formula "unfold" i cta in
@@ -76,7 +79,7 @@ let rec ccheck (c : kcert) cta =
           let imp_neg = CTbinop (Timplies, t2, t1) in
           let unfolded_iff = CTbinop (Tand, imp_pos, imp_neg), pos in
           let cta = add i unfolded_iff cta in
-          ccheck c cta
+          cc c cta
       | _ -> verif_failed "Nothing to unfold" end
   | KUnfoldArr (_, _, _, i, c) ->
       let t, pos = find_formula "unfold" i cta in
@@ -84,14 +87,14 @@ let rec ccheck (c : kcert) cta =
       | CTbinop (Timplies, t1, t2) ->
           let unfolded_imp = CTbinop (Tor, CTnot t1, t2), pos in
           let cta = add i unfolded_imp cta in
-          ccheck c cta
+          cc c cta
       | _ -> verif_failed "Nothing to unfold" end
   | KSwap (_, _, i, c) ->
       let t, pos = find_formula "Swap" i cta in
       begin match t with
       | CTnot t ->
           let cta = add i (t, not pos) cta in
-          ccheck c cta
+          cc c cta
       | _ -> verif_failed "Not a negation"
       end
   | KDestruct (_, _, _, i, j1, j2, c) ->
@@ -101,7 +104,7 @@ let rec ccheck (c : kcert) cta =
           let cta = remove i cta
                     |> add j1 (t1, pos)
                     |> add j2 (t2, pos) in
-          ccheck c cta
+          cc c cta
       | _ -> verif_failed "Nothing to destruct" end
   | KIntroQuant (_, _, _, i, y, c) ->
       let t, pos = find_formula "intro_quant" i cta in
@@ -120,7 +123,7 @@ let rec ccheck (c : kcert) cta =
             end
           else let cta = add i (ct_open t (CTfvar (y, [])), pos) cta
                          |> add_var y cty in
-               ccheck c cta
+               cc c cta
       | _ -> verif_failed "Nothing to introduce" end
   | KInstQuant (_, _, _, i, j, t_inst, c) ->
       let t, pos = find_formula "inst_quant" i cta in
@@ -128,7 +131,7 @@ let rec ccheck (c : kcert) cta =
       | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true ->
           infers_into ~e_str:"KInstquant" cta t_inst ty;
           let cta = add j (ct_open t t_inst, pos) cta in
-          ccheck c cta
+          cc c cta
       | _ -> verif_failed "Can't instantiate formula"
       end
   | KIntroType (_, p, lts, c) ->
@@ -140,7 +143,7 @@ let rec ccheck (c : kcert) cta =
           let nt = ct_ty_subst subst ct in
           let cta = List.fold_left (fun cta ts -> add_type ts cta) cta lts in
           let cta = add p (nt, pos) cta in
-          ccheck c cta
+          cc c cta
       | _ -> verif_failed "Can't introduce type variable" end
   | KInstType (_, p1, p2, lty, c) ->
       let t, pos = find_formula "KInstType" p1 cta in
@@ -149,7 +152,7 @@ let rec ccheck (c : kcert) cta =
           let subst = Mtv.of_list (List.combine alphas lty) in
           let nt = ct_ty_subst subst ct in
           let cta = add p2 (nt, pos) cta in
-          ccheck c cta
+          cc c cta
       | _ -> verif_failed "Can't instantiate type variable" end
   | KRewrite (_, is_eq, cty, _, _, ctxt, i1, i2, c) ->
       let a, b = match find_formula "rew" i1 cta, is_eq with
@@ -159,7 +162,7 @@ let rec ccheck (c : kcert) cta =
       let t, pos = find_formula "rew" i2 cta in
       assert (ct_equal t (instantiate_safe cta ctxt a));
       let cta =  add i2 (instantiate ctxt b, pos) cta in
-      ccheck c cta
+      cc c cta
   | KInduction (g, hi1, hi2, hr, x, a, ctxt, c1, c2) ->
       let le = CTfvar ((cta.get_ls le_str).ls_name, []) in
       let lt = CTfvar ((cta.get_ls lt_str).ls_name, []) in
@@ -178,8 +181,10 @@ let rec ccheck (c : kcert) cta =
                  |> add hr (CTquant (CTforall, ctint, ct_close idn (
                             CTbinop (Timplies, CTapp (CTapp (lt, n), x),
                                      instantiate ctxt n))), false) in
-      ccheck c1 cta1; ccheck c2 cta2
+      cc c1 cta1; cc c2 cta2
+  in
+  cc c cta
 
-let checker_caml kc init_ct _res_ct =
-  try ccheck kc init_ct
+let checker_caml kc init res =
+  try ccheck kc init res
   with e -> raise (Trans.TransFailure ("checker_caml", e))
