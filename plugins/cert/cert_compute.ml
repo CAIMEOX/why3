@@ -7,9 +7,11 @@ open Compute
 open Cert_certificates
 open Cert_trans_utils
 
+(** Certifying version of transformation normalize_hyp_or_goal from Compute *)
+
 (* One function for computing on a given decl, using or not user-specified
    rules. See compute.ml for a description of the parameters. *)
-let ccompute specified steps where env =
+let compute specified steps where env =
   Trans.store (fun task ->
       let pr = default_goal task where in
       let tr = if specified then normalize_hyp_few steps (Some pr) env

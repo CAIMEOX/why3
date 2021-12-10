@@ -23,14 +23,14 @@ let ccheck (c : kcert) cta res =
           Format.eprintf "@[<v>Conflict of tasks: @ \
                           Actual task: %a@ \
                           Certif task: %a@]@."
-            pacta cta'
-            pacta cta;
+            practa cta'
+            practa cta;
           verif_failed "Tasks differ, look at std_err" end
   | KClear (_, _, i, c) ->
       let cta = remove i cta in
       cc c cta
   | KForget (i, c) ->
-      assert (not (has_ident_context i cta.gamma_delta));
+      assert (not (has_ident_context i cta));
       let cta = remove_var i cta in
       cc c cta
   | KAxiom (_, i1, i2) ->
@@ -41,8 +41,8 @@ let ccheck (c : kcert) cta res =
             then begin
                 Format.eprintf "@[<v>t1: %a@ \
                                 t2: %a@]@."
-                  pcte t1
-                  pcte t2;
+                  prct t1
+                  prct t2;
                 verif_failed "The hypothesis and goal given do not match"
               end)
       else verif_failed "Formulas have wrong positivities in the task"
@@ -118,7 +118,7 @@ let ccheck (c : kcert) cta res =
                               TASK@ %a@]@."
                 prhyp i
                 prid y
-                pacta cta;
+                practa cta;
               verif_failed "Non-free variable"
             end
           else let cta = add i (ct_open t (CTfvar (y, [])), pos) cta
@@ -173,7 +173,7 @@ let ccheck (c : kcert) cta res =
       infers_into cta x ctint;
       infers_into cta a ctint;
       assert (ct_equal t (instantiate_safe cta ctxt x));
-      assert (not (has_ident_context ix (remove g cta).gamma_delta) && pos);
+      assert (not (has_ident_context ix (remove g cta)) && pos);
       let cta1 = add hi1 (CTapp (CTapp (le, x), a), false) cta in
       let idn = id_register (id_fresh "ctxt_var") in
       let n = CTfvar (idn, []) in

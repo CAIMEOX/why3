@@ -1,12 +1,8 @@
-val split_goal_full :
-  (Why3.Task.task list * Cert_certificates.scert) Why3.Trans.trans
-val split_goal_right :
-  (Why3.Task.task list * Cert_certificates.scert) Why3.Trans.trans
-val split_all_full :
-  (Why3.Task.task list * Cert_certificates.scert) Why3.Trans.trans
-val split_all_right :
-  (Why3.Task.task list * Cert_certificates.scert) Why3.Trans.trans
-val split_premise_full :
-  (Why3.Task.task list * Cert_certificates.scert) Why3.Trans.trans
-val split_premise_right :
-  (Why3.Task.task list * Cert_certificates.scert) Why3.Trans.trans
+open Cert_certificates
+
+val split_goal_full : ctrans
+val split_goal_right : ctrans
+val split_all_full : ctrans
+val split_all_right : ctrans
+val split_premise_full : ctrans
+val split_premise_right : ctrans

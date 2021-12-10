@@ -1,7 +1,6 @@
 open Why3
 open Term
 open Ident
-open Decl
 open Task
 open Ty
 open Format
@@ -13,8 +12,7 @@ let print_list pre = pp_print_list ~pp_sep:pp_print_space pre
 exception Certif_verification_failed of string
 let verif_failed s = raise (Certif_verification_failed s)
 
-(** To certify transformations, we will represent Why3 tasks by ctask, its terms
-   by cterm and type those terms with ctype *)
+(** Types for certifying transformations *)
 
 type cquant = CTforall | CTexists | CTlambda
 
@@ -24,7 +22,8 @@ type ctype =
   | CTyapp of ident * ctype list (* (possibly) applied type symbol *)
   | CTarrow of ctype * ctype (* arrow type *)
 
-(* Interpreted types *)
+(** Interpreted types *)
+
 let ctint = CTyapp (ts_int.ts_name, [])
 let ctreal = CTyapp (ts_real.ts_name, [])
 let ctbool = CTyapp (ts_bool.ts_name, [])
@@ -82,25 +81,15 @@ let rec is_predicate = function
   | CTarrow (_, ct) -> is_predicate ct
   | _ -> false
 
-(* We define two printers, <hip> for premises, <ip> for everything else. This is
-   needed because the logical definitions (via Dlogic) uses the same ident for
-   the defined symbol and for its axiom's name. *)
+(** Pretty printing of ctype (compatible with Lambdapi) *)
+
 let san =
   let lower_h c = if c = 'H' then "h" else char_to_alnum c in
   sanitizer lower_h char_to_alnum
 
-let hsan s = "H" ^ san s
-
 let ip = create_ident_printer ~sanitizer:san []
-let hip = create_ident_printer ~sanitizer:hsan []
 
 let prid fmt i = fprintf fmt "%s" (id_unique ip i)
-
-let prhyp fmt i = fprintf fmt "%s" (id_unique hip i)
-
-let prls fmt ls = prid fmt ls.ls_name
-
-let prpr fmt pr = prhyp fmt pr.pr_name
 
 let rec collect acc = function
   | CTyapp (_, l) -> List.fold_left collect acc l
@@ -108,12 +97,11 @@ let rec collect acc = function
   | CTprop -> acc
   | CTyvar v -> Stv.add v acc
 
-(** Pretty printing of ctype (compatible with lambdapi) *)
-(* Prints a shallow type without outside parentheses *)
+(* Prints a shallow type *)
 let rec prty fmt ty =
   let ltv = Stv.elements (collect Stv.empty ty) in
   fprintf fmt "@[";
-  pp_print_list ~pp_sep:pp_print_space
+  print_list
     (fun fmt tv -> fprintf fmt "Π %a : Type,@ " Pretty.print_tv tv) fmt ltv;
   prty_comp fmt ty;
   fprintf fmt "@]"
@@ -129,7 +117,6 @@ and prty_comp fmt = function
         prty_comp t2
   | ty -> prty_paren fmt ty
 
-(* Prints a shallow type, protected with outside parentheses if needed *)
 and prty_paren fmt = function
   | CTyvar v -> fprintf fmt "εₜ %a" Pretty.print_tv v
   | CTprop -> fprintf fmt "Type"
@@ -141,36 +128,33 @@ and prts fmt ts =
   else if id_equal ts ts_bool.ts_name then fprintf fmt "boolean"
   else fprintf fmt "εₜ %a" prid ts
 
-(* pred functions know if we are printing the type of a predicate or not *)
-(* Prints a deep type, protected with outside parentheses if needed *)
-(* TODO: print quantification on type variables *)
-let rec pred_ty pred fmt ty = match ty with
+(* Prints a deep type. No type quantification, pred indicates if the type of a
+   predicate or not *)
+let rec pr_pred_ty pred fmt ty = match ty with
   | CTyapp (ts, l) when l <> [] ->
       fprintf fmt "@[<2>%a@ %a@]"
         prid ts
-        (print_list (pred_ty_paren pred)) l
+        (print_list (pr_pred_ty_paren pred)) l
   | CTarrow (t1, t2) ->
       fprintf fmt "@[%a %a@ %a@]"
-        (pred_ty_paren pred) t1
+        (pr_pred_ty_paren pred) t1
         prarrow pred
-        (pred_ty pred) t2
-  | _ -> pred_ty_paren pred fmt ty
-and pred_ty_paren pred fmt = function
+        (pr_pred_ty pred) t2
+  | _ -> pr_pred_ty_paren pred fmt ty
+and pr_pred_ty_paren pred fmt = function
   | CTyvar v -> Pretty.print_tv fmt v
   | CTprop -> fprintf fmt "DType"
   | CTyapp (ts, []) -> prid fmt ts
-  | cty -> fprintf fmt "(%a)" (pred_ty pred) cty
+  | cty -> fprintf fmt "(%a)" (pr_pred_ty pred) cty
 
 and prarrow fmt pred =
   if pred then fprintf fmt "⇁"
   else fprintf fmt "⇒"
 
-(* Prints a deep type without outside parentheses *)
-let prdty fmt ty =
-  pred_ty (is_predicate ty) fmt ty
-(* Prints a deep type, protected with outside parentheses if needed *)
 let prdty_paren fmt ty =
-  pred_ty_paren (is_predicate ty) fmt ty
+  pr_pred_ty_paren (is_predicate ty) fmt ty
+
+(** Terms for certifying transformations *)
 
 type cterm =
   | CTqtype of tvsymbol list * cterm (* type quantifier binding, assumed to only
@@ -187,7 +171,8 @@ type cterm =
   | CTtrue (* true formula: ⊤ *)
   | CTfalse (* false formula: ⊥ *)
 
-(* Interpreted terms *)
+(** Interpreted terms *)
+
 let id_eq = ps_equ.ls_name
 let id_true = fs_bool_true.ls_name
 let id_false = fs_bool_false.ls_name
@@ -293,18 +278,18 @@ let rec ct_fv_close x k ct = match ct with
 
 let ct_close x t = ct_fv_close x 0 t
 
-(** Pretty printing of terms (compatible with lambdapi) *)
+(** Pretty printing of terms (compatible with Lambdapi) *)
 
-let rec pcte fmt = function
+let rec prct fmt = function
   | CTqtype (tv::l, t) ->
       fprintf fmt "`π %a : Type, %a"
         Pretty.print_tv tv
-        pcte (CTqtype(l, t))
+        prct (CTqtype(l, t))
   | CTqtype ([], t) ->
-      pquant fmt t
-  | t -> pquant fmt t
+      prquant fmt t
+  | t -> prquant fmt t
 
-and pquant fmt = function
+and prquant fmt = function
   | CTquant (q, cty, t) ->
       let x = id_register (id_fresh "x") in
       let t_open = ct_open t (CTfvar (x, [])) in
@@ -315,7 +300,7 @@ and pquant fmt = function
         q_str
         prid x
         prty_paren cty
-        pquant t_open;
+        prquant t_open;
       forget_id ip x
   | ct -> prarr fmt ct
 
@@ -371,7 +356,9 @@ and prpv fmt = function
       pp_print_string fmt (BigInt.to_string i)
   | CTfalse -> fprintf fmt "⊥"
   | CTtrue -> fprintf fmt "⊤"
-  | ct -> fprintf fmt "(%a)" pcte ct
+  | ct -> fprintf fmt "(%a)" prct ct
+
+(** Tasks for certifying transformations *)
 
 type 't ctask =
   { uid : ident; (* A unique identifier of the task *)
@@ -385,6 +372,15 @@ type 't ctask =
   }
 
 (** Pretty printing of ctask *)
+
+(* We define a second printer for premise identifiers. This is needed because
+   the logical definitions (via Dlogic) uses the same ident for the defined
+   symbol and for its axiom's name. *)
+let hsan s = "H" ^ san s
+
+let hip = create_ident_printer ~sanitizer:hsan []
+
+let prhyp fmt i = fprintf fmt "%s" (id_unique hip i)
 
 let prt fmt sid =
   Sid.iter (fun i -> fprintf fmt "%a@ " prid i) sid
@@ -415,22 +411,22 @@ let gen_pcta pt fmt cta =
     prs cta.sigma
     (prgd pt) cta.gamma_delta
 
-let pacta = gen_pcta pcte
+let practa = gen_pcta prct
 
-let pcta = gen_pcta Pretty.print_term
+let prcta = gen_pcta Pretty.print_term
 
-let plcta =
-  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "========@ ") pacta
+let prlcta =
+  pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "========@ ") practa
 
-let eplcta cta lcta =
+let eprlcta cta lcta =
   eprintf "@[<v>INIT :@ \
            %a==========@ \
            RES :@ \
            %a@]@."
-    pacta cta
-    plcta lcta
+    practa cta
+    prlcta lcta
 
-(** Utility functions on ctask (used notably in caml checker) *)
+(** Utility functions on ctask (used notably in the OCaml checker) *)
 
 let ctask_equal cta1 cta2 =
   Mid.equal cty_same cta1.sigma cta2.sigma &&
@@ -486,17 +482,17 @@ let remove i cta = lift_mid_cta (Mid.remove i) cta
 
 let add i ct cta = lift_mid_cta (Mid.add i ct) cta
 
-(* Verify that an ident is fresh in relation to a context of propositions *)
+(* Verify that an ident is fresh w.r.t. a context of propositions *)
 exception Found
-let has_ident_context i ctxt =
+let has_ident_context i cta =
   let rec found_ident_term i t = match t with
     | CTfvar (i', _) when id_equal i i' -> raise Found
     | _ -> ct_map (found_ident_term i) t in
   try Mid.map (fun (t, _) -> found_ident_term i t)
-        ctxt |> ignore; false
+        cta.gamma_delta |> ignore; false
   with Found -> true
 
-(* Typing algorithm *)
+(** Typing algorithm *)
 
 let rec type_matching subst ty1 ty2 = match ty1, ty2 with
   | CTprop, CTprop -> subst
@@ -572,7 +568,7 @@ let infers_into ?e_str:(s="") cta t ty =
   try assert (cty_equal (infer_type cta t) ty)
   with e ->
     eprintf "@[<v>Checking %s: wrong type for %a@ \
-             expected: %a@]@." s pcte t prty ty;
+             expected: %a@]@." s prct t prty ty;
             raise e
 
 let instantiate f a =
@@ -588,6 +584,6 @@ let instantiate_safe cta f a =
       ct_open f a
   | _ -> assert false
 
-(** We instrument existing transformations to produce a certificate *)
+(** Certifying transformations *)
 
 type 'certif ctransformation = (task list * 'certif) Trans.trans

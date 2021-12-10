@@ -7,40 +7,12 @@ open Format
 
 open Cert_syntax
 
-type sc =
-  | Nc
-  | Hole of cterm ctask
-  | Assert of prsymbol * term * sc * sc
-  | Let of prsymbol * (bool -> term -> sc)
-  | Axiom of prsymbol * prsymbol
-  | Trivial of prsymbol
-  | EqSym of prsymbol * sc
-  | EqTrans of prsymbol * prsymbol * prsymbol * sc
-  | Unfold of prsymbol * sc
-  | Fold of prsymbol * sc
-  | Split of prsymbol * sc * sc
-  | Destruct of prsymbol * prsymbol * prsymbol * sc
-  | Swap of prsymbol * sc
-  | Clear of prsymbol * sc
-  | Forget of lsymbol * sc
-  | Duplicate of prsymbol * prsymbol * sc
-  | IntroQuant of prsymbol * lsymbol * sc
-  | InstQuant of prsymbol * prsymbol * term * sc
-  | IntroType of prsymbol * tysymbol list * sc
-  | InstType of prsymbol * prsymbol * ty list * sc
-  | Rewrite of prsymbol * prsymbol * sc
-  | Induction of prsymbol * prsymbol * prsymbol * prsymbol *
-                   term * term * sc * sc
-  | Conv of prsymbol * term * sc
-
-type scert = int * (sc list -> sc)
-
-type 'a args = Z : sc args | Succ : 'a args -> (sc -> 'a) args
+type scert
+type ctrans = scert ctransformation
 
 val lambda1 : (scert -> scert) -> scert
 val lambda2 : (scert -> scert -> scert) -> scert
 val lambdan : int -> (scert list -> scert) -> scert
-
 val ( +++ ) : scert -> scert list -> scert
 val ( ++ ) : scert -> scert -> scert
 
@@ -74,7 +46,8 @@ val dir : bool -> prsymbol -> scert
 val construct : prsymbol -> prsymbol -> prsymbol -> scert
 val iffsym_hyp : prsymbol -> scert
 
-type ctrans = scert ctransformation
+val prscert : formatter -> scert -> unit
+val eprscert : scert -> unit
 
 type ('ts, 'v, 'ty, 'h, 't) kc =
   | KHole of cterm ctask
@@ -108,10 +81,6 @@ type ('ts, 'v, 'ty, 'h, 't) kc =
 
 type wkc = (tysymbol, lsymbol, ty option, prsymbol, term) kc
 type kcert = (ident, ident, ctype, ident, cterm) kc
-
-val print_certif : string -> scert -> unit
-val prcertif : formatter -> scert -> unit
-val eprcertif : scert -> unit
 
 val make_kernel_cert :
   term ctask -> cterm ctask list -> scert -> kcert

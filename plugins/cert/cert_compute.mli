@@ -5,5 +5,5 @@ open Task
 
 open Cert_certificates
 
-val ccompute :
+val compute :
   bool -> int option -> prsymbol option -> Env.env -> (task list * scert) trans

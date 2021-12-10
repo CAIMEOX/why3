@@ -1,4 +1,3 @@
-(* From Ind_itp *)
 open Why3
 open Decl
 open Term
@@ -8,14 +7,13 @@ open Args_wrapper
 open Cert_certificates
 open Cert_trans_utils
 
-(** Explanation *)
+(** Certifying version of transformation induction from Ind_itp *)
 
 (* Explanation for induction base goal of induction tactic *)
 let base_case_expl = "base case"
 
 (* Explanation for recursive case *)
 let rec_case_expl = "recursive case"
-
 
 (* Documentation of induction:
 
@@ -43,7 +41,6 @@ let rec_case_expl = "recursive case"
        ()
    done
 
-
    (1) One may be convinced of this because it is possible to make a lemma of
    the form "forall x: int. Min_d(x) -> G(x)" with appropriate abstract constant
    symbol for every other constant (added in the context). One can then apply
@@ -53,9 +50,7 @@ let rec_case_expl = "recursive case"
 
    (2) If it does not talk about x, we will have to prove it (unchanged) to be
    able to use it in the recursive part. So it should not change the provability.
-
 *)
-
 
 let is_good_type t ty =
   try (Term.t_ty_check t (Some ty); true) with
@@ -252,4 +247,3 @@ let induction x bound env =
                 induction g hi1 hi2 hr x bound ++
                 intro_cert g rev in
       [ti; tr], c)
-

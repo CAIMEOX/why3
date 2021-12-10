@@ -1,4 +1,3 @@
-(* From Apply *)
 open Why3
 open Term
 open Decl
@@ -6,6 +5,8 @@ open Generic_arg_trans_utils
 
 open Cert_certificates
 open Cert_trans_utils
+
+(** Certifying version of transformation rewrite from Apply *)
 
 (* Rewrite with a certificate: if f1 is unifiable to t with substitution s then
    return s.f2 and replace every occurrences of s.f1 with s.f2 in the rest of
