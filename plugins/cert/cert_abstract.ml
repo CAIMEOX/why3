@@ -9,8 +9,7 @@ open Format
 
 open Cert_syntax
 
-
-(** Abstracting a Why3 <task> into a <ctask> : extract only the logical core *)
+(** Abstract Why3 type option into ctype *)
 
 let abstract_quant = function
   | Tforall -> CTforall
@@ -30,6 +29,8 @@ let rec abstract_type { ty_node } =
 let abstract_otype = function
   | None -> CTprop
   | Some ty -> abstract_type ty
+
+(** Abstract Why3 term into cterm *)
 
 let type_lsymbol ls =
   List.fold_right (fun t acc -> CTarrow (abstract_type t, acc))
@@ -101,6 +102,12 @@ and close bv_lvl lvl q lvs t_open =
                       CTquant (q, cty, ct) in
   List.fold_right ctquant lvs ctn_open
 
+let abstract_terms_ctask cta =
+  { cta with gamma_delta = Mid.map (fun (t, pos) -> abstract_term t, pos)
+                             cta.gamma_delta }
+
+(** Abstracting Why3 task into ctask: extract only the logical core *)
+
 let abstract_decl_acc acc decl =
   match decl.d_node with
   | Dtype tys ->
@@ -130,8 +137,7 @@ let rec abstract_task_acc acc = function
       abstract_task_acc new_acc task_prev
   | None -> acc
 
-(** The interpreted symbols are saved as part of the task *)
-
+(* The interpreted symbols are saved as part of the task *)
 let types_sigma_interp env =
   let interp_type = ref [] in
   let interp_var = ref [] in
@@ -186,10 +192,6 @@ let types_sigma_interp env =
                    (print_list pre) !str_ls;
                  raise e in
   get_ls, interp_type, interp_var
-
-let abstract_terms_task cta =
-  { cta with gamma_delta = Mid.map (fun (t, pos) -> abstract_term t, pos)
-                             cta.gamma_delta }
 
 let abstract_task env =
   let get_ls, types_interp, sigma_interp = types_sigma_interp env in

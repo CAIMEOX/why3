@@ -1,4 +1,3 @@
-(* From Split_goal *)
 open Why3
 open Ident
 open Term
@@ -6,6 +5,8 @@ open Decl
 open Ty
 
 open Cert_certificates
+
+(** Certifying version of transformations from Split_goal *)
 
 type split = {
   right_only : bool;
@@ -184,11 +185,11 @@ let _print_ret_err { conj; cp; cn; disj; dn; dp; bwd; fwd; side; cpos; cneg } =
      cpos  : %b@ \
      cneg  : %b@ @]@."
     (M.print_mon " /\\ ") conj
-    prcertif cp
-    prcertif cn
+    prscert cp
+    prscert cn
     (M.print_mon " \\/ ") disj
-    prcertif dn
-    prcertif dp
+    prscert dn
+    prscert dp
     print_pr_t bwd
     print_pr_t fwd
     (M.print_mon " /\\ ") side

@@ -8,9 +8,10 @@ open Format
 open Cert_syntax
 open Cert_abstract
 
-(** We equip each transformation application with a certificate indicating
-    why the list of resulting tasks implies the initial task *)
+(** Surface certificates *)
 
+(* Transformations application return a certificate indicating why the list of
+   resulting tasks implies the initial task *)
 type sc =
   | Nc
   | Hole of cterm ctask
@@ -40,10 +41,15 @@ type sc =
 
 type scert = int * (sc list -> sc)
 
+type ctrans = scert ctransformation
+
+(* To ultimately replace the holes with the resulting tasks *)
 let fill_tasks (n, f) res_ct =
   if List.length res_ct = n
   then f (List.map (fun u -> Hole u) res_ct)
   else verif_failed "Wrong number of holes in certificate"
+
+(** Operators to define new surface certificates *)
 
 type 'a args =
   | Z : sc args
@@ -100,35 +106,46 @@ let (++) (n1, f1) c2 : scert =
   let lc2 = Lists.init n1 (fun _ -> c2) in
   (n1, f1) +++ lc2
 
+(** Smart constructors of surface certificates *)
+
 let letc n pr f =
   newcertn n (fun l -> Let (pr, fun pos t -> apply (f (List.map return l) pos t)))
-(* Use letc n pr f when you need a certificate of arity n and want to have
-   access to the position and formula associated with pr. The first argument of
-   f should be a list of size n containing the resulting certificates, the
-   second is the position of pr and the third is the formula of pr *)
+(* Certificate of arity n that gives access to the position and formula
+   associated with pr. The first argument of f should be a list of size n
+   containing the resulting certificates, the second is the position of pr and
+   the third is the formula associated with pr *)
+
 let nc : scert = return Nc
 (* "no certificate", makes verification fail: use it as a placeholder *)
+
 let idc : scert = newcert1 (fun t -> t)
 (* For the identity transformation *)
+
 let assertion p t = newcert2 (fun a1 a2 -> Assert (p, t, a1, a2))
 (* Produces two new tasks: one with p : t added to the goals and
    one with p : t added to the hypotheses *)
+
 let axiom p1 p2 = return (Axiom (p1, p2))
 (* Closes the task when p1 and p2 contain the same formula and
    one is in the hypotheses while the other is in the goals *)
+
 let trivial p = return (Trivial p)
 (* Closes the task when p either contains ⊥ in the hypotheses,
    ⊤ in the goals or a formula of the form t = t in the goals *)
+
 let eqsym p = newcert1 (fun a -> EqSym (p, a))
 (* From a task with a premise of the form p : t₁ = t₂, produces the
    same task with premise p modified into p : t₂ = t₁ *)
+
 let eqtrans h1 h2 h3 = newcert1 (fun a -> EqTrans (h1, h2, h3, a))
 (* From a task with two hypotheses of the form h₁ : t₁ = t₂ and h₂ : t₂ = t₃,
    produces the same task with added hypothesis h₃ : t₁ = t₃*)
+
 let unfold p = newcert1 (fun a -> Unfold (p, a))
 (* From a task with a premise of the form p : t₁ → t₂ (resp. p : t₁ ↔ t₂),
    produces the same task with premise p modified into p : ¬ t₁ ∨ t₂
    (resp. p : (t₁ → t₂) ∧ (t₂ → t₁)) *)
+
 let fold p = newcert1 (fun a -> Fold (p, a))
 (* From a task with a premise of the form p : ¬ t₁ ∨ t₂
    (resp. p : (t₁ → t₂) ∧ (t₂ → t₁)), produces the same task with premise p
@@ -145,36 +162,46 @@ let destruct p p1 p2 = newcert1 (fun a -> Destruct (p, p1, p2, a))
 let swap p = newcert1 (fun a -> Swap (p, a))
 (* Puts an hypothesis (resp. a goal) into the goals (resp. the hypotheses),
    by negating it, then potentially removing a double negation *)
+
 let clear p = newcert1 (fun a -> Clear (p, a))
 (* Removes a premise p from the task *)
+
 let forget ls = newcert1 (fun a -> Forget (ls, a))
 (* Removes an unused variable ls from the task *)
+
 let duplicate p1 p2 =
   assert (not (pr_equal p1 p2));
   newcert1 (fun a -> Duplicate (p1, p2, a))
 (* Duplicates a premise p₁ into p₂ *)
+
 let introquant p y = newcert1 (fun a -> IntroQuant (p, y, a))
 (* From a fresh variable y and a task with hypothesis p : ∃ x : τ. q
    (resp. goal p : ∀ x. q), produces a new task with the variable y of
    type τ and hypothesis (resp. goal) p modified into p : q[x ↦ y] *)
+
 let instquant p1 p2 t = newcert1 (fun a -> InstQuant (p1, p2, t, a))
 (* From a term t of type τ and a task with hypothesis p₁ : ∀ x : τ. q
    (resp. goal p₁ : ∃ x. q), produces a new task with the variable y of
    type τ and the added hypothesis (resp. goal) p₂ : q[x ↦ t] *)
+
 let introtype p il = newcert1 (fun a -> IntroType (p, il, a))
 (* From a list of fresh type symbols [ι₁; …; ιₙ] and a task with goal p : Π α₁ … αₙ. t
    it produces a new task with the goal p modified as t[α₁ ↦ ι₁]…[αₙ ↦ ιₙ] *)
+
 let insttype p1 p2 tyl = newcert1 (fun a -> InstType (p1, p2, tyl, a))
 (* From a list of types [τ₁; …; τₙ] and a task with hypothesis p₁ : Π α₁ … αₙ. t
    it produces a new task with the added hypothesis p₂ : t[α₁ ↦ τ₁]…[αₙ ↦ τₙ] *)
+
 let rewrite h p = newcert1 (fun a -> Rewrite (h, p, a))
 (* From a task with hypothesis h : t₁ = t₂ and premise p : t[t₁],
    produces the tasks with p modified into p : t[t₂] *)
+
 let induction g hi1 hi2 hr x a =
   newcert2 (fun a1 a2 -> Induction (g, hi1, hi2, hr, x, a, a1, a2))
 (* From an integer a and a task with a goal g : t[x] with x being an integer,
    produces two new tasks: one with the added hypothesis hi1 : i ≤ a and the
    other with the added hypotheses hi2 : a < i and hr : ∀ n. n < i → t[n] *)
+
 let conv p t' =
   newcert1 (fun a -> Conv (p, t', a))
 (* Returns the task where a computation has been done in p, changing it to t' *)
@@ -221,8 +248,68 @@ let iffsym_hyp h =
 (* From a task with an hypothesis of the form h : t₁ ↔ t₂, produces the
    same task with premise h modified into h : t₂ ↔ t₁ *)
 
+(** Pretty printing of surface certificates *)
 
-type ctrans = scert ctransformation
+let rec prsc fmt c =
+  let prpr = Pretty.print_pr in
+  let prls = Pretty.print_ls in
+  let prt = Pretty.print_term in
+  let prty = Pretty.print_ty in
+  let prts = Pretty.print_ts in
+  match c with
+  | Nc -> fprintf fmt "No_certif"
+  | Hole ct -> fprintf fmt "Hole %a" prid ct.uid
+  | Assert (p, _, c1, c2) ->
+      fprintf fmt "Assert (@[%a, <fun>,@ @[<4>%a@],@ @[<4>%a@])@]"
+        prpr p prsc c1 prsc c2
+  | Let (p, _) -> fprintf fmt "Let (%a, <cont>)" prpr p
+  | Axiom (p1, p2) -> fprintf fmt "Axiom (%a, %a)" prpr p1 prpr p2
+  | Trivial p -> fprintf fmt "Trivial %a" prpr p
+  | EqSym (p, c) -> fprintf fmt "EqSym (%a,@ %a)" prpr p prsc c
+  | EqTrans (p1, p2, p3, c) -> fprintf fmt "EqTrans (%a, %a, %a, @ %a)"
+                                 prpr p1 prpr p2 prpr p3 prsc c
+  | Unfold (p, c) -> fprintf fmt "Unfold (%a,@ %a)" prpr p prsc c
+  | Fold (p, c) -> fprintf fmt "Fold (%a,@ %a)" prpr p prsc c
+  | Split (p, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]"
+                           prpr p prsc c1 prsc c2
+  | Destruct (p, p1, p2, c) ->
+      fprintf fmt "Destruct (%a, %a, %a,@ %a)" prpr p prpr p1 prpr p2 prsc c
+  | Swap (p, c) -> fprintf fmt "Swap (%a,@ %a)" prpr p prsc c
+  | Clear (p, c) -> fprintf fmt "Clear@ (%a,@ %a)" prpr p prsc c
+  | Forget (v, c) -> fprintf fmt "Forget@ (%a,@ %a)" prls v prsc c
+  | Duplicate (p1, p2, c) -> fprintf fmt "Duplicate@ (%a, %a, @ %a)"
+                               prpr p1 prpr p2 prsc c
+  | IntroQuant (p, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)"
+                              prpr p prls y prsc c
+  | InstQuant (p1, p2, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)"
+                                prpr p1 prpr p2 prt t prsc c
+  | IntroType (p, li, c) -> fprintf fmt "IntroType (%a, %a,@ %a)"
+                                prpr p
+                                (print_list prts) li
+                                prsc c
+  | InstType (p1, p2, ty, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)"
+                                  prpr p1 prpr p2
+                                  (print_list prty) ty
+                                  prsc c
+  | Rewrite (p, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" prpr p prpr h prsc c
+  | Induction (p1, p2, p3, p4, x, _, c1, c2) ->
+      fprintf fmt "Induction (%a, %a, %a, %a, %a, <fun>,@ %a,@ %a)"
+        prpr p1 prpr p2 prpr p3 prpr p4 prt x prsc c1 prsc c2
+  | Conv (p, t, c) -> fprintf fmt "Conv@ (%a,@ %a,@ %a)" prpr p prt t prsc c
+
+let prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
+
+let prscert fmt (n, c) =
+  let cts = Lists.init n dummy_ctask in
+  let lid = List.map (fun ct -> ct.uid) cts in
+  let c = fill_tasks (n, c) cts in
+  fprintf fmt "@[<v>[%a],@ @[%a@]@]"
+    prlid lid prsc c;
+  List.iter (forget_id ip) lid
+
+let eprscert c = eprintf "%a@." prscert c
+
+(** Kernel certificates *)
 
 (* We will denote a ctask <{sigma; gamma_delta}> by <Σ | Γ ⊢ Δ>
    We sometimes omit the signature (when it's not confusing) and write <Γ ⊢ Δ> *)
@@ -351,117 +438,12 @@ type ('ts, 'v, 'ty, 'h, 't) kc =
 
 (* Why3 kernel certificates *)
 type wkc = (tysymbol, lsymbol, ty option, prsymbol, term) kc
+
 type kcert = (ident, ident, ctype, ident, cterm) kc
 
-let rec print_certif filename cert =
-  let oc = open_out filename in
-  let fmt = formatter_of_out_channel oc in
-  fprintf fmt "%a@." prcertif cert;
-  close_out oc
+(** Elaboration of certificates *)
 
-and prc fmt c =
-  let prt = Pretty.print_term in
-  let prty = Pretty.print_ty in
-  let prts = Pretty.print_ts in
-  match c with
-  | Nc -> fprintf fmt "No_certif"
-  | Hole ct -> fprintf fmt "Hole %a" prid ct.uid
-  | Assert (p, _, c1, c2) ->
-      fprintf fmt "Assert (@[%a, <fun>,@ @[<4>%a@],@ @[<4>%a@])@]"
-        prpr p prc c1 prc c2
-  | Let (p, _) -> fprintf fmt "Let (%a, <cont>)" prpr p
-  | Axiom (p1, p2) -> fprintf fmt "Axiom (%a, %a)" prpr p1 prpr p2
-  | Trivial p -> fprintf fmt "Trivial %a" prpr p
-  | EqSym (p, c) -> fprintf fmt "EqSym (%a,@ %a)" prpr p prc c
-  | EqTrans (p1, p2, p3, c) -> fprintf fmt "EqTrans (%a, %a, %a, @ %a)"
-                                 prpr p1 prpr p2 prpr p3 prc c
-  | Unfold (p, c) -> fprintf fmt "Unfold (%a,@ %a)" prpr p prc c
-  | Fold (p, c) -> fprintf fmt "Fold (%a,@ %a)" prpr p prc c
-  | Split (p, c1, c2) -> fprintf fmt "Split (@[%a,@ @[<4>%a@],@ @[<4>%a@])@]"
-                           prpr p prc c1 prc c2
-  | Destruct (p, p1, p2, c) ->
-      fprintf fmt "Destruct (%a, %a, %a,@ %a)" prpr p prpr p1 prpr p2 prc c
-  | Swap (p, c) -> fprintf fmt "Swap (%a,@ %a)" prpr p prc c
-  | Clear (p, c) -> fprintf fmt "Clear@ (%a,@ %a)" prpr p prc c
-  | Forget (v, c) -> fprintf fmt "Forget@ (%a,@ %a)" prls v prc c
-  | Duplicate (p1, p2, c) -> fprintf fmt "Duplicate@ (%a, %a, @ %a)"
-                               prpr p1 prpr p2 prc c
-  | IntroQuant (p, y, c) -> fprintf fmt "IntroQuant (%a, %a,@ %a)"
-                              prpr p prls y prc c
-  | InstQuant (p1, p2, t, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)"
-                                prpr p1 prpr p2 prt t prc c
-  | IntroType (p, li, c) -> fprintf fmt "IntroType (%a, %a,@ %a)"
-                                prpr p
-                                (pp_print_list ~pp_sep:pp_print_space prts) li
-                                prc c
-  | InstType (p1, p2, ty, c) -> fprintf fmt "InstQuant (%a, %a, %a,@ %a)"
-                                  prpr p1 prpr p2
-                                  (pp_print_list ~pp_sep:pp_print_space prty) ty
-                                  prc c
-  | Rewrite (p, h, c) -> fprintf fmt "Rewrite (%a, %a,@ %a)" prpr p prpr h prc c
-  | Induction (p1, p2, p3, p4, x, _, c1, c2) ->
-      fprintf fmt "Induction (%a, %a, %a, %a, %a, <fun>,@ %a,@ %a)"
-        prpr p1 prpr p2 prpr p3 prpr p4 prt x prc c1 prc c2
-  | Conv (p, t, c) -> fprintf fmt "Conv@ (%a,@ %a,@ %a)" prpr p prt t prc c
-
-and prlid = pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt "; ") prid
-and prcertif fmt (n, c) =
-  let cts = Lists.init n dummy_ctask in
-  let lid = List.map (fun ct -> ct.uid) cts in
-  let c = fill_tasks (n, c) cts in
-  fprintf fmt "@[<v>[%a],@ @[%a@]@]"
-    prlid lid prc c;
-  List.iter (forget_id ip) lid
-
-let eprcertif c = eprintf "%a@." prcertif c
-
-
-(** Utility functions on certificates *)
-
-(* To define recursive functions on elements of type kc *)
-let map_kc fc fv fts fh ft fty = function
-  | KHole _ as c -> c
-  | KAssert (p, t, c1, c2) ->
-      let f1 = fc c1 in
-      let f2 = fc c2 in
-      KAssert (fh p, ft t, f1, f2)
-  | KAxiom (t, p1, p2) -> KAxiom (ft t, fh p1, fh p2)
-  | KTrivial (pos, p) -> KTrivial (pos, fh p)
-  | KEqRefl (ty, t, g) -> KEqRefl (fty ty, ft t, fh g)
-  | KEqSym (pos, ty, t1, t2, p, c) ->
-      KEqSym (pos, fty ty, ft t1, ft t2, fh p, fc c)
-  | KEqTrans (ty, t1, t2, t3, p1, p2, p3, c) ->
-      KEqTrans (fty ty, ft t1, ft t2, ft t3, fh p1, fh p2, fh p3, fc c)
-  | KSplit (pos, t1, t2, p, c1, c2) ->
-      let f1 = fc c1 in
-      let f2 = fc c2 in
-      KSplit (pos, ft t1, ft t2, fh p, f1, f2)
-  | KUnfoldIff (pos, t1, t2, p, c) -> KUnfoldIff (pos, ft t1, ft t2, fh p, fc c)
-  | KUnfoldArr (pos, t1, t2, p, c) -> KUnfoldArr (pos, ft t1, ft t2, fh p, fc c)
-  | KFoldIff (pos, t1, t2, p, c) -> KFoldIff (pos, ft t1, ft t2, fh p, fc c)
-  | KFoldArr (pos, t1, t2, p, c) -> KFoldArr (pos, ft t1, ft t2, fh p, fc c)
-  | KDestruct (pos, t1, t2, p, j1, j2, c) ->
-      KDestruct (pos, ft t1, ft t2, fh p, fh j1, fh j2, fc c)
-  | KSwap (pos, t, p, c) -> KSwap (pos, ft t, fh p, fc c)
-  | KSwapNegate (pos, t, p, c) -> KSwapNegate (pos, ft t, fh p, fc c)
-  | KClear (pos, t, p, c) -> KClear (pos, ft t, fh p, fc c)
-  | KForget (p, c) -> KForget (fv p, fc c)
-  | KDuplicate (pos, t, p1, p2, c) -> KDuplicate (pos, ft t, fh p1, fh p2, fc c)
-  | KIntroQuant (pos, ty, f, p, y, c) ->
-      KIntroQuant (pos, fty ty, ft f, fh p, fv y, fc c)
-  | KInstQuant (pos, ty, f, p1, p2, t, c) ->
-      KInstQuant (pos, fty ty, ft f, fh p1, fh p2, ft t, fc c)
-  | KIntroType (t, p, li, c) ->
-      KIntroType (ft t, fh p, List.map fts li, fc c)
-  | KInstType (t, p1, p2, ty, c) ->
-      KInstType (ft t, fh p1, fh p2, List.map fty ty, fc c)
-  | KRewrite (pos, topt, ty, t1, t2, f, p, h, c) ->
-      KRewrite (pos, Opt.map ft topt, fty ty, ft t1, ft t2, ft f, fh p, fh h, fc c)
-  | KInduction (p1, p2, p3, p4, x, a, f, c1, c2) ->
-      KInduction (fh p1, fh p2, fh p3, fh p4, ft x, ft a, ft f, fc c1, fc c2)
-  | KConv (pos, t, t', p, c) -> KConv (pos, ft t, ft t',fh p, fc c)
-
-(** Compile chain.
+(* Compile chain.
     1. surface certificates: scert
        The certificates returned by certifying transformations.
        Many constructors and few parameters to ease making certifying
@@ -488,19 +470,8 @@ let map_kc fc fv fts fh ft fty = function
 
 exception Elaboration_failed
 
-let rec abstract_terms_types (l : wkc) : kcert = match l with
-  | KRewrite (pos, Some {t_node = Tapp (ls, [])}, None, a, b, ctxt, i, h, c) ->
-      let ntls = CTfvar (ls.ls_name, []) in
-      let cctxt = abstract_term ctxt in
-      let nctxt = CTquant (CTlambda, CTprop, ct_close ls.ls_name cctxt) in
-      let na = abstract_term a in
-      let nb = abstract_term b in
-      let nc = abstract_terms_types c in
-      KRewrite (pos, Some ntls, CTprop, na, nb, nctxt, i.pr_name, h.pr_name, nc)
-  | c ->
-      map_kc abstract_terms_types
-           (fun ls -> ls.ls_name) (fun ts -> ts.ts_name) (fun pr -> pr.pr_name)
-           abstract_term abstract_otype c
+
+(** Step 3 of compile chain (see above) *)
 
 let t_open_quant_one q tq = match t_open_quant tq with
   | vs::vsl, trg, t_open ->
@@ -521,10 +492,10 @@ let elaborate init_ct c =
     | Hole task -> KHole task
     | Axiom (p1, p2) ->
         let t1, pos1 = try find_formula "Axiom1" p1 cta
-                       with e -> pcta err_formatter cta; raise e
+                       with e -> prcta err_formatter cta; raise e
         in
         let t2, pos2 = try find_formula "Axiom2" p2 cta
-                       with e -> pcta err_formatter cta; raise e
+                       with e -> prcta err_formatter cta; raise e
         in
         assert (pos1 <> pos2);
         assert (t_equal t1 t2);
@@ -730,6 +701,67 @@ let elaborate init_ct c =
   in
   elab init_ct c
 
+(** Step 4 of compile chain (see above) *)
+
+(* To define recursive functions on elements of type kc *)
+let map_kc fc fv fts fh ft fty = function
+  | KHole _ as c -> c
+  | KAssert (p, t, c1, c2) ->
+      let f1 = fc c1 in
+      let f2 = fc c2 in
+      KAssert (fh p, ft t, f1, f2)
+  | KAxiom (t, p1, p2) -> KAxiom (ft t, fh p1, fh p2)
+  | KTrivial (pos, p) -> KTrivial (pos, fh p)
+  | KEqRefl (ty, t, g) -> KEqRefl (fty ty, ft t, fh g)
+  | KEqSym (pos, ty, t1, t2, p, c) ->
+      KEqSym (pos, fty ty, ft t1, ft t2, fh p, fc c)
+  | KEqTrans (ty, t1, t2, t3, p1, p2, p3, c) ->
+      KEqTrans (fty ty, ft t1, ft t2, ft t3, fh p1, fh p2, fh p3, fc c)
+  | KSplit (pos, t1, t2, p, c1, c2) ->
+      let f1 = fc c1 in
+      let f2 = fc c2 in
+      KSplit (pos, ft t1, ft t2, fh p, f1, f2)
+  | KUnfoldIff (pos, t1, t2, p, c) -> KUnfoldIff (pos, ft t1, ft t2, fh p, fc c)
+  | KUnfoldArr (pos, t1, t2, p, c) -> KUnfoldArr (pos, ft t1, ft t2, fh p, fc c)
+  | KFoldIff (pos, t1, t2, p, c) -> KFoldIff (pos, ft t1, ft t2, fh p, fc c)
+  | KFoldArr (pos, t1, t2, p, c) -> KFoldArr (pos, ft t1, ft t2, fh p, fc c)
+  | KDestruct (pos, t1, t2, p, j1, j2, c) ->
+      KDestruct (pos, ft t1, ft t2, fh p, fh j1, fh j2, fc c)
+  | KSwap (pos, t, p, c) -> KSwap (pos, ft t, fh p, fc c)
+  | KSwapNegate (pos, t, p, c) -> KSwapNegate (pos, ft t, fh p, fc c)
+  | KClear (pos, t, p, c) -> KClear (pos, ft t, fh p, fc c)
+  | KForget (p, c) -> KForget (fv p, fc c)
+  | KDuplicate (pos, t, p1, p2, c) -> KDuplicate (pos, ft t, fh p1, fh p2, fc c)
+  | KIntroQuant (pos, ty, f, p, y, c) ->
+      KIntroQuant (pos, fty ty, ft f, fh p, fv y, fc c)
+  | KInstQuant (pos, ty, f, p1, p2, t, c) ->
+      KInstQuant (pos, fty ty, ft f, fh p1, fh p2, ft t, fc c)
+  | KIntroType (t, p, li, c) ->
+      KIntroType (ft t, fh p, List.map fts li, fc c)
+  | KInstType (t, p1, p2, ty, c) ->
+      KInstType (ft t, fh p1, fh p2, List.map fty ty, fc c)
+  | KRewrite (pos, topt, ty, t1, t2, f, p, h, c) ->
+      KRewrite (pos, Opt.map ft topt, fty ty, ft t1, ft t2, ft f, fh p, fh h, fc c)
+  | KInduction (p1, p2, p3, p4, x, a, f, c1, c2) ->
+      KInduction (fh p1, fh p2, fh p3, fh p4, ft x, ft a, ft f, fc c1, fc c2)
+  | KConv (pos, t, t', p, c) -> KConv (pos, ft t, ft t',fh p, fc c)
+
+let rec abstract_terms_types_kcert (l : wkc) : kcert = match l with
+  | KRewrite (pos, Some {t_node = Tapp (ls, [])}, None, a, b, ctxt, i, h, c) ->
+      let ntls = CTfvar (ls.ls_name, []) in
+      let cctxt = abstract_term ctxt in
+      let nctxt = CTquant (CTlambda, CTprop, ct_close ls.ls_name cctxt) in
+      let na = abstract_term a in
+      let nb = abstract_term b in
+      let nc = abstract_terms_types_kcert c in
+      KRewrite (pos, Some ntls, CTprop, na, nb, nctxt, i.pr_name, h.pr_name, nc)
+  | c ->
+      map_kc abstract_terms_types_kcert
+           (fun ls -> ls.ls_name) (fun ts -> ts.ts_name) (fun pr -> pr.pr_name)
+           abstract_term abstract_otype c
+
+(** Step 5 of compile chain (see above) *)
+
 let kaxiom pos t p1 p2 =
   if pos then KAxiom (t, p1, p2)
   else KAxiom (t, p2, p1)
@@ -809,6 +841,6 @@ let rec trim c =
 let make_kernel_cert init_ct res_ct (c : scert) : kcert =
   fill_tasks c res_ct
   |> elaborate init_ct
-  |> abstract_terms_types
+  |> abstract_terms_types_kcert
   |> trim
 

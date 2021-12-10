@@ -6,10 +6,14 @@ open Task
 
 open Cert_certificates
 
+(** Operator to define new certifying transformations by composing certificates *)
+
 let decl_cert f = Trans.decl_acc idc (++) (fun d _ -> f d)
+
 let decl_l_cert f = Trans.decl_l_acc idc (++) (fun d _ -> f d)
 
-(* Identity transformation with a certificate *)
+(** Certifying identity transformation *)
+
 let id_ctrans = Trans.store (fun task -> [task], idc)
 
 (** Combinators on transformations with a certificate *)
@@ -57,18 +61,17 @@ let repeat (ctr : ctrans) : ctrans = Trans.store (fun task ->
     else loop new_gt in
   loop gen_task)
 
-(** Primitive transformations with a certificate *)
-
-(* First, some utility functions *)
-let default_goal task = function
-  | Some pr -> pr
-  | None -> task_goal task
+(** Choose and update the "target": the set of declarations we focus on *)
 
 type target =
   | Pr of prsymbol
   | Everywhere
   | Anywhere
   | Nowhere
+
+let default_goal task = function
+  | Some pr -> pr
+  | None -> task_goal task
 
 let find_target any every where task =
   if any then Anywhere
@@ -87,6 +90,9 @@ let update_tg_c (tg, c1) co =
   | _, Some c2 -> Nowhere, c2
   | _, None -> tg, c1
 
+(** Define certificates independently from transformations *)
+
+(* generalizes given declarations *)
 let revert_cert pr decls =
   let rec rc = function
     | [] -> idc
@@ -111,7 +117,7 @@ let revert_cert pr decls =
         | _ -> assert false in
   rc decls
 
-(* introduces generalized declarations *)
+(* introduces given generalized declarations *)
 let intro_cert pr decls =
   let rec ic decls = match decls with
     | [] -> idc

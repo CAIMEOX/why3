@@ -16,12 +16,11 @@ open Cert_verif_lambdapi
 let checker_nothing (_ : kcert) (_ : cterm ctask) (_ : cterm ctask list) = ()
 
 let _no_dbg = None, None
-let _cert_dbg = Some eprcertif, None
-let _cta_dbg = None, Some eplcta
-let _all_dbg = Some eprcertif, Some eplcta
+let _cert_dbg = Some eprscert, None
+let _cta_dbg = None, Some eprlcta
+let _all_dbg = Some eprscert, Some eprlcta
 
-(** Get a certified transformation from a transformation with a certificate *)
-
+(* Get a certified transformation from a transformation with a certificate *)
 let checker_ctrans
       ?(env : Env.env option)
       (debug : (scert -> unit) option *
@@ -38,9 +37,9 @@ let checker_ctrans
     Opt.iter (fun eprcertif -> eprcertif certif) dbg_cert;
     let abstract_task = abstract_task env in
     let init_ct = abstract_task init_t in
-    let res_ct = List.map (fun t -> abstract_terms_task (abstract_task t)) res_t in
+    let res_ct = List.map (fun t -> abstract_terms_ctask (abstract_task t)) res_t in
     let kernel_certif = make_kernel_cert init_ct res_ct certif in
-    let init_ct = abstract_terms_task init_ct in
+    let init_ct = abstract_terms_ctask init_ct in
     Opt.iter (fun eplcta -> eplcta init_ct res_ct) dbg_cta;
     checker kernel_certif init_ct res_ct;
     (* let t3 = Unix.times () in *)
@@ -73,8 +72,8 @@ let cassumption chk            = make_certifying chk assumption
 let cblast chk                 = make_certifying chk blast
 let ccase chk t                = make_certifying chk (case t)
 let cclear chk l               = make_certifying chk (clear l)
-let ccompute chk specified steps where env =
-  make_certifying ~env:env chk (ccompute specified steps where env)
+let compute chk specified steps where env =
+  make_certifying ~env:env chk (compute specified steps where env)
 let ccontradict chk            = make_certifying chk contradict
 let cdestruct_all chk any every where =
   make_certifying chk (destruct_all any every where)
@@ -83,12 +82,12 @@ let cinduction chk x bound env = make_certifying chk ~env:env (induction x bound
 let cinstantiate chk t what    = make_certifying chk (inst t what)
 let cintro chk any every where = make_certifying chk (intro any every where)
 let cintros chk                = make_certifying chk intros
-let cleft chk where            = make_certifying chk (cdir false where)
+let cleft chk where            = make_certifying chk (dir false where)
 let cprint chk any every where = make_certifying chk (tprint any every where)
-let crename chk pr1            = make_certifying chk (crename pr1)
+let crename chk pr1            = make_certifying chk (rename pr1)
 let crevert chk ls             = make_certifying chk (revert ls)
 let crewrite chk rev g where wt= make_certifying chk (rewrite g rev wt where)
-let cright chk where           = make_certifying chk (cdir true where)
+let cright chk where           = make_certifying chk (dir true where)
 let csplit chk any every where = make_certifying chk (split_logic any every where)
 let csplit_all_full chk        = make_certifying chk split_all_full
 let csplit_all_right chk       = make_certifying chk split_all_right
@@ -124,7 +123,7 @@ let register () =
   wrap_and_register
     "ccompute"
     (Topt ("verif", (Tstring (Toptbool ("specified", Topt ("upto", Tint (Topt ("in", Tprsymbol Tenvtrans_l))))))))
-    ccompute
+    compute
     ~desc:"ccompute [upto int] [specified] [in <name>]@ performs@ computations@ \
            in@ the@ given@ premise (default to the goal), using only@ using@ \
            the@ user-specified@ rules@ if@ the@ flag <specified> is@ present";

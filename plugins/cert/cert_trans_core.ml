@@ -9,7 +9,8 @@ open Generic_arg_trans_utils
 open Cert_certificates
 open Cert_trans_utils
 
-(* To debug *)
+(** Printing a declaration (for debugging purposes) *)
+
 let tprint_tg target =
   Trans.decl_acc (target, idc) update_tg_c (fun d (tg, _) ->
       match d.d_node with
@@ -24,8 +25,10 @@ let tprint any every where : ctrans =
       let ta, (_, c) = tprint_tg tg task in
       [ta], c)
 
+(** Elementary certifying transformations *)
 
-(* Assumption with a certificate : *)
+(* Certifying transformation assumption: closes a task that has an hypothesis
+   identical to the goal *)
 let assumption_pr_t prg tg =
   decl_l_cert (fun d ->
       match d.d_node with
@@ -36,6 +39,8 @@ let assumption : ctrans = Trans.store (fun task ->
   let prg, tg = task_goal task, task_goal_fmla task in
   assumption_pr_t prg tg task)
 
+(* Certifying transformation contradict: closes a task that has an hypothesis
+   that is the negation of another hypothesis *)
 let find_contradict =
   Trans.fold_decl (fun d (m, found, (cert : scert)) ->
       match d.d_node with
@@ -54,6 +59,7 @@ let contradict : ctrans =
       let res_task = if found then [] else [task] in
       res_task, c)
 
+(* Certifying transformation rename: renames a premise *)
 let ren pr1 =
   decl_cert  (fun d ->
       match d.d_node with
@@ -63,14 +69,13 @@ let ren pr1 =
           rename pr1 pr2
       | _ -> [d], idc)
 
-let crename pr1 : ctrans =
+let rename pr1 : ctrans =
   Trans.store (fun task ->
       let ta, c = ren pr1 task in
       [ta], c)
 
-
-(* Closes task if hypotheses contain false or if the goal is true or reflexivity
-   of equality *)
+(* Certifying transformation close: closes task if hypotheses contain false or
+   if the goal is true or reflexivity of equality *)
 let close : ctrans =
   Trans.store (fun task ->
       let trans =
@@ -91,9 +96,8 @@ let close : ctrans =
       | None -> [task], idc)
 
 
-(* Split with a certificate : destructs a logical constructor at the top of the
-   formula or destructs /\ in the hypotheses *)
-
+(* Certifying transformations destruct_and, split_or_and, destruct_all to
+   destruct logical constructors at the top of a formula *)
 let destruct_tg target =
   Trans.decl_acc (target, idc) update_tg_c (fun d (tg, _) ->
       match d.d_node with
@@ -158,6 +162,7 @@ let destruct_all any every where : ctrans =
       let lta, (_, c) = destruct_all_tg tg task in
       lta, c)
 
+(* Decomposes a logical connector under a negation *)
 let neg_decompose_tg target =
   Trans.decl_l_acc (target, idc) update_tg_c (fun d (tg, _) ->
       match d.d_node with
@@ -240,6 +245,7 @@ let unfold_hyp_arr any every where : ctrans =
       let ta, (_, c) = unfold_tg tg task in
       [ta], c)
 
+(* Certifying transformation intro *)
 (* the next 2 functions are copied from introduction.ml *)
 let intro_attrs = Sattr.singleton Inlining.intro_attr
 
@@ -291,11 +297,11 @@ let intro any every where : ctrans =
       let ta, (_, c) = intro_tg tg task in
       [ta], c)
 
-(* Direction with a certificate *)
+(* Certifying transformation dir *)
 (* choose Left (A) or Right (B) when
     • the goal is of the form A ∨ B
     • the hypothesis is of the form A ∧ B *)
-let cdir_pr d prg =
+let dir_pr d prg =
   Trans.decl_acc false (||) (fun decl found ->
       match decl.d_node with
       | Dprop (k, pr, t) when pr_equal pr prg && not found ->
@@ -308,14 +314,14 @@ let cdir_pr d prg =
           | _ -> [decl], false end
       | _ -> [decl], false)
 
-let cdir d where : ctrans =
+let dir d where : ctrans =
   Trans.store (fun task ->
       let pr = default_goal task where in
-      let nt, found = cdir_pr d pr task in
+      let nt, found = dir_pr d pr task in
       if found then [nt], dir d pr
       else [task], idc)
 
-(* Assert with certificate *)
+(* Certifying transformation assert: introduces a cut in a proof *)
 let assert_h_t h t =
   Trans.decl_l (fun decl ->
       match decl.d_node with
@@ -331,8 +337,7 @@ let cassert t : ctrans =
       Trans.apply (assert_h_t h t) task,
       assertion h t +++ [clear prg; idc])
 
-(* Instantiate with certificate *)
-
+(* Certifying transformation instantiate: instantiates a quantifier *)
 let inst_tg t_inst target = Trans.decl_acc (target, idc) update_tg_c
    (fun decl (tg, _) ->
      match decl.d_node with
@@ -357,7 +362,7 @@ let inst t_inst where : ctrans =
       let ta, (_, c) = inst_tg t_inst target task in
       [ta], c)
 
-
+(* Certifying transformation exfalso: replace goal with false *)
 let exfalso : ctrans =
   Trans.store (fun task ->
       let h = create_prsymbol (gen_ident "H") in
@@ -371,6 +376,8 @@ let exfalso : ctrans =
       [Trans.apply trans task],
       assertion h t_false +++ [clear g; trivial h])
 
+(* Certifying transformation case: considers case where the given proposition
+   if true and the case where it is false *)
 let case t : ctrans = Trans.store (fun task ->
   let h = create_prsymbol (gen_ident "H") in
   let trans =
@@ -383,6 +390,7 @@ let case t : ctrans = Trans.store (fun task ->
   Trans.apply trans task,
   assertion h (t_not t) +++ [swap h; idc])
 
+(* Certifying transformation swap: put an hypothesis to a goal or vice-versa *)
 (* if formula <f> designed by <where> is a premise, dismiss the old
  goal and put <not f> in its place *)
 let swap_pr gpr =
@@ -411,6 +419,7 @@ let swap where : ctrans =
             swap gpr ++ clear pr_goal
         | None -> [task], idc)
 
+(* Certifying transformation revert: put a variable declaration in the goal *)
 let revert ls : ctrans =
   Trans.store (fun task ->
       let x = t_app_infer ls [] in
@@ -428,8 +437,7 @@ let revert ls : ctrans =
                     instquant gpr prinst x ++ axiom prinst idg] in
       [task], cert)
 
-
-(* clear transformation with a certificate, removes formula <g> from the task *)
+(* Certif transformation clear: removes formula g from the task *)
 let clear_one_d g =
   decl_cert (fun decl ->
       match decl.d_node with
@@ -442,7 +450,7 @@ let clear_one g : ctrans =
       let ta, c = clear_one_d g task in
       [ta], c)
 
-(** Derived transformations with a certificate *)
+(** Derived certifying transformations *)
 
 let trivial = try_close [assumption; close; contradict]
 
