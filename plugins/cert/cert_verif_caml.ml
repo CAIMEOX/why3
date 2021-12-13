@@ -6,6 +6,8 @@ open Term (* only for binop *)
 open Cert_syntax
 open Cert_certificates
 
+(** This checker uses an efficient computational approach *)
+
 (* This is the main verification function: <ccheck> replays the certificate on
    a ctask *)
 let ccheck (c : kcert) cta res =
@@ -109,8 +111,8 @@ let ccheck (c : kcert) cta res =
   | KIntroQuant (_, _, _, i, y, c) ->
       let t, pos = find_formula "intro_quant" i cta in
       begin match t, pos with
-      | CTquant (CTforall, cty, t), true
-      | CTquant (CTexists, cty, t), false ->
+      | CTbind (CTforall, cty, t), true
+      | CTbind (CTexists, cty, t), false ->
           if Mid.mem y cta.sigma
           then begin
               Format.eprintf "@[<v>i : %a@ \
@@ -128,7 +130,7 @@ let ccheck (c : kcert) cta res =
   | KInstQuant (_, _, _, i, j, t_inst, c) ->
       let t, pos = find_formula "inst_quant" i cta in
       begin match t, pos with
-      | CTquant (CTforall, ty, t), false | CTquant (CTexists, ty, t), true ->
+      | CTbind (CTforall, ty, t), false | CTbind (CTexists, ty, t), true ->
           infers_into ~e_str:"KInstquant" cta t_inst ty;
           let cta = add j (ct_open t t_inst, pos) cta in
           cc c cta
@@ -178,7 +180,7 @@ let ccheck (c : kcert) cta res =
       let idn = id_register (id_fresh "ctxt_var") in
       let n = CTfvar (idn, []) in
       let cta2 = add hi2 (CTapp (CTapp (lt, a), x), false) cta
-                 |> add hr (CTquant (CTforall, ctint, ct_close idn (
+                 |> add hr (CTbind (CTforall, ctint, ct_close idn (
                             CTbinop (Timplies, CTapp (CTapp (lt, n), x),
                                      instantiate ctxt n))), false) in
       cc c1 cta1; cc c2 cta2

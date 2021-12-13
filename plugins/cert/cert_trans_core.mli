@@ -4,8 +4,10 @@ open Term
 
 open Cert_certificates
 
+(** Printing a declaration (for debugging purposes) *)
 val tprint : bool -> bool -> prsymbol option -> ctrans
 
+(** Elementary certifying transformations *)
 val assumption : ctrans
 val contradict : ctrans
 val rename : prsymbol -> ctrans
@@ -20,6 +22,7 @@ val case : term -> ctrans
 val swap : prsymbol option -> ctrans
 val revert : lsymbol -> ctrans
 
+(** Derived certifying transformations *)
 val trivial : ctrans
 val intros : ctrans
 val split_logic : bool -> bool -> prsymbol option -> ctrans

@@ -750,7 +750,7 @@ let rec abstract_terms_types_kcert (l : wkc) : kcert = match l with
   | KRewrite (pos, Some {t_node = Tapp (ls, [])}, None, a, b, ctxt, i, h, c) ->
       let ntls = CTfvar (ls.ls_name, []) in
       let cctxt = abstract_term ctxt in
-      let nctxt = CTquant (CTlambda, CTprop, ct_close ls.ls_name cctxt) in
+      let nctxt = CTbind (CTlambda, CTprop, ct_close ls.ls_name cctxt) in
       let na = abstract_term a in
       let nb = abstract_term b in
       let nc = abstract_terms_types_kcert c in
@@ -824,7 +824,7 @@ let rec trim c =
       let c_open = KClear (pos, pre, j, c) in
       let h, g, a, b = if pos then i, j, t2, t1 else j, i, t1, t2 in
       (* We want to close a task of the form <Γ, h : a = b ⊢ Δ, g : b = a> *)
-      let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq cty, b), CTbvar 0)) in
+      let ctxt = CTbind (CTlambda, cty, CTapp (CTapp (eq cty, b), CTbvar 0)) in
       let c_closed = KRewrite (not pos, None, cty, a, b, ctxt, h, g,
                                KEqRefl (cty, b, g)) in
       let c1, c2 = if pos then c_open, c_closed else c_closed, c_open in
@@ -832,7 +832,7 @@ let rec trim c =
         KAssert (i, post, c1, c2)
   | KEqTrans (cty, t1, t2, t3, i1, i2, i3, c) ->
       let c = trim c in
-      let ctxt = CTquant (CTlambda, cty, CTapp (CTapp (eq cty, t1), CTbvar 0)) in
+      let ctxt = CTbind (CTlambda, cty, CTapp (CTapp (eq cty, t1), CTbvar 0)) in
       kduplicate false (CTapp (CTapp (eq cty, t1), t2)) i1 i3 @@
         KRewrite (false, None, cty, t2, t3, ctxt, i2, i3, c)
   | _ -> map_kc trim (fun v -> v) (fun ts -> ts) (fun h -> h) (fun t -> t)

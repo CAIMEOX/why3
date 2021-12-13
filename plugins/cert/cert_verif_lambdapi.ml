@@ -5,6 +5,8 @@ open Format
 open Cert_syntax
 open Cert_certificates
 
+(** This checker relies on the superficial encoding of proof tasks into Lambdapi *)
+
 (* We represent a ctask
     ι₁ : n₁, .., ιₕ : nₕ  |
     x₁ : ty₁,.., xᵢ : tyᵢ |
