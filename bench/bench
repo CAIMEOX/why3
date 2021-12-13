@@ -15,7 +15,7 @@ shopt -s nullglob
 
 suffix=
 
-categories="badfiles drivers execution extraction goodfiles inferloop invalidgoals list mlwprinter rac realizations replay replay-without-shapes stdlib steplimit validgoals validsplitgoals"
+categories="badfiles drivers execution extraction goodfiles inferloop invalidgoals list mlwprinter rac realizations replay replay-without-shapes stdlib steplimit validgoals validsplitgoals cert"
 
 enabled_categories=""
 
@@ -662,4 +662,9 @@ fi
 if enabled inferloop && test -n "$has_infer"; then
     echo "=== Checking loop invariant inference ==="
     bench/infer-bench bench/infer
+fi
+
+if enabled cert && lambdapi --version > /dev/null; then
+    echo "=== Checking certifying transformations ==="
+    replay plugins/cert/tests
 fi

@@ -14,7 +14,7 @@ let verif_failed s = raise (Certif_verification_failed s)
 
 (** Types for certifying transformations *)
 
-type cquant = CTforall | CTexists | CTlambda
+type cbind = CTforall | CTexists | CTlambda
 
 type ctype =
   | CTyvar of tvsymbol (* type variable *)
@@ -166,7 +166,7 @@ type cterm =
   | CTapp of cterm * cterm (* binary application *)
   | CTbinop of binop * cterm * cterm (* application of a binary operator,
                                         written ∧, ∨, ⇒ and ⇔ *)
-  | CTquant of cquant * ctype * cterm (* quantifier bindings: ∃, ∀ and λ *)
+  | CTbind of cbind * ctype * cterm (* bindings: ∃, ∀ and λ *)
   | CTnot of cterm (* négation: ¬ *)
   | CTtrue (* true formula: ⊤ *)
   | CTfalse (* false formula: ⊥ *)
@@ -191,7 +191,7 @@ let eq cty = CTfvar (id_eq, [cty])
 
 let ct_map f ct = match ct with
   | CTbvar _ | CTfvar _ | CTint _ | CTtrue | CTfalse -> ct
-  | CTquant (q, cty, ct) -> CTquant (q, cty, f ct)
+  | CTbind (q, cty, ct) -> CTbind (q, cty, f ct)
   | CTqtype (i, ct) -> CTqtype (i, f ct)
   | CTapp (ct1, ct2) -> CTapp (f ct1, f ct2)
   | CTbinop (op, ct1, ct2) ->  CTbinop (op, f ct1, f ct2)
@@ -208,14 +208,14 @@ let ct_equal t1 t2 =
         ct_eq tl1 tl2 && ct_eq tr1 tr2
     | CTbinop (op1, tl1, tr1), CTbinop (op2, tl2, tr2) ->
         op1 = op2 && ct_eq tl1 tl2 && ct_eq tr1 tr2
-    | CTquant (q1, ty1, t1), CTquant (q2, ty2, t2) when q1 = q2 ->
+    | CTbind (q1, ty1, t1), CTbind (q2, ty2, t2) when q1 = q2 ->
         let ty1 = cty_ty_subst subst1 ty1 in
         let ty2 = cty_ty_subst subst2 ty2 in
         cty_equal ty1 ty2 && ct_eq t1 t2
     | CTtrue, CTtrue | CTfalse, CTfalse -> true
     | CTnot t1, CTnot t2 -> ct_eq t1 t2
     | CTint i1, CTint i2 -> BigInt.eq i1 i2
-    | (CTbvar _ | CTfvar _ | CTapp _ | CTbinop _ | CTquant _
+    | (CTbvar _ | CTfvar _ | CTapp _ | CTbinop _ | CTbind _
        | CTqtype _ | CTtrue | CTfalse | CTnot _ | CTint _), _ -> false
   in
   match t1, t2 with
@@ -231,8 +231,8 @@ let rec replace_cterm tl tr t =
 
 (* Warning: beware variable capture *)
 let rec ct_ty_subst subst = function
-  | CTquant (q, qcty, ct) ->
-      CTquant (q, cty_ty_subst subst qcty,
+  | CTbind (q, qcty, ct) ->
+      CTbind (q, cty_ty_subst subst qcty,
                ct_ty_subst subst ct)
   | CTfvar (i, l) -> CTfvar (i, List.map (cty_ty_subst subst) l)
   | ct -> ct_map (ct_ty_subst subst) ct
@@ -240,9 +240,9 @@ let rec ct_ty_subst subst = function
 (* Bound variable substitution *)
 let rec ct_bv_subst k u ctn = match ctn with
   | CTbvar i -> if i = k then u else ctn
-  | CTquant (q, cty, ct) ->
+  | CTbind (q, cty, ct) ->
       let nct = ct_bv_subst (k+1) u ct in
-      CTquant (q, cty, nct)
+      CTbind (q, cty, nct)
   | _ -> ct_map (ct_bv_subst k u) ctn
 
 let ct_open t u = ct_bv_subst 0 u t
@@ -255,7 +255,7 @@ let locally_closed =
     | CTbvar _ -> false
     | CTapp (ct1, ct2)
     | CTbinop (_, ct1, ct2) -> term ct1 && term ct2
-    | CTquant (_, _, t) -> term (ct_open t dv)
+    | CTbind (_, _, t) -> term (ct_open t dv)
     | CTqtype (_, ct)
     | CTnot ct -> term ct
     | CTint _ | CTfvar _ | CTtrue | CTfalse -> true
@@ -273,7 +273,7 @@ let ct_subst (m : cterm Mid.t) ct =
 (* Variable closing *)
 let rec ct_fv_close x k ct = match ct with
   | CTfvar (y, l) -> if id_equal x y then (assert (l = []);  CTbvar k) else ct
-  | CTquant (q, cty, ct) -> CTquant (q, cty, ct_fv_close x (k+1) ct)
+  | CTbind (q, cty, ct) -> CTbind (q, cty, ct_fv_close x (k+1) ct)
   | _ -> ct_map (ct_fv_close x k) ct
 
 let ct_close x t = ct_fv_close x 0 t
@@ -290,7 +290,7 @@ let rec prct fmt = function
   | t -> prquant fmt t
 
 and prquant fmt = function
-  | CTquant (q, cty, t) ->
+  | CTbind (q, cty, t) ->
       let x = id_register (id_fresh "x") in
       let t_open = ct_open t (CTfvar (x, [])) in
       let q_str = match q with CTforall -> "`∀"
@@ -531,7 +531,7 @@ let infer_type cta t =
                  begin try assert (cty_equal ty CTprop);
                      CTprop
                  with _ -> failwith "not should be applied on prop only" end
-    | CTquant (quant, ty1, t) ->
+    | CTbind (quant, ty1, t) ->
         assert (Mtv.is_empty (find_vars ty1));
         let ni = id_register (id_fresh "type_ident") in
         let sigma = Mid.add ni ty1 sigma in
@@ -573,14 +573,14 @@ let infers_into ?e_str:(s="") cta t ty =
 
 let instantiate f a =
   match f with
-  | CTquant (CTlambda, _, f) -> ct_open f a
+  | CTbind (CTlambda, _, f) -> ct_open f a
   | _ -> assert false
 
 let instantiate_safe cta f a =
   well_typed cta f;
   let ty = infer_type cta a in
   match f with
-  | CTquant (CTlambda, ty', f) when cty_equal ty ty' ->
+  | CTbind (CTlambda, ty', f) when cty_equal ty ty' ->
       ct_open f a
   | _ -> assert false
 

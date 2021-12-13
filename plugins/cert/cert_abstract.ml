@@ -99,7 +99,7 @@ and close bv_lvl lvl q lvs t_open =
   let lvl = lvl + List.length lvs in
   let ctn_open = abstract_term_rec bv_lvl lvl t_open in
   let ctquant vs ct = let cty = abstract_type vs.vs_ty in
-                      CTquant (q, cty, ct) in
+                      CTbind (q, cty, ct) in
   List.fold_right ctquant lvs ctn_open
 
 let abstract_terms_ctask cta =

@@ -4,6 +4,6 @@ axiom P : forall x :'a. p x
 predicate b
 axiom B : b
 
-goal G1 : forall x : 'a. b
+goal G1 : forall _ : 'a. b
 
 goal G2 : forall x : 'a. p x

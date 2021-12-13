@@ -7,15 +7,18 @@ open Format
 
 open Cert_syntax
 
+(** Surface certificates *)
 type scert
 type ctrans = scert ctransformation
 
+(** Operators to define new surface certificates *)
 val lambda1 : (scert -> scert) -> scert
 val lambda2 : (scert -> scert -> scert) -> scert
 val lambdan : int -> (scert list -> scert) -> scert
 val ( +++ ) : scert -> scert list -> scert
 val ( ++ ) : scert -> scert -> scert
 
+(** Smart constructors of surface certificates *)
 val letc : int -> prsymbol -> (scert list -> bool -> term -> scert) -> scert
 val nc : scert
 val idc : scert
@@ -46,9 +49,11 @@ val dir : bool -> prsymbol -> scert
 val construct : prsymbol -> prsymbol -> prsymbol -> scert
 val iffsym_hyp : prsymbol -> scert
 
+(** Pretty printing of surface certificates *)
 val prscert : formatter -> scert -> unit
 val eprscert : scert -> unit
 
+(** Kernel certificates *)
 type ('ts, 'v, 'ty, 'h, 't) kc =
   | KHole of cterm ctask
   | KClear of bool * 't * 'h * ('ts, 'v, 'ty, 'h, 't) kc
@@ -82,5 +87,6 @@ type ('ts, 'v, 'ty, 'h, 't) kc =
 type wkc = (tysymbol, lsymbol, ty option, prsymbol, term) kc
 type kcert = (ident, ident, ctype, ident, cterm) kc
 
+(** Elaboration of certificates *)
 val make_kernel_cert :
   term ctask -> cterm ctask list -> scert -> kcert
