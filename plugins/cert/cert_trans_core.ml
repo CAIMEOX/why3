@@ -25,33 +25,33 @@ let tprint any every where : ctrans =
 
 
 (* Assumption with a certificate : *)
-let assumption_pr_t prg tg =
-  decl_l_cert (fun d ->
+let assumption_pr_t _ tg =
+  Trans.decl_l (fun d ->
       match d.d_node with
-      | Dprop (Paxiom, pr, t) when t_equal t tg -> [], axiom pr prg
-      | _ -> [[d]], idc)
+      | Dprop (Paxiom, _, t) when t_equal t tg -> []
+      | _ -> [[d]]) None
 
-let assumption : ctrans = Trans.store (fun task ->
+let assumption = Trans.store (fun task ->
   let prg, tg = task_goal task, task_goal_fmla task in
-  assumption_pr_t prg tg task)
+  Trans.apply (assumption_pr_t prg tg) task)
 
 let find_contradict =
-  Trans.fold_decl (fun d (m, found, (cert : scert)) ->
+  Trans.fold_decl (fun d (m, found) ->
       match d.d_node with
       | Dprop (Paxiom, pr, t) when not found ->
           let un_not_t = match t.t_node with Tnot t -> t | _ -> t_not t in
-          let found, new_cert =
+          let found =
             match Mterm.(find_opt (t_not t) m, find_opt un_not_t m) with
-            | Some g, _ | _, Some g -> true, swap g ++ axiom pr g
-            | _ -> false, cert in
-          Mterm.add t pr m, found, new_cert
-      | _ -> m, found, cert) (Mterm.empty, false, idc)
+            | Some _, _ | _, Some _ -> true
+            | _ -> false in
+          Mterm.add t pr m, found
+      | _ -> m, found) (Mterm.empty, false)
 
-let contradict : ctrans =
+let contradict =
   Trans.store (fun task ->
-      let _, found, c = Trans.apply find_contradict task in
+      let _, found = Trans.apply find_contradict task in
       let res_task = if found then [] else [task] in
-      res_task, c)
+      res_task)
 
 let ren pr1 =
   decl_cert  (fun d ->
@@ -70,7 +70,7 @@ let crename pr1 : ctrans =
 
 (* Closes task if hypotheses contain false or if the goal is true or reflexivity
    of equality *)
-let close : ctrans =
+let close =
   Trans.store (fun task ->
       let trans =
         Trans.fold_decl (fun d acc ->
@@ -86,8 +86,8 @@ let close : ctrans =
                 end
             | _ -> acc) None in
       match Trans.apply trans task with
-      | Some pr -> [], trivial pr
-      | None -> [task], idc)
+      | Some _ -> []
+      | None -> [task])
 
 
 (* Split with a certificate : destructs a logical constructor at the top of the
@@ -129,8 +129,14 @@ let split_or_and any every where : ctrans =
       let lta, (_, c) = split_or_and_tg tg task in
       lta, c)
 
+let update_tg tg b =
+  match tg, b with
+  | Everywhere, _ -> Everywhere
+  | _, true -> Nowhere
+  | _, false -> tg
+
 let destruct_all_tg target =
-  Trans.decl_l_acc (target, idc) update_tg_c (fun d (tg, _) ->
+  Trans.decl_l_acc target update_tg (fun d tg ->
       match d.d_node with
       | Dprop (k, pr, t) when match_tg tg pr ->
           begin match k, t.t_node with
@@ -138,27 +144,27 @@ let destruct_all_tg target =
               let pr1 = pr_clone pr in
               let pr2 = pr_clone pr in
               [[create_prop_decl k pr1 f1; create_prop_decl k pr2 f2]],
-              Some (destruct pr pr1 pr2)
+              true
           | (Pgoal as k), Tbinop (Tand, f1, f2)
           | (Paxiom as k), Tbinop (Tor, f1, f2) ->
               [[create_prop_decl k pr f1]; [create_prop_decl k pr f2]],
-              Some (split pr)
+              true
           | Pgoal, Tbinop (Tor, f1, f2) ->
               let prh = pr_clone pr in
               [[create_prop_decl Paxiom prh (t_not_simp f1);
                 create_prop_decl Pgoal pr f2]],
-              Some (destruct pr prh pr ++ swap prh)
-          | _ -> [[d]], None end
-      | _ -> [[d]], None)
+              true
+          | _ -> [[d]], false end
+      | _ -> [[d]], false)
 
-let destruct_all any every where : ctrans =
+let destruct_all any every where =
   Trans.store (fun task ->
       let tg = find_target any every where task in
-      let lta, (_, c) = destruct_all_tg tg task in
-      lta, c)
+      let lta, _ = destruct_all_tg tg task in
+      lta)
 
 let neg_decompose_tg target =
-  Trans.decl_l_acc (target, idc) update_tg_c (fun d (tg, _) ->
+  Trans.decl_l_acc target update_tg (fun d tg ->
       match d.d_node with
       | Dprop (k, pr, t) when match_tg tg pr ->
           begin match t.t_node with
@@ -166,78 +172,77 @@ let neg_decompose_tg target =
               begin match k, nt.t_node with
               | k, Tnot nnt -> (* double negation *)
                   [[create_prop_decl k pr nnt]],
-                  Some (swap pr ++ swap pr)
+                  true
               | Paxiom, Tbinop (Tor, f1, f2) -> (* destruct *)
                   let pr1 = pr_clone pr in
                   let pr2 = pr_clone pr in
                   [[create_prop_decl Paxiom pr1 (t_not_simp f1);
                     create_prop_decl Paxiom pr2 (t_not_simp f2)]],
-                  Some (swap pr ++ destruct pr pr1 pr2 ++ swap pr1 ++ swap pr2)
+                  true
               | Pgoal, Tbinop (Tand, f1, f2) ->
                   let pr1 = pr_clone pr in
                   let pr2 = pr_clone pr in
                   [[create_prop_decl Paxiom pr1 f1;
                     create_prop_decl Pgoal pr2 (t_not_simp f2)]],
-                  Some (swap pr ++ destruct pr pr1 pr2 ++ swap pr2)
+                  true
               | Paxiom, Tbinop (Tand, f1, f2) -> (* split *)
                   [[create_prop_decl Paxiom pr (t_not_simp f1)];
                    [create_prop_decl Paxiom pr (t_not_simp f2)]],
-                  Some (swap pr ++ split pr ++ swap pr)
+                  true
               | Pgoal, Tbinop (Tor, f1, f2) ->
                   [[create_prop_decl Pgoal pr (t_not_simp f1)];
                    [create_prop_decl Pgoal pr (t_not_simp f2)]],
-                  Some (swap pr ++ split pr ++ swap pr)
+                  true
               | Pgoal, Ttrue -> (* ⊥ and ⊤ *)
                   [[create_prop_decl Pgoal pr t_false]],
-                  Some (clear pr ++ assertion pr t_false +++
-                          [idc; trivial pr])
+                  true
               | Pgoal, Tfalse ->
-                  [], Some (swap pr ++ trivial pr)
+                  [], true
               | Paxiom, Tfalse ->
-                  [[]], Some (clear pr)
+                  [[]], true
               | Paxiom, Ttrue ->
-                  [], Some (swap pr ++ trivial pr)
+                  [], true
               | k, Tbinop (Tiff, f1, f2) -> (* unfold *)
                   let destr_iff = t_and (t_implies f1 f2) (t_implies f2 f1) in
                   [[create_prop_decl k pr destr_iff]],
-                  Some (swap pr ++ unfold pr ++ swap pr)
+                  true
               | k, Tbinop (Timplies, f1, f2) ->
                   let destr_imp = t_or (t_not f1) f2 in
                   [[create_prop_decl k pr destr_imp]],
-                  Some (swap pr ++ unfold pr ++ swap pr)
-              | _ -> [[d]], None
+                  true
+              | _ -> [[d]], false
               end
-          | _ -> [[d]], None end
-      | _ -> [[d]], None)
+          | _ -> [[d]], false end
+      | _ -> [[d]], false)
 
-let neg_decompose any every where : ctrans = Trans.store (fun task ->
+let neg_decompose any every where = Trans.store (fun task ->
    let tg = find_target any every where task in
-   let lta, (_, c) = neg_decompose_tg tg task in
-   lta, c)
+   let lta, _ = neg_decompose_tg tg task in
+   lta)
 
 (* replaces A <-> B with (A -> B) /\ (B -> A) *)
 (* and A -> B with ¬A ∨ B *)
 let unfold_tg target =
-  Trans.decl_acc (target, idc) update_tg_c (fun d (tg, _) ->
+  Trans.decl_acc target update_tg (fun d tg ->
       match d.d_node with
       | Dprop (k, pr, t) when match_tg tg pr ->
           begin match t.t_node with
           | Tbinop (Tiff, f1, f2)  ->
               let destr_iff = t_and (t_implies f1 f2) (t_implies f2 f1) in
               [create_prop_decl k pr destr_iff],
-              Some (unfold pr)
+              true
           | Tbinop (Timplies, f1, f2) ->
               let destr_imp = t_or (t_not f1) f2 in
               [create_prop_decl k pr destr_imp],
-              Some (unfold pr)
-          | _ -> [d], None end
-      | _ -> [d], None)
+              true
+          | _ -> [d], false end
+      | _ -> [d], false)
 
-let unfold_hyp_arr any every where : ctrans =
+let unfold_hyp_arr any every where =
   Trans.store (fun task ->
       let tg = find_target any every where task in
-      let ta, (_, c) = unfold_tg tg task in
-      [ta], c)
+      let ta, _ = unfold_tg tg task in
+      [ta])
 
 (* the next 2 functions are copied from introduction.ml *)
 let intro_attrs = Sattr.singleton Inlining.intro_attr
@@ -276,11 +281,11 @@ let intro_tg target =
 (* introduces hypothesis H : A when the goal is of the form A → B or introduces
    variable x when the goal is of the form ∀ x. P x introduces variable x when a
    hypothesis is of the form ∃ x. P x *)
-let intro any every where : ctrans =
+let intro any every where =
   Trans.store (fun task ->
       let tg = find_target any every where task in
-      let ta, (_, c) = intro_tg tg task in
-      [ta], c)
+      let ta, _ = intro_tg tg task in
+      [ta])
 
 (* Direction with a certificate *)
 (* choose Left (A) or Right (B) when
@@ -383,24 +388,24 @@ let swap_pr gpr =
           Some t, acc_task
       | _ -> opt_t, add_decl acc_task d) (None, None)
 
-let swap where : ctrans =
-  Trans.store (fun task ->
-      let gpr = default_goal task where in
-      let t, pr_goal = task_goal_fmla task, task_goal task in
-      let _, hyp = task_separate_goal task in
-      if pr_equal gpr pr_goal
-      then let underlying_t = match t.t_node with Tnot t' -> t' | _ -> t in
-           Trans.apply (compose (case underlying_t)
-                          (compose assumption exfalso)) task
-      else
-        let clues, nt = Trans.apply (swap_pr gpr) hyp in
-        match clues with
-        | Some t ->
-            let not_t = match t.t_node with Tnot t' -> t' | _ -> t_not t in
-            let decl = create_prop_decl Pgoal gpr not_t in
-            [add_decl nt decl],
-            swap gpr ++ clear pr_goal
-        | None -> [task], idc)
+(* let swap where : ctrans =
+ *   Trans.store (fun task ->
+ *       let gpr = default_goal task where in
+ *       let t, pr_goal = task_goal_fmla task, task_goal task in
+ *       let _, hyp = task_separate_goal task in
+ *       if pr_equal gpr pr_goal
+ *       then let underlying_t = match t.t_node with Tnot t' -> t' | _ -> t in
+ *            Trans.apply (compose (case underlying_t)
+ *                           (compose assumption exfalso)) task
+ *       else
+ *         let clues, nt = Trans.apply (swap_pr gpr) hyp in
+ *         match clues with
+ *         | Some t ->
+ *             let not_t = match t.t_node with Tnot t' -> t' | _ -> t_not t in
+ *             let decl = create_prop_decl Pgoal gpr not_t in
+ *             [add_decl nt decl],
+ *             swap gpr ++ clear pr_goal
+ *         | None -> [task], idc) *)
 
 let revert ls : ctrans =
   Trans.store (fun task ->
@@ -467,10 +472,10 @@ let trivial = try_close [assumption; close; contradict]
 
 let intros = repeat (intro false false None)
 
-let split_logic any every where =
-  compose (unfold_hyp_arr any every where)
-    (compose (split_or_and any every where)
-       (destruct_and any every where))
+(* let split_logic any every where =
+ *   compose (unfold_hyp_arr any every where)
+ *     (compose (split_or_and any every where)
+ *        (destruct_and any every where)) *)
 
 let rec blast task =
     Trans.apply (
@@ -483,6 +488,6 @@ let rec blast task =
                 id_ctrans))
       task
 
-let blast : ctrans = Trans.store blast
+let blast = Trans.store blast
 
-let clear l = compose_list (List.map (fun pr -> clear_one pr) l)
+(* let clear l = compose_list (List.map (fun pr -> clear_one pr) l) *)
