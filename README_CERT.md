@@ -61,6 +61,14 @@ tâches résultantes obtenues par application de transformations certifiantes.
 Cette dépendance est optionnelle et peut être remplacée, au choix, par un autre
 prouveur automatique.
 
+Conditions d'expérimentation
+----------------------------
+
+Les expérimentations décrites dans le manuscrit ont été effectuées dans les
+conditions suivantes.
+   - sytème : Linux 4.9
+   - processeur : Intel Xeon E5-2450
+   - mémoire : 64 GB
 
 Code source
 -----------
