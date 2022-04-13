@@ -672,7 +672,11 @@ if enabled inferloop && test -n "$has_infer"; then
     bench/infer-bench bench/infer
 fi
 
-if enabled cert && lambdapi --version > /dev/null; then
-    echo "=== Checking certifying transformations ==="
-    replay plugins/cert/tests
+if enabled cert; then
+    if lambdapi --version > /dev/null 2>&1; then
+        echo "=== Checking certifying transformations ==="
+        replay plugins/cert/tests
+    else
+        echo "Skipping test family 'cert', 'lambdapi' not installed"
+    fi
 fi
