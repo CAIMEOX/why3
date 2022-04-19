@@ -86,14 +86,8 @@ let mk_loop_continue entry : Ptree.expr =
 let mk_loop_expr entry invariants (e : Ptree.expr) : Ptree.expr =
     let continue = mk_expr ~loc:Loc.dummy_position (Eoptexn (entry, Ity.MaskVisible, e)) in
     let invariants = List.map snd invariants in
-    let infinite_loop =
-      mk_expr ~loc:entry.id_loc
+    mk_expr ~loc:entry.id_loc
         (Ewhile (mk_expr ~loc:Loc.dummy_position Etrue, invariants, [], continue))
-    in
-    (* adding a "absurd" after the infinite loop to avoid generation of
-       meaningless VCs *)
-    let absurd = mk_expr ~loc:Loc.dummy_position Eabsurd in
-    mk_expr ~loc:entry.id_loc (Esequence(infinite_loop,absurd))
 
 
 let mk_scope_break entry ?(loc=entry.id_loc) () =
@@ -183,7 +177,7 @@ let translate_cfg_fundef (id,args,retty,pat,mask,spec,locals,block,blocks) =
   let body =
     List.fold_right declare_local locals body
   in
-  let body = mk_seq ~loc body (mk_expr ~loc Eabsurd) in
+  (* let body = mk_seq ~loc body (mk_expr ~loc Eabsurd) in *)
   let body = mk_expr ~loc (Eoptexn(mk_id ~loc "Return", mask, body)) in
   (* ignore termination *)
   let body =
