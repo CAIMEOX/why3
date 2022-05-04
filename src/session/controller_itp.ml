@@ -246,7 +246,7 @@ let print_session fmt c =
 let reload_files ?(hard_reload=false) (c : controller) =
   let old_ses = c.controller_session in
   if hard_reload then begin
-    c.controller_env <- Env.create_env (Env.get_loadpath c.controller_env);
+    c.controller_env <- Env.create_env_from_resolver (Env.get_resolver c.controller_env);
     Whyconf.Hprover.reset c.controller_provers;
     load_drivers c;
   end;

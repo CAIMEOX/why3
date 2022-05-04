@@ -28,10 +28,12 @@ exception LibraryNotFound of pathname
 exception TheoryNotFound of pathname * string
 exception AmbiguousPath of filename * filename
 
+type resolver = (string list -> filename option)
 type env = {
-  env_path : Sstr.t;
+  env_resolver : resolver;
   env_tag  : Weakhtbl.tag;
 }
+(** env_resolve: resolve a path for one of those file *)
 
 let env_tag env = env.env_tag
 
@@ -39,12 +41,24 @@ module Wenv = Weakhtbl.Make(struct type t = env let tag = env_tag end)
 
 (** Environment construction and utilisation *)
 
-let create_env = let c = ref (-1) in fun lp -> {
-  env_path = Sstr.of_list lp;
+let default_resolver loadpath fl =
+  let add_dir dir = List.map (Filename.concat dir) fl in
+  let fl = List.concat (List.map add_dir loadpath) in
+  if fl = [] then failwith "Env.locate_library (empty loadpath)";
+  match List.filter Sys.file_exists fl with
+  | [] -> None
+  | [file] -> Some file
+  | file1 :: file2 :: _ -> raise (AmbiguousPath (file1, file2))
+
+
+let create_env_from_resolver = let c = ref (-1) in fun env_resolver -> {
+  env_resolver;
   env_tag  = (incr c; Weakhtbl.create_tag !c)
 }
 
-let get_loadpath env = Sstr.elements env.env_path
+let create_env lp = create_env_from_resolver (default_resolver lp)
+
+let get_resolver env = env.env_resolver
 
 (** Input languages *)
 
@@ -181,13 +195,9 @@ let locate_library env path =
   let add_ext ext = file ^ "." ^ ext in
   let fl = List.map add_ext (Mstr.keys !extension_table) in
   if fl = [] then failwith "Env.locate_library (no formats)";
-  let add_dir dir = List.map (Filename.concat dir) fl in
-  let fl = List.concat (List.map add_dir (get_loadpath env)) in
-  if fl = [] then failwith "Env.locate_library (empty loadpath)";
-  match List.filter Sys.file_exists fl with
-  | [] -> raise (LibraryNotFound path)
-  | [file] -> file
-  | file1 :: file2 :: _ -> raise (AmbiguousPath (file1, file2))
+  match env.env_resolver fl with
+  | None -> raise (LibraryNotFound path)
+  | Some file -> file
 
 exception CircularDependency of pathname
 

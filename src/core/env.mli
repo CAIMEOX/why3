@@ -32,8 +32,17 @@ val create_env : filename list -> env
 (** creates an environment from a "loadpath", a list of directories
     containing loadable Why3/WhyML/etc files *)
 
-val get_loadpath : env -> filename list
-(** returns the loadpath of a given environment *)
+type resolver = (string list -> filename option)
+
+val create_env_from_resolver : resolver -> env
+(** creates an environment from a resolver which takes a list of possible
+    basename and return if found a corresponding path *)
+
+val default_resolver: filename list -> resolver
+(** The resolver used by {!create_env}, resolve the files in the given
+    directories *)
+
+val get_resolver: env -> resolver
 
 (** {2 Input languages} *)
 
