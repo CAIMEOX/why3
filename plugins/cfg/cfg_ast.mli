@@ -54,8 +54,8 @@ type cfg_fundef =
 
 type cfg_decl =
   | Dmlw_decl of Ptree.decl
-  | Dletcfg of cfg_fundef
-  | Dreccfg of cfg_fundef list
+  | Dletcfg of cfg_fundef * bool
+  | Dreccfg of cfg_fundef list * bool
   | Dscope of Loc.position * bool * ident * cfg_decl list
 
 type cfg_file = (ident * cfg_decl list) list

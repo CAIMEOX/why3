@@ -43,11 +43,15 @@ cfgdecl:
   | scope_head_parsing_only cfgdecl* END
       { let loc,import,qid = $1 in (Cfg_ast.Dscope(loc,import,qid,$2))}
   | IMPORT uqualid { (Dmlw_decl (Dimport $2)) }
-  | d = pure_decl | d = prog_decl | d = meta_decl { Dmlw_decl d }
   | use_clone_parsing_only { Dmlw_decl $1 }
-  | LET CFG f=recdefn { Dletcfg f }
-  | LET REC CFG dl=with_list1(recdefn) { Dreccfg dl }
+  | LET CFG const f=recdefn { Dletcfg (f, $3) }
+  | LET REC CFG const dl=with_list1(recdefn) { Dreccfg (dl, $4) }
+  | d = pure_decl | d = prog_decl | d = meta_decl { Dmlw_decl d }
 ;
+
+const:
+| CONSTANT { true }
+|  { false }
 
 recdefn:
   | id=attrs(lident_rich) args=binders COLON ret=return_named sp=spec EQUAL

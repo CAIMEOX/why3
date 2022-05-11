@@ -27,26 +27,31 @@ let translate_cfg_fundef (x : cfg_fundef) =
   if List.exists (function ATstr a -> Ident.attr_equal a stackify_attr | _ -> false) id.id_ats
   then !stackify x else Cfg_paths.translate_cfg_fundef x
 
-let translate_letcfg d =
+let translate_letcfg d is_const =
   let loc = Loc.dummy_position in
   let (id, ghost, rk, args, retty, pat, mask, spec, body) = translate_cfg_fundef d in
 
+  let rk = if is_const then Expr.RKfunc else rk in
   let r =
     Dlet (id, ghost, rk, Ptree_helpers.expr ~loc (Efun (args, retty, pat, mask, spec, body)))
   in
   Debug.dprintf Cfg_paths.debug "%a@." (Mlw_printer.pp_decl ~attr:true) r;
   r
 
-let translate_reccfg ds =
-  let translated_fundefs = List.map translate_cfg_fundef ds in
+let translate_reccfg ds is_const =
+  let translated_fundefs = List.map (fun d ->
+    let (id, ghost, rk, args, retty, pat, mask, spec, body) = translate_cfg_fundef d in
+    let rk = if is_const then Expr.RKfunc else rk in
+    (id, ghost, rk, args, retty, pat, mask, spec, body)
+    ) ds in
 
   Drec translated_fundefs
 
 let rec translate_decl d acc =
   match d with
   | Dmlw_decl d -> d :: acc
-  | Dletcfg d -> (translate_letcfg d)::acc
-  | Dreccfg l -> translate_reccfg l :: acc
+  | Dletcfg (d, const) -> (translate_letcfg d const)::acc
+  | Dreccfg (l, const) -> translate_reccfg l const :: acc
   | Cfg_ast.Dscope (l, b, i, ds) -> Ptree.Dscope (l, b, i, List.fold_right translate_decl ds []) :: acc
 
 let translate (m,dl) =
