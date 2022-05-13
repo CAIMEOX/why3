@@ -1,0 +1,56 @@
+module Return1
+  use int.Int
+  use mach.java.lang.Integer
+
+  type t = {
+    mutable a : integer;
+    mutable b : integer;
+  }
+
+  let g(_ : integer) : unit =
+     ()
+
+  let f(self [@W:unused_variable:N] : t) (_ : integer) : unit =
+    ()
+
+end
+
+
+module Return2
+  use int.Int
+  use mach.java.lang.Integer
+
+  type t = {
+    mutable a : integer;
+    mutable b : integer;
+  }
+
+  let g(_ : integer) : unit =
+     ()
+
+  let f(self [@W:unused_variable:N] : t) (i : integer) : unit =
+      g i 
+
+
+end
+
+module Return3
+  use int.Int
+  use mach.java.lang.Integer
+
+  type t = {
+    mutable a : integer;
+    mutable b : integer;
+  }
+
+  let g(_ _ : integer) : unit =
+     ()
+     
+  let f(self [@W:unused_variable:N] : t) (i j : integer) : unit =
+    let b = i < j in
+    if b then
+      g i j
+     
+
+end
+
