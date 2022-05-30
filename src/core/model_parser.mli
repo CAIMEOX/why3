@@ -43,6 +43,12 @@ type model_value =
   | Var of string
   | Undefined
   | Unparsed of string
+  (* to add : *)
+(*
+  | Function of (string list) * model_value  (* parameters, body *)
+  | Ite of model_value * model_value * model_value (* if then else *)
+  | Let of string * model_value * model_value (* let v = t1 in t2 *)
+ *)
 
 and arr_index = {arr_index_key: model_value; arr_index_value: model_value}
 

@@ -1,0 +1,10 @@
+
+use int.Int
+
+function f (x:int) : int
+
+let main (y:int) : unit
+  requires { y = 0 }
+=
+  assert { f 0 <> y };
+  assert { f 1 <> y }
