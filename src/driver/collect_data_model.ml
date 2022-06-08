@@ -29,6 +29,9 @@ type context = {
   (** Lazy bindings for top-level constants, initially all [None] *)
   consts: Model_parser.model_value Hstr.t;
 
+  (** Lazy bindings for top-level functions, initially all [None] *)
+  funcs: Model_parser.model_value Hstr.t;
+
   (** Lazy bindings for prover variables, mutable to cache values during
       evaluation *)
   prover_values: Model_parser.model_value Hstr.t;
@@ -211,9 +214,67 @@ and eval_to_array ctx = function
 (*            Import Smtv2_model_defs to model elements                 *)
 (************************************************************************)
 
-(** Create a mapping from the names of constants among the definitions to model
-    values, which are obtained by evaluating the SMTv2 expressions by which
-    the constants are defined. *)
+let rec convert_term_to_model_value t =
+  let open Model_parser in
+  match t with
+  | Tconst c -> Const c
+  | Tvar var -> Var var
+  | Tprover_var (_,var) -> Var var
+  | Tapply (s,l) -> Apply (s, List.map convert_term_to_model_value l)
+  | Tarray a -> Array (convert_array_to_model_array a)
+  | Tite (t1,t2,t3) ->
+    let b = convert_term_to_model_value t1 in
+    let v = convert_term_to_model_value t2 in
+    let v' = convert_term_to_model_value t3 in
+    Ite (b,v,v')
+  | Tlet (bs,t') ->
+    let bs = List.map (fun (s,t) -> (s,convert_term_to_model_value t)) bs in
+    let t' = convert_term_to_model_value t in
+    Let (bs,t')
+  | Tto_array t' -> Array (convert_term_to_model_array t')
+  | Tunparsed s -> Unparsed s
+
+and convert_array_to_model_array a =
+  let open Model_parser in
+  match a with
+  | Aconst t ->
+    { arr_others = convert_term_to_model_value t;
+      arr_indices = [] }
+  | Avar v -> Format.kasprintf failwith "convert_array_to_model_array: Avar %s" v
+  | Astore (a,key,value) ->
+    let a = convert_array_to_model_array a in
+    let arr_indices = {
+        arr_index_key = convert_term_to_model_value key;
+        arr_index_value = convert_term_to_model_value value
+      } :: a.arr_indices in
+    { a with arr_indices}
+
+and convert_term_to_model_array t =
+  let open Model_parser in
+  match t with
+  | Tvar v -> Format.kasprintf failwith "convert_term_to_model_array: Tvar %s" v
+  | Tarray a -> convert_array_to_model_array a
+  | _ -> Format.kasprintf failwith "convert_term_to_model_array: %a" print_term t
+
+let convert_func_def ctx v =
+  let open Model_parser in
+  let res = match Mstr.find v ctx.function_defs with
+    | exception Not_found ->
+        Warning.emit "function %s not defined" v;
+        None
+    | def ->
+        let body = convert_term_to_model_value def.body in
+        let args = List.map fst def.args in
+        Some (Function (args, body)) in
+  let res = Opt.get_def (Model_parser.Var v) res in
+  Hstr.add ctx.funcs v res;
+  res
+
+(** Create a mapping from the names of:
+    - constants among the definitions to model values, which are obtained by
+    evaluating the SMTv2 expressions by which the constants are defined;
+    - function definitions to model values, which are obtained by converting
+    the [Smtv2_model_defs.definition] to [Model_parser.model_value]. *)
 let create_list info (defs: definition Mstr.t) =
 
   (* Convert list_records to take replace fields with model_trace when
@@ -252,18 +313,39 @@ let create_list info (defs: definition Mstr.t) =
   Debug.dprintf debug_cntex "@[<hov2>Const defs:%a@]@."
     Pp.(print_list_pre comma string) const_names;
 
+  (* The function names, i.e. the keys of the resulting mapping *)
+  let func_names =
+    let is_func nm def =
+      (List.length def.args > 0) &&
+      not (Mstr.mem nm fields_projs) &&
+      not (List.mem nm info.noarg_constructors) in
+    Mstr.keys (Mstr.filter is_func function_defs) in
+
+  Debug.dprintf debug_cntex "@[<hov2>Function defs:%a@]@."
+    Pp.(print_list_pre comma string) func_names;
+
   (* The evaluation context *)
   let ctx =
-    { values= Mstr.empty; consts= Hstr.create 7; prover_values= Hstr.create 7;
+    { values= Mstr.empty; consts= Hstr.create 7; funcs= Hstr.create 7;
+      prover_values= Hstr.create 7;
       function_defs; fields_projs; info; list_records;
       interprete_prover_vars= true } in
 
   (* Evaluate the expressions by which the constants are defined *)
-  let res =
+  let res_const =
     let for_const nm  =
       Debug.dprintf debug_cntex "@[<hv2>EVAL CONST %s@]@." nm;
       nm, eval_const ctx nm in
     Mstr.of_list (List.map for_const const_names) in
+
+  (* Convert function definitions to Model_parser.Function *)
+  let res_func =
+    let for_func nm  =
+      Debug.dprintf debug_cntex "@[<hv2>CONVERT FUNCTION %s@]@." nm;
+      nm, convert_func_def ctx nm in
+    Mstr.of_list (List.map for_func func_names) in
+
+  let res = Mstr.union (fun _key x _y -> Some x) res_const res_func in
 
   let print_mv fmt (s, mv) =
     Format.fprintf fmt "%s: %a" s Model_parser.print_model_value_human mv in

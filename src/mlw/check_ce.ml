@@ -242,6 +242,8 @@ let import_model_const ity = function
 
     @raise CannotImportModelValue when the value cannot be imported *)
 let rec import_model_value loc env check known th_known ity v =
+  Debug.dprintf debug_check_ce_rac_results "Import model value from prover model:@ %a@."
+    print_model_value v;
   let ts, l1, l2 = ity_components ity in
   let subst = its_match_regs ts l1 l2 in
   let def = Pdecl.find_its_defn known ts in
@@ -312,6 +314,9 @@ let rec import_model_value loc env check known th_known ity v =
           let v0 = import_model_value loc env check known th_known value_ity
               a.arr_others in
           purefun_value ~result_ity:ity ~arg_ity:key_ity mv v0
+      | Ite _ -> cannot_import "WIP_TODO import ite value"
+      | Let _ -> cannot_import "WIP_TODO import let value"
+      | Function _ -> cannot_import "WIP_TODO import function value"
       | Unparsed s -> cannot_import "unparsed value %s" s
       | Undefined -> undefined_value env ity in
   check ity res;

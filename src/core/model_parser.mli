@@ -41,14 +41,11 @@ type model_value =
   | Proj of model_proj
   | Apply of string * model_value list
   | Var of string
+  | Ite of model_value * model_value * model_value (* if then else *)
+  | Let of (string * model_value) list * model_value (* let v1 = t1, v2 = t2, ... in t *)
+  | Function of (string list) * model_value  (* args, body *)
   | Undefined
   | Unparsed of string
-  (* to add : *)
-(*
-  | Function of (string list) * model_value  (* parameters, body *)
-  | Ite of model_value * model_value * model_value (* if then else *)
-  | Let of string * model_value * model_value (* let v = t1 in t2 *)
- *)
 
 and arr_index = {arr_index_key: model_value; arr_index_value: model_value}
 
@@ -361,6 +358,9 @@ class clean : object
   method apply : string -> model_value list -> model_value option
   method array : model_array -> model_value option
   method record : model_record -> model_value option
+  method ite : model_value -> model_value -> model_value -> model_value option
+  method letdecl : (string * model_value) list -> model_value -> model_value option
+  method func : string list -> model_value -> model_value option
   method undefined : model_value option
   method unparsed : string -> model_value option
 end

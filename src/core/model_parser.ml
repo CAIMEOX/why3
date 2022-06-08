@@ -51,6 +51,9 @@ type model_value =
   | Proj of model_proj
   | Apply of string * model_value list
   | Var of string
+  | Ite of model_value * model_value * model_value (* if then else *)
+  | Let of (string * model_value) list * model_value (* let v1 = t1, v2 = t2, ... in t *)
+  | Function of (string list) * model_value  (* args, body *)
   | Undefined
   | Unparsed of string
 
@@ -141,6 +144,37 @@ let rec compare_model_value v1 v2 =
   | Apply _, _ -> -1 | _, Apply _ -> 1
   | Var v1, Var v2 -> String.compare v1 v2
   | Var _, _ -> -1 | _, Var _ -> 1
+  | Ite (b1,v1,v1'), Ite (b2,v2,v2') ->
+    let cb = compare_model_value b1 b2 in
+    if cb = 0 then
+      let cv = compare_model_value v1 v2 in
+      if cv = 0 then
+        compare_model_value v1' v2'
+      else
+        cv
+    else
+      cb
+  | Ite _, _ -> -1 | _, Ite _ -> 1
+  | Let (bs1,t1), Let (bs2,t2) ->
+    let compare_binding (s1,v1) (s2,v2) =
+      let c = String.compare s1 s2 in
+      if c = 0 then
+        compare_model_value v1 v2
+      else c
+    in
+    let c = Lists.compare compare_binding bs1 bs2 in
+    if c = 0 then
+      compare_model_value v1 v2
+    else
+      c
+  | Let _, _ -> - 1 | _, Let _ -> 1
+  | Function (args1,v1), Function (args2,v2) ->
+    let c = Lists.compare String.compare args1 args2 in
+    if c = 0 then
+      compare_model_value v1 v2
+    else
+      c
+  | Function _, _ -> -1 | _, Function _ -> 1
   | Undefined, Undefined -> 0
   | Undefined, _ -> -1 | _, Undefined -> 1
   | Unparsed s1, Unparsed s2 -> String.compare s1 s2
@@ -320,6 +354,9 @@ let rec convert_model_value value : Json_base.json =
       ]
   | Record r -> convert_record r
   | Proj p -> convert_proj p
+  | Ite (b,v,v') -> convert_ite b v v'
+  | Let (bs,t) -> convert_let bs t
+  | Function (ls, v) -> convert_function ls v
   | Undefined ->
       let m = ["type", Json_base.String "Undefined"] in
       Json_base.Record m
@@ -358,6 +395,48 @@ and convert_fields fields =
          let m = ("value", convert_model_value v) :: m in
          Json_base.Record m)
        fields)
+and convert_ite  b v v' =
+  let b =
+    let m = ("if", convert_model_value b) :: [] in
+    Json_base.Record m in
+  let v =
+    let m = ("then", convert_model_value v) :: [] in
+    Json_base.Record m in
+  let v' =
+    let m = ("else", convert_model_value v') :: [] in
+    Json_base.Record m in
+  let m = ("type", Json_base.String "Ite") :: [] in
+  let m = ("val", Json_base.List [b;v;v']) :: m in
+  Json_base.Record m
+
+and convert_let_bindings bs =
+  match bs with
+  | [] -> []
+  | (b,v) :: tail ->
+      let m = ("name", Json_base.String b) :: [] in
+      let m = ("value", convert_model_value v) :: m in
+      Json_base.Record m :: convert_let_bindings tail
+
+and convert_let bs t =
+  let bs =
+    let m = ("bindings", Json_base.List (convert_let_bindings bs)) :: [] in
+    Json_base.Record m in
+  let t =
+    let m = ("value", convert_model_value t) :: [] in
+    Json_base.Record m in
+  let m = ("type", Json_base.String "Let") :: [] in
+  let m = ("val", Json_base.List [bs;t]) :: m in
+  Json_base.Record m
+
+and convert_function ls v =
+  let ls = List.map (fun s -> Json_base.String s) ls in
+  let lsv =
+    let m = ("args", Json_base.List ls) :: [] in
+    let m = ("body", convert_model_value v) :: m in
+    Json_base.Record m in
+  let m = ("type", Json_base.String "Function") :: [] in
+  let m = ("val", lsv) :: m in
+  Json_base.Record m
 
 let print_model_value_sanit fmt v =
   let v = convert_model_value v in
@@ -433,6 +512,10 @@ and print_proj_human fmt p =
   let s, v = p in
   fprintf fmt "@[{%s =>@ %a}@]" s print_model_value_human v
 
+and print_let_bindings fmt p =
+  let s, v = p in
+  fprintf fmt "@[{%s = %a}@]" s print_model_value_human v
+
 and print_model_value_human fmt (v : model_value) =
   match v with
   | Const c -> print_model_const_human fmt c
@@ -445,6 +528,19 @@ and print_model_value_human fmt (v : model_value) =
   | Record r -> print_record_human fmt r
   | Proj p -> print_proj_human fmt p
   | Var v -> pp_print_string fmt v
+  | Ite (b,v,v') ->
+      fprintf fmt "@[if %a@ then %a@ else %a@]"
+        print_model_value b
+        print_model_value v
+        print_model_value v'
+  | Let (bs,t) ->
+      fprintf fmt "@[let %a@ in %a@]"
+        (Pp.print_list Pp.space print_let_bindings) bs
+        print_model_value t
+  | Function (ls,v) ->
+      fprintf fmt "@[fun (%a) ->@ %a@]"
+        (Pp.print_list Pp.space pp_print_string) ls
+        print_model_value v
   | Undefined -> pp_print_string fmt "UNDEFINED"
   | Unparsed s -> pp_print_string fmt s
 
@@ -955,7 +1051,7 @@ let recover_name pm fields_projs raw_name =
 let rec replace_projection (const_function : string -> string) =
   let const_function s = try const_function s with Not_found -> s in
   function
-  | Const _ as v -> v
+  | Const _ | Var _ as v -> v
   | Record fs ->
       let aux (f, mv) = const_function f, replace_projection const_function mv in
       Record (List.map aux fs)
@@ -964,7 +1060,16 @@ let rec replace_projection (const_function : string -> string) =
   | Array a -> Array (replace_projection_array const_function a)
   | Apply (s, l) ->
       Apply (const_function s, List.map (replace_projection const_function) l)
-  | Var _ | Undefined | Unparsed _ as v -> v
+  | Ite (b,v,v') ->
+      Ite ( replace_projection const_function b,
+            replace_projection const_function v,
+            replace_projection const_function v' )
+  | Let (bs,t) ->
+      Let ( replace_projection_bindings const_function bs,
+            replace_projection const_function t )
+  | Function (ls,v) ->
+      Function (List.map const_function ls, replace_projection const_function v)
+  | Undefined | Unparsed _ as v -> v
 
 and replace_projection_array const_function a =
   let for_index a =
@@ -972,6 +1077,11 @@ and replace_projection_array const_function a =
     {a with arr_index_value} in
   {arr_others= replace_projection const_function a.arr_others;
    arr_indices= List.map for_index a.arr_indices}
+
+and replace_projection_bindings const_function bs =
+  List.map
+    (fun (b,v) -> (const_function b, replace_projection const_function v))
+    bs
 
 (* Elements that are of record with only one field in the source code, are
    simplified by eval_match in wp generation. So, this allows to reconstruct
@@ -1021,6 +1131,9 @@ let register_remove_field f = remove_field := f
 let build_model_rec pm (elts: model_element list) : model_files =
   let fields_projs = fields_projs pm and vc_attrs = pm.Printer.vc_term_attrs in
   let process_me me =
+    Debug.dprintf debug "@[<hv2>Processing model element:@ name = %s@ value = %a@]@."
+      me.me_name.men_name
+      print_model_value me.me_value;
     match Mstr.find me.me_name.men_name pm.queried_terms with
     | exception Not_found ->
         Debug.dprintf debug "No term for %s@." me.me_name.men_name;
@@ -1094,11 +1207,13 @@ class clean = object (self)
       Opt.bind (self#value me.me_value) @@ fun me_value ->
       Some {me with me_value}
   method value v = match v with
-    | Const c -> self#const c
-    | Unparsed s    -> self#unparsed s
-    | Proj (p, v)   -> self#proj p v   | Apply (s, vs) -> self#apply s vs
-    | Array a       -> self#array a    | Record fs     -> self#record fs
-    | Undefined     -> self#undefined  | Var v         -> self#var v
+    | Const c         -> self#const c
+    | Unparsed s      -> self#unparsed s
+    | Proj (p, v)     -> self#proj p v   | Apply (s, vs) -> self#apply s vs
+    | Array a         -> self#array a    | Record fs     -> self#record fs
+    | Undefined       -> self#undefined  | Var v         -> self#var v
+    | Ite (b,v,v')    -> self#ite b v v' | Let (bs,t)  -> self#letdecl bs t
+    | Function (ls,v) -> self#func ls v
   method const c = match c with
     | String v      -> self#string v  | Integer v     -> self#integer v
     | Decimal v     -> self#decimal v | Fraction v    -> self#fraction v
@@ -1132,6 +1247,21 @@ class clean = object (self)
       Some (f, v) in
     opt_bind_all (List.map clean_field fs) @@ fun fs ->
     Some (Record fs)
+  method ite b v v' =
+    Opt.bind (self#value b) @@ fun b ->
+    Opt.bind (self#value v) @@ fun v ->
+    Opt.bind (self#value v') @@ fun v' ->
+    Some (Ite (b,v,v'))
+  method letdecl bs t =
+    let clean_binding (b,v) =
+      Opt.bind (self#value v) @@fun v ->
+      Some (b,v) in
+    opt_bind_all (List.map clean_binding bs) @@ fun bs ->
+    Opt.bind (self#value t) @@ fun t ->
+    Some (Let (bs,t))
+  method func ls v =
+    Opt.bind (self#value v) @@ fun v ->
+    Some (Function (ls,v))
   method unparsed _ = None
   method undefined = Some Undefined
 end

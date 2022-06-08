@@ -410,7 +410,7 @@ module Why = struct
   (* The callee must ensure that RAC is enabled. *)
   let check_term cnf : check_term =
     fun ?vsenv ctx t ->
-    Debug.dprintf debug_rac_check_sat "@[<hv2>Check term: %a %a@]@." print_term t
+    Debug.dprintf debug_rac_check_sat "@[<hv2>Check term: %a with@ %a@]@." print_term t
       Pp.(print_list space (fun fmt vs -> fprintf fmt "@[%a=%a@]" print_vs vs print_value (get_vs ctx.cntr_env vs)))
       (Mvs.keys (t_freevars Mvs.empty t)) ;
     let task, _ = task_of_term ?vsenv cnf.metas ctx.cntr_env t in
