@@ -227,6 +227,13 @@ let io_print_string =
 let debug_print =
   eval (VTany ^-> VTunit) (fun v -> Format.eprintf "%a\n@?" print_value v)
 
+module BV = struct
+
+  let add (size:int) x y =
+    BigInt.(euclidean_mod (add x y) (pow_int_pos 2 size))
+
+end
+
 let builtin_progs = Hrs.create 17
 
 type builtin = Builtin_module of {
@@ -362,6 +369,9 @@ let built_in_modules () =
         ]);
     float_module 32 ~prec:24 "Float32";
     float_module 64 ~prec:53 "Float64";
+    builtin ["bv"] "BV32" [
+        "add", eval (VTnum ^-> VTnum ^-> VTnum) (BV.add 32);
+      ];
   ] @ if Debug.test_flag debug_disable_builtin_mach then [] else [
     builtin ["mach"; "int"] "Byte" bounded_int_ops;
     builtin ["mach"; "int"] "Int31" bounded_int_ops;

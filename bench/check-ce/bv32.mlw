@@ -3,17 +3,33 @@ module Ce_int32bv
   use mach.bv.BVCheck32
 
   type bv32 = BVCheck32.t
- 
+
   let dummy_update (ref r : bv32)
     requires { r = (0x22:bv32) }
     ensures { r = (0x42:bv32) } =
     r <- (0x42:bv32);
     r <- add r r
 
+  let dummy_update_ov_check (ref r : bv32)
+    requires { r = (0x22:bv32) }
+    ensures { r = (0x42:bv32) } =
+    r <- (0x42:bv32);
+    r <- u_add r r
+
  let dummy_update_with_int (ref r : bv32)
     requires { t'int r = 0x22 }
     ensures { t'int r = 0x42 } =
     r <- (0x42:bv32);
     r <- add r r
+
+  let test () =
+    let ref r = (0x22:bv32) in
+    dummy_update r;
+    r
+
+  let test_ov () =
+    let ref r = (0x22:bv32) in
+    dummy_update_ov_check r;
+    r
 
 end
