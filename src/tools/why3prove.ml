@@ -137,6 +137,7 @@ let opt_task = ref None
 
 let opt_print_theory = ref false
 let opt_print_namespace = ref false
+let opt_color = ref false
 
 let option_list =
   let open Getopt in
@@ -185,7 +186,7 @@ let option_list =
     KLong "rac-timelimit", Hnd1 (AInt, fun i -> opt_rac_timelimit := Some i),
     "<seconds> Time limit in seconds for RAC (with --check-ce)";
     KLong "rac-steplimit", Hnd1 (AInt, fun i -> opt_rac_steplimit := Some i),
-    "<seconds> Step limit for RAC (with --check-ce)";
+    "<steps> Step limit for RAC (with --check-ce)";
     Key ('v',"verbosity"), Hnd1(AInt, fun i -> opt_ce_check_verbosity := Some i),
     "<lvl> verbosity level for interpretation log of counterexam-\n\
      ple solver model";
@@ -194,6 +195,8 @@ let option_list =
     KLong "json-model-values", Hnd0 (fun () -> opt_json := Some `Values),
     " print values of prover model in JSON format (back-\n\
      wards compatiblity with --json)";
+    KLong "color", Hnd0 (fun () -> opt_color := true),
+    " print output with colors";
   ]
 
 let config, env =
@@ -513,7 +516,7 @@ let do_input env drv = function
 
 let () =
   try
-    if Util.terminal_has_color then (
+    if (Util.terminal_has_color && !opt_color) then (
       Format.set_formatter_tag_functions Util.ansi_color_tags;
       set_mark_tags true );
     let load (f,ef) = load_driver_raw (Whyconf.get_main config) env f ef in
