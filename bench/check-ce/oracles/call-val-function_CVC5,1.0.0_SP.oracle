@@ -1,0 +1,71 @@
+<check-ce-rac-results>Check model 0 ("bench/check-ce/call-val-function.mlw", line 8, characters 12-24)
+<check-ce-rac-results>Checking model:
+                      File call-val-function.mlw:
+                        Line 7:
+                          y = {"type": "Integer", "val": "0"}
+                        Line 8:
+                          z = {"type": "Integer", "val": "43"}
+                        Line 10:
+                          result = {"type": "Integer", "val": "44"}
+                          z = {"type": "Integer", "val": "43"}
+<check-ce-rac-results>Giant-step RAC
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>Value from model for parameter `y` at "bench/check-ce/call-val-function.mlw", line 7, characters 10-11: 0
+<rac-values>No value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13 at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13
+<check-ce-rac-results>Normal RAC
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>Value from model for parameter `y` at "bench/check-ce/call-val-function.mlw", line 7, characters 10-11: 0
+<rac-values>No value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13 at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13
+<check-ce-rac-results>Results of RAC executions for model 0:
+                        - Concrete RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13)
+                          
+                        - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13)
+                          
+<check-ce-rac-results>Check model 1 ("bench/check-ce/call-val-function.mlw", line 8, characters 12-24)
+<check-ce-rac-results>Checking model:
+                      File call-val-function.mlw:
+                        Line 7:
+                          y = {"type": "Integer", "val": "42"}
+                        Line 8:
+                          z = {"type": "Integer", "val": "43"}
+                        Line 10:
+                          result = {"type": "Integer", "val": "44"}
+                          z = {"type": "Integer", "val": "43"}
+<check-ce-rac-results>Giant-step RAC
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>Value from model for parameter `y` at "bench/check-ce/call-val-function.mlw", line 7, characters 10-11: 42
+<rac-values>No value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13 at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13
+<check-ce-rac-results>Normal RAC
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
+<rac-values>Value from model for parameter `y` at "bench/check-ce/call-val-function.mlw", line 7, characters 10-11: 42
+<rac-values>No value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13 at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13
+<check-ce-rac-results>Results of RAC executions for model 1:
+                        - Concrete RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13)
+                          
+                        - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13)
+                          
+<check-ce-categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13)
+  - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13)
+  - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13)
+File "bench/check-ce/call-val-function.mlw", line 8, characters 12-24:
+Sub-goal Postcondition of goal main'vc.
+Prover result is: Unknown (unknown + incomplete) (0.08s, 5739 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because missing value for return value of call to f at "bench/check-ce/call-val-function.mlw", line 10, characters 10-13):
+File call-val-function.mlw:
+  Line 7:
+    y = 42 (0X2A)
+  Line 8:
+    z = 43 (0X2B)
+  Line 10:
+    result = 44 (0X2C)
+    z = 43 (0X2B)
+
