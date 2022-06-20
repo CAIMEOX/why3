@@ -227,12 +227,14 @@ let io_print_string =
 let debug_print =
   eval (VTany ^-> VTunit) (fun v -> Format.eprintf "%a\n@?" print_value v)
 
+(*
 module BV = struct
 
   let add (size:int) x y =
     BigInt.(euclidean_mod (add x y) (pow_int_pos 2 size))
 
 end
+ *)
 
 let builtin_progs = Hrs.create 17
 
@@ -369,9 +371,11 @@ let built_in_modules () =
         ]);
     float_module 32 ~prec:24 "Float32";
     float_module 64 ~prec:53 "Float64";
+(*
     builtin ["bv"] "BV32" [
         "add", eval (VTnum ^-> VTnum ^-> VTnum) (BV.add 32);
       ];
+ *)
   ] @ if Debug.test_flag debug_disable_builtin_mach then [] else [
     builtin ["mach"; "int"] "Byte" bounded_int_ops;
     builtin ["mach"; "int"] "Int31" bounded_int_ops;
@@ -701,6 +705,8 @@ let get_and_register_variable ctx ?def ?loc id ity =
   value
 
 let get_and_register_result ?def ?rs ctx posts oid loc ity =
+  Debug.dprintf debug_trace_exec "[get_and_register_result] oid=%a loc = %a@."
+    (Pp.print_option pp_print_int) oid Loc.gen_report_position loc;
   let ctx_desc = asprintf "return value of call%t at %a%t"
       (fun fmt -> Opt.iter (fprintf fmt " to %a" print_rs) rs)
       Pretty.print_loc' loc
@@ -1359,6 +1365,8 @@ and exec_call ?(main_function=false) ?loc ?attrs ctx rs arg_pvs ity_result =
     if ctx.giant_steps && not main_function && giant_steps_possible ()
     then Log.Exec_giant_steps
     else Log.Exec_normal in
+  Debug.dprintf debug_trace_exec "@[<h>%tExec call %a in mode %a@]@."
+    pp_indent print_rs rs Log.pp_mode mode;
   let mvs = let aux pv v = pv.pv_vs, snapshot v in
     Mvs.of_list (List.map2 aux rs.rs_cty.cty_args arg_vs) in
   let ctx =
