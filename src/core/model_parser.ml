@@ -1215,7 +1215,7 @@ class clean = object (self)
   method float v = Some (Const (Float v))
   method boolean v = Some (Const (Boolean v))
   method bitvector v = Some (Const (Bitvector v))
-  method var _ = None
+  method var v = Some (Var v)
   method proj p v =
     Opt.bind (self#value v) @@ fun v ->
     Some (Proj (p, v))
