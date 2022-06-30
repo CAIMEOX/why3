@@ -1597,15 +1597,29 @@ let bind_globals ?rs_main ctx =
         {ctx with env= bind_rs rs v ctx.env}, Sidpos.add_id id locs )
     | PDpure ->
       begin match d.pd_pure with
-      | [{d_node = Decl.Dparam ls}] when ls.ls_args = [] ->
+      | [{d_node = Decl.Dparam ls}] ->
         begin match ls.ls_value with
+        (* TODO_WIP in None case (i.e. predicate?) we could use a default boolean value?*)
         | None -> ctx, locs
         | Some ty ->
-          Debug.dprintf debug_trace_exec "EVAL GLOBAL LOGICAL CONST %a at %a@."
-            print_decoded id.id_string
-            Pp.(print_option_or_default "NO LOC" Loc.pp_position) id.id_loc;
-          let v = get_and_register_global (Sidpos.check locs) ctx exec_expr id None [] (Ity.ity_of_ty ty) in
-          {ctx with env= bind_ls ls v ctx.env}, Sidpos.add_id id locs
+          begin match ls.ls_args with
+          | [] ->
+            Debug.dprintf debug_trace_exec "EVAL GLOBAL LOGICAL CONST %a at %a@."
+              print_decoded id.id_string
+              Pp.(print_option_or_default "NO LOC" Loc.pp_position) id.id_loc;
+            let v = get_and_register_global (Sidpos.check locs) ctx exec_expr id None [] (Ity.ity_of_ty ty) in
+            {ctx with env= bind_ls ls v ctx.env}, Sidpos.add_id id locs
+          | _ ->
+            Debug.dprintf debug_trace_exec "EVAL GLOBAL LOGICAL FUN %a at %a@."
+              print_decoded id.id_string
+              Pp.(print_option_or_default "NO LOC" Loc.pp_position) id.id_loc;
+            let ity = List.fold_right
+              (fun ty acc -> ity_func (ity_of_ty ty) acc)
+              ls.ls_args
+              (ity_of_ty ty) in
+            let v = get_and_register_global (Sidpos.check locs) ctx exec_expr id None [] ity in
+            {ctx with env= bind_ls ls v ctx.env}, Sidpos.add_id id locs
+          end
         end
       | _ -> ctx, locs
       end

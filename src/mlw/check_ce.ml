@@ -242,7 +242,8 @@ let import_model_const ity = function
 
     @raise CannotImportModelValue when the value cannot be imported *)
 let rec import_model_value loc env check known th_known ity v =
-  Debug.dprintf debug_check_ce_rac_results "Import model value from prover model:@ %a@."
+  Debug.dprintf debug_check_ce_rac_results "Import model value from prover model:@. type = %a@. value = %a@."
+    print_ity ity
     print_model_value v;
   let ts, l1, l2 = ity_components ity in
   let subst = its_match_regs ts l1 l2 in
@@ -295,7 +296,7 @@ let rec import_model_value loc env check known th_known ity v =
             import_model_value loc env check known th_known (ity_of_ty ty_res) x
           in
           get_or_stuck loc env ity "range projection" (proj_value ity ls x)
-      | Array a ->
+      | Array a -> (* TODO_WIP simplify using Function Ite *)
           let open Ty in
           if not (its_equal def.Pdecl.itd_its its_func) then
             cannot_import "Cannot import array as %a" print_its def.Pdecl.itd_its;
@@ -314,12 +315,48 @@ let rec import_model_value loc env check known th_known ity v =
           let v0 = import_model_value loc env check known th_known value_ity
               a.arr_others in
           purefun_value ~result_ity:ity ~arg_ity:key_ity mv v0
-      | Ite _ -> cannot_import "WIP_TODO import ite value"
-      | Let _ -> cannot_import "WIP_TODO import let value"
-      | Function _ -> cannot_import "WIP_TODO import function value"
+      | Ite (b, v1, v2) ->
+          let open Ty in
+          let b = import_model_value loc env check known th_known ity_bool b in
+          let _, b = term_of_value env [] b in
+          let v1 = import_model_value loc env check known th_known ity v1 in
+          let _, t1 = term_of_value env [] v1 in
+          let v2 = import_model_value loc env check known th_known ity v2 in
+          let _, t2 = term_of_value env [] v2 in
+          ite_value ity b t1 t2
+      | Let (ls, v) -> cannot_import "TODO_WIP cannot import Let value"
+      | Function (args,v) -> (* TODO_WIP check that bound args are correctly handled (substitution?) *)
+          let open Ty in
+          if not (its_equal ts its_func) then
+            cannot_import "Cannot import function as %a" print_its ts;
+          let rec extract_function_ity l args = begin match l with
+            | [a;b] ->
+                begin try
+                  let ts', l1', l2' = ity_components b in
+                  if (its_equal ts' its_func) then
+                    extract_function_ity l1' (a::args)
+                  else
+                    b, (a::args)
+                with
+                | _ -> b, [a]
+                end
+            | _ -> assert false
+            end
+          in
+          let result_ity, args_ity = extract_function_ity l1 [] in
+          let args_preid = List.map (fun str -> Ident.id_fresh str) args in
+          let args_vs =
+            try List.map2
+              (fun ity str -> create_vsymbol str (ty_of_ity ity))
+              args_ity args_preid
+            with
+            | _ -> cannot_import "Cannot import function when type does not match arity"
+          in
+          let v0 = import_model_value loc env check known th_known result_ity v in
+          logicfun_value ~result_ity ~args_vs v0
       | Unparsed s -> cannot_import "unparsed value %s" s
       | Undefined -> undefined_value env ity in
-  check ity res;
+  check ity res; (* TODO_WIP does not work when ity = (->) *)
   res
 
 let oracle_of_model pm model =
@@ -711,7 +748,7 @@ let rec model_value v =
       else
         Apply (id_name rs.rs_name, vs) )
   | Vreal _ | Vfloat _ | Vfloat_mode _
-  | Vfun _ | Vpurefun _ | Vterm _ | Vundefined ->
+  | Vfun _ | Vpurefun _ | Vlogicfun _ | Vterm _ | Vundefined ->
       failwith "Cannot convert interpreter value to model value"
 
 (** Transform an interpretation log into a prover model.

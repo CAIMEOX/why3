@@ -66,8 +66,9 @@ module rec Value : sig
     | Vbool of bool
     | Vproj of lsymbol * value
     | Varray of value array
-    | Vpurefun of ty (* keys *) * value Mv.t * value
+    | Vpurefun of ty (* keys *) * value Mv.t * value (* TODO_WIP subsumed by Vlogicfun *)
     | Vfun of value Mvs.t (* closure *) * vsymbol * expr
+    | Vlogicfun of vsymbol list * value (* fun v1 v2 ... vk -> v *)
     | Vterm of term
     (** Result of a pure expression *)
     | Vundefined
@@ -92,6 +93,7 @@ end = struct
     | Varray of value array
     | Vpurefun of ty (* keys *) * value Mv.t * value
     | Vfun of value Mvs.t (* closure *) * vsymbol * expr
+    | Vlogicfun of vsymbol list * value (* fun v1 v2 ... vk -> v *)
     | Vterm of term
     | Vundefined
   and field = Field of value ref
@@ -143,6 +145,10 @@ end = struct
           cmptr (fun (_,_,x) -> x) compare_values;
         ] (ty1, mv1, v1) (ty2, mv2, v2)
     | Vpurefun _, _ -> -1 | _, Vpurefun _ -> 1
+    | Vlogicfun (vs1, v1) , Vlogicfun (vs2, v2) ->
+        let cmp_vsymbols = cmp_lists [cmptr (fun x -> x) vs_compare] in
+        cmp [cmptr fst cmp_vsymbols; cmptr snd compare_values] (vs1, v1) (vs2, v2)
+    | Vlogicfun _, _ -> -1 | _, Vlogicfun _ -> 1
     | Vterm t1, Vterm t2 ->
         t_compare t1 t2
     | Vterm _, _ -> -1 | _, Vterm _ -> 1
@@ -188,8 +194,14 @@ let bool_value b = value ty_bool (Vbool b)
 let constr_value ity rs fs vl =
   value (ty_of_ity ity) (Vconstr (rs, fs, List.map field vl))
 
-let purefun_value ~result_ity ~arg_ity mv v =
+let purefun_value ~result_ity ~arg_ity mv v = (* TODO_WIP subsumed by logicfun_value *)
   value (ty_of_ity result_ity) (Vpurefun (ty_of_ity arg_ity, mv, v))
+
+let logicfun_value ~result_ity ~args_vs v =
+  value (ty_of_ity result_ity) (Vlogicfun (args_vs, v))
+
+let ite_value ~ity b t1 t2 =
+  value (ty_of_ity ity) (Vterm (t_if b t1 t2))
 
 let unit_value =
   value (ty_tuple []) (Vconstr (Expr.rs_void, [], []))
@@ -285,6 +297,10 @@ and print_value' fmt v =
   | Vpurefun (_, mv, v) ->
       fprintf fmt "@[[|%a; _ -> %a|]@]" (pp_bindings ~delims:Pp.(nothing,nothing) print_value print_value)
         (Mv.bindings mv) print_value v
+  | Vlogicfun (args, v) ->
+      fprintf fmt "@[[|%a -> %a|]@]"
+        (Pp.print_list Pp.comma print_vs) args
+        print_value v
   | Vterm t ->
       print_term fmt t
   | Vundefined -> fprintf fmt "UNDEFINED"
@@ -298,6 +314,7 @@ let rec snapshot v =
     | Vpurefun (ty, mv, v) ->
         let mv = Mv.(fold (fun k v -> add (snapshot k) (snapshot v)) mv empty) in
         Vpurefun (ty, mv, snapshot v)
+    | Vlogicfun (args, v) -> Vlogicfun (args, snapshot v)
     | Vproj (rs, v) -> Vproj (rs, snapshot v)
     | Varray a -> Varray (Array.map snapshot a)
     | Vfloat _ | Vstring _ | Vterm _ | Vbool _ | Vreal _
@@ -1169,6 +1186,10 @@ let rec term_of_value ?(ty_mt=Mtv.empty) (env: env) vsenv v : (vsymbol * term) l
         vsenv, t in
       let vsenv, t = Mv.fold mk_case m (term_of_value ~ty_mt env vsenv def) in
       vsenv, t_lambda [vs_arg] [] t
+  | Vlogicfun (args, v) ->
+      (* TERM: fun arg1 ... argk -> v *)
+      let vsenv, value = term_of_value ~ty_mt env vsenv v in
+      vsenv, t_lambda args [] value
 
 type compute_term = env -> Term.term -> Term.term
 

@@ -60,6 +60,8 @@ module rec Value : sig
         model/candidate counterexample. See {!type:Model_parser.model_array}. *)
     | Vfun of value Term.Mvs.t (* closure values *) * Term.vsymbol * Expr.expr
     (** A function value *)
+    | Vlogicfun of Term.vsymbol list * value
+    (** A logical function value *)
     | Vterm of Term.term
     (** The result of a pure expression *)
     | Vundefined
@@ -99,6 +101,8 @@ val real_value : Big_real.real -> value
 
 val constr_value : Ity.ity -> Expr.rsymbol -> Expr.rsymbol list -> value list -> value
 val purefun_value : result_ity:Ity.ity -> arg_ity:Ity.ity -> value Mv.t -> value -> value
+val logicfun_value : result_ity:Ity.ity -> args_vs:Term.vsymbol list -> value -> value
+val ite_value : ity:Ity.ity -> Term.term -> Term.term -> Term.term -> value
 val unit_value : value
 
 val range_value : Ity.ity -> BigInt.t -> value
