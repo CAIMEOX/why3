@@ -86,32 +86,6 @@ val field : value -> field
 val field_get : field -> value
 val field_set : field -> value -> unit
 
-(** {4 Constructors}
-
-    Non defensive API for building [value]s: there are no checks that
-    [ity] is compatible with the [value] being built. *)
-
-(* TODO: make it defensive? *)
-val bool_value : bool -> value
-val int_value : BigInt.t -> value
-val string_value : string -> value
-val num_value : Ity.ity -> BigInt.t -> value
-val float_value : Ity.ity -> big_float -> value
-val real_value : Big_real.real -> value
-
-val constr_value : Ity.ity -> Expr.rsymbol -> Expr.rsymbol list -> value list -> value
-val purefun_value : result_ity:Ity.ity -> arg_ity:Ity.ity -> value Mv.t -> value -> value
-val logicfun_value : result_ity:Ity.ity -> args_vs:Term.vsymbol list -> value -> value
-val ite_value : ity:Ity.ity -> Term.term -> Term.term -> Term.term -> value
-val unit_value : value
-
-val range_value : Ity.ity -> BigInt.t -> value
-(** Returns a range value, or raises [Incomplete] if the value is outside the range. *)
-
-val proj_value : Ity.ity -> Term.lsymbol -> value -> value option
-(** Returns a range value, or [None] if the type is a range, the value is
-   outside. *)
-
 (** {4 Snapshots}
 
     Values are mutable, the following functions make deep-copies. *)
@@ -260,6 +234,34 @@ type compute_term = env -> Term.term -> Term.term
 val compute_term_dummy : compute_term
 (** An implementation that is just the identity, i.e. it does {e not} reduce the
     term. *)
+
+(** {4 Constructors}
+
+    Non defensive API for building [value]s: there are no checks that
+    [ity] is compatible with the [value] being built. *)
+
+(* TODO: make it defensive? *)
+val bool_value : bool -> value
+val int_value : BigInt.t -> value
+val string_value : string -> value
+val num_value : Ity.ity -> BigInt.t -> value
+val float_value : Ity.ity -> big_float -> value
+val real_value : Big_real.real -> value
+
+val constr_value : Ity.ity -> Expr.rsymbol -> Expr.rsymbol list -> value list -> value
+val purefun_value : result_ity:Ity.ity -> arg_ity:Ity.ity -> value Mv.t -> value -> value
+val logicfun_value : result_ity:Ity.ity -> args_vs:Term.vsymbol list -> value -> value
+val ite_value : ity:Ity.ity -> env -> value -> value -> value -> value
+val apply_value : ty:Ty.ty option -> env -> Term.lsymbol -> value list -> value
+val var_value : ity:Ity.ity -> Term.vsymbol -> value
+val unit_value : value
+
+val range_value : Ity.ity -> BigInt.t -> value
+(** Returns a range value, or raises [Incomplete] if the value is outside the range. *)
+
+val proj_value : Ity.ity -> Term.lsymbol -> value -> value option
+(** Returns a range value, or [None] if the type is a range, the value is
+   outside. *)
 
 (** {4 Default values} *)
 

@@ -179,63 +179,7 @@ let field_get (Field r) = r.contents
 
 let field_set (Field r) v = r := v
 
-let int_value n = value ty_int (Vnum n)
-
-let num_value ity n = value (ty_of_ity ity) (Vnum n)
-
-let float_value ity f = value (ty_of_ity ity) (Vfloat f)
-
-let real_value r = value ty_real (Vreal r)
-
-let string_value s = value ty_str (Vstring s)
-
-let bool_value b = value ty_bool (Vbool b)
-
-let constr_value ity rs fs vl =
-  value (ty_of_ity ity) (Vconstr (rs, fs, List.map field vl))
-
-let purefun_value ~result_ity ~arg_ity mv v = (* TODO_WIP subsumed by logicfun_value *)
-  value (ty_of_ity result_ity) (Vpurefun (ty_of_ity arg_ity, mv, v))
-
-let logicfun_value ~result_ity ~args_vs v =
-  value (ty_of_ity result_ity) (Vlogicfun (args_vs, v))
-
-let ite_value ~ity b t1 t2 =
-  value (ty_of_ity ity) (Vterm (t_if b t1 t2))
-
-let unit_value =
-  value (ty_tuple []) (Vconstr (Expr.rs_void, [], []))
-
 (**********************************************************************)
-
-let range_value ity n =
-  begin match ity_components ity with
-  | { its_def = Range r }, _, _ ->
-      begin try
-          Number.(check_range { il_kind = ILitUnk; il_int = n } r)
-        with Number.OutOfRange _ ->
-          raise (Incomplete "value out of range")
-      end
-  | _ -> ()
-  end;
-  value (ty_of_ity ity) (Vnum n)
-
-let proj_value ity ls v =
-  let valid_range =
-    match ity_components ity, v with
-      | ({ its_def = Range r; its_ts= ts }, _, _), {v_desc= Vnum n}
-        when ls.ls_name.id_string = ts.ts_name.id_string ^ "'int"
-          && Opt.equal ty_equal ls.ls_value (Some ty_int) -> (
-          try
-            Number.(check_range { il_kind = ILitUnk; il_int = n } r);
-            true
-          with Number.OutOfRange _ ->
-            false )
-      | _ -> true in
-  if valid_range then
-    Some (value (ty_of_ity ity) (Vproj (ls, v)))
-  else
-    None
 
 let mode_to_string m =
   let open Mlmpfr_wrapper in
@@ -1195,6 +1139,74 @@ type compute_term = env -> Term.term -> Term.term
 
 let compute_term_dummy : compute_term = fun _ t -> t
 
+let int_value n = value ty_int (Vnum n)
+
+let num_value ity n = value (ty_of_ity ity) (Vnum n)
+
+let float_value ity f = value (ty_of_ity ity) (Vfloat f)
+
+let real_value r = value ty_real (Vreal r)
+
+let string_value s = value ty_str (Vstring s)
+
+let bool_value b = value ty_bool (Vbool b)
+
+let constr_value ity rs fs vl =
+  value (ty_of_ity ity) (Vconstr (rs, fs, List.map field vl))
+
+let purefun_value ~result_ity ~arg_ity mv v = (* TODO_WIP subsumed by logicfun_value *)
+  value (ty_of_ity result_ity) (Vpurefun (ty_of_ity arg_ity, mv, v))
+
+let logicfun_value ~result_ity ~args_vs v =
+  value (ty_of_ity result_ity) (Vlogicfun (args_vs, v))
+
+let ite_value ~ity env b v1 v2 =
+  let _, b = term_of_value env [] b in
+  let _, t1 = term_of_value env [] v1 in
+  let _, t2 = term_of_value env [] v2 in
+  value (ty_of_ity ity) (Vterm (t_if b t1 t2))
+
+let apply_value ~ty env ls vs =
+  let ty' = match ty with
+  | Some ty -> ty
+  | None -> ty_bool in
+  let ts = List.map (fun v -> snd (term_of_value env [] v)) vs in
+  value ty' (Vterm (t_app ls ts ty))
+
+let var_value ~ity vs =
+  value (ty_of_ity ity) (Vterm (t_var vs))
+
+let unit_value =
+  value (ty_tuple []) (Vconstr (Expr.rs_void, [], []))
+
+let range_value ity n =
+  begin match ity_components ity with
+  | { its_def = Range r }, _, _ ->
+      begin try
+          Number.(check_range { il_kind = ILitUnk; il_int = n } r)
+        with Number.OutOfRange _ ->
+          raise (Incomplete "value out of range")
+      end
+  | _ -> ()
+  end;
+  value (ty_of_ity ity) (Vnum n)
+
+let proj_value ity ls v =
+  let valid_range =
+    match ity_components ity, v with
+      | ({ its_def = Range r; its_ts= ts }, _, _), {v_desc= Vnum n}
+        when ls.ls_name.id_string = ts.ts_name.id_string ^ "'int"
+          && Opt.equal ty_equal ls.ls_value (Some ty_int) -> (
+          try
+            Number.(check_range { il_kind = ILitUnk; il_int = n } r);
+            true
+          with Number.OutOfRange _ ->
+            false )
+      | _ -> true in
+  if valid_range then
+    Some (value (ty_of_ity ity) (Vproj (ls, v)))
+  else
+    None
 
 (******************************************************************************)
 (*                           TYPE DEFAULTS                                    *)

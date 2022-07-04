@@ -241,17 +241,25 @@ let import_model_const ity = function
     type is cloned with different types as instantiations of the abstract type.
 
     @raise CannotImportModelValue when the value cannot be imported *)
-let rec import_model_value loc env check known th_known ity v =
+let rec import_model_value loc env var_env check known th_known ity v =
   Debug.dprintf debug_check_ce_rac_results "Import model value from prover model:@. type = %a@. value = %a@."
     print_ity ity
     print_model_value v;
-  let ts, l1, l2 = ity_components ity in
-  let subst = its_match_regs ts l1 l2 in
-  let def = Pdecl.find_its_defn known ts in
   let res = match v with
       | Const c -> import_model_const ity c
-      | Var _ -> undefined_value env ity
+      | Var s ->
+        (* check if the variable is in the local environment [var_env] of bounded variables
+           (i.e. inside the body of a function) *)
+        begin try
+          let vs = Mstr.find s var_env in
+          var_value ~ity vs
+        with
+        | _ -> undefined_value env ity
+        end
       | Record r ->
+          let ts, l1, l2 = ity_components ity in
+          let subst = its_match_regs ts l1 l2 in
+          let def = Pdecl.find_its_defn known ts in
           let rs = match def.Pdecl.itd_constructors with [rs] -> rs | _ ->
             cannot_import "type with not exactly one constructors %a/%d"
               print_its ts (List.length def.Pdecl.itd_constructors) in
@@ -259,21 +267,38 @@ let rec import_model_value loc env check known th_known ity v =
             let field_name = trace_or_name field_rs.rs_name in
             let field_ity = ity_full_inst subst (fd_of_rs field_rs).pv_ity in
             match List.assoc field_name r with
-            | v -> import_model_value loc env check known th_known field_ity v
+            | v -> import_model_value loc env var_env check known th_known field_ity v
             | exception Not_found ->
                 (* TODO Better create a default value? *)
                 undefined_value env field_ity in
           let vs = List.map aux def.Pdecl.itd_fields in
           constr_value ity rs def.Pdecl.itd_fields vs
       | Apply (s, vs) ->
-          let matching_name rs = String.equal rs.rs_name.id_string s in
-          let rs = List.find matching_name def.Pdecl.itd_constructors in
-          let itys = List.map (fun pv -> ity_full_inst subst pv.pv_ity)
-              rs.rs_cty.cty_args in
-          let vs =
-            List.map2 (import_model_value loc env check known th_known) itys vs
-          in
-          constr_value ity rs [] vs
+          begin try
+            (* first search a name matching [s] in the constructors for the type [ity] *)
+            let ts, l1, l2 = ity_components ity in
+            let subst = its_match_regs ts l1 l2 in
+            let def = Pdecl.find_its_defn known ts in
+            let matching_name rs = String.equal rs.rs_name.id_string s in
+            let rs = List.find matching_name def.Pdecl.itd_constructors in
+            let itys = List.map (fun pv -> ity_full_inst subst pv.pv_ity)
+                rs.rs_cty.cty_args in
+            let vs =
+              List.map2 (import_model_value loc env var_env check known th_known) itys vs
+            in
+            constr_value ity rs [] vs
+          with
+          | _ ->
+            (* if not found, test if this corresponds to a special case *)
+            begin match s with
+              | "=" -> (* equal predicate for the solver *)
+                let vs = (* TODO_WIP find a better solution than [ity_int] *)
+                  List.map (import_model_value loc env var_env check known th_known ity_int) vs
+                in
+                apply_value ~ty:None env ps_equ vs
+              | _ -> cannot_import "Cannot import Apply %s, name %s not found" s s
+            end
+          end
       | Proj (p, x) ->
           (* {p : ity -> ty_res => x: ty_res} : ITY *)
           let search (id, decl) = match decl.Decl.d_node with
@@ -293,11 +318,14 @@ let rec import_model_value loc env check known th_known ity v =
                            value type %a"
               Pretty.print_ls ls Pretty.print_ty ty_arg print_ity ity;
           let x =
-            import_model_value loc env check known th_known (ity_of_ty ty_res) x
+            import_model_value loc env var_env check known th_known (ity_of_ty ty_res) x
           in
           get_or_stuck loc env ity "range projection" (proj_value ity ls x)
       | Array a -> (* TODO_WIP simplify using Function Ite *)
           let open Ty in
+          let ts, l1, l2 = ity_components ity in
+          let subst = its_match_regs ts l1 l2 in
+          let def = Pdecl.find_its_defn known ts in
           if not (its_equal def.Pdecl.itd_its its_func) then
             cannot_import "Cannot import array as %a" print_its def.Pdecl.itd_its;
           let key_ity, value_ity = match def.Pdecl.itd_its.its_ts.ts_args with
@@ -306,54 +334,60 @@ let rec import_model_value loc env check known th_known ity v =
           let key_value ix = ix.arr_index_key, ix.arr_index_value in
           let keys, values = List.split (List.map key_value a.arr_indices) in
           let keys =
-            List.map (import_model_value loc env check known th_known key_ity)
+            List.map (import_model_value loc env var_env check known th_known key_ity)
               keys in
           let values =
-            List.map (import_model_value loc env check known th_known value_ity)
+            List.map (import_model_value loc env var_env check known th_known value_ity)
               values in
           let mv = Mv.of_list (List.combine keys values) in
-          let v0 = import_model_value loc env check known th_known value_ity
+          let v0 = import_model_value loc env var_env check known th_known value_ity
               a.arr_others in
           purefun_value ~result_ity:ity ~arg_ity:key_ity mv v0
       | Ite (b, v1, v2) ->
-          let open Ty in
-          let b = import_model_value loc env check known th_known ity_bool b in
-          let _, b = term_of_value env [] b in
-          let v1 = import_model_value loc env check known th_known ity v1 in
-          let _, t1 = term_of_value env [] v1 in
-          let v2 = import_model_value loc env check known th_known ity v2 in
-          let _, t2 = term_of_value env [] v2 in
-          ite_value ity b t1 t2
-      | Let (ls, v) -> cannot_import "TODO_WIP cannot import Let value"
-      | Function (args,v) -> (* TODO_WIP check that bound args are correctly handled (substitution?) *)
-          let open Ty in
+          let b = import_model_value loc env var_env check known th_known ity_bool b in
+          let v1 = import_model_value loc env var_env check known th_known ity v1 in
+          let v2 = import_model_value loc env var_env check known th_known ity v2 in
+          ite_value ~ity env b v1 v2
+      | Let _ -> cannot_import "Cannot import Let value" (* TODO *)
+      | Function (args,v) ->
+          let ts, l1, _ = ity_components ity in
           if not (its_equal ts its_func) then
-            cannot_import "Cannot import function as %a" print_its ts;
-          let rec extract_function_ity l args = begin match l with
-            | [a;b] ->
-                begin try
-                  let ts', l1', l2' = ity_components b in
-                  if (its_equal ts' its_func) then
-                    extract_function_ity l1' (a::args)
-                  else
-                    b, (a::args)
+            cannot_import "Cannot import function as %a" print_its ts
+          else begin
+            let rec extract_function_ity l args = begin match l with
+              | [a;b] ->
+                  begin try
+                    let ts', l1', _ = ity_components b in
+                    if (its_equal ts' its_func) then
+                      extract_function_ity l1' (a::args)
+                    else
+                      b, (a::args)
+                  with
+                  | _ -> b, [a]
+                  end
+              | _ -> assert false
+              end
+            in
+            (* [result_ity] is the type of the result, i.e. the last element of [l1] *)
+            (* [args_ity] is the type of each argument of the function *)
+            let result_ity, args_ity = extract_function_ity l1 [] in
+            (* [var_env'] is the list of the variables that are bound
+               in the body of the function *)
+            let var_env', args_vs =
+              List.split
+                (try List.map2
+                  (fun ity str ->
+                    let preid = Ident.id_fresh str in
+                    let vs = create_vsymbol preid (ty_of_ity ity) in
+                    ((preid.pre_name, vs), vs))
+                  args_ity args
                 with
-                | _ -> b, [a]
-                end
-            | _ -> assert false
-            end
-          in
-          let result_ity, args_ity = extract_function_ity l1 [] in
-          let args_preid = List.map (fun str -> Ident.id_fresh str) args in
-          let args_vs =
-            try List.map2
-              (fun ity str -> create_vsymbol str (ty_of_ity ity))
-              args_ity args_preid
-            with
-            | _ -> cannot_import "Cannot import function when type does not match arity"
-          in
-          let v0 = import_model_value loc env check known th_known result_ity v in
-          logicfun_value ~result_ity ~args_vs v0
+                | _ -> cannot_import "Cannot import function when type does not match arity")
+            in
+            let var_env = Mstr.union (fun _ _ vs2 -> Some vs2) var_env (Mstr.of_list var_env') in
+            let v0 = import_model_value loc env var_env check known th_known result_ity v in
+            logicfun_value ~result_ity ~args_vs v0
+          end
       | Unparsed s -> cannot_import "unparsed value %s" s
       | Undefined -> undefined_value env ity in
   check ity res; (* TODO_WIP does not work when ity = (->) *)
@@ -363,7 +397,7 @@ let oracle_of_model pm model =
   let import check oid loc env ity me =
     let loc = if loc <> None then loc else
         match oid with Some id -> id.id_loc | None -> None in
-    import_model_value loc env check pm.Pmodule.mod_known
+    import_model_value loc env Mstr.empty check pm.Pmodule.mod_known
       pm.Pmodule.mod_theory.Theory.th_known ity me.me_value in
   let for_variable env ?(check=fun _ _ -> ()) ~loc id ity =
     Opt.map (import check (Some id) loc env ity)
