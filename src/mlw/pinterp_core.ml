@@ -242,7 +242,7 @@ and print_value' fmt v =
       fprintf fmt "@[[|%a; _ -> %a|]@]" (pp_bindings ~delims:Pp.(nothing,nothing) print_value print_value)
         (Mv.bindings mv) print_value v
   | Vlogicfun (args, v) ->
-      fprintf fmt "@[[|%a -> %a|]@]"
+      fprintf fmt "@[fun (%a) ->@ %a@]"
         (Pp.print_list Pp.comma print_vs) args
         print_value v
   | Vterm t ->
@@ -843,18 +843,20 @@ let check_type_invs rac ?loc ~giant_steps env ity v =
   let ts = match ity.ity_node with
   | Ityapp (ts, _, _) | Ityreg {reg_its= ts} -> ts
   | Ityvar _ -> failwith "check_type_invs: type variable" in
-  let def = Pdecl.find_its_defn env.pmodule.Pmodule.mod_known ts in
-  if def.Pdecl.itd_invariant <> [] then
-    let fs_vs = match v.v_desc with
-      | Vconstr (_, fs, vs) ->
-          List.fold_right2 Mrs.add fs (List.map field_get vs) Mrs.empty
-      | _ -> failwith "check_type_invs: value is not record" in
-    let bind_field env rs =
-      bind_pvs (Opt.get rs.rs_field) (Mrs.find rs fs_vs) env in
-    let env = List.fold_left bind_field env def.Pdecl.itd_fields in
-    let desc = asprintf "of type %a" print_ity ity in
-    let ctx = mk_cntr_ctx env ?loc:loc ~desc ~giant_steps:(Some giant_steps) Vc.expl_type_inv in
-    check_terms rac ctx def.Pdecl.itd_invariant
+  match Pdecl.find_its_defn env.pmodule.Pmodule.mod_known ts with
+  | exception Not_found -> ()
+  | def when def.Pdecl.itd_invariant = [] -> ()
+  | def ->
+      let fs_vs = match v.v_desc with
+        | Vconstr (_, fs, vs) ->
+            List.fold_right2 Mrs.add fs (List.map field_get vs) Mrs.empty
+        | _ -> failwith "check_type_invs: value is not record" in
+      let bind_field env rs =
+        bind_pvs (Opt.get rs.rs_field) (Mrs.find rs fs_vs) env in
+      let env = List.fold_left bind_field env def.Pdecl.itd_fields in
+      let desc = asprintf "of type %a" print_ity ity in
+      let ctx = mk_cntr_ctx env ?loc:loc ~desc ~giant_steps:(Some giant_steps) Vc.expl_type_inv in
+      check_terms rac ctx def.Pdecl.itd_invariant
 
 let opt_or o1 o2 = if o1 <> None then o1 else o2
 

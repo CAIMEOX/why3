@@ -390,7 +390,7 @@ let rec import_model_value loc env var_env check known th_known ity v =
           end
       | Unparsed s -> cannot_import "unparsed value %s" s
       | Undefined -> undefined_value env ity in
-  check ity res; (* TODO_WIP does not work when ity = (->) *)
+  check ity res;
   res
 
 let oracle_of_model pm model =

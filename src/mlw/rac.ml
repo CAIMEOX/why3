@@ -132,7 +132,7 @@ let task_of_term ?(vsenv=[]) metas (env: env) t =
   let rec t_free_sls sofar t =
     t_fold (fun sofar t ->
         match t.t_node with
-        | Tapp (ls, []) -> Sls.add ls sofar
+        | Tapp (ls, _) -> t_free_sls (Sls.add ls sofar) t
         | _ -> t_free_sls sofar t) sofar t in
   let free_sls = t_free_sls Sls.empty t in
   let lsenv =
@@ -164,7 +164,8 @@ let task_of_term ?(vsenv=[]) metas (env: env) t =
         let vsenv, t = term_of_value env [] (Lazy.force (Mls.find ls lsenv)) in
         let task, ls_mt, ls_mv = List.fold_right bind_term vsenv (task, ls_mt, ls_mv) in
         let t = t_ty_subst ls_mt ls_mv t in
-        let ldecl = Decl.make_ls_defn ls [] t in
+        let vsl, _, t = t_open_lambda t in
+        let ldecl = Decl.make_ls_defn ls vsl t in
         let decl = create_logic_decl [ldecl] in
         let task = add_decl task decl in
         task, ls_mt, ls_mv
