@@ -192,7 +192,7 @@ let () = wrap_and_register
     (Tlist Ttrans) (fun l -> remove_list ~is_rec:false l)
 
 let () = wrap_and_register
-    ~desc:"remove <name list>@ removes@ the@ listed@ premises@ and@ everything@ \
+    ~desc:"remove_rec <name list>@ removes@ the@ listed@ premises@ and@ everything@ \
            depending@ on@ that."
      "remove_rec"
     (Tlist Ttrans) (fun l -> remove_list ~is_rec:true l)

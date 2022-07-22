@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="Isabelle" version="2019" timelimit="0" steplimit="0" memlimit="0"/>
+<prover id="1" name="Z3" version="4.8.6" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="2" name="Alt-Ergo" version="2.3.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="3" name="CVC4" version="1.7" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="micro-C">
+<path name=".."/><path name="pgcd.c"/>
+<theory name="Pgcd">
+ <goal name="gcd_self" proved="true">
+ <proof prover="3"><result status="valid" time="0.25" steps="42843"/></proof>
+ </goal>
+ <goal name="gcd_ab">
+ <proof prover="0" obsolete="true"><path name="pgcd_Pgcd_gcd_ab_2.xml"/><result status="unknown" time="0.00" steps="0"/></proof>
+ <proof prover="1"><result status="timeout" time="1.00" steps="8913958"/></proof>
+ <proof prover="2"><result status="timeout" time="1.00"/></proof>
+ <proof prover="3"><result status="timeout" time="1.00" steps="143042"/></proof>
+ <transf name="unfold" arg1="is_gcd">
+  <goal name="gcd_ab.0">
+  <transf name="unfold" arg1="comdiv">
+   <goal name="gcd_ab.0.0">
+   <transf name="split_vc" >
+    <goal name="gcd_ab.0.0.0" proved="true">
+    <transf name="unfold" proved="true" arg1="divides">
+     <goal name="gcd_ab.0.0.0.0" proved="true">
+     <transf name="unfold" proved="true" arg1="divides" arg2="in" arg3="H2">
+      <goal name="gcd_ab.0.0.0.0.0" proved="true">
+      <transf name="destruct" proved="true" arg1="H2">
+       <goal name="gcd_ab.0.0.0.0.0.0" proved="true">
+       <transf name="unfold" proved="true" arg1="divides" arg2="in" arg3="H1">
+        <goal name="gcd_ab.0.0.0.0.0.0.0" proved="true">
+        <transf name="destruct" proved="true" arg1="H1">
+         <goal name="gcd_ab.0.0.0.0.0.0.0.0" proved="true">
+         <transf name="exists" proved="true" arg1="(k1+k)">
+          <goal name="gcd_ab.0.0.0.0.0.0.0.0.0" proved="true">
+          <proof prover="3"><result status="valid" time="0.05" steps="6139"/></proof>
+          </goal>
+         </transf>
+         </goal>
+        </transf>
+        </goal>
+       </transf>
+       </goal>
+      </transf>
+      </goal>
+     </transf>
+     </goal>
+    </transf>
+    </goal>
+    <goal name="gcd_ab.0.0.1" proved="true">
+    <proof prover="3"><result status="valid" time="0.01" steps="6062"/></proof>
+    </goal>
+    <goal name="gcd_ab.0.0.2">
+    <proof prover="1"><result status="timeout" time="1.00" steps="8762171"/></proof>
+    <proof prover="2"><result status="timeout" time="1.00"/></proof>
+    <proof prover="3"><result status="timeout" time="1.00" steps="164638"/></proof>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="gcd_ba">
+ <proof prover="1"><result status="timeout" time="1.00" steps="1828422"/></proof>
+ <proof prover="2"><result status="timeout" time="1.00"/></proof>
+ <proof prover="3"><result status="timeout" time="1.00" steps="137370"/></proof>
+ <transf name="split_vc" >
+  <goal name="gcd_ba.0">
+  <proof prover="1" timelimit="10" memlimit="4000"><result status="timeout" time="10.00" steps="105658739"/></proof>
+  <proof prover="2" timelimit="10" memlimit="4000"><result status="timeout" time="10.00"/></proof>
+  <proof prover="3" timelimit="10" memlimit="4000"><result status="timeout" time="10.00" steps="776624"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="pgcd&#39;vc" expl="VC for pgcd" proved="true">
+ <proof prover="2"><result status="valid" time="0.01" steps="38"/></proof>
+ <proof prover="3"><result status="timeout" time="1.00" steps="140022"/></proof>
+ <transf name="split_vc" proved="true" >
+  <goal name="pgcd&#39;vc.0" expl="loop invariant init" proved="true">
+  <proof prover="3"><result status="valid" time="0.02" steps="6221"/></proof>
+  </goal>
+  <goal name="pgcd&#39;vc.1" expl="loop variant decrease" proved="true">
+  <proof prover="3"><result status="valid" time="0.02" steps="7091"/></proof>
+  </goal>
+  <goal name="pgcd&#39;vc.2" expl="loop invariant preservation" proved="true">
+  <proof prover="2"><result status="valid" time="0.01" steps="20"/></proof>
+  </goal>
+  <goal name="pgcd&#39;vc.3" expl="loop variant decrease" proved="true">
+  <proof prover="3"><result status="valid" time="0.03" steps="7114"/></proof>
+  </goal>
+  <goal name="pgcd&#39;vc.4" expl="loop invariant preservation" proved="true">
+  <proof prover="2"><result status="valid" time="0.01" steps="20"/></proof>
+  </goal>
+  <goal name="pgcd&#39;vc.5" expl="postcondition" proved="true">
+  <proof prover="3"><result status="valid" time="0.10" steps="21889"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>

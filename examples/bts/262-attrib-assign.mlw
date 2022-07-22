@@ -1,0 +1,4 @@
+
+val ref x : int
+
+let f () = [@attr] x <- 42

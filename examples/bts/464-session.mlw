@@ -1,0 +1,27 @@
+
+
+
+
+module M1
+
+use int.Int
+
+goal g1 : 2+2 = 5
+
+goal g1t : 2+2 = 4
+
+goal g2 : 4+5 = 7
+
+end
+
+
+
+module M2
+
+use int.Int
+
+goal g3 : 2+2 = 19
+
+goal g4 : 4+5 = 67
+
+end
