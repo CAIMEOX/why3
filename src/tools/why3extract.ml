@@ -115,6 +115,30 @@ let opt_driver =
     eprintf "%a@." Exn_printer.exn_printer e;
     exit 1
 
+(** Ensure the existence of directories all along the given `path`. If a
+    directory does not exist, it is created with permission 755.
+    @raise Sys_error if a part of the path exists but is not a directory
+ *)
+let ensure_path_existence path =
+  (* TODO: use Str.split *)
+  let dlist = String.split_on_char '/' path in
+  if List.length dlist > 0 then
+    let rec aux dir dl =
+      if not (Sys.file_exists dir) then
+        begin
+          Debug.dprintf Pdriver.debug "mkdir '%s'@." dir ;
+          Unix.mkdir dir 0o755
+        end
+      else if not (Sys.is_directory dir) then
+        raise (Sys_error (dir ^ " is not a directory"));
+      match dl with
+      | [] -> ()
+      | d :: tail -> aux (Filename.concat dir d) tail
+    in
+    let first_dir =
+      if String.length (List.hd dlist) = 0 then "/" else (List.hd dlist) in
+    aux first_dir (List.tl dlist)
+
 let get_cout_old ?fname fg m = match opt_output with
   | None ->
       let tname = m.mod_theory.th_name.Ident.id_string in
@@ -123,6 +147,8 @@ let get_cout_old ?fname fg m = match opt_output with
       stdout, None
   | Some f ->
       let file = Filename.concat f (fg ?fname m) in
+      Debug.dprintf Pdriver.debug "extract module to file %s@." file ;
+      let _ = ensure_path_existence (Filename.dirname file) in 
       let tname = m.mod_theory.th_name.Ident.id_string in
       Debug.dprintf Pdriver.debug "extract module %s to file %s@." tname file;
       let old = if Sys.file_exists file then begin
