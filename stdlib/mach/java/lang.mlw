@@ -1,0 +1,246 @@
+(** {1 Package java.lang } *)
+
+(**
+ These module are used to mimic Java classes from the standard Java
+ package `java.lang`.
+
+ Modules used to represent Java integers are based
+ on {h <a href="https://why3.lri.fr/stdlib/mach.int.html#Bounded_int_">}`mach.int.Bounded_int`{h </a>} (similarly to {h <a href="https://why3.lri.fr/stdlib/mach.int.html#Int32_">}`mach.int.Int32`{h </a>} for instance).
+ *)
+
+
+(** {2 java.lang.Short } *)
+ 
+module Short
+  use int.Int
+
+  type short = < range -0x8000 0x7fff >
+
+  let constant min_short : short = - 0x8000
+  let constant max_short : short =   0x7fff
+  function to_int (x : short) : int = short'int x
+
+  clone export mach.int.Bounded_int with
+    type t = short,
+    constant min = short'minInt,
+    constant max = short'maxInt,
+    function to_int = short'int,
+    lemma to_int_in_bounds,
+    lemma extensionality
+end
+
+(** {2 java.lang.Integer } *)
+
+module Integer
+  use int.Int
+
+  type integer = < range -0x8000_0000 0x7fff_ffff >
+
+  let constant min_integer : integer = -0x8000_0000
+  let constant max_integer : integer = 0x7fff_ffff
+  function to_int (x : integer) : int = integer'int x
+
+  clone export mach.int.Bounded_int with
+    type t = integer,
+    constant min = integer'minInt,
+    constant max = integer'maxInt,
+    function to_int = integer'int,
+    lemma to_int_in_bounds,
+    lemma extensionality
+
+  let function from_int (n : int) : integer
+    requires { [@expl:integer overflow] in_bounds n }
+    ensures  { result = n }
+  = of_int n
+
+(** This function is used by modules that mimic Java collections. The
+   size of a collection is represented by a 32 bit integer and if the
+   collection contains Integer.MAX_VALUE or more elements then the
+   `size` method always returns the same value, Integer.MAX_VALUE.
+
+   See for instance the module {h <a href="mach.java.util.html#List_">}`java.util.List`{h </a>.} *)
+  
+  let function enforced_integer (a : int) : integer
+    ensures { result = if min_integer < a < max_integer then a
+                       else if a <= min_integer then min_integer
+                       else max_integer (* a >= max_integer *) }
+  =
+    if to_int min_integer < a < to_int max_integer then from_int a
+    else if a <= to_int min_integer then min_integer
+    else max_integer (* a >= max_integer *)
+end
+
+(** {2 java.lang.Long } *)
+
+module Long
+
+  use int.Int
+  use Integer
+
+  type long = < range -0x8000_0000_0000_0000 0x7fff_ffff_ffff_ffff >
+
+  let constant min_long : long = - 0x8000_0000_0000_0000
+  let constant max_long : long =   0x7fff_ffff_ffff_ffff
+  function to_int (x : long) : int = long'int x
+
+  clone export mach.int.Bounded_int with
+    type t = long,
+    constant min = long'minInt,
+    constant max = long'maxInt,
+    function to_int = long'int,
+    lemma to_int_in_bounds,
+    lemma extensionality
+
+  let function of_integer (x : integer) : long =
+    ensures { to_int result = Integer.to_int x }
+    let x' = Integer.to_int x in
+      of_int x'
+
+  val function int_value (x : long) : integer
+    requires { Integer.in_bounds x }
+    ensures { result = Integer.from_int x }
+end
+
+(** {2 java.String } *)
+
+module String
+  use export string.String
+  use Integer
+  use Long
+
+  val concat (s1 s2 : string) : string
+
+  val of_integer (i : integer) : string
+
+  val of_long (l : long) : string
+
+  val format_1 (fmt :string) (x0 : 'a) : string
+
+  val format_2 (fmt :string) (x0 : 'a) (x1 : 'b) : string
+
+  val format_3 (fmt :string) (x0 : 'a) (x1 : 'b) (x2 : 'c) : string
+
+  val format_4 (fmt :string) (x0 : 'a) (x1 : 'b) (x2 : 'c) (x3 : 'c) : string
+
+end
+
+
+(** {2 Java arrays} *)
+
+(** This module is used where arrays are used in Java (i.e. with []
+    syntax). *) 
+
+module Array
+  use int.Int
+  use Integer
+  use map.Map as M
+
+  type array [@extraction:array] 'a = private {
+    mutable ghost elts : int -> 'a;
+                length : integer;
+  } invariant {
+    0 <= length 
+  }
+
+  function ([]) (a: array 'a) (i: int) : 'a = a.elts i
+
+  val ([]) (a: array 'a) (i: integer) : 'a
+    requires { [@expl:index in array bounds] 0 <= i < a.length }
+    ensures  { result = a[i] }
+
+  val ([]<-) (a: array 'a) (i: integer) (v: 'a) : unit writes {a}
+    requires { [@expl:index in array bounds] 0 <= i < a.length }
+    ensures  { a.elts = M.set (old a.elts) i v }
+
+  (** unsafe get/set operations with no precondition *)
+
+  exception OutOfBounds
+
+  let defensive_get (a: array 'a) (i: integer)
+    ensures { 0 <= i < a.length }
+    ensures { result = a[i] }
+    raises  { OutOfBounds -> i < 0 \/ i >= a.length }
+  = if i < of_int 0 || i >= length a then raise OutOfBounds;
+    a[i]
+
+  let defensive_set (a: array 'a) (i: integer) (v: 'a)
+    ensures { 0 <= i < a.length }
+    ensures { a.elts = M.set (old a.elts) i v }
+    raises  { OutOfBounds -> (i < 0 \/ i >= a.length) /\ a = old a }
+  = if i < of_int 0 || i >= length a then raise OutOfBounds;
+    a[i] <- v
+
+  val make [@extraction:array_make] (n: integer) (v: 'a) : array 'a
+    requires { [@expl:array creation size] n >= 0 }
+    ensures  { forall i:int. 0 <= i < n -> result[i] = v }
+    ensures  { result.length = n }
+
+  val append (a1: array 'a) (a2: array 'a) : array 'a
+    ensures { result.length = a1.length + a2.length }
+    ensures { forall i:int. 0 <= i < a1.length -> result[i] = a1[i] }
+    ensures { forall i:int. 0 <= i < a2.length ->
+              result[a1.length + i] = a2[i] }
+
+  val sub (a: array 'a) (ofs: integer) (len: integer) : array 'a
+    requires { 0 <= ofs /\ 0 <= len }
+    requires { ofs + len <= a.length }
+    ensures  { result.length = len }
+    ensures  { forall i:int. 0 <= i < len ->
+               result[i] = a[ofs + i] }
+
+  val copy (a: array 'a) : array 'a
+    ensures  { result.length = a.length }
+    ensures  { forall i:int. 0 <= i < result.length -> result[i] = a[i] }
+
+  val fill (a: array 'a) (ofs: integer) (len: integer) (v: 'a) : unit writes {a}
+    requires { 0 <= ofs /\ 0 <= len }
+    requires { ofs + len <= a.length }
+    ensures  { forall i:int.
+      (0 <= i < ofs \/
+        ofs + len <= i < a.length) -> a[i] = (old a)[i] }
+    ensures  { forall i:int. ofs <= i < ofs + len ->
+               a[i] = v }
+
+  val blit (a1: array 'a) (ofs1: integer)
+                 (a2: array 'a) (ofs2: integer) (len: integer) : unit writes {a2}
+    requires { 0 <= ofs1 /\ 0 <= len }
+    requires { ofs1 + len <= a1.length }
+    requires { 0 <= ofs2 /\
+               ofs2 + len <= a2.length }
+    ensures  { forall i:int.
+      (0 <= i < ofs2 \/
+       ofs2 + len <= i < a2.length) ->
+       a2[i] = (old a2)[i] }
+    ensures  { forall i:int.
+      ofs2 <= i < ofs2 + len ->
+      a2[i] = a1[ofs1 + i - ofs2] }
+
+  val self_blit (a: array 'a) (ofs1: integer) (ofs2: integer) (len: integer) : unit
+    writes {a}
+    requires { 0 <= ofs1 /\ 0 <= len /\
+               ofs1 + len <= a.length }
+    requires { 0 <= ofs2 /\ ofs2 + len <= a.length }
+    ensures  { forall i:int.
+      (0 <= i < ofs2 \/
+       ofs2 + len <= i < a.length) -> a[i] = (old a)[i] }
+    ensures  { forall i:int.
+      ofs2 <= i < ofs2 + len ->
+      a[i] = (old a)[ofs1 + i - ofs2] }
+
+end
+
+
+
+(** {2 Exceptions } *)
+
+module IndexOutOfBoundsException
+  exception E
+end
+
+module IllegalArgumentException
+  exception E
+end
+
+module ArithmeticException
+  exception E
+end
