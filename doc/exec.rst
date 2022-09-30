@@ -381,3 +381,6 @@ This gives the following C code.
      }
      return idx;
    }
+
+.. include:: whyml2java.rst
+  
