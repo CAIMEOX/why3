@@ -87,13 +87,17 @@ let craft_engine p env prs task =
   collect_rules p env km prs task
 
 let collect_rules_trans p env : Reduction_engine.engine Trans.trans =
-  Trans.on_tagged_pr meta_rewrite
-    (fun prs -> if p.compute_defs
-    then Trans.store (craft_engine p env prs)
-    else Trans.on_tagged_ls meta_rewrite_def
-        (fun lss -> let p = { p with compute_def_set = lss } in
-        Trans.store (craft_engine p env prs)
-        ))
+  Trans.on_tagged_ls Inlining.meta_inline_no
+    (fun lss ->
+       let p = { p with compute_no_inlining = lss } in
+       Trans.on_tagged_pr meta_rewrite
+         (fun prs ->
+            if p.compute_defs
+            then Trans.store (craft_engine p env prs)
+            else Trans.on_tagged_ls meta_rewrite_def
+                (fun lss -> let p = { p with compute_def_set = lss } in
+                  Trans.store (craft_engine p env prs)
+                )))
 
 let normalize_goal_transf ?pr_norm ?step_limit p env : 'a Trans.trans =
   let tr = Trans.on_meta_excl meta_compute_max_quantifier_domain @@ function
@@ -114,6 +118,7 @@ let default_param = {
   compute_defs = false;
   compute_builtin = false;
   compute_def_set = Term.Mls.empty;
+  compute_no_inlining = Term.Mls.empty;
   compute_max_quantifier_domain = 10;
 }
 

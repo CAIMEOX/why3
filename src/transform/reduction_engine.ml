@@ -392,6 +392,7 @@ type params =
   { compute_defs : bool;
     compute_builtin : bool;
     compute_def_set : Term.Sls.t;
+    compute_no_inlining : Term.Sls.t;
     compute_max_quantifier_domain : int;
   }
 
@@ -1169,10 +1170,11 @@ and reduce_app_no_equ engine st ls ~orig ty rem_cont =
       | Decl.Dtype _ | Decl.Dprop _ -> assert false
       | Decl.Dlogic dl ->
         (* regular definition *)
-        let d = List.assq ls dl in
-        if engine.params.compute_defs ||
+          if (engine.params.compute_defs &&
+              not (Term.Sls.mem ls engine.params.compute_no_inlining)) ||
            Term.Sls.mem ls engine.params.compute_def_set
         then begin
+          let d = List.assq ls dl in
           let vl,e = Decl.open_ls_defn d in
           let add (mt,mv) x y =
             Ty.ty_match mt x.vs_ty (t_type y), Mvs.add x y mv

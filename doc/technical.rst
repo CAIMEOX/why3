@@ -742,11 +742,14 @@ by :why3:tool:`why3 show transformations`.
 .. why3:transform:: inline_goal
 
    Expand all outermost symbols of the goal that have a non-recursive
-   definition.
+   definition. There is an expection for the symbols which are given
+   the meta :why3:meta:`inline:no`, which are never inlined. See also
+   :why3:transform:`inline_all`.
 
 .. why3:transform:: inline_all
 
-   Expand all non-recursive definitions.
+   Expand all non-recursive definitions, as
+   :why3:transform:`inline_goal`, but also in the hypotheses.
 
 .. why3:transform:: instantiate
 
@@ -1625,6 +1628,8 @@ Why3 Metas
 ----------
 
 .. why3:meta:: compute_max_steps
+
+.. why3:meta:: inline:no
 
 .. why3:meta:: keep:literal
 

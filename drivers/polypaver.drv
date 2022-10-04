@@ -58,10 +58,6 @@ theory real.Real
   syntax predicate (>=) "(%1 >= %2)"
   syntax predicate (>)  "(%1 > %2)"
 
-  meta "inline:no" predicate (<=)
-  meta "inline:no" predicate (>=)
-  meta "inline:no" predicate (>)
-
   remove allprops
 end
 

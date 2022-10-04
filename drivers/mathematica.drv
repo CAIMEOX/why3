@@ -59,10 +59,6 @@ theory int.Int
   syntax predicate (>=) "(%1 >= %2)"
   syntax predicate (>)  "(%1 > %2)"
 
-  meta "inline:no" predicate (<=)
-  meta "inline:no" predicate (>=)
-  meta "inline:no" predicate (>)
-
   remove prop MulComm.Comm
   remove prop MulAssoc.Assoc
   remove prop Unit_def_l
@@ -126,10 +122,6 @@ theory real.Real
   syntax predicate (<)  "(%1 < %2)"
   syntax predicate (>=) "(%1 >= %2)"
   syntax predicate (>)  "(%1 > %2)"
-
-  meta "inline:no" predicate (<=)
-  meta "inline:no" predicate (>=)
-  meta "inline:no" predicate (>)
 
   remove prop MulComm.Comm
   remove prop MulAssoc.Assoc

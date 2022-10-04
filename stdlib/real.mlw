@@ -21,13 +21,19 @@ module Real
   val predicate (<)  real real : bool
 
   let predicate (>)  (x y : real) = y < x
-  let predicate (<=) (x y : real) = x < y || x = y
-  let predicate (>=) (x y : real) = y <= x
+  let predicate (<=) (x y : real) = not (y < x)
+  let predicate (>=) (x y : real) = not (x < y)
+
+  meta "inline:no" predicate (<=)
+  meta "inline:no" predicate (>=)
+  meta "inline:no" predicate (>)
 
   clone export algebra.OrderedField with type t = real,
     constant zero = zero, constant one = one,
     function (-_) = (-_), function (+) = (+),
     function (*) = (*), predicate (<=) = (<=)
+
+  meta "inline:no" function (-)
 
   let (-) (x y : real)
     ensures { result = x - y }

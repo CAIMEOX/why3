@@ -57,11 +57,6 @@ theory int.Int
   meta "gappa arith" predicate (<), "not ", ">=", "<="
   meta "gappa arith" predicate (>), "not ", "<=", ">="
 
-  meta "inline:no" function (-)
-  meta "inline:no" predicate (<=)
-  meta "inline:no" predicate (>=)
-  meta "inline:no" predicate (>)
-
   remove prop NonTrivialRing
   remove prop ZeroLessOne
 
@@ -103,11 +98,6 @@ theory real.Real
   meta "gappa arith" predicate (>=), "", ">=", "<="
   meta "gappa arith" predicate (<), "not ", ">=", "<="
   meta "gappa arith" predicate (>), "not ", "<=", ">="
-
-  meta "inline:no" function (-)
-  meta "inline:no" predicate (<=)
-  meta "inline:no" predicate (>=)
-  meta "inline:no" predicate (>)
 
   remove prop NonTrivialRing
   remove prop ZeroLessOne

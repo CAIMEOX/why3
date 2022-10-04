@@ -22,8 +22,13 @@ module Int
 
   let function  (-)  (x y : int) = x + -y
   let predicate (>)  (x y : int) = y < x
-  let predicate (<=) (x y : int) = x < y || x = y
-  let predicate (>=) (x y : int) = y <= x
+  let predicate (<=) (x y : int) = not y < x
+  let predicate (>=) (x y : int) = not x < y
+
+  meta "inline:no" function (-)
+  meta "inline:no" predicate (<=)
+  meta "inline:no" predicate (>=)
+  meta "inline:no" predicate (>)
 
   clone export algebra.OrderedUnitaryCommutativeRing with
     type t = int, constant zero = zero, constant one = one,

@@ -84,7 +84,7 @@ let fold in_goal notls notdef task_hd (env, task) =
 
 (* transformations *)
 
-let meta = Theory.register_meta "inline:no" [Theory.MTlsymbol]
+let meta_inline_no = Theory.register_meta "inline:no" [Theory.MTlsymbol]
   ~desc:"Disallow@ the@ inlining@ of@ the@ given@ function/predicate@ symbol."
 
 let t ~use_meta ~in_goal ~notls ~notdef =
@@ -92,7 +92,7 @@ let t ~use_meta ~in_goal ~notls ~notdef =
     let trans notls =
       Trans.fold_map (fold in_goal notls notdef) Mls.empty None in
     if use_meta then
-      Trans.on_tagged_ls meta (fun sls ->
+      Trans.on_tagged_ls meta_inline_no (fun sls ->
         let notls ls = Sls.mem ls sls || notls ~for_counterexample ls in
         trans notls)
     else

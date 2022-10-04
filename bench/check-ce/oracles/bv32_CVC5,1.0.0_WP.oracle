@@ -7,7 +7,7 @@
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/bv32.mlw", line 9, characters 14-29)
 File "bench/check-ce/bv32.mlw", line 9, characters 14-29:
 Sub-goal Postcondition of goal dummy_update'vc.
-Prover result is: Unknown (unknown + incomplete) (0.79s, 118816 steps).
+Prover result is: Unknown (unknown + incomplete) (0.84s, 118804 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -18,43 +18,43 @@ File int.mlw:
     Constant one initialization
     one = 1
 File bv.mlw:
-  Line 596:
+  Line 605:
     Constant zeros initialization
   Line 192:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 596:
+  Line 605:
     zeros = 0
     Constant one initialization
   Line 197:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 596:
+  Line 605:
     one = 0
     Constant ones initialization
   Line 199:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 596:
+  Line 605:
     ones = 0
-  Line 638:
+  Line 647:
     Constant zeros initialization
   Line 192:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 638:
+  Line 647:
     zeros = 0
     Constant one initialization
   Line 197:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 638:
+  Line 647:
     one = 0
     Constant ones initialization
   Line 199:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 638:
+  Line 647:
     ones = 0
 File bv32.mlw:
   Line 7:
@@ -89,5 +89,5 @@ File bv32.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `dummy_update_with_int` cannot be evaluated)
 File "bench/check-ce/bv32.mlw", line 15, characters 14-28:
 Sub-goal Postcondition of goal dummy_update_with_int'vc.
-Prover result is: Step limit exceeded (0.28s, 150099 steps).
+Prover result is: Step limit exceeded (0.23s, 150099 steps).
 

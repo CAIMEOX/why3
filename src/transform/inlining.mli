@@ -13,7 +13,8 @@
 
 val intro_attr : Ident.attribute
 
-val meta : Theory.meta
+val meta_inline_no : Theory.meta
+(** The meta "inline:no", on a given lsymbol, prevents any inlining of its definition *)
 
 (** {2 Generic inlining} *)
 
