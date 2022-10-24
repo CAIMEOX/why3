@@ -203,6 +203,12 @@ pvsbin/
 /plugins/microc/test/
 /plugins/microc/mc_parser.conflicts
 
+# /plugins/mome/
+/plugins/mome/mome_lexer.ml
+/plugins/mome/mome_parser.ml
+/plugins/mome/mome_parser.mli
+/plugins/mome/mome_parser.conflicts
+
 # /plugins/cfg/
 /plugins/cfg/cfg_lexer.ml
 /plugins/cfg/cfg_parser.ml

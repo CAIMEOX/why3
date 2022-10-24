@@ -550,6 +550,8 @@ PLUGGENERATED = \
 	plugins/python/py_parser.ml plugins/python/py_parser.mli \
 	plugins/microc/mc_lexer.ml \
 	plugins/microc/mc_parser.ml plugins/microc/mc_parser.mli \
+	plugins/mome/mome_lexer.ml \
+	plugins/mome/mome_parser.ml plugins/mome/mome_parser.mli \
 	plugins/cfg/cfg_lexer.ml \
 	plugins/cfg/cfg_parser.ml plugins/cfg/cfg_parser.mli \
 	plugins/parser/dimacs.ml
@@ -560,6 +562,7 @@ PLUG_TRANSFORM =
 PLUG_TPTP = tptp_parser tptp_typing tptp_lexer tptp_printer
 PLUG_PYTHON = py_parser py_lexer py_main
 PLUG_MICROC = mc_parser mc_lexer mc_printer mc_main
+PLUG_MOME = mome_syntax mome_parser mome_lexer mome_main
 PLUG_CFG = cfg_parser cfg_lexer cfg_paths cfg_main
 ifeq (@enable_stackify@,yes)
 PLUG_CFG += stackify cfg_stackify
@@ -567,11 +570,12 @@ endif
 
 PLUG_CMIONLY = tptp/tptp_ast python/py_ast microc/mc_ast cfg/cfg_ast
 
-PLUGINS = genequlin dimacs tptp python microc cfg
+PLUGINS = genequlin dimacs tptp python microc mome cfg
 
 TPTPMODULES = $(addprefix plugins/tptp/, $(PLUG_TPTP))
 PYTHONMODULES = $(addprefix plugins/python/, $(PLUG_PYTHON))
 MICROCMODULES = $(addprefix plugins/microc/, $(PLUG_MICROC))
+MOMEMODULES = $(addprefix plugins/mome/, $(PLUG_MOME))
 CFGMODULES = $(addprefix plugins/cfg/, $(PLUG_CFG))
 
 TPTPCMO = $(addsuffix .cmo, $(TPTPMODULES))
@@ -582,6 +586,9 @@ PYTHONCMX = $(addsuffix .cmx, $(PYTHONMODULES))
 
 MICROCCMO = $(addsuffix .cmo, $(MICROCMODULES))
 MICROCCMX = $(addsuffix .cmx, $(MICROCMODULES))
+
+MOMECMO = $(addsuffix .cmo, $(MOMEMODULES))
+MOMECMX = $(addsuffix .cmx, $(MOMEMODULES))
 
 ifeq (@enable_hypothesis_selection@,yes)
 PLUG_TRANSFORM += hypothesis_selection
@@ -601,14 +608,14 @@ PLUGMODULES = $(addprefix plugins/parser/, $(PLUG_PARSER)) \
 	      $(addprefix plugins/printer/, $(PLUG_PRINTER)) \
 	      $(addprefix plugins/transform/, $(PLUG_TRANSFORM)) \
 	      $(TPTPMODULES) $(PYTHONMODULES) $(MICROCMODULES) \
-	      $(CFGMODULES)
+	      $(MOMEMODULES) $(CFGMODULES)
 
 PLUGDEP = $(addsuffix .dep, $(PLUGMODULES)) $(PLUG_CMIONLY:%=plugins/%.dep)
 PLUGCMO = $(addsuffix .cmo, $(PLUGMODULES))
 PLUGCMX = $(addsuffix .cmx, $(PLUGMODULES))
 PLUGCMI = $(addsuffix .cmi, $(PLUGMODULES)) $(PLUG_CMIONLY:%=plugins/%.cmi)
 
-PLUGDIRS = parser printer transform tptp python microc cfg
+PLUGDIRS = parser printer transform tptp python microc mome cfg
 PLUGINCLUDES = $(addprefix -I plugins/, $(PLUGDIRS))
 
 ifeq (@enable_stackify@,yes)
@@ -657,6 +664,8 @@ lib/plugins/python.cmxs: $(PYTHONCMX)
 lib/plugins/python.cma: $(PYTHONCMO)
 lib/plugins/microc.cmxs: $(MICROCCMX)
 lib/plugins/microc.cma: $(MICROCCMO)
+lib/plugins/mome.cmxs: $(MOMECMX)
+lib/plugins/mome.cma: $(MOMECMO)
 lib/plugins/cfg.cmxs: $(addsuffix .cmx, $(CFGMODULES))
 lib/plugins/cfg.cma: $(addsuffix .cmo, $(CFGMODULES))
 
@@ -1679,7 +1688,7 @@ src/trywhy3/why3_worker.js: src/trywhy3/why3_worker.byte src/trywhy3/trywhy3.con
 	  `find stdlib -name "*.mlw" -exec printf " --file=%s:/%s" {} {} ";"` \
 	+dynlink.js +toplevel.js $<
 
-src/trywhy3/why3_worker.byte: $(WHY3CMA) $(PYTHONCMO) $(MICROCCMO) \
+src/trywhy3/why3_worker.byte: $(WHY3CMA) $(PYTHONCMO) $(MICROCCMO) $(MOMECMO) \
 		$(addprefix src/trywhy3/, bindings.cmo worker_proto.cmo why3_worker.cmo)
 	$(OCAMLFIND) ocamlc $(filter-out -thread,$(BFLAGS)) -package js_of_ocaml -o $@ -linkpkg $^
 
