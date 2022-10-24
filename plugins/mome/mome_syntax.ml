@@ -1,31 +1,16 @@
-type attr = string (* TODO: use Ptree.attr *)
+(********************************************************************)
+(*                                                                  *)
+(*  The Why3 Verification Platform   /   The Why3 Development Team  *)
+(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*                                                                  *)
+(*  This software is distributed under the terms of the GNU Lesser  *)
+(*  General Public License version 2.1, with the special exception  *)
+(*  on linking described in file LICENSE.                           *)
+(*                                                                  *)
+(********************************************************************)
 
-type ident = {
-  ident_string : string;
-  ident_attrs  : attr list;
-  ident_begin  : Lexing.position;
-  ident_end    : Lexing.position;
-}
-
-(* from Ident *)
-let op_infix  s = "infix " ^ s
-let op_prefix s = "prefix " ^ s
-let op_get    s = "mixfix []" ^ s
-let op_set    s = "mixfix []<-" ^ s
-let op_update s = "mixfix [<-]" ^ s
-let op_cut    s = "mixfix [..]" ^ s
-let op_lcut   s = "mixfix [.._]" ^ s
-let op_rcut   s = "mixfix [_..]" ^ s
-
-let op_equ   = op_infix "="
-let op_neq   = op_infix "<>"
-let op_tight = op_prefix
-
-let norm = "()"
-
-type qualid =
-  | Qid  of ident
-  | Qdot of qualid * ident
+open Why3
+open Ptree
 
 type ty =
   | Tyvar   of ident
@@ -33,11 +18,6 @@ type ty =
   | Tyarrow of ty * ty
   | Tyscope of qualid * ty
   | Typaren of ty
-
-type constant =
-  | ConstInt of string
-  | ConstFloat of string
-  | ConstString of string
 
 type binder = {
   b_ident : ident;
@@ -48,8 +28,7 @@ type binder = {
 
 type pat = {
   pat_desc  : pat_desc;
-  pat_begin : Lexing.position;
-  pat_end   : Lexing.position;
+  pat_loc   : Loc.position;
 }
 
 and pat_desc =
@@ -71,8 +50,7 @@ type outcome = pat (* ident * pat list *)
 
 type expr = {
   expr_desc   : expr_desc;
-  expr_begin  : Lexing.position;
-  expr_end    : Lexing.position;
+  expr_loc    : Loc.position;
 }
 
 and expr_desc =
@@ -85,7 +63,7 @@ and expr_desc =
   | Ecall of qualid * expr list
   | Eassign of expr * expr
   | Eseq of expr * expr
-  | Econst of constant
+  | Econst of Constant.constant
   | Eident of qualid
   | Escope of qualid * expr
   | Einfix of expr * ident * expr
@@ -100,6 +78,8 @@ and expr_desc =
 and let_defn  = outcome * expr (* outcome <- expr *)
 and with_defn = outcome * expr (* outcome -> expr *)
 and fun_defn  = ident * pat list * outcome list * expr (* TODO: spec *)
+
+(* parsing tree pretty-printing *)
 
 open Format
 
@@ -137,16 +117,14 @@ let rec print_expr fmt e = match e.expr_desc with
       fprintf fmt "@[%a <-@ %a@]" print_expr d print_expr e
   | Eseq (d,e) ->
       fprintf fmt "@[%a ;@ %a@]" print_expr d print_expr e
-  | Econst (ConstInt s | ConstFloat s) ->
-      fprintf fmt "%s" s
-  | Econst (ConstString s) ->
-      fprintf fmt "\"%s\"" s
+  | Econst c ->
+      Constant.print_def fmt c
   | Eident q ->
       print_q fmt q
   | Escope (q,e) ->
       fprintf fmt "@[%a.(%a)@]" print_q q print_expr e
   | Einfix (d,o,e) ->
-      let o = List.hd (List.rev (String.split_on_char ' ' o.ident_string)) in
+      let o = List.hd (List.rev (String.split_on_char ' ' o.id_str)) in
       fprintf fmt "@[%a %s@ %a@]" print_expr d o print_expr e
   | Eand (d,e) ->
       fprintf fmt "@[%a &&@ %a@]" print_expr d print_expr e
@@ -160,8 +138,10 @@ let rec print_expr fmt e = match e.expr_desc with
       fprintf fmt "false"
   | Eparen e ->
       fprintf fmt "@[(%a)@]" print_expr e
-  | Eattr (a,e) ->
+  | Eattr (ATstr {Ident.attr_string = a},e) ->
       fprintf fmt "@[[@%s]@ %a@]" a print_expr e
+  | Eattr (ATpos _,e) ->
+      print_expr fmt e
 
 and print_ld fmt (o, e) =
   fprintf fmt "%a = %a" print_out o print_expr e
@@ -209,7 +189,7 @@ and print_b fmt b = fprintf fmt "%s%s%s%a"
   (if b.b_mut   then "&" else "") print_id b.b_ident
 
 and print_q fmt = function
-  | Qid i -> print_id fmt i
+  | Qident i -> print_id fmt i
   | Qdot (q,i) -> fprintf fmt "%a.%a" print_q q print_id i
 
-and print_id fmt i = fprintf fmt "%s" i.ident_string
+and print_id fmt i = fprintf fmt "%s" i.id_str

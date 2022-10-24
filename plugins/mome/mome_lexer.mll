@@ -1,5 +1,17 @@
+(********************************************************************)
+(*                                                                  *)
+(*  The Why3 Verification Platform   /   The Why3 Development Team  *)
+(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*                                                                  *)
+(*  This software is distributed under the terms of the GNU Lesser  *)
+(*  General Public License version 2.1, with the special exception  *)
+(*  on linking described in file LICENSE.                           *)
+(*                                                                  *)
+(********************************************************************)
+
 {
   open Lexing
+  open Why3
   open Mome_parser
 
   let keywords = Hashtbl.create 97
@@ -169,8 +181,6 @@
     | (_, col, _) :: st when tcol < col -> find_opener t tcol 0 (n + m + 1) st
     | _ -> if n > 0 then n - 1 else m
 
-(*   exception HardBox *)
-
   exception Restart
   exception Retry
 
@@ -190,7 +200,7 @@
         drop s (n - 1)
 
   let freestyle h =
-    if h = Hard then Printf.eprintf "hardbox smashing!\n"; (* raise HardBox *)
+    if h = Hard then Loc.errorm "Error: hardbox smashing!@.";
     FreeStyle
 
   let rec smash tcol = function
@@ -262,8 +272,7 @@
     if s.lline < pos.pos_lnum then
     match s.ichar with
     | (' ' | '\t') as d when c <> d ->
-        Format.eprintf "Error: mixed tab/space indentation@.";
-        exit 1
+        Loc.errorm "Error: mixed tab/space indentation@."
     | _ -> s.ichar <- c
 
   let rec eof s =
@@ -331,33 +340,37 @@ rule token st = parse
   | core_uident as id
       { add st lexbuf (CORE_UIDENT id) }
   | dec dec_sep* as s
-      { add st lexbuf (INTEGER s) }
-(*       { INTEGER Number.(int_literal ILitDec ~neg:false (Lexlib.remove_underscores s)) } *)
+      { let l = Number.(int_literal ILitDec ~neg:false (Lexlib.remove_underscores s)) in
+        add st lexbuf (INTEGER l) }
   | '0' ['x' 'X'] (hex hex_sep* as s)
-      { add st lexbuf (INTEGER ("0x" ^ s)) }
-(*       { INTEGER Number.(int_literal ILitHex ~neg:false (Lexlib.remove_underscores s)) } *)
+      { let l = Number.(int_literal ILitHex ~neg:false (Lexlib.remove_underscores s)) in
+        add st lexbuf (INTEGER l) }
   | '0' ['o' 'O'] (oct oct_sep* as s)
-      { add st lexbuf (INTEGER ("0o" ^ s)) }
-(*       { INTEGER Number.(int_literal ILitOct ~neg:false (Lexlib.remove_underscores s)) } *)
+      { let l = Number.(int_literal ILitOct ~neg:false (Lexlib.remove_underscores s)) in
+        add st lexbuf (INTEGER l) }
   | '0' ['b' 'B'] (bin bin_sep* as s)
-      { add st lexbuf (INTEGER ("0b" ^ s)) }
-(*       { INTEGER Number.(int_literal ILitBin ~neg:false (Lexlib.remove_underscores s)) } *)
-  | (dec+ as i) ".."
-      { add st lexbuf (INTEGER i);
-        add st lexbuf ~shift:(String.length i) DOTDOT; }
-  | '0' ['x' 'X'] (hex+ as i) ".."
-      { add st lexbuf (INTEGER ("0x" ^ i));
-        add st lexbuf ~shift:(String.length i + 2) DOTDOT; }
+      { let l = Number.(int_literal ILitBin ~neg:false (Lexlib.remove_underscores s)) in
+        add st lexbuf (INTEGER l) }
+  | (dec+ as s) ".."
+      { let l = Number.(int_literal ILitDec ~neg:false s) in
+        add st lexbuf (INTEGER l);
+        add st lexbuf ~shift:(String.length s) DOTDOT; }
+  | '0' ['x' 'X'] (hex+ as s) ".."
+      { let l = Number.(int_literal ILitHex ~neg:false s) in
+        add st lexbuf (INTEGER l);
+        add st lexbuf ~shift:(String.length s + 2) DOTDOT; }
   | (dec+ as i)     ("" as f)    ['e' 'E'] (['-' '+']? dec+ as e)
   | (dec+ as i) '.' (dec* as f) (['e' 'E'] (['-' '+']? dec+ as e))?
   | (dec* as i) '.' (dec+ as f) (['e' 'E'] (['-' '+']? dec+ as e))?
-      { add st lexbuf (FLOAT (i ^ "." ^ f ^ (match e with Some e -> "e" ^ e | _ -> ""))) }
-(*       { REAL (Number.real_literal ~radix:10 ~neg:false ~int:i ~frac:f ~exp:(Opt.map Lexlib.remove_leading_plus e)) } *)
+      { let e = Opt.map Lexlib.remove_leading_plus e in
+        let l = Number.real_literal ~radix:10 ~neg:false ~int:i ~frac:f ~exp:e in
+        add st lexbuf (REAL l) }
   | '0' ['x' 'X'] (hex+ as i) ("" as f) ['p' 'P'] (['-' '+']? dec+ as e)
   | '0' ['x' 'X'] (hex+ as i) '.' (hex* as f) (['p' 'P'] (['-' '+']? dec+ as e))?
   | '0' ['x' 'X'] (hex* as i) '.' (hex+ as f) (['p' 'P'] (['-' '+']? dec+ as e))?
-      { add st lexbuf (FLOAT ("0x" ^ i ^ "." ^ f ^ (match e with Some e -> "e" ^ e | _ -> ""))) }
-(*       { REAL (Number.real_literal ~radix:16 ~neg:false ~int:i ~frac:f ~exp:(Opt.map Lexlib.remove_leading_plus e)) } *)
+      { let e = Opt.map Lexlib.remove_leading_plus e in
+        let l = Number.real_literal ~radix:16 ~neg:false ~int:i ~frac:f ~exp:e in
+        add st lexbuf (REAL l) }
   | "'" (lalpha suffix as id)
       { add st lexbuf (QUOTE_LIDENT id) }
   | ","
@@ -443,9 +456,7 @@ rule token st = parse
   | eof
       { eof st }
   | _ as c
-      { Format.eprintf "Error: illegal character: %c@." c;
-        exit 1 }
-(*       { Lexlib.illegal_character c lexbuf } *)
+      { Lexlib.illegal_character c lexbuf }
 
 {
   let next st lb =

@@ -1,25 +1,44 @@
+(********************************************************************)
+(*                                                                  *)
+(*  The Why3 Verification Platform   /   The Why3 Development Team  *)
+(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*                                                                  *)
+(*  This software is distributed under the terms of the GNU Lesser  *)
+(*  General Public License version 2.1, with the special exception  *)
+(*  on linking described in file LICENSE.                           *)
+(*                                                                  *)
+(********************************************************************)
+
 %{
+open Why3
+open Ptree
 open Mome_syntax
 
-let add_attr id l = (* id.ident_attrs is usually nil *)
-  { id with ident_attrs = List.rev_append id.ident_attrs l }
+let floc s e = Loc.extract (s,e)
 
-let id_anonymous b e =
-  { ident_string = "_"; ident_attrs = []; ident_begin = b; ident_end = e }
+let add_attr id l =
+  { id with id_ats = List.rev_append id.id_ats l }
 
 let mk_id s b e =
-  { ident_string = s; ident_attrs = []; ident_begin = b; ident_end = e }
+  { id_str = s; id_ats = []; id_loc = floc b e }
 
-let get_op  q b e = Qid (mk_id (op_get q) b e)
-let upd_op  q b e = Qid (mk_id (op_update q) b e)
-let cut_op  q b e = Qid (mk_id (op_cut q) b e)
-let rcut_op q b e = Qid (mk_id (op_rcut q) b e)
-let lcut_op q b e = Qid (mk_id (op_lcut q) b e)
+let id_normal b e = mk_id "()" b e
+let _id_anonymous b e = mk_id "_" b e
+
+let get_op  q b e = Qident (mk_id (Ident.op_get q) b e)
+let upd_op  q b e = Qident (mk_id (Ident.op_update q) b e)
+let cut_op  q b e = Qident (mk_id (Ident.op_cut q) b e)
+let rcut_op q b e = Qident (mk_id (Ident.op_rcut q) b e)
+let lcut_op q b e = Qident (mk_id (Ident.op_lcut q) b e)
 
 let mk_binder i g n m = { b_ident = i; b_ghost = g; b_null = n; b_mut = m }
 
-let mk_pat  d b e = { pat_desc = d; pat_begin = b; pat_end = e }
-let mk_expr d b e = { expr_desc = d; expr_begin = b; expr_end = e }
+let mk_pat  d b e = { pat_desc = d; pat_loc = floc b e }
+let mk_expr d b e = { expr_desc = d; expr_loc = floc b e }
+
+let core_ident_error  = format_of_string
+  "Symbol %s cannot be user-defined. User-defined symbol cannot use ' \
+    before a letter. You can only use ' followed by _ or a number."
 
 %}
 
@@ -27,8 +46,9 @@ let mk_expr d b e = { expr_desc = d; expr_begin = b; expr_end = e }
 %token <string> RIGHTSQ_QUOTE RIGHTPAR_QUOTE RIGHTPAR_USCORE
 %token <string> OP0 OP1 OP2 OP3 OP4 (* decreasing priority *)
 %token <string> STRING ATTRIBUTE
-%token <string> INTEGER
-%token <string> FLOAT
+%token <Why3.Number.int_constant> INTEGER
+%token <Why3.Number.real_constant> REAL
+%token <Why3.Loc.position> POSITION
 
 %token LET (*FUN REC*) IN ENDIN
 %token IF THEN ELSE ENDIF
@@ -76,7 +96,7 @@ let mk_expr d b e = { expr_desc = d; expr_begin = b; expr_end = e }
 %left OP2
 %left OP1
 %nonassoc prec_prefix_op
-%nonassoc INTEGER FLOAT (* stronger than MINUS *)
+%nonassoc INTEGER REAL (* stronger than MINUS *)
 %nonassoc LEFTSQ
 %nonassoc OP0
 
@@ -94,8 +114,8 @@ seq_expr_eof:
 mk_expr(X): d = X { mk_expr d $startpos $endpos }
 
 seq_expr:
-| assign_expr (*%prec below_SEMI*)  { $1 }
-| assign_expr SEMICOLON         { $1 }
+| assign_expr (*%prec below_SEMI*)    { $1 }
+| assign_expr SEMICOLON               { $1 }
 | assign_expr SEMICOLON seq_expr
     { mk_expr (Eseq ($1, $3)) $startpos $endpos }
 
@@ -107,7 +127,7 @@ assign_expr:
 expr:
 | single_expr (*%prec below_COMMA*)   { $1 }
 | single_expr ident_skip preceded(COMMA, single_expr)+
-    { mk_expr (Ecall (Qid $2, $1::$3)) $startpos $endpos }
+    { mk_expr (Ecall (Qident $2, $1::$3)) $startpos $endpos }
 
 single_expr: e = mk_expr(single_expr_)  { e }
 
@@ -127,19 +147,19 @@ single_expr_:
 | NOT single_expr
     { Enot $2 }
 | prefix_op single_expr %prec prec_prefix_op
-    { Ecall (Qid $1, [$2]) }
+    { Ecall (Qident $1, [$2]) }
 | minus_numeral
     { Econst $1 }
 | l = single_expr ; o = infix_op_4 ; r = single_expr
     { Einfix (l,o,r) }
 | l = single_expr ; o = infix_op_123 ; r = single_expr
-    { Ecall (Qid o, [l;r]) }
+    { Ecall (Qident o, [l;r]) }
 | qualid expr_arg+
     { Ecall ($1, $2) }
 | qualid LEFTPAR RIGHTPAR
     { Ecall ($1, []) }
 | LEFTPAR ident_skip RIGHTPAR
-    { Ecall (Qid $2, []) }
+    { Ecall (Qident $2, []) }
 | IF seq_expr THEN seq_expr ELSE seq_expr ENDIF
     { Eif ($2, $4, $6) }
 | IF seq_expr THEN seq_expr expr_skip ENDIF
@@ -155,8 +175,8 @@ single_expr_:
 | attr single_expr %prec prec_attr
     { Eattr ($1, $2) }
 
-expr_skip: ident_skip     { mk_expr (Ecall (Qid $1, [])) $startpos $endpos }
-ident_skip: (* epsilon *) { mk_id norm $startpos $endpos }
+expr_skip: ident_skip     { mk_expr (Ecall (Qident $1, [])) $startpos $endpos }
+ident_skip: (* epsilon *) { id_normal $startpos $endpos }
 
 expr_arg: e = mk_expr(expr_arg_) { e }
 expr_dot: e = mk_expr(expr_dot_) { e }
@@ -166,12 +186,12 @@ expr_arg_:
 | literal                         { Econst $1 }
 | TRUE                            { Etrue }
 | FALSE                           { Efalse }
-| o = prefix_op_0 ; a = expr_arg  { Ecall (Qid o, [a]) }
+| o = prefix_op_0 ; a = expr_arg  { Ecall (Qident o, [a]) }
 | expr_sub_                       { $1 }
 
 expr_dot_:
 | lqualid                         { Eident $1 }
-| o = prefix_op_0 ; a = expr_dot  { Ecall (Qid o, [a]) }
+| o = prefix_op_0 ; a = expr_dot  { Ecall (Qident o, [a]) }
 | expr_sub_                       { $1 }
 
 expr_sub_:
@@ -212,10 +232,10 @@ outcome_:
 
 out_uni_:
 | pat_uni ident_skip preceded(COMMA, pat_uni)*
-                                  { Papp (Qid $2, $1::$3) }
-| LEFTPAR ident_skip RIGHTPAR     { Papp (Qid $2, []) }
-| lident_attrs pat_arg+           { Papp (Qid $1, $2) }
-| lident_attrs LEFTPAR RIGHTPAR   { Papp (Qid $1, []) }
+                                  { Papp (Qident $2, $1::$3) }
+| LEFTPAR ident_skip RIGHTPAR     { Papp (Qident $2, []) }
+| lident_attrs pat_arg+           { Papp (Qident $1, $2) }
+| lident_attrs LEFTPAR RIGHTPAR   { Papp (Qident $1, []) }
 
 pattern_:
 | pat_uni_                        { $1 }
@@ -275,41 +295,41 @@ ty_block:
 (* Literals *)
 
 minus_numeral:
-| MINUS INTEGER { ConstInt   ("-" ^ $2) }
-| MINUS FLOAT   { ConstFloat ("-" ^ $2) }
+| MINUS INTEGER { Constant.(ConstInt (Number.neg_int $2)) }
+| MINUS REAL    { Constant.(ConstReal (Number.neg_real $2))}
 
 literal:
-| INTEGER { ConstInt    $1 }
-| FLOAT   { ConstFloat  $1 }
-| STRING  { ConstString $1 }
+| INTEGER { Constant.ConstInt  $1 }
+| REAL    { Constant.ConstReal $1 }
+| STRING  { Constant.ConstStr  $1 }
 
 (* Qualified idents *)
 
 qualid:
-| ident                   { Qid $1 }
+| ident                   { Qident $1 }
 | uqualid DOT ident       { Qdot ($1, $3) }
 
 uqualid:
-| uident                  { Qid $1 }
+| uident                  { Qident $1 }
 | uqualid DOT uident      { Qdot ($1, $3) }
 
 lqualid:
-| lident                  { Qid $1 }
+| lident                  { Qident $1 }
 | uqualid DOT lident      { Qdot ($1, $3) }
 
 lqualid_rich:
-| lident                  { Qid $1 }
-| lident_op               { Qid $1 }
+| lident                  { Qident $1 }
+| lident_op               { Qident $1 }
 | uqualid DOT lident      { Qdot ($1, $3) }
 | uqualid DOT lident_op   { Qdot ($1, $3) }
 
 (*
 tqualid:
-| uident                  { Qid $1 }
+| uident                  { Qident $1 }
 | squalid DOT uident      { Qdot ($1, $3) }
 
 squalid:
-| sident                  { Qid $1 }
+| sident                  { Qident $1 }
 | squalid DOT sident      { Qdot ($1, $3) }
 *)
 
@@ -348,7 +368,8 @@ uident:
 (*
 uident_nq:
 | UIDENT          { mk_id $1 $startpos $endpos }
-| CORE_UIDENT     { let loc = floc $startpos($1) $endpos($1) in
+| CORE_UIDENT     { let loc = floc $startpos $endpos in
+                    Loc.errorm ~loc core_ident_error $1 }
 *)
 
 lident:
@@ -357,10 +378,8 @@ lident:
 
 lident_nq:
 | LIDENT          { mk_id $1 $startpos $endpos }
-(*
-| CORE_LIDENT     { let loc = floc $startpos($1) $endpos($1) in
+| CORE_LIDENT     { let loc = floc $startpos $endpos in
                     Loc.errorm ~loc core_ident_error $1 }
-*)
 
 (*
 sident:
@@ -389,26 +408,24 @@ lident_op_nq:
     { mk_id $2 $startpos($2) $endpos($2) }
 | LEFTPAR lident_op_str RIGHTPAR_USCORE
     { mk_id ($2^$3) $startpos $endpos }
-(*
 | LEFTPAR lident_op_str RIGHTPAR_QUOTE
     { let loc = floc $startpos $endpos in
       Loc.errorm ~loc "Symbol (%s)%s cannot be user-defined" $2 $3 }
 *)
-*)
 
 lident_op_str:
-| op_symbol                         { op_infix $1 }
-| op_symbol UNDERSCORE              { op_prefix $1 }
-| MINUS     UNDERSCORE              { op_prefix "-" }
-| EQUAL                             { op_infix "=" }
-| MINUS                             { op_infix "-" }
-| OP0 UNDERSCORE?                   { op_prefix $1 }
-| LEFTSQ rightsq                    { op_get $2 }
-| LEFTSQ rightsq LARROW             { op_set $2 }
-| LEFTSQ LARROW rightsq             { op_update $3 }
-| LEFTSQ DOTDOT rightsq             { op_cut $3 }
-| LEFTSQ UNDERSCORE DOTDOT rightsq  { op_rcut $4 }
-| LEFTSQ DOTDOT UNDERSCORE rightsq  { op_lcut $4 }
+| op_symbol                         { Ident.op_infix $1 }
+| op_symbol UNDERSCORE              { Ident.op_prefix $1 }
+| MINUS     UNDERSCORE              { Ident.op_prefix "-" }
+| EQUAL                             { Ident.op_infix "=" }
+| MINUS                             { Ident.op_infix "-" }
+| OP0 UNDERSCORE?                   { Ident.op_prefix $1 }
+| LEFTSQ rightsq                    { Ident.op_get $2 }
+| LEFTSQ rightsq LARROW             { Ident.op_set $2 }
+| LEFTSQ LARROW rightsq             { Ident.op_update $3 }
+| LEFTSQ DOTDOT rightsq             { Ident.op_cut $3 }
+| LEFTSQ UNDERSCORE DOTDOT rightsq  { Ident.op_rcut $4 }
+| LEFTSQ DOTDOT UNDERSCORE rightsq  { Ident.op_lcut $4 }
 
 rightsq:
 | RIGHTSQ         { "" }
@@ -421,29 +438,26 @@ op_symbol:
 | OP4 { $1 }
 
 %inline prefix_op_0:
-| o = OP0   { mk_id (op_prefix o)   $startpos $endpos }
+| o = OP0   { mk_id (Ident.op_prefix o)   $startpos $endpos }
 
 prefix_op:
-| op_symbol { mk_id (op_prefix $1)  $startpos $endpos }
-| MINUS     { mk_id (op_prefix "-") $startpos $endpos }
+| op_symbol { mk_id (Ident.op_prefix $1)  $startpos $endpos }
+| MINUS     { mk_id (Ident.op_prefix "-") $startpos $endpos }
 
 %inline infix_op_123:
-| o = OP1   { mk_id (op_infix o)    $startpos $endpos }
-| o = OP2   { mk_id (op_infix o)    $startpos $endpos }
-| o = OP3   { mk_id (op_infix o)    $startpos $endpos }
-| MINUS     { mk_id (op_infix "-")  $startpos $endpos }
+| o = OP1   { mk_id (Ident.op_infix o)    $startpos $endpos }
+| o = OP2   { mk_id (Ident.op_infix o)    $startpos $endpos }
+| o = OP3   { mk_id (Ident.op_infix o)    $startpos $endpos }
+| MINUS     { mk_id (Ident.op_infix "-")  $startpos $endpos }
 
 %inline infix_op_4:
-| o = OP4   { mk_id (op_infix o)    $startpos $endpos }
-| EQUAL     { mk_id (op_infix "=")  $startpos $endpos }
+| o = OP4   { mk_id (Ident.op_infix o)    $startpos $endpos }
+| EQUAL     { mk_id (Ident.op_infix "=")  $startpos $endpos }
 
 (* Attributes and position markers *)
 
 attrs(X): X attr* { add_attr $1 $2 }
 
 attr:
-| ATTRIBUTE { $1 }
-(* TODO:
 | ATTRIBUTE { ATstr (Ident.create_attribute $1) }
 | POSITION  { ATpos $1 }
-*)
