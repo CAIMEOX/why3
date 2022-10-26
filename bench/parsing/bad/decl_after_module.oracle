@@ -1,2 +1,2 @@
-File "bench/parsing/bad/decl_after_module.mlw", line 5, characters 0-9:
+File "bench/parsing/bad/decl_after_module.mlw", line 5, characters 1-10:
 trying to open a module inside another module

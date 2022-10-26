@@ -1,15 +1,15 @@
-File "bench/check-ce/multifile1.mlw", line 6, characters 14-24:
+File "bench/check-ce/multifile1.mlw", line 6, characters 15-25:
 Sub-goal Postcondition of goal decr'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile1.mlw", line 10, characters 14-24)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile1.mlw", line 10, characters 15-25)
 - Checked model 1: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile1.mlw", line 10, characters 14-24)
-File "bench/check-ce/multifile1.mlw", line 10, characters 14-24:
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile1.mlw", line 10, characters 15-25)
+File "bench/check-ce/multifile1.mlw", line 10, characters 15-25:
 Sub-goal Postcondition of goal incr'vc.
 Prover result is: Unknown (sat).
 The contracts of some function or loop are too weak, for example during the

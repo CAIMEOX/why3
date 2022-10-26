@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
-File "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
+File "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25:
 Sub-goal Postcondition of goal f1'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -36,12 +36,12 @@ File global_logic_constant.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
-File "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
+File "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25:
 Sub-goal Postcondition of goal f2'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the

@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/attributes.mlw", line 11, characters 42-49)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/attributes.mlw", line 11, characters 42-49)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/attributes.mlw", line 11, characters 43-50)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/attributes.mlw", line 11, characters 43-50)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/attributes.mlw", line 11, characters 42-49)
-  - Abstract RAC: STUCK (when reaching the end of a loop iteration at "bench/check-ce/attributes.mlw", line 7, characters 2-33)
-File "bench/check-ce/attributes.mlw", line 11, characters 42-49:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/attributes.mlw", line 11, characters 43-50)
+  - Abstract RAC: STUCK (when reaching the end of a loop iteration at "bench/check-ce/attributes.mlw", line 7, characters 3-34)
+File "bench/check-ce/attributes.mlw", line 11, characters 43-50:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -346,12 +346,12 @@ File attributes.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/attributes.mlw", line 23, characters 11-18)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/attributes.mlw", line 23, characters 11-18)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/attributes.mlw", line 23, characters 12-19)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/attributes.mlw", line 23, characters 12-19)
 - Checked model 1: BAD_CE
-  - Concrete RAC: STUCK (failure in postcondition of `h` at "bench/check-ce/attributes.mlw", line 17, characters 12-21)
-  - Abstract RAC: STUCK (failure in postcondition of `h` at "bench/check-ce/attributes.mlw", line 17, characters 12-21)
-File "bench/check-ce/attributes.mlw", line 23, characters 11-18:
+  - Concrete RAC: STUCK (failure in postcondition of `h` at "bench/check-ce/attributes.mlw", line 17, characters 13-22)
+  - Abstract RAC: STUCK (failure in postcondition of `h` at "bench/check-ce/attributes.mlw", line 17, characters 13-22)
+File "bench/check-ce/attributes.mlw", line 23, characters 12-19:
 Sub-goal Assertion of goal g'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the

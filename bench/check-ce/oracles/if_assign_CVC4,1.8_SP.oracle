@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 10, characters 12-23)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 10, characters 12-23)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 10, characters 13-24)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 10, characters 13-24)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 10, characters 12-23)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 10, characters 12-23)
-File "bench/check-ce/if_assign.mlw", line 10, characters 12-23:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 10, characters 13-24)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 10, characters 13-24)
+File "bench/check-ce/if_assign.mlw", line 10, characters 13-24:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -49,12 +49,12 @@ File if_assign.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 16, characters 12-23)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 16, characters 12-23)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 16, characters 13-24)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 16, characters 13-24)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 16, characters 12-23)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 16, characters 12-23)
-File "bench/check-ce/if_assign.mlw", line 16, characters 12-23:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 16, characters 13-24)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 16, characters 13-24)
+File "bench/check-ce/if_assign.mlw", line 16, characters 13-24:
 Sub-goal Postcondition of goal fTest1'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -102,12 +102,12 @@ File if_assign.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/if_assign.mlw", line 28, characters 31-38)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/if_assign.mlw", line 28, characters 31-38)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/if_assign.mlw", line 28, characters 32-39)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/if_assign.mlw", line 28, characters 32-39)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/if_assign.mlw", line 28, characters 31-38)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/if_assign.mlw", line 28, characters 31-38)
-File "bench/check-ce/if_assign.mlw", line 28, characters 31-38:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/if_assign.mlw", line 28, characters 32-39)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/if_assign.mlw", line 28, characters 32-39)
+File "bench/check-ce/if_assign.mlw", line 28, characters 32-39:
 Sub-goal Assertion of goal fTest2'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -141,21 +141,21 @@ File if_assign.mlw:
     Property failure at assertion with:
       x = {contents= 42}
 
-File "bench/check-ce/if_assign.mlw", line 30, characters 23-30:
+File "bench/check-ce/if_assign.mlw", line 30, characters 24-31:
 Sub-goal Assertion of goal fTest2'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 25, characters 12-23)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 25, characters 12-23)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 25, characters 13-24)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 25, characters 13-24)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 25, characters 12-23)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 25, characters 12-23)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 25, characters 13-24)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 25, characters 13-24)
 - Checked model 2: BAD_CE
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/if_assign.mlw", line 28, characters 31-38)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/if_assign.mlw", line 28, characters 31-38)
-File "bench/check-ce/if_assign.mlw", line 25, characters 12-23:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/if_assign.mlw", line 28, characters 32-39)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/if_assign.mlw", line 28, characters 32-39)
+File "bench/check-ce/if_assign.mlw", line 25, characters 13-24:
 Sub-goal Postcondition of goal fTest2'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the

@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC_SW
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `f` cannot be evaluated)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/blackbox.mlw", line 17, characters 11-16)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/blackbox.mlw", line 17, characters 12-17)
 - Checked model 1: NC_SW
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `f` cannot be evaluated)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/blackbox.mlw", line 17, characters 11-16)
-File "bench/check-ce/blackbox.mlw", line 15, characters 13-14:
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/blackbox.mlw", line 17, characters 12-17)
+File "bench/check-ce/blackbox.mlw", line 15, characters 14-15:
 Sub-goal Assertion of goal main'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, or the contracts of
@@ -43,18 +43,18 @@ File blackbox.mlw:
     Property failure at assertion with:
       x = 0
 
-File "bench/check-ce/blackbox.mlw", line 13, characters 14-18:
+File "bench/check-ce/blackbox.mlw", line 13, characters 15-19:
 Sub-goal Postcondition of goal main'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC_SW
-  - Concrete RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/blackbox.mlw", line 14, characters 12-15)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/blackbox.mlw", line 17, characters 11-16)
+  - Concrete RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/blackbox.mlw", line 14, characters 13-16)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/blackbox.mlw", line 17, characters 12-17)
 - Checked model 1: NC_SW
-  - Concrete RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/blackbox.mlw", line 14, characters 12-15)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/blackbox.mlw", line 17, characters 11-16)
-File "bench/check-ce/blackbox.mlw", line 17, characters 11-16:
+  - Concrete RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/blackbox.mlw", line 14, characters 13-16)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/blackbox.mlw", line 17, characters 12-17)
+File "bench/check-ce/blackbox.mlw", line 17, characters 12-17:
 Sub-goal Assertion of goal main'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, or the contracts of

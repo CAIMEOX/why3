@@ -1,20 +1,20 @@
-Warning, file "bench/check-ce/func_call1.mlw", line 15, characters 6-7: unused variable w
-File "bench/check-ce/func_call1.mlw", line 8, characters 12-21:
+Warning, file "bench/check-ce/func_call1.mlw", line 15, characters 7-8: unused variable w
+File "bench/check-ce/func_call1.mlw", line 8, characters 13-22:
 Sub-goal Postcondition of goal g'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/func_call1.mlw", line 9, characters 12-26:
+File "bench/check-ce/func_call1.mlw", line 9, characters 13-27:
 Sub-goal Postcondition of goal g'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call1.mlw", line 16, characters 11-16)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call1.mlw", line 16, characters 12-17)
 - Checked model 1: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call1.mlw", line 16, characters 11-16)
-File "bench/check-ce/func_call1.mlw", line 16, characters 11-16:
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call1.mlw", line 16, characters 12-17)
+File "bench/check-ce/func_call1.mlw", line 16, characters 12-17:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The contracts of some function or loop are too weak, for example during the

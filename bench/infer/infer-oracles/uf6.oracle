@@ -90,7 +90,7 @@ File bench/infer/uf6.mlw:
 Goal cons'vc.
 Prover result is: Unknown () (0.17s).
 
-File "bench/infer/uf6.mlw", line 20, characters 11-24:
+File "bench/infer/uf6.mlw", line 20, characters 12-25:
 Goal nil'vc.
 Prover result is: Unknown () (0.02s).
 

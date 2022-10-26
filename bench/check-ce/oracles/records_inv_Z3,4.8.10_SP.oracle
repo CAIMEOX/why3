@@ -4,12 +4,12 @@ Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: BAD_CE
-  - Concrete RAC: STUCK (failure in type invariant of type r at "bench/check-ce/records_inv.mlw", line 13, characters 16-21)
-  - Abstract RAC: STUCK (failure in type invariant of type r at "bench/check-ce/records_inv.mlw", line 13, characters 16-21)
+  - Concrete RAC: STUCK (failure in type invariant of type r at "bench/check-ce/records_inv.mlw", line 13, characters 17-22)
+  - Abstract RAC: STUCK (failure in type invariant of type r at "bench/check-ce/records_inv.mlw", line 13, characters 17-22)
 - Selected model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 16, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 16, characters 14-24)
-File "bench/check-ce/records_inv.mlw", line 16, characters 14-24:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 16, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 16, characters 15-25)
+File "bench/check-ce/records_inv.mlw", line 16, characters 15-25:
 Sub-goal Postcondition of goal record_match_eval_test1'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -41,12 +41,12 @@ File records_inv.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: BAD_CE
-  - Concrete RAC: STUCK (failure in type invariant of type r at "bench/check-ce/records_inv.mlw", line 13, characters 16-21)
-  - Abstract RAC: STUCK (failure in type invariant of type r at "bench/check-ce/records_inv.mlw", line 13, characters 16-21)
+  - Concrete RAC: STUCK (failure in type invariant of type r at "bench/check-ce/records_inv.mlw", line 13, characters 17-22)
+  - Abstract RAC: STUCK (failure in type invariant of type r at "bench/check-ce/records_inv.mlw", line 13, characters 17-22)
 - Selected model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 24, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 24, characters 14-24)
-File "bench/check-ce/records_inv.mlw", line 24, characters 14-24:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 24, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 24, characters 15-25)
+File "bench/check-ce/records_inv.mlw", line 24, characters 15-25:
 Sub-goal Postcondition of goal record_match_eval_test2'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -75,12 +75,12 @@ File records_inv.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 31, characters 9-25)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 31, characters 9-25)
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 31, characters 10-26)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 31, characters 10-26)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 31, characters 9-25)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 31, characters 9-25)
-File "bench/check-ce/records_inv.mlw", line 31, characters 9-25:
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 31, characters 10-26)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 31, characters 10-26)
+File "bench/check-ce/records_inv.mlw", line 31, characters 10-26:
 Sub-goal Precondition of goal record_match_eval_test3'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -117,18 +117,18 @@ File records_inv.mlw:
     Property failure at precondition of `r'mk` with:
       f = 6
 
-File "bench/check-ce/records_inv.mlw", line 29, characters 14-18:
+File "bench/check-ce/records_inv.mlw", line 29, characters 15-19:
 Sub-goal Postcondition of goal record_match_eval_test3'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 36, characters 9-26)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 36, characters 9-26)
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 36, characters 10-27)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 36, characters 10-27)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 36, characters 9-26)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 36, characters 9-26)
-File "bench/check-ce/records_inv.mlw", line 36, characters 9-26:
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 36, characters 10-27)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 36, characters 10-27)
+File "bench/check-ce/records_inv.mlw", line 36, characters 10-27:
 Sub-goal Precondition of goal record_match_eval_test4'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -165,18 +165,18 @@ File records_inv.mlw:
     Property failure at precondition of `r'mk` with:
       f = 6
 
-File "bench/check-ce/records_inv.mlw", line 34, characters 14-22:
+File "bench/check-ce/records_inv.mlw", line 34, characters 15-23:
 Sub-goal Postcondition of goal record_match_eval_test4'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 42, characters 9-26)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 42, characters 9-26)
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 42, characters 10-27)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 42, characters 10-27)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 42, characters 9-26)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 42, characters 9-26)
-File "bench/check-ce/records_inv.mlw", line 42, characters 9-26:
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 42, characters 10-27)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 42, characters 10-27)
+File "bench/check-ce/records_inv.mlw", line 42, characters 10-27:
 Sub-goal Precondition of goal record_match_eval_test44'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -213,22 +213,22 @@ File records_inv.mlw:
     Property failure at precondition of `r'mk` with:
       f = 6
 
-File "bench/check-ce/records_inv.mlw", line 43, characters 13-22:
+File "bench/check-ce/records_inv.mlw", line 43, characters 14-23:
 Sub-goal Assertion of goal record_match_eval_test44'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/records_inv.mlw", line 40, characters 14-22:
+File "bench/check-ce/records_inv.mlw", line 40, characters 15-23:
 Sub-goal Postcondition of goal record_match_eval_test44'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 51, characters 9-26)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 51, characters 9-26)
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 51, characters 10-27)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 51, characters 10-27)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 51, characters 9-26)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 51, characters 9-26)
-File "bench/check-ce/records_inv.mlw", line 51, characters 9-26:
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 51, characters 10-27)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/records_inv.mlw", line 51, characters 10-27)
+File "bench/check-ce/records_inv.mlw", line 51, characters 10-27:
 Sub-goal Precondition of goal test_record_match_eval_test5'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -268,18 +268,18 @@ File records_inv.mlw:
     Property failure at precondition of `r'mk` with:
       f = 6
 
-File "bench/check-ce/records_inv.mlw", line 49, characters 14-26:
+File "bench/check-ce/records_inv.mlw", line 49, characters 15-27:
 Sub-goal Postcondition of goal test_record_match_eval_test5'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 66, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 66, characters 14-24)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 66, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 66, characters 15-25)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 66, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 66, characters 14-24)
-File "bench/check-ce/records_inv.mlw", line 66, characters 14-24:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 66, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 66, characters 15-25)
+File "bench/check-ce/records_inv.mlw", line 66, characters 15-25:
 Sub-goal Postcondition of goal record_match_eval_test1'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -311,12 +311,12 @@ File records_inv.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 74, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 74, characters 14-24)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 74, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 74, characters 15-25)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 74, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 74, characters 14-24)
-File "bench/check-ce/records_inv.mlw", line 74, characters 14-24:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 74, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 74, characters 15-25)
+File "bench/check-ce/records_inv.mlw", line 74, characters 15-25:
 Sub-goal Postcondition of goal record_match_eval_test2'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -345,12 +345,12 @@ File records_inv.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 79, characters 14-17)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 79, characters 14-17)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 79, characters 15-18)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 79, characters 15-18)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 79, characters 14-17)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 79, characters 14-17)
-File "bench/check-ce/records_inv.mlw", line 79, characters 14-17:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 79, characters 15-18)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 79, characters 15-18)
+File "bench/check-ce/records_inv.mlw", line 79, characters 15-18:
 Sub-goal Postcondition of goal record_match_eval_test3'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -377,12 +377,12 @@ File records_inv.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 84, characters 14-22)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 84, characters 14-22)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 84, characters 15-23)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 84, characters 15-23)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 84, characters 14-22)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 84, characters 14-22)
-File "bench/check-ce/records_inv.mlw", line 84, characters 14-22:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 84, characters 15-23)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_inv.mlw", line 84, characters 15-23)
+File "bench/check-ce/records_inv.mlw", line 84, characters 15-23:
 Sub-goal Postcondition of goal record_match_eval_test4'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the

@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/bv32.mlw", line 9, characters 14-29)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/bv32.mlw", line 9, characters 14-29)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/bv32.mlw", line 9, characters 15-30)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/bv32.mlw", line 9, characters 15-30)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/bv32.mlw", line 9, characters 14-29)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/bv32.mlw", line 9, characters 14-29)
-File "bench/check-ce/bv32.mlw", line 9, characters 14-29:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/bv32.mlw", line 9, characters 15-30)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/bv32.mlw", line 9, characters 15-30)
+File "bench/check-ce/bv32.mlw", line 9, characters 15-30:
 Sub-goal Postcondition of goal dummy_update'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -87,7 +87,7 @@ File bv32.mlw:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Precondition of `dummy_update_with_int` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `dummy_update_with_int` cannot be evaluated)
-File "bench/check-ce/bv32.mlw", line 15, characters 14-28:
+File "bench/check-ce/bv32.mlw", line 15, characters 15-29:
 Sub-goal Postcondition of goal dummy_update_with_int'vc.
 Prover result is: Unknown or time/memory/step limit.
 

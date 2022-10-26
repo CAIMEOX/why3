@@ -5,7 +5,7 @@
 - Selected model 1: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/falseCE.mlw", line 15, characters 11-21:
+File "bench/check-ce/falseCE.mlw", line 15, characters 12-22:
 Sub-goal Assertion of goal rsa'vc.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(

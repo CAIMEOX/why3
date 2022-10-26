@@ -1,12 +1,12 @@
-Warning, file "bench/check-ce/615.mlw", line 2, characters 9-10: unused variable t
+Warning, file "bench/check-ce/615.mlw", line 2, characters 10-11: unused variable t
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (check at "bench/check-ce/615.mlw", line 3, characters 12-28)
-  - Abstract RAC: FAILURE (check at "bench/check-ce/615.mlw", line 3, characters 12-28)
+  - Concrete RAC: FAILURE (check at "bench/check-ce/615.mlw", line 3, characters 13-29)
+  - Abstract RAC: FAILURE (check at "bench/check-ce/615.mlw", line 3, characters 13-29)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (check at "bench/check-ce/615.mlw", line 3, characters 12-28)
-  - Abstract RAC: FAILURE (check at "bench/check-ce/615.mlw", line 3, characters 12-28)
-File "bench/check-ce/615.mlw", line 3, characters 12-28:
+  - Concrete RAC: FAILURE (check at "bench/check-ce/615.mlw", line 3, characters 13-29)
+  - Abstract RAC: FAILURE (check at "bench/check-ce/615.mlw", line 3, characters 13-29)
+File "bench/check-ce/615.mlw", line 3, characters 13-29:
 Sub-goal Check of goal f'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the

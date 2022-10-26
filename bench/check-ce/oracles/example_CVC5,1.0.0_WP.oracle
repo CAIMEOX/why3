@@ -1,4 +1,4 @@
-<check-ce>Check model 0 ("bench/check-ce/example.mlw", line 7, characters 15-22)
+<check-ce>Check model 0 ("bench/check-ce/example.mlw", line 7, characters 16-23)
 <check-ce>Validating model:
           File example.mlw:
             Line 4:
@@ -48,7 +48,7 @@
                 Line 7:
                   Property failure, Assertion with:
                     a = 42
-<check-ce>Check model 1 ("bench/check-ce/example.mlw", line 7, characters 15-22)
+<check-ce>Check model 1 ("bench/check-ce/example.mlw", line 7, characters 16-23)
 <check-ce>Validating model:
           File example.mlw:
             Line 4:
@@ -98,7 +98,7 @@
                 Line 7:
                   Property failure, Assertion with:
                     a = 42
-<check-ce>Check model 2 ("bench/check-ce/example.mlw", line 7, characters 15-22)
+<check-ce>Check model 2 ("bench/check-ce/example.mlw", line 7, characters 16-23)
 <check-ce>Validating model:
           File example.mlw:
             Line 4:
@@ -155,7 +155,7 @@
     Summary: The program does not comply to the verification goal
 - Checked model 2 (Concrete: good model, Abstract: good model)
     Summary: The program does not comply to the verification goal
-File "bench/check-ce/example.mlw", line 7, characters 15-22:
+File "bench/check-ce/example.mlw", line 7, characters 16-23:
 Goal Assertion from verification condition def'vc.
 Prover result is: unknown (sat) (0.05s, 4706 steps).
 The program does not comply to the verification goal, for example during the

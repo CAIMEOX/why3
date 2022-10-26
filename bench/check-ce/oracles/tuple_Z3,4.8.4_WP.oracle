@@ -1,4 +1,4 @@
-<check-ce>Check model 0 ("bench/check-ce/tuple.mlw", line 5, characters 38-43)
+<check-ce>Check model 0 ("bench/check-ce/tuple.mlw", line 5, characters 39-44)
 <check-ce>Checking model:
           File tuple.mlw:
             Line 5:
@@ -8,19 +8,19 @@
             Line 6:
               result = {"type": "Integer", "val": "0"}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Type default value for parameter `x` at "bench/check-ce/tuple.mlw", line 4, characters 10-11: (0,
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Type default value for parameter `x` at "bench/check-ce/tuple.mlw", line 4, characters 11-12: (0,
                                                                     0)
-<rac-values>Value computed from postcondition for return value of call to (-) at "bench/check-ce/tuple.mlw", line 7, characters 14-23 at "bench/check-ce/tuple.mlw", line 7, characters 14-23: 0
-<rac-values>Value computed from postcondition for return value of call to (-) at "bench/check-ce/tuple.mlw", line 7, characters 3-12 at "bench/check-ce/tuple.mlw", line 7, characters 3-12: 0
+<rac-values>Value computed from postcondition for return value of call to (-) at "bench/check-ce/tuple.mlw", line 7, characters 15-24 at "bench/check-ce/tuple.mlw", line 7, characters 15-24: 0
+<rac-values>Value computed from postcondition for return value of call to (-) at "bench/check-ce/tuple.mlw", line 7, characters 4-13 at "bench/check-ce/tuple.mlw", line 7, characters 4-13: 0
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Type default value for parameter `x` at "bench/check-ce/tuple.mlw", line 4, characters 10-11: (0,
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Type default value for parameter `x` at "bench/check-ce/tuple.mlw", line 4, characters 11-12: (0,
                                                                     0)
 <check-ce>Result of checking model 0: BAD_CE
-            - Concrete RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 12-43)
+            - Concrete RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 13-44)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -77,7 +77,7 @@
                   Property failure at postcondition of `swap` with:
                     x = (0, 0)
                     result = (0, 1)
-            - Abstract RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 12-43)
+            - Abstract RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 13-44)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -118,7 +118,7 @@
                   Property failure at postcondition of `swap` with:
                     x = (0, 0)
                     result = (0, 1)
-<check-ce>Check model 1 ("bench/check-ce/tuple.mlw", line 5, characters 38-43)
+<check-ce>Check model 1 ("bench/check-ce/tuple.mlw", line 5, characters 39-44)
 <check-ce>Checking model:
           File tuple.mlw:
             Line 5:
@@ -128,19 +128,19 @@
             Line 6:
               result = {"type": "Integer", "val": "0"}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Type default value for parameter `x` at "bench/check-ce/tuple.mlw", line 4, characters 10-11: (0,
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Type default value for parameter `x` at "bench/check-ce/tuple.mlw", line 4, characters 11-12: (0,
                                                                     0)
-<rac-values>Value computed from postcondition for return value of call to (-) at "bench/check-ce/tuple.mlw", line 7, characters 14-23 at "bench/check-ce/tuple.mlw", line 7, characters 14-23: 0
-<rac-values>Value computed from postcondition for return value of call to (-) at "bench/check-ce/tuple.mlw", line 7, characters 3-12 at "bench/check-ce/tuple.mlw", line 7, characters 3-12: 0
+<rac-values>Value computed from postcondition for return value of call to (-) at "bench/check-ce/tuple.mlw", line 7, characters 15-24 at "bench/check-ce/tuple.mlw", line 7, characters 15-24: 0
+<rac-values>Value computed from postcondition for return value of call to (-) at "bench/check-ce/tuple.mlw", line 7, characters 4-13 at "bench/check-ce/tuple.mlw", line 7, characters 4-13: 0
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Type default value for parameter `x` at "bench/check-ce/tuple.mlw", line 4, characters 10-11: (0,
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Type default value for parameter `x` at "bench/check-ce/tuple.mlw", line 4, characters 11-12: (0,
                                                                     0)
 <check-ce>Result of checking model 1: BAD_CE
-            - Concrete RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 12-43)
+            - Concrete RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 13-44)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -197,7 +197,7 @@
                   Property failure at postcondition of `swap` with:
                     x = (0, 0)
                     result = (0, 1)
-            - Abstract RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 12-43)
+            - Abstract RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 13-44)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -240,12 +240,12 @@
                     result = (0, 1)
 <check-ce-summary>Results:
 - Checked model 0: BAD_CE
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 12-43)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 12-43)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 13-44)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 13-44)
 - Selected model 1: BAD_CE
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 12-43)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 12-43)
-File "bench/check-ce/tuple.mlw", line 5, characters 38-43:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 13-44)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/tuple.mlw", line 5, characters 13-44)
+File "bench/check-ce/tuple.mlw", line 5, characters 39-44:
 Sub-goal Postcondition of goal swap'vc.
 Prover result is: Unknown (unknown) (1.17s, 7500000 steps).
 Sorry, we don't have a good counterexample for you :(

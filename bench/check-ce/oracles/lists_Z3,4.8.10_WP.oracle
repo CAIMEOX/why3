@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 14, characters 26-39)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 14, characters 26-39)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 14, characters 27-40)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 14, characters 27-40)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 14, characters 26-39)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 14, characters 26-39)
-File "bench/check-ce/lists.mlw", line 14, characters 26-39:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 14, characters 27-40)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 14, characters 27-40)
+File "bench/check-ce/lists.mlw", line 14, characters 27-40:
 Goal g1.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -39,7 +39,7 @@ File lists.mlw:
 - Checked model 1: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/lists.mlw", line 16, characters 26-39:
+File "bench/check-ce/lists.mlw", line 16, characters 27-40:
 Goal g2.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(
@@ -47,9 +47,9 @@ Sorry, we don't have a good counterexample for you :(
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 25, characters 30-43)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 25, characters 30-43)
-File "bench/check-ce/lists.mlw", line 25, characters 30-43:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 25, characters 31-44)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 25, characters 31-44)
+File "bench/check-ce/lists.mlw", line 25, characters 31-44:
 Goal g1.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -80,7 +80,7 @@ File lists.mlw:
 - Checked model 0: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/lists.mlw", line 27, characters 30-43:
+File "bench/check-ce/lists.mlw", line 27, characters 31-44:
 Goal g2.
 Prover result is: Unknown or time/memory/step limit.
 

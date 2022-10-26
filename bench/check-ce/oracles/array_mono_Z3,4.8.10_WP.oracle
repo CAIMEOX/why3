@@ -9,7 +9,7 @@ Prover result is: Valid.
 - Checked model 1: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Precondition of `([])` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `([])` cannot be evaluated)
-File "bench/check-ce/array_mono.mlw", line 36, characters 4-8:
+File "bench/check-ce/array_mono.mlw", line 36, characters 5-9:
 Sub-goal Index in array bounds of goal f1'vc.
 Prover result is: Unknown or time/memory/step limit.
 The following counterexample model could not be verified
@@ -22,7 +22,7 @@ File array_mono.mlw:
   Line 36:
     a = {elts = (others => 0); length = 0}
 
-File "bench/check-ce/array_mono.mlw", line 41, characters 4-14:
+File "bench/check-ce/array_mono.mlw", line 41, characters 5-15:
 Sub-goal Index in array bounds of goal f2'vc.
 Prover result is: Valid.
 
@@ -33,7 +33,7 @@ Prover result is: Valid.
 - Checked model 1: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Precondition of `f2` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `f2` cannot be evaluated)
-File "bench/check-ce/array_mono.mlw", line 40, characters 14-26:
+File "bench/check-ce/array_mono.mlw", line 40, characters 15-27:
 Sub-goal Postcondition of goal f2'vc.
 Prover result is: Unknown or time/memory/step limit.
 The following counterexample model could not be verified

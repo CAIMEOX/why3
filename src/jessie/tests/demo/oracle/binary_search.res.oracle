@@ -10,37 +10,37 @@
 [jessie3] processing function binary_search
 [kernel] Current source was: tests/demo/binary_search.c:23
          The full backtrace is:
-         Raised at file "src/util/loc.ml", line 78, characters 18-19
-         Called from file "src/mlw/dexpr.ml", line 744, characters 13-40
-         Called from file "ACSLtoWhy3.ml", line 296, characters 30-45
-         Called from file "ACSLtoWhy3.ml", line 1279, characters 29-40
-         Called from file "ACSLtoWhy3.ml", line 1279, characters 55-68
-         Called from file "ACSLtoWhy3.ml", line 1315, characters 34-49
-         Called from file "ACSLtoWhy3.ml", line 1315, characters 34-49
-         Called from file "ACSLtoWhy3.ml", line 1315, characters 34-49
-         Called from file "ACSLtoWhy3.ml", line 1294, characters 58-73
-         Called from file "ACSLtoWhy3.ml", line 1315, characters 20-33
-         Called from file "ACSLtoWhy3.ml", line 1315, characters 34-49
-         Called from file "ACSLtoWhy3.ml", line 1315, characters 34-49
-         Called from file "ACSLtoWhy3.ml", line 1417, characters 17-34
-         Called from file "ACSLtoWhy3.ml", line 1431, characters 41-60
-         Called from file "ACSLtoWhy3.ml", line 1431, characters 41-60
-         Called from file "ACSLtoWhy3.ml", line 1431, characters 41-60
-         Called from file "ACSLtoWhy3.ml", line 1431, characters 41-60
-         Called from file "ACSLtoWhy3.ml", line 1433, characters 15-44
-         Called from file "src/mlw/dexpr.ml", line 578, characters 23-51
-         Called from file "list.ml", line 59, characters 20-23
-         Called from file "src/mlw/dexpr.ml", line 581, characters 12-31
-         Called from file "ACSLtoWhy3.ml", line 1476, characters 17-53
-         Called from file "ACSLtoWhy3.ml", line 1512, characters 19-36
-         Called from file "list.ml", line 88, characters 24-34
-         Called from file "ACSLtoWhy3.ml", line 1614, characters 6-65
-         Called from file "register.ml", line 88, characters 6-26
-         Called from file "queue.ml", line 105, characters 6-15
-         Called from file "src/kernel_internals/runtime/boot.ml", line 37, characters 4-20
-         Called from file "src/kernel_services/cmdline_parameters/cmdline.ml", line 787, characters 2-9
-         Called from file "src/kernel_services/cmdline_parameters/cmdline.ml", line 817, characters 18-64
-         Called from file "src/kernel_services/cmdline_parameters/cmdline.ml", line 228, characters 4-8
+         Raised at file "src/util/loc.ml", line 78, characters 19-20
+         Called from file "src/mlw/dexpr.ml", line 744, characters 14-41
+         Called from file "ACSLtoWhy3.ml", line 296, characters 31-46
+         Called from file "ACSLtoWhy3.ml", line 1279, characters 30-41
+         Called from file "ACSLtoWhy3.ml", line 1279, characters 56-69
+         Called from file "ACSLtoWhy3.ml", line 1315, characters 35-50
+         Called from file "ACSLtoWhy3.ml", line 1315, characters 35-50
+         Called from file "ACSLtoWhy3.ml", line 1315, characters 35-50
+         Called from file "ACSLtoWhy3.ml", line 1294, characters 59-74
+         Called from file "ACSLtoWhy3.ml", line 1315, characters 21-34
+         Called from file "ACSLtoWhy3.ml", line 1315, characters 35-50
+         Called from file "ACSLtoWhy3.ml", line 1315, characters 35-50
+         Called from file "ACSLtoWhy3.ml", line 1417, characters 18-35
+         Called from file "ACSLtoWhy3.ml", line 1431, characters 42-61
+         Called from file "ACSLtoWhy3.ml", line 1431, characters 42-61
+         Called from file "ACSLtoWhy3.ml", line 1431, characters 42-61
+         Called from file "ACSLtoWhy3.ml", line 1431, characters 42-61
+         Called from file "ACSLtoWhy3.ml", line 1433, characters 16-45
+         Called from file "src/mlw/dexpr.ml", line 578, characters 24-52
+         Called from file "list.ml", line 59, characters 21-24
+         Called from file "src/mlw/dexpr.ml", line 581, characters 13-32
+         Called from file "ACSLtoWhy3.ml", line 1476, characters 18-54
+         Called from file "ACSLtoWhy3.ml", line 1512, characters 20-37
+         Called from file "list.ml", line 88, characters 25-35
+         Called from file "ACSLtoWhy3.ml", line 1614, characters 7-66
+         Called from file "register.ml", line 88, characters 7-27
+         Called from file "queue.ml", line 105, characters 7-16
+         Called from file "src/kernel_internals/runtime/boot.ml", line 37, characters 5-21
+         Called from file "src/kernel_services/cmdline_parameters/cmdline.ml", line 787, characters 3-10
+         Called from file "src/kernel_services/cmdline_parameters/cmdline.ml", line 817, characters 19-65
+         Called from file "src/kernel_services/cmdline_parameters/cmdline.ml", line 228, characters 5-9
          
          Unexpected error (Why3.Loc.Message("This expression has type int64, but is expected to have type t")).
          Please report as 'crash' at http://bts.frama-c.com/.

@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 8, characters 14-28)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 8, characters 14-28)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 8, characters 15-29)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 8, characters 15-29)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 8, characters 14-28)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 8, characters 14-28)
-File "bench/check-ce/maps.mlw", line 8, characters 14-28:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 8, characters 15-29)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 8, characters 15-29)
+File "bench/check-ce/maps.mlw", line 8, characters 15-29:
 Sub-goal Postcondition of goal test_map'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -50,12 +50,12 @@ File maps.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 14, characters 14-34)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 14, characters 14-34)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 14, characters 15-35)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 14, characters 15-35)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 14, characters 14-34)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 14, characters 14-34)
-File "bench/check-ce/maps.mlw", line 14, characters 14-34:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 14, characters 15-35)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 14, characters 15-35)
+File "bench/check-ce/maps.mlw", line 14, characters 15-35:
 Sub-goal Postcondition of goal test_map_multidim1'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -118,12 +118,12 @@ File maps.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 19, characters 14-34)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 19, characters 14-34)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 19, characters 15-35)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 19, characters 15-35)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 19, characters 14-34)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 19, characters 14-34)
-File "bench/check-ce/maps.mlw", line 19, characters 14-34:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 19, characters 15-35)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 19, characters 15-35)
+File "bench/check-ce/maps.mlw", line 19, characters 15-35:
 Sub-goal Postcondition of goal test_map_multidim2'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -202,12 +202,12 @@ File maps.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 26, characters 14-28)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 26, characters 14-28)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 26, characters 15-29)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 26, characters 15-29)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 26, characters 14-28)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 26, characters 14-28)
-File "bench/check-ce/maps.mlw", line 26, characters 14-28:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 26, characters 15-29)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 26, characters 15-29)
+File "bench/check-ce/maps.mlw", line 26, characters 15-29:
 Sub-goal Postcondition of goal proj_map_test1'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -252,12 +252,12 @@ File maps.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 31, characters 14-28)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 31, characters 14-28)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 31, characters 15-29)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 31, characters 15-29)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 31, characters 14-28)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 31, characters 14-28)
-File "bench/check-ce/maps.mlw", line 31, characters 14-28:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 31, characters 15-29)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 31, characters 15-29)
+File "bench/check-ce/maps.mlw", line 31, characters 15-29:
 Sub-goal Postcondition of goal proj_map_test2'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -303,12 +303,12 @@ File maps.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 42, characters 3-31)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 42, characters 3-31)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 42, characters 4-32)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 42, characters 4-32)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 42, characters 3-31)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 42, characters 3-31)
-File "bench/check-ce/maps.mlw", line 42, characters 3-31:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 42, characters 4-32)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps.mlw", line 42, characters 4-32)
+File "bench/check-ce/maps.mlw", line 42, characters 4-32:
 Goal t1.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -337,7 +337,7 @@ File maps.mlw:
 - Selected model 1: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because cannot import value from model: not implemented for value 1/10)
   - Abstract RAC: INCOMPLETE (terminated because cannot import value from model: not implemented for value 1/10)
-File "bench/check-ce/maps.mlw", line 50, characters 36-64:
+File "bench/check-ce/maps.mlw", line 50, characters 37-65:
 Goal g.
 Prover result is: Unknown (sat).
 The following counterexample model could not be verified

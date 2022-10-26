@@ -1,4 +1,4 @@
-File "bench/check-ce/jlamp_projections.mlw", line 29, characters 8-18:
+File "bench/check-ce/jlamp_projections.mlw", line 29, characters 9-19:
 Sub-goal Precondition of goal p3'vc.
 Prover result is: Valid.
 
@@ -7,9 +7,9 @@ Prover result is: Valid.
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
 - Selected model 1: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/jlamp_projections.mlw", line 29, characters 2-18)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/jlamp_projections.mlw", line 29, characters 2-18)
-File "bench/check-ce/jlamp_projections.mlw", line 29, characters 2-18:
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/jlamp_projections.mlw", line 29, characters 3-19)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/jlamp_projections.mlw", line 29, characters 3-19)
+File "bench/check-ce/jlamp_projections.mlw", line 29, characters 3-19:
 Sub-goal Integer overflow of goal p3'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -40,7 +40,7 @@ File jlamp_projections.mlw:
       x = {to_int => 127}
       y = {to_int => 1}
 
-File "bench/check-ce/jlamp_projections.mlw", line 42, characters 14-24:
+File "bench/check-ce/jlamp_projections.mlw", line 42, characters 15-25:
 Sub-goal Precondition of goal p3'vc.
 Prover result is: Valid.
 
@@ -49,9 +49,9 @@ Prover result is: Valid.
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
 - Selected model 1: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/jlamp_projections.mlw", line 42, characters 7-24)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/jlamp_projections.mlw", line 42, characters 7-24)
-File "bench/check-ce/jlamp_projections.mlw", line 42, characters 7-24:
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/jlamp_projections.mlw", line 42, characters 8-25)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/jlamp_projections.mlw", line 42, characters 8-25)
+File "bench/check-ce/jlamp_projections.mlw", line 42, characters 8-25:
 Sub-goal Integer overflow of goal p3'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -90,7 +90,7 @@ File jlamp_projections.mlw:
       x = {to_int => 127}
       y = {to_int => 1}
 
-File "bench/check-ce/jlamp_projections.mlw", line 54, characters 29-39:
+File "bench/check-ce/jlamp_projections.mlw", line 54, characters 30-40:
 Sub-goal Precondition of goal p4'vc.
 Prover result is: Valid.
 
@@ -99,9 +99,9 @@ Prover result is: Valid.
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
 - Selected model 1: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/jlamp_projections.mlw", line 54, characters 21-39)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/jlamp_projections.mlw", line 54, characters 21-39)
-File "bench/check-ce/jlamp_projections.mlw", line 54, characters 21-39:
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/jlamp_projections.mlw", line 54, characters 22-40)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/jlamp_projections.mlw", line 54, characters 22-40)
+File "bench/check-ce/jlamp_projections.mlw", line 54, characters 22-40:
 Sub-goal Integer overflow of goal p4'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the

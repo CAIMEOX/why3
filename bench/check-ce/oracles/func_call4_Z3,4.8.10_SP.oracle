@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/func_call4.mlw", line 11, characters 25-30)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call4.mlw", line 11, characters 25-30)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/func_call4.mlw", line 11, characters 26-31)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call4.mlw", line 11, characters 26-31)
 - Checked model 1: BAD_CE
-  - Concrete RAC: STUCK (failure in postcondition of `g` at "bench/check-ce/func_call4.mlw", line 8, characters 12-21)
-  - Abstract RAC: STUCK (failure in postcondition of `g` at "bench/check-ce/func_call4.mlw", line 8, characters 12-21)
-File "bench/check-ce/func_call4.mlw", line 11, characters 25-30:
+  - Concrete RAC: STUCK (failure in postcondition of `g` at "bench/check-ce/func_call4.mlw", line 8, characters 13-22)
+  - Abstract RAC: STUCK (failure in postcondition of `g` at "bench/check-ce/func_call4.mlw", line 8, characters 13-22)
+File "bench/check-ce/func_call4.mlw", line 11, characters 26-31:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the

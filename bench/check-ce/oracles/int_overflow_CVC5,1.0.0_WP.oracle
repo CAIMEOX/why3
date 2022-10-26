@@ -1,15 +1,15 @@
-File "bench/check-ce/int_overflow.mlw", line 6, characters 27-42:
+File "bench/check-ce/int_overflow.mlw", line 6, characters 28-43:
 Goal test0.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 9, characters 27-44)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 9, characters 27-44)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 9, characters 28-45)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 9, characters 28-45)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 9, characters 27-44)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 9, characters 27-44)
-File "bench/check-ce/int_overflow.mlw", line 9, characters 27-44:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 9, characters 28-45)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 9, characters 28-45)
+File "bench/check-ce/int_overflow.mlw", line 9, characters 28-45:
 Goal test1.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -43,7 +43,7 @@ File int_overflow.mlw:
 - Selected model 1: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `test2'goal1` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `test2'goal1` cannot be evaluated)
-File "bench/check-ce/int_overflow.mlw", line 14, characters 27-38:
+File "bench/check-ce/int_overflow.mlw", line 14, characters 28-39:
 Goal test2.
 Prover result is: Unknown or time/memory/step limit.
 The following counterexample model could not be verified
@@ -52,7 +52,7 @@ File int_overflow.mlw:
   Line 14:
     x = 0
 
-File "bench/check-ce/int_overflow.mlw", line 19, characters 43-53:
+File "bench/check-ce/int_overflow.mlw", line 19, characters 44-54:
 Goal test_overflow.
 Prover result is: Valid.
 
@@ -63,7 +63,7 @@ Prover result is: Valid.
 - Selected model 1: BAD_CE
   - Concrete RAC: FAILURE (postcondition at unknown location)
   - Abstract RAC: FAILURE (postcondition at unknown location)
-File "bench/check-ce/int_overflow.mlw", line 19, characters 48-62:
+File "bench/check-ce/int_overflow.mlw", line 19, characters 49-63:
 Goal test_overflow.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(
@@ -76,7 +76,7 @@ Sorry, we don't have a good counterexample for you :(
 - Selected model 1: BAD_CE
   - Concrete RAC: FAILURE (postcondition at unknown location)
   - Abstract RAC: FAILURE (postcondition at unknown location)
-File "bench/check-ce/int_overflow.mlw", line 24, characters 45-56:
+File "bench/check-ce/int_overflow.mlw", line 24, characters 46-57:
 Goal test_overflow2.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(
@@ -89,7 +89,7 @@ Sorry, we don't have a good counterexample for you :(
 - Selected model 1: BAD_CE
   - Concrete RAC: FAILURE (postcondition at unknown location)
   - Abstract RAC: FAILURE (postcondition at unknown location)
-File "bench/check-ce/int_overflow.mlw", line 24, characters 51-65:
+File "bench/check-ce/int_overflow.mlw", line 24, characters 52-66:
 Goal test_overflow2.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(
@@ -97,12 +97,12 @@ Sorry, we don't have a good counterexample for you :(
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 31, characters 33-49)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 31, characters 33-49)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 31, characters 34-50)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 31, characters 34-50)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 31, characters 33-49)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 31, characters 33-49)
-File "bench/check-ce/int_overflow.mlw", line 31, characters 33-49:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 31, characters 34-50)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 31, characters 34-50)
+File "bench/check-ce/int_overflow.mlw", line 31, characters 34-50:
 Goal test_overflow_int16.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -141,7 +141,7 @@ File int_overflow.mlw:
 - Selected model 1: BAD_CE
   - Concrete RAC: FAILURE (postcondition at unknown location)
   - Abstract RAC: FAILURE (postcondition at unknown location)
-File "bench/check-ce/int_overflow.mlw", line 36, characters 54-67:
+File "bench/check-ce/int_overflow.mlw", line 36, characters 55-68:
 Goal test_overflow_int16_alt.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(
@@ -154,7 +154,7 @@ Sorry, we don't have a good counterexample for you :(
 - Selected model 1: BAD_CE
   - Concrete RAC: FAILURE (postcondition at unknown location)
   - Abstract RAC: FAILURE (postcondition at unknown location)
-File "bench/check-ce/int_overflow.mlw", line 36, characters 64-76:
+File "bench/check-ce/int_overflow.mlw", line 36, characters 65-77:
 Goal test_overflow_int16_alt.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(
@@ -162,12 +162,12 @@ Sorry, we don't have a good counterexample for you :(
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 42, characters 29-45)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 42, characters 29-45)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 42, characters 30-46)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 42, characters 30-46)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 42, characters 29-45)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 42, characters 29-45)
-File "bench/check-ce/int_overflow.mlw", line 42, characters 29-45:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 42, characters 30-46)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 42, characters 30-46)
+File "bench/check-ce/int_overflow.mlw", line 42, characters 30-46:
 Goal test_overflow_int16_bis.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -201,12 +201,12 @@ File int_overflow.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 49, characters 33-49)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 49, characters 33-49)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 49, characters 34-50)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 49, characters 34-50)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 49, characters 33-49)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 49, characters 33-49)
-File "bench/check-ce/int_overflow.mlw", line 49, characters 33-49:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 49, characters 34-50)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 49, characters 34-50)
+File "bench/check-ce/int_overflow.mlw", line 49, characters 34-50:
 Goal test_overflow_int32.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -240,12 +240,12 @@ File int_overflow.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 54, characters 48-64)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 54, characters 48-64)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 54, characters 49-65)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 54, characters 49-65)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 54, characters 48-64)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 54, characters 48-64)
-File "bench/check-ce/int_overflow.mlw", line 54, characters 48-64:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 54, characters 49-65)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 54, characters 49-65)
+File "bench/check-ce/int_overflow.mlw", line 54, characters 49-65:
 Goal test_overflow_int32_bis.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -277,7 +277,7 @@ File int_overflow.mlw:
       y = 1073741824
       x = 1073741824
 
-File "bench/check-ce/int_overflow.mlw", line 59, characters 88-108:
+File "bench/check-ce/int_overflow.mlw", line 59, characters 89-109:
 Goal test_overflow_int32_bis_inline.
 Prover result is: Valid.
 
@@ -288,7 +288,7 @@ Prover result is: Valid.
 - Selected model 1: BAD_CE
   - Concrete RAC: FAILURE (postcondition at unknown location)
   - Abstract RAC: FAILURE (postcondition at unknown location)
-File "bench/check-ce/int_overflow.mlw", line 59, characters 103-122:
+File "bench/check-ce/int_overflow.mlw", line 59, characters 104-123:
 Goal test_overflow_int32_bis_inline.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(

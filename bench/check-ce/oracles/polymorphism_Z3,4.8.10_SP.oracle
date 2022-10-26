@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 7, characters 27-34)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 7, characters 27-34)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 7, characters 28-35)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 7, characters 28-35)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 7, characters 27-34)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 7, characters 27-34)
-File "bench/check-ce/polymorphism.mlw", line 7, characters 27-34:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 7, characters 28-35)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 7, characters 28-35)
+File "bench/check-ce/polymorphism.mlw", line 7, characters 28-35:
 Goal gm.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -25,12 +25,12 @@ File polymorphism.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 11, characters 22-35)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 11, characters 22-35)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 11, characters 23-36)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 11, characters 23-36)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 11, characters 22-35)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 11, characters 22-35)
-File "bench/check-ce/polymorphism.mlw", line 11, characters 22-35:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 11, characters 23-36)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 11, characters 23-36)
+File "bench/check-ce/polymorphism.mlw", line 11, characters 23-36:
 Goal gm2.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -53,7 +53,7 @@ File polymorphism.mlw:
 - Checked model 0: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/polymorphism.mlw", line 15, characters 30-37:
+File "bench/check-ce/polymorphism.mlw", line 15, characters 31-38:
 Goal g.
 Prover result is: Unknown or time/memory/step limit.
 

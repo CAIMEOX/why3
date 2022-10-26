@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
-File "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
+File "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19:
 Sub-goal Assertion of goal test1'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -42,12 +42,12 @@ File test_result_ce_value1.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
-File "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
+File "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19:
 Sub-goal Assertion of goal test1bis'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the

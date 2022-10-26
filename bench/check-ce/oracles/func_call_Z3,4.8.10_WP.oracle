@@ -1,15 +1,15 @@
-File "bench/check-ce/func_call.mlw", line 8, characters 12-21:
+File "bench/check-ce/func_call.mlw", line 8, characters 13-22:
 Sub-goal Postcondition of goal g'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call.mlw", line 14, characters 11-16)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call.mlw", line 14, characters 12-17)
 - Checked model 1: BAD_CE
   - Concrete RAC: NORMAL
-  - Abstract RAC: STUCK (failure in postcondition of `g` at "bench/check-ce/func_call.mlw", line 8, characters 12-21)
-File "bench/check-ce/func_call.mlw", line 14, characters 11-16:
+  - Abstract RAC: STUCK (failure in postcondition of `g` at "bench/check-ce/func_call.mlw", line 8, characters 13-22)
+File "bench/check-ce/func_call.mlw", line 14, characters 12-17:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The contracts of some function or loop are too weak, for example during the

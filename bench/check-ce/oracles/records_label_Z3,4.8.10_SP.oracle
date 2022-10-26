@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_label.mlw", line 12, characters 14-35)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_label.mlw", line 12, characters 14-35)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_label.mlw", line 12, characters 15-36)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_label.mlw", line 12, characters 15-36)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_label.mlw", line 12, characters 14-35)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_label.mlw", line 12, characters 14-35)
-File "bench/check-ce/records_label.mlw", line 12, characters 14-35:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/records_label.mlw", line 12, characters 15-36)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/records_label.mlw", line 12, characters 15-36)
+File "bench/check-ce/records_label.mlw", line 12, characters 15-36:
 Sub-goal Postcondition of goal record_old_test1'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -36,12 +36,12 @@ File records_label.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 22, characters 13-58)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 22, characters 13-58)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 22, characters 14-59)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 22, characters 14-59)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 22, characters 13-58)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 22, characters 13-58)
-File "bench/check-ce/records_label.mlw", line 22, characters 13-58:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 22, characters 14-59)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 22, characters 14-59)
+File "bench/check-ce/records_label.mlw", line 22, characters 14-59:
 Sub-goal Assertion of goal record_at_test2'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -73,12 +73,12 @@ File records_label.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 30, characters 13-37)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 30, characters 13-37)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 30, characters 14-38)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 30, characters 14-38)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 30, characters 13-37)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 30, characters 13-37)
-File "bench/check-ce/records_label.mlw", line 30, characters 13-37:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 30, characters 14-38)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/records_label.mlw", line 30, characters 14-38)
+File "bench/check-ce/records_label.mlw", line 30, characters 14-38:
 Sub-goal Assertion of goal several_hats'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the

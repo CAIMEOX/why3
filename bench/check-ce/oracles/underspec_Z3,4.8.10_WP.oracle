@@ -1,15 +1,15 @@
-File "bench/check-ce/underspec.mlw", line 17, characters 27-33:
+File "bench/check-ce/underspec.mlw", line 17, characters 28-34:
 Sub-goal Loop invariant init of goal f'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (loop invariant preservation at "bench/check-ce/underspec.mlw", line 17, characters 18-33)
+  - Abstract RAC: FAILURE (loop invariant preservation at "bench/check-ce/underspec.mlw", line 17, characters 19-34)
 - Checked model 1: BAD_CE
   - Concrete RAC: NORMAL
-  - Abstract RAC: STUCK (failure in loop invariant preservation after last iteration at "bench/check-ce/underspec.mlw", line 17, characters 18-33)
-File "bench/check-ce/underspec.mlw", line 17, characters 27-33:
+  - Abstract RAC: STUCK (failure in loop invariant preservation after last iteration at "bench/check-ce/underspec.mlw", line 17, characters 19-34)
+File "bench/check-ce/underspec.mlw", line 17, characters 28-34:
 Sub-goal Loop invariant preservation of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The contracts of some function or loop are too weak, for example during the
@@ -59,22 +59,22 @@ File underspec.mlw:
       x1 = {contents= (-175)}
       i = 1
 
-File "bench/check-ce/underspec.mlw", line 17, characters 27-33:
+File "bench/check-ce/underspec.mlw", line 17, characters 28-34:
 Sub-goal Loop invariant preservation of goal f'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/underspec.mlw", line 31, characters 14-23:
+File "bench/check-ce/underspec.mlw", line 31, characters 15-24:
 Sub-goal Postcondition of goal g'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/underspec.mlw", line 37, characters 13-18)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/underspec.mlw", line 37, characters 14-19)
 - Checked model 1: BAD_CE
   - Concrete RAC: NORMAL
-  - Abstract RAC: STUCK (failure in postcondition of `g` at "bench/check-ce/underspec.mlw", line 31, characters 14-23)
-File "bench/check-ce/underspec.mlw", line 37, characters 13-18:
+  - Abstract RAC: STUCK (failure in postcondition of `g` at "bench/check-ce/underspec.mlw", line 31, characters 15-24)
+File "bench/check-ce/underspec.mlw", line 37, characters 14-19:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The contracts of some function or loop are too weak, for example during the

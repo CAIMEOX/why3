@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/let_constant.mlw", line 9, characters 13-24)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/let_constant.mlw", line 9, characters 13-24)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/let_constant.mlw", line 9, characters 14-25)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/let_constant.mlw", line 9, characters 14-25)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/let_constant.mlw", line 9, characters 13-24)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/let_constant.mlw", line 9, characters 13-24)
-File "bench/check-ce/let_constant.mlw", line 9, characters 13-24:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/let_constant.mlw", line 9, characters 14-25)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/let_constant.mlw", line 9, characters 14-25)
+File "bench/check-ce/let_constant.mlw", line 9, characters 14-25:
 Sub-goal Assertion of goal dummy'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the

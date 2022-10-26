@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 11, characters 15-38)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 11, characters 15-38)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 11, characters 16-39)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 11, characters 16-39)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 11, characters 15-38)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 11, characters 15-38)
-File "bench/check-ce/result.mlw", line 11, characters 15-38:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 11, characters 16-39)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 11, characters 16-39)
+File "bench/check-ce/result.mlw", line 11, characters 16-39:
 Sub-goal Postcondition of goal p1'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -70,12 +70,12 @@ File result.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 18, characters 12-36)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 18, characters 12-36)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 18, characters 13-37)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 18, characters 13-37)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 18, characters 12-36)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 18, characters 12-36)
-File "bench/check-ce/result.mlw", line 18, characters 12-36:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 18, characters 13-37)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/result.mlw", line 18, characters 13-37)
+File "bench/check-ce/result.mlw", line 18, characters 13-37:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the

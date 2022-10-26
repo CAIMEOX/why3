@@ -1,23 +1,23 @@
-File "bench/check-ce/while1.mlw", line 10, characters 18-24:
+File "bench/check-ce/while1.mlw", line 10, characters 19-25:
 Sub-goal Loop invariant init of goal f'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/while1.mlw", line 9, characters 16-21:
+File "bench/check-ce/while1.mlw", line 9, characters 17-22:
 Sub-goal Loop variant decrease of goal f'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/while1.mlw", line 10, characters 18-24:
+File "bench/check-ce/while1.mlw", line 10, characters 19-25:
 Sub-goal Loop invariant preservation of goal f'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/while1.mlw", line 5, characters 12-22)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/while1.mlw", line 5, characters 13-23)
 - Checked model 1: BAD_CE
   - Concrete RAC: NORMAL
-  - Abstract RAC: STUCK (when reaching the end of a loop iteration at "bench/check-ce/while1.mlw", line 8, character 4 to line 13, character 8)
-File "bench/check-ce/while1.mlw", line 5, characters 12-22:
+  - Abstract RAC: STUCK (when reaching the end of a loop iteration at "bench/check-ce/while1.mlw", line 8, character 5 to line 13, character 9)
+File "bench/check-ce/while1.mlw", line 5, characters 13-23:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The contracts of some function or loop are too weak, for example during the

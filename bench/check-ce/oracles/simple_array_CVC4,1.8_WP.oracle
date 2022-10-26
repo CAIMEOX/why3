@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/simple_array.mlw", line 6, characters 3-31)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/simple_array.mlw", line 6, characters 3-31)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/simple_array.mlw", line 6, characters 4-32)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/simple_array.mlw", line 6, characters 4-32)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/simple_array.mlw", line 6, characters 3-31)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/simple_array.mlw", line 6, characters 3-31)
-File "bench/check-ce/simple_array.mlw", line 6, characters 3-31:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/simple_array.mlw", line 6, characters 4-32)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/simple_array.mlw", line 6, characters 4-32)
+File "bench/check-ce/simple_array.mlw", line 6, characters 4-32:
 Goal t1.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the

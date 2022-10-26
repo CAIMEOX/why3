@@ -1,14 +1,14 @@
-File "bench/check-ce/func_call1.mlw", line 15, characters 6-7:
+File "bench/check-ce/func_call1.mlw", line 15, characters 7-8:
 warning: unused variable w
-File "bench/check-ce/func_call1.mlw", line 8, characters 12-21:
+File "bench/check-ce/func_call1.mlw", line 8, characters 13-22:
 Sub-goal Postcondition of goal g'vc.
 Prover result is: Valid (0.01s, 183 steps).
 
-File "bench/check-ce/func_call1.mlw", line 9, characters 12-26:
+File "bench/check-ce/func_call1.mlw", line 9, characters 13-27:
 Sub-goal Postcondition of goal g'vc.
 Prover result is: Valid (0.01s, 66 steps).
 
-<check-ce>Check model 0 ("bench/check-ce/func_call1.mlw", line 16, characters 11-16)
+<check-ce>Check model 0 ("bench/check-ce/func_call1.mlw", line 16, characters 12-17)
 <check-ce>Checking model:
           File func_call1.mlw:
             Line 8:
@@ -48,20 +48,20 @@ Prover result is: Valid (0.01s, 66 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "2"}}]}}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Type default value for return value of call at "bench/check-ce/func_call1.mlw", line 4, characters 9-14 at "bench/check-ce/func_call1.mlw", line 4, characters 9-14: 0
-<rac-values>RHS evaluated for global `z` at "bench/check-ce/func_call1.mlw", line 4, characters 8-9: {contents=
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Type default value for return value of call at "bench/check-ce/func_call1.mlw", line 4, characters 10-15 at "bench/check-ce/func_call1.mlw", line 4, characters 10-15: 0
+<rac-values>RHS evaluated for global `z` at "bench/check-ce/func_call1.mlw", line 4, characters 9-10: {contents=
                                                                     0}
 <rac-values>Type default value for parameter `_` at NO LOC: ()
-<rac-values>Value from model for variable `z` at "bench/check-ce/func_call1.mlw", line 15, characters 10-15 at "bench/check-ce/func_call1.mlw", line 15, characters 10-15: {contents=
+<rac-values>Value from model for variable `z` at "bench/check-ce/func_call1.mlw", line 15, characters 11-16 at "bench/check-ce/func_call1.mlw", line 15, characters 11-16: {contents=
                                                                     2}
-<rac-values>Value from model for return value of call to g at "bench/check-ce/func_call1.mlw", line 15, characters 10-15 at "bench/check-ce/func_call1.mlw", line 15, characters 10-15: 3
+<rac-values>Value from model for return value of call to g at "bench/check-ce/func_call1.mlw", line 15, characters 11-16 at "bench/check-ce/func_call1.mlw", line 15, characters 11-16: 3
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Type default value for return value of call at "bench/check-ce/func_call1.mlw", line 4, characters 9-14 at "bench/check-ce/func_call1.mlw", line 4, characters 9-14: 0
-<rac-values>RHS evaluated for global `z` at "bench/check-ce/func_call1.mlw", line 4, characters 8-9: {contents=
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Type default value for return value of call at "bench/check-ce/func_call1.mlw", line 4, characters 10-15 at "bench/check-ce/func_call1.mlw", line 4, characters 10-15: 0
+<rac-values>RHS evaluated for global `z` at "bench/check-ce/func_call1.mlw", line 4, characters 9-10: {contents=
                                                                     0}
 <rac-values>Type default value for parameter `_` at NO LOC: ()
 <check-ce>Result of checking model 0: SW
@@ -112,7 +112,7 @@ Prover result is: Valid (0.01s, 66 steps).
                     _ = 3
                 Line 13:
                   Execution of main function terminated normally
-            - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call1.mlw", line 16, characters 11-16)
+            - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call1.mlw", line 16, characters 12-17)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -151,7 +151,7 @@ Prover result is: Valid (0.01s, 66 steps).
                 Line 16:
                   Property failure at assertion with:
                     z = {contents= 2}
-<check-ce>Check model 1 ("bench/check-ce/func_call1.mlw", line 16, characters 11-16)
+<check-ce>Check model 1 ("bench/check-ce/func_call1.mlw", line 16, characters 12-17)
 <check-ce>Checking model:
           File func_call1.mlw:
             Line 8:
@@ -191,20 +191,20 @@ Prover result is: Valid (0.01s, 66 steps).
                     [{"field": "contents",
                       "value": {"type": "Integer", "val": "177"}}]}}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Type default value for return value of call at "bench/check-ce/func_call1.mlw", line 4, characters 9-14 at "bench/check-ce/func_call1.mlw", line 4, characters 9-14: 0
-<rac-values>RHS evaluated for global `z` at "bench/check-ce/func_call1.mlw", line 4, characters 8-9: {contents=
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Type default value for return value of call at "bench/check-ce/func_call1.mlw", line 4, characters 10-15 at "bench/check-ce/func_call1.mlw", line 4, characters 10-15: 0
+<rac-values>RHS evaluated for global `z` at "bench/check-ce/func_call1.mlw", line 4, characters 9-10: {contents=
                                                                     0}
 <rac-values>Type default value for parameter `_` at NO LOC: ()
-<rac-values>Value from model for variable `z` at "bench/check-ce/func_call1.mlw", line 15, characters 10-15 at "bench/check-ce/func_call1.mlw", line 15, characters 10-15: {contents=
+<rac-values>Value from model for variable `z` at "bench/check-ce/func_call1.mlw", line 15, characters 11-16 at "bench/check-ce/func_call1.mlw", line 15, characters 11-16: {contents=
                                                                     177}
-<rac-values>Value from model for return value of call to g at "bench/check-ce/func_call1.mlw", line 15, characters 10-15 at "bench/check-ce/func_call1.mlw", line 15, characters 10-15: 3
+<rac-values>Value from model for return value of call to g at "bench/check-ce/func_call1.mlw", line 15, characters 11-16 at "bench/check-ce/func_call1.mlw", line 15, characters 11-16: 3
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Type default value for return value of call at "bench/check-ce/func_call1.mlw", line 4, characters 9-14 at "bench/check-ce/func_call1.mlw", line 4, characters 9-14: 0
-<rac-values>RHS evaluated for global `z` at "bench/check-ce/func_call1.mlw", line 4, characters 8-9: {contents=
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Type default value for return value of call at "bench/check-ce/func_call1.mlw", line 4, characters 10-15 at "bench/check-ce/func_call1.mlw", line 4, characters 10-15: 0
+<rac-values>RHS evaluated for global `z` at "bench/check-ce/func_call1.mlw", line 4, characters 9-10: {contents=
                                                                     0}
 <rac-values>Type default value for parameter `_` at NO LOC: ()
 <check-ce>Result of checking model 1: SW
@@ -255,7 +255,7 @@ Prover result is: Valid (0.01s, 66 steps).
                     _ = 3
                 Line 13:
                   Execution of main function terminated normally
-            - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call1.mlw", line 16, characters 11-16)
+            - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call1.mlw", line 16, characters 12-17)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -297,11 +297,11 @@ Prover result is: Valid (0.01s, 66 steps).
 <check-ce-summary>Results:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call1.mlw", line 16, characters 11-16)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call1.mlw", line 16, characters 12-17)
 - Checked model 1: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call1.mlw", line 16, characters 11-16)
-File "bench/check-ce/func_call1.mlw", line 16, characters 11-16:
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/func_call1.mlw", line 16, characters 12-17)
+File "bench/check-ce/func_call1.mlw", line 16, characters 12-17:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown (unknown) (1.21s, 7500000 steps).
 The contracts of some function or loop are too weak, for example during the

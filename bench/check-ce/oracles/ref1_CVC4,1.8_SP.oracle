@@ -1,9 +1,9 @@
-Warning, file "bench/check-ce/ref1.mlw", line 5, characters 6-7: unused variable x
+Warning, file "bench/check-ce/ref1.mlw", line 5, characters 7-8: unused variable x
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/ref1.mlw", line 6, characters 11-16)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/ref1.mlw", line 6, characters 11-16)
-File "bench/check-ce/ref1.mlw", line 6, characters 11-16:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/ref1.mlw", line 6, characters 12-17)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/ref1.mlw", line 6, characters 12-17)
+File "bench/check-ce/ref1.mlw", line 6, characters 12-17:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the

@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: BAD_CE
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 32-67)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 32-67)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 33-68)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 33-68)
 - Selected model 1: BAD_CE
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 32-67)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 32-67)
-File "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 58-63:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 33-68)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 33-68)
+File "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 59-64:
 Goal G.
 Prover result is: Unknown (sat).
 Sorry, we don't have a good counterexample for you :(
@@ -13,12 +13,12 @@ Sorry, we don't have a good counterexample for you :(
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 21-26)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 21-26)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 22-27)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 22-27)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 21-26)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 21-26)
-File "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 21-26:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 22-27)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 22-27)
+File "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 22-27:
 Goal g2.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -48,12 +48,12 @@ File algebraic_types_mono.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 21-28)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 21-28)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 22-29)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 22-29)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 21-28)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 21-28)
-File "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 21-28:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 22-29)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 22-29)
+File "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 22-29:
 Goal g4.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -82,12 +82,12 @@ File algebraic_types_mono.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 21-31)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 21-31)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 22-32)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 22-32)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 21-31)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 21-31)
-File "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 21-31:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 22-32)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 22-32)
+File "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 22-32:
 Goal g5.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -119,12 +119,12 @@ File algebraic_types_mono.mlw:
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
 - Selected model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 25, characters 29-38)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 25, characters 29-38)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 25, characters 30-39)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 25, characters 30-39)
 - Checked model 2: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/algebraic_types_mono.mlw", line 25, characters 29-38:
+File "bench/check-ce/algebraic_types_mono.mlw", line 25, characters 30-39:
 Goal g1.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -153,12 +153,12 @@ File algebraic_types_mono.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 29-36)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 29-36)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 30-37)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 30-37)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 29-36)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 29-36)
-File "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 29-36:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 30-37)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 30-37)
+File "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 30-37:
 Goal g7.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the

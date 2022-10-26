@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 8, characters 12-26)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 8, characters 13-27)
 - Checked model 1: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 8, characters 12-26)
-File "bench/check-ce/multifile2.mlw", line 8, characters 12-26:
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 8, characters 13-27)
+File "bench/check-ce/multifile2.mlw", line 8, characters 13-27:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown (sat).
 The contracts of some function or loop are too weak, for example during the
@@ -36,12 +36,12 @@ File multifile2.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 13, characters 12-26)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 13, characters 12-26)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 13, characters 13-27)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 13, characters 13-27)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 13, characters 12-26)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 13, characters 12-26)
-File "bench/check-ce/multifile2.mlw", line 13, characters 12-26:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 13, characters 13-27)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 13, characters 13-27)
+File "bench/check-ce/multifile2.mlw", line 13, characters 13-27:
 Sub-goal Postcondition of goal g'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -92,12 +92,12 @@ File multifile2.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 18, characters 12-26)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 18, characters 12-26)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 18, characters 13-27)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 18, characters 13-27)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 18, characters 12-26)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 18, characters 12-26)
-File "bench/check-ce/multifile2.mlw", line 18, characters 12-26:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 18, characters 13-27)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile2.mlw", line 18, characters 13-27)
+File "bench/check-ce/multifile2.mlw", line 18, characters 13-27:
 Sub-goal Postcondition of goal h'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the

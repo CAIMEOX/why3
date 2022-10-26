@@ -1,4 +1,4 @@
-<check-ce>Check model 0 ("bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
+<check-ce>Check model 0 ("bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
 <check-ce>Checking model:
           File test_result_ce_value1.mlw:
             Line 6:
@@ -13,19 +13,19 @@
             Line 12:
               result = {"type": "Integer", "val": "41"}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 8, characters 11-12: (-1)
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 6-12 at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 6-12: 0
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 10-25 at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 10-25: 41
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 8, characters 12-13: (-1)
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 7-13 at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 7-13: 0
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 11-26 at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 11-26: 41
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 8, characters 11-12: (-1)
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 6-12 at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 6-12: 0
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 10-25 at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 10-25: 41
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 8, characters 12-13: (-1)
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 7-13 at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 7-13: 0
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 11-26 at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 11-26: 41
 <check-ce>Result of checking model 0: NC
-            - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
+            - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -55,7 +55,7 @@
                 Line 12:
                   Property failure at assertion with:
                     a = 42
-            - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
+            - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -85,7 +85,7 @@
                 Line 12:
                   Property failure at assertion with:
                     a = 42
-<check-ce>Check model 1 ("bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
+<check-ce>Check model 1 ("bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
 <check-ce>Checking model:
           File test_result_ce_value1.mlw:
             Line 6:
@@ -100,19 +100,19 @@
             Line 12:
               result = {"type": "Integer", "val": "41"}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 8, characters 11-12: (-1)
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 6-12 at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 6-12: 0
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 10-25 at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 10-25: 41
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 8, characters 12-13: (-1)
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 7-13 at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 7-13: 0
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 11-26 at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 11-26: 41
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 8, characters 11-12: (-1)
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 6-12 at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 6-12: 0
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 10-25 at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 10-25: 41
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 8, characters 12-13: (-1)
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 7-13 at "bench/check-ce/test_result_ce_value1.mlw", line 10, characters 7-13: 0
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 11-26 at "bench/check-ce/test_result_ce_value1.mlw", line 9, characters 11-26: 41
 <check-ce>Result of checking model 1: NC
-            - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
+            - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -142,7 +142,7 @@
                 Line 12:
                   Property failure at assertion with:
                     a = 42
-            - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
+            - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -174,12 +174,12 @@
                     a = 42
 <check-ce-summary>Results:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
-File "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19)
+File "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 12-19:
 Sub-goal Assertion of goal test1'vc.
 Prover result is: Unknown (sat) (0.03s, 898 steps).
 The program does not comply to the verification goal, for example during the
@@ -214,7 +214,7 @@ File test_result_ce_value1.mlw:
     Property failure at assertion with:
       a = 42
 
-<check-ce>Check model 0 ("bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
+<check-ce>Check model 0 ("bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
 <check-ce>Checking model:
           File test_result_ce_value1.mlw:
             Line 6:
@@ -228,19 +228,19 @@ File test_result_ce_value1.mlw:
             Line 16:
               result = {"type": "Integer", "val": "41"}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 14, characters 14-15: (-1)
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 13-19 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 13-19: 0
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 10-19 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 10-19: 41
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 14, characters 15-16: (-1)
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 14-20 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 14-20: 0
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 11-20 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 11-20: 41
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 14, characters 14-15: (-1)
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 13-19 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 13-19: 0
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 10-19 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 10-19: 41
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 14, characters 15-16: (-1)
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 14-20 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 14-20: 0
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 11-20 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 11-20: 41
 <check-ce>Result of checking model 0: NC
-            - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
+            - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -269,7 +269,7 @@ File test_result_ce_value1.mlw:
                 Line 16:
                   Property failure at assertion with:
                     a = 42
-            - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
+            - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -298,7 +298,7 @@ File test_result_ce_value1.mlw:
                 Line 16:
                   Property failure at assertion with:
                     a = 42
-<check-ce>Check model 1 ("bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
+<check-ce>Check model 1 ("bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
 <check-ce>Checking model:
           File test_result_ce_value1.mlw:
             Line 6:
@@ -312,19 +312,19 @@ File test_result_ce_value1.mlw:
             Line 16:
               result = {"type": "Integer", "val": "41"}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 14, characters 14-15: (-1)
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 13-19 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 13-19: 0
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 10-19 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 10-19: 41
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 14, characters 15-16: (-1)
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 14-20 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 14-20: 0
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 11-20 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 11-20: 41
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 14, characters 14-15: (-1)
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 13-19 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 13-19: 0
-<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 10-19 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 10-19: 41
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for parameter `x` at "bench/check-ce/test_result_ce_value1.mlw", line 14, characters 15-16: (-1)
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 14-20 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 14-20: 0
+<rac-values>Value from model for return value of call to id at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 11-20 at "bench/check-ce/test_result_ce_value1.mlw", line 15, characters 11-20: 41
 <check-ce>Result of checking model 1: NC
-            - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
+            - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -353,7 +353,7 @@ File test_result_ce_value1.mlw:
                 Line 16:
                   Property failure at assertion with:
                     a = 42
-            - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
+            - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -384,12 +384,12 @@ File test_result_ce_value1.mlw:
                     a = 42
 <check-ce-summary>Results:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
-File "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19)
+File "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 12-19:
 Sub-goal Assertion of goal test1bis'vc.
 Prover result is: Unknown (sat) (0.01s, 898 steps).
 The program does not comply to the verification goal, for example during the

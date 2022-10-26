@@ -1,4 +1,4 @@
-<check-ce>Check model 0 ("bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
+<check-ce>Check model 0 ("bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
 <check-ce>Checking model:
           File global_logic_constant.mlw:
             Line 6:
@@ -8,17 +8,17 @@
             Line 10:
               result = {"type": "Integer", "val": "1"}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 15-17: 1
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 16-18: 1
 <rac-values>Type default value for parameter `_` at NO LOC: ()
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 15-17: 1
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 16-18: 1
 <rac-values>Type default value for parameter `_` at NO LOC: ()
 <check-ce>Result of checking model 0: NC
-            - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
+            - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -42,7 +42,7 @@
                 Line 9:
                   Property failure at postcondition of `f1` with:
                     result = 1
-            - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
+            - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -66,7 +66,7 @@
                 Line 9:
                   Property failure at postcondition of `f1` with:
                     result = 1
-<check-ce>Check model 1 ("bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
+<check-ce>Check model 1 ("bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
 <check-ce>Checking model:
           File global_logic_constant.mlw:
             Line 6:
@@ -76,17 +76,17 @@
             Line 10:
               result = {"type": "Integer", "val": "1"}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 15-17: 1
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 16-18: 1
 <rac-values>Type default value for parameter `_` at NO LOC: ()
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 15-17: 1
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 16-18: 1
 <rac-values>Type default value for parameter `_` at NO LOC: ()
 <check-ce>Result of checking model 1: NC
-            - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
+            - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -110,7 +110,7 @@
                 Line 9:
                   Property failure at postcondition of `f1` with:
                     result = 1
-            - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
+            - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -136,12 +136,12 @@
                     result = 1
 <check-ce-summary>Results:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24)
-File "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25)
+File "bench/check-ce/global_logic_constant.mlw", line 9, characters 15-25:
 Sub-goal Postcondition of goal f1'vc.
 Prover result is: Unknown (sat) (0.02s, 698 steps).
 The program does not comply to the verification goal, for example during the
@@ -170,7 +170,7 @@ File global_logic_constant.mlw:
     Property failure at postcondition of `f1` with:
       result = 1
 
-<check-ce>Check model 0 ("bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
+<check-ce>Check model 0 ("bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
 <check-ce>Checking model:
           File global_logic_constant.mlw:
             Line 12:
@@ -190,23 +190,23 @@ File global_logic_constant.mlw:
             Line 16:
               result = {"type": "Integer", "val": "2"}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Type default value for return value of call at "bench/check-ce/global_logic_constant.mlw", line 6, characters 17-22 at "bench/check-ce/global_logic_constant.mlw", line 6, characters 17-22: 0
-<rac-values>RHS evaluated for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 15-17: 0
-<rac-values>Value from model for global `v2` at "bench/check-ce/global_logic_constant.mlw", line 12, characters 10-12: {contents=
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Type default value for return value of call at "bench/check-ce/global_logic_constant.mlw", line 6, characters 18-23 at "bench/check-ce/global_logic_constant.mlw", line 6, characters 18-23: 0
+<rac-values>RHS evaluated for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 16-18: 0
+<rac-values>Value from model for global `v2` at "bench/check-ce/global_logic_constant.mlw", line 12, characters 11-13: {contents=
                                                                     2}
 <rac-values>Type default value for parameter `_` at NO LOC: ()
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Type default value for return value of call at "bench/check-ce/global_logic_constant.mlw", line 6, characters 17-22 at "bench/check-ce/global_logic_constant.mlw", line 6, characters 17-22: 0
-<rac-values>RHS evaluated for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 15-17: 0
-<rac-values>Value from model for global `v2` at "bench/check-ce/global_logic_constant.mlw", line 12, characters 10-12: {contents=
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Type default value for return value of call at "bench/check-ce/global_logic_constant.mlw", line 6, characters 18-23 at "bench/check-ce/global_logic_constant.mlw", line 6, characters 18-23: 0
+<rac-values>RHS evaluated for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 16-18: 0
+<rac-values>Value from model for global `v2` at "bench/check-ce/global_logic_constant.mlw", line 12, characters 11-13: {contents=
                                                                     2}
 <rac-values>Type default value for parameter `_` at NO LOC: ()
 <check-ce>Result of checking model 0: NC
-            - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
+            - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -239,7 +239,7 @@ File global_logic_constant.mlw:
                 Line 15:
                   Property failure at postcondition of `f2` with:
                     result = 2
-            - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
+            - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -272,7 +272,7 @@ File global_logic_constant.mlw:
                 Line 15:
                   Property failure at postcondition of `f2` with:
                     result = 2
-<check-ce>Check model 1 ("bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
+<check-ce>Check model 1 ("bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
 <check-ce>Checking model:
           File global_logic_constant.mlw:
             Line 12:
@@ -292,23 +292,23 @@ File global_logic_constant.mlw:
             Line 16:
               result = {"type": "Integer", "val": "3"}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Type default value for return value of call at "bench/check-ce/global_logic_constant.mlw", line 6, characters 17-22 at "bench/check-ce/global_logic_constant.mlw", line 6, characters 17-22: 0
-<rac-values>RHS evaluated for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 15-17: 0
-<rac-values>Value from model for global `v2` at "bench/check-ce/global_logic_constant.mlw", line 12, characters 10-12: {contents=
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Type default value for return value of call at "bench/check-ce/global_logic_constant.mlw", line 6, characters 18-23 at "bench/check-ce/global_logic_constant.mlw", line 6, characters 18-23: 0
+<rac-values>RHS evaluated for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 16-18: 0
+<rac-values>Value from model for global `v2` at "bench/check-ce/global_logic_constant.mlw", line 12, characters 11-13: {contents=
                                                                     3}
 <rac-values>Type default value for parameter `_` at NO LOC: ()
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Type default value for return value of call at "bench/check-ce/global_logic_constant.mlw", line 6, characters 17-22 at "bench/check-ce/global_logic_constant.mlw", line 6, characters 17-22: 0
-<rac-values>RHS evaluated for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 15-17: 0
-<rac-values>Value from model for global `v2` at "bench/check-ce/global_logic_constant.mlw", line 12, characters 10-12: {contents=
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Type default value for return value of call at "bench/check-ce/global_logic_constant.mlw", line 6, characters 18-23 at "bench/check-ce/global_logic_constant.mlw", line 6, characters 18-23: 0
+<rac-values>RHS evaluated for global `v1` at "bench/check-ce/global_logic_constant.mlw", line 6, characters 16-18: 0
+<rac-values>Value from model for global `v2` at "bench/check-ce/global_logic_constant.mlw", line 12, characters 11-13: {contents=
                                                                     3}
 <rac-values>Type default value for parameter `_` at NO LOC: ()
 <check-ce>Result of checking model 1: NC
-            - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
+            - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -341,7 +341,7 @@ File global_logic_constant.mlw:
                 Line 15:
                   Property failure at postcondition of `f2` with:
                     result = 3
-            - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
+            - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -376,12 +376,12 @@ File global_logic_constant.mlw:
                     result = 3
 <check-ce-summary>Results:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24)
-File "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25)
+File "bench/check-ce/global_logic_constant.mlw", line 15, characters 15-25:
 Sub-goal Postcondition of goal f2'vc.
 Prover result is: Unknown (unknown) (1.22s, 7500000 steps).
 The program does not comply to the verification goal, for example during the

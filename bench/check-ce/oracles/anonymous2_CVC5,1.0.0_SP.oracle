@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/anonymous2.mlw", line 9, characters 11-16)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/anonymous2.mlw", line 9, characters 12-17)
 - Checked model 1: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/anonymous2.mlw", line 9, characters 11-16)
-File "bench/check-ce/anonymous2.mlw", line 9, characters 11-16:
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/anonymous2.mlw", line 9, characters 12-17)
+File "bench/check-ce/anonymous2.mlw", line 9, characters 12-17:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown (sat).
 The contracts of some function or loop are too weak, for example during the

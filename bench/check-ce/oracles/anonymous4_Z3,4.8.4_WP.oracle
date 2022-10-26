@@ -1,4 +1,4 @@
-<check-ce>Check model 0 ("bench/check-ce/anonymous4.mlw", line 8, characters 13-23)
+<check-ce>Check model 0 ("bench/check-ce/anonymous4.mlw", line 8, characters 14-24)
 <check-ce>Checking model:
           File anonymous4.mlw:
             Line 6:
@@ -8,16 +8,16 @@
             Line 9:
               result = {"type": "Integer", "val": "1"}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter `y` at "bench/check-ce/anonymous4.mlw", line 6, characters 7-8: 0
-<rac-values>No value for return value of call to f at "bench/check-ce/anonymous4.mlw", line 9, characters 2-5 at "bench/check-ce/anonymous4.mlw", line 9, characters 2-5
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for parameter `y` at "bench/check-ce/anonymous4.mlw", line 6, characters 8-9: 0
+<rac-values>No value for return value of call to f at "bench/check-ce/anonymous4.mlw", line 9, characters 3-6 at "bench/check-ce/anonymous4.mlw", line 9, characters 3-6
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter `y` at "bench/check-ce/anonymous4.mlw", line 6, characters 7-8: 0
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for parameter `y` at "bench/check-ce/anonymous4.mlw", line 6, characters 8-9: 0
 <check-ce>Result of checking model 0: BAD_CE
-            - Concrete RAC: STUCK (failure in assumption at "bench/check-ce/anonymous4.mlw", line 4, characters 35-40)
+            - Concrete RAC: STUCK (failure in assumption at "bench/check-ce/anonymous4.mlw", line 4, characters 36-41)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -43,9 +43,9 @@
                 Line 4:
                   Execution got stuck at assumption with:
                     y = 0
-            - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/anonymous4.mlw", line 9, characters 2-5)
+            - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/anonymous4.mlw", line 9, characters 3-6)
               
-<check-ce>Check model 1 ("bench/check-ce/anonymous4.mlw", line 8, characters 13-23)
+<check-ce>Check model 1 ("bench/check-ce/anonymous4.mlw", line 8, characters 14-24)
 <check-ce>Checking model:
           File anonymous4.mlw:
             Line 6:
@@ -195,10 +195,10 @@
                     "value": {"type": "Integer", "val": "6082"}},
                    {"others": {"type": "Integer", "val": "-32"}}]}
 <check-ce>Giant-step RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter `y` at "bench/check-ce/anonymous4.mlw", line 6, characters 7-8: 0
-<rac-values>Value from model for return value of call to f at "bench/check-ce/anonymous4.mlw", line 9, characters 2-5 at "bench/check-ce/anonymous4.mlw", line 9, characters 2-5: [|
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for parameter `y` at "bench/check-ce/anonymous4.mlw", line 6, characters 8-9: 0
+<rac-values>Value from model for return value of call to f at "bench/check-ce/anonymous4.mlw", line 9, characters 3-6 at "bench/check-ce/anonymous4.mlw", line 9, characters 3-6: [|
                                                                     (-61) -> (-61);
                                                                     (-60) -> (-60);
                                                                     (-59) -> (-59);
@@ -268,11 +268,11 @@
                                                                     84 -> 84;
                                                                     6082 -> 6082; _ -> (-32)|]
 <check-ce>Normal RAC
-<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 15-19: 0
-<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 15-18: 1
-<rac-values>Value from model for parameter `y` at "bench/check-ce/anonymous4.mlw", line 6, characters 7-8: 0
+<rac-values>RHS evaluated for global `zero` at "WHY3DATA/stdlib/int.mlw", line 13, characters 16-20: 0
+<rac-values>RHS evaluated for global `one` at "WHY3DATA/stdlib/int.mlw", line 14, characters 16-19: 1
+<rac-values>Value from model for parameter `y` at "bench/check-ce/anonymous4.mlw", line 6, characters 8-9: 0
 <check-ce>Result of checking model 1: BAD_CE
-            - Concrete RAC: STUCK (failure in assumption at "bench/check-ce/anonymous4.mlw", line 4, characters 35-40)
+            - Concrete RAC: STUCK (failure in assumption at "bench/check-ce/anonymous4.mlw", line 4, characters 36-41)
               File int.mlw:
                 Line 13:
                   Constant zero initialization
@@ -302,12 +302,12 @@
               
 <check-ce-summary>Results:
 - Checked model 0: BAD_CE
-  - Concrete RAC: STUCK (failure in assumption at "bench/check-ce/anonymous4.mlw", line 4, characters 35-40)
-  - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/anonymous4.mlw", line 9, characters 2-5)
+  - Concrete RAC: STUCK (failure in assumption at "bench/check-ce/anonymous4.mlw", line 4, characters 36-41)
+  - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to f at "bench/check-ce/anonymous4.mlw", line 9, characters 3-6)
 - Selected model 1: BAD_CE
-  - Concrete RAC: STUCK (failure in assumption at "bench/check-ce/anonymous4.mlw", line 4, characters 35-40)
+  - Concrete RAC: STUCK (failure in assumption at "bench/check-ce/anonymous4.mlw", line 4, characters 36-41)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `f` cannot be evaluated)
-File "bench/check-ce/anonymous4.mlw", line 8, characters 13-23:
+File "bench/check-ce/anonymous4.mlw", line 8, characters 14-24:
 Sub-goal Postcondition of goal g'vc.
 Prover result is: Unknown (unknown) (2.12s, 7500000 steps).
 Sorry, we don't have a good counterexample for you :(

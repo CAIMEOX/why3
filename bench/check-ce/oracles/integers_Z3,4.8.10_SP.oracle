@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 5, characters 50-61)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 5, characters 50-61)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 5, characters 51-62)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 5, characters 51-62)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 5, characters 50-61)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 5, characters 50-61)
-File "bench/check-ce/integers.mlw", line 5, characters 50-61:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 5, characters 51-62)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 5, characters 51-62)
+File "bench/check-ce/integers.mlw", line 5, characters 51-62:
 Goal g_lab.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -34,12 +34,12 @@ File integers.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 7, characters 43-54)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 7, characters 43-54)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 7, characters 44-55)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 7, characters 44-55)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 7, characters 43-54)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 7, characters 43-54)
-File "bench/check-ce/integers.mlw", line 7, characters 43-54:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 7, characters 44-55)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 7, characters 44-55)
+File "bench/check-ce/integers.mlw", line 7, characters 44-55:
 Goal g_no_lab.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -73,7 +73,7 @@ File integers.mlw:
 - Selected model 1: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g2_lab'goal1` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g2_lab'goal1` cannot be evaluated)
-File "bench/check-ce/integers.mlw", line 11, characters 30-38:
+File "bench/check-ce/integers.mlw", line 11, characters 31-39:
 Goal g2_lab.
 Prover result is: Unknown (sat).
 The following counterexample model could not be verified
@@ -86,12 +86,12 @@ File integers.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 22, characters 2-45)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 22, characters 2-45)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 22, characters 3-46)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 22, characters 3-46)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 22, characters 2-45)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 22, characters 2-45)
-File "bench/check-ce/integers.mlw", line 22, characters 2-45:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 22, characters 3-46)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/integers.mlw", line 22, characters 3-46)
+File "bench/check-ce/integers.mlw", line 22, characters 3-46:
 Goal newgoal.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the

@@ -1,15 +1,15 @@
-File "bench/check-ce/for.mlw", line 8, characters 25-31:
+File "bench/check-ce/for.mlw", line 8, characters 26-32:
 Sub-goal Loop invariant init of goal f'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (loop invariant preservation at "bench/check-ce/for.mlw", line 8, characters 16-31)
+  - Abstract RAC: FAILURE (loop invariant preservation at "bench/check-ce/for.mlw", line 8, characters 17-32)
 - Checked model 1: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (loop invariant preservation at "bench/check-ce/for.mlw", line 8, characters 16-31)
-File "bench/check-ce/for.mlw", line 8, characters 25-31:
+  - Abstract RAC: FAILURE (loop invariant preservation at "bench/check-ce/for.mlw", line 8, characters 17-32)
+File "bench/check-ce/for.mlw", line 8, characters 26-32:
 Sub-goal Loop invariant preservation of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The contracts of some function or loop are too weak, for example during the

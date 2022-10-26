@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (check at "bench/check-ce/614.mlw", line 5, characters 20-36)
-  - Abstract RAC: FAILURE (check at "bench/check-ce/614.mlw", line 5, characters 20-36)
+  - Concrete RAC: FAILURE (check at "bench/check-ce/614.mlw", line 5, characters 21-37)
+  - Abstract RAC: FAILURE (check at "bench/check-ce/614.mlw", line 5, characters 21-37)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (check at "bench/check-ce/614.mlw", line 5, characters 20-36)
-  - Abstract RAC: FAILURE (check at "bench/check-ce/614.mlw", line 5, characters 20-36)
-File "bench/check-ce/614.mlw", line 5, characters 20-36:
+  - Concrete RAC: FAILURE (check at "bench/check-ce/614.mlw", line 5, characters 21-37)
+  - Abstract RAC: FAILURE (check at "bench/check-ce/614.mlw", line 5, characters 21-37)
+File "bench/check-ce/614.mlw", line 5, characters 21-37:
 Sub-goal E of goal f'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the

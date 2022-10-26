@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/jlamp0.mlw", line 12, characters 13-26)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/jlamp0.mlw", line 12, characters 13-26)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/jlamp0.mlw", line 12, characters 14-27)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/jlamp0.mlw", line 12, characters 14-27)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/jlamp0.mlw", line 12, characters 13-26)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/jlamp0.mlw", line 12, characters 13-26)
-File "bench/check-ce/jlamp0.mlw", line 12, characters 13-26:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/jlamp0.mlw", line 12, characters 14-27)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/jlamp0.mlw", line 12, characters 14-27)
+File "bench/check-ce/jlamp0.mlw", line 12, characters 14-27:
 Sub-goal Assertion of goal p1'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -57,12 +57,12 @@ File jlamp0.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/jlamp0.mlw", line 10, characters 15-29)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/jlamp0.mlw", line 10, characters 15-29)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/jlamp0.mlw", line 10, characters 16-30)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/jlamp0.mlw", line 10, characters 16-30)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/jlamp0.mlw", line 10, characters 15-29)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/jlamp0.mlw", line 10, characters 15-29)
-File "bench/check-ce/jlamp0.mlw", line 10, characters 15-29:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/jlamp0.mlw", line 10, characters 16-30)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/jlamp0.mlw", line 10, characters 16-30)
+File "bench/check-ce/jlamp0.mlw", line 10, characters 16-30:
 Sub-goal Postcondition of goal p1'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -127,12 +127,12 @@ File jlamp0.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
+  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-File "bench/check-ce/jlamp0.mlw", line 22, characters 18-31:
+  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+File "bench/check-ce/jlamp0.mlw", line 22, characters 19-32:
 Sub-goal Loop invariant init of goal p2'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -171,18 +171,18 @@ File jlamp0.mlw:
     Property failure at loop invariant init with:
       c = {contents= 1}
 
-File "bench/check-ce/jlamp0.mlw", line 23, characters 18-31:
+File "bench/check-ce/jlamp0.mlw", line 23, characters 19-32:
 Sub-goal Loop invariant init of goal p2'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: BAD_CE
-  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
+  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
 - Selected model 1: BAD_CE
-  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-File "bench/check-ce/jlamp0.mlw", line 24, characters 16-18:
+  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+File "bench/check-ce/jlamp0.mlw", line 24, characters 17-19:
 Sub-goal Loop variant decrease of goal p2'vc.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(
@@ -190,12 +190,12 @@ Sorry, we don't have a good counterexample for you :(
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
+  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-File "bench/check-ce/jlamp0.mlw", line 22, characters 18-31:
+  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+File "bench/check-ce/jlamp0.mlw", line 22, characters 19-32:
 Sub-goal Loop invariant preservation of goal p2'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -236,12 +236,12 @@ File jlamp0.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: BAD_CE
-  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
+  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
 - Selected model 1: BAD_CE
-  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-File "bench/check-ce/jlamp0.mlw", line 23, characters 18-31:
+  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+File "bench/check-ce/jlamp0.mlw", line 23, characters 19-32:
 Sub-goal Loop invariant preservation of goal p2'vc.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(
@@ -249,12 +249,12 @@ Sorry, we don't have a good counterexample for you :(
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: BAD_CE
-  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
+  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
 - Selected model 1: BAD_CE
-  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 18-31)
-File "bench/check-ce/jlamp0.mlw", line 19, characters 15-28:
+  - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/jlamp0.mlw", line 22, characters 19-32)
+File "bench/check-ce/jlamp0.mlw", line 19, characters 16-29:
 Sub-goal Postcondition of goal p2'vc.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(

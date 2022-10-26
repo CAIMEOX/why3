@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 6, characters 21-34)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 6, characters 21-34)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 6, characters 22-35)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 6, characters 22-35)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 6, characters 21-34)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 6, characters 21-34)
-File "bench/check-ce/strings.mlw", line 6, characters 21-34:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 6, characters 22-35)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 6, characters 22-35)
+File "bench/check-ce/strings.mlw", line 6, characters 22-35:
 Goal T1.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -34,12 +34,12 @@ File strings.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 7, characters 21-35)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 7, characters 21-35)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 7, characters 22-36)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 7, characters 22-36)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 7, characters 21-35)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 7, characters 21-35)
-File "bench/check-ce/strings.mlw", line 7, characters 21-35:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 7, characters 22-36)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 7, characters 22-36)
+File "bench/check-ce/strings.mlw", line 7, characters 22-36:
 Goal T2.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -68,12 +68,12 @@ File strings.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 8, characters 25-52)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 8, characters 25-52)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 8, characters 26-53)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 8, characters 26-53)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 8, characters 25-52)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 8, characters 25-52)
-File "bench/check-ce/strings.mlw", line 8, characters 25-52:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 8, characters 26-53)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 8, characters 26-53)
+File "bench/check-ce/strings.mlw", line 8, characters 26-53:
 Goal T3.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -106,9 +106,9 @@ File strings.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: BAD_CE
-  - Concrete RAC: STUCK (failure in precondition of `T4'goal` at "bench/check-ce/strings.mlw", line 9, characters 7-9)
-  - Abstract RAC: STUCK (failure in precondition of `T4'goal` at "bench/check-ce/strings.mlw", line 9, characters 7-9)
-File "bench/check-ce/strings.mlw", line 9, characters 38-55:
+  - Concrete RAC: STUCK (failure in precondition of `T4'goal` at "bench/check-ce/strings.mlw", line 9, characters 8-10)
+  - Abstract RAC: STUCK (failure in precondition of `T4'goal` at "bench/check-ce/strings.mlw", line 9, characters 8-10)
+File "bench/check-ce/strings.mlw", line 9, characters 39-56:
 Goal T4.
 Prover result is: Unknown or time/memory/step limit.
 
@@ -116,7 +116,7 @@ Prover result is: Unknown or time/memory/step limit.
 - Checked model 0: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/strings.mlw", line 10, characters 59-78:
+File "bench/check-ce/strings.mlw", line 10, characters 60-79:
 Goal T5.
 Prover result is: Unknown or time/memory/step limit.
 
@@ -124,15 +124,15 @@ Prover result is: Unknown or time/memory/step limit.
 - Checked model 0: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/strings.mlw", line 11, characters 59-79:
+File "bench/check-ce/strings.mlw", line 11, characters 60-80:
 Goal T6.
 Prover result is: Unknown or time/memory/step limit.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 12, characters 21-78)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 12, characters 21-78)
-File "bench/check-ce/strings.mlw", line 12, characters 59-78:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 12, characters 22-79)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 12, characters 22-79)
+File "bench/check-ce/strings.mlw", line 12, characters 60-79:
 Goal T7.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -161,9 +161,9 @@ File strings.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 13, characters 21-79)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 13, characters 21-79)
-File "bench/check-ce/strings.mlw", line 13, characters 59-79:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 13, characters 22-80)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 13, characters 22-80)
+File "bench/check-ce/strings.mlw", line 13, characters 60-80:
 Goal T8.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -194,7 +194,7 @@ File strings.mlw:
 - Checked model 0: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/strings.mlw", line 14, characters 59-78:
+File "bench/check-ce/strings.mlw", line 14, characters 60-79:
 Goal T9.
 Prover result is: Unknown or time/memory/step limit.
 
@@ -202,15 +202,15 @@ Prover result is: Unknown or time/memory/step limit.
 - Checked model 0: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/strings.mlw", line 15, characters 60-80:
+File "bench/check-ce/strings.mlw", line 15, characters 61-81:
 Goal T10.
 Prover result is: Unknown or time/memory/step limit.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 16, characters 22-79)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 16, characters 22-79)
-File "bench/check-ce/strings.mlw", line 16, characters 60-79:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 16, characters 23-80)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 16, characters 23-80)
+File "bench/check-ce/strings.mlw", line 16, characters 61-80:
 Goal T11.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -239,9 +239,9 @@ File strings.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 17, characters 22-80)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 17, characters 22-80)
-File "bench/check-ce/strings.mlw", line 17, characters 60-80:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 17, characters 23-81)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 17, characters 23-81)
+File "bench/check-ce/strings.mlw", line 17, characters 61-81:
 Goal T12.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -270,9 +270,9 @@ File strings.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 18, characters 22-28)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 18, characters 22-28)
-File "bench/check-ce/strings.mlw", line 18, characters 22-28:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 18, characters 23-29)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 18, characters 23-29)
+File "bench/check-ce/strings.mlw", line 18, characters 23-29:
 Goal T13.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -301,9 +301,9 @@ File strings.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 19, characters 22-34)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 19, characters 22-34)
-File "bench/check-ce/strings.mlw", line 19, characters 22-34:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 19, characters 23-35)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 19, characters 23-35)
+File "bench/check-ce/strings.mlw", line 19, characters 23-35:
 Goal T14.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -332,12 +332,12 @@ File strings.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 20, characters 24-45)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 20, characters 24-45)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 20, characters 25-46)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 20, characters 25-46)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 20, characters 24-45)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 20, characters 24-45)
-File "bench/check-ce/strings.mlw", line 20, characters 24-45:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 20, characters 25-46)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 20, characters 25-46)
+File "bench/check-ce/strings.mlw", line 20, characters 25-46:
 Goal T15.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -370,12 +370,12 @@ File strings.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 21, characters 22-38)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 21, characters 22-38)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 21, characters 23-39)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 21, characters 23-39)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 21, characters 22-38)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 21, characters 22-38)
-File "bench/check-ce/strings.mlw", line 21, characters 22-38:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 21, characters 23-39)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 21, characters 23-39)
+File "bench/check-ce/strings.mlw", line 21, characters 23-39:
 Goal T16.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -404,12 +404,12 @@ File strings.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 22, characters 42-54)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 22, characters 42-54)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 22, characters 43-55)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 22, characters 43-55)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 22, characters 42-54)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 22, characters 42-54)
-File "bench/check-ce/strings.mlw", line 22, characters 42-54:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 22, characters 43-55)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 22, characters 43-55)
+File "bench/check-ce/strings.mlw", line 22, characters 43-55:
 Goal T17.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the

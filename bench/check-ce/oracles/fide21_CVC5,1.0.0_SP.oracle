@@ -1,15 +1,15 @@
-File "bench/check-ce/fide21.mlw", line 7, characters 12-17:
+File "bench/check-ce/fide21.mlw", line 7, characters 13-18:
 Sub-goal Postcondition of goal set_x'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/fide21.mlw", line 15, characters 11-16)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/fide21.mlw", line 15, characters 12-17)
 - Checked model 1: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/fide21.mlw", line 15, characters 11-16)
-File "bench/check-ce/fide21.mlw", line 15, characters 11-16:
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/fide21.mlw", line 15, characters 12-17)
+File "bench/check-ce/fide21.mlw", line 15, characters 12-17:
 Sub-goal Assertion of goal main'vc.
 Prover result is: Unknown or time/memory/step limit.
 The contracts of some function or loop are too weak, for example during the
@@ -50,18 +50,18 @@ File fide21.mlw:
     Property failure at assertion with:
       x = {contents= 4}
 
-File "bench/check-ce/fide21.mlw", line 19, characters 12-22:
+File "bench/check-ce/fide21.mlw", line 19, characters 13-23:
 Sub-goal Postcondition of goal incr'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/fide21.mlw", line 24, characters 11-16)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/fide21.mlw", line 24, characters 12-17)
 - Checked model 1: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/fide21.mlw", line 24, characters 11-16)
-File "bench/check-ce/fide21.mlw", line 24, characters 11-16:
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/fide21.mlw", line 24, characters 12-17)
+File "bench/check-ce/fide21.mlw", line 24, characters 12-17:
 Sub-goal Assertion of goal test'vc.
 Prover result is: Unknown (sat).
 The contracts of some function or loop are too weak, for example during the

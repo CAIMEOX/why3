@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/range_type_int.mlw", line 9, characters 12-27)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/range_type_int.mlw", line 9, characters 12-27)
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/range_type_int.mlw", line 9, characters 13-28)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/range_type_int.mlw", line 9, characters 13-28)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (assertion at "bench/check-ce/range_type_int.mlw", line 9, characters 12-27)
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/range_type_int.mlw", line 9, characters 12-27)
-File "bench/check-ce/range_type_int.mlw", line 9, characters 12-27:
+  - Concrete RAC: FAILURE (assertion at "bench/check-ce/range_type_int.mlw", line 9, characters 13-28)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/range_type_int.mlw", line 9, characters 13-28)
+File "bench/check-ce/range_type_int.mlw", line 9, characters 13-28:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the

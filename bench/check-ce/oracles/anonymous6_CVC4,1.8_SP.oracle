@@ -1,15 +1,15 @@
-File "bench/check-ce/anonymous6.mlw", line 6, characters 18-27:
+File "bench/check-ce/anonymous6.mlw", line 6, characters 19-28:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/anonymous6.mlw", line 7, characters 10-15)
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/anonymous6.mlw", line 7, characters 11-16)
 - Checked model 1: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (assertion at "bench/check-ce/anonymous6.mlw", line 7, characters 10-15)
-File "bench/check-ce/anonymous6.mlw", line 7, characters 10-15:
+  - Abstract RAC: FAILURE (assertion at "bench/check-ce/anonymous6.mlw", line 7, characters 11-16)
+File "bench/check-ce/anonymous6.mlw", line 7, characters 11-16:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The contracts of some function or loop are too weak, for example during the

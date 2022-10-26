@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/657.mlw", line 8, characters 27-40)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/657.mlw", line 8, characters 27-40)
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/657.mlw", line 8, characters 28-41)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/657.mlw", line 8, characters 28-41)
 - Checked model 1: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/657.mlw", line 8, characters 27-40:
+File "bench/check-ce/657.mlw", line 8, characters 28-41:
 Sub-goal Precondition of goal ok'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -80,12 +80,12 @@ File 657.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/657.mlw", line 10, characters 27-41)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/657.mlw", line 10, characters 27-41)
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/657.mlw", line 10, characters 28-42)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/657.mlw", line 10, characters 28-42)
 - Checked model 1: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/657.mlw", line 10, characters 27-41:
+File "bench/check-ce/657.mlw", line 10, characters 28-42:
 Sub-goal Precondition of goal ko'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -160,12 +160,12 @@ File 657.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/657.mlw", line 13, characters 14-40)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/657.mlw", line 13, characters 14-40)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/657.mlw", line 13, characters 15-41)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/657.mlw", line 13, characters 15-41)
 - Checked model 1: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/657.mlw", line 13, characters 14-40:
+File "bench/check-ce/657.mlw", line 13, characters 15-41:
 Sub-goal Postcondition of goal ko2'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the

@@ -1,19 +1,19 @@
-File "bench/check-ce/while.mlw", line 10, characters 25-32:
+File "bench/check-ce/while.mlw", line 10, characters 26-33:
 Sub-goal Loop invariant init of goal f'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/while.mlw", line 9, characters 14-19:
+File "bench/check-ce/while.mlw", line 9, characters 15-20:
 Sub-goal Loop variant decrease of goal f'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
-  - Abstract RAC: FAILURE (loop invariant preservation at "bench/check-ce/while.mlw", line 10, characters 16-32)
+  - Abstract RAC: FAILURE (loop invariant preservation at "bench/check-ce/while.mlw", line 10, characters 17-33)
 - Checked model 1: BAD_CE
   - Concrete RAC: NORMAL
-  - Abstract RAC: STUCK (when reaching the end of a loop iteration at "bench/check-ce/while.mlw", line 8, character 2 to line 16, character 6)
-File "bench/check-ce/while.mlw", line 10, characters 25-32:
+  - Abstract RAC: STUCK (when reaching the end of a loop iteration at "bench/check-ce/while.mlw", line 8, character 3 to line 16, character 7)
+File "bench/check-ce/while.mlw", line 10, characters 26-33:
 Sub-goal Loop invariant preservation of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The contracts of some function or loop are too weak, for example during the
@@ -79,11 +79,11 @@ File while.mlw:
       x1 = {contents= (-1)}
       i = {contents= 1}
 
-File "bench/check-ce/while.mlw", line 9, characters 14-19:
+File "bench/check-ce/while.mlw", line 9, characters 15-20:
 Sub-goal Loop variant decrease of goal f'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/while.mlw", line 10, characters 25-32:
+File "bench/check-ce/while.mlw", line 10, characters 26-33:
 Sub-goal Loop invariant preservation of goal f'vc.
 Prover result is: Valid.
 

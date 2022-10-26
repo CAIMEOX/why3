@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/anonymous3.mlw", line 7, characters 12-22)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/anonymous3.mlw", line 7, characters 13-23)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `f` cannot be evaluated)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/anonymous3.mlw", line 7, characters 12-22)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/anonymous3.mlw", line 7, characters 13-23)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `f` cannot be evaluated)
-File "bench/check-ce/anonymous3.mlw", line 7, characters 12-22:
+File "bench/check-ce/anonymous3.mlw", line 7, characters 13-23:
 Sub-goal Postcondition of goal g'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the

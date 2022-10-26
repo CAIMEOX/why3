@@ -1,72 +1,72 @@
 * Experiment binary_search
 ** Original
-File "bench/check-ce/petiot2018/binary_search.mlw", line 12, characters 19-44:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 12, characters 20-45:
 Sub-goal Loop invariant init of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 13, characters 45-54:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 13, characters 46-55:
 Sub-goal Loop invariant init of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 14, characters 50-58:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 14, characters 51-59:
 Sub-goal Loop invariant init of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 16, characters 12-31:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 16, characters 13-32:
 Sub-goal Precondition of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 17, characters 7-11:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 17, characters 8-12:
 Sub-goal Index in array bounds of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 15, characters 14-21:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 15, characters 15-22:
 Sub-goal Loop variant decrease of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 12, characters 19-44:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 12, characters 20-45:
 Sub-goal Loop invariant preservation of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 13, characters 45-54:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 13, characters 46-55:
 Sub-goal Loop invariant preservation of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 14, characters 50-58:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 14, characters 51-59:
 Sub-goal Loop invariant preservation of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 15, characters 14-21:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 15, characters 15-22:
 Sub-goal Loop variant decrease of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 12, characters 19-44:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 12, characters 20-45:
 Sub-goal Loop invariant preservation of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 13, characters 45-54:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 13, characters 46-55:
 Sub-goal Loop invariant preservation of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 14, characters 50-58:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 14, characters 51-59:
 Sub-goal Loop invariant preservation of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 6, characters 15-43:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 6, characters 16-44:
 Sub-goal Postcondition of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 7, characters 45-54:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 7, characters 46-55:
 Sub-goal Postcondition of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/binary_search.mlw", line 8, characters 50-58:
+File "bench/check-ce/petiot2018/binary_search.mlw", line 8, characters 51-59:
 Sub-goal Postcondition of goal binary_search'vc.
 Prover result is: Valid.
 
 ** binary_search-B1
 bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/experiments/binary_search-B1.mlw --apply-transform=split_vc --prover=Z3,4.8.10,counterexamples --timelimit=15 --check-ce --rac-prover=Z3,4.8.10 --sub-goal=:15@loop variant decrease --stepslimit=500000
-File "bench/check-ce/petiot2018/experiments/binary_search-B1.mlw", line 15, characters 10-23:
+File "bench/check-ce/petiot2018/experiments/binary_search-B1.mlw", line 15, characters 11-24:
 Sub-goal Loop variant decrease of goal binary_search'vc.
 Prover result is: Step limit exceeded.
 The program does not comply to the verification goal, for example during the
@@ -194,7 +194,7 @@ File binary_search-B1.mlw:
       r = {contents= 0}
       t = {length= 1; elts= [|(-47924) -> 401; _ -> 401|]}
 
-File "bench/check-ce/petiot2018/experiments/binary_search-B1.mlw", line 15, characters 10-23:
+File "bench/check-ce/petiot2018/experiments/binary_search-B1.mlw", line 15, characters 11-24:
 Sub-goal Loop variant decrease of goal binary_search'vc.
 Prover result is: Step limit exceeded.
 The program does not comply to the verification goal, for example during the
@@ -312,11 +312,11 @@ File binary_search-B1.mlw:
 
 ** binary_search-B2
 bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/experiments/binary_search-B2.mlw --apply-transform=split_vc --prover=Z3,4.8.10,counterexamples --timelimit=15 --check-ce --rac-prover=Z3,4.8.10 --sub-goal=:15@loop variant decrease --stepslimit=500000
-File "bench/check-ce/petiot2018/experiments/binary_search-B2.mlw", line 15, characters 14-21:
+File "bench/check-ce/petiot2018/experiments/binary_search-B2.mlw", line 15, characters 15-22:
 Sub-goal Loop variant decrease of goal binary_search'vc.
 Prover result is: Valid.
 
-File "bench/check-ce/petiot2018/experiments/binary_search-B2.mlw", line 15, characters 14-21:
+File "bench/check-ce/petiot2018/experiments/binary_search-B2.mlw", line 15, characters 15-22:
 Sub-goal Loop variant decrease of goal binary_search'vc.
 Prover result is: Step limit exceeded.
 The program does not comply to the verification goal, for example during the
@@ -1007,7 +1007,7 @@ File binary_search-B2.mlw:
 
 ** binary_search-B3
 bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/experiments/binary_search-B3.mlw --apply-transform=split_vc --prover=Z3,4.8.10,counterexamples --timelimit=15 --check-ce --rac-prover=Z3,4.8.10 --sub-goal=:14@loop invariant preservation --stepslimit=500000
-File "bench/check-ce/petiot2018/experiments/binary_search-B3.mlw", line 14, characters 50-58:
+File "bench/check-ce/petiot2018/experiments/binary_search-B3.mlw", line 14, characters 51-59:
 Sub-goal Loop invariant preservation of goal binary_search'vc.
 Prover result is: Step limit exceeded.
 The program does not comply to the verification goal, for example during the
@@ -1134,14 +1134,14 @@ File binary_search-B3.mlw:
       x = 401
       r = {contents= 3558}
 
-File "bench/check-ce/petiot2018/experiments/binary_search-B3.mlw", line 14, characters 50-58:
+File "bench/check-ce/petiot2018/experiments/binary_search-B3.mlw", line 14, characters 51-59:
 Sub-goal Loop invariant preservation of goal binary_search'vc.
 Prover result is: Valid.
 
 ** binary_search-B4
 bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/experiments/binary_search-B4.mlw --apply-transform=split_vc --prover=Z3,4.8.10,counterexamples --timelimit=15 --check-ce --rac-prover=Z3,4.8.10 --sub-goal=:8@postcondition --stepslimit=500000
 Warning: const x!0 not defined
-File "bench/check-ce/petiot2018/experiments/binary_search-B4.mlw", line 8, characters 50-58:
+File "bench/check-ce/petiot2018/experiments/binary_search-B4.mlw", line 8, characters 51-59:
 Sub-goal Postcondition of goal binary_search'vc.
 Prover result is: Unknown (sat).
 The contracts of some function or loop are too weak, for example during the

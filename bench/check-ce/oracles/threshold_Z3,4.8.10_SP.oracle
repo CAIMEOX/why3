@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: BAD_CE
-  - Concrete RAC: STUCK (for range projection int32 at "bench/check-ce/threshold.mlw", line 8, characters 9-12)
-  - Abstract RAC: STUCK (for range projection int32 at "bench/check-ce/threshold.mlw", line 8, characters 9-12)
+  - Concrete RAC: STUCK (for range projection int32 at "bench/check-ce/threshold.mlw", line 8, characters 10-13)
+  - Abstract RAC: STUCK (for range projection int32 at "bench/check-ce/threshold.mlw", line 8, characters 10-13)
 - Selected model 1: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/threshold.mlw", line 11, characters 11-20)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/threshold.mlw", line 11, characters 11-20)
-File "bench/check-ce/threshold.mlw", line 11, characters 11-20:
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/threshold.mlw", line 11, characters 12-21)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/threshold.mlw", line 11, characters 12-21)
+File "bench/check-ce/threshold.mlw", line 11, characters 12-21:
 Sub-goal Integer overflow of goal f'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -50,12 +50,12 @@ File threshold.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/threshold.mlw", line 9, characters 13-33)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/threshold.mlw", line 9, characters 13-33)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/threshold.mlw", line 9, characters 14-34)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/threshold.mlw", line 9, characters 14-34)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/threshold.mlw", line 9, characters 13-33)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/threshold.mlw", line 9, characters 13-33)
-File "bench/check-ce/threshold.mlw", line 9, characters 13-33:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/threshold.mlw", line 9, characters 14-34)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/threshold.mlw", line 9, characters 14-34)
+File "bench/check-ce/threshold.mlw", line 9, characters 14-34:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
@@ -108,12 +108,12 @@ File threshold.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (precondition at "bench/check-ce/threshold.mlw", line 30, characters 11-24)
-  - Abstract RAC: FAILURE (precondition at "bench/check-ce/threshold.mlw", line 30, characters 11-24)
+  - Concrete RAC: FAILURE (precondition at "bench/check-ce/threshold.mlw", line 30, characters 12-25)
+  - Abstract RAC: FAILURE (precondition at "bench/check-ce/threshold.mlw", line 30, characters 12-25)
 - Checked model 1: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/threshold.mlw", line 30, characters 11-24:
+File "bench/check-ce/threshold.mlw", line 30, characters 12-25:
 Sub-goal Arithmetic overflow of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -194,12 +194,12 @@ File threshold.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/threshold.mlw", line 27, characters 13-45)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/threshold.mlw", line 27, characters 13-45)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/threshold.mlw", line 27, characters 14-46)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/threshold.mlw", line 27, characters 14-46)
 - Checked model 1: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
-File "bench/check-ce/threshold.mlw", line 27, characters 13-45:
+File "bench/check-ce/threshold.mlw", line 27, characters 14-46:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the

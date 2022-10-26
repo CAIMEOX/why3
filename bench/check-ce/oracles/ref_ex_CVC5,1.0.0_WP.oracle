@@ -1,11 +1,11 @@
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 7, characters 14-25)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 7, characters 14-25)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 7, characters 15-26)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 7, characters 15-26)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 7, characters 14-25)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 7, characters 14-25)
-File "bench/check-ce/ref_ex.mlw", line 7, characters 14-25:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 7, characters 15-26)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 7, characters 15-26)
+File "bench/check-ce/ref_ex.mlw", line 7, characters 15-26:
 Sub-goal Postcondition of goal test_post'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -62,12 +62,12 @@ File ref_ex.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 13, characters 14-29)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 13, characters 14-29)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 13, characters 15-30)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 13, characters 15-30)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 13, characters 14-29)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 13, characters 14-29)
-File "bench/check-ce/ref_ex.mlw", line 13, characters 14-29:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 13, characters 15-30)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 13, characters 15-30)
+File "bench/check-ce/ref_ex.mlw", line 13, characters 15-30:
 Sub-goal Postcondition of goal test_post2'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -125,12 +125,12 @@ File ref_ex.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 24, characters 12-36)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 24, characters 12-36)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 24, characters 13-37)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 24, characters 13-37)
 - Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 24, characters 12-36)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 24, characters 12-36)
-File "bench/check-ce/ref_ex.mlw", line 24, characters 12-36:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 24, characters 13-37)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 24, characters 13-37)
+File "bench/check-ce/ref_ex.mlw", line 24, characters 13-37:
 Sub-goal Postcondition of goal incr'vc.
 Prover result is: Unknown or time/memory/step limit.
 The program does not comply to the verification goal, for example during the
@@ -206,29 +206,29 @@ File ref_ex.mlw:
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: BAD_CE
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 35, characters 2-8)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_ex.mlw", line 38, characters 14-36)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 35, characters 3-9)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_ex.mlw", line 38, characters 15-37)
 - Selected model 1: BAD_CE
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 35, characters 2-8)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_ex.mlw", line 38, characters 14-36)
-File "bench/check-ce/ref_ex.mlw", line 38, characters 14-36:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 35, characters 3-9)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_ex.mlw", line 38, characters 15-37)
+File "bench/check-ce/ref_ex.mlw", line 38, characters 15-37:
 Sub-goal Loop invariant init of goal test_loop'vc.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(
 
 
-File "bench/check-ce/ref_ex.mlw", line 39, characters 12-14:
+File "bench/check-ce/ref_ex.mlw", line 39, characters 13-15:
 Sub-goal Loop variant decrease of goal test_loop'vc.
 Prover result is: Valid.
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: BAD_CE
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 35, characters 2-8)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_ex.mlw", line 38, characters 14-36)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 35, characters 3-9)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_ex.mlw", line 38, characters 15-37)
 - Selected model 1: BAD_CE
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 35, characters 2-8)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_ex.mlw", line 38, characters 14-36)
-File "bench/check-ce/ref_ex.mlw", line 38, characters 14-36:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 35, characters 3-9)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_ex.mlw", line 38, characters 15-37)
+File "bench/check-ce/ref_ex.mlw", line 38, characters 15-37:
 Sub-goal Loop invariant preservation of goal test_loop'vc.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(
@@ -236,12 +236,12 @@ Sorry, we don't have a good counterexample for you :(
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: BAD_CE
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 35, characters 2-8)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_ex.mlw", line 38, characters 14-36)
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 35, characters 3-9)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_ex.mlw", line 38, characters 15-37)
 - Selected model 1: BAD_CE
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 35, characters 2-8)
-  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_ex.mlw", line 38, characters 14-36)
-File "bench/check-ce/ref_ex.mlw", line 32, characters 12-23:
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_ex.mlw", line 35, characters 3-9)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_ex.mlw", line 38, characters 15-37)
+File "bench/check-ce/ref_ex.mlw", line 32, characters 13-24:
 Sub-goal Postcondition of goal test_loop'vc.
 Prover result is: Unknown or time/memory/step limit.
 Sorry, we don't have a good counterexample for you :(
