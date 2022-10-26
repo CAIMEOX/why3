@@ -103,9 +103,9 @@ let pp_position_tail fmt bl bc el ec =
   let open Format in
   fprintf fmt "line %d, character" bl;
   if bl=el then
-    fprintf fmt "s %d-%d" bc ec
+    fprintf fmt "s %d-%d" (bc+1) (ec+1)
   else
-    fprintf fmt " %d to line %d, character %d" bc el ec
+    fprintf fmt " %d to line %d, character %d" (bc+1) el (ec+1)
 
 let pp_position fmt loc =
   let open Format in
