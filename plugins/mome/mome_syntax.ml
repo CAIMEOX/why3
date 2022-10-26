@@ -66,7 +66,7 @@ and expr_desc =
   | Econst of Constant.constant
   | Eident of qualid
   | Escope of qualid * expr
-  | Einfix of expr * ident * expr
+  | Echain of expr * ident * expr
   | Eand of expr * expr
   | Eor of expr * expr
   | Enot of expr
@@ -79,11 +79,36 @@ and let_defn  = outcome * expr (* outcome <- expr *)
 and with_defn = outcome * expr (* outcome -> expr *)
 and fun_defn  = ident * pat list * outcome list * expr (* TODO: spec *)
 
+type decl = {
+  decl_desc   : decl_desc;
+  decl_loc    : Loc.position;
+}
+
+and decl_desc =
+  | Dlet of let_defn list
+  | Dfun of fun_defn list
+  | Drec of fun_defn list
+
 (* parsing tree pretty-printing *)
 
 open Format
 
-let rec print_expr fmt e = match e.expr_desc with
+let rec print_decl fmt d = match d.decl_desc with
+  | Dlet [] | Dfun [] | Drec [] -> assert false
+  | Dlet (ld::ldl) ->
+      fprintf fmt "@[<hv 0>let %a%a@]@\n"
+        print_ld ld (fun fmt ldl -> List.iter (fun ld ->
+          fprintf fmt "@\nand %a" print_ld ld) ldl) ldl
+  | Dfun (fd::fdl) ->
+      fprintf fmt "@[<hv 0>fun %a%a in@]@\n"
+        print_fd fd (fun fmt fdl -> List.iter (fun fd ->
+          fprintf fmt "@\nand %a" print_fd fd) fdl) fdl
+  | Drec (fd::fdl) ->
+      fprintf fmt "@[<hv 0>rec %a%a in@]@\n"
+        print_fd fd (fun fmt fdl -> List.iter (fun fd ->
+          fprintf fmt "@\nand %a" print_fd fd) fdl) fdl
+
+and print_expr fmt e = match e.expr_desc with
   | Elet ([], _) | Efun ([], _) | Erec ([], _) -> assert false
   | Elet (ld::ldl, e) ->
       fprintf fmt "@[@[<hv 0>let %a%a in@]@\n%a endin@]"
@@ -123,7 +148,7 @@ let rec print_expr fmt e = match e.expr_desc with
       print_q fmt q
   | Escope (q,e) ->
       fprintf fmt "@[%a.(%a)@]" print_q q print_expr e
-  | Einfix (d,o,e) ->
+  | Echain (d,o,e) ->
       let o = List.hd (List.rev (String.split_on_char ' ' o.id_str)) in
       fprintf fmt "@[%a %s@ %a@]" print_expr d o print_expr e
   | Eand (d,e) ->

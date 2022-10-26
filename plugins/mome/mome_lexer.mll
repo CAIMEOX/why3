@@ -18,9 +18,12 @@
 
   let () = List.iter (fun (x,y) -> Hashtbl.add keywords x y)
     [ "let",      LET;
+      "endlet",   ENDLET;
 (*
       "fun",      FUN;
+      "endfun",   ENDFUN;
       "rec",      REC;
+      "endrec",   ENDREC;
 *)
       "in",       IN;
       "endin",    ENDIN;
@@ -103,23 +106,29 @@
     is_fragile = Hashtbl.create 3;
   }
 
+  let fail_smash = "the left boundary of this box is fixed, it cannot be moved"
+  let fail_par = "token '(' cannot be implicitly closed"
+  let fail_brc = "token '{' cannot be implicitly closed"
+  let fail_sqb = "token '[' cannot be implicitly closed"
+  let fail_if  = "token 'if' cannot be implicitly closed"
+
   let () =
-    declare_box lang INIT ~isep:SEMICOLON ~iend:FAIL ~ends:[EOF];
-    declare_box lang LET ~isep:AND ~seps:[EQUAL] ~iend:IN;
+    declare_box lang INIT ~lax:true ~iend:(FAIL fail_smash) ~ends:[EOF];
+    declare_box lang LET ~isep:AND ~seps:[EQUAL] ~iend:ENDLET ~ends:[IN];
 (*
-    declare_box lang FUN ~isep:AND ~seps:[EQUAL; COLON] ~iend:IN;
-    declare_box lang REC ~isep:AND ~seps:[EQUAL; COLON] ~iend:IN;
+    declare_box lang FUN ~isep:AND ~seps:[EQUAL; COLON] ~iend:ENDFUN ~ends:[IN];
+    declare_box lang REC ~isep:AND ~seps:[EQUAL; COLON] ~iend:ENDREC ~ends:[IN];
 *)
     declare_box lang EQUAL ~isep:SEMICOLON;
     declare_box lang RARROW ~isep:SEMICOLON;
     declare_box lang IN ~lax:true ~isep:SEMICOLON ~iend:ENDIN;
     declare_box lang DO ~isep:SEMICOLON ~iend:DONE;
-    declare_box lang LEFTPAR ~isep:SEMICOLON ~iend:FAIL ~ends:[RIGHTPAR];
+    declare_box lang LEFTPAR ~isep:SEMICOLON ~iend:(FAIL fail_par) ~ends:[RIGHTPAR];
 (*
-    declare_box lang LEFTBRC ~isep:SEMICOLON ~iend:FAIL ~ends:[RIGHTBRC];
+    declare_box lang LEFTBRC ~isep:SEMICOLON ~iend:(FAIL fail_brc) ~ends:[RIGHTBRC];
 *)
-    declare_box lang LEFTSQ ~isep:SEMICOLON ~iend:FAIL ~ends:[RIGHTSQ];
-    declare_box lang IF ~isep:SEMICOLON ~iend:FAIL ~ends:[THEN];
+    declare_box lang LEFTSQ ~isep:SEMICOLON ~iend:(FAIL fail_sqb) ~ends:[RIGHTSQ];
+    declare_box lang IF ~isep:SEMICOLON ~iend:(FAIL fail_if) ~ends:[THEN];
     declare_box lang THEN ~isep:SEMICOLON ~iend:ENDIF ~ends:[ELSE];
     declare_box lang ELSE ~lax:true ~isep:SEMICOLON ~iend:ENDIF;
     declare_box lang COLON ~isep:BAR ~ends:[EQUAL];
@@ -154,12 +163,12 @@
     queue = Queue.create ();
     lline = -1;
     lemit = SEMICOLON;
-    stack = [INIT, 0, Box Hard];
+    stack = [ INIT, -1, Primed;
+              INIT, -2, Box Hard ];
     ichar = '?';
   }
 
   let emit s t =
-(*     Printf.eprintf "{%s}%!" t; *)
     Queue.add t s.queue;
     s.lemit <- t
 
@@ -186,10 +195,12 @@
 
   let rec drop s n = match s.stack with
     | _ when n = 0 -> ()
-    | [_] -> emit s FAIL
+(*     | [_;_] | [_] -> fail_smash () *)
     | [] -> assert false
     | (b, _, _) :: st ->
         ( match implicit_end lang b with
+          | Some (FAIL s) ->
+              Loc.errorm "%a" Format.pp_print_text s
           | Some e ->
               emit s e;
               if is_opener lang e then (
@@ -200,7 +211,7 @@
         drop s (n - 1)
 
   let freestyle h =
-    if h = Hard then Loc.errorm "Error: hardbox smashing!@.";
+    if h = Hard then Loc.errorm "%a" Format.pp_print_text fail_smash;
     FreeStyle
 
   let rec smash tcol = function
@@ -272,11 +283,11 @@
     if s.lline < pos.pos_lnum then
     match s.ichar with
     | (' ' | '\t') as d when c <> d ->
-        Loc.errorm "Error: mixed tab/space indentation@."
+        Loc.errorm "mixed tab/space indentation"
     | _ -> s.ichar <- c
 
   let rec eof s =
-    try drop s (List.length s.stack - 1);
+    try drop s (List.length s.stack - 2);
         emit s EOF
     with Restart -> eof s
 
@@ -467,5 +478,11 @@ rule token st = parse
     let st = create () in
     let lb = from_channel c in
     Why3.Loc.set_file file lb;
-    Why3.Loc.with_location (Mome_parser.seq_expr_eof (next st)) lb
+    Why3.Loc.with_location (Mome_parser.top_level (next st)) lb
+
+(*
+  let () = Why3.Exn_printer.register (fun fmt exn -> match exn with
+  | _ -> raise exn)
+*)
+
 }

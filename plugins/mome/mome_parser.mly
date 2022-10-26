@@ -35,27 +35,31 @@ let mk_binder i g n m = { b_ident = i; b_ghost = g; b_null = n; b_mut = m }
 
 let mk_pat  d b e = { pat_desc = d; pat_loc = floc b e }
 let mk_expr d b e = { expr_desc = d; expr_loc = floc b e }
+let mk_decl d b e = { decl_desc = d; decl_loc = floc b e }
 
 let core_ident_error  = format_of_string
   "Symbol %s cannot be user-defined. User-defined symbol cannot use ' \
     before a letter. You can only use ' followed by _ or a number."
+
+let () = Why3.Exn_printer.register (fun fmt exn -> match exn with
+  | Error -> Format.pp_print_string fmt "syntax error"
+  | _ -> raise exn)
 
 %}
 
 %token <string> LIDENT CORE_LIDENT QUOTE_LIDENT UIDENT CORE_UIDENT
 %token <string> RIGHTSQ_QUOTE RIGHTPAR_QUOTE RIGHTPAR_USCORE
 %token <string> OP0 OP1 OP2 OP3 OP4 (* decreasing priority *)
-%token <string> STRING ATTRIBUTE
+%token <string> STRING ATTRIBUTE FAIL
 %token <Why3.Number.int_constant> INTEGER
 %token <Why3.Number.real_constant> REAL
 %token <Why3.Loc.position> POSITION
 
-%token LET (*FUN REC*) IN ENDIN
+%token LET ENDLET (*FUN ENDFUN REC ENDREC*) IN ENDIN
 %token IF THEN ELSE ENDIF
 %token WHILE DO DONE
 (*
-%token WITH ENDWITH
-%token WHERE ENDWHERE
+%token WITH ENDWITH WHERE ENDWHERE
 %token BREAK CONTINUE RETURN
 *)
 %token TRUE FALSE AS AND
@@ -69,7 +73,7 @@ let core_ident_error  = format_of_string
 %token QSIGN SEMICOLON UNDERSCORE
 %token AMPAMP BARBAR NOT
 
-%token INIT EOF FAIL
+%token INIT EOF
 
 (*
 %nonassoc below_SEMI
@@ -100,16 +104,19 @@ let core_ident_error  = format_of_string
 %nonassoc LEFTSQ
 %nonassoc OP0
 
-%start <Mome_syntax.expr> seq_expr_eof
+%start <Mome_syntax.decl list> top_level
 
 %%
 
-(* Expressions *)
+top_level:
+| top_level_decl* EOF { $1 }
+| INIT                { assert false }
+| FAIL                { assert false }
 
-seq_expr_eof:
-| seq_expr EOF    { $1 }
-| INIT            { assert false }
-| FAIL            { assert false }
+top_level_decl:
+| LET let_defn ENDLET { mk_decl (Dlet ($2)) $startpos $endpos }
+
+(* Expressions *)
 
 mk_expr(X): d = X { mk_expr d $startpos $endpos }
 
@@ -118,6 +125,8 @@ seq_expr:
 | assign_expr SEMICOLON               { $1 }
 | assign_expr SEMICOLON seq_expr
     { mk_expr (Eseq ($1, $3)) $startpos $endpos }
+| LET let_defn ENDLET SEMICOLON seq_expr
+    { mk_expr (Elet ($2, $5)) $startpos $endpos }
 
 assign_expr:
 | expr (*%prec below_LARROW*)         { $1 }
@@ -151,7 +160,7 @@ single_expr_:
 | minus_numeral
     { Econst $1 }
 | l = single_expr ; o = infix_op_4 ; r = single_expr
-    { Einfix (l,o,r) }
+    { Echain (l,o,r) }
 | l = single_expr ; o = infix_op_123 ; r = single_expr
     { Ecall (Qident o, [l;r]) }
 | qualid expr_arg+
@@ -164,9 +173,7 @@ single_expr_:
     { Eif ($2, $4, $6) }
 | IF seq_expr THEN seq_expr expr_skip ENDIF
     { Eif ($2, $4, $5) }
-| LET separated_nonempty_list(AND,
-        separated_pair(outcome, EQUAL, seq_expr))
-  IN seq_expr ENDIN
+| LET let_defn IN seq_expr ENDIN
     { Elet ($2, $4) }
 | WHILE seq_expr DO seq_expr DONE
     { Ewhile ($2, $4) }
@@ -174,6 +181,9 @@ single_expr_:
     { Ewhile ($2, $4) }
 | attr single_expr %prec prec_attr
     { Eattr ($1, $2) }
+
+let_defn: separated_nonempty_list(AND,
+          separated_pair(outcome, EQUAL, seq_expr))   { $1 }
 
 expr_skip: ident_skip     { mk_expr (Ecall (Qident $1, [])) $startpos $endpos }
 ident_skip: (* epsilon *) { id_normal $startpos $endpos }

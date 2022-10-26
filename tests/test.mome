@@ -1,35 +1,35 @@
-a ; b
+let () = a ; b
 
-(  e1
-   e2
-     e2c
-   e3 )
+let () = ( e1
+           e2
+             e2c
+           e3 )
 
-if c then d endif
+let () =  if c then d endif
 
-if c1
-   c2 then e1
+          if c1
+             c2 then e1
 
-if c then e1
-  e2
-  e3
+          if c then e1
+            e2
+            e3
 
-if c1
-   c2 then
- e1
- e2
+          if c1
+             c2 then
+            e1
+            e2
 
-if c1
-then
-  e1
-else
-  d1
+          if c1
+          then
+            e1
+          else
+            d1
 
-if c1
-then
-  e1
-; e2
-  e3
+          if c1
+          then
+            e1
+          ; e2
+            e3
 
 ;; if c1
 ;; then
@@ -38,18 +38,18 @@ then
 ;; ; e2
 ;;   e3
 
-if c1
-then
-  e1
+          if c1
+          then
+            e1
 
-if c1 then
-  e1
-  e2
-else
-  g1
-  g2
+          if c1 then
+            e1
+            e2
+          else
+            g1
+            g2
 
-let x = 1 in x < 2
+let () = let x = 1 in x < 2
 
 let x = 1
 
@@ -91,9 +91,9 @@ let xxx = e1
 ;; let x = a in let y = b
 ;; e
 
-let x = a in let y = b in
-  e1
-  e2
+let () = let x = a in let y = b in
+            e1
+         e2
 
 ;; let x = a in let y = b
 ;;  toto
@@ -103,15 +103,15 @@ let x = a in let y = b in
 ;;  toto in
 ;; e
 
-let x = a in let y = b
- toto in
- e
+let () =  let x = a in let y = b
+            toto in
+            e
 
-let x = a in
-  let y = b
-  toto
+let () =  let x = a in
+            let y = b
+            toto
 
-fun f ( a = b ) = e1
+;; fun f ( a = b ) = e1
 
 ;; fun f do a = b
 ;;   = e1
@@ -135,5 +135,3 @@ fun f ( a = b ) = e1
 ;;     | exc2
 ;;     = titi
 ;;       toto
-
-()
