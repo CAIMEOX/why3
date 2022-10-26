@@ -55,7 +55,7 @@ File .:
 
 == RAC execute giant steps
 
-FAILURE (assertion at line 5, characters 0-0)
+FAILURE (assertion at line 5, characters 1-1)
 File .:
   Line 0:
     Execution of main function `f` with env:
