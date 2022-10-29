@@ -278,11 +278,6 @@
         Loc.errorm "mixed tab/space indentation"
     | _ -> s.ichar <- c
 
-  let rec eof s =
-    try drop s (List.length s.stack - 2);
-        emit s EOF
-    with Restart -> eof s
-
 }
 
 let space = [' ' '\t' '\r']
@@ -457,7 +452,7 @@ rule token st = parse
         add st lexbuf (STRING s) }
 *)
   | eof
-      { eof st }
+      { add st lexbuf EOF }
   | _ as c
       { Lexlib.illegal_character c lexbuf }
 
