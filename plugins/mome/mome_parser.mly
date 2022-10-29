@@ -55,11 +55,11 @@ let () = Why3.Exn_printer.register (fun fmt exn -> match exn with
 %token <Why3.Number.real_constant> REAL
 %token <Why3.Loc.position> POSITION
 
-%token LET ENDLET (*FUN ENDFUN REC ENDREC*) IN ENDIN
+%token LET ENDLET FUN ENDFUN REC ENDREC IN ENDIN
 %token IF THEN ELSE ENDIF
 %token WHILE DO DONE
-(*
 %token WITH ENDWITH WHERE ENDWHERE
+(*
 %token BREAK CONTINUE RETURN
 *)
 %token TRUE FALSE AS AND
@@ -75,23 +75,16 @@ let () = Why3.Exn_printer.register (fun fmt exn -> match exn with
 
 %token INIT EOF
 
-(*
-%nonassoc below_SEMI
+%nonassoc WHERE WITH
 %nonassoc SEMICOLON
-%nonassoc LET FUN REC
-*)
-%nonassoc DOT (*RETURN*)
-(*
-%nonassoc below_LARROW
-%nonassoc LARROW
-%nonassoc below_COMMA
-%nonassoc COMMA
-*)
 %nonassoc prec_attr
+%nonassoc DOT
 (*
-%nonassoc COLON
-*)
+%nonassoc COLON (* weaker than -> because of t: a -> b *)
+                (* this breaks "... with x : int -> 5"
+                   which in OCaml is simply forbidden *)
 %right RARROW (*LRARROW*)
+*)
 %right BARBAR
 %right AMPAMP
 %nonassoc NOT
@@ -109,42 +102,56 @@ let () = Why3.Exn_printer.register (fun fmt exn -> match exn with
 %%
 
 top_level:
-| top_level_decl* EOF { $1 }
-| INIT                { assert false }
-| FAIL                { assert false }
+| top_level_decl* EOF   { $1 }
+| INIT                  { assert false }
+| FAIL                  { assert false }
 
 top_level_decl:
-| LET let_defn ENDLET { mk_decl (Dlet ($2)) $startpos $endpos }
+| LET let_defn ENDLET   { mk_decl (Dlet ($2)) $startpos $endpos }
+| FUN fun_defn ENDFUN   { mk_decl (Dfun ($2)) $startpos $endpos }
+| REC fun_defn ENDREC   { mk_decl (Drec ($2)) $startpos $endpos }
 
 (* Expressions *)
 
 mk_expr(X): d = X { mk_expr d $startpos $endpos }
 
-seq_expr:
-| assign_expr (*%prec below_SEMI*)    { $1 }
-| assign_expr SEMICOLON               { $1 }
-| assign_expr SEMICOLON seq_expr
+seq_expr: seq_expr_nsc | seq_expr_sc  { $1 }
+
+seq_expr_nsc:
+| assign_expr
+| over_expr(seq_expr_nsc) { $1 }
+
+seq_expr_sc:
+| assign_expr SEMICOLON
+| over_expr(seq_expr_sc)  { $1 }
+
+over_expr(X):
+| assign_expr SEMICOLON X
     { mk_expr (Eseq ($1, $3)) $startpos $endpos }
-| LET let_defn ENDLET SEMICOLON seq_expr
+| LET let_defn ENDLET SEMICOLON X
     { mk_expr (Elet ($2, $5)) $startpos $endpos }
+| FUN fun_defn ENDFUN SEMICOLON X
+    { mk_expr (Efun ($2, $5)) $startpos $endpos }
+| REC fun_defn ENDREC SEMICOLON X
+    { mk_expr (Erec ($2, $5)) $startpos $endpos }
 
 assign_expr:
-| expr (*%prec below_LARROW*)         { $1 }
+| expr                    { $1 }
 | expr LARROW expr
     { mk_expr (Eassign ($1, $3)) $startpos $endpos }
+| under_expr WHERE fun_defn ENDWHERE
+    { mk_expr (Erec ($3, $1)) $startpos $endpos }
+| under_expr WITH with_defn ENDWITH
+    { mk_expr (Ewith ($1, $3)) $startpos $endpos }
+
+%inline under_expr: assign_expr | seq_expr_sc  { $1 }
 
 expr:
-| single_expr (*%prec below_COMMA*)   { $1 }
+| single_expr             { $1 }
 | single_expr ident_skip preceded(COMMA, single_expr)+
     { mk_expr (Ecall (Qident $2, $1::$3)) $startpos $endpos }
 
 single_expr: e = mk_expr(single_expr_)  { e }
-
-(*
-  | Efun of fun_defn list * expr
-  | Erec of fun_defn list * expr
-  | Ewith of expr * with_defn list
-*)
 
 single_expr_:
 | expr_arg_
@@ -175,6 +182,10 @@ single_expr_:
     { Eif ($2, $4, $5) }
 | LET let_defn IN seq_expr ENDIN
     { Elet ($2, $4) }
+| FUN fun_defn IN seq_expr ENDIN
+    { Efun ($2, $4) }
+| REC fun_defn IN seq_expr ENDIN
+    { Erec ($2, $4) }
 | WHILE seq_expr DO seq_expr DONE
     { Ewhile ($2, $4) }
 | WHILE seq_expr DO expr_skip DONE
@@ -182,8 +193,20 @@ single_expr_:
 | attr single_expr %prec prec_attr
     { Eattr ($1, $2) }
 
+with_defn: BAR? separated_nonempty_list(BAR,
+          separated_pair(outcome, RARROW, seq_expr))  { $2 }
+
 let_defn: separated_nonempty_list(AND,
           separated_pair(outcome, EQUAL, seq_expr))   { $1 }
+
+fun_defn: separated_nonempty_list(AND,
+          separated_pair(fun_decl, EQUAL, seq_expr))  { $1 }
+
+fun_decl: lident_nq pat_arg* fun_out  { $1, $2, $3 }
+
+fun_out:
+| (* epsilon *)   { [] }
+| COLON separated_nonempty_list(BAR, out_uni)   { $2 }
 
 expr_skip: ident_skip     { mk_expr (Ecall (Qident $1, [])) $startpos $endpos }
 ident_skip: (* epsilon *) { id_normal $startpos $endpos }
@@ -235,6 +258,7 @@ pat_arg: mk_pat(pat_arg_) { $1 }
 pat_uni: mk_pat(pat_uni_) { $1 }
 
 outcome: mk_pat(outcome_) { $1 }
+out_uni: mk_pat(out_uni_) { $1 }
 
 outcome_:
 | out_uni_                        { $1 }
@@ -291,7 +315,9 @@ binder:
 ty:
 | ty_arg                  { $1 }
 | lqualid ty_arg+         { Tyapp ($1, $2) }
+(*
 | ty RARROW ty            { Tyarrow ($1, $3) }
+*)
 
 ty_arg:
 | lqualid                 { Tyapp ($1, []) }
@@ -305,13 +331,13 @@ ty_block:
 (* Literals *)
 
 minus_numeral:
-| MINUS INTEGER { Constant.(ConstInt (Number.neg_int $2)) }
-| MINUS REAL    { Constant.(ConstReal (Number.neg_real $2))}
+| MINUS INTEGER   { Constant.(ConstInt (Number.neg_int $2)) }
+| MINUS REAL      { Constant.(ConstReal (Number.neg_real $2))}
 
 literal:
-| INTEGER { Constant.ConstInt  $1 }
-| REAL    { Constant.ConstReal $1 }
-| STRING  { Constant.ConstStr  $1 }
+| INTEGER   { Constant.ConstInt  $1 }
+| REAL      { Constant.ConstReal $1 }
+| STRING    { Constant.ConstStr  $1 }
 
 (* Qualified idents *)
 
@@ -441,11 +467,7 @@ rightsq:
 | RIGHTSQ         { "" }
 | RIGHTSQ_QUOTE   { $1 }
 
-op_symbol:
-| OP1 { $1 }
-| OP2 { $1 }
-| OP3 { $1 }
-| OP4 { $1 }
+op_symbol:  OP1 | OP2 | OP3 | OP4   { $1 }
 
 %inline prefix_op_0:
 | o = OP0   { mk_id (Ident.op_prefix o)   $startpos $endpos }

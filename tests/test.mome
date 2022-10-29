@@ -103,35 +103,36 @@ let () = let x = a in let y = b in
 ;;  toto in
 ;; e
 
-let () =  let x = a in let y = b
-            toto in
-            e
+let () =  let x = a in
+          let y = b
+          toto
+          e
+          with
+            f x -> c
+            g y -> d
 
 let () =  let x = a in
             let y = b
             toto
 
-;; fun f ( a = b ) = e1
+fun f ( a : b ) = e1
 
-;; fun f do a = b
-;;   = e1
+fun g ( x : t ) ( y : t ) :
+  ( z : t )
+  exc
+  exc2 =
+    toto
+    titi
 
-;; fun g ( x : t ) ( y : t ) :
-;;   ( z : t )
-;;   exc
-;;   exc2 =
-;;     toto
-;;     titi
+fun g ( x : t ) ( y : t )
+    : ( z : t )
+      exc
+      exc2
+    = toto
+      titi
 
-;; fun g ( x : t ) ( y : t )
-;;     : ( z : t )
-;;       exc
-;;       exc2 =
-;;       toto
-;;       titi
-;;
-;;     f ( x : t )
-;;     : ( z : t )
-;;     | exc2
-;;     = titi
-;;       toto
+    f ( x : t )
+    : ( z : t )
+    | exc2
+    = titi
+      toto

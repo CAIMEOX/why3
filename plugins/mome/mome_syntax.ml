@@ -77,7 +77,8 @@ and expr_desc =
 
 and let_defn  = outcome * expr (* outcome <- expr *)
 and with_defn = outcome * expr (* outcome -> expr *)
-and fun_defn  = ident * pat list * outcome list * expr (* TODO: spec *)
+and fun_defn  = fun_decl * expr
+and fun_decl  = ident * pat list * outcome list (* TODO: spec *)
 
 type decl = {
   decl_desc   : decl_desc;
@@ -96,15 +97,15 @@ open Format
 let rec print_decl fmt d = match d.decl_desc with
   | Dlet [] | Dfun [] | Drec [] -> assert false
   | Dlet (ld::ldl) ->
-      fprintf fmt "@[<hv 0>let %a%a@]@\n"
+      fprintf fmt "@[<hv 0>let %a%a endlet@]@\n"
         print_ld ld (fun fmt ldl -> List.iter (fun ld ->
           fprintf fmt "@\nand %a" print_ld ld) ldl) ldl
   | Dfun (fd::fdl) ->
-      fprintf fmt "@[<hv 0>fun %a%a in@]@\n"
+      fprintf fmt "@[<hv 0>fun %a%a endfun@]@\n"
         print_fd fd (fun fmt fdl -> List.iter (fun fd ->
           fprintf fmt "@\nand %a" print_fd fd) fdl) fdl
   | Drec (fd::fdl) ->
-      fprintf fmt "@[<hv 0>rec %a%a in@]@\n"
+      fprintf fmt "@[<hv 0>rec %a%a endrec@]@\n"
         print_fd fd (fun fmt fdl -> List.iter (fun fd ->
           fprintf fmt "@\nand %a" print_fd fd) fdl) fdl
 
@@ -174,7 +175,7 @@ and print_ld fmt (o, e) =
 and print_wd fmt (o, e) =
   fprintf fmt "%a -> %a" print_out o print_expr e
 
-and print_fd fmt (i, pl, ol, e) =
+and print_fd fmt ((i, pl, ol), e) =
   let rec print_ol fmt = function
     | [] -> ()
     | [o] -> print_out fmt o

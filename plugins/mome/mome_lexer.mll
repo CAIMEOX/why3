@@ -19,12 +19,10 @@
   let () = List.iter (fun (x,y) -> Hashtbl.add keywords x y)
     [ "let",      LET;
       "endlet",   ENDLET;
-(*
       "fun",      FUN;
       "endfun",   ENDFUN;
       "rec",      REC;
       "endrec",   ENDREC;
-*)
       "in",       IN;
       "endin",    ENDIN;
       "if",       IF;
@@ -34,11 +32,11 @@
       "while",    WHILE;
       "do",       DO;
       "done",     DONE;
-(*
       "with",     WITH;
       "endwith",  ENDWITH;
       "where",    WHERE;
       "endwhere", ENDWHERE;
+(*
       "break",    BREAK;
       "continue", CONTINUE;
       "return",   RETURN;
@@ -115,10 +113,8 @@
   let () =
     declare_box lang INIT ~lax:true ~iend:(FAIL fail_smash) ~ends:[EOF];
     declare_box lang LET ~isep:AND ~seps:[EQUAL] ~iend:ENDLET ~ends:[IN];
-(*
     declare_box lang FUN ~isep:AND ~seps:[EQUAL; COLON] ~iend:ENDFUN ~ends:[IN];
     declare_box lang REC ~isep:AND ~seps:[EQUAL; COLON] ~iend:ENDREC ~ends:[IN];
-*)
     declare_box lang EQUAL ~isep:SEMICOLON;
     declare_box lang RARROW ~isep:SEMICOLON;
     declare_box lang IN ~lax:true ~isep:SEMICOLON ~iend:ENDIN;
@@ -132,10 +128,8 @@
     declare_box lang THEN ~isep:SEMICOLON ~iend:ENDIF ~ends:[ELSE];
     declare_box lang ELSE ~lax:true ~isep:SEMICOLON ~iend:ENDIF;
     declare_box lang COLON ~isep:BAR ~ends:[EQUAL];
-(*
     declare_box lang WHERE ~isep:AND ~seps:[EQUAL; COLON] ~iend:ENDWHERE;
     declare_box lang WITH ~isep:BAR ~seps:[RARROW] ~iend:ENDWITH;
-*)
 
     declare_fragile lang COLON;
     declare_fragile lang BAR;
@@ -168,9 +162,12 @@
     ichar = '?';
   }
 
-  let emit s t =
-    Queue.add t s.queue;
-    s.lemit <- t
+  let fail s = Loc.errorm "%a" Format.pp_print_text s
+
+  let emit s = function
+    | FAIL s -> fail s
+    | t -> Queue.add t s.queue;
+           s.lemit <- t
 
   let push st t tcol k = match k, st with
     | Box _, _ -> (t, tcol, k) :: st
@@ -195,12 +192,9 @@
 
   let rec drop s n = match s.stack with
     | _ when n = 0 -> ()
-(*     | [_;_] | [_] -> fail_smash () *)
     | [] -> assert false
     | (b, _, _) :: st ->
         ( match implicit_end lang b with
-          | Some (FAIL s) ->
-              Loc.errorm "%a" Format.pp_print_text s
           | Some e ->
               emit s e;
               if is_opener lang e then (
@@ -211,17 +205,17 @@
         drop s (n - 1)
 
   let freestyle h =
-    if h = Hard then Loc.errorm "%a" Format.pp_print_text fail_smash;
-    FreeStyle
+    if h = Soft then FreeStyle else fail fail_smash
 
   let rec smash tcol = function
     | (_, col, _) :: _ as st when col <= tcol -> st
+    | [_;_] | [_] -> fail fail_smash
     | (b, _, Box h) :: st ->
         push (smash tcol st) b 0 (freestyle h)
     | (b, _,  FreeStyle) :: st ->
         push (smash tcol st) b 0 FreeStyle
     | (_, _, Primed) :: _ -> assert false
-    | [] -> [] (* assert false *)
+    | [] -> assert false
 
   let rec cut tcol n = function
     | (_, col, _) :: _ as st when col <= tcol -> st, n
@@ -243,8 +237,7 @@
         let st = if is_end_for lang t b then st else
           let k = match k with
             | Primed | FreeStyle -> FreeStyle
-            | Box h when tline > s.lline && implicit_sep lang b = Some t
-                      || tcol < col -> freestyle h
+            | Box h when tcol < col -> freestyle h
             | Box _ -> k in
           push st b col k in
         s.stack <- st )
@@ -256,10 +249,9 @@
             s.stack <- push st r tcol (Box Soft)
         | _, (b, bcol, Box _) :: st when bcol = tcol ->
             drop s n; (* now s.stack == keep *)
+            s.stack <- push st b tcol (Box Hard);
             ( match implicit_sep lang b with
-              | Some sep when s.lemit <> sep ->
-                  s.stack <- push st b tcol (Box Hard);
-                  emit s sep;
+              | Some sep when s.lemit <> sep -> emit s sep;
               | _ -> () )
         | (r, _, Primed) :: st, _ ->
             s.stack <- push (smash tcol st) r tcol (Box Soft)
