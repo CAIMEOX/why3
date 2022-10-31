@@ -113,87 +113,71 @@ top_level_decl:
 
 (* Expressions *)
 
-mk_expr(X): d = X { mk_expr d $startpos $endpos }
+mk_expr(X):  X  { mk_expr $1 $startpos $endpos }
 
-seq_expr: seq_expr_nsc | seq_expr_sc  { $1 }
+seq_expr: seq_expr_nsc | seq_expr_sc      { $1 }
 
 seq_expr_nsc:
-| assign_expr
-| over_expr(seq_expr_nsc) { $1 }
+| uni_expr
+| mk_expr(over_expr_(seq_expr_nsc))       { $1 }
 
 seq_expr_sc:
-| assign_expr SEMICOLON
-| over_expr(seq_expr_sc)  { $1 }
+| uni_expr SEMICOLON
+| mk_expr(over_expr_(seq_expr_sc))        { $1 }
 
-over_expr(X):
-| assign_expr SEMICOLON X
-    { mk_expr (Eseq ($1, $3)) $startpos $endpos }
-| LET let_defn ENDLET SEMICOLON X
-    { mk_expr (Elet ($2, $5)) $startpos $endpos }
-| FUN fun_defn ENDFUN SEMICOLON X
-    { mk_expr (Efun ($2, $5)) $startpos $endpos }
-| REC fun_defn ENDREC SEMICOLON X
-    { mk_expr (Erec ($2, $5)) $startpos $endpos }
+over_expr_(X):
+| uni_expr            SEMICOLON X         { Eseq ($1, $3) }
+| LET let_defn ENDLET SEMICOLON X         { Elet ($2, $5) }
+| FUN fun_defn ENDFUN SEMICOLON X         { Efun ($2, $5) }
+| REC fun_defn ENDREC SEMICOLON X         { Erec ($2, $5) }
+| expr AS outcome     SEMICOLON X         { Elet ([$3,$1], $5) }
+(* this can be "uni_expr AS outcome", but AS in patterns binds
+   stronger than COMMA, and it seems proper to preserve this here *)
 
-assign_expr:
-| expr                    { $1 }
-| expr LARROW expr
-    { mk_expr (Eassign ($1, $3)) $startpos $endpos }
-| under_expr WHERE fun_defn ENDWHERE
-    { mk_expr (Erec ($3, $1)) $startpos $endpos }
-| under_expr WITH with_defn ENDWITH
-    { mk_expr (Ewith ($1, $3)) $startpos $endpos }
+%inline under_expr: uni_expr | seq_expr_sc  { $1 }
 
-%inline under_expr: assign_expr | seq_expr_sc  { $1 }
+uni_expr:     mk_expr(uni_expr_)          { $1 }
+tuple_expr:   mk_expr(tuple_expr_)        { $1 }
+expr:         mk_expr(expr_)              { $1 }
 
-expr:
-| single_expr             { $1 }
-| single_expr ident_skip preceded(COMMA, single_expr)+
-    { mk_expr (Ecall (Qident $2, $1::$3)) $startpos $endpos }
+uni_expr_:
+| tuple_expr_                             { $1 }
+| tuple_expr LARROW tuple_expr            { Eassign ($1, $3) }
+| under_expr WHERE fun_defn ENDWHERE      { Erec ($3, $1) }
+| under_expr WITH out_defn ENDWITH        { Ewith ($1, $3) }
+(*
+| expr AS outcome IN seq_expr ENDIN       { Elet ([$3,$1], $5) }
+  -- cannot work, because IN is a closer for LET/FUN/REC,
+     and AS is not (and should not be) an opener *)
 
-single_expr: e = mk_expr(single_expr_)  { e }
+tuple_expr_:
+| expr_                                   { $1 }
+| expr ident_skip preceded(COMMA, expr)+  { Ecall (Qident $2, $1::$3) }
 
-single_expr_:
-| expr_arg_
-    { $1 }
-| single_expr AMPAMP single_expr
-    { Eand ($1, $3) }
-| single_expr BARBAR single_expr
-    { Eor ($1, $3) }
-| NOT single_expr
-    { Enot $2 }
-| prefix_op single_expr %prec prec_prefix_op
-    { Ecall (Qident $1, [$2]) }
-| minus_numeral
-    { Econst $1 }
-| l = single_expr ; o = infix_op_4 ; r = single_expr
-    { Echain (l,o,r) }
-| l = single_expr ; o = infix_op_123 ; r = single_expr
-    { Ecall (Qident o, [l;r]) }
-| qualid expr_arg+
-    { Ecall ($1, $2) }
-| qualid LEFTPAR RIGHTPAR
-    { Ecall ($1, []) }
-| LEFTPAR ident_skip RIGHTPAR
-    { Ecall (Qident $2, []) }
+expr_:
+| expr_arg_                               { $1 }
+| expr AMPAMP expr                        { Eand ($1, $3) }
+| expr BARBAR expr                        { Eor ($1, $3) }
+| NOT expr                                { Enot $2 }
+| prefix_op expr %prec prec_prefix_op     { Ecall (Qident $1, [$2]) }
+| minus_numeral                           { Econst $1 }
+| expr infix_op_4 expr                    { Echain ($1,$2,$3) }
+| expr infix_op_123 expr                  { Ecall (Qident $2, [$1;$3]) }
+| qualid expr_arg+                        { Ecall ($1, $2) }
+| qualid LEFTPAR RIGHTPAR                 { Ecall ($1, []) }
+| LEFTPAR ident_skip RIGHTPAR             { Ecall (Qident $2, []) }
 | IF seq_expr THEN seq_expr ELSE seq_expr ENDIF
-    { Eif ($2, $4, $6) }
+                                          { Eif ($2, $4, $6) }
 | IF seq_expr THEN seq_expr expr_skip ENDIF
-    { Eif ($2, $4, $5) }
-| LET let_defn IN seq_expr ENDIN
-    { Elet ($2, $4) }
-| FUN fun_defn IN seq_expr ENDIN
-    { Efun ($2, $4) }
-| REC fun_defn IN seq_expr ENDIN
-    { Erec ($2, $4) }
-| WHILE seq_expr DO seq_expr DONE
-    { Ewhile ($2, $4) }
-| WHILE seq_expr DO expr_skip DONE
-    { Ewhile ($2, $4) }
-| attr single_expr %prec prec_attr
-    { Eattr ($1, $2) }
+                                          { Eif ($2, $4, $5) }
+| LET let_defn IN seq_expr ENDIN          { Elet ($2, $4) }
+| FUN fun_defn IN seq_expr ENDIN          { Efun ($2, $4) }
+| REC fun_defn IN seq_expr ENDIN          { Erec ($2, $4) }
+| WHILE seq_expr DO seq_expr DONE         { Ewhile ($2, $4) }
+| WHILE seq_expr DO expr_skip DONE        { Ewhile ($2, $4) }
+| attr expr %prec prec_attr               { Eattr ($1, $2) }
 
-with_defn: BAR? separated_nonempty_list(BAR,
+out_defn: BAR? separated_nonempty_list(BAR,
           separated_pair(outcome, RARROW, seq_expr))  { $2 }
 
 let_defn: separated_nonempty_list(AND,
@@ -205,27 +189,27 @@ fun_defn: separated_nonempty_list(AND,
 fun_decl: lident_nq pat_arg* fun_out  { $1, $2, $3 }
 
 fun_out:
-| (* epsilon *)   { [] }
+| (* epsilon *)                                 { [] }
 | COLON separated_nonempty_list(BAR, out_uni)   { $2 }
 
 expr_skip: ident_skip     { mk_expr (Ecall (Qident $1, [])) $startpos $endpos }
 ident_skip: (* epsilon *) { id_normal $startpos $endpos }
 
-expr_arg: e = mk_expr(expr_arg_) { e }
-expr_dot: e = mk_expr(expr_dot_) { e }
+expr_arg: mk_expr(expr_arg_)  { $1 }
+expr_dot: mk_expr(expr_dot_)  { $1 }
 
 expr_arg_:
-| qualid                          { Eident $1 }
-| literal                         { Econst $1 }
-| TRUE                            { Etrue }
-| FALSE                           { Efalse }
-| o = prefix_op_0 ; a = expr_arg  { Ecall (Qident o, [a]) }
-| expr_sub_                       { $1 }
+| qualid                              { Eident $1 }
+| literal                             { Econst $1 }
+| TRUE                                { Etrue }
+| FALSE                               { Efalse }
+| o = prefix_op_0 ; a = expr_arg      { Ecall (Qident o, [a]) }
+| expr_sub_                           { $1 }
 
 expr_dot_:
-| lqualid                         { Eident $1 }
-| o = prefix_op_0 ; a = expr_dot  { Ecall (Qident o, [a]) }
-| expr_sub_                       { $1 }
+| lqualid                             { Eident $1 }
+| o = prefix_op_0 ; a = expr_dot      { Ecall (Qident o, [a]) }
+| expr_sub_                           { $1 }
 
 expr_sub_:
 | expr_block_                         { $1 }
@@ -243,7 +227,7 @@ expr_sub_:
     { Ecall (lcut_op $5 $startpos($2) $endpos($2), [$1;$4]) }
 
 expr_block_:
-| LEFTPAR seq_expr RIGHTPAR   { Eparen $2 }
+| LEFTPAR seq_expr RIGHTPAR                         { Eparen $2 }
 (*
 | LEFTBRC field_list1(expr) RIGHTBRC                { Erecord $2 }
 | LEFTBRC expr_arg WITH field_list1(expr) RIGHTBRC  { Eupdate ($2, $4) }
@@ -251,14 +235,14 @@ expr_block_:
 
 (* Patterns *)
 
-mk_pat(X): X { mk_pat $1 $startpos $endpos }
+mk_pat(X):  X { mk_pat $1 $startpos $endpos }
 
-pattern: mk_pat(pattern_) { $1 }
-pat_arg: mk_pat(pat_arg_) { $1 }
-pat_uni: mk_pat(pat_uni_) { $1 }
+outcome: mk_pat(outcome_)   { $1 }
+out_uni: mk_pat(out_uni_)   { $1 }
 
-outcome: mk_pat(outcome_) { $1 }
-out_uni: mk_pat(out_uni_) { $1 }
+pattern: mk_pat(pattern_)   { $1 }
+pat_arg: mk_pat(pat_arg_)   { $1 }
+pat_uni: mk_pat(pat_uni_)   { $1 }
 
 outcome_:
 | out_uni_                        { $1 }
@@ -331,13 +315,13 @@ ty_block:
 (* Literals *)
 
 minus_numeral:
-| MINUS INTEGER   { Constant.(ConstInt (Number.neg_int $2)) }
-| MINUS REAL      { Constant.(ConstReal (Number.neg_real $2))}
+| MINUS INTEGER           { Constant.(ConstInt (Number.neg_int $2)) }
+| MINUS REAL              { Constant.(ConstReal (Number.neg_real $2))}
 
 literal:
-| INTEGER   { Constant.ConstInt  $1 }
-| REAL      { Constant.ConstReal $1 }
-| STRING    { Constant.ConstStr  $1 }
+| INTEGER                 { Constant.ConstInt  $1 }
+| REAL                    { Constant.ConstReal $1 }
+| STRING                  { Constant.ConstStr  $1 }
 
 (* Qualified idents *)
 
@@ -431,22 +415,16 @@ quote_lident:
 (* Symbolic operation names *)
 
 lident_op:
-| LEFTPAR lident_op_str RIGHTPAR
-    { mk_id $2 $startpos($2) $endpos($2) }
-| LEFTPAR lident_op_str RIGHTPAR_USCORE
-    { mk_id ($2^$3) $startpos $endpos }
-| LEFTPAR lident_op_str RIGHTPAR_QUOTE
-    { mk_id ($2^$3) $startpos $endpos }
+| LEFTPAR lident_op_str RIGHTPAR          { mk_id $2 $startpos $endpos }
+| LEFTPAR lident_op_str RIGHTPAR_USCORE   { mk_id ($2^$3) $startpos $endpos }
+| LEFTPAR lident_op_str RIGHTPAR_QUOTE    { mk_id ($2^$3) $startpos $endpos }
 
 (*
 lident_op_nq:
-| LEFTPAR lident_op_str RIGHTPAR
-    { mk_id $2 $startpos($2) $endpos($2) }
-| LEFTPAR lident_op_str RIGHTPAR_USCORE
-    { mk_id ($2^$3) $startpos $endpos }
-| LEFTPAR lident_op_str RIGHTPAR_QUOTE
-    { let loc = floc $startpos $endpos in
-      Loc.errorm ~loc "Symbol (%s)%s cannot be user-defined" $2 $3 }
+| LEFTPAR lident_op_str RIGHTPAR          { mk_id $2 $startpos $endpos }
+| LEFTPAR lident_op_str RIGHTPAR_USCORE   { mk_id ($2^$3) $startpos $endpos }
+| LEFTPAR lident_op_str RIGHTPAR_QUOTE    { let loc = floc $startpos $endpos in
+                Loc.errorm ~loc "Symbol (%s)%s cannot be user-defined" $2 $3 }
 *)
 
 lident_op_str:
@@ -470,25 +448,25 @@ rightsq:
 op_symbol:  OP1 | OP2 | OP3 | OP4   { $1 }
 
 %inline prefix_op_0:
-| o = OP0   { mk_id (Ident.op_prefix o)   $startpos $endpos }
+| OP0       { mk_id (Ident.op_prefix $1)  $startpos $endpos }
 
 prefix_op:
 | op_symbol { mk_id (Ident.op_prefix $1)  $startpos $endpos }
 | MINUS     { mk_id (Ident.op_prefix "-") $startpos $endpos }
 
 %inline infix_op_123:
-| o = OP1   { mk_id (Ident.op_infix o)    $startpos $endpos }
-| o = OP2   { mk_id (Ident.op_infix o)    $startpos $endpos }
-| o = OP3   { mk_id (Ident.op_infix o)    $startpos $endpos }
+| OP1       { mk_id (Ident.op_infix $1)   $startpos $endpos }
+| OP2       { mk_id (Ident.op_infix $1)   $startpos $endpos }
+| OP3       { mk_id (Ident.op_infix $1)   $startpos $endpos }
 | MINUS     { mk_id (Ident.op_infix "-")  $startpos $endpos }
 
 %inline infix_op_4:
-| o = OP4   { mk_id (Ident.op_infix o)    $startpos $endpos }
+| OP4       { mk_id (Ident.op_infix $1)   $startpos $endpos }
 | EQUAL     { mk_id (Ident.op_infix "=")  $startpos $endpos }
 
 (* Attributes and position markers *)
 
-attrs(X): X attr* { add_attr $1 $2 }
+attrs(X):   X attr* { add_attr $1 $2 }
 
 attr:
 | ATTRIBUTE { ATstr (Ident.create_attribute $1) }

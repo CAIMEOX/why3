@@ -1,4 +1,7 @@
 let () = a ; b
+         titi as x
+         ee
+         with zz -> ()
 
 let () = ( e1
            e2
