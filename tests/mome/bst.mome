@@ -1,0 +1,29 @@
+
+;; binary search trees
+
+;; type elt = ...
+;; type tree = Empty | Node tree elt tree
+
+fun find (x: elt) (t: tree) : bool =
+  search t
+  where loop search (t: tree) : bool =
+    t with Empty      -> break false
+         | Node l v r -> if v = x then break true
+                         if x < v then l else r
+
+;; insertion: when the element is already there, do not rebuild the tree
+
+fun add (x: elt) (t0: tree) : (_: tree) =
+  addrec t0
+  where addrec (t: tree) : (_: tree) =
+    t with Empty      -> Node Empty x Empty
+         | Node l v r -> if v = x then add'return t0
+                         addrec (if x < v then l else r)
+
+fun add2 (x: elt) (t: tree) : (_: tree) =
+  add t with already () -> t
+  where add (t: tree) : (_: tree) | already () =
+    t with Empty      -> Node Empty x Empty
+         | Node l v r -> if v = x then already ()
+                         add (if x < v then l else r)
+

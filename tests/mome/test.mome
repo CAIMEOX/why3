@@ -1,0 +1,141 @@
+let () = a ; b
+         titi as x
+         ee
+         with zz -> ()
+
+let () = ( e1
+           e2
+             e2c
+           e3 )
+
+let () =  if c then d endif
+
+          if c1
+             c2 then e1
+
+          if c then e1
+            e2
+            e3
+
+          if c1
+             c2 then
+            e1
+            e2
+
+          if c1
+          then
+            e1
+          else
+            d1
+
+          if c1
+          then
+            e1
+          ; e2
+            e3
+
+;; if c1
+;; then
+;;   e0
+;;   e1
+;; ; e2
+;;   e3
+
+          if c1
+          then
+            e1
+
+          if c1 then
+            e1
+            e2
+          else
+            g1
+            g2
+
+let () = let x = 1 in x < 2
+
+let x = 1
+
+let x = 4
+    y = 5
+
+let x =
+  e1
+    e1c
+
+let x = e1
+          e1c
+
+let x = e1
+        e2
+
+let x =
+  e1
+  e2
+
+let xxx = e1
+     e1c
+    yy = e2
+
+let xxx = e1
+ e1c
+
+let xxx =
+ e1
+ e2
+
+let xxx = e1
+   e1c
+  e2c
+
+;; let x = a in let y = b in
+;; e
+
+;; let x = a in let y = b
+;; e
+
+let () = let x = a in let y = b in
+            e1
+         e2
+
+;; let x = a in let y = b
+;;  toto
+;; e
+
+;; let x = a in let y = b
+;;  toto in
+;; e
+
+let () =  let x = a in
+          let y = b
+          toto
+          e
+          with
+            f x -> c
+            g y -> d
+
+let () =  let x = a in
+            let y = b
+            toto
+
+fun f ( a : b ) = e1
+
+fun g ( x : t ) ( y : t ) :
+  ( z : t )
+  exc
+  exc2 =
+    toto
+    titi
+
+fun g ( x : t ) ( y : t )
+    : ( z : t )
+      exc
+      exc2
+    = toto
+      titi
+
+    f ( x : t )
+    : ( z : t )
+    | exc2
+    = titi
+      toto
