@@ -41,8 +41,19 @@ let rec rep_in_term args t =
     let t = rep t in
     let term_bound = t_close_bound vs t in
     t_let (rep term) term_bound
-  | Tcase (term, term_branchs) -> t_case (rep term) term_branchs
-  | Teps term_bound -> assert false
+  | Tcase (term, term_branchs) ->
+    t_case (rep term)
+      (List.map
+         (fun branch ->
+           let pat, t = t_open_branch branch in
+           let t = rep t in
+           t_close_branch pat t)
+         term_branchs)
+  | Teps term_bound ->
+    let vs, t = t_open_bound term_bound in
+    let t = rep t in
+    let term_bound = t_close_bound vs t in
+    t_eps term_bound
   | Tquant (quant, term_quant) ->
     let vs, trigger, t = t_open_quant term_quant in
     let t = rep t in
