@@ -1,5 +1,6 @@
 filename "%f-%t-%g.ae"
 
+transformation "replace_predicate"
 transformation "inline_trivial"
 
 transformation "eliminate_builtin"

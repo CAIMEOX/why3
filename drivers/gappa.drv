@@ -10,6 +10,7 @@ unknown "no contradiction was found\\|some enclosures were not satisfied\\|some 
 time "why3cpulimit time : %s s"
 fail "Error: \\(.*\\)" "\\1"
 
+transformation "replace_predicate"
 transformation "inline_trivial"
 transformation "eliminate_builtin"
 transformation "inline_all"
@@ -188,7 +189,7 @@ theory ieee_float.GenericFloat
   meta "instantiate:auto" prop sub_finite
   meta "instantiate:auto" prop mul_finite
   meta "instantiate:auto" prop div_finite
-
+  remove prop max_real_int
 end
 
 theory ieee_float.Float32
