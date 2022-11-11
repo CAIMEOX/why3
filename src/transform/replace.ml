@@ -6,32 +6,13 @@ let meta_replace =
   register_meta "trans:replace_predicate" [ MTlsymbol; MTlsymbol ]
     ~desc:"Replace@ a@ predicate@ by@ one@ with@ the@ same signature."
 
-let rec rep_in_term args t =
-  let rep = rep_in_term args in
+let rec rep_in_term mls t =
+  let rep = rep_in_term mls in
   match t.t_node with
   | Tapp (ls, terms) ->
     let ls =
-      List.fold_left
-        (fun ls ls_l ->
-          match ls_l with
-          | [] -> ls
-          | [ ls1; ls2 ] ->
-            let ls1 =
-              match ls1 with
-              | MAls ls1 -> ls1
-              | _ -> assert false
-            in
-            let ls2 =
-              match ls2 with
-              | MAls ls2 -> ls2
-              | _ -> assert false
-            in
-            if ls_equal ls ls1 then
-              ls2
-            else
-              ls
-          | _ -> assert false)
-        ls args
+      try Mls.find ls mls with
+      | Not_found -> ls
     in
     let terms = List.map rep terms in
     t_app_infer ls terms
@@ -63,15 +44,37 @@ let rec rep_in_term args t =
   | Tnot term -> t_not (rep term)
   | _ -> t
 
-let rep args d =
+let rep mls d =
   match d.d_node with
   | Dprop (kind, pr, t) ->
-    let t = rep_in_term args t in
+    let t = rep_in_term mls t in
     [ create_prop_decl kind pr t ]
   | _ -> [ d ]
 
 (* TODO : Check types *)
-let replace args = Trans.decl (rep args) None
+let replace args =
+  let mls =
+    List.fold_left
+      (fun acc ls_l ->
+        match ls_l with
+        | [] -> acc
+        | [ ls1; ls2 ] ->
+          let ls1 =
+            match ls1 with
+            | MAls ls1 -> ls1
+            | _ -> assert false
+          in
+          let ls2 =
+            match ls2 with
+            | MAls ls2 -> ls2
+            | _ -> assert false
+          in
+          Mls.add ls1 ls2 acc
+        | _ -> assert false)
+      Mls.empty args
+  in
+  Trans.decl (rep mls) None
+
 let replace_predicate = Trans.on_meta meta_replace replace
 
 let () =
