@@ -1,7 +1,32 @@
 
 from random import randint
 
-#@ lemma G: (1==1  so 2==2) and (2==2 by 1==1)
+#@constant
+one = 1
+
+g = 42 + one
+
+#@ assert g > 1
+
+#@ function
+def pure(x: int) -> int:
+  #@ ensures result > x
+  return x+1
+# return x+one # FIXME
+
+#@ assert pure(1) > 0
+
+#@ lemma test_pure: pure(41) == 42
+
+def use_pure(x):
+  #@ ensures result == pure(x)
+  return x+1
+
+#@ lemma test_by_and_so: (1==1  so 2==2) and (2==2 by 1==1)
+
+def test_add_list():
+  #@ ensures len(add_list(result, result)) == 0
+  return []
 
 def f(x):
   #@ ensures result > x
@@ -64,7 +89,7 @@ foo = [1,2,3]
 #@ constant
 N = 42
 
-#@ lemma L: N == 42
+#@ assert N == 42
 
 x, y = 1, 2
 #@ assert x == 1 and y == 2
@@ -81,7 +106,9 @@ x, y = y, x
 #@ function
 def mfact(n) -> int:
     #@ variant n
-    return 1 if n <= 0 else n*mfact(n-1)
+    return 1 if n <= 0 else n * mfact(n-1)
+
+#@ lemma L2: mfact(2) == 2
 
 n = len([0] + [1])
 #@ assert n == 2

@@ -68,9 +68,9 @@ and stmt_desc =
   | Scontinue
   | Slabel of ident
 
-and block = decl list
+and block = stmt list
 
-and decl =
+type decl =
   | Dimport of ident * ident list
   | Ddef of ident * (ident * typ option) list * typ option * Ptree.spec
              * block * is_function
@@ -80,4 +80,4 @@ and decl =
               * Ptree.term option
   | Dprop of Decl.prop_kind * ident * Ptree.term
 
-type file = block
+type file = decl list

@@ -47,8 +47,6 @@ let mk_unit ~loc =
   mk_expr ~loc (Etuple [])
 let mk_var ~loc id =
   mk_expr ~loc (Eident (Qident id))
-let mk_pure t =
-  mk_expr ~loc:t.term_loc (Epure t)
 
 let mk_ref ~loc e =
   mk_expr ~loc (Eapply (mk_expr ~loc Eref, e))
@@ -91,58 +89,96 @@ let empty_spec = {
 }
 
 type env = {
-  vars: ident Mstr.t;
+  globals: Sstr.t;
+     vars: Sstr.t;
 }
 
 let empty_env =
-  { vars = Mstr.empty }
+  { globals = Sstr.empty;
+    vars = Sstr.empty; }
 
-let is_const (e: Py_ast.expr list) =
-  match List.nth e 2 with
-  | {Py_ast.expr_desc=Eint "1";_}  -> 1
-  | {Py_ast.expr_desc=Eunop (Uneg, {Py_ast.expr_desc=Eint "1";_});_} -> -1
-  | _ -> 0
+let is_var env id =
+  Sstr.mem id.id_str env.globals ||
+  Sstr.mem id.id_str env.vars
+let is_global env id =
+  Sstr.mem id.id_str env.globals
+let mk_global id =
+  { id with id_str = id.id_str ^ "'global" }
 
-let add_var env id =
-  { vars = Mstr.add id.id_str id env.vars }
+let add_global env id =
+  { env with globals = Sstr.add id.id_str env.globals }
+let add_local env {id_str=x} =
+  { globals = Sstr.remove x env.globals;
+    vars = Sstr.add x env.vars; }
+let add_binder env = function
+  | _, Some id, _, _ -> add_local env id
+  | _ -> env
 let add_param env (id, _) =
-  add_var env id
+  add_local env id
+let rec add_pattern env pat = match pat.pat_desc with
+  | Pvar id -> add_local env id
+  | Pwild -> env
+  | Papp (_, pl) | Ptuple pl -> List.fold_left add_pattern env pl
+  | _ -> assert false
 
-let for_vars ~loc x =
-  let x = x.id_str in
-  mk_id ~loc (x ^ "'index"), mk_id ~loc (x ^ "'list")
+(* Changing `x` to `x'global` in terms *)
+let rec term env (t: Ptree.term) =
+  { t with term_desc = term_desc env t.term_desc }
 
-let rec has_stmt p = function
-  | Dstmt s -> p s || begin match s.stmt_desc with
-      | Sbreak | Scontinue  | Sreturn _ | Sassign _ | Slabel _ | Spass _
-      | Seval _ | Sset _ | Sblock _ | Sassert _ | Swhile _ | Scall_lemma _
-      -> false
-    | Sif (_, bl1, bl2) -> has_stmtl p bl1 || has_stmtl p bl2
-    | Sfor (_, _, _, bl) -> has_stmtl p bl end
-  | _ -> false
-and has_stmtl p bl = List.exists (has_stmt p) bl
+and term_desc env = function
+  | Ttrue
+  | Tfalse
+  | Tconst _ as t ->
+      t
+  | Tident (Qident id) as t ->
+      if is_global env id then Tident (Qident (mk_global id)) else t
+  | Tidapp (id, tl) ->
+      (* FIXME id extr args *)
+      Tidapp (id, List.map (term env) tl)
+  | Tinfix (t1, id, t2) ->
+      Tinfix (term env t1, id, term env t2)
+  | Tinnfix (t1, id, t2) ->
+      Tinnfix (term env t1, id, term env t2)
+  | Tbinop (t1, o, t2) ->
+      Tbinop (term env t1, o, term env t2)
+  | Tbinnop (t1, o, t2) ->
+      Tbinnop (term env t1, o, term env t2)
+  | Tnot t ->
+      Tnot (term env t)
+  | Tif (t1, t2, t3) ->
+      Tif (term env t1, term env t2, term env t3)
+  | Tquant (q, bl, tll, t) ->
+      let env = List.fold_left add_binder env bl in
+      Tquant (q, bl, List.map (List.map (term env)) tll, term env t)
+  | Tlet (id, t1, t2) ->
+      Tlet (id, term env t1, term (add_local env id) t2)
+  | Tat (t, id) ->
+      Tat (term env t, id)
+  | Ttuple tl ->
+      Ttuple (List.map (term env) tl)
+  (* not part of micro-Python syntax *)
+  | Tident (Qdot _)
+  | Tasref _
+  | Tapply _
+  | Tattr _
+  | Trecord _
+  | Tupdate _
+  | Tscope _
+  | Tcast _
+  | Tcase _ ->
+      assert false
 
-let rec expr_has_call id e = match e.Py_ast.expr_desc with
-  | Enone | Ebool _ | Eint _ | Estring _ | Py_ast.Eident _ -> false
-  | Emake (e1, e2) | Eget (e1, e2) | Ebinop (_, e1, e2) ->
-    expr_has_call id e1 || expr_has_call id e2
-  | Econd(c,e1,e2) -> expr_has_call id c || expr_has_call id e1 || expr_has_call id e2
-  | Eunop (_, e1) -> expr_has_call id e1
-  | Edot (e, f, el) -> id.id_str = f.id_str || List.exists (expr_has_call id) (e::el)
-  | Ecall (f, el) -> id.id_str = f.id_str || List.exists (expr_has_call id) el
-  | Elist el -> List.exists (expr_has_call id) el
-  | Py_ast.Etuple el -> List.exists (expr_has_call id) el
-
-let rec stmt_has_call id s = match s.stmt_desc with
-  | Sbreak | Scontinue | Slabel _ | Sassert _ | Spass _ -> false
-  | Sreturn e | Sassign (_, e) | Seval e -> expr_has_call id e
-  | Sblock s -> block_has_call id s
-  | Scall_lemma (f, _) -> id.id_str = f.id_str
-  | Sset (e1, e2, e3) ->
-    expr_has_call id e1 || expr_has_call id e2 || expr_has_call id e3
-  | Sif (e, s1, s2) -> expr_has_call id e || block_has_call id s1 || block_has_call id s2
-  | Sfor (_, e, _, s) | Swhile (e, _, _, s) -> expr_has_call id e || block_has_call id s
-and block_has_call id = has_stmtl (stmt_has_call id)
+let post env (loc, pl) =
+  let post (pat, t) = (pat, term (add_pattern env pat) t) in
+  (loc, List.map post pl)
+let variant env v =
+  let variant (t, r) = (term env t, r) in
+  List.map variant v
+let spec env sp =
+  { sp with
+    sp_pre  = List.map (term env) sp.sp_pre;
+    sp_post = List.map (post env) sp.sp_post;
+    sp_variant = variant env sp.sp_variant; }
 
 let rec is_list (e: Py_ast.expr) =
   match e.Py_ast.expr_desc with
@@ -161,8 +197,10 @@ let rec expr env {Py_ast.expr_loc = loc; Py_ast.expr_desc = d } = match d with
     constant_s ~loc s
   | Py_ast.Estring _s ->
     mk_unit ~loc (*FIXME*)
+  | Py_ast.Eident id when is_global env id ->
+     mk_expr ~loc (Eident (Qident (mk_global id)))
   | Py_ast.Eident id ->
-    if not (Mstr.mem id.id_str env.vars) then
+    if not (Sstr.mem id.id_str env.vars) then
       Loc.errorm ~loc "unbound variable %s" id.id_str;
      mk_expr ~loc (Eident (Qident id))
   | Py_ast.Econd (c, e1, e2) ->
@@ -194,49 +232,45 @@ let rec expr env {Py_ast.expr_loc = loc; Py_ast.expr_desc = d } = match d with
     mk_expr ~loc (Eidapp (prefix ~loc "-", [expr env e]))
   | Py_ast.Eunop (Py_ast.Unot, e) ->
     mk_expr ~loc (Enot (expr env e))
-
   | Py_ast.Edot (e, f, el) ->
     let el = List.map (expr env) (e::el) in
     let id = Qdot (Qident (mk_id ~loc "Python"), f) in
     mk_expr ~loc (Eidapp (id, el))
-
   | Py_ast.Ecall ({id_str="slice"} as id, [e1;e2;e3]) ->
-
     let zero = expr env ({Py_ast.expr_loc = loc; Py_ast.expr_desc = Eint "0"}) in
     let e1' = mk_id ~loc "e1'" in
     let e1_var = mk_var ~loc e1' in
-
     let len = mk_expr ~loc (Eidapp (Qident (mk_id ~loc "len"), [e1_var])) in
-
     let e2, e3 = match e2, e3 with
-      | {Py_ast.expr_desc=Py_ast.Enone}, {Py_ast.expr_desc=Py_ast.Enone} -> zero, len
-      | _                              , {Py_ast.expr_desc=Py_ast.Enone} -> expr env e2, len
-      | {Py_ast.expr_desc=Py_ast.Enone}, _                               -> zero, expr env e3
-      | _                              , _                               -> expr env e2, expr env e3
+      | {Py_ast.expr_desc=Py_ast.Enone}, {Py_ast.expr_desc=Py_ast.Enone} ->
+          zero, len
+      | _, {Py_ast.expr_desc=Py_ast.Enone} ->
+          expr env e2, len
+      | {Py_ast.expr_desc=Py_ast.Enone}, _ ->
+          zero, expr env e3
+      | _                              , _ ->
+          expr env e2, expr env e3
     in
-
     let id = Qdot (Qident (mk_id ~loc "Python"), id) in
-
     mk_expr ~loc (Elet (e1', false, Expr.RKnone, expr env e1,
       mk_expr ~loc (Eidapp (id, [e1_var;e2;e3]))
     ))
-
   | Py_ast.Ecall ({id_str="range"} as id, els) when List.length els < 4 ->
     let zero = {Py_ast.expr_loc = loc; Py_ast.expr_desc = Eint "0"} in
     let from_to_step, id = match els with
                         | [e]        -> [zero; e], id
                         | [e1;e2]    -> [e1; e2], id
                         | [e1;e2;e3] -> [e1; e2; e3], mk_id ~loc "range3"
-                        | _          -> assert false
-    in
+                        | _          -> assert false in
     let el = List.map (expr env) from_to_step in
     mk_expr ~loc (Eidapp (Qident id, el))
-
   | Py_ast.Ecall ({id_str="print"}, el) ->
     let eval res e =
-      mk_expr ~loc (Elet (mk_id ~loc "_", false, Expr.RKnone, expr env e, res)) in
+      mk_expr ~loc (Elet (mk_id ~loc "_", false,
+                          Expr.RKnone, expr env e, res)) in
     List.fold_left eval (mk_unit ~loc) el
   | Py_ast.Ecall (id, el) ->
+      (* FIXME add extra args *)
     let el = if el = [] then [mk_unit ~loc] else List.map (expr env) el in
     mk_expr ~loc (Eidapp (Qident id, el))
   | Py_ast.Emake (e1, e2) -> (* [e1]*e2 *)
@@ -261,33 +295,34 @@ let rec expr env {Py_ast.expr_loc = loc; Py_ast.expr_desc = d } = match d with
 
 let no_params ~loc = [loc, None, false, Some (PTtuple [])]
 
-let mk_for_params exps loc env =
+let logic_param (id, ty) = id.id_loc, Some id, false, ty
 
-  let mk_op1 op ub = mk_expr ~loc (Eidapp (infix ~loc op, [expr env ub; constant ~loc 1])) in
+let is_one_or_minus_one = function
+  | { Py_ast.expr_desc = Eint "1"; _ }  ->
+      Some 1
+  | { Py_ast.expr_desc = Eunop (Uneg, {Py_ast.expr_desc=Eint "1";_}); _ } ->
+      Some (-1)
+  | _ ->
+      None
+
+let mk_for_params exps loc env =
+  let mk_op1 op ub =
+    mk_expr ~loc (Eidapp (infix ~loc op, [expr env ub; constant ~loc 1])) in
   let mk_minus1 ub = mk_op1 "-" ub in
   let mk_plus1 ub = mk_op1 "+" ub in
-
   match exps with
   | [e1] ->
       let zero = {Py_ast.expr_loc = loc; Py_ast.expr_desc = Eint "0"} in
       expr env zero, mk_minus1 e1, Expr.To
   | [e1;e2] ->
       expr env e1, mk_minus1 e2, Expr.To
-  | [e1;e2;_] ->
-      begin match is_const exps with
-      |  1 -> expr env e1, mk_minus1 e2, Expr.To
-      | -1 -> expr env e1, mk_plus1 e2, Expr.DownTo
-      | _  -> assert false
+  | [e1;e2;e3] ->
+      begin match is_one_or_minus_one e3 with
+      | Some 1    -> expr env e1, mk_minus1 e2, Expr.To
+      | Some (-1) -> expr env e1, mk_plus1 e2, Expr.DownTo
+      | _         -> assert false
       end
   | _ -> assert false
-
-let rec new_vars env (e: Py_ast.expr) =
-  match e.Py_ast.expr_desc with
-  | Py_ast.Eident id ->
-      if Mstr.mem id.id_str env.vars then [] else [id]
-  | Py_ast.Etuple el ->
-      List.sort_uniq compare (List.concat (List.map (new_vars env) el))
-  | _ -> []
 
 (*
   (r1,..)..(rn,..) := e1,...em
@@ -310,10 +345,9 @@ let rec build_pat2 (e1: Py_ast.expr) (e2: expr) =
   let loc = e1.Py_ast.expr_loc in
   match e1.Py_ast.expr_desc, e2.expr_desc with
   | Py_ast.Etuple el1, Etuple el2 ->
-      if List.length el1 = List.length el2 then
-        mk_pat ~loc (Ptuple (List.map2 build_pat2 el1 el2))
-      else
-        Loc.errorm ~loc "illegal assignment"
+      if List.length el1 <> List.length el2 then
+        Loc.errorm ~loc "illegal assignment";
+      mk_pat ~loc (Ptuple (List.map2 build_pat2 el1 el2))
   | Py_ast.Etuple el1, _ ->
       mk_pat ~loc (Ptuple (List.map build_pat1 el1))
   | Py_ast.Eident id, _ ->
@@ -328,26 +362,62 @@ let rec flatten_updates (e: Py_ast.expr) (p: pattern) =
   | _, Pvar _ -> [e, p]
   | _ -> failwith "flatten_updates"
 
-let rec gen_updates env lp cnt =
+let rec gen_updates ~global env lp cnt =
   match lp with
   | [] -> cnt
   | ({ Py_ast.expr_desc = Py_ast.Eident id },
-     { pat_desc = Pvar id'; pat_loc = loc }) :: lp'
-        when Mstr.mem id.id_str env.vars ->
+     { pat_desc = Pvar id'; pat_loc = loc }) :: lp' when is_var env id ->
+      let id = if is_global env id then mk_global id else id in
       let a = mk_expr ~loc (Eassign [mk_lref ~loc id, None, mk_var ~loc id']) in
-      mk_expr ~loc (Esequence (a, gen_updates env lp' cnt))
+      mk_expr ~loc (Esequence (a, gen_updates ~global env lp' cnt))
   | ({ Py_ast.expr_desc = Py_ast.Eident id},
      { pat_desc = Pvar id'; pat_loc = loc }) :: lp' ->
+      let id = if global then mk_global id else id in
       mk_expr ~loc
         (Elet (set_ref id, false, Expr.RKnone, mk_ref ~loc (mk_var ~loc id'),
-               gen_updates env lp' cnt))
-  | ({ Py_ast.expr_desc = Eget (e1,e2) },
+               gen_updates ~global env lp' cnt))
+  | ({ Py_ast.expr_desc = Eget (e1, e2) },
      { pat_desc = Pvar id'; pat_loc = loc }) :: lp' ->
       let a =
         array_set ~loc:e1.Py_ast.expr_loc (expr env e1) (expr env e2) (mk_var ~loc id') in
-      mk_expr ~loc (Esequence (a, gen_updates env lp' cnt))
+      mk_expr ~loc (Esequence (a, gen_updates ~global env lp' cnt))
   | (e,_) :: _ ->
       Loc.errorm ~loc:e.Py_ast.expr_loc "invalid lhs in assignment"
+
+let for_vars ~loc x =
+  let x = x.id_str in
+  mk_id ~loc (x ^ "'index"), mk_id ~loc (x ^ "'list")
+
+let rec has_stmt p s =
+  p s || begin match s.stmt_desc with
+      | Sbreak | Scontinue  | Sreturn _ | Sassign _ | Slabel _ | Spass _
+      | Seval _ | Sset _ | Sblock _ | Sassert _ | Swhile _ | Scall_lemma _
+      -> false
+    | Sif (_, bl1, bl2) -> has_stmtl p bl1 || has_stmtl p bl2
+    | Sfor (_, _, _, bl) -> has_stmtl p bl end
+and has_stmtl p bl = List.exists (has_stmt p) bl
+
+let rec expr_has_call id e = match e.Py_ast.expr_desc with
+  | Enone | Ebool _ | Eint _ | Estring _ | Py_ast.Eident _ -> false
+  | Emake (e1, e2) | Eget (e1, e2) | Ebinop (_, e1, e2) ->
+    expr_has_call id e1 || expr_has_call id e2
+  | Econd(c,e1,e2) -> expr_has_call id c || expr_has_call id e1 || expr_has_call id e2
+  | Eunop (_, e1) -> expr_has_call id e1
+  | Edot (e, f, el) -> id.id_str = f.id_str || List.exists (expr_has_call id) (e::el)
+  | Ecall (f, el) -> id.id_str = f.id_str || List.exists (expr_has_call id) el
+  | Elist el -> List.exists (expr_has_call id) el
+  | Py_ast.Etuple el -> List.exists (expr_has_call id) el
+
+let rec stmt_has_call id s = match s.stmt_desc with
+  | Sbreak | Scontinue | Slabel _ | Sassert _ | Spass _ -> false
+  | Sreturn e | Sassign (_, e) | Seval e -> expr_has_call id e
+  | Sblock s -> block_has_call id s
+  | Scall_lemma (f, _) -> id.id_str = f.id_str
+  | Sset (e1, e2, e3) ->
+    expr_has_call id e1 || expr_has_call id e2 || expr_has_call id e3
+  | Sif (e, s1, s2) -> expr_has_call id e || block_has_call id s1 || block_has_call id s2
+  | Sfor (_, e, _, s) | Swhile (e, _, _, s) -> expr_has_call id e || block_has_call id s
+and block_has_call id = has_stmtl (stmt_has_call id)
 
 let rec stmt env {Py_ast.stmt_loc = loc; Py_ast.stmt_desc = d } =
   match d with
@@ -358,7 +428,9 @@ let rec stmt env {Py_ast.stmt_loc = loc; Py_ast.stmt_desc = d } =
     mk_expr ~loc (Elet (id, false, Expr.RKnone, expr env e, mk_unit ~loc))
   | Py_ast.Scall_lemma (f, lt) ->
     let id = mk_id ~loc "_'" in
-    let call = Eidapp (Qident f, List.map mk_pure lt) in
+    let pure t = mk_expr ~loc:t.term_loc (Epure (term env t)) in
+    (* FIXME f extra args *)
+    let call = Eidapp (Qident f, List.map pure lt) in
     mk_expr ~loc
       (Elet (id, false, Expr.RKnone, mk_expr ~loc call, mk_unit ~loc))
   | Py_ast.Sif (e, s1, s2) ->
@@ -373,16 +445,18 @@ let rec stmt env {Py_ast.stmt_loc = loc; Py_ast.stmt_desc = d } =
      let e = expr env e in
      let p = build_pat2 lhs e in
      let lp = flatten_updates lhs p in
-     let u = gen_updates env lp (mk_unit ~loc) in
+     let u = gen_updates ~global:false env lp (mk_unit ~loc) in
      mk_expr ~loc (Ematch (e, [p, u], []))
 
   | Py_ast.Sset (e1, e2, e3) ->
     array_set ~loc (expr env e1) (expr env e2) (expr env e3)
   | Py_ast.Sassert (k, t) ->
-    mk_expr ~loc (Eassert (k, t))
+    mk_expr ~loc (Eassert (k, term env t))
   | Py_ast.Swhile (e, inv, var, s) ->
     let id_b = mk_id ~loc break_id in
     let id_c = mk_id ~loc continue_id in
+    let inv = List.map (term env) inv in
+    let var = variant env var in
     let body = block env ~loc s in
     let body = mk_expr ~loc (Eoptexn (id_c, Ity.MaskVisible, body)) in
     let loop = mk_expr ~loc (Ewhile (expr env e, inv, var, body)) in
@@ -394,15 +468,19 @@ let rec stmt env {Py_ast.stmt_loc = loc; Py_ast.stmt_desc = d } =
   | Py_ast.Slabel _ ->
     mk_unit ~loc (* ignore lonely marks *)
   | Py_ast.Spass (ty, sp) ->
+     let sp = spec env sp in
      mk_expr ~loc
        (Eany ([], Expr.RKnone, ty, mk_pat ~loc Pwild, Ity.MaskVisible, sp))
     (* make a special case for
          for id in range(e1, [e2, e3]) *)
-  | Py_ast.Sfor (id, {Py_ast.expr_desc=Ecall ({id_str="range"}, exps)},
+  | Py_ast.Sfor (id, {Py_ast.expr_desc=Ecall ({id_str="range"},
+                                              ([_; _; e3] as exps))},
                  inv, body)
-    when (List.length exps = 3 && (let c = is_const exps in c = -1 || c = 1)) ->
+    when is_one_or_minus_one e3 <> None ->
     let lb, ub, direction = mk_for_params exps loc env in
-    let body = block ~loc (add_var env id) body in
+    let env = add_local env id in
+    let inv = List.map (term env) inv in
+    let body = block ~loc env body in
     let body =
       mk_expr ~loc (Eoptexn (mk_id ~loc continue_id, Ity.MaskVisible, body)) in
     let body = mk_expr ~loc (Elet (set_ref id, false, Expr.RKnone,
@@ -414,7 +492,9 @@ let rec stmt env {Py_ast.stmt_loc = loc; Py_ast.stmt_desc = d } =
                  inv, body)
     when (List.length exps < 3) ->
     let lb, ub, direction = mk_for_params exps loc env in
-    let body = block ~loc (add_var env id) body in
+    let env = add_local env id in
+    let inv = List.map (term env) inv in
+    let body = block ~loc env body in
     let body =
       mk_expr ~loc (Eoptexn (mk_id ~loc continue_id, Ity.MaskVisible, body)) in
     let body = mk_expr ~loc (Elet (set_ref id, false, Expr.RKnone,
@@ -440,7 +520,9 @@ let rec stmt env {Py_ast.stmt_loc = loc; Py_ast.stmt_desc = d } =
     let lenl = mk_expr ~loc (Eidapp (len ~loc, [mk_var ~loc l])) in
     let ub = mk_expr ~loc (Eidapp (infix ~loc "-", [lenl; constant ~loc 1])) in
     let li = mk_expr ~loc (Eidapp (get_op ~loc, [mk_var ~loc l; mk_var ~loc i])) in
-    let body = block ~loc (add_var env id) body in
+    let env = add_local env id in
+    let inv = List.map (term env) inv in
+    let body = block ~loc env body in
     let body = mk_expr ~loc (Eoptexn (mk_id ~loc continue_id, Ity.MaskVisible, body)) in
     let body = mk_expr ~loc (Elet (set_ref id, false, Expr.RKnone,
                                    mk_ref ~loc li, body)) in
@@ -451,32 +533,83 @@ let rec stmt env {Py_ast.stmt_loc = loc; Py_ast.stmt_desc = d } =
 and block env ~loc = function
   | [] ->
     mk_unit ~loc
-  | Dstmt { stmt_loc = loc; stmt_desc = Slabel id } :: sl ->
+  | { stmt_loc = loc; stmt_desc = Slabel id } :: sl ->
     mk_expr ~loc (Elabel (id, block env ~loc sl))
-  | Dstmt { Py_ast.stmt_loc=loc; stmt_desc = Py_ast.Sassign (lhs, e) } :: sl ->
-     let ids = new_vars env lhs in
-     let env' =  List.fold_left add_var env ids in
-     let e = expr env e in
-     let p = build_pat2 lhs e in
-     let lp = flatten_updates lhs p in
-     let u = gen_updates env lp (block env' ~loc sl) in
-     mk_expr ~loc (Ematch (e, [p, u], []))
-  | Dstmt ({ Py_ast.stmt_loc = loc } as s) :: sl ->
+  | { Py_ast.stmt_loc=loc; stmt_desc = Py_ast.Sassign (lhs, e) } :: sl ->
+      assignment env ~global:false ~loc lhs e (fun env' -> block env' ~loc sl)
+  | { Py_ast.stmt_loc = loc } as s :: sl ->
     let s = stmt env s in
     if sl = [] then s else mk_expr ~loc (Esequence (s, block env ~loc sl))
-  | Ddef (id, idl, ty, sp, bl, fct) :: sl ->
-    (* f(x1,...,xn): body ==>
-      let f x1 ... xn =
-        let x1 = ref x1 in ... let xn = ref xn in
-        try body with Return x -> x *)
-    let param (id, ty) = id.id_loc, Some id, false, ty in
-    let params = if idl = [] then no_params ~loc else List.map param idl in
-    let p = mk_pat ~loc Pwild in
-    let is_rec = block_has_call id bl in
-    let s = block env ~loc sl in
-    (match bl with
-       | [Py_ast.Dstmt {stmt_desc=Py_ast.Sreturn e}] when fct ->
+
+and assignment env ~global ~loc lhs e k =
+  let rec declare_var env (e: Py_ast.expr) = match e.Py_ast.expr_desc with
+    | Py_ast.Eident id when is_var env id ->
+        env
+    | Py_ast.Eident id ->
+        (if global then add_global else add_local) env id
+    | Py_ast.Etuple el ->
+        List.fold_left declare_var env el
+    | _ ->
+        env in
+  let env' = declare_var env lhs in
+  let e = expr env e in
+  let p = build_pat2 lhs e in
+  let lp = flatten_updates lhs p in
+  let u = gen_updates ~global env lp (k env') in
+  mk_expr ~loc (Ematch (e, [p, u], []))
+
+(* Translation schema:
+
+  - Python code is turned into a single main function:
+
+                              let main () =
+      x = 1                     let ref x = 1 in
+      def f(y):                 let f y = let ref y = y in
+        return x + y              x + y in
+      #@ assert x == 1          assert { x = 1 };
+      x = x + 1                 x <- x + 1;
+      #@ assert x == 2          assert { x = 2 };
+      print(f(1))               print (f 1)
+
+  - Logical functions and predicates are moved outside,
+    with global variables added as new parameters, e.g.
+
+      N = 10
+      #@function add(x: int) -> int = x+N
+      ...add(3)...
+
+    becomes
+
+      function add N x = x+N
+      let main () = let ref N = 10 in ...add(N, 3)...
+
+  - A global variable `x` is renamed `x'global` everywhere
+
+*)
+
+let rec decl env ~loc = function
+  | [] ->
+      mk_unit ~loc
+  | Py_ast.Dimport _ :: dl ->
+      decl env ~loc dl
+  | Dstmt { stmt_loc = loc; stmt_desc = Slabel id } :: dl ->
+      mk_expr ~loc (Elabel (id, decl env ~loc dl))
+  | Dstmt { Py_ast.stmt_loc=loc; stmt_desc = Py_ast.Sassign (lhs, e) } :: dl ->
+      assignment env ~global:true ~loc lhs e (fun env' -> decl env' ~loc dl)
+  | Dstmt s :: [] ->
+      stmt env s
+  | Dstmt s :: dl ->
+      mk_expr ~loc (Esequence (stmt env s, decl env ~loc dl))
+  | Ddef (id, idl, ty, sp, bl, fct) :: dl ->
+      let loc = id.id_loc in
+      let param (id, ty) = id.id_loc, Some id, false, ty in
+      let params = if idl = [] then no_params ~loc else List.map param idl in
+      let p = mk_pat ~loc Pwild in
+      let is_rec = block_has_call id bl in
+      (match bl with
+       | [{stmt_desc = Py_ast.Sreturn e}] when fct ->
            let env' = List.fold_left add_param empty_env idl in
+           let sp = spec env sp in
            let e = expr env' e in
            let d =
              if is_rec then
@@ -485,12 +618,18 @@ and block env ~loc = function
                let e = Efun (params, ty, p, Ity.MaskVisible, sp, e) in
                Dlet (id, false, Expr.RKfunc, mk_expr ~loc e) in
            Typing.add_decl id.id_loc d;
-           s
+           decl env ~loc dl
        | _ ->
+         if fct then
+           Loc.errorm ~loc "this function cannot be considered as pure";
+         (* f(x1,...,xn): body ==>
+            let f x1 ... xn =
+             let x1 = ref x1 in ... let xn = ref xn in
+             try body with Return x -> x *)
            let env' = List.fold_left add_param env idl in
+           let sp = spec env' sp in
            let body = block env' ~loc:id.id_loc bl in
            let body =
-             let loc = id.id_loc in
              let id = mk_id ~loc return_id in
              { body with expr_desc = Eoptexn (id, Ity.MaskVisible, body) } in
            let local bl (id, _) =
@@ -499,6 +638,7 @@ and block env ~loc = function
              mk_expr ~loc (Elet (set_ref id, false, Expr.RKnone, ref, bl)) in
            let body = List.fold_left local body idl in
            let kind = if fct then Expr.RKlocal else Expr.RKnone in
+           let s = decl env ~loc dl in
            let e =
              if is_rec then
                Erec ([id, false, kind, params, ty, p, Ity.MaskVisible, sp, body], s)
@@ -507,51 +647,41 @@ and block env ~loc = function
                Elet (id, false, kind, mk_expr ~loc e, s)
            in
            mk_expr ~loc e)
-  | (Py_ast.Dimport _ | Py_ast.Dlogic _) :: sl ->
-    block env ~loc sl
-  | Py_ast.Dconst (id, e) :: sl ->
-    let e = expr env e in
-    let d = Dlet (id, false, Expr.RKfunc, e) in
-    Typing.add_decl id.id_loc d;
-    let e = Elet (id, false, Expr.RKnone, e,
-                  block ~loc (add_var env id) sl) in
-    mk_expr ~loc e
-  | Py_ast.Dprop (pk, id, t) :: sl ->
-    Typing.add_decl id.id_loc (Dprop (pk, id, t));
-    block env ~loc sl
-
-let logic_param (id, ty) =
-  id.id_loc, Some id, false, ty
-
-let logic = function
-  | Py_ast.Dlogic (id, idl, ty, None, def) ->
-    let d = { ld_loc = id.id_loc;
-              ld_ident = id;
-              ld_params = List.map logic_param idl;
-              ld_type = ty;
-              ld_def = def } in
-    Typing.add_decl id.id_loc (Dlogic [d])
-  | Py_ast.Dlogic (id, idl, Some ty, Some var, Some def) ->
-     let loc = id.id_loc in
-     let p = mk_pat ~loc (Pvar id) in
-     let s = { Ptree_helpers.empty_spec with sp_variant = [var,None] } in
-     let e = mk_expr ~loc (Epure def) in
-     let pl = List.map (fun (id,ty) -> loc,Some id,false,Some ty) idl in
-     let dr =
-       Drec ([id, true, Expr.RKfunc, pl, Some ty, p, Ity.MaskVisible, s, e]) in
-     Typing.add_decl id.id_loc dr
-  | Py_ast.Dlogic (id, idl, None, _, def) ->
-    let d = { ld_loc = id.id_loc;
-              ld_ident = id;
-              ld_params = List.map logic_param idl;
-              ld_type = None;
-              ld_def = def } in
-    Typing.add_decl id.id_loc (Dlogic [d])
-  | _ -> ()
+  | Py_ast.Dlogic (id, idl, ty, None, def) :: dl ->
+      let def = Opt.map (term env) def in
+      let d = { ld_loc = id.id_loc;
+                ld_ident = id;
+                ld_params = List.map logic_param idl;
+                ld_type = ty;
+                ld_def = def } in
+      Typing.add_decl id.id_loc (Dlogic [d]);
+      decl env ~loc dl
+  | Py_ast.Dlogic (id, _idl, _ty, Some _var, Some _def) :: _dl ->
+      let loc = id.id_loc in
+      Loc.errorm ~loc "recursive functions are not yet supported"
+(*
+      let p = mk_pat ~loc Pwild in
+      let s = { Ptree_helpers.empty_spec with sp_variant = [var,None] } in
+      let e = mk_expr ~loc (Epure def) in
+      let pl = List.map (fun (id,ty) -> loc,Some id,false,Some ty) idl in
+      let dr =
+        Drec ([id, true, Expr.RKfunc, pl,  ty, p, Ity.MaskVisible, s, e]) in
+      Typing.add_decl id.id_loc dr;
+      decl env ~loc dl
+*)
+  | Py_ast.Dlogic (_, _, _, Some _, None) :: _ ->
+      assert false
+  | Py_ast.Dconst (id, e) :: dl ->
+      let e = expr env e in
+      let e = Elet (mk_global id, false, Expr.RKnone, e,
+                    decl ~loc (add_global env id) dl) in
+      mk_expr ~loc e
+  | Py_ast.Dprop (pk, id, t) :: dl ->
+    Typing.add_decl id.id_loc (Dprop (pk, id, term env t));
+    decl env ~loc dl
 
 let translate ~loc dl =
-  List.iter logic dl;
-  let bl = block empty_env ~loc dl in
+  let bl = decl empty_env ~loc dl in
   let p = mk_pat ~loc Pwild in
   let fd = Efun (no_params ~loc, None, p, Ity.MaskVisible, empty_spec, bl) in
   let main = Dlet (mk_id ~loc "main", false, Expr.RKnone, mk_expr ~loc fd) in

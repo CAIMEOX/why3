@@ -23,7 +23,7 @@
   let mk_pat  d s e = { pat_desc  = d; pat_loc  = floc s e }
   let mk_term d s e = { term_desc = d; term_loc = floc s e }
   let mk_expr loc d = { expr_desc = d; expr_loc = loc }
-  let mk_stmt loc d = Dstmt { stmt_desc = d; stmt_loc = loc }
+  let mk_stmt loc d = { stmt_desc = d; stmt_loc = loc }
   let mk_var id = mk_expr id.id_loc (Eident id)
 
   let variant_union v1 v2 = match v1, v2 with
@@ -106,7 +106,8 @@
 %start <Why3.Ptree.ident list> ident_comma_list_eof
 
 %type <Py_ast.file> file
-%type <Py_ast.decl> stmt
+%type <Py_ast.stmt> stmt
+%type <Py_ast.decl> decl
 
 %%
 
@@ -120,7 +121,7 @@ file:
 decl:
 | import { $1 }
 | def    { $1 }
-| stmt   { $1 }
+| stmt   { Dstmt $1 }
 | func   { $1 }
 | prop   { $1 }
 | const  { $1 }
@@ -399,12 +400,12 @@ simple_stmt_desc:
       let operation =
         mk_expr_floc (Ebinop (o, mk_expr_floc (Eget(expr_a, expr_id)), e2)) in
       let s1 =
-        Dstmt ({ stmt_desc = Sassign (mk_var a, e0); stmt_loc = loc }) in
+        { stmt_desc = Sassign (mk_var a, e0); stmt_loc = loc } in
       let s2 =
-        Dstmt ({ stmt_desc = Sassign (mk_var id, e1); stmt_loc = loc }) in
+        { stmt_desc = Sassign (mk_var id, e1); stmt_loc = loc } in
       let s3 =
-        Dstmt ({ stmt_desc = Sset (expr_a, expr_id, operation);
-                 stmt_loc = loc }) in
+        { stmt_desc = Sset (expr_a, expr_id, operation);
+          stmt_loc = loc } in
       Sblock [s1; s2; s3]
     }
 | k=assertion_kind t = term
