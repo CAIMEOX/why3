@@ -153,7 +153,7 @@ func:
     Dlogic (id, List.map (logic_param loc) l, None, var, def) }
 
 fp_variant:
-| LEFTBR VARIANT v=term RIGHTBR { v }
+| VARIANT LEFTBR v=term RIGHTBR { v }
 
 logic_body:
 | EQUAL t=term
