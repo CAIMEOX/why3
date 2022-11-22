@@ -4,7 +4,7 @@
 ;; type elt = ...
 ;; type tree = Empty | Node tree elt tree
 
-fun find (x: elt) (t: tree) : bool =
+fun find (x: elt) (t: tree) : (_: bool) =
   search t
   where loop search (t: tree) : bool =
     t with Empty      -> break false

@@ -1,0 +1,61 @@
+
+fun swap (a: array int) (i: int) (j: int) =
+  let tmp = a[i]
+  a|i] <- a[j]
+  a[j] <- tmp
+
+;; at least two values i.e. lo + 2 <= hi
+;; 3-way partition
+;;    lo       m      i      j     hi
+;;   |   < p  | = p  | ???? | > p |
+fun partition (a: array int) (lo: int) (hi: int) : (m: int, i: int) =
+  let p = a[lo]
+  let &m = lo
+  let &j = hi
+  let &i = lo + 1
+  while i < j do
+    if a[i] < p then
+      swap a m i
+      m <- m + 1
+      i <- i + 1
+    else if a[i] > p then
+      j <- j - 1
+      swap a i j
+    else
+      i <- i + 1
+  m, i
+
+;;    lo       m      i      j     hi
+;;   |   < p  | = p  | ???? | > p |
+fun partition (a: array int) (lo: int) (hi: int) : (m: int, i: int) =
+  let p = a[lo]
+  part lo (lo + 1) hi
+  where loop part m i j =
+    if i >= j then
+      return m i ;; or break m i
+    if a[i] < p then
+      swap a m i
+      m + 1, i + 1, j
+    else if a[i] > p then
+      swap a i (j - 1)
+      m, i, j - 1
+    else
+      m, i + 1, j
+
+fun knuth_shuffle (a: array int) =
+  for i in 1..length a do
+    swap a (random (i + 1)) i
+  done
+
+fun quicksort (a: array int) =
+  knuth_shuffle a
+  quickrec 0 (length a)
+  where rec quickrec (lo hi: int) =
+    if hi - lo <= 1 then return
+    let i, j = partition a lo hi
+    if hi - j > i - lo then
+      quickrec lo i
+      quickrec j hi
+    else
+      quickrec j hi
+      quickrec lo i
