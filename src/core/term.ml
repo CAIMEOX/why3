@@ -1500,7 +1500,7 @@ let t_open_lambda_cb t =
 
 let t_closure ls tyl ty =
   let mk_v i ty = create_vsymbol (id_fresh ("y" ^ string_of_int i)) ty in
-  let vl = Lists.mapi mk_v tyl in
+  let vl = List.mapi mk_v tyl in
   let t = t_app ls (List.map t_var vl) ty in
   t_lambda vl [] t
 
@@ -1627,6 +1627,7 @@ let small t = match t.t_node with
 
 let v_copy_unused v =
   let id = v.vs_name in
+  if Sattr.mem Ident.unused_attr id.id_attrs then v else
   let attrs = Sattr.singleton Ident.unused_attr in
   let attrs =
     try

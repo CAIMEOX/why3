@@ -10,6 +10,8 @@ Configuration
   * the libdir and datadir are not anymore stored in the Why3 config
     file, but they can be manually set there if desired. See also the
     usage of environment variables WHY3LIB and WHY3DATA
+  * the option --enable-profiling does not exist anymore, see
+    CONTRIBUTING.md for details
 
 API
   * source locations are now represented by both a start line number
@@ -24,6 +26,11 @@ API
 
 MLCFG input language
   * attributes on the body of an MLCFG function are now supported
+
+Python language
+  * added `by` and `so` connectives in predicates
+  * fixed overloading of `+` in Python code
+  * list concatenation in logic with `add_list`
 
 Provers
   * support for CVC5 1.0.0 (released April 6, 2022)
