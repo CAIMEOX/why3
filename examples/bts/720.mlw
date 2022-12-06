@@ -1,0 +1,99 @@
+module A
+  type nat = O | S nat
+
+  goal g1 : forall x:nat. O <> S x
+
+  goal g2 : forall x y:nat. S x = S y -> x = y
+
+  predicate is2 (x:nat) =
+     match x with
+     | O -> false
+     | S (S O) -> true
+     | _ -> false
+     end
+
+   goal g3 : is2 (S (S O))
+
+  use list.List
+  use list.Nth
+  use option.Option
+
+  goal g4: nth 3 (Cons (S O) (Cons O (Cons (S O) (Cons (S (S O)) Nil)))) = Some (S (S O))
+  goal g5: nth 4 (Cons (S O) (Cons O (Cons (S O) (Cons (S (S O)) Nil)))) = None
+end
+
+module AA
+  type nat = A (f : int) | B ( f : int ) nat
+
+  goal g1 : forall x y. A x <> B x y
+
+  goal g2 : forall x y z t. B x y = B z t -> y = t
+end
+
+module B
+  use list.List
+  use list.Append
+
+  let rec function reverse (l: list 'a) : list 'a =
+  match l with
+  | Nil      -> Nil
+  | Cons x r -> reverse r ++ Cons x Nil
+  end
+
+  let rec lemma reverse_append (l1 l2: list 'a) (x: 'a)
+    variant { l1 }
+    ensures { (reverse (Cons x l1)) ++ l2 = (reverse l1) ++ (Cons x l2) }
+  = match l1 with
+    | Nil -> ()
+    | Cons x l3 -> reverse_append l3 l2 x
+    end
+end
+
+module CaseOfRecord
+
+use int.Int
+use bool.Bool
+
+type t = { f : int ; g : bool }
+
+goal g1 : forall x:t.
+    if x.g then x.f < x.f + 1 else x.f > x.f - 1
+
+end
+
+module CaseOfOneConstr
+
+use int.Int
+use bool.Bool
+
+type t = C int
+
+goal g1 : forall x:t.
+    match x with C y -> y+1 > y end
+
+end
+
+
+module TestMem
+
+use int.Int
+
+type list = Nil | Cons int list
+
+predicate mem (x:int) (l:list) =
+  match l with
+  | Nil -> false
+  | Cons y r -> x = y \/ mem x r
+  end
+
+goal g : mem 1 (Cons 2 (Cons 1 Nil))
+
+goal list_pos :
+  forall l:list.
+    (forall n:int. (mem n l -> (0 <= n))) ->
+    match l with
+    | Nil -> true
+    | Cons x2 x3 -> (forall n:int. (mem n x3 -> (0 <= n))) /\ (0 <= x2)
+    end
+
+end

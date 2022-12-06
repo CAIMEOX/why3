@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="Alt-Ergo" version="2.4.2" timelimit="5" steplimit="0" memlimit="1000"/>
+<file format="whyml">
+<path name=".."/><path name="720.mlw"/>
+<theory name="A" proved="true">
+ <goal name="g1" proved="true">
+ <proof prover="0"><result status="valid" time="0.00" steps="0"/></proof>
+ </goal>
+ <goal name="g2" proved="true">
+ <proof prover="0"><result status="valid" time="0.00" steps="2"/></proof>
+ </goal>
+ <goal name="g3" proved="true">
+ <proof prover="0"><result status="valid" time="0.00" steps="4"/></proof>
+ </goal>
+ <goal name="g4" proved="true">
+ <proof prover="0"><result status="valid" time="0.01" steps="30"/></proof>
+ </goal>
+ <goal name="g5" proved="true">
+ <proof prover="0"><result status="valid" time="0.00" steps="35"/></proof>
+ </goal>
+</theory>
+<theory name="AA" proved="true">
+ <goal name="g1" proved="true">
+ <proof prover="0"><result status="valid" time="0.00" steps="0"/></proof>
+ </goal>
+ <goal name="g2" proved="true">
+ <proof prover="0"><result status="valid" time="0.00" steps="3"/></proof>
+ </goal>
+</theory>
+<theory name="B" proved="true">
+ <goal name="reverse_append&#39;vc" expl="VC for reverse_append" proved="true">
+ <proof prover="0"><result status="valid" time="1.08" steps="8401"/></proof>
+ </goal>
+</theory>
+<theory name="CaseOfRecord">
+ <goal name="g1">
+ <proof prover="0"><result status="highfailure" time="0.00"/></proof>
+ </goal>
+</theory>
+<theory name="CaseOfOneConstr" proved="true">
+ <goal name="g1" proved="true">
+ <proof prover="0"><result status="valid" time="0.00" steps="0"/></proof>
+ </goal>
+</theory>
+<theory name="TestMem">
+ <goal name="g" proved="true">
+ <proof prover="0"><result status="valid" time="0.00" steps="11"/></proof>
+ </goal>
+ <goal name="list_pos">
+ <proof prover="0"><result status="timeout" time="5.00"/></proof>
+ </goal>
+</theory>
+</file>
+</why3session>

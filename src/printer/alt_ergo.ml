@@ -236,11 +236,39 @@ let rec print_term info fmt t =
   | Tif(t1,t2,t3) ->
      fprintf fmt "(if %a then %a else %a)"
        (print_fmla info) t1 (print_term info) t2 (print_term info) t3
-  | Tcase _ -> unsupportedTerm t
-      "alt-ergo: you must eliminate match"
   | Teps _ -> unsupportedTerm t
       "alt-ergo: you must eliminate epsilon"
   | Tquant _ | Tbinop _ | Tnot _ | Ttrue | Tfalse -> raise (TermExpected t)
+  | Tcase (subject, tb) when subject.t_ty = Some Ty.ty_bool ->
+      begin
+        try
+          match tb with
+          | [tb1;tb2] ->
+              let pat1, t1 = t_open_branch tb1 in
+              let _pat2, t2 = t_open_branch tb2 in
+              begin
+                match pat1.pat_node with
+                | Papp(ls,[]) when ls_equal ls fs_bool_true ->
+                    fprintf fmt "(if %a then %a else %a)" (print_term info) subject
+                      (print_term info) t1 (print_term info) t2
+                | Papp(ls,[]) when ls_equal ls fs_bool_false ->
+                    fprintf fmt "(if %a then %a else %a)" (print_term info) subject
+                      (print_term info) t2 (print_term info) t1
+                | _ -> raise Exit
+              end
+          | _ -> raise Exit
+        with Exit ->
+          unsupportedTerm t "alt-ergo: unsupported patterns on bool type"
+      end
+    | Tcase (t, tbs) ->
+      let print_branch fmt tb =
+        let pat, t = t_open_branch tb in
+        fprintf fmt "@[%a ->@ %a@]" (print_pattern info) pat (print_term info) t
+      in
+      let alt fmt () = fprintf fmt "@\n| " in
+      fprintf fmt "@[<v 0>match %a with@\n| %a@\nend@]" (print_term info) t
+        (print_list alt print_branch)
+        tbs
   in
   check_exit_vc_term t info.info_in_goal info.info_vc_term;
 
@@ -270,6 +298,21 @@ and print_fmla info fmt f =
   in
   check_exit_vc_term f info.info_in_goal info.info_vc_term
 
+and print_pattern info fmt p =
+  match p.pat_node with
+  | Pwild -> fprintf fmt "_"
+  | Pvar { vs_name = id } -> fprintf fmt "%a" (print_ident info) id
+  | Papp (ls, pats) -> (
+    match pats with
+    | [] -> fprintf fmt "%a" (print_ident info) ls.ls_name
+    | pats ->
+      fprintf fmt "@[%a(%a)@]" (print_ident info) ls.ls_name
+        (print_list comma (print_pattern info))
+        pats)
+  | Por (p1, p2) ->
+    fprintf fmt "%a | %a" (print_pattern info) p1 (print_pattern info) p2
+  | Pas (p, v) ->
+    fprintf fmt "%a as %a" (print_pattern info) p (print_ident info) v.vs_name
 and print_fmla_node info fmt f = match f.t_node with
   | Tapp ({ ls_name = id }, []) ->
       print_ident info fmt id
@@ -317,9 +360,37 @@ and print_fmla_node info fmt f = match f.t_node with
         (print_type info) v.vs_ty
         (print_fmla info) f2;
       forget_var info v
-  | Tcase _ -> unsupportedTerm f
-      "alt-ergo: you must eliminate match"
   | Tvar _ | Tconst _ | Teps _ -> raise (FmlaExpected f)
+  | Tcase (subject, tb) when subject.t_ty = Some Ty.ty_bool ->
+      begin
+        try
+          match tb with
+          | [tb1;tb2] ->
+              let pat1, t1 = t_open_branch tb1 in
+              let _pat2, t2 = t_open_branch tb2 in
+              begin
+                match pat1.pat_node with
+                | Papp(ls,[]) when ls_equal ls fs_bool_true ->
+                    fprintf fmt "(if %a then %a else %a)" (print_term info) subject
+                      (print_fmla info) t1 (print_fmla info) t2
+                | Papp(ls,[]) when ls_equal ls fs_bool_false ->
+                    fprintf fmt "(if %a then %a else %a)" (print_term info) subject
+                      (print_fmla info) t2 (print_fmla info) t1
+                | _ -> raise Exit
+              end
+          | _ -> raise Exit
+        with Exit ->
+          unsupportedTerm f "alt-ergo: unsupported patterns on bool type"
+      end
+  | Tcase (t, tbs) ->
+    let print_branch fmt tb =
+      let pat, t = t_open_branch tb in
+      fprintf fmt "@[%a -> %a@]" (print_pattern info) pat (print_fmla info) t
+    in
+    let alt fmt () = fprintf fmt "@\n| " in
+    fprintf fmt "@[<v 0>match %a with@\n| %a@\nend@]" (print_term info) t
+      (print_list alt print_branch)
+      tbs
 
 and print_expr info fmt =
   TermTF.t_select (print_term info fmt) (print_fmla info fmt)
@@ -367,8 +438,31 @@ let print_data_decl info fmt = function
           (print_type info) (Opt.get ls.ls_value) in
       fprintf fmt "%a@ =@ {@ %a@ }@\n@\n" (print_type_decl info) ts
         (print_list semi print_field) pjl
-  | _, _ -> unsupported
-      "alt-ergo: algebraic datatype are not supported"
+  | ts, csl ->
+    let print_constructor info fmt (ls, args) =
+      let print_field fmt (ty, name) =
+        let name =
+          match name with
+          (* we can't use the Why3 name because Alt-Ergo does NOT want to have
+             the same projection name several times
+             | Some ls -> Ident.id_unique info.info_printer ls.ls_name
+          *)
+          | Some _ls -> Ident.string_unique info.info_printer "_"
+          | None -> Ident.string_unique info.info_printer "_"
+        in
+        fprintf fmt "%s : %a" name (print_type info) ty
+      in
+      if List.length args = 0 then
+        fprintf fmt "%a" (print_ident info) ls.ls_name
+      else
+        let fields = List.map2 (fun a b -> (a, b)) ls.ls_args args in
+        fprintf fmt "@[%a of { @[%a@] }@]" (print_ident info) ls.ls_name
+          (print_list semi print_field)
+          fields
+    in
+    fprintf fmt "@[<v 2>%a =@\n  %a@]@\n\n" (print_type_decl info) ts
+      (print_list alt2 (print_constructor info))
+      csl
 
 let print_data_decl info fmt ((ts, _csl) as p) =
   if Mid.mem ts.ts_name info.info_syn then () else
