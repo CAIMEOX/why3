@@ -75,10 +75,15 @@ let replace args =
   in
   Trans.decl (rep mls) None
 
-let replace_predicate = Trans.on_meta meta_replace replace
+let replace_predicate env =
+  Trans.compose
+    (Trans.on_meta meta_replace replace)
+    (Inlining.t ~use_meta:true ~in_goal:true
+       ~notls:(fun ~for_counterexample _ -> false)
+       ~notdef:(fun _ -> false))
 
 let () =
-  Trans.register_transform "replace_predicate" replace_predicate
+  Trans.register_env_transform "replace_predicate" replace_predicate
     ~desc:
       "Only@ keep@ declarations@ of@ integer@ and@ real@ variables,@ also@ \
        only@ keep@ assertions@ about@ inequalities@ or@ equalites@ between@ \
