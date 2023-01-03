@@ -80,90 +80,158 @@ open Ident
 (*       Unsupported *)
 (*   | _ -> Unsupported *)
 
-let apply_add truths t t1 t2 =
-  match Mterm.find t1 truths with
-  | [ truth ] -> (
-    match truth with
-    | Tapp (ls, [ _t1; _t2 ]) ->
-      (* TODO: Match ls with le, then match _t1 with Tapp(absls, [ Tapp
-         (minusls, [_, t3]) ]) and we take t3. Do the same for t2, then we use
-         the addition lemma with (t - (t3 + t4) <= ...) *)
-      assert false
-    | _ -> assert false)
-  | _ -> assert false
+let add_ineq ineqs t ineq =
+  let t_ineqs = Mterm.find t ineqs in
+  match t_ineqs with
+  | [] -> Mterm.add t [ ineq ] ineqs
+  | _ -> Mterm.add t (ineq :: t_ineqs) ineqs
 
-(* truths is a map from terms to predicates. For now only *_post_ieee predicates
-   are supported *)
-let rec apply mls t truths =
+(* Deduce new inequalities from "add_ieee_post t1 t2 t" *)
+let apply_add mls ineqs t t1 t2 =
+  let le_ls = assert false (* TODO : Find real symbol *) in
+  let add_ls = assert false (* TODO : Find real symbol *) in
+  let sub_ls = assert false (* TODO : Find real symbol *) in
+  let mult_ls = assert false (* TODO : Find real symbol *) in
+  let abs_ls = assert false (* TODO : Find real symbol *) in
+  let eps = assert false (* TODO : Create term from constant *) in
+  let add = t_app add_ls [ t1; t2 ] (Some ty_real) in
+  let sub = t_app sub_ls [ t; add ] (Some ty_real) in
+  let abs = t_app abs_ls [ sub ] (Some ty_real) in
+  let err = t_app mult_ls [ add; eps ] (Some ty_real) in
+  let ineq = t_app le_ls [ abs; err ] (Some ty_bool) in
+  let ineqs = add_ineq ineqs t ineq in
+  let abs x = t_app abs_ls [ x ] (Some ty_real) in
+  let add x y = t_app add_ls [ x; y ] (Some ty_real) in
+  let sub x y = t_app sub_ls [ x; y ] (Some ty_real) in
+  let mult x y = t_app mult_ls [ x; y ] (Some ty_real) in
+  let le x y = t_app le_ls [ x; y ] (Some ty_bool) in
+  let t1_ineqs = Mterm.find t1 ineqs in
+  let t2_ineqs = Mterm.find t2 ineqs in
+  let combine_ineqs (t1, t2) (t1', t2') =
+    match t1.t_node with
+    | Tapp (abs_ls, [ x ]) -> (
+      match x.t_node with
+      | Tapp (sub_ls, [ a; b ]) -> assert false
+      | _ -> (
+        match t2.t_node with
+        | Tapp (abs_ls, [ x ]) -> (
+          match x.t_node with
+          | Tapp (sub_ls, [ a; b ]) -> assert false
+          | _ -> le (abs t) (add (add t2 t2') (mult (add t2 t2') eps)))
+        | _ -> assert false))
+    | _ -> assert false
+  in
+  List.fold_left
+    (fun ineqs t1_ineq ->
+      match t1_ineq.t_node with
+      | Tapp (ls, [ _t1; _t2 ]) when ls = le_ls ->
+        let combine_ineqs = combine_ineqs (_t1, _t2) in
+        List.fold_left
+          (fun ineqs t2_ineq ->
+            match t2_ineq.t_node with
+            | Tapp (ls, [ _t1; _t2 ]) when ls = le_ls ->
+              let new_ineq = combine_ineqs (_t1, _t2) in
+              add_ineq ineqs t new_ineq
+            | _ -> ineqs)
+            (* For now we don't deduce anything here, maybe we should ? *)
+          ineqs t2_ineqs
+      | _ -> ineqs)
+    ineqs t1_ineqs
+
+(* let rec combine_ineqs ineq ineq_list = *)
+(*   match ineqs with *)
+(*   | [] ->  *)
+(* match Mterm.find t1 ineqs with *)
+(* | [] -> ( *)
+(*   match Mterm.find t2 ineqs with *)
+(*   | [] -> ineqs *)
+(*   | ineq :: tl -> assert false) *)
+(* | ineq :: tl -> ( *)
+(*   match ineq.t_node with *)
+(*   | Tapp (ls, [ _t1; _t2 ]) -> ( *)
+(*     match Mls.find ls mls with *)
+(*     | "le" -> assert false *)
+(*     | _ -> *)
+(*       assert false *)
+(* (* TODO: Match ls with le, then match _t1 with Tapp(absls, [ Tapp *) (*
+   (minusls, [_, t3]) ]) and we take t3. Do the same for t2, then we use *) (*
+   the addition lemma with (t - (t3 + t4) <= ...) *)) *)
+(* | _ -> assert false) *)
+
+(* TODO: Avoid traversing the same term twice *)
+(* ineqs is a map from real terms to inequalities that hold for these terms *)
+(* ieee_posts is a map from float terms to an ieee_post condition *)
+let rec apply mls t ieee_posts ineqs =
   let apply = apply mls in
-  match Mterm.find t truths with
-  (* For now only 1 truth possible *)
-  | [ truth ] -> (
-    match truth with
+  match Mterm.find t ieee_posts with
+  | [] -> ineqs
+  | [ ieee_post ] -> (
+    match ieee_post with
     | Tapp (ls, [ t1; t2 ]) -> (
-      let truths = apply t1 truths in
-      let truths = apply t2 truths in
+      let ineqs = apply t1 ieee_posts ineqs in
+      let ineqs = apply t2 ieee_posts ineqs in
       match Mls.find ls mls with
-      | "add_ieee_post" -> apply_add truths t t1 t2
+      | "add_ieee_post" -> apply_add mls ineqs t t1 t2
       | _ -> failwith "Unsupported yet")
     | _ -> assert false)
+  (* Only 0 or 1 ieee_post possible *)
   | _ -> assert false
 
-let apply_trans_on_ineqs env = assert false
-(*   let symbol_names = *)
-(*     [ *)
-(*       Ident.op_infix "<"; *)
-(*       Ident.op_infix "<="; *)
-(*       Ident.op_infix ">"; *)
-(*       Ident.op_infix ">="; *)
-(*     ] *)
-(*   in *)
-(*   let int = Env.read_theory env [ "int" ] "Int" in *)
-(*   let int_symbols = *)
-(*     List.map (fun name -> ns_find_ls int.th_export [ name ]) symbol_names *)
-(*   in *)
-(*   let real = Env.read_theory env [ "real" ] "Real" in *)
-(*   let real_symbols = *)
-(*     List.map (fun name -> ns_find_ls real.th_export [ name ]) symbol_names *)
-(*   in *)
-(*   let symbols = int_symbols @ real_symbols in *)
-(*   let add_fmlas = add_fmlas symbols in *)
-(*   let arith_symbols = [] in *)
-(*   Trans.bind Trans.identity (fun task -> *)
-(*       let goal = Task.task_goal_fmla task in *)
-(*       match goal.t_node with *)
-(*       | Tapp (ls, [ t1; t2 ]) -> *)
-(*         if List.exists (fun _ls -> ls_equal ls _ls) symbols then *)
-(*           let terms_ineqs = *)
-(*             Trans.fold_decl *)
-(*               (fun d acc -> *)
-(*                 match d.d_node with *)
-(*                 | Dparam { ls_args = []; ls_value = Some ty } *)
-(*                   when ty_equal ty ty_int || ty_equal ty ty_real -> *)
-(*                   assert false (* Mterm.add ? *) *)
-(*                 | Dprop (Paxiom, pr, f) -> add_fmlas acc f *)
-(*                 | _ -> acc) *)
-(*               Mterm.empty *)
-(*           in *)
-(*           let rec get_terms t = *)
-(*             match t.t_node with *)
-(*             | Tvar v -> [ t ] *)
-(*             | Tconst c -> [] *)
-(*             | Tapp (ls, [ t1; t2 ]) -> *)
-(* if List.exists (fun _ls -> ls_equal ls _ls) arith_symbols then *)
-(*                 get_terms t1 @ get_terms t2 *)
-(*               else *)
-(*                 [ t ] *)
-(*             | _ -> assert false *)
-(*           in *)
-(*           let goal_terms = get_terms t1 @ get_terms t2 in *)
-(*           assert false *)
-(*         else *)
-(*           failwith "Unsupported goal" *)
-(*       | _ -> failwith "Unsupported goal") *)
-
-(* Trans.compose (Trans.lookup_transform "abstract_unknown_lsymbols" env)
-   (Trans.decl (filter_non_arith (int_symbols @ real_symbols)) None) *)
+let apply_trans_on_ineqs env =
+  let symbol_names =
+    [
+      Ident.op_infix "<";
+      Ident.op_infix "<=";
+      Ident.op_infix ">";
+      Ident.op_infix ">=";
+      Ident.op_infix "+";
+      Ident.op_infix "-";
+      Ident.op_infix "*";
+      Ident.op_infix "/";
+    ]
+  in
+  let real = Env.read_theory env [ "real" ] "Real" in
+  let symbols =
+    List.map (fun name -> ns_find_ls real.th_export [ name ]) symbol_names
+  in
+  let add_fmlas = add_fmlas symbols in
+  let arith_symbols = [] in
+  Trans.bind Trans.identity
+    (fun task ->
+      let goal = Task.task_goal_fmla task in
+      match goal.t_node with
+      | Tapp (ls, [ t1; t2 ]) ->
+        if List.exists (fun _ls -> ls_equal ls _ls) symbols then
+          let terms_ineqs =
+            Trans.fold_decl
+              (fun d acc ->
+                match d.d_node with
+                | Dparam { ls_args = []; ls_value = Some ty }
+                  when ty_equal ty ty_int || ty_equal ty ty_real ->
+                  assert false (* Mterm.add ? *)
+                | Dprop (Paxiom, pr, f) -> add_fmlas acc f
+                | _ -> acc)
+              Mterm.empty
+          in
+          let rec get_terms t =
+            match t.t_node with
+            | Tvar v -> [ t ]
+            | Tconst c -> []
+            | Tapp (ls, [ t1; t2 ]) ->
+              if List.exists (fun _ls -> ls_equal ls _ls) arith_symbols then
+                get_terms t1 @ get_terms t2
+              else
+                [ t ]
+            | _ -> assert false
+          in
+          let goal_terms = get_terms t1 @ get_terms t2 in
+          assert false
+        else
+          failwith "Unsupported goal"
+      | _ -> failwith "Unsupported goal")
+    Trans.compose
+    (Trans.lookup_transform "abstract_unknown_lsymbols" env)
+    (Trans.decl (filter_non_arith (int_symbols @ real_symbols)) None)
 
 let () =
   Trans.register_env_transform "apply_trans_on_ineqs" apply_trans_on_ineqs
