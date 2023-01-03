@@ -14,6 +14,7 @@ open Decl
 open Ty
 open Theory
 open Ident
+open Task
 
 (* Filter all the formulas that are not inequalities or equalities about
    int/reals *)
@@ -177,6 +178,37 @@ let rec apply mls t ieee_posts ineqs =
   (* Only 0 or 1 ieee_post possible *)
   | _ -> assert false
 
+let add_new_impl _ _ _ = assert false
+
+let get_truths_and_impls d (truths, impls) =
+  match d.d_node with
+  | Dprop (kind, pr, f) when kind = Paxiom || kind = Plemma -> (
+    let truths = Mterm.add f (pr, kind) truths in
+    match f.t_node with
+    | Tbinop (Timplies, f1, _) -> (truths, add_new_impl impls f1 f)
+    | _ -> (truths, impls))
+  | _ -> (truths, impls)
+
+let filter_non_arith truths acc t = assert false
+
+let rec task_fold_left fn = function
+  | Some task ->
+    let prev = task_fold_left fn task.task_prev in
+    fn prev task.task_decl
+  | None -> None
+
+let remove_unused_decls truths task =
+  let filter_non_arith = filter_non_arith truths in
+  task_fold_left filter_non_arith task
+
+let check_truth = assert false
+
+let remove_unused_decls (truths, impls) =
+  let truths, _ =
+    Mterm.fold_left (fun arg t _ -> check_truth arg t) (truths, impls) truths
+  in
+  Trans.store (remove_unused_decls truths)
+
 let apply_trans_on_ineqs env =
   let symbol_names =
     [
@@ -194,44 +226,48 @@ let apply_trans_on_ineqs env =
   let symbols =
     List.map (fun name -> ns_find_ls real.th_export [ name ]) symbol_names
   in
-  let add_fmlas = add_fmlas symbols in
+  (* let add_fmlas = add_fmlas symbols in *)
   let arith_symbols = [] in
-  Trans.bind Trans.identity
-    (fun task ->
-      let goal = Task.task_goal_fmla task in
-      match goal.t_node with
-      | Tapp (ls, [ t1; t2 ]) ->
-        if List.exists (fun _ls -> ls_equal ls _ls) symbols then
-          let terms_ineqs =
-            Trans.fold_decl
-              (fun d acc ->
-                match d.d_node with
-                | Dparam { ls_args = []; ls_value = Some ty }
-                  when ty_equal ty ty_int || ty_equal ty ty_real ->
-                  assert false (* Mterm.add ? *)
-                | Dprop (Paxiom, pr, f) -> add_fmlas acc f
-                | _ -> acc)
-              Mterm.empty
-          in
-          let rec get_terms t =
-            match t.t_node with
-            | Tvar v -> [ t ]
-            | Tconst c -> []
-            | Tapp (ls, [ t1; t2 ]) ->
-              if List.exists (fun _ls -> ls_equal ls _ls) arith_symbols then
-                get_terms t1 @ get_terms t2
-              else
-                [ t ]
-            | _ -> assert false
-          in
-          let goal_terms = get_terms t1 @ get_terms t2 in
-          assert false
-        else
-          failwith "Unsupported goal"
-      | _ -> failwith "Unsupported goal")
-    Trans.compose
-    (Trans.lookup_transform "abstract_unknown_lsymbols" env)
-    (Trans.decl (filter_non_arith (int_symbols @ real_symbols)) None)
+
+  Trans.bind
+    (Trans.fold_decl get_truths_and_impls (Mterm.empty, Mterm.empty))
+    remove_unused_decls
+(* Trans.bind Trans.identity *)
+(*   (fun task -> *)
+(*     let goal = Task.task_goal_fmla task in *)
+(*     match goal.t_node with *)
+(*     | Tapp (ls, [ t1; t2 ]) -> *)
+(*       if List.exists (fun _ls -> ls_equal ls _ls) symbols then *)
+(*         let terms_ineqs = *)
+(*           Trans.fold_decl *)
+(*             (fun d acc -> *)
+(*               match d.d_node with *)
+(*               | Dparam { ls_args = []; ls_value = Some ty } *)
+(*                 when ty_equal ty ty_int || ty_equal ty ty_real -> *)
+(*                 assert false (* Mterm.add ? *) *)
+(*               | Dprop (Paxiom, pr, f) -> add_fmlas acc f *)
+(*               | _ -> acc) *)
+(*             Mterm.empty *)
+(*         in *)
+(*         let rec get_terms t = *)
+(*           match t.t_node with *)
+(*           | Tvar v -> [ t ] *)
+(*           | Tconst c -> [] *)
+(*           | Tapp (ls, [ t1; t2 ]) -> *)
+(*             if List.exists (fun _ls -> ls_equal ls _ls) arith_symbols then *)
+(*               get_terms t1 @ get_terms t2 *)
+(*             else *)
+(*               [ t ] *)
+(*           | _ -> assert false *)
+(*         in *)
+(*         let goal_terms = get_terms t1 @ get_terms t2 in *)
+(*         assert false *)
+(*       else *)
+(*         failwith "Unsupported goal" *)
+(*     | _ -> failwith "Unsupported goal") *)
+(*   Trans.compose *)
+(*   (Trans.lookup_transform "abstract_unknown_lsymbols" env) *)
+(*   (Trans.decl (filter_non_arith (int_symbols @ real_symbols)) None) *)
 
 let () =
   Trans.register_env_transform "apply_trans_on_ineqs" apply_trans_on_ineqs
