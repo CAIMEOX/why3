@@ -16,258 +16,217 @@ open Theory
 open Ident
 open Task
 
-(* Filter all the formulas that are not inequalities or equalities about
-   int/reals *)
-(* Also performs some simplifications *)
-(* let rec add_fmlas symbols map f = *)
-(*   let rec add = add_fmlas symbols in *)
-(*   match f.t_node with *)
-(*   | Tbinop (Tand, f1, f2) -> ( *)
-(*     match get f1 with *)
-(*     | Unsupported *)
-(*     | Tautology -> *)
-(*       get f2 *)
-(*     | Contradiction -> Contradiction *)
-(*     | Formula f1 -> ( *)
-(*       match get f2 with *)
-(*       | Unsupported *)
-(*       | Tautology -> *)
-(*         Formula f1 *)
-(*       | Contradiction -> Contradiction *)
-(*       | Formula f2 -> Formula (t_and f1 f2))) *)
-(*   | Tbinop (Tor, f1, f2) -> ( *)
-(*     match get f1 with *)
-(*     | Unsupported -> Unsupported *)
-(*     | Tautology -> Tautology *)
-(*     | Contradiction -> get f2 *)
-(*     | Formula f1 -> ( *)
-(*       match get f2 with *)
-(*       | Unsupported -> Unsupported *)
-(*       | Tautology -> Tautology *)
-(*       | Contradiction -> Formula f1 *)
-(*       | Formula f2 -> Formula (t_or f1 f2))) *)
-(*   | Tbinop (Timplies, f1, f2) -> ( *)
-(*     match get f1 with *)
-(*     | Unsupported *)
-(*     | Contradiction -> *)
-(*       Unsupported *)
-(*     | Tautology -> get f2 *)
-(*     | Formula f1 -> ( *)
-(*       match get f2 with *)
-(*       | Unsupported -> Unsupported *)
-(*       | Tautology -> Tautology *)
-(*       | Contradiction -> Formula (t_implies f1 t_false) *)
-(*       | Formula f2 -> Formula (t_implies f1 f2))) *)
-(*   | Ttrue -> Tautology *)
-(*   | Tfalse -> Contradiction *)
-(*   | Tnot f1 -> ( *)
-(*     match get f1 with *)
-(*     | Unsupported -> Unsupported *)
-(*     | Tautology -> Contradiction *)
-(*     | Contradiction -> Tautology *)
-(*     | Formula f -> Formula (t_not f)) *)
-(*   | Tapp (ls, [ t1; t2 ]) -> *)
-(*     if ls_equal ls ps_equ then *)
-(*       match t1.t_ty with *)
-(*       | Some ty -> *)
-(*         if ty_equal ty ty_int || ty_equal ty ty_real then *)
-(*           Formula f *)
-(*         else *)
-(*           Unsupported *)
-(*       | None -> Formula f *)
-(*     else if List.exists (fun _ls -> ls_equal ls _ls) symbols then *)
-(*       Formula f *)
-(*     else *)
-(*       Unsupported *)
-(*   | _ -> Unsupported *)
+type ineq_symbol =
+  | Lt
+  | Gt
+  | Le
+  | Ge
 
-let add_ineq ineqs t ineq =
-  let t_ineqs = Mterm.find t ineqs in
-  match t_ineqs with
-  | [] -> Mterm.add t [ ineq ] ineqs
-  | _ -> Mterm.add t (ineq :: t_ineqs) ineqs
+type real_op =
+  | Add
+  | Sub
+  | Mul
+  | Div
 
-(* Deduce new inequalities from "add_ieee_post t1 t2 t" *)
-let apply_add mls ineqs t t1 t2 =
-  let le_ls = assert false (* TODO : Find real symbol *) in
-  let add_ls = assert false (* TODO : Find real symbol *) in
-  let sub_ls = assert false (* TODO : Find real symbol *) in
-  let mult_ls = assert false (* TODO : Find real symbol *) in
-  let abs_ls = assert false (* TODO : Find real symbol *) in
-  let eps = assert false (* TODO : Create term from constant *) in
-  let add = t_app add_ls [ t1; t2 ] (Some ty_real) in
-  let sub = t_app sub_ls [ t; add ] (Some ty_real) in
-  let abs = t_app abs_ls [ sub ] (Some ty_real) in
-  let err = t_app mult_ls [ add; eps ] (Some ty_real) in
-  let ineq = t_app le_ls [ abs; err ] (Some ty_bool) in
-  let ineqs = add_ineq ineqs t ineq in
-  let abs x = t_app abs_ls [ x ] (Some ty_real) in
-  let add x y = t_app add_ls [ x; y ] (Some ty_real) in
-  let sub x y = t_app sub_ls [ x; y ] (Some ty_real) in
-  let mult x y = t_app mult_ls [ x; y ] (Some ty_real) in
-  let le x y = t_app le_ls [ x; y ] (Some ty_bool) in
-  let t1_ineqs = Mterm.find t1 ineqs in
-  let t2_ineqs = Mterm.find t2 ineqs in
-  let combine_ineqs (t1, t2) (t1', t2') =
+type ieee_symbol =
+  | AddPostSingle
+  | SubPostSingle
+  | MulPostSingle
+  | DivPostSingle
+  | AddPostDouble
+  | SubPostDouble
+  | MulPostDouble
+  | DivPostDouble
+
+type symbols = {
+  real_ineqs : ineq_symbol Mls.t;
+  real_ops : real_op Mls.t;
+  abs : lsymbol;
+  to_real : lsymbol;
+  ieee : ieee_symbol Mls.t;
+}
+
+type ineq =
+  | Abs of ineq_symbol * term * term
+  | Absminus of ineq_symbol * term * term * term
+  | Unsupported
+
+type ieee_post = Post of ieee_symbol * term * term * term
+
+let parse_ineq symbols ineq =
+  match ineq.t_node with
+  | Tapp (ls, [ t1; t2 ]) when Mls.mem ls symbols.real_ineqs -> (
     match t1.t_node with
-    | Tapp (abs_ls, [ x ]) -> (
-      match x.t_node with
-      | Tapp (sub_ls, [ a; b ]) -> assert false
-      | _ -> (
-        match t2.t_node with
-        | Tapp (abs_ls, [ x ]) -> (
-          match x.t_node with
-          | Tapp (sub_ls, [ a; b ]) -> assert false
-          | _ -> le (abs t) (add (add t2 t2') (mult (add t2 t2') eps)))
-        | _ -> assert false))
-    | _ -> assert false
-  in
-  List.fold_left
-    (fun ineqs t1_ineq ->
-      match t1_ineq.t_node with
-      | Tapp (ls, [ _t1; _t2 ]) when ls = le_ls ->
-        let combine_ineqs = combine_ineqs (_t1, _t2) in
-        List.fold_left
-          (fun ineqs t2_ineq ->
-            match t2_ineq.t_node with
-            | Tapp (ls, [ _t1; _t2 ]) when ls = le_ls ->
-              let new_ineq = combine_ineqs (_t1, _t2) in
-              add_ineq ineqs t new_ineq
-            | _ -> ineqs)
-            (* For now we don't deduce anything here, maybe we should ? *)
-          ineqs t2_ineqs
-      | _ -> ineqs)
-    ineqs t1_ineqs
-
-(* let rec combine_ineqs ineq ineq_list = *)
-(*   match ineqs with *)
-(*   | [] ->  *)
-(* match Mterm.find t1 ineqs with *)
-(* | [] -> ( *)
-(*   match Mterm.find t2 ineqs with *)
-(*   | [] -> ineqs *)
-(*   | ineq :: tl -> assert false) *)
-(* | ineq :: tl -> ( *)
-(*   match ineq.t_node with *)
-(*   | Tapp (ls, [ _t1; _t2 ]) -> ( *)
-(*     match Mls.find ls mls with *)
-(*     | "le" -> assert false *)
-(*     | _ -> *)
-(*       assert false *)
-(* (* TODO: Match ls with le, then match _t1 with Tapp(absls, [ Tapp *) (*
-   (minusls, [_, t3]) ]) and we take t3. Do the same for t2, then we use *) (*
-   the addition lemma with (t - (t3 + t4) <= ...) *)) *)
-(* | _ -> assert false) *)
-
-(* TODO: Avoid traversing the same term twice *)
-(* ineqs is a map from real terms to inequalities that hold for these terms *)
-(* ieee_posts is a map from float terms to an ieee_post condition *)
-let rec apply mls t ieee_posts ineqs =
-  let apply = apply mls in
-  match Mterm.find t ieee_posts with
-  | [] -> ineqs
-  | [ ieee_post ] -> (
-    match ieee_post with
-    | Tapp (ls, [ t1; t2 ]) -> (
-      let ineqs = apply t1 ieee_posts ineqs in
-      let ineqs = apply t2 ieee_posts ineqs in
-      match Mls.find ls mls with
-      | "add_ieee_post" -> apply_add mls ineqs t t1 t2
-      | _ -> failwith "Unsupported yet")
-    | _ -> assert false)
-  (* Only 0 or 1 ieee_post possible *)
+    | Tapp (_ls, [ t ]) when ls_equal _ls symbols.abs -> (
+      let ineq_symbol = Mls.find ls symbols.real_ineqs in
+      match t.t_node with
+      | Tvar v -> Abs (ineq_symbol, t1, t2)
+      | Tapp (ls, [ _t1; _t2 ])
+        when Mls.mem ls symbols.real_ops && Mls.find ls symbols.real_ops == Sub
+        ->
+        Absminus (ineq_symbol, _t1, _t2, t2)
+      | _ -> Unsupported)
+    | _ -> Unsupported)
   | _ -> assert false
 
-let add_new_impl _ _ _ = assert false
+let rec get_subterms symbols t =
+  match t.t_node with
+  | Tvar v -> [ t ]
+  | Tapp (ls, [ t ]) when ls_equal ls symbols.abs -> get_subterms symbols t
+  | Tapp (ls, terms) when Mls.mem ls symbols.real_ops ->
+    List.fold_left (fun ts t -> ts @ get_subterms symbols t) [] terms
+  | Tapp (ls, _) -> [ t ]
+  | _ -> []
 
-let get_truths_and_impls d (truths, impls) =
-  match d.d_node with
-  | Dprop (kind, pr, f) when kind = Paxiom || kind = Plemma -> (
-    let truths = Mterm.add f (pr, kind) truths in
-    match f.t_node with
-    | Tbinop (Timplies, f1, _) -> (truths, add_new_impl impls f1 f)
-    | _ -> (truths, impls))
-  | _ -> (truths, impls)
-
-let filter_non_arith truths acc t = assert false
-
-let rec task_fold_left fn = function
-  | Some task ->
-    let prev = task_fold_left fn task.task_prev in
-    fn prev task.task_decl
-  | None -> None
-
-let remove_unused_decls truths task =
-  let filter_non_arith = filter_non_arith truths in
-  task_fold_left filter_non_arith task
-
-let check_truth = assert false
-
-let remove_unused_decls (truths, impls) =
-  let truths, _ =
-    Mterm.fold_left (fun arg t _ -> check_truth arg t) (truths, impls) truths
+let add_ineq symbols ineqs ineq =
+  let add ineqs ineq t =
+    let t_ineqs =
+      try Mterm.find t ineqs with
+      | Not_found -> []
+    in
+    match t_ineqs with
+    | [] -> Mterm.add t [ ineq ] ineqs
+    | _ -> Mterm.add t (ineq :: t_ineqs) ineqs
   in
-  Trans.store (remove_unused_decls truths)
+  let ineq = parse_ineq symbols ineq in
+  let get_subterms = get_subterms symbols in
+  let terms =
+    match ineq with
+    | Abs (_, t1, t2) -> get_subterms t1 @ get_subterms t2
+    | Absminus (_, t1, t2, t3) ->
+      get_subterms t1 @ get_subterms t2 @ get_subterms t3
+    | Unsupported -> []
+  in
+  List.fold_left (fun ineqs t -> add ineqs ineq t) ineqs terms
+
+let rec add_fmlas symbols f (ieee_posts, ineqs) =
+  let rec add = add_fmlas symbols in
+  match f.t_node with
+  | Tbinop (Tand, f1, f2) ->
+    let ieee_posts, ineqs = add f1 (ieee_posts, ineqs) in
+    add f2 (ieee_posts, ineqs)
+  | Tapp (ls, [ t1; t2 ]) when Mls.mem ls symbols.real_ineqs ->
+    (ieee_posts, add_ineq symbols ineqs f)
+  | Tapp (ls, [ t1; t2; t3 ]) when Mls.mem ls symbols.ieee ->
+    ( Mterm.add t3 (Post (Mls.find ls symbols.ieee, t1, t2, t3)) ieee_posts,
+      ineqs )
+  | _ -> (ieee_posts, ineqs)
+
+let get_ieee_posts_and_ineqs symbols d (ieee_posts, ineqs) =
+  match d.d_node with
+  | Dprop (kind, pr, f) when kind = Paxiom || kind = Plemma ->
+    add_fmlas symbols f (ieee_posts, ineqs)
+  | _ -> (ieee_posts, ineqs)
+
+let use_ieee_thms symbols ineqs ieee_symbol t1 t2 t3 = assert false
+
+(* TODO: Avoid traversing the same term twice *)
+let rec apply_theorems symbols ieee_posts ineqs t =
+  let apply = apply_theorems symbols in
+  try
+    match Mterm.find t ieee_posts with
+    | Post (ieee_symbol, t1, t2, t3) ->
+      let new_truths = apply ieee_posts ineqs t1 in
+      let new_truths = new_truths @ apply ieee_posts ineqs t2 in
+      new_truths @ use_ieee_thms symbols ineqs ieee_symbol t1 t2 t3
+  with
+  | Not_found -> []
+
+let apply symbols (ieee_posts, ineqs) task =
+  let goal = Task.task_goal_fmla task in
+  match goal.t_node with
+  (* TODO: Also destruct conjunctions ? *)
+  | Tapp (ls, [ t1; t2 ]) when Mls.mem ls symbols.real_ineqs -> (
+    match parse_ineq symbols goal with
+    | Abs (ineq_symbol, t1, t2) ->
+      let new_truths = apply_theorems symbols ieee_posts ineqs t1 in
+      assert false
+    | Absminus _ -> failwith "Unsupported yet"
+    | Unsupported -> failwith "Unsupported inequality form")
+  | _ -> failwith "Unsupported goal, it should be a real inequality"
+
+let apply_transitivity symbols (ieee_posts, ineqs) =
+  (* let new_truths = [] in *)
+  (* let truths, _ = *)
+  (*   Mterm.fold_left (fun arg t _ -> check_truth arg t) (truths, impls) truths *)
+  (* in *)
+  Trans.store (apply symbols (ieee_posts, ineqs))
 
 let apply_trans_on_ineqs env =
-  let symbol_names =
+  let real = Env.read_theory env [ "real" ] "Real" in
+  let ineqs_symbol_names =
     [
-      Ident.op_infix "<";
-      Ident.op_infix "<=";
-      Ident.op_infix ">";
-      Ident.op_infix ">=";
-      Ident.op_infix "+";
-      Ident.op_infix "-";
-      Ident.op_infix "*";
-      Ident.op_infix "/";
+      (Ident.op_infix "<", Lt);
+      (Ident.op_infix "<=", Le);
+      (Ident.op_infix ">", Gt);
+      (Ident.op_infix ">=", Ge);
     ]
   in
-  let real = Env.read_theory env [ "real" ] "Real" in
-  let symbols =
-    List.map (fun name -> ns_find_ls real.th_export [ name ]) symbol_names
+  let ops_symbol_names =
+    [
+      (Ident.op_infix "+", Add);
+      (Ident.op_infix "-", Sub);
+      (Ident.op_infix "*", Mul);
+      (Ident.op_infix "/", Div);
+    ]
   in
-  (* let add_fmlas = add_fmlas symbols in *)
-  let arith_symbols = [] in
+  let real_ineqs =
+    List.fold_left
+      (fun mls (name, indicator) ->
+        let ls = ns_find_ls real.th_export [ name ] in
+        Mls.add ls indicator mls)
+      Mls.empty ineqs_symbol_names
+  in
+  let real_ops =
+    List.fold_left
+      (fun mls (name, indicator) ->
+        let ls = ns_find_ls real.th_export [ name ] in
+        Mls.add ls indicator mls)
+      Mls.empty ops_symbol_names
+  in
+  let real_abs = Env.read_theory env [ "real" ] "Abs" in
+  let abs = ns_find_ls real_abs.th_export [ "abs" ] in
+  let ieee_generic = Env.read_theory env [ "ieee_float" ] "GenericFloat" in
+  let to_real = ns_find_ls ieee_generic.th_export [ "to_real" ] in
+  (* TODO: Support minus, sqrt ? *)
+  let ieee_symbol_names =
+    [
+      ("add_post_ieee", AddPostSingle);
+      ("sub_post_ieee", SubPostSingle);
+      ("mul_post_ieee", MulPostSingle);
+      ("div_post_ieee", DivPostSingle);
+    ]
+  in
+  let ieee_single = Env.read_theory env [ "mach.float" ] "Single" in
+  let ieee_single =
+    List.fold_left
+      (fun mls (name, indicator) ->
+        let ls = ns_find_ls ieee_single.th_export [ name ] in
+        Mls.add ls indicator mls)
+      Mls.empty ieee_symbol_names
+  in
+  let ieee_symbol_names =
+    [
+      ("add_post_ieee", AddPostDouble);
+      ("sub_post_ieee", SubPostDouble);
+      ("mul_post_ieee", MulPostDouble);
+      ("div_post_ieee", DivPostDouble);
+    ]
+  in
+  let ieee_double = Env.read_theory env [ "mach.float" ] "Double" in
+  let ieee =
+    List.fold_left
+      (fun mls (name, indicator) ->
+        let ls = ns_find_ls ieee_double.th_export [ name ] in
+        Mls.add ls indicator mls)
+      ieee_single ieee_symbol_names
+  in
+  let symbols = { real_ineqs; real_ops; abs; to_real; ieee } in
 
+  let get_ieee_posts_and_ineqs = get_ieee_posts_and_ineqs symbols in
   Trans.bind
-    (Trans.fold_decl get_truths_and_impls (Mterm.empty, Mterm.empty))
-    remove_unused_decls
-(* Trans.bind Trans.identity *)
-(*   (fun task -> *)
-(*     let goal = Task.task_goal_fmla task in *)
-(*     match goal.t_node with *)
-(*     | Tapp (ls, [ t1; t2 ]) -> *)
-(*       if List.exists (fun _ls -> ls_equal ls _ls) symbols then *)
-(*         let terms_ineqs = *)
-(*           Trans.fold_decl *)
-(*             (fun d acc -> *)
-(*               match d.d_node with *)
-(*               | Dparam { ls_args = []; ls_value = Some ty } *)
-(*                 when ty_equal ty ty_int || ty_equal ty ty_real -> *)
-(*                 assert false (* Mterm.add ? *) *)
-(*               | Dprop (Paxiom, pr, f) -> add_fmlas acc f *)
-(*               | _ -> acc) *)
-(*             Mterm.empty *)
-(*         in *)
-(*         let rec get_terms t = *)
-(*           match t.t_node with *)
-(*           | Tvar v -> [ t ] *)
-(*           | Tconst c -> [] *)
-(*           | Tapp (ls, [ t1; t2 ]) -> *)
-(*             if List.exists (fun _ls -> ls_equal ls _ls) arith_symbols then *)
-(*               get_terms t1 @ get_terms t2 *)
-(*             else *)
-(*               [ t ] *)
-(*           | _ -> assert false *)
-(*         in *)
-(*         let goal_terms = get_terms t1 @ get_terms t2 in *)
-(*         assert false *)
-(*       else *)
-(*         failwith "Unsupported goal" *)
-(*     | _ -> failwith "Unsupported goal") *)
-(*   Trans.compose *)
-(*   (Trans.lookup_transform "abstract_unknown_lsymbols" env) *)
-(*   (Trans.decl (filter_non_arith (int_symbols @ real_symbols)) None) *)
+    (Trans.fold_decl get_ieee_posts_and_ineqs (Mterm.empty, Mterm.empty))
+    (apply_transitivity symbols)
 
 let () =
   Trans.register_env_transform "apply_trans_on_ineqs" apply_trans_on_ineqs
