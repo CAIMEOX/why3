@@ -126,7 +126,16 @@ let compile ~get_constructors ~mk_case ~mk_let tl rl =
               else [pat_wild ty, comp_wilds ()]
             in
             let add acc (cs,ql) =
-              let get_vs q = create_vsymbol (id_fresh "x") q.pat_ty in
+              let get_vs q =
+                match q.pat_node with
+                  | Pvar vs
+                  | Pas (_, vs) -> vs
+                  | _ ->
+                      let nice_name =
+                        match (q.pat_ty).ty_node with | Tyvar v -> v.tv_name | Tyapp (v, _) -> v.ts_name
+                      in
+                      create_vsymbol (id_clone ?loc:t.t_loc nice_name) q.pat_ty
+                 in
               let vl = List.rev_map get_vs ql in
               let pl = List.rev_map pat_var vl in
               let al = List.rev_map t_var vl in
