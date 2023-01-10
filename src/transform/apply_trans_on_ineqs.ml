@@ -9,6 +9,13 @@
 (*                                                                  *)
 (********************************************************************)
 
+(* Other theorems ?
+  - Exact substraction (see Higham 2002 p.45) theorem 2.4 and 2.5
+  - also see section 4.2 of handbook of FP arithmetic
+  - Better bounds when we know we won't underflow ?
+  For methods, see Higham p. 472 (501)
+*)
+
 open Term
 open Decl
 open Ty
