@@ -9,12 +9,9 @@
 (*                                                                  *)
 (********************************************************************)
 
-(* Other theorems ?
-  - Exact substraction (see Higham 2002 p.45) theorem 2.4 and 2.5
-  - also see section 4.2 of handbook of FP arithmetic
-  - Better bounds when we know we won't underflow ?
-  For methods, see Higham p. 472 (501)
-*)
+(* Other theorems ? - Exact substraction (see Higham 2002 p.45) theorem 2.4 and
+   2.5 - also see section 4.2 of handbook of FP arithmetic - Better bounds when
+   we know we won't underflow ? For methods, see Higham p. 472 (501) *)
 
 open Term
 open Decl
@@ -77,7 +74,10 @@ let parse_ineq symbols ineq =
     match t1.t_node with
     | Tapp (_ls, [ t ]) when ls_equal _ls symbols.abs -> (
       match t.t_node with
-      | Tvar v -> Abs (_ls, t1, t2)
+      (* TODO: Is Tvar v possible or is it alway an application ? *)
+      | Tvar _
+      | Tapp (_, []) ->
+        Abs (ls, t1, t2)
       | Tapp (ls, [ _t1; _t2 ]) when ls_equal ls symbols.sub ->
         Absminus (ls, _t1, _t2, t2)
       | _ -> Unsupported)
@@ -148,7 +148,7 @@ let use_ieee_thms symbols ineqs ieee_symbol t1 t2 t3 =
   let add t1 t2 = t_app symbols.add [ t1; t2 ] (Some ty_real) in
   let sub t1 t2 = t_app symbols.sub [ t1; t2 ] (Some ty_real) in
   let mul t1 t2 = t_app symbols.mul [ t1; t2 ] (Some ty_real) in
-  let div t1 t2 = t_app symbols.div [ t1; t2 ] (Some ty_real) in
+  let _div t1 t2 = t_app symbols.div [ t1; t2 ] (Some ty_real) in
   let ineq ls t1 t2 = t_app ls [ t1; t2 ] (Some ty_bool) in
   let combine_ineqs ineq1 ineq2 =
     match ineq1 with
@@ -224,7 +224,12 @@ let apply symbols (ieee_posts, ineqs) task =
     match parse_ineq symbols goal with
     | Abs (ineq_symbol, t1, t2) ->
       let new_truths = apply_theorems symbols ieee_posts ineqs t1 in
-      assert false
+      List.fold_left
+        (fun task truth ->
+          add_prop_decl task Plemma
+            (create_prsymbol (id_fresh "generated"))
+            truth)
+        task new_truths
     | Absminus _ -> failwith "Unsupported yet"
     | Unsupported -> failwith "Unsupported inequality form")
   | _ -> failwith "Unsupported goal, it should be a real inequality"
@@ -246,7 +251,7 @@ let apply_trans_on_ineqs env =
   let abs = ns_find_ls real_abs.th_export [ "abs" ] in
   let ieee_generic = Env.read_theory env [ "ieee_float" ] "GenericFloat" in
   let to_real = ns_find_ls ieee_generic.th_export [ "to_real" ] in
-  let ieee_single = Env.read_theory env [ "mach.float" ] "Single" in
+  let ieee_single = Env.read_theory env [ "mach"; "float" ] "Single" in
   let add_post_ieee_single =
     ns_find_ls ieee_single.th_export [ "add_post_ieee" ]
   in
@@ -259,7 +264,7 @@ let apply_trans_on_ineqs env =
   let div_post_ieee_single =
     ns_find_ls ieee_single.th_export [ "div_post_ieee" ]
   in
-  let ieee_double = Env.read_theory env [ "mach.float" ] "Double" in
+  let ieee_double = Env.read_theory env [ "mach"; "float" ] "Double" in
   let add_post_ieee_double =
     ns_find_ls ieee_double.th_export [ "add_post_ieee" ]
   in
@@ -296,9 +301,11 @@ let apply_trans_on_ineqs env =
   in
 
   let get_ieee_posts_and_ineqs = get_ieee_posts_and_ineqs symbols in
-  Trans.bind
-    (Trans.fold_decl get_ieee_posts_and_ineqs (Mterm.empty, Mterm.empty))
-    (apply_transitivity symbols)
+  Trans.compose
+    (Trans.lookup_transform "inline_trivial" env)
+    (Trans.bind
+       (Trans.fold_decl get_ieee_posts_and_ineqs (Mterm.empty, Mterm.empty))
+       (apply_transitivity symbols))
 
 let () =
   Trans.register_env_transform "apply_trans_on_ineqs" apply_trans_on_ineqs
