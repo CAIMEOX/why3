@@ -30,51 +30,29 @@ type symbols = {
   gt : lsymbol;
   ge : lsymbol;
   abs : lsymbol;
-  to_real : lsymbol;
-  t'real_single : lsymbol;
-  add_post_ieee_single : lsymbol;
-  sub_post_ieee_single : lsymbol;
-  mul_post_ieee_single : lsymbol;
-  div_post_ieee_single : lsymbol;
-  t'real_double : lsymbol;
-  add_post_ieee_double : lsymbol;
-  sub_post_ieee_double : lsymbol;
-  mul_post_ieee_double : lsymbol;
-  div_post_ieee_double : lsymbol; (* add_post_safe64 : lsymbol; *)
+  to_real_double : lsymbol;
+  add_post_double : lsymbol;
+  sub_post_double : lsymbol;
+  mul_post_double : lsymbol;
+  div_post_double : lsymbol;
+  type_double : tysymbol;
 }
 
 let is_op_ls symbols ls =
   ls_equal ls symbols.add || ls_equal ls symbols.sub || ls_equal ls symbols.mul
   || ls_equal ls symbols.div
 
-let to_real_of_type symbols ls =
-  if ls_equal ls symbols.add_post_ieee_single then
-    symbols.t'real_single
-  else if ls_equal ls symbols.add_post_ieee_double then
-    symbols.t'real_double
-  else
-    symbols.to_real
-
 (* TODO: Add ge and gt later *)
 let is_ineq_ls symbols ls = ls_equal ls symbols.lt || ls_equal ls symbols.le
 (* || ls_equal ls symbols.gt || ls_equal ls symbols.ge *)
 
-let is_to_real symbols ls =
-  ls_equal ls symbols.to_real
-  || ls_equal ls symbols.t'real_single
-  || ls_equal ls symbols.t'real_double
-
-let is_ieee_single symbols ls =
-  ls_equal ls symbols.add_post_ieee_single
-  || ls_equal ls symbols.sub_post_ieee_single
-  || ls_equal ls symbols.sub_post_ieee_single
-  || ls_equal ls symbols.sub_post_ieee_single
+let is_to_real symbols ls = ls_equal ls symbols.to_real_double
 
 let is_ieee_double symbols ls =
-  ls_equal ls symbols.add_post_ieee_double
-  || ls_equal ls symbols.sub_post_ieee_double
-  || ls_equal ls symbols.sub_post_ieee_double
-  || ls_equal ls symbols.sub_post_ieee_double
+  ls_equal ls symbols.add_post_double
+  || ls_equal ls symbols.sub_post_double
+  || ls_equal ls symbols.mul_post_double
+  || ls_equal ls symbols.div_post_double
 
 type ineq =
   | Abs of lsymbol * term * term
@@ -111,48 +89,33 @@ let rec get_subterms symbols t =
   | _ -> []
 
 let add_ineq symbols ineqs ineq =
-  let add ineqs ineq t =
-    let t_ineqs =
-      try Mterm.find t ineqs with
-      | Not_found -> []
-    in
-    match t_ineqs with
-    | [] -> Mterm.add t [ ineq ] ineqs
-    | _ -> Mterm.add t (ineq :: t_ineqs) ineqs
-  in
-  let ineq = parse_ineq symbols ineq in
-  let get_subterms = get_subterms symbols in
-  let terms =
-    match ineq with
-    | Abs (_, t1, t2) -> get_subterms t1 @ get_subterms t2
-    | Absminus (_, t1, t2, t3) ->
-      get_subterms t1 @ get_subterms t2 @ get_subterms t3
-    | Unsupported -> []
-  in
-  List.fold_left (fun ineqs t -> add ineqs ineq t) ineqs terms
 
-let rec add_fmlas symbols f (ieee_posts, ineqs) =
+(* TODO: Add support for inequalities in both directions *)
+let rec add_fmlas symbols f info =
   let rec add = add_fmlas symbols in
   match f.t_node with
   | Tbinop (Tand, f1, f2) ->
-    let ieee_posts, ineqs = add f1 (ieee_posts, ineqs) in
-    add f2 (ieee_posts, ineqs)
-  | Tapp (ls, [ t1; t2 ]) when is_ineq_ls symbols ls ->
-    (ieee_posts, add_ineq symbols ineqs f)
-  | Tapp (ls, [ t1; t2; t3 ])
-    when is_ieee_single symbols ls || is_ieee_double symbols ls ->
-    (Mterm.add t3 (Post (ls, t1, t2, t3)) ieee_posts, ineqs)
-  | _ -> (ieee_posts, ineqs)
+    let info = add f1 info in
+    add f2 info
+  | Tapp (ls, [ t1; t2 ]) when is_ineq_ls symbols ls -> (
+    match t1.t_node with
+    | Tapp (_ls, [ t ]) when ls_equal _ls symbols.abs -> (
+      match t.t_node with | Tapp (_ls, [ t ]) when is_to_real symbols _ls -> assert false | _ -> info)
+    | _ -> info)
+  (* TODO: Also check for round_error, it is the way functions talk about the rounding errors *)
+  | Tapp (ls, [ t1; t2; t3 ]) when is_ieee_double symbols ls ->
+    Mterm.add t3 (Post (ls, t1, t2, t3)) info
+  | _ -> info
 
 (* TODO : Normalize ineqs to be of the form "|x| <= y" or "|x| <= max
    (|y|,|z|)" *)
 (* If we have x <= y and z <= x, generate the ineq |x| <= max (|y|,|z|) *)
 (* Furthermore, resolve "max(|y|, |z|)" when those are constants *)
-let get_ieee_posts_and_ineqs symbols d (ieee_posts, ineqs) =
+let get_info symbols d info =
   match d.d_node with
   | Dprop (kind, pr, f) when kind = Paxiom || kind = Plemma ->
-    add_fmlas symbols f (ieee_posts, ineqs)
-  | _ -> (ieee_posts, ineqs)
+    add_fmlas symbols f info
+  | _ -> info
 
 let get_key mls elem =
   List.find (fun key -> Mls.find key mls = elem) (Mls.keys mls)
@@ -192,10 +155,7 @@ let use_ieee_thms symbols ineqs ieee_symbol t1 t2 t3 =
             (fun new_ineqs t2_ineq ->
               match t2_ineq with
               | Abs (ineq_symbol2, t1', t2') ->
-                if
-                  ls_equal ieee_symbol symbols.add_post_ieee_single
-                  || ls_equal ieee_symbol symbols.add_post_ieee_double
-                then
+                if ls_equal ieee_symbol symbols.add_post_double then
                   let left = abs t3 in
                   let right = add (add t2 t2') (mul eps (abs (add t2 t2'))) in
                   let ineq_symbol =
@@ -218,10 +178,7 @@ let use_ieee_thms symbols ineqs ieee_symbol t1 t2 t3 =
               (fun new_ineqs t2_ineq ->
                 match t2_ineq with
                 | Absminus (ineq_symbol2, t1', t2', t3') ->
-                  if
-                    ls_equal ieee_symbol symbols.add_post_ieee_single
-                    || ls_equal ieee_symbol symbols.add_post_ieee_double
-                  then
+                  if ls_equal ieee_symbol symbols.add_post_double then
                     let left = abs t3 in
                     let right = add (add t2 t2') (mul eps (abs (add t2 t2'))) in
                     let ineq_symbol =
@@ -239,10 +196,7 @@ let use_ieee_thms symbols ineqs ieee_symbol t1 t2 t3 =
                 | _ -> new_ineqs)
               new_ineqs t2_ineqs
           in
-          if
-            ls_equal ieee_symbol symbols.add_post_ieee_single
-            || ls_equal ieee_symbol symbols.add_post_ieee_double
-          then
+          if ls_equal ieee_symbol symbols.add_post_double then
             (* Apply FP addition theorem *)
             (* TODO: Improve the bound to limit the accumulation of micro errors *)
             let left = abs (sub t3 (add t2' t2)) in
@@ -263,10 +217,7 @@ let use_ieee_thms symbols ineqs ieee_symbol t1 t2 t3 =
       (fun new_ineqs t2_ineq ->
         match t2_ineq with
         | Absminus (ineq_symbol, _, t2', t3') ->
-          if
-            ls_equal ieee_symbol symbols.add_post_ieee_single
-            || ls_equal ieee_symbol symbols.add_post_ieee_double
-          then
+          if ls_equal ieee_symbol symbols.add_post_double then
             (* Apply FP addition theorem *)
             let left = abs (sub t3 (add t2' t1)) in
             let right =
@@ -282,10 +233,7 @@ let use_ieee_thms symbols ineqs ieee_symbol t1 t2 t3 =
       new_ineqs t2_ineqs
   in
   (* TODO: Should we do this if we already combined Absminus inequality ? *)
-  if
-    ls_equal ieee_symbol symbols.add_post_ieee_single
-    || ls_equal ieee_symbol symbols.add_post_ieee_double
-  then
+  if ls_equal ieee_symbol symbols.add_post_double then
     let left = abs (sub t3 (add t1 t2)) in
     let right = mul eps (abs (add t1 t2)) in
     ineq symbols.le left right :: new_ineqs
@@ -302,9 +250,8 @@ let rec apply_theorems symbols ieee_posts ineqs t =
     try
       match Mterm.find x ieee_posts with
       | Post (ieee_symbol, t1, t2, t3) ->
-        let to_real = to_real_of_type symbols ieee_symbol in
-        let to_real_t1 = t_app to_real [ t1 ] (Some ty_real) in
-        let to_real_t2 = t_app to_real [ t2 ] (Some ty_real) in
+        let to_real_t1 = t_app symbols.to_real_double [ t1 ] (Some ty_real) in
+        let to_real_t2 = t_app symbols.to_real_double [ t2 ] (Some ty_real) in
         let new_truths = apply ieee_posts ineqs to_real_t1 in
         let ineqs = List.fold_left (add_ineq symbols) ineqs new_truths in
         let new_truths = apply ieee_posts ineqs to_real_t2 in
@@ -336,7 +283,9 @@ let apply symbols (ieee_posts, ineqs) task =
     | Unsupported -> failwith "Unsupported inequality form")
   | _ -> failwith "Unsupported goal, it should be a real inequality"
 
-let apply_transitivity symbols (ieee_posts, ineqs) =
+let apply_transitivity symbols info =
+  let ieee_posts = assert false in
+  let ineqs = assert false in
   Trans.store (apply symbols (ieee_posts, ineqs))
 
 let apply_trans_on_ineqs env =
@@ -351,37 +300,13 @@ let apply_trans_on_ineqs env =
   let div = ns_find_ls real.th_export [ Ident.op_infix "/" ] in
   let real_abs = Env.read_theory env [ "real" ] "Abs" in
   let abs = ns_find_ls real_abs.th_export [ "abs" ] in
-  let ieee_generic = Env.read_theory env [ "ieee_float" ] "GenericFloat" in
-  let to_real = ns_find_ls ieee_generic.th_export [ "to_real" ] in
-  let ieee_single = Env.read_theory env [ "mach"; "float" ] "Single" in
-  let t'real_single = ns_find_ls ieee_single.th_export [ "t'real" ] in
-  let add_post_ieee_single =
-    ns_find_ls ieee_single.th_export [ "add_post_ieee" ]
-  in
-  let sub_post_ieee_single =
-    ns_find_ls ieee_single.th_export [ "sub_post_ieee" ]
-  in
-  let mul_post_ieee_single =
-    ns_find_ls ieee_single.th_export [ "mul_post_ieee" ]
-  in
-  let div_post_ieee_single =
-    ns_find_ls ieee_single.th_export [ "div_post_ieee" ]
-  in
-  let ieee_double = Env.read_theory env [ "mach"; "float" ] "Double" in
-  let t'real_double = ns_find_ls ieee_double.th_export [ "t'real" ] in
-  let add_post_ieee_double =
-    ns_find_ls ieee_double.th_export [ "add_post_ieee" ]
-  in
-  let sub_post_ieee_double =
-    ns_find_ls ieee_double.th_export [ "sub_post_ieee" ]
-  in
-  let mul_post_ieee_double =
-    ns_find_ls ieee_double.th_export [ "mul_post_ieee" ]
-  in
-  let div_post_ieee_double =
-    ns_find_ls ieee_double.th_export [ "div_post_ieee" ]
-  in
-  (* let safe64 = Env.read_theory env [ ""; "float" ] "Double" in *)
+  let safe64 = Env.read_theory env [ "cfloat" ] "Safe64" in
+  let to_real_double = ns_find_ls safe64.th_export [ "to_real" ] in
+  let add_post_double = ns_find_ls safe64.th_export [ "safe64_add_post" ] in
+  let sub_post_double = ns_find_ls safe64.th_export [ "safe64_sub_post" ] in
+  let mul_post_double = ns_find_ls safe64.th_export [ "safe64_mul_post" ] in
+  let div_post_double = ns_find_ls safe64.th_export [ "safe64_div_post" ] in
+  let type_double = ns_find_ts safe64.th_export [ "t" ] in
   let symbols =
     {
       add;
@@ -393,26 +318,17 @@ let apply_trans_on_ineqs env =
       gt;
       ge;
       abs;
-      to_real;
-      t'real_single;
-      add_post_ieee_single;
-      sub_post_ieee_single;
-      mul_post_ieee_single;
-      div_post_ieee_single;
-      t'real_double;
-      add_post_ieee_double;
-      sub_post_ieee_double;
-      mul_post_ieee_double;
-      div_post_ieee_double;
+      to_real_double;
+      add_post_double;
+      sub_post_double;
+      mul_post_double;
+      div_post_double;
+      type_double;
     }
   in
 
-  let get_ieee_posts_and_ineqs = get_ieee_posts_and_ineqs symbols in
-  Trans.compose
-    (Trans.lookup_transform "inline_trivial" env)
-    (Trans.bind
-       (Trans.fold_decl get_ieee_posts_and_ineqs (Mterm.empty, Mterm.empty))
-       (apply_transitivity symbols))
+  let get_info = get_info symbols in
+  Trans.bind (Trans.fold_decl get_info Mterm.empty) (apply_transitivity symbols)
 
 let () =
   Trans.register_env_transform "apply_trans_on_ineqs" apply_trans_on_ineqs
