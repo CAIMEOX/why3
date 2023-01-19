@@ -148,8 +148,8 @@ let rec is_list (e: Py_ast.expr) =
   match e.Py_ast.expr_desc with
   | Py_ast.Ecall (f, _) when f.id_str = "slice" -> true
   | Py_ast.Ebinop (Py_ast.Badd, e, _) -> is_list e
-  | Py_ast.Edot _ -> true
-  | Py_ast.Elist _ -> true
+  | Py_ast.Edot (_, m, _) -> m.id_str = "copy"
+  | Py_ast.Elist _ | Py_ast.Emake _ -> true
   | _ -> false
 
 let rec expr env {Py_ast.expr_loc = loc; Py_ast.expr_desc = d } = match d with
@@ -560,12 +560,12 @@ let translate ~loc dl =
 let read_channel env path file c =
   let f : Py_ast.file = Py_lexer.parse file c in
   Debug.dprintf debug "%s parsed successfully.@." file;
+  let loc = Loc.user_position file 0 0 0 0 in
   let file = Filename.basename file in
   let file = Filename.chop_extension file in
   let name = Strings.capitalize file in
   Debug.dprintf debug "building module %s.@." name;
   Typing.open_file env path;
-  let loc = Loc.user_position file 0 0 0 0 in
   Typing.open_module (mk_id ~loc name);
   let use_import (f, m) =
     let m = mk_id ~loc m in

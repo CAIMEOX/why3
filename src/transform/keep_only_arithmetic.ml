@@ -14,15 +14,34 @@ open Decl
 open Ty
 open Theory
 
+(* Performs some basic simplifications and remove all goals assertions that are
+   not equalites/inequalities *)
+
+let get_arith_symbols env =
+  let symbol_names =
+    [
+      Ident.op_infix "<";
+      Ident.op_infix "<=";
+      Ident.op_infix ">";
+      Ident.op_infix ">=";
+    ]
+  in
+  let int = Env.read_theory env [ "int" ] "Int" in
+  let int_symbols =
+    List.map (fun name -> ns_find_ls int.th_export [ name ]) symbol_names
+  in
+  let real = Env.read_theory env [ "real" ] "Real" in
+  let real_symbols =
+    List.map (fun name -> ns_find_ls real.th_export [ name ]) symbol_names
+  in
+  int_symbols @ real_symbols
+
 type fmla =
   | Unsupported
   | Tautology
   | Contradiction
   | Formula of term
 
-(* Filter all the formulas that are not inequalities or equalities about
-   int/reals *)
-(* Also performs some simplifications *)
 let rec get_fmla symbols f =
   let get = get_fmla symbols in
   match f.t_node with
@@ -52,16 +71,26 @@ let rec get_fmla symbols f =
       | Formula f2 -> Formula (t_or f1 f2)))
   | Tbinop (Timplies, f1, f2) -> (
     match get f1 with
-    | Unsupported
-    | Contradiction ->
-      Unsupported
-    | Tautology -> get f2
     | Formula f1 -> (
       match get f2 with
-      | Unsupported -> Unsupported
-      | Tautology -> Tautology
-      | Contradiction -> Formula (t_implies f1 t_false)
-      | Formula f2 -> Formula (t_implies f1 f2)))
+      | Formula f2 -> Formula (t_implies_simp f1 f2)
+      | Contradiction -> Formula (t_implies_simp f1 t_false)
+      | _ -> Unsupported)
+    | Tautology -> get f2
+    | _ -> Unsupported)
+  | Tbinop (Tiff, f1, f2) -> (
+    match get f1 with
+    | Formula f1 -> (
+      match get f2 with
+      | Formula f2 -> Formula (t_iff_simp f1 f2)
+      | Contradiction -> Formula (t_implies_simp f1 t_false)
+      | _ -> Unsupported)
+    | Tautology -> get f2
+    | Contradiction -> (
+      match get f2 with
+      | Formula _ -> Formula (t_implies_simp f2 t_false)
+      | _ -> Unsupported)
+    | _ -> Unsupported)
   | Ttrue -> Tautology
   | Tfalse -> Contradiction
   | Tnot f1 -> (
@@ -83,51 +112,28 @@ let rec get_fmla symbols f =
       Formula f
     else
       Unsupported
-  | Tquant (Tforall, t) -> let (vs,trigger,t) = t_open_quant t in (match get t with Formula f -> Formula (t_forall_close_simp vs trigger f) | _ -> Unsupported)
+  | Tquant (q, t) -> (
+    let vs, trigger, t = t_open_quant t in
+    match get t with
+    | Formula f -> Formula (t_quant_close_simp q vs trigger f)
+    | _ -> Unsupported)
   | _ -> Unsupported
 
-let filter_non_arith symbols d =
+let remove_non_arith symbols d =
   match d.d_node with
-  | Dtype _ -> [ d ]
-  | Dlogic _ -> [ d ]
-  | Dind _ -> [ d ]
-  | Dparam _ -> [ d ]
-  (* | Dparam { ls_value = Some ty } *)
-  (*   when ty_equal ty ty_int || ty_equal ty ty_real -> *)
-  (*   [ d ] *)
-  (* | Dparam ls when List.exists (fun _ls -> ls_equal ls _ls) symbols || ls_equal ls ps_equ -> [ d ] *)
-  | Dprop (Paxiom, pr, f) -> (
+  | Dprop (kind, _, f) when kind = Paxiom || kind = Plemma -> (
     match get_fmla symbols f with
-    | Contradiction -> [ create_prop_decl Paxiom pr t_false ]
-    | Formula f -> [ create_prop_decl Paxiom pr f ]
-    | _ -> [])
-  | Dprop (Pgoal, pr, f) -> (
-    match get_fmla symbols f with
-    | Unsupported -> failwith "Unsupported goal"
+    | Formula _
     | Contradiction ->
-      [ create_prop_decl Pgoal pr t_false ]
-    | Tautology -> [ create_prop_decl Pgoal pr t_true ]
-    | Formula f -> [ create_prop_decl Pgoal pr f ])
-  | _ -> []
+      [ d ]
+    | _ -> [])
+  | _ -> [ d ]
 
 let keep_only_arithmetic env =
-  let symbol_names =
-    [
-      Ident.op_infix "<";
-      Ident.op_infix "<=";
-      Ident.op_infix ">";
-      Ident.op_infix ">=";
-    ]
-  in
-  let int = Env.read_theory env [ "int" ] "Int" in
-  let int_symbols =
-    List.map (fun name -> ns_find_ls int.th_export [ name ]) symbol_names
-  in
-  let real = Env.read_theory env [ "real" ] "Real" in
-  let real_symbols =
-    List.map (fun name -> ns_find_ls real.th_export [ name ]) symbol_names
-  in
-  Trans.decl (filter_non_arith (int_symbols @ real_symbols)) None
+  let symbols = get_arith_symbols env in
+  Trans.compose
+    (Trans.lookup_transform "inline_trivial" env)
+    (Trans.decl (remove_non_arith symbols) None)
 
 let () =
   Trans.register_env_transform "keep_only_arithmetic" keep_only_arithmetic
