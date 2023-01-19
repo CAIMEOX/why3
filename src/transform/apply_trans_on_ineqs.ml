@@ -32,9 +32,13 @@ type symbols = {
   mul : lsymbol;
   div : lsymbol;
   lt : lsymbol;
+  lt_infix : lsymbol;
   le : lsymbol;
+  le_infix : lsymbol;
   gt : lsymbol;
+  gt_infix : lsymbol;
   ge : lsymbol;
+  ge_infix : lsymbol;
   abs : lsymbol;
   to_real_double : lsymbol;
   add_post_double : lsymbol;
@@ -61,7 +65,10 @@ let is_op_ls symbols ls =
   || ls_equal ls symbols.div
 
 (* TODO: Add ge and gt later *)
-let is_ineq_ls symbols ls = ls_equal ls symbols.lt || ls_equal ls symbols.le
+let is_ineq_ls symbols ls =
+  ls_equal ls symbols.lt || ls_equal ls symbols.le
+  || ls_equal ls symbols.lt_infix
+  || ls_equal ls symbols.le_infix
 (* || ls_equal ls symbols.gt || ls_equal ls symbols.ge *)
 
 let is_to_real symbols ls = ls_equal ls symbols.to_real_double
@@ -166,8 +173,8 @@ let use_ieee_thms symbols info ieee_symbol t1 t2 t3 =
   let mul t1 t2 = t_app symbols.mul [ t1; t2 ] (Some ty_real) in
   let _div t1 t2 = t_app symbols.div [ t1; t2 ] (Some ty_real) in
   let t_ineq ls t1 t2 = ps_app ls [ t1; t2 ] in
-  let t1_info = Mterm.find t1 info in
-  let t2_info = Mterm.find t2 info in
+  let t1_info = get_info info t1 in
+  let t2_info = get_info info t2 in
   let fmla = t_true in
   (* Combine ieee_post with the inequalities of t1 and t2 *)
   let info, fmla =
@@ -184,7 +191,7 @@ let use_ieee_thms symbols info ieee_symbol t1 t2 t3 =
               in
               let right = add (add t1' t2') (mul eps (abs (add t1' t2'))) in
               let info = add_ineq info t3 ls right in
-              let fmla = t_and fmla (t_ineq ls (abs (to_real t3)) right) in
+              let fmla = t_and_simp fmla (t_ineq ls (abs (to_real t3)) right) in
               (info, fmla)
             else
               failwith "TODO : Unsupported symbol")
@@ -195,11 +202,18 @@ let use_ieee_thms symbols info ieee_symbol t1 t2 t3 =
   match t1_info.round_error with
   | Some (t1', t2') -> (
     match t2_info.round_error with
-    | Some (t1'', t2'') -> failwith "TODO"
-    | None -> failwith "TODO")
+    | Some (t1'', t2'') -> (info, fmla (* failwith "TODO" *))
+    | None ->
+      let left = abs (sub (to_real t3) (add t1' (to_real t2))) in
+      let right =
+        add t2' (mul eps (add (add (abs t1') (abs t2')) (abs (to_real t2))))
+      in
+      let info = add_round_error info t3 (add t1' (to_real t2)) right in
+      let fmla = t_and fmla (t_ineq symbols.le left right) in
+      (info, fmla))
   | None -> (
     match t2_info.round_error with
-    | Some (t1', t2') -> failwith "TODO"
+    | Some (t1', t2') -> (info, fmla (* failwith "TODO" *))
     | None ->
       let left = abs (sub (to_real t3) (add (to_real t1) (to_real t2))) in
       let right = mul eps (abs (add (to_real t1) (to_real t2))) in
@@ -277,20 +291,38 @@ let use_ieee_thms symbols info ieee_symbol t1 t2 t3 =
 (*     failwith "Unsupported, todo" *)
 (*   (* TODO: Combine with other Absminus. *) *)
 (* | _ -> new_ineqs) *)
+
+let is_ty_float symbols ty =
+  match ty.ty_node with
+  | Tyapp (v, []) ->
+    if ts_equal v symbols.type_double then
+      true
+    else
+      false
+  | _ -> false
+
 let rec get_floats symbols t =
   match t.t_node with
-  | Tvar v -> (
-    match v.vs_ty.ty_node with
-    | Tyapp (v, []) ->
-      if ts_equal v symbols.type_double then
-        [ t ]
-      else
-        []
-    | _ -> [])
+  | Tvar v ->
+    if is_ty_float symbols v.vs_ty then
+      [ t ]
+    else
+      []
+  | Tapp (ls, []) ->
+    if is_ty_float symbols (Opt.get ls.ls_value) then
+      [ t ]
+    else
+      []
   | Tapp (ls, tl) -> List.fold_left (fun l t -> l @ get_floats symbols t) [] tl
   | _ -> []
 
 let t_by t1 t2 = t_implies (t_or_asym t2 t_true) t1
+
+let t_by_simp t1 t2 =
+  match t2.t_node with
+  | Ttrue -> t1
+  | _ -> t_by t1 t2
+
 let t_so t1 t2 = t_and t1 (t_or_asym t2 t_true)
 
 (* Apply theorems on FP term t depending on what we know about it *)
@@ -302,9 +334,9 @@ let rec apply_theorems symbols info t =
   | Some (ieee_post, t1, t2) ->
     let info, fmla = apply info t1 in
     let info, fmla' = apply info t2 in
-    let fmla = t_and fmla fmla' in
+    let fmla = t_and_simp fmla fmla' in
     let info, fmla' = use_ieee_thms symbols info ieee_post t1 t2 t in
-    (info, t_by fmla' fmla)
+    (info, t_by_simp fmla' fmla)
   | None -> (
     match t_info.round_error with
     | Some (t1, t2) ->
@@ -314,30 +346,28 @@ let rec apply_theorems symbols info t =
     | None -> (info, t_true))
 
 let apply symbols info task =
-  let goal = Task.task_goal_fmla task in
-  let _, task = Task.task_separate_goal task in
+  let goal_tdecl, task = Task.task_separate_goal task in
+  let kind, pr, goal =
+    match goal_tdecl.td_node with
+    | Decl d -> (
+      match d.d_node with
+      | Dprop p -> p
+      | _ -> assert false)
+    | _ -> assert false
+  in
   match goal.t_node with
   (* TODO: Also destruct conjunctions ? *)
   | Tapp (ls, [ t1; t2 ]) when is_ineq_ls symbols ls ->
     let floats = get_floats symbols t1 @ get_floats symbols t2 in
-    let info, fmla =
+    let _, fmla =
       List.fold_left
         (fun (info, fmla) t ->
           let info, fmla' = apply_theorems symbols info t in
-          (info, t_and fmla fmla'))
+          (info, t_and_simp fmla fmla'))
         (info, t_true) floats
     in
-    failwith "TODO: add new generated truths about floats in task";
-
-    (* let task = *)
-    (*   List.fold_left *)
-    (*     (fun task truth -> *)
-    (*       add_prop_decl task Paxiom *)
-    (*         (create_prsymbol (id_fresh "generated")) *)
-    (*         truth) *)
-    (*     task new_truths *)
-    (* in *)
-    add_prop_decl task Pgoal (create_prsymbol (id_fresh "generated")) goal
+    let goal = t_by_simp goal fmla in
+    add_prop_decl task kind pr goal
   | _ -> failwith "Unsupported goal, it should be a real inequality"
 
 let apply_transitivity symbols info = Trans.store (apply symbols info)
@@ -348,6 +378,11 @@ let apply_trans_on_ineqs env =
   let le = ns_find_ls real.th_export [ Ident.op_infix "<=" ] in
   let gt = ns_find_ls real.th_export [ Ident.op_infix ">" ] in
   let ge = ns_find_ls real.th_export [ Ident.op_infix ">=" ] in
+  let real_infix = Env.read_theory env [ "real" ] "RealInfix" in
+  let lt_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "<." ] in
+  let le_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "<=." ] in
+  let gt_infix = ns_find_ls real_infix.th_export [ Ident.op_infix ">." ] in
+  let ge_infix = ns_find_ls real_infix.th_export [ Ident.op_infix ">=." ] in
   let add = ns_find_ls real.th_export [ Ident.op_infix "+" ] in
   let sub = ns_find_ls real.th_export [ Ident.op_infix "-" ] in
   let mul = ns_find_ls real.th_export [ Ident.op_infix "*" ] in
@@ -369,9 +404,13 @@ let apply_trans_on_ineqs env =
       mul;
       div;
       lt;
+      lt_infix;
       le;
+      le_infix;
       gt;
+      gt_infix;
       ge;
+      ge_infix;
       abs;
       to_real_double;
       add_post_double;
