@@ -40,6 +40,7 @@ type symbols = {
   ge : lsymbol;
   ge_infix : lsymbol;
   abs : lsymbol;
+  min : lsymbol;
   to_real_double : lsymbol;
   add_post_double : lsymbol;
   sub_post_double : lsymbol;
@@ -49,12 +50,15 @@ type symbols = {
   type_double : tysymbol;
 }
 
+type round_error =
+  | Relative of term * term * term
+  | Absolute of term * term
+
 (* This type corresponds to what we know about a certain FP variable "x" *)
 type info = {
   (* "(<=, y)" means "|to_real x| <= y" *)
   ineqs : (lsymbol * term) list;
-  (* "(y, z)" means "round_error x y <= z", eg. "|to_real x - y| <= z" *)
-  round_error : (term * term) option;
+  round_error : round_error option;
   (* If x has an ieee_post, it means it is the result of an arithmetic FP
      operation *)
   ieee_post : (lsymbol * term * term) option;
@@ -104,14 +108,15 @@ let add_ineq info t ls t' =
   Mterm.add t t_info info
 
 (* TODO: Warning when we have multiple "round_error" ? *)
-let add_round_error info t t1 t2 =
+let add_round_error info t t1 factor t2 =
   let t_info = get_info info t in
+  let round_error =
+    match factor with
+    | None -> Some (Absolute (t1, t2))
+    | Some f -> Some (Relative (t1, f, t2))
+  in
   let t_info =
-    {
-      ineqs = t_info.ineqs;
-      round_error = Some (t1, t2);
-      ieee_post = t_info.ieee_post;
-    }
+    { ineqs = t_info.ineqs; round_error; ieee_post = t_info.ieee_post }
   in
   Mterm.add t t_info info
 
@@ -143,7 +148,7 @@ let rec add_fmlas symbols f info =
       | _ -> info)
     (* Look for "round_error x <=. y" *)
     | Tapp (_ls, [ t1; t2' ]) when ls_equal _ls symbols.round_error ->
-      add_round_error info t1 t2' t2
+      add_round_error info t1 t2' None t2
     | _ -> info)
   (* Look for safe_64_*_post *)
   | Tapp (ls, [ t1; t2; t3 ]) when is_ieee_double symbols ls ->
@@ -160,6 +165,15 @@ let collect_info symbols d info =
     add_fmlas symbols f info
   | _ -> info
 
+let t_by t1 t2 = t_implies (t_or_asym t2 t_true) t1
+
+let t_by_simp t1 t2 =
+  match t2.t_node with
+  | Ttrue -> t1
+  | _ -> t_by t1 t2
+
+let t_so t1 t2 = t_and t1 (t_or_asym t2 t_true)
+
 (* t3 is a result of FP arithmetic operation involving t1 and t2 *)
 (* Compute new inequalities on t3 based on what we know on t1 and t2 *)
 (* TODO: Support "|x| <= max(|y|,|z|)" ??? *)
@@ -171,8 +185,9 @@ let use_ieee_thms symbols info ieee_symbol t1 t2 t3 =
   let add t1 t2 = t_app symbols.add [ t1; t2 ] (Some ty_real) in
   let sub t1 t2 = t_app symbols.sub [ t1; t2 ] (Some ty_real) in
   let mul t1 t2 = t_app symbols.mul [ t1; t2 ] (Some ty_real) in
-  let _div t1 t2 = t_app symbols.div [ t1; t2 ] (Some ty_real) in
+  let div t1 t2 = t_app symbols.div [ t1; t2 ] (Some ty_real) in
   let t_ineq ls t1 t2 = ps_app ls [ t1; t2 ] in
+  let min t1 t2 = fs_app symbols.min [ t1; t2 ] ty_real in
   let t1_info = get_info info t1 in
   let t2_info = get_info info t2 in
   let fmla = t_true in
@@ -198,99 +213,110 @@ let use_ieee_thms symbols info ieee_symbol t1 t2 t3 =
           (info, fmla) t2_info.ineqs)
       (info, fmla) t1_info.ineqs
   in
+  let fmla = t_true in
   (* Combine ieee_post with potential round_errors *)
   match t1_info.round_error with
-  | Some (t1', t2') -> (
+  | Some (Absolute (t1', t2')) -> (
     match t2_info.round_error with
-    | Some (t1'', t2'') -> (info, fmla (* failwith "TODO" *))
+    | Some (Absolute (t1'', t2'')) -> (info, fmla (* failwith "TODO" *))
+    | Some (Relative (t1'', t2'', t3'')) -> (info, fmla) (* TODO *)
     | None ->
       let left = abs (sub (to_real t3) (add t1' (to_real t2))) in
       let right =
         add t2' (mul eps (add (add (abs t1') (abs t2')) (abs (to_real t2))))
       in
-      let info = add_round_error info t3 (add t1' (to_real t2)) right in
+      let info = add_round_error info t3 (add t1' (to_real t2)) None right in
       let fmla = t_and fmla (t_ineq symbols.le left right) in
       (info, fmla))
+  | Some (Relative (t1', t2', t3')) -> (
+    match t2_info.round_error with
+    | Some _ -> failwith "TODO"
+    | None ->
+      (* Use trick to keep addition error tractable *)
+      (* TODO : Wip *)
+      let abs_err = abs (sub (to_real t3) (add (to_real t1) (to_real t2))) in
+      let f1 =
+        t_ineq symbols.le abs_err
+          (min
+             (abs (to_real t1))
+             (min (abs (to_real t2)) (mul eps (add (to_real t1) (to_real t2)))))
+      in
+      let start = t_ineq symbols.le abs_err in
+      let factor = div t2' eps in
+      let f2 = start (abs (add (sub (to_real t1) t1') t1')) in
+      let tmp = start (add (abs (sub (to_real t1) t1')) t3') in
+      let f2 = t_by tmp f2 in
+      let tmp = start (mul eps (add (mul t3' factor) (abs (to_real t2)))) in
+      let f2 = t_by tmp f2 in
+      let tmp =
+        start
+          (mul eps
+             (add (mul (mul (abs (to_real t2)) eps) factor) (abs (to_real t2))))
+      in
+      let f2 = t_by tmp f2 in
+      let t_one =
+        t_const
+          (Constant.ConstReal
+             (Number.real_literal ~radix:10 ~neg:false ~int:"1" ~frac:"0"
+                ~exp:None))
+          ty_real
+      in
+      (* |delta| <= eps (|x| + (A/eps+1)|y|) *)
+      let tmp =
+        start (mul eps (add t1' (mul (abs (to_real t2)) (add factor t_one))))
+      in
+      let f2 = t_by tmp f2 in
+      let f2 =
+        t_implies (t_ineq symbols.le t3' (mul eps (abs (to_real t2)))) f2
+      in
+      let f3 = t_implies (t_ineq symbols.le (to_real t2) (mul eps t3')) tmp in
+      let f4 =
+        t_ineq symbols.le
+          (abs (add (to_real t1) (to_real t2)))
+          (add (add (abs (sub (to_real t1) t1')) (abs t3')) (abs (to_real t2)))
+      in
+      let tmp' =
+        t_ineq symbols.le
+          (mul factor (mul eps t3'))
+          (mul factor (abs (to_real t2)))
+      in
+      let f4 = t_by tmp (t_and f4 tmp') in
+      let tmp =
+        t_and
+          (t_ineq symbols.lt (mul eps t3') (abs (to_real t2)))
+          (t_ineq symbols.lt (mul eps (abs (to_real t2))) t3')
+      in
+      let f4 = t_implies tmp f4 in
+      let left = abs (sub (to_real t3) (add t1' (to_real t2))) in
+      let right =
+        mul eps (mul (add factor t_one) (add t3' (abs (to_real t2))))
+      in
+      (* TODO : Simplifier la fin pour avoir comme erreur relative t2' + eps *)
+      let f =
+        t_by (t_ineq symbols.le left right) (t_so f1 (t_and (t_and f2 f3) f4))
+      in
+      let info =
+        add_round_error info t3
+          (add t1' (to_real t2))
+          (Some (add t_one factor))
+          (add (abs t1') (abs (to_real t2)))
+      in
+      (info, t_and fmla f))
   | None -> (
     match t2_info.round_error with
-    | Some (t1', t2') -> (info, fmla (* failwith "TODO" *))
+    | Some (Absolute (t1', t2')) -> (info, fmla (* failwith "TODO" *))
+    | Some (Relative _) -> (info, fmla) (* TODO *)
     | None ->
       let left = abs (sub (to_real t3) (add (to_real t1) (to_real t2))) in
       let right = mul eps (abs (add (to_real t1) (to_real t2))) in
       let info =
-        add_round_error info t3 (add (to_real t1) (to_real t2)) right
+        add_round_error info t3
+          (add (to_real t1) (to_real t2))
+          (Some eps)
+          (abs (add (to_real t1) (to_real t2)))
       in
       let fmla = t_and fmla (t_ineq symbols.le left right) in
       (info, fmla))
-
-(* TODO: Combine with round_error *)
-
-(* let new_ineqs = *)
-(*   List.fold_left *)
-(*     (fun new_ineqs t2_ineq -> *)
-(*       match t2_ineq with *)
-(*       | Absminus (ineq_symbol, _, t2', t3') -> *)
-(*         if ls_equal ieee_symbol symbols.add_post_double then *)
-(*           (* Apply FP addition theorem *) *)
-(*           let left = abs (sub t3 (add t2' t1)) in *)
-(*           let right = *)
-(*             add *)
-(*               (add (add t2' t1) t3') *)
-(*               (mul eps (add (abs t1) (abs (add t2' t3')))) *)
-(*           in *)
-(*           ineq ineq_symbol left right :: new_ineqs *)
-(*         else *)
-(*           failwith "Unsupported, todo" *)
-(*         (* TODO: Combine with other Absminus. *) *)
-(*       | _ -> new_ineqs) *)
-(*     new_ineqs t2_ineqs *)
-(* in *)
-(* TODO: Should we do this if we already combined Absminus inequality ? *)
-(* if ls_equal ieee_symbol symbols.add_post_double then *)
-(*   let left = abs (sub t3 (add t1 t2)) in *)
-(*   let right = mul eps (abs (add t1 t2)) in *)
-(*   ineq symbols.le left right :: new_ineqs *)
-(* else *)
-(*   new_ineqs *)
-
-(* | Absminus (ineq_symbol1, _, t2', t3') -> *)
-(* let new_ineqs = *)
-(*     List.fold_left *)
-(*       (fun new_ineqs t2_ineq -> *)
-(*         match t2_ineq with *)
-(*         | Absminus (ineq_symbol2, t1', t2', t3') -> *)
-(*           if ls_equal ieee_symbol symbols.add_post_double then *)
-(*             let left = abs t3 in *)
-(*             let right = add (add t2 t2') (mul eps (abs (add t2 t2'))) in *)
-(*             let ineq_symbol = *)
-(*               if *)
-(*                 ls_equal ineq_symbol1 symbols.lt *)
-(*                 || ls_equal ineq_symbol2 symbols.lt *)
-(*               then *)
-(*                 symbols.lt *)
-(*               else *)
-(*                 symbols.le *)
-(*             in *)
-(*             ineq ineq_symbol left right :: new_ineqs *)
-(*           else *)
-(*             failwith "Unsupported symbole" *)
-(*         | _ -> new_ineqs) *)
-(*       new_ineqs t2_ineqs *)
-(*   in *)
-(*   if ls_equal ieee_symbol symbols.add_post_double then *)
-(*     (* Apply FP addition theorem *) *)
-(*     (* TODO: Improve the bound to limit the accumulation of micro errors *) *)
-(*     let left = abs (sub t3 (add t2' t2)) in *)
-(*     let right = *)
-(*       add *)
-(*         (add (add t2' t2) t3') *)
-(*         (mul eps (add (abs t2) (abs (add t2' t3')))) *)
-(*     in *)
-(*     ineq ineq_symbol1 left right :: new_ineqs *)
-(*   else *)
-(*     failwith "Unsupported, todo" *)
-(*   (* TODO: Combine with other Absminus. *) *)
-(* | _ -> new_ineqs) *)
 
 let is_ty_float symbols ty =
   match ty.ty_node with
@@ -316,15 +342,6 @@ let rec get_floats symbols t =
   | Tapp (ls, tl) -> List.fold_left (fun l t -> l @ get_floats symbols t) [] tl
   | _ -> []
 
-let t_by t1 t2 = t_implies (t_or_asym t2 t_true) t1
-
-let t_by_simp t1 t2 =
-  match t2.t_node with
-  | Ttrue -> t1
-  | _ -> t_by t1 t2
-
-let t_so t1 t2 = t_and t1 (t_or_asym t2 t_true)
-
 (* Apply theorems on FP term t depending on what we know about it *)
 (* TODO: Avoid traversing the same term twice. *)
 let rec apply_theorems symbols info t =
@@ -339,7 +356,7 @@ let rec apply_theorems symbols info t =
     (info, t_by_simp fmla' fmla)
   | None -> (
     match t_info.round_error with
-    | Some (t1, t2) ->
+    | Some _ ->
       failwith "TODO round_error"
       (* Here we should find if there a floats in t1, do the recursive call on
          these floats then call apply_round_error_thm on these *)
@@ -389,6 +406,9 @@ let apply_trans_on_ineqs env =
   let div = ns_find_ls real.th_export [ Ident.op_infix "/" ] in
   let real_abs = Env.read_theory env [ "real" ] "Abs" in
   let abs = ns_find_ls real_abs.th_export [ "abs" ] in
+  (* TODO: If not included we should add min max theory *)
+  let real_minmax = Env.read_theory env [ "real" ] "MinMax" in
+  let min = ns_find_ls real_minmax.th_export [ "min" ] in
   let safe64 = Env.read_theory env [ "cfloat" ] "Safe64" in
   let to_real_double = ns_find_ls safe64.th_export [ "to_real" ] in
   let add_post_double = ns_find_ls safe64.th_export [ "safe64_add_post" ] in
@@ -412,6 +432,7 @@ let apply_trans_on_ineqs env =
       ge;
       ge_infix;
       abs;
+      min;
       to_real_double;
       add_post_double;
       sub_post_double;
