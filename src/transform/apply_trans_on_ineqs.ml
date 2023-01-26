@@ -311,6 +311,34 @@ let apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2 exact_t2
   let f1' = t_by (delta_le (add (abs (sub (to_real t2) exact_t2)) t2')) f1' in
   let f1 = t_by (delta_le (add (add (mul t1' t1_factor) t1_cst) t1')) f1 in
   let f1' = t_by (delta_le (add (add (mul t2' t2_factor) t2_cst) t2')) f1' in
+  let f1 =
+    t_by
+      (delta_le
+         (add (add (mul t1' t1_factor) t1_cst) (sub (mul eps t2') t1_cst)))
+      f1
+  in
+  let f1' =
+    t_by
+      (delta_le
+         (add (add (mul t2' t2_factor) t2_cst) (sub (mul eps t1') t2_cst)))
+      f1'
+  in
+  let f1 =
+    t_by
+      (delta_le
+         (add
+            (add (mul (mul eps (add t2' t2_cst)) t1_factor) t1_cst)
+            (sub (mul eps t2') t1_cst)))
+      f1
+  in
+  let f1' =
+    t_by
+      (delta_le
+         (add
+            (add (mul (mul eps (add t1' t1_cst)) t2_factor) t2_cst)
+            (sub (mul eps t1') t2_cst)))
+      f1'
+  in
   let delta_ineq =
     delta_le
       (add
@@ -369,9 +397,9 @@ let apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2 exact_t2
     t_and f2
       (t_and
          (t_ineq symbols.le (mul t1' t1_factor)
-            (mul (div t1_factor eps) (add t2' t2_factor)))
+            (mul t1_factor (div (add t2' t2_factor) eps)))
          (t_ineq symbols.le (mul t2' t2_factor)
-            (mul (div t2_factor eps) (add t1' t1_factor))))
+            (mul t2_factor (div (add t1' t1_factor) eps))))
   in
   let f2 = t_by delta_ineq f2 in
   let f2 =
