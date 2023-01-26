@@ -283,6 +283,15 @@ let t_so t1 t2 = t_and t1 (t_or_asym t2 t_true)
 
 (* TODO: Check when we have a None if it is well managed because t1' will not be
    0 !!! *)
+(*
+ * If we have :
+ *  - |t1 - exact_t1| <= t1_factor * t1' + t1_cst
+ *  - |t2 - exact_t2| <= t2_factor * t2' + t2_cst
+ *  Then we get the following error on addition :
+ *  |fl(t1 + t2) - (exact_t1 + exact_t2)| <= (eps + t1_factor + t2_factor)(t1'+t2')
+                                              + (1+eps+t2_factor)t1_cst
+                                              + (1+eps+t1_factor)t2_cst
+ *)
 let apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2 exact_t2
     t2_factor t2' t2_cst r =
   let eps = get_eps None in
@@ -293,68 +302,103 @@ let apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2 exact_t2
     (add symbols, sub symbols, mul symbols, div symbols)
   in
   let t_ineq ls t1 t2 = ps_app ls [ t1; t2 ] in
-  let left =
+  let delta_le =
     t_ineq symbols.le (abs (sub (to_real r) (add (to_real t1) (to_real t2))))
   in
-  let t1_factor' = div t1_factor eps in
-  let t2_factor' = div t2_factor eps in
-  let t1'' = add t1' (div t1_cst t1_factor) in
-  let t2'' = add t2' (div t2_cst t2_factor) in
-  let f1 = left (abs (add (sub (to_real t1) exact_t1) exact_t1)) in
-  let f1' = left (abs (add (sub (to_real t2) exact_t2) exact_t2)) in
-  let f1 = t_by (left (add (abs (sub (to_real t1) exact_t1)) t1')) f1 in
-  let f1' = t_by (left (add (abs (sub (to_real t2) exact_t2)) t2')) f1' in
-  let f1 = t_by (left (mul eps (add (mul t1'' t1_factor') t2''))) f1 in
-  let f1' = t_by (left (mul eps (add (mul t2'' t2_factor') t1''))) f1' in
+  let f1 = delta_le (abs (add (sub (to_real t1) exact_t1) exact_t1)) in
+  let f1' = delta_le (abs (add (sub (to_real t2) exact_t2) exact_t2)) in
+  let f1 = t_by (delta_le (add (abs (sub (to_real t1) exact_t1)) t1')) f1 in
+  let f1' = t_by (delta_le (add (abs (sub (to_real t2) exact_t2)) t2')) f1' in
+  let f1 = t_by (delta_le (add (add (mul t1' t1_factor) t1_cst) t1')) f1 in
+  let f1' = t_by (delta_le (add (add (mul t2' t2_factor) t2_cst) t2')) f1' in
+  let delta_ineq =
+    delta_le
+      (add
+         (add (mul (add eps t1_factor) t2') (mul (add eps t2_factor) t1'))
+         (add (mul (add t2_factor eps) t1_cst) (mul (add t1_factor eps) t2_cst)))
+  in
+  let f1 = t_by delta_ineq f1 in
+  let f1' = t_by delta_ineq f1' in
   let f1 =
-    t_by (left (mul eps (add (mul (mul t2'' eps) t1_factor') t2''))) f1
+    t_implies (t_ineq symbols.le (add t1' t1_cst) (mul eps (add t2' t2_cst))) f1
   in
   let f1' =
-    t_by (left (mul eps (add (mul (mul t1'' eps) t2_factor') t1''))) f1'
+    t_implies
+      (t_ineq symbols.le (add t2' t2_cst) (mul eps (add t1' t1_cst)))
+      f1'
   in
-  let goal =
-    left
-      (mul eps
-         (add
-            (mul t1'' (add t2_factor' t_one))
-            (mul t2'' (add t1_factor' t_one))))
-  in
-  let f1 = t_by goal f1 in
-  let f1' = t_by goal f1' in
-  let f1 = t_implies (t_ineq symbols.le t1'' (mul eps t2'')) f1 in
-  let f1' = t_implies (t_ineq symbols.le t2'' (mul eps t1'')) f1' in
-  let f2 =
+  let f1_test =
     t_ineq symbols.le
-      (abs (add (to_real t1) (to_real t2)))
-      (add
-         (add (abs (sub (to_real t1) exact_t1)) t1'')
-         (add (abs (sub (to_real t2) exact_t2)) t2''))
+      (abs (to_real t1))
+      (abs (sub (add (to_real t1) exact_t1) exact_t1))
+  in
+  let f2_test =
+    t_ineq symbols.le
+      (abs (to_real t2))
+      (abs (sub (add (to_real t2) exact_t2) exact_t2))
+  in
+  let f2 =
+    t_by
+      (t_ineq symbols.le
+         (abs (add (to_real t1) (to_real t2)))
+         (add
+            (abs (sub (add (to_real t1) exact_t1) exact_t1))
+            (abs (sub (add (to_real t2) exact_t2) exact_t2))))
+      (t_and f1_test f2_test)
+  in
+  let f1_test' =
+    t_ineq symbols.le
+      (abs (sub (add (to_real t1) exact_t1) exact_t1))
+      (add (abs (sub (to_real t1) exact_t1)) t1')
+  in
+  let f2_test' =
+    t_ineq symbols.le
+      (abs (sub (add (to_real t2) exact_t2) exact_t2))
+      (add (abs (sub (to_real t2) exact_t2)) t2')
+  in
+  let f2 =
+    t_by
+      (t_ineq symbols.le
+         (abs (add (to_real t1) (to_real t2)))
+         (add
+            (add (abs (sub (to_real t1) exact_t1)) t1')
+            (add (abs (sub (to_real t2) exact_t2)) t2')))
+      (t_and f2 (t_and f1_test' f2_test'))
   in
   let f2 =
     t_and f2
       (t_and
-         (t_ineq symbols.le
-            (mul t1_factor' (mul eps t1''))
-            (mul t1_factor' t2''))
-         (t_ineq symbols.le
-            (mul t2_factor' (mul eps t2''))
-            (mul t2_factor' t1'')))
+         (t_ineq symbols.le (mul t1' t1_factor)
+            (mul (div t1_factor eps) (add t2' t2_factor)))
+         (t_ineq symbols.le (mul t2' t2_factor)
+            (mul (div t2_factor eps) (add t1' t1_factor))))
   in
-  let f2 = t_by goal f2 in
+  let f2 = t_by delta_ineq f2 in
   let f2 =
     t_implies
       (t_and
-         (t_ineq symbols.lt (mul eps t1'') t2'')
-         (t_ineq symbols.lt (mul eps t2'') t1''))
+         (t_ineq symbols.lt (mul eps (add t1' t1_cst)) (add t2' t2_cst))
+         (t_ineq symbols.lt (mul eps (add t2' t2_cst)) (add t1' t1_cst)))
       f2
   in
-  let f = t_by goal (t_and (t_and f1 f1') f2) in
+  let f = t_by delta_ineq (t_and (t_and f1 f1') f2) in
   let left = abs (sub (to_real r) (add exact_t1 exact_t2)) in
   let right =
     add
       (mul (add (add t1_factor t2_factor) eps) (add t1' t2'))
-      (add (add t1_cst t2_cst)
-         (mul eps (add (div t1_cst t1_factor) (div t2_cst t2_factor))))
+      (add
+         (mul (add (add t_one eps) t2_factor) t1_cst)
+         (mul (add (add t_one eps) t1_factor) t2_cst))
+  in
+  let f =
+    t_and f
+      (t_ineq symbols.le
+         (abs (sub (to_real r) (add exact_t1 exact_t2)))
+         (add
+            (abs (sub (to_real r) (add (to_real t1) (to_real t2))))
+            (add
+               (add (add (mul t2_factor t2') t2_cst) t1_cst)
+               (mul t1_factor t1'))))
   in
   let f = t_by (t_ineq symbols.le left right) f in
   let info =
@@ -363,8 +407,9 @@ let apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2 exact_t2
          ( add exact_t1 exact_t2,
            add (add t1_factor t2_factor) eps,
            add t1' t2',
-           add (add t1_cst t2_cst)
-             (mul eps (add (div t1_cst t1_factor) (div t2_cst t2_factor))) ))
+           add
+             (mul (add (add t_one eps) t2_factor) t1_cst)
+             (mul (add (add t_one eps) t1_factor) t2_cst) ))
   in
   (info, f)
 
@@ -527,7 +572,7 @@ let rec apply_theorems symbols info t =
     | None -> (info, t_true))
 
 let apply symbols info task =
-  let goal_tdecl, task' = Task.task_separate_goal task in
+  let goal_tdecl, task = Task.task_separate_goal task in
   let kind, pr, goal =
     match goal_tdecl.td_node with
     | Decl d -> (
@@ -536,21 +581,16 @@ let apply symbols info task =
       | _ -> assert false)
     | _ -> assert false
   in
-  match goal.t_node with
-  (* TODO: Also destruct conjunctions ? *)
-  | Tapp (ls, [ t1; t2 ]) when is_ineq_ls symbols ls ->
-    let floats = get_floats symbols t1 @ get_floats symbols t2 in
-    let _, fmla =
-      List.fold_left
-        (fun (info, fmla) t ->
-          let info, fmla' = apply_theorems symbols info t in
-          (info, t_and_simp fmla fmla'))
-        (info, t_true) floats
-    in
-    let goal = t_by_simp goal fmla in
-    add_prop_decl task' kind pr goal
-  (* TODO: Check for overflow goal *)
-  | _ -> task
+  let floats = get_floats symbols goal in
+  let _, fmla =
+    List.fold_left
+      (fun (info, fmla) t ->
+        let info, fmla' = apply_theorems symbols info t in
+        (info, t_and_simp fmla fmla'))
+      (info, t_true) floats
+  in
+  let goal = t_by_simp goal fmla in
+  add_prop_decl task kind pr goal
 
 let apply_transitivity symbols info = Trans.store (apply symbols info)
 
