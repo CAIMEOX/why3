@@ -150,6 +150,13 @@ let get_eps ieee_symbol =
           ~exp:(Some "-53")))
     ty_real
 
+let get_eta ieee_symbol =
+  t_const
+    (Constant.ConstReal
+       (Number.real_literal ~radix:16 ~neg:false ~int:"1" ~frac:"0"
+          ~exp:(Some "-1075")))
+    ty_real
+
 let get_to_real symbols ieee_symbol = symbols.to_real_double
 
 let get_info info t =
@@ -281,8 +288,6 @@ let t_by_simp t1 t2 =
 
 let t_so t1 t2 = t_and t1 (t_or_asym t2 t_true)
 
-(* TODO: Check when we have a None if it is well managed because t1' will not be
-   0 !!! *)
 (*
  * If we have :
  *  - |t1 - exact_t1| <= t1_factor * t1' + t1_cst
@@ -292,6 +297,8 @@ let t_so t1 t2 = t_and t1 (t_or_asym t2 t_true)
                                               + (1+eps+t2_factor)t1_cst
                                               + (1+eps+t1_factor)t2_cst
  *)
+(* TODO: Get read of absolute values inside absolute values when possible with
+   t1' and t2' *)
 let apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2 exact_t2
     t2_factor t2' t2_cst r =
   let eps = get_eps None in
@@ -314,13 +321,17 @@ let apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2 exact_t2
   let f1 =
     t_by
       (delta_le
-         (add (add (mul t1' t1_factor) t1_cst) (sub (mul eps t2') t1_cst)))
+         (add
+            (add (mul t1' t1_factor) t1_cst)
+            (sub (mul eps (add t2' t2_cst)) t1_cst)))
       f1
   in
   let f1' =
     t_by
       (delta_le
-         (add (add (mul t2' t2_factor) t2_cst) (sub (mul eps t1') t2_cst)))
+         (add
+            (add (mul t2' t2_factor) t2_cst)
+            (sub (mul eps (add t1' t1_cst)) t2_cst)))
       f1'
   in
   let f1 =
@@ -328,7 +339,7 @@ let apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2 exact_t2
       (delta_le
          (add
             (add (mul (mul eps (add t2' t2_cst)) t1_factor) t1_cst)
-            (sub (mul eps t2') t1_cst)))
+            (sub (mul eps (add t2' t2_cst)) t1_cst)))
       f1
   in
   let f1' =
@@ -336,7 +347,7 @@ let apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2 exact_t2
       (delta_le
          (add
             (add (mul (mul eps (add t1' t1_cst)) t2_factor) t2_cst)
-            (sub (mul eps t1') t2_cst)))
+            (sub (mul eps (add t1' t1_cst)) t2_cst)))
       f1'
   in
   let delta_ineq =
@@ -393,14 +404,21 @@ let apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2 exact_t2
             (add (abs (sub (to_real t2) exact_t2)) t2')))
       (t_and f2 (t_and f1_test' f2_test'))
   in
-  let f2 =
-    t_and f2
+  let a =
+    t_and
+      (t_ineq symbols.le t1' (div (add t2' t2_cst) eps))
+      (t_ineq symbols.le t2' (div (add t1' t1_cst) eps))
+  in
+  let tmp =
+    t_by
       (t_and
          (t_ineq symbols.le (mul t1' t1_factor)
-            (mul t1_factor (div (add t2' t2_factor) eps)))
+            (mul (div (add t2' t2_cst) eps) t1_factor))
          (t_ineq symbols.le (mul t2' t2_factor)
-            (mul t2_factor (div (add t1' t1_factor) eps))))
+            (mul (div (add t1' t1_cst) eps) t2_factor)))
+      a
   in
+  let f2 = t_and f2 tmp in
   let f2 = t_by delta_ineq f2 in
   let f2 =
     t_implies
@@ -441,11 +459,138 @@ let apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2 exact_t2
   in
   (info, f)
 
+(*
+ * If we have :
+ *  - |t1 - exact_t1| <= t1_factor * t1' + t1_cst
+ *  - |t2 - exact_t2| <= t2_factor * t2' + t2_cst
+ *  Then we get the following error on multiplication :
+ *  |fl(t1 * t2) - (exact_t1 * exact_t2)| <= (eps + t1_factor + t2_factor + t1_factor*t2_factor)(|t1'*t2'|)
+                                              + (1+eps)((t2_cst+t2_cst*t1_factor)|t1'| + (t1_cst+t1_cst*t2_factor)|t2'| + t1_cst*t2_cst) + eta
+ *)
+(* TODO: Get rid of absolute values inside absolute values when possible with
+   t1' and t2' *)
+let apply_multiplication_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2
+    exact_t2 t2_factor t2' t2_cst r =
+  let eps = get_eps None in
+  let eta = get_eta None in
+  let to_real = get_to_real symbols None in
+  let to_real t = fs_app to_real [ t ] ty_real in
+  let abs t = t_app symbols.abs [ t ] (Some ty_real) in
+  let add, sub, mul, div =
+    (add symbols, sub symbols, mul symbols, div symbols)
+  in
+  let t_ineq ls t1 t2 = ps_app ls [ t1; t2 ] in
+  let rel_err =
+    add (add (add t1_factor t2_factor) (mul t1_factor t2_factor)) eps
+  in
+  let cst_err =
+    add
+      (mul (add t_one eps)
+         (add
+            (add
+               (mul (add t2_cst (mul t2_cst t1_factor)) t1')
+               (mul (add t1_cst (mul t1_cst t2_factor)) t2'))
+            (mul t1_cst t2_cst)))
+      eta
+  in
+  let final_bound = add (mul rel_err (abs (mul t1' t2'))) cst_err in
+  let upper_bound =
+    t_ineq symbols.le
+      (mul (to_real t1) (to_real t2))
+      (mul (add (add exact_t1 (mul t1_factor t1')) t1_cst) (to_real t2))
+  in
+  let upper_bound =
+    t_by
+      (t_ineq symbols.le
+         (mul (to_real t1) (to_real t2))
+         (add
+            (add
+               (mul exact_t1 (to_real t2))
+               (mul (mul t1_factor t1') (to_real t2)))
+            (mul t1_cst (to_real t2))))
+      upper_bound
+  in
+  let lower_bound =
+    t_ineq symbols.ge
+      (mul (to_real t1) (to_real t2))
+      (mul (sub (sub exact_t1 (mul t1_factor t1')) t1_cst) (to_real t2))
+  in
+  let lower_bound =
+    t_by
+      (t_ineq symbols.ge
+         (sub
+            (sub
+               (mul exact_t1 (to_real t2))
+               (mul (mul t1_factor t1') (to_real t2)))
+            (mul t1_cst (to_real t2)))
+         (mul (to_real t1) (to_real t2)))
+      lower_bound
+  in
+  let f1 =
+    t_by
+      (t_ineq symbols.le
+         (abs (sub (to_real r) (mul exact_t1 exact_t2)))
+         final_bound)
+      (t_and lower_bound upper_bound)
+  in
+  let f1 = t_implies (t_ineq symbols.ge (to_real t2) t_zero) f1 in
+  let lower_bound =
+    t_ineq symbols.ge
+      (mul (to_real t1) (to_real t2))
+      (mul (sub (sub exact_t1 (mul t1_factor t1')) t1_cst) (to_real t2))
+  in
+  let lower_bound =
+    t_ineq symbols.ge
+      (mul (to_real t1) (to_real t2))
+      (add
+         (add
+            (mul exact_t1 (to_real t2))
+            (mul (mul t1_factor t1') (to_real t2)))
+         (mul t1_cst (to_real t2)))
+  in
+  let upper_bound =
+    t_ineq symbols.le
+      (mul (to_real t1) (to_real t2))
+      (mul (add (add exact_t1 (mul t1_factor t1')) t1_cst) (to_real t2))
+  in
+  let upper_bound =
+    t_by
+      (t_ineq symbols.ge
+         (sub
+            (sub
+               (mul exact_t1 (to_real t2))
+               (mul (mul t1_factor t1') (to_real t2)))
+            (mul t1_cst (to_real t2)))
+         (mul (to_real t1) (to_real t2)))
+      upper_bound
+  in
+  let f2 =
+    t_by
+      (t_ineq symbols.le
+         (abs (sub (to_real r) (mul exact_t1 exact_t2)))
+         final_bound)
+      (t_and lower_bound upper_bound)
+  in
+  let f2 = t_implies (t_ineq symbols.lt (to_real t2) t_zero) f2 in
+  let f =
+    t_by
+      (t_ineq symbols.le
+         (abs (sub (to_real r) (mul exact_t1 exact_t2)))
+         final_bound)
+      (t_and f1 f2)
+  in
+  let info =
+    add_round_error info r
+      (AbsRelative (mul exact_t1 exact_t2, rel_err, abs (mul t1' t2'), cst_err))
+  in
+  (info, f)
+
 (* t3 is a result of FP arithmetic operation involving t1 and t2 *)
 (* Compute new inequalities on t3 based on what we know on t1 and t2 *)
 (* TODO: Support "|x| <= max(|y|,|z|)" ??? *)
 let use_ieee_thms symbols info ieee_symbol t1 t2 r =
   let eps = get_eps None in
+  let eta = get_eta None in
   let to_real = get_to_real symbols None in
   let to_real t = fs_app to_real [ t ] ty_real in
   let abs t = t_app symbols.abs [ t ] (Some ty_real) in
@@ -476,66 +621,113 @@ let use_ieee_thms symbols info ieee_symbol t1 t2 r =
               let fmla = t_and_simp fmla (t_ineq ls (abs (to_real r)) right) in
               (info, fmla)
             else
-              failwith "TODO : Unsupported symbol")
+              (info, fmla)) (* TODO : Support other symbols *)
           (info, fmla) t2_info.ineqs)
       (info, fmla) t1_info.ineqs
   in
+  let fmla = t_true in
   (* Combine ieee_post with potential round_errors *)
-  match t1_info.round_error with
-  (* TODO: Correct handling of Relative and Absolute error combination *)
-  (* TODO: Correct handling of Absolute and Absolute error combination *)
-  (* TODO: Correct handling of Absolute and None error combination *)
-  | Some (Absolute (exact_t1, t1')) -> failwith " TODO absolute "
-  (* ( *)
-  (*   match t2_info.round_error with *)
-  (*   | Some (Absolute (exact_t2, t2')) -> *)
-  (*     (* TODO *) *)
-  (*     apply_addition_thm symbols info t1 exact_t1 t_one t1' t2 exact_t2 t_one *)
-  (*       t2' r *)
-  (*   | Some (AbsRelative (exact_t2, t2_factor, t2', cst)) -> *)
-  (*     failwith "TODO" (* TODO *) *)
-  (*   | None -> *)
-  (*     (* TODO: This gives some shit result, correct *) *)
-  (*     apply_addition_thm symbols info t1 exact_t1 t_one t1' t2 (to_real t2) *)
-  (*       t_zero *)
-  (*       (abs (to_real t2)) *)
-  (*       r) *)
-  | Some (AbsRelative (exact_t1, t1_factor, t1', t1_cst)) -> (
-    match t2_info.round_error with
-    | Some (Absolute _) -> failwith "TODO absolute 2" (* TODO *)
-    | Some (AbsRelative (exact_t2, t2_factor, t2', t2_cst)) ->
-      (* OK *)
-      apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2
-        exact_t2 t2_factor t2' t2_cst r
-    | None ->
-      (* OK *)
-      apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2
-        (to_real t2) t_zero
-        (abs (to_real t2))
-        t_zero r)
-  | None -> (
-    match t2_info.round_error with
-    | Some (Absolute (exact_t2, t2')) -> failwith "TODO absolute 3"
-    (* TODO *)
-    | Some (AbsRelative (exact_t2, t2_factor, t2', cst)) ->
-      (* OK *)
-      apply_addition_thm symbols info t1 (to_real t1) t_zero
-        (abs (to_real t1))
-        t_zero t2 exact_t2 t2_factor t2' cst r
-    | None ->
-      (* OK *)
-      let left = abs (sub (to_real r) (add (to_real t1) (to_real t2))) in
-      let right = mul eps (abs (add (to_real t1) (to_real t2))) in
-      let info =
-        add_round_error info r
-          (AbsRelative
-             ( add (to_real t1) (to_real t2),
-               eps,
-               abs (add (to_real t1) (to_real t2)),
-               t_zero ))
-      in
-      let fmla = t_and fmla (t_ineq symbols.le left right) in
-      (info, fmla))
+  if ls_equal ieee_symbol symbols.add_post_double then
+    match t1_info.round_error with
+    (* TODO: Handle Absolute errors *)
+    | Some (Absolute (exact_t1, t1')) -> failwith " TODO absolute "
+    | Some (AbsRelative (exact_t1, t1_factor, t1', t1_cst)) -> (
+      match t2_info.round_error with
+      | Some (Absolute _) -> failwith "TODO absolute 2" (* TODO *)
+      | Some (AbsRelative (exact_t2, t2_factor, t2', t2_cst)) ->
+        (* OK *)
+        let info, fmla' =
+          apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2
+            exact_t2 t2_factor t2' t2_cst r
+        in
+        (info, t_and fmla fmla')
+      | None ->
+        (* OK *)
+        let info, fmla' =
+          apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2
+            (to_real t2) t_zero
+            (abs (to_real t2))
+            t_zero r
+        in
+        (info, t_and fmla fmla'))
+    | None -> (
+      match t2_info.round_error with
+      | Some (Absolute (exact_t2, t2')) -> failwith "TODO absolute 3"
+      (* TODO *)
+      | Some (AbsRelative (exact_t2, t2_factor, t2', cst)) ->
+        (* OK *)
+        let info, fmla' =
+          apply_addition_thm symbols info t1 (to_real t1) t_zero
+            (abs (to_real t1))
+            t_zero t2 exact_t2 t2_factor t2' cst r
+        in
+        (info, t_and fmla fmla')
+      | None ->
+        (* OK *)
+        let left = abs (sub (to_real r) (add (to_real t1) (to_real t2))) in
+        let right = mul eps (abs (add (to_real t1) (to_real t2))) in
+        let info =
+          add_round_error info r
+            (AbsRelative
+               ( add (to_real t1) (to_real t2),
+                 eps,
+                 abs (add (to_real t1) (to_real t2)),
+                 t_zero ))
+        in
+        let fmla = t_and fmla (t_ineq symbols.le left right) in
+        (info, fmla))
+  else if ls_equal ieee_symbol symbols.mul_post_double then
+    match t1_info.round_error with
+    (* TODO: Handle Absolute errors *)
+    | Some (Absolute (exact_t1, t1')) -> failwith " TODO absolute "
+    | Some (AbsRelative (exact_t1, t1_factor, t1', t1_cst)) -> (
+      match t2_info.round_error with
+      | Some (Absolute _) -> failwith "TODO absolute 2" (* TODO *)
+      | Some (AbsRelative (exact_t2, t2_factor, t2', t2_cst)) ->
+        (* OK *)
+        let info, fmla' =
+          apply_multiplication_thm symbols info t1 exact_t1 t1_factor t1' t1_cst
+            t2 exact_t2 t2_factor t2' t2_cst r
+        in
+        (info, t_and fmla fmla')
+      | None ->
+        (* OK *)
+        let info, fmla' =
+          apply_multiplication_thm symbols info t1 exact_t1 t1_factor t1' t1_cst
+            t2 (to_real t2) t_zero
+            (abs (to_real t2))
+            t_zero r
+        in
+        (info, t_and fmla fmla'))
+    | None -> (
+      match t2_info.round_error with
+      | Some (Absolute (exact_t2, t2')) -> failwith "TODO absolute 3"
+      (* TODO *)
+      | Some (AbsRelative (exact_t2, t2_factor, t2', cst)) ->
+        (* OK *)
+        let info, fmla' =
+          apply_multiplication_thm symbols info t1 (to_real t1) t_zero
+            (abs (to_real t1))
+            t_zero t2 exact_t2 t2_factor t2' cst r
+        in
+        (info, t_and fmla fmla')
+      | None ->
+        (* OK *)
+        let left = abs (sub (to_real r) (mul (to_real t1) (to_real t2))) in
+        let right = add (mul eps (abs (mul (to_real t1) (to_real t2)))) eta in
+        let info =
+          add_round_error info r
+            (AbsRelative
+               ( mul (to_real t1) (to_real t2),
+                 eps,
+                 abs (mul (to_real t1) (to_real t2)),
+                 eta ))
+        in
+        let fmla = t_and fmla (t_ineq symbols.le left right) in
+        (info, fmla))
+  else
+    (info, fmla)
+(* TODO: Support sub, div *)
 
 let is_ty_float symbols ty =
   match ty.ty_node with
