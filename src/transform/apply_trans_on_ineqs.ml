@@ -108,6 +108,11 @@ let div symbols t1 t2 =
   else
     fs_app symbols.div [ t1; t2 ] ty_real
 
+let abs symbols t =
+  match t.t_node with
+  | Tapp (ls, [ t ]) when ls_equal symbols.abs ls -> t
+  | _ -> fs_app symbols.abs [ t ] ty_real
+
 let is_op_ls symbols ls =
   ls_equal ls symbols.add || ls_equal ls symbols.sub || ls_equal ls symbols.mul
   || ls_equal ls symbols.div
@@ -288,6 +293,11 @@ let t_by_simp t1 t2 =
 
 let t_so t1 t2 = t_and t1 (t_or_asym t2 t_true)
 
+let t_so_simp t1 t2 =
+  match t1.t_node with
+  | Ttrue -> t2
+  | _ -> t_so t1 t2
+
 (*
  * If we have :
  *  - |t1 - exact_t1| <= t1_factor * t1' + t1_cst
@@ -297,165 +307,98 @@ let t_so t1 t2 = t_and t1 (t_or_asym t2 t_true)
                                               + (1+eps+t2_factor)t1_cst
                                               + (1+eps+t1_factor)t2_cst
  *)
-(* TODO: Get read of absolute values inside absolute values when possible with
-   t1' and t2' *)
 let apply_addition_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2 exact_t2
     t2_factor t2' t2_cst r =
   let eps = get_eps None in
   let to_real = get_to_real symbols None in
   let to_real t = fs_app to_real [ t ] ty_real in
-  let abs t = t_app symbols.abs [ t ] (Some ty_real) in
-  let add, sub, mul, div =
-    (add symbols, sub symbols, mul symbols, div symbols)
+  let abs = abs symbols in
+  let ( +. ) x y = add symbols x y in
+  let ( -. ) x y = sub symbols x y in
+  let ( *. ) x y = mul symbols x y in
+  let ( /. ) x y = div symbols x y in
+  let ( <=. ) x y = ps_app symbols.le [ x; y ] in
+  let ( <. ) x y = ps_app symbols.lt [ x; y ] in
+  let delta = abs (to_real r -. (to_real t1 +. to_real t2)) in
+  let delta_upper_bound =
+    ((eps +. t1_factor) *. t2')
+    +. ((eps +. t2_factor) *. t1')
+    +. (((t2_factor +. eps) *. t1_cst) +. ((t1_factor +. eps) *. t2_cst))
   in
-  let t_ineq ls t1 t2 = ps_app ls [ t1; t2 ] in
-  let delta_le =
-    t_ineq symbols.le (abs (sub (to_real r) (add (to_real t1) (to_real t2))))
+  let mk_f t1 exact_t1 t1' t1_factor t1_cst t2 exact_t2 t2' t2_factor t2_cst =
+    let f = delta <=. abs (to_real t1 +. (exact_t1 -. exact_t1)) in
+    let f = t_by (delta <=. abs (to_real t1 -. exact_t1) +. t1') f in
+    let f = t_by (delta <=. (t1' *. t1_factor) +. t1_cst +. t1') f in
+    let f =
+      t_by
+        (delta
+        <=. (t1' *. t1_factor) +. t1_cst +. ((eps *. (t2' +. t2_cst)) -. t1_cst)
+        )
+        f
+    in
+    let f =
+      t_by
+        (delta
+        <=. (eps *. (t2' +. t2_cst) *. t1_factor)
+            +. t1_cst
+            +. (eps *. (t2' +. t2_cst))
+            -. t1_cst)
+        f
+    in
+    let f = t_by (delta <=. delta_upper_bound) f in
+    let f = t_implies (t1' +. t1_cst <=. eps *. (t2' +. t2_cst)) f in
+    t_so (abs exact_t1 <=. t1') f
   in
-  let f1 = delta_le (abs (add (sub (to_real t1) exact_t1) exact_t1)) in
-  let f1' = delta_le (abs (add (sub (to_real t2) exact_t2) exact_t2)) in
-  let f1 = t_by (delta_le (add (abs (sub (to_real t1) exact_t1)) t1')) f1 in
-  let f1' = t_by (delta_le (add (abs (sub (to_real t2) exact_t2)) t2')) f1' in
-  let f1 = t_by (delta_le (add (add (mul t1' t1_factor) t1_cst) t1')) f1 in
-  let f1' = t_by (delta_le (add (add (mul t2' t2_factor) t2_cst) t2')) f1' in
   let f1 =
-    t_by
-      (delta_le
-         (add
-            (add (mul t1' t1_factor) t1_cst)
-            (sub (mul eps (add t2' t2_cst)) t1_cst)))
-      f1
+    mk_f t1 exact_t1 t1' t1_factor t1_cst t2 exact_t2 t2' t2_factor t2_cst
   in
   let f1' =
-    t_by
-      (delta_le
-         (add
-            (add (mul t2' t2_factor) t2_cst)
-            (sub (mul eps (add t1' t1_cst)) t2_cst)))
-      f1'
+    mk_f t2 exact_t2 t2' t2_factor t2_cst t1 exact_t1 t1' t1_factor t1_cst
   in
-  let f1 =
-    t_by
-      (delta_le
-         (add
-            (add (mul (mul eps (add t2' t2_cst)) t1_factor) t1_cst)
-            (sub (mul eps (add t2' t2_cst)) t1_cst)))
-      f1
-  in
-  let f1' =
-    t_by
-      (delta_le
-         (add
-            (add (mul (mul eps (add t1' t1_cst)) t2_factor) t2_cst)
-            (sub (mul eps (add t1' t1_cst)) t2_cst)))
-      f1'
-  in
-  let delta_ineq =
-    delta_le
-      (add
-         (add (mul (add eps t1_factor) t2') (mul (add eps t2_factor) t1'))
-         (add (mul (add t2_factor eps) t1_cst) (mul (add t1_factor eps) t2_cst)))
-  in
-  let f1 = t_by delta_ineq f1 in
-  let f1' = t_by delta_ineq f1' in
-  let f1 =
-    t_implies (t_ineq symbols.le (add t1' t1_cst) (mul eps (add t2' t2_cst))) f1
-  in
-  let f1' =
-    t_implies
-      (t_ineq symbols.le (add t2' t2_cst) (mul eps (add t1' t1_cst)))
-      f1'
-  in
-  let f1_test =
-    t_ineq symbols.le
-      (abs (to_real t1))
-      (abs (sub (add (to_real t1) exact_t1) exact_t1))
-  in
-  let f2_test =
-    t_ineq symbols.le
-      (abs (to_real t2))
-      (abs (sub (add (to_real t2) exact_t2) exact_t2))
+  let f2 =
+    abs (to_real t1 +. to_real t2)
+    <=. abs (to_real t1 +. (exact_t1 -. exact_t1))
+        +. abs (to_real t2 +. (exact_t2 -. exact_t2))
   in
   let f2 =
     t_by
-      (t_ineq symbols.le
-         (abs (add (to_real t1) (to_real t2)))
-         (add
-            (abs (sub (add (to_real t1) exact_t1) exact_t1))
-            (abs (sub (add (to_real t2) exact_t2) exact_t2))))
-      (t_and f1_test f2_test)
-  in
-  let f1_test' =
-    t_ineq symbols.le
-      (abs (sub (add (to_real t1) exact_t1) exact_t1))
-      (add (abs (sub (to_real t1) exact_t1)) t1')
-  in
-  let f2_test' =
-    t_ineq symbols.le
-      (abs (sub (add (to_real t2) exact_t2) exact_t2))
-      (add (abs (sub (to_real t2) exact_t2)) t2')
-  in
-  let f2 =
-    t_by
-      (t_ineq symbols.le
-         (abs (add (to_real t1) (to_real t2)))
-         (add
-            (add (abs (sub (to_real t1) exact_t1)) t1')
-            (add (abs (sub (to_real t2) exact_t2)) t2')))
-      (t_and f2 (t_and f1_test' f2_test'))
-  in
-  let a =
-    t_and
-      (t_ineq symbols.le t1' (div (add t2' t2_cst) eps))
-      (t_ineq symbols.le t2' (div (add t1' t1_cst) eps))
-  in
-  let tmp =
-    t_by
-      (t_and
-         (t_ineq symbols.le (mul t1' t1_factor)
-            (mul (div (add t2' t2_cst) eps) t1_factor))
-         (t_ineq symbols.le (mul t2' t2_factor)
-            (mul (div (add t1' t1_cst) eps) t2_factor)))
-      a
-  in
-  let f2 = t_and f2 tmp in
-  let f2 = t_by delta_ineq f2 in
-  let f2 =
-    t_implies
-      (t_and
-         (t_ineq symbols.lt (mul eps (add t1' t1_cst)) (add t2' t2_cst))
-         (t_ineq symbols.lt (mul eps (add t2' t2_cst)) (add t1' t1_cst)))
+      (abs (to_real t1 +. to_real t2)
+      <=. abs (to_real t1 -. exact_t1)
+          +. t1'
+          +. (abs (to_real t2 -. exact_t2) +. t2'))
       f2
   in
-  let f = t_by delta_ineq (t_and (t_and f1 f1') f2) in
-  let left = abs (sub (to_real r) (add exact_t1 exact_t2)) in
-  let right =
-    add
-      (mul (add (add t1_factor t2_factor) eps) (add t1' t2'))
-      (add
-         (mul (add (add t_one eps) t2_factor) t1_cst)
-         (mul (add (add t_one eps) t1_factor) t2_cst))
+  let f2 =
+    t_and f2
+      (t_and
+         (t1' *. t1_factor <=. (t2' +. t2_cst) /. eps *. t1_factor)
+         (t2' *. t2_factor <=. (t1' +. t1_cst) /. eps *. t2_factor))
   in
+  let f2 = t_by (delta <=. delta_upper_bound) f2 in
+  let f2 =
+    t_implies
+      (t_and
+         (eps *. (t1' +. t1_cst) <. t2' +. t2_cst)
+         (eps *. (t2' +. t2_cst) <. t1' +. t1_cst))
+      f2
+  in
+  let f = t_by (delta <=. delta_upper_bound) (t_and (t_and f1 f1') f2) in
+  let rel_err = t1_factor +. t2_factor +. eps in
+  let cst_err =
+    ((t_one +. eps +. t2_factor) *. t1_cst)
+    +. ((t_one +. eps +. t1_factor) *. t2_cst)
+  in
+  let total_err = (rel_err *. (t1' +. t2')) +. cst_err in
   let f =
     t_and f
-      (t_ineq symbols.le
-         (abs (sub (to_real r) (add exact_t1 exact_t2)))
-         (add
-            (abs (sub (to_real r) (add (to_real t1) (to_real t2))))
-            (add
-               (add (add (mul t2_factor t2') t2_cst) t1_cst)
-               (mul t1_factor t1'))))
+      (abs (to_real r -. (exact_t1 +. exact_t2))
+      <=. delta
+          +. ((t1_factor *. t1') +. t1_cst +. ((t2_factor *. t2') +. t2_cst)))
   in
-  let f = t_by (t_ineq symbols.le left right) f in
+  let f = t_by (abs (to_real r -. (exact_t1 +. exact_t2)) <=. total_err) f in
   let info =
     add_round_error info r
-      (AbsRelative
-         ( add exact_t1 exact_t2,
-           add (add t1_factor t2_factor) eps,
-           add t1' t2',
-           add
-             (mul (add (add t_one eps) t2_factor) t1_cst)
-             (mul (add (add t_one eps) t1_factor) t2_cst) ))
+      (AbsRelative (exact_t1 +. exact_t2, rel_err, t1' +. t2', cst_err))
   in
   (info, f)
 
@@ -475,7 +418,7 @@ let apply_multiplication_thm symbols info t1 exact_t1 t1_factor t1' t1_cst t2
   let eta = get_eta None in
   let to_real = get_to_real symbols None in
   let to_real t = fs_app to_real [ t ] ty_real in
-  let abs t = t_app symbols.abs [ t ] (Some ty_real) in
+  let abs = abs symbols in
   let add, sub, mul, div =
     (add symbols, sub symbols, mul symbols, div symbols)
   in
@@ -760,11 +703,11 @@ let rec apply_theorems symbols info t =
   let t_info = get_info info t in
   match t_info.ieee_post with
   | Some (ieee_post, t1, t2) ->
-    let info, fmla = apply info t1 in
-    let info, fmla' = apply info t2 in
-    let fmla = t_and_simp fmla fmla' in
-    let info, fmla' = use_ieee_thms symbols info ieee_post t1 t2 t in
-    (info, t_by_simp fmla' fmla)
+    let info, f1 = apply info t1 in
+    let info, f2 = apply info t2 in
+    let f = t_and_simp f1 f2 in
+    let info, fmla = use_ieee_thms symbols info ieee_post t1 t2 t in
+    (info, t_so_simp f fmla)
   | None -> (
     match t_info.round_error with
     | Some (AbsRelative (exact_t, t_factor, t', cst)) ->
@@ -882,9 +825,11 @@ let apply_trans_on_ineqs env =
   in
 
   let collect_info = collect_info symbols in
+  (* Trans.compose *)
   Trans.bind
     (Trans.fold_decl collect_info Mterm.empty)
     (apply_transitivity symbols)
+(* (Trans.lookup_transform "split_vc" env) *)
 
 let () =
   Trans.register_env_transform "apply_trans_on_ineqs" apply_trans_on_ineqs
