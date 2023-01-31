@@ -66,48 +66,48 @@ type info = {
   ieee_post : (lsymbol * term * term) option;
 }
 
-let t_zero =
+let zero =
   t_const
     (Constant.ConstReal
        (Number.real_literal ~radix:10 ~neg:false ~int:"0" ~frac:"0" ~exp:None))
     ty_real
 
-let t_one =
+let one =
   t_const
     (Constant.ConstReal
        (Number.real_literal ~radix:10 ~neg:false ~int:"1" ~frac:"0" ~exp:None))
     ty_real
 
 let add symbols t1 t2 =
-  if t_equal t1 t_zero then
+  if t_equal t1 zero then
     t2
-  else if t_equal t2 t_zero then
+  else if t_equal t2 zero then
     t1
   else
     fs_app symbols.add [ t1; t2 ] ty_real
 
 let sub symbols t1 t2 =
-  if t_equal t1 t_zero then
+  if t_equal t1 zero then
     fs_app symbols.minus [ t2 ] ty_real
-  else if t_equal t2 t_zero then
+  else if t_equal t2 zero then
     t1
   else
     fs_app symbols.sub [ t1; t2 ] ty_real
 
 let mul symbols t1 t2 =
-  if t_equal t1 t_zero || t_equal t2 t_zero then
-    t_zero
-  else if t_equal t1 t_one then
+  if t_equal t1 zero || t_equal t2 zero then
+    zero
+  else if t_equal t1 one then
     t2
-  else if t_equal t2 t_one then
+  else if t_equal t2 one then
     t1
   else
     fs_app symbols.mul [ t1; t2 ] ty_real
 
 let div symbols t1 t2 =
-  if t_equal t1 t_zero then
-    t_zero
-  else if t_equal t2 t_one then
+  if t_equal t1 zero then
+    zero
+  else if t_equal t2 one then
     t1
   else
     fs_app symbols.div [ t1; t2 ] ty_real
@@ -217,12 +217,12 @@ let add_ieee_post info ls t t1 t2 =
 let parse_round_error symbols info t1 t1' t2 =
   let rec parse t =
     if t_equal t t1' then
-      (AbsRelative (t, t_one, t1', t_zero), true)
+      (AbsRelative (t, one, t1', zero), true)
     else
       match t.t_node with
       | Tapp (_ls, [ t' ]) when ls_equal _ls symbols.abs ->
         if t_equal t' t1' then
-          (AbsRelative (t1', t_one, t, t_zero), true)
+          (AbsRelative (t1', one, t, zero), true)
         else
           (* TODO: Look inside abs ? *)
           (Absolute (t1', t2), false)
@@ -279,7 +279,7 @@ let rec add_fmlas symbols f info =
       parse_round_error symbols info t1 t1' t2
     | _ -> info (* Look for rel_round_error *))
   | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls symbols.rel_round_error ->
-    add_round_error info t1 (AbsRelative (t2, t4, t3, t_zero))
+    add_round_error info t1 (AbsRelative (t2, t4, t3, zero))
   (* Look for safe_64_*_post *)
   | Tapp (ls, [ t1; t2; t3 ]) when is_ieee_double symbols ls ->
     add_ieee_post info ls t3 t1 t2
@@ -399,8 +399,8 @@ let combine_errors_with_addition symbols info t1 exact_t1 t1_factor t1' t1_cst
   let f = t_by (delta <=. delta_upper_bound) (t_and (t_and f1 f1') f2) in
   let rel_err = t1_factor +. t2_factor +. eps in
   let cst_err =
-    ((t_one +. eps +. t2_factor) *. t1_cst)
-    +. ((t_one +. eps +. t1_factor) *. t2_cst)
+    ((one +. eps +. t2_factor) *. t1_cst)
+    +. ((one +. eps +. t1_factor) *. t2_cst)
   in
   let total_err = (rel_err *. (t1' +. t2')) +. cst_err in
   let f =
@@ -430,113 +430,66 @@ let combine_errors_with_multiplication symbols info t1 exact_t1 t1_factor t1'
   let eta = get_eta None in
   let to_real = get_to_real symbols None in
   let to_real t = fs_app to_real [ t ] ty_real in
-  let abs = abs symbols in
-  let add, sub, mul, div =
-    (add symbols, sub symbols, mul symbols, div symbols)
+  let abs, ( +. ), ( -. ), ( *. ), ( /. ), ( <=. ), ( <. ) =
+    ( abs symbols,
+      ( +. ) symbols,
+      ( -. ) symbols,
+      ( *. ) symbols,
+      ( /. ) symbols,
+      ( <=. ) symbols,
+      ( <. ) symbols )
   in
-  let t_ineq ls t1 t2 = ps_app ls [ t1; t2 ] in
-  let rel_err =
-    add (add (add t1_factor t2_factor) (mul t1_factor t2_factor)) eps
-  in
+  let rel_err = t1_factor +. t2_factor +. (t1_factor *. t2_factor) +. eps in
   let cst_err =
-    add
-      (mul (add t_one eps)
-         (add
-            (add
-               (mul (add t2_cst (mul t2_cst t1_factor)) t1')
-               (mul (add t1_cst (mul t1_cst t2_factor)) t2'))
-            (mul t1_cst t2_cst)))
-      eta
+    (one +. eps)
+    *. (((t2_cst +. (t2_cst *. t1_factor)) *. t1')
+       +. ((t1_cst +. (t1_cst *. t2_factor)) *. t2')
+       +. (t1_cst +. t2_cst))
+    +. eta
   in
-  let final_bound = add (mul rel_err (abs (mul t1' t2'))) cst_err in
+  let final_bound = (rel_err *. abs (t1' *. t2')) +. cst_err in
   let upper_bound =
-    t_ineq symbols.le
-      (mul (to_real t1) (to_real t2))
-      (mul (add (add exact_t1 (mul t1_factor t1')) t1_cst) (to_real t2))
+    to_real t1 *. to_real t2
+    <=. (exact_t1 +. (t1_factor *. t1') +. t1_cst) *. to_real t2
   in
   let upper_bound =
     t_by
-      (t_ineq symbols.le
-         (mul (to_real t1) (to_real t2))
-         (add
-            (add
-               (mul exact_t1 (to_real t2))
-               (mul (mul t1_factor t1') (to_real t2)))
-            (mul t1_cst (to_real t2))))
+      (to_real t1 *. to_real t2
+      <=. (exact_t1 *. to_real t2)
+          +. (t1_factor *. t1' *. to_real t2)
+          +. (t1_cst *. to_real t2))
       upper_bound
   in
   let lower_bound =
-    t_ineq symbols.ge
-      (mul (to_real t1) (to_real t2))
-      (mul (sub (sub exact_t1 (mul t1_factor t1')) t1_cst) (to_real t2))
+    (exact_t1 -. (t1_factor *. t1') -. t1_cst) *. to_real t2
+    <=. to_real t1 *. to_real t2
   in
+
   let lower_bound =
     t_by
-      (t_ineq symbols.ge
-         (sub
-            (sub
-               (mul exact_t1 (to_real t2))
-               (mul (mul t1_factor t1') (to_real t2)))
-            (mul t1_cst (to_real t2)))
-         (mul (to_real t1) (to_real t2)))
+      (to_real t1 *. to_real t2
+      <=. (exact_t1 *. to_real t2)
+          -. (t1_factor *. t1' *. to_real t2)
+          -. (t1_cst *. to_real t2))
       lower_bound
   in
   let f1 =
     t_by
-      (t_ineq symbols.le
-         (abs (sub (to_real r) (mul exact_t1 exact_t2)))
-         final_bound)
+      (abs (to_real r -. (exact_t1 *. exact_t2)) <=. final_bound)
       (t_and lower_bound upper_bound)
   in
-  let f1 = t_implies (t_ineq symbols.ge (to_real t2) t_zero) f1 in
-  let _lower_bound =
-    t_ineq symbols.ge
-      (mul (to_real t1) (to_real t2))
-      (mul (sub (sub exact_t1 (mul t1_factor t1')) t1_cst) (to_real t2))
-  in
-  let lower_bound =
-    t_ineq symbols.ge
-      (mul (to_real t1) (to_real t2))
-      (add
-         (add
-            (mul exact_t1 (to_real t2))
-            (mul (mul t1_factor t1') (to_real t2)))
-         (mul t1_cst (to_real t2)))
-  in
-  let upper_bound =
-    t_ineq symbols.le
-      (mul (to_real t1) (to_real t2))
-      (mul (add (add exact_t1 (mul t1_factor t1')) t1_cst) (to_real t2))
-  in
-  let upper_bound =
-    t_by
-      (t_ineq symbols.ge
-         (sub
-            (sub
-               (mul exact_t1 (to_real t2))
-               (mul (mul t1_factor t1') (to_real t2)))
-            (mul t1_cst (to_real t2)))
-         (mul (to_real t1) (to_real t2)))
-      upper_bound
-  in
-  let f2 =
-    t_by
-      (t_ineq symbols.le
-         (abs (sub (to_real r) (mul exact_t1 exact_t2)))
-         final_bound)
-      (t_and lower_bound upper_bound)
-  in
-  let f2 = t_implies (t_ineq symbols.lt (to_real t2) t_zero) f2 in
+  let f1 = t_implies (to_real t2 <=. zero) f1 in
+  (* TODO: Build f1 and f2 with a function that just switch the terms for the
+     different cases *)
+  let f2 = t_true in
   let f =
     t_by
-      (t_ineq symbols.le
-         (abs (sub (to_real r) (mul exact_t1 exact_t2)))
-         final_bound)
+      (abs (to_real r -. (exact_t1 *. exact_t2)) <=. final_bound)
       (t_and f1 f2)
   in
   let info =
     add_round_error info r
-      (AbsRelative (mul exact_t1 exact_t2, rel_err, abs (mul t1' t2'), cst_err))
+      (AbsRelative (exact_t1 *. exact_t2, rel_err, abs (t1' *. t2'), cst_err))
   in
   (info, f)
 
@@ -638,26 +591,23 @@ let apply_addition_thms prove_overflow symbols info x y r =
           exact_y y_factor y' y_cst r
       | None ->
         combine_errors_with_addition symbols info x exact_x x_factor x' x_cst y
-          (to_real y) t_zero
+          (to_real y) zero
           (abs (to_real y))
-          t_zero r)
+          zero r)
     | None -> (
       match y_info.round_error with
       | Some (Absolute (exact_y, y')) -> failwith "TODO absolute 3"
       | Some (AbsRelative (exact_y, y_factor, y', cst)) ->
-        combine_errors_with_addition symbols info x (to_real x) t_zero
+        combine_errors_with_addition symbols info x (to_real x) zero
           (abs (to_real x))
-          t_zero y exact_y y_factor y' cst r
+          zero y exact_y y_factor y' cst r
       | None ->
         let left = abs (to_real r -. (to_real x +. to_real y)) in
         let right = eps *. abs (to_real x +. to_real y) in
         let info =
           add_round_error info r
             (AbsRelative
-               ( to_real x +. to_real y,
-                 eps,
-                 abs (to_real x +. to_real y),
-                 t_zero ))
+               (to_real x +. to_real y, eps, abs (to_real x +. to_real y), zero))
         in
         (info, left <=. right))
 
