@@ -118,6 +118,7 @@ theory real.Square
 end
 
 import "smtlib-strings.gen"
+import "smtlib-sequences.gen"
 
 theory string.RegExpr
 

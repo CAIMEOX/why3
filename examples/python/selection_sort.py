@@ -12,4 +12,5 @@ def tri_selection(L):
                 im = j
         if im != i:
             L[im], L[i] = L[i], L[im]
+        #@ assert forall k. forall l. 0<=k<=l<i -> L[k]<=L[l]
         #@ assert forall k. 0<=k<i -> L[k]<=L[i]

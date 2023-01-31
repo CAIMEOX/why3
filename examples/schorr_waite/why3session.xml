@@ -9,26 +9,26 @@
 <path name=".."/><path name="schorr_waite.mlw"/>
 <theory name="SchorrWaite" proved="true">
  <goal name="tl_stackNodes&#39;vc" expl="VC for tl_stackNodes" proved="true">
- <proof prover="3"><result status="valid" time="0.01" steps="19"/></proof>
+ <proof prover="3"><result status="valid" time="0.01" steps="24"/></proof>
  </goal>
  <goal name="cons_not_in&#39;vc" expl="VC for cons_not_in" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="cons_not_in&#39;vc.0" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.01" steps="6"/></proof>
+  <proof prover="3"><result status="valid" time="0.01" steps="5"/></proof>
   </goal>
   <goal name="cons_not_in&#39;vc.1" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.01" steps="15"/></proof>
+  <proof prover="3"><result status="valid" time="0.01" steps="13"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="tl_cons&#39;vc" expl="VC for tl_cons" proved="true">
- <proof prover="3"><result status="valid" time="0.01" steps="42"/></proof>
+ <proof prover="3"><result status="valid" time="0.01" steps="32"/></proof>
  </goal>
  <goal name="trans_path&#39;vc" expl="VC for trans_path" proved="true">
  <proof prover="3"><result status="valid" time="0.09" steps="634"/></proof>
  </goal>
  <goal name="path_edge" proved="true">
- <proof prover="0"><result status="valid" time="0.16"/></proof>
+ <proof prover="0"><result status="valid" time="0.03"/></proof>
  </goal>
  <goal name="path_edge_cons" proved="true">
  <proof prover="3"><result status="valid" time="0.01" steps="34"/></proof>
@@ -132,7 +132,7 @@
   <proof prover="3"><result status="valid" time="0.01" steps="22"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.32" expl="loop variant decrease" proved="true">
-  <proof prover="3"><result status="valid" time="0.12" steps="416"/></proof>
+  <proof prover="3"><result status="valid" time="0.12" steps="140"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.33" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.01" steps="33"/></proof>
@@ -141,13 +141,13 @@
   <proof prover="3"><result status="valid" time="0.03" steps="22"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.35" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.22" steps="645"/></proof>
+  <proof prover="3"><result status="valid" time="0.05" steps="196"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.36" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.10" steps="481"/></proof>
+  <proof prover="3"><result status="valid" time="0.10" steps="510"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.37" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="1.10" steps="2688"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="181"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.38" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="22"/></proof>
@@ -156,81 +156,81 @@
   <proof prover="3"><result status="valid" time="0.02" steps="22"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.40" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.92" steps="1608"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="133"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.41" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.65"/></proof>
+  <proof prover="0"><result status="valid" time="0.12"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.42" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="19"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.43" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.74"/></proof>
+  <proof prover="0"><result status="valid" time="2.34"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.44" expl="loop invariant preservation" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="schorr_waite&#39;vc.44.0" expl="loop invariant preservation" proved="true">
    <transf name="split_goal_right" proved="true" >
     <goal name="schorr_waite&#39;vc.44.0.0" expl="loop invariant preservation" proved="true">
-    <proof prover="0"><result status="valid" time="3.20"/></proof>
-    <proof prover="3"><result status="valid" time="0.53" steps="907"/></proof>
+    <proof prover="0"><result status="valid" time="1.94"/></proof>
+    <proof prover="3"><result status="valid" time="0.18" steps="618"/></proof>
     </goal>
     <goal name="schorr_waite&#39;vc.44.0.1" expl="loop invariant preservation" proved="true">
-    <proof prover="3"><result status="valid" time="1.33" steps="2666"/></proof>
+    <proof prover="3"><result status="valid" time="0.21" steps="712"/></proof>
     </goal>
    </transf>
    </goal>
    <goal name="schorr_waite&#39;vc.44.1" expl="loop invariant preservation" proved="true">
    <transf name="split_goal_right" proved="true" >
     <goal name="schorr_waite&#39;vc.44.1.0" expl="loop invariant preservation" proved="true">
-    <proof prover="3"><result status="valid" time="0.43" steps="587"/></proof>
+    <proof prover="3"><result status="valid" time="0.16" steps="621"/></proof>
     </goal>
     <goal name="schorr_waite&#39;vc.44.1.1" expl="loop invariant preservation" proved="true">
-    <proof prover="0"><result status="valid" time="3.64"/></proof>
-    <proof prover="3"><result status="valid" time="1.34" steps="2676"/></proof>
+    <proof prover="0"><result status="valid" time="2.06"/></proof>
+    <proof prover="3"><result status="valid" time="0.17" steps="572"/></proof>
     </goal>
    </transf>
    </goal>
   </transf>
   </goal>
   <goal name="schorr_waite&#39;vc.45" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="1.80" steps="3147"/></proof>
+  <proof prover="3"><result status="valid" time="0.09" steps="131"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.46" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.65"/></proof>
+  <proof prover="0"><result status="valid" time="0.22"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.47" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.12" steps="315"/></proof>
+  <proof prover="3"><result status="valid" time="0.12" steps="174"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.48" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.33" steps="80752"/></proof>
+  <proof prover="2"><result status="valid" time="0.27" steps="83726"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.49" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="1.30" steps="2364"/></proof>
+  <proof prover="3"><result status="valid" time="0.22" steps="864"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.50" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.61" steps="1514"/></proof>
+  <proof prover="3"><result status="valid" time="0.58" steps="1562"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.51" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="3.79" steps="4068"/></proof>
+  <proof prover="3"><result status="valid" time="0.39" steps="909"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.52" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.11" steps="59"/></proof>
+  <proof prover="3"><result status="valid" time="0.11" steps="61"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.53" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="23"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.54" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.06" steps="350"/></proof>
+  <proof prover="3"><result status="valid" time="0.06" steps="80"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.55" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.01" steps="24"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.56" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="1.05"/></proof>
+  <proof prover="0"><result status="valid" time="0.75"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.57" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="2.60" steps="4829"/></proof>
+  <proof prover="3"><result status="valid" time="3.90" steps="11021"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.58" expl="precondition" proved="true">
   <proof prover="3"><result status="valid" time="0.01" steps="18"/></proof>
@@ -275,13 +275,13 @@
   <proof prover="3"><result status="valid" time="0.02" steps="21"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.72" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.07" steps="212"/></proof>
+  <proof prover="3"><result status="valid" time="0.07" steps="207"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.73" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.01" steps="18"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.74" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.05" steps="142"/></proof>
+  <proof prover="3"><result status="valid" time="0.05" steps="150"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.75" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="43"/></proof>
@@ -290,7 +290,7 @@
   <proof prover="3"><result status="valid" time="0.02" steps="24"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.77" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.06" steps="119"/></proof>
+  <proof prover="3"><result status="valid" time="0.06" steps="118"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.78" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.01" steps="21"/></proof>
@@ -299,13 +299,13 @@
   <proof prover="3"><result status="valid" time="0.01" steps="18"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.80" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="251"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="249"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.81" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="55"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.82" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="157"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="156"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.83" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="24"/></proof>
@@ -323,7 +323,7 @@
   <proof prover="3"><result status="valid" time="0.04" steps="154"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.88" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.27" steps="792"/></proof>
+  <proof prover="3"><result status="valid" time="0.27" steps="832"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.89" expl="precondition" proved="true">
   <proof prover="3"><result status="valid" time="0.01" steps="23"/></proof>
@@ -347,70 +347,70 @@
   <proof prover="3"><result status="valid" time="0.02" steps="35"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.96" expl="loop variant decrease" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="382"/></proof>
+  <proof prover="3"><result status="valid" time="0.17" steps="362"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.97" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="41"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.98" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="71"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="69"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.99" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="67"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="63"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.100" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="99"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="96"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.101" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="37"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.102" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="119"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="116"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.103" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="74"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="73"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.104" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.06" steps="70"/></proof>
+  <proof prover="3"><result status="valid" time="0.06" steps="69"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.105" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.33" steps="775"/></proof>
+  <proof prover="3"><result status="valid" time="0.19" steps="717"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.106" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="34"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.107" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.05" steps="129"/></proof>
+  <proof prover="3"><result status="valid" time="0.05" steps="127"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.108" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.11" steps="195"/></proof>
+  <proof prover="3"><result status="valid" time="0.11" steps="189"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.109" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="67"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="66"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.110" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.09" steps="185"/></proof>
+  <proof prover="3"><result status="valid" time="0.09" steps="177"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.111" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.07" steps="85"/></proof>
+  <proof prover="3"><result status="valid" time="0.07" steps="84"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.112" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.06" steps="234"/></proof>
+  <proof prover="3"><result status="valid" time="0.06" steps="226"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.113" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.30" steps="588"/></proof>
+  <proof prover="3"><result status="valid" time="0.16" steps="567"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.114" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="223"/></proof>
+  <proof prover="3"><result status="valid" time="0.18" steps="207"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.115" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.14" steps="434"/></proof>
+  <proof prover="3"><result status="valid" time="0.11" steps="420"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.116" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="40"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.117" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.32" steps="529"/></proof>
+  <proof prover="3"><result status="valid" time="0.24" steps="502"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.118" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="43"/></proof>
@@ -419,10 +419,10 @@
   <proof prover="3"><result status="valid" time="0.02" steps="42"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.120" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="221"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="218"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.121" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="3.48" steps="2688"/></proof>
+  <proof prover="3"><result status="valid" time="2.18" steps="2678"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.122" expl="precondition" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="21"/></proof>
@@ -437,16 +437,16 @@
   <proof prover="3"><result status="valid" time="0.02" steps="24"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.126" expl="loop variant decrease" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="85"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="84"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.127" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.00" steps="36"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.128" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="66"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="64"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.129" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="63"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="59"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.130" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.01" steps="30"/></proof>
@@ -455,31 +455,31 @@
   <proof prover="3"><result status="valid" time="0.02" steps="29"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.132" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="82"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="80"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.133" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="62"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="61"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.134" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="63"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="62"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.135" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.21" steps="648"/></proof>
+  <proof prover="3"><result status="valid" time="0.13" steps="594"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.136" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.01" steps="29"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.137" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.05" steps="132"/></proof>
+  <proof prover="3"><result status="valid" time="0.05" steps="129"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.138" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.14" steps="258"/></proof>
+  <proof prover="3"><result status="valid" time="0.14" steps="247"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.139" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="79"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="77"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.140" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.08" steps="52"/></proof>
+  <proof prover="3"><result status="valid" time="0.08" steps="51"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.141" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.04" steps="49"/></proof>
@@ -488,10 +488,10 @@
   <proof prover="3"><result status="valid" time="0.02" steps="64"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.143" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="94"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="93"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.144" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="76"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="80"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.145" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.04" steps="87"/></proof>
@@ -500,7 +500,7 @@
   <proof prover="3"><result status="valid" time="0.02" steps="33"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.147" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="127"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="125"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.148" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.01" steps="32"/></proof>
@@ -509,7 +509,7 @@
   <proof prover="3"><result status="valid" time="0.02" steps="39"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.150" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.04" steps="124"/></proof>
+  <proof prover="3"><result status="valid" time="0.04" steps="122"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.151" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.03" steps="49"/></proof>
@@ -524,7 +524,7 @@
   <proof prover="3"><result status="valid" time="0.01" steps="25"/></proof>
   </goal>
   <goal name="schorr_waite&#39;vc.155" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="69"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="63"/></proof>
   </goal>
  </transf>
  </goal>

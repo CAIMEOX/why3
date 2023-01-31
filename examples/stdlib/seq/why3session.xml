@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="CVC5" version="1.0.4" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="1" name="CVC4" version="1.8" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="3" name="Alt-Ergo" version="2.4.2" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="4" name="Z3" version="4.12.1" timelimit="5" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
+<path name=".."/><path name=".."/><path name=".."/><path name="stdlib"/>
+<path name="seq.mlw"/>
+<theory name="Seq" proved="true">
+ <goal name="empty&#39;vc" expl="VC for empty" proved="true">
+ <proof prover="1"><result status="valid" time="0.01" steps="960"/></proof>
+ </goal>
+ <goal name="set&#39;vc" expl="VC for set" proved="true">
+ <proof prover="4"><result status="valid" time="0.05" steps="159938"/></proof>
+ </goal>
+ <goal name="mixfix [&lt;-]&#39;vc" expl="VC for mixfix [&lt;-]" proved="true">
+ <proof prover="1"><result status="valid" time="0.01" steps="1584"/></proof>
+ </goal>
+ <goal name="singleton&#39;vc" expl="VC for singleton" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="3759"/></proof>
+ </goal>
+ <goal name="infix ++&#39;vc" expl="VC for infix ++" proved="true">
+ <proof prover="1"><result status="valid" time="0.04" steps="5736"/></proof>
+ </goal>
+ <goal name="cons&#39;vc" expl="VC for cons" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="5928"/></proof>
+ </goal>
+ <goal name="snoc&#39;vc" expl="VC for snoc" proved="true">
+ <proof prover="1"><result status="valid" time="0.05" steps="6277"/></proof>
+ </goal>
+ <goal name="mixfix [..]&#39;vc" expl="VC for mixfix [..]" proved="true">
+ <proof prover="3" timelimit="1"><result status="valid" time="0.07" steps="696"/></proof>
+ </goal>
+ <goal name="mixfix [_..]&#39;vc" expl="VC for mixfix [_..]" proved="true">
+ <proof prover="1" timelimit="1"><result status="valid" time="0.02" steps="3829"/></proof>
+ </goal>
+ <goal name="mixfix [.._]&#39;vc" expl="VC for mixfix [.._]" proved="true">
+ <proof prover="1" timelimit="1"><result status="valid" time="0.02" steps="3829"/></proof>
+ </goal>
+</theory>
+<theory name="FreeMonoid" proved="true">
+ <goal name="associative&#39;vc" expl="VC for associative" proved="true">
+ <proof prover="1"><result status="valid" time="0.05" steps="10477"/></proof>
+ </goal>
+ <goal name="left_neutral&#39;vc" expl="VC for left_neutral" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="8061"/></proof>
+ </goal>
+ <goal name="right_neutral&#39;vc" expl="VC for right_neutral" proved="true">
+ <proof prover="1"><result status="valid" time="0.05" steps="8692"/></proof>
+ </goal>
+ <goal name="cons_def&#39;vc" expl="VC for cons_def" proved="true">
+ <proof prover="1" timelimit="1"><result status="valid" time="0.09" steps="9617"/></proof>
+ </goal>
+ <goal name="snoc_def&#39;vc" expl="VC for snoc_def" proved="true">
+ <proof prover="1" timelimit="1"><result status="valid" time="0.06" steps="9772"/></proof>
+ </goal>
+ <goal name="double_sub_sequence&#39;vc" expl="VC for double_sub_sequence" proved="true">
+ <proof prover="1"><result status="valid" time="0.09" steps="11940"/></proof>
+ </goal>
+ <goal name="cons_back&#39;vc" expl="VC for cons_back" proved="true">
+ <proof prover="1"><result status="valid" time="0.07" steps="10692"/></proof>
+ </goal>
+ <goal name="snoc_back&#39;vc" expl="VC for snoc_back" proved="true">
+ <proof prover="1"><result status="valid" time="0.05" steps="10451"/></proof>
+ </goal>
+ <goal name="cat_back&#39;vc" expl="VC for cat_back" proved="true">
+ <proof prover="1"><result status="valid" time="0.08" steps="19802"/></proof>
+ </goal>
+ <goal name="cons_dec&#39;vc" expl="VC for cons_dec" proved="true">
+ <proof prover="4"><result status="valid" time="0.09" steps="41469"/></proof>
+ </goal>
+ <goal name="snoc_dec&#39;vc" expl="VC for snoc_dec" proved="true">
+ <proof prover="1"><result status="valid" time="0.06" steps="21895"/></proof>
+ </goal>
+ <goal name="cat_dec&#39;vc" expl="VC for cat_dec" proved="true">
+ <proof prover="3"><result status="valid" time="0.02" steps="527"/></proof>
+ </goal>
+ <goal name="empty_dec&#39;vc" expl="VC for empty_dec" proved="true">
+ <proof prover="1"><result status="valid" time="0.07" steps="10215"/></proof>
+ </goal>
+ <goal name="singleton_dec&#39;vc" expl="VC for singleton_dec" proved="true">
+ <proof prover="1"><result status="valid" time="0.13" steps="10351"/></proof>
+ </goal>
+</theory>
+<theory name="ToList" proved="true">
+ <goal name="to_list_length&#39;vc" expl="VC for to_list_length" proved="true">
+ <proof prover="3"><result status="valid" time="0.03" steps="230"/></proof>
+ </goal>
+ <goal name="to_list_nth&#39;vc" expl="VC for to_list_nth" proved="true">
+ <proof prover="1"><result status="valid" time="0.11" steps="14558"/></proof>
+ </goal>
+ <goal name="to_list_def_cons&#39;vc" expl="VC for to_list_def_cons" proved="true">
+ <proof prover="1"><result status="valid" time="0.51" steps="59147"/></proof>
+ </goal>
+</theory>
+<theory name="OfList" proved="true">
+ <goal name="length_of_list&#39;vc" expl="VC for length_of_list" proved="true">
+ <proof prover="1"><result status="valid" time="0.08" steps="13485"/></proof>
+ </goal>
+ <goal name="elts_seq_of_list&#39;vc" expl="VC for elts_seq_of_list" proved="true">
+ <proof prover="1"><result status="valid" time="0.10" steps="16446"/></proof>
+ </goal>
+ <goal name="is_of_list" proved="true">
+ <proof prover="3"><result status="valid" time="0.01" steps="38"/></proof>
+ </goal>
+ <goal name="of_list_app&#39;vc" expl="VC for of_list_app" proved="true">
+ <proof prover="3"><result status="valid" time="0.05" steps="708"/></proof>
+ </goal>
+ <goal name="of_list_app_length" proved="true">
+ <proof prover="1"><result status="valid" time="0.08" steps="13171"/></proof>
+ </goal>
+ <goal name="of_list_snoc&#39;vc" expl="VC for of_list_snoc" proved="true">
+ <proof prover="1"><result status="valid" time="1.62" steps="129707"/></proof>
+ </goal>
+ <goal name="convolution_to_of_list" proved="true">
+ <transf name="induction_ty_lex" proved="true" >
+  <goal name="convolution_to_of_list.0" proved="true">
+  <proof prover="1"><result status="valid" time="0.08" steps="12999"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+<theory name="Mem" proved="true">
+ <goal name="mem_append" proved="true">
+ <transf name="unfold" proved="true" arg1="mem">
+  <goal name="mem_append.0" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="mem_append.0.0" proved="true">
+   <proof prover="3"><result status="valid" time="0.01" steps="19"/></proof>
+   </goal>
+   <goal name="mem_append.0.1" proved="true">
+   <transf name="destruct" proved="true" arg1="H">
+    <goal name="mem_append.0.1.0" proved="true">
+    <proof prover="3"><result status="valid" time="0.06" steps="120"/></proof>
+    </goal>
+    <goal name="mem_append.0.1.1" proved="true">
+    <transf name="split_vc" proved="true" >
+     <goal name="mem_append.0.1.1.0" proved="true">
+     <transf name="exists" proved="true" arg1="(length s1 + i)">
+      <goal name="mem_append.0.1.1.0.0" proved="true">
+      <proof prover="1"><result status="valid" time="0.06" steps="7789"/></proof>
+      </goal>
+     </transf>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="mem_tail&#39;vc" expl="VC for mem_tail" proved="true">
+ <proof prover="1"><result status="valid" time="0.15" steps="12117"/></proof>
+ </goal>
+</theory>
+<theory name="Reverse" proved="true">
+ <goal name="reverse&#39;vc" expl="VC for reverse" proved="true">
+ <proof prover="1"><result status="valid" time="0.04" steps="7101"/></proof>
+ </goal>
+</theory>
+<theory name="ToFset" proved="true">
+ <goal name="to_set_cardinal&#39;vc" expl="VC for to_set_cardinal" proved="true">
+ <proof prover="3"><result status="valid" time="0.04" steps="169"/></proof>
+ </goal>
+ <goal name="to_set_mem&#39;vc" expl="VC for to_set_mem" proved="true">
+ <proof prover="1"><result status="valid" time="0.29" steps="42944"/></proof>
+ </goal>
+ <goal name="to_set_snoc&#39;vc" expl="VC for to_set_snoc" proved="true">
+ <transf name="introduce_premises" proved="true" >
+  <goal name="to_set_snoc&#39;vc.0" expl="VC for to_set_snoc" proved="true">
+  <transf name="assert" proved="true" arg1="(snoc s x == s ++ singleton x)">
+   <goal name="to_set_snoc&#39;vc.0.0" expl="asserted formula" proved="true">
+   <proof prover="1"><result status="valid" time="2.24" steps="341278"/></proof>
+   </goal>
+   <goal name="to_set_snoc&#39;vc.0.1" expl="VC for to_set_snoc" proved="true">
+   <proof prover="1"><result status="valid" time="1.22" steps="98155"/></proof>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="to_set_cardinal_distinct&#39;vc" expl="VC for to_set_cardinal_distinct" proved="true">
+ <proof prover="3"><result status="valid" time="0.19" steps="928"/></proof>
+ </goal>
+</theory>
+<theory name="Sorted" proved="true">
+ <goal name="sorted_cons&#39;vc" expl="VC for sorted_cons" proved="true">
+ <proof prover="1"><result status="valid" time="0.09" steps="17992"/></proof>
+ </goal>
+ <goal name="sorted_append" proved="true">
+ <transf name="unfold" proved="true" arg1="sorted">
+  <goal name="sorted_append.0" proved="true">
+  <transf name="unfold" proved="true" arg1="sorted_sub">
+   <goal name="sorted_append.0.0" proved="true">
+   <transf name="split_vc" proved="true" >
+    <goal name="sorted_append.0.0.0" proved="true">
+    <proof prover="1"><result status="valid" time="0.07" steps="10593"/></proof>
+    </goal>
+    <goal name="sorted_append.0.0.1" proved="true">
+    <transf name="instantiate" proved="true" arg1="H3" arg2="i1,i2">
+     <goal name="sorted_append.0.0.1.0" proved="true">
+     <proof prover="1"><result status="valid" time="0.03" steps="9071"/></proof>
+     </goal>
+    </transf>
+    </goal>
+    <goal name="sorted_append.0.0.2" proved="true">
+    <transf name="instantiate" proved="true" arg1="H3" arg2="(i1+length s1),(i2+length s1)">
+     <goal name="sorted_append.0.0.2.0" proved="true">
+     <proof prover="1"><result status="valid" time="0.06" steps="8884"/></proof>
+     </goal>
+    </transf>
+    </goal>
+    <goal name="sorted_append.0.0.3" proved="true">
+    <transf name="instantiate" proved="true" arg1="H4" arg2="i,(j+length s1)">
+     <goal name="sorted_append.0.0.3.0" proved="true">
+     <proof prover="1"><result status="valid" time="0.06" steps="8732"/></proof>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="sorted_snoc" proved="true">
+ <transf name="introduce_premises" proved="true" >
+  <goal name="sorted_snoc.0" proved="true">
+  <transf name="assert" proved="true" arg1="(snoc s x == s ++ singleton x)">
+   <goal name="sorted_snoc.0.0" expl="asserted formula" proved="true">
+   <proof prover="1"><result status="valid" time="0.02" steps="8965"/></proof>
+   </goal>
+   <goal name="sorted_snoc.0.1" proved="true">
+   <proof prover="3"><result status="valid" time="0.01" steps="173"/></proof>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+<theory name="SortedInt" proved="true">
+ <goal name="TO.Refl" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="3850"/></proof>
+ </goal>
+ <goal name="TO.Trans" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="4133"/></proof>
+ </goal>
+ <goal name="TO.Total" proved="true">
+ <proof prover="1"><result status="valid" time="0.03" steps="4037"/></proof>
+ </goal>
+</theory>
+<theory name="Sum" proved="true">
+ <goal name="sum_snoc" proved="true">
+ <proof prover="3"><result status="valid" time="1.84" steps="6222"/></proof>
+ </goal>
+ <goal name="sum_tail" proved="true">
+ <proof prover="4"><result status="valid" time="0.20" steps="304011"/></proof>
+ </goal>
+ <goal name="sum_tail_tail" proved="true">
+ <proof prover="4"><result status="valid" time="0.99" steps="1821528"/></proof>
+ </goal>
+</theory>
+<theory name="Occ" proved="true">
+ <goal name="occ_snoc&#39;vc" expl="VC for occ_snoc" proved="true">
+ <proof prover="4"><result status="valid" time="0.06" steps="143241"/></proof>
+ </goal>
+ <goal name="occ_append&#39;vc" expl="VC for occ_append" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="occ_append&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="1"><result status="valid" time="0.04" steps="12807"/></proof>
+  </goal>
+  <goal name="occ_append&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="1"><result status="valid" time="0.10" steps="13871"/></proof>
+  </goal>
+  <goal name="occ_append&#39;vc.2" expl="variant decrease" proved="true">
+  <proof prover="1"><result status="valid" time="0.07" steps="12354"/></proof>
+  </goal>
+  <goal name="occ_append&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="4"><result status="valid" time="0.21" steps="373332"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="occ_cons" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="occ_cons.0" proved="true">
+  <transf name="assert" proved="true" arg1="(cons x s == singleton x ++ s)">
+   <goal name="occ_cons.0.0" expl="asserted formula" proved="true">
+   <proof prover="1"><result status="valid" time="0.03" steps="13399"/></proof>
+   </goal>
+   <goal name="occ_cons.0.1" proved="true">
+   <proof prover="1"><result status="valid" time="1.48" steps="131408"/></proof>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="occ_front" proved="true">
+ <proof prover="0"><result status="timeout" time="4.21" steps="285940"/></proof>
+ <proof prover="1"><result status="timeout" time="5.00" steps="387685"/></proof>
+ <proof prover="3"><result status="timeout" time="5.00"/></proof>
+ <proof prover="4"><result status="timeout" time="5.00" steps="8084812"/></proof>
+ <transf name="split_vc" proved="true" >
+  <goal name="occ_front.0" proved="true">
+  <proof prover="1"><result status="valid" time="0.11" steps="12759"/></proof>
+  </goal>
+  <goal name="occ_front.1" proved="true">
+  <proof prover="1"><result status="valid" time="0.07" steps="12772"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+<theory name="Exchange" proved="true">
+ <goal name="exchange_set" proved="true">
+ <proof prover="1"><result status="valid" time="0.07" steps="9538"/></proof>
+ </goal>
+</theory>
+<theory name="Permut" proved="true">
+ <goal name="exchange_permut_sub&#39;vc" expl="VC for exchange_permut_sub" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="exchange_permut_sub&#39;vc.0" expl="variant decrease" proved="true">
+  <proof prover="1"><result status="valid" time="0.06" steps="12262"/></proof>
+  </goal>
+  <goal name="exchange_permut_sub&#39;vc.1" expl="precondition" proved="true">
+  <proof prover="1"><result status="valid" time="0.08" steps="13424"/></proof>
+  </goal>
+  <goal name="exchange_permut_sub&#39;vc.2" expl="precondition" proved="true">
+  <proof prover="1"><result status="valid" time="0.05" steps="12121"/></proof>
+  </goal>
+  <goal name="exchange_permut_sub&#39;vc.3" expl="precondition" proved="true">
+  <proof prover="1"><result status="valid" time="0.05" steps="12139"/></proof>
+  </goal>
+  <goal name="exchange_permut_sub&#39;vc.4" expl="precondition" proved="true">
+  <proof prover="1"><result status="valid" time="0.05" steps="12162"/></proof>
+  </goal>
+  <goal name="exchange_permut_sub&#39;vc.5" expl="assertion" proved="true">
+  <proof prover="1"><result status="valid" time="2.45" steps="393627"/></proof>
+  </goal>
+  <goal name="exchange_permut_sub&#39;vc.6" expl="assertion" proved="true">
+  <proof prover="1" timelimit="10" memlimit="4000"><result status="valid" time="2.77" steps="319441"/></proof>
+  </goal>
+  <goal name="exchange_permut_sub&#39;vc.7" expl="assertion" proved="true">
+  <proof prover="1"><result status="valid" time="0.12" steps="17293"/></proof>
+  </goal>
+  <goal name="exchange_permut_sub&#39;vc.8" expl="assertion" proved="true">
+  <proof prover="3"><result status="valid" time="2.16" steps="8623"/></proof>
+  </goal>
+  <goal name="exchange_permut_sub&#39;vc.9" expl="assertion" proved="true">
+  <proof prover="1"><result status="valid" time="0.11" steps="17549"/></proof>
+  </goal>
+  <goal name="exchange_permut_sub&#39;vc.10" expl="assertion" proved="true">
+  <proof prover="3"><result status="valid" time="1.46" steps="5321"/></proof>
+  </goal>
+  <goal name="exchange_permut_sub&#39;vc.11" expl="postcondition" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="exchange_permut_sub&#39;vc.11.0" expl="postcondition" proved="true">
+   <proof prover="1" timelimit="1"><result status="valid" time="0.04" steps="13470"/></proof>
+   </goal>
+   <goal name="exchange_permut_sub&#39;vc.11.1" expl="postcondition" proved="true">
+   <transf name="split_vc" proved="true" >
+    <goal name="exchange_permut_sub&#39;vc.11.1.0" expl="postcondition" proved="true">
+    <proof prover="3" timelimit="1"><result status="valid" time="0.02" steps="155"/></proof>
+    </goal>
+    <goal name="exchange_permut_sub&#39;vc.11.1.1" expl="postcondition" proved="true">
+    <proof prover="0" timelimit="1"><result status="valid" time="0.35" steps="27234"/></proof>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="permut_sub_weakening&#39;vc" expl="VC for permut_sub_weakening" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="permut_sub_weakening&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="4"><result status="valid" time="0.07" steps="110738"/></proof>
+  </goal>
+  <goal name="permut_sub_weakening&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="1"><result status="valid" time="0.66" steps="73299"/></proof>
+  </goal>
+  <goal name="permut_sub_weakening&#39;vc.2" expl="assertion" proved="true">
+  <proof prover="1"><result status="valid" time="0.67" steps="70829"/></proof>
+  </goal>
+  <goal name="permut_sub_weakening&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="3"><result status="valid" time="1.71" steps="11004"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="permut_refl" proved="true">
+ <proof prover="1"><result status="valid" time="0.11" steps="15755"/></proof>
+ </goal>
+ <goal name="permut_sym" proved="true">
+ <proof prover="1"><result status="valid" time="0.08" steps="11932"/></proof>
+ </goal>
+ <goal name="permut_trans" proved="true">
+ <proof prover="1"><result status="valid" time="0.10" steps="13458"/></proof>
+ </goal>
+ <goal name="permut_exists&#39;vc" expl="VC for permut_exists" proved="true">
+ <proof prover="3"><result status="valid" time="1.86" steps="14289"/></proof>
+ </goal>
+ <goal name="permut_all_mem" proved="true">
+ <proof prover="3"><result status="valid" time="0.17" steps="897"/></proof>
+ </goal>
+ <goal name="exchange_permut_all" proved="true">
+ <proof prover="1"><result status="valid" time="0.14" steps="15231"/></proof>
+ </goal>
+</theory>
+<theory name="FoldLeft" proved="true">
+ <goal name="fold_left&#39;vc" expl="VC for fold_left" proved="true">
+ <proof prover="1"><result status="valid" time="0.09" steps="7682"/></proof>
+ </goal>
+ <goal name="fold_left_ext" proved="true">
+ <proof prover="1"><result status="valid" time="0.07" steps="6033"/></proof>
+ </goal>
+ <goal name="fold_left_cons" proved="true">
+ <proof prover="3"><result status="valid" time="0.01" steps="48"/></proof>
+ </goal>
+ <goal name="fold_left_app&#39;vc" expl="VC for fold_left_app" proved="true">
+ <proof prover="3"><result status="valid" time="0.32" steps="1293"/></proof>
+ <transf name="split_vc" proved="true" >
+  <goal name="fold_left_app&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="1"><result status="valid" time="0.06" steps="9657"/></proof>
+  </goal>
+  <goal name="fold_left_app&#39;vc.1" expl="variant decrease" proved="true">
+  <proof prover="1"><result status="valid" time="0.10" steps="9107"/></proof>
+  </goal>
+  <goal name="fold_left_app&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="3"><result status="valid" time="0.32" steps="1675"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+<theory name="FoldRight" proved="true">
+ <goal name="fold_right&#39;vc" expl="VC for fold_right" proved="true">
+ <proof prover="1"><result status="valid" time="0.09" steps="7729"/></proof>
+ </goal>
+ <goal name="fold_right_ext" proved="true">
+ <proof prover="1"><result status="valid" time="0.06" steps="5614"/></proof>
+ </goal>
+ <goal name="fold_right_snoc" proved="true">
+ <proof prover="3"><result status="valid" time="0.05" steps="119"/></proof>
+ </goal>
+</theory>
+</file>
+</why3session>

@@ -4,6 +4,8 @@
 <why3session shape_version="6">
 <prover id="0" name="Alt-Ergo" version="2.3.0" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="1" name="Alt-Ergo" version="2.0.0" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="2" name="CVC5" version="1.0.4" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="3" name="Alt-Ergo" version="2.4.2" timelimit="1" steplimit="0" memlimit="1000"/>
 <file format="whyml" proved="true">
 <path name=".."/><path name="ral.mlw"/>
 <theory name="RAL" proved="true">
@@ -29,10 +31,10 @@
  <proof prover="1"><result status="valid" time="0.01" steps="4"/></proof>
  </goal>
  <goal name="agg_measure_is_length&#39;vc" expl="VC for agg_measure_is_length" proved="true">
- <proof prover="1"><result status="valid" time="0.01" steps="51"/></proof>
+ <proof prover="1"><result status="valid" time="0.01" steps="59"/></proof>
  </goal>
  <goal name="selected_part&#39;vc" expl="VC for selected_part" proved="true">
- <proof prover="1"><result status="valid" time="0.12" steps="729"/></proof>
+ <proof prover="1"><result status="valid" time="0.12" steps="656"/></proof>
  </goal>
  <goal name="Sel.M.assoc" proved="true">
  <proof prover="1"><result status="valid" time="0.01" steps="4"/></proof>
@@ -50,7 +52,7 @@
  <proof prover="1"><result status="valid" time="0.02" steps="6"/></proof>
  </goal>
  <goal name="Sel.M.agg_sing" proved="true">
- <proof prover="1"><result status="valid" time="0.01" steps="19"/></proof>
+ <proof prover="1"><result status="valid" time="0.01" steps="17"/></proof>
  </goal>
  <goal name="Sel.M.agg_cat" proved="true">
  <proof prover="1"><result status="valid" time="0.01" steps="5"/></proof>
@@ -62,7 +64,7 @@
  <proof prover="1"><result status="valid" time="0.02" steps="35"/></proof>
  </goal>
  <goal name="Sel.selected_part&#39;refn&#39;vc" expl="VC for selected_part&#39;refn" proved="true">
- <proof prover="1"><result status="valid" time="0.10" steps="397"/></proof>
+ <proof prover="1"><result status="valid" time="0.10" steps="406"/></proof>
  </goal>
  <goal name="empty&#39;vc" expl="VC for empty" proved="true">
  <proof prover="1"><result status="valid" time="0.02" steps="6"/></proof>
@@ -74,10 +76,10 @@
  <proof prover="1"><result status="valid" time="0.01" steps="4"/></proof>
  </goal>
  <goal name="decompose_front&#39;vc" expl="VC for decompose_front" proved="true">
- <proof prover="1"><result status="valid" time="0.03" steps="59"/></proof>
+ <proof prover="1"><result status="valid" time="0.03" steps="53"/></proof>
  </goal>
  <goal name="decompose_back&#39;vc" expl="VC for decompose_back" proved="true">
- <proof prover="1"><result status="valid" time="0.04" steps="59"/></proof>
+ <proof prover="1"><result status="valid" time="0.04" steps="56"/></proof>
  </goal>
  <goal name="front&#39;vc" expl="VC for front" proved="true">
  <proof prover="1"><result status="valid" time="0.02" steps="4"/></proof>
@@ -98,22 +100,23 @@
  <proof prover="1"><result status="valid" time="0.01" steps="5"/></proof>
  </goal>
  <goal name="set&#39;vc" expl="VC for set" proved="true">
- <proof prover="1"><result status="valid" time="0.20" steps="492"/></proof>
+ <proof prover="1"><result status="valid" time="0.20" steps="398"/></proof>
  </goal>
  <goal name="get&#39;vc" expl="VC for get" proved="true">
- <proof prover="1"><result status="valid" time="0.07" steps="106"/></proof>
+ <proof prover="1"><result status="valid" time="0.07" steps="103"/></proof>
  </goal>
  <goal name="insert&#39;vc" expl="VC for insert" proved="true">
- <proof prover="1"><result status="valid" time="0.28" steps="533"/></proof>
+ <proof prover="2"><result status="valid" time="0.90" steps="120481"/></proof>
+ <proof prover="3"><result status="valid" time="0.25" steps="4950"/></proof>
  </goal>
  <goal name="remove&#39;vc" expl="VC for remove" proved="true">
- <proof prover="1"><result status="valid" time="0.21" steps="392"/></proof>
+ <proof prover="3"><result status="valid" time="0.18" steps="3251"/></proof>
  </goal>
  <goal name="cut&#39;vc" expl="VC for cut" proved="true">
- <proof prover="1"><result status="valid" time="0.09" steps="181"/></proof>
+ <proof prover="1"><result status="valid" time="0.63" steps="1431"/></proof>
  </goal>
  <goal name="split&#39;vc" expl="VC for split" proved="true">
- <proof prover="1"><result status="valid" time="0.15" steps="355"/></proof>
+ <proof prover="1"><result status="valid" time="0.15" steps="330"/></proof>
  </goal>
  <goal name="harness&#39;vc" expl="VC for harness" proved="true">
  <transf name="split_goal_right" proved="true" >
@@ -130,10 +133,10 @@
   <proof prover="1"><result status="valid" time="0.03" steps="15"/></proof>
   </goal>
   <goal name="harness&#39;vc.4" expl="check" proved="true">
-  <proof prover="1"><result status="valid" time="0.06" steps="142"/></proof>
+  <proof prover="1"><result status="valid" time="0.06" steps="87"/></proof>
   </goal>
   <goal name="harness&#39;vc.5" expl="check" proved="true">
-  <proof prover="1"><result status="valid" time="0.07" steps="142"/></proof>
+  <proof prover="1"><result status="valid" time="0.07" steps="87"/></proof>
   </goal>
   <goal name="harness&#39;vc.6" expl="precondition" proved="true">
   <proof prover="1"><result status="valid" time="0.03" steps="18"/></proof>
@@ -142,15 +145,15 @@
   <proof prover="1"><result status="valid" time="0.02" steps="20"/></proof>
   </goal>
   <goal name="harness&#39;vc.8" expl="check" proved="true">
-  <proof prover="1"><result status="valid" time="0.58" steps="536"/></proof>
+  <proof prover="1"><result status="valid" time="0.20" steps="476"/></proof>
   </goal>
   <goal name="harness&#39;vc.9" expl="check" proved="true">
-  <proof prover="1" timelimit="5"><result status="valid" time="1.02" steps="501"/></proof>
+  <proof prover="1" timelimit="5"><result status="valid" time="0.71" steps="684"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="harness2&#39;vc" expl="VC for harness2" proved="true">
- <proof prover="1"><result status="valid" time="0.11" steps="223"/></proof>
+ <proof prover="1"><result status="valid" time="0.11" steps="193"/></proof>
  </goal>
 </theory>
 </file>

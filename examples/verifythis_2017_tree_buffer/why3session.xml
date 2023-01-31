@@ -3,11 +3,13 @@
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
 <prover id="0" name="CVC4" version="1.4" timelimit="5" steplimit="0" memlimit="1000"/>
-<prover id="1" name="CVC4" version="1.6" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="2" name="Z3" version="4.5.0" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="3" name="Eprover" version="1.8-001" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="4" name="Z3" version="4.4.0" timelimit="5" steplimit="0" memlimit="1000"/>
 <prover id="5" name="Alt-Ergo" version="2.0.0" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="6" name="Z3" version="4.12.1" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="7" name="CVC5" version="1.0.4" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="8" name="Alt-Ergo" version="2.4.2" timelimit="5" steplimit="0" memlimit="1000"/>
 <file format="whyml" proved="true">
 <path name=".."/><path name="verifythis_2017_tree_buffer.mlw"/>
 <theory name="Spec" proved="true">
@@ -100,7 +102,7 @@
  <proof prover="5"><result status="valid" time="0.00" steps="6"/></proof>
  </goal>
  <goal name="process_queue&#39;vc" expl="VC for process_queue" proved="true">
- <proof prover="5"><result status="valid" time="0.01" steps="9"/></proof>
+ <proof prover="5"><result status="valid" time="0.01" steps="12"/></proof>
  </goal>
  <goal name="rt_empty&#39;vc" expl="VC for rt_empty" proved="true">
  <proof prover="5"><result status="valid" time="0.01" steps="9"/></proof>
@@ -119,11 +121,12 @@
    <proof prover="5"><result status="valid" time="0.01" steps="6"/></proof>
    </goal>
    <goal name="rt_add&#39;vc.0.2" expl="VC for rt_add" proved="true">
-   <proof prover="5"><result status="valid" time="0.01" steps="15"/></proof>
+   <proof prover="5"><result status="valid" time="0.01" steps="14"/></proof>
    </goal>
    <goal name="rt_add&#39;vc.0.3" expl="VC for rt_add" proved="true">
-   <proof prover="0"><result status="timeout" time="5.00"/></proof>
-   <proof prover="1"><result status="valid" time="0.13" steps="21023"/></proof>
+   <proof prover="6"><result status="valid" time="0.28" steps="2332955"/></proof>
+   <proof prover="7"><result status="valid" time="0.04" steps="11211"/></proof>
+   <proof prover="8"><result status="valid" time="0.26" steps="8673"/></proof>
    </goal>
   </transf>
   </goal>

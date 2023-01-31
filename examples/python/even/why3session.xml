@@ -7,7 +7,7 @@
 <path name=".."/><path name="even.py"/>
 <theory name="Even" proved="true">
  <goal name="main&#39;vc" expl="VC for main" proved="true">
- <proof prover="0"><result status="valid" time="0.44" steps="88969"/></proof>
+ <proof prover="0"><result status="valid" time="0.20" steps="70540"/></proof>
  </goal>
 </theory>
 </file>
