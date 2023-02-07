@@ -420,10 +420,12 @@ let print_ty_decl info fmt ts =
   (fprintf fmt "%a@\n@\n" (print_type_decl info) ts; forget_tvs info)
 
 let print_data_decl info d fmt = function
-  | ts, csl (* monomorphic enumeration *)
+  | ts, csl
     when ts.ts_args = [] && List.for_all (fun (_,l) -> l = []) csl ->
+       (* monomorphic enumeration *)
       print_enum_decl info fmt ts csl
-  | ts, [cs,pjl] (* records *) ->
+  | ts, [(cs,pjl)] when List.for_all ((<>) None) pjl ->
+      (* records *)
       if Sid.mem ts.ts_name (get_used_syms_decl d) then
         unsupported "alt-ergo: recursive records are not supported";
       let field_name_ty pj ty =
