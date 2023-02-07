@@ -25,7 +25,7 @@ let debug = Debug.register_info_flag "smtv2_printer"
   ~desc:"Print@ debugging@ messages@ about@ printing@ \
          the@ input@ of@ smtv2."
 
-let debug_incremental = Debug.register_info_flag "force_incremental"
+let debug_incremental = Debug.register_flag "force_incremental"
     ~desc:"Force@ incremental@ mode@ for@ smtv2@ provers"
 
 (** SMTLIB tokens taken from CVC4/CVC5: src/parser/smt2/{Smt2.g,smt2.cpp} *)
@@ -199,15 +199,14 @@ type info = {
   mutable info_in_goal : bool;
   info_vc_term : vc_term_info;
   info_printer : ident_printer;
-  mutable list_projs : Ident.ident Mstr.t;
-  mutable list_field_def: Ident.ident Mstr.t;
+  mutable type_coercions : Sls.t Mty.t;
+  mutable type_fields : (lsymbol list) Mty.t;
   info_version : version;
   meta_model_projection : Sls.t;
   meta_record_def : Sls.t;
-  mutable list_records : field_info list Mstr.t;
-  (* For algebraic type counterexamples: constructors with no arguments can be
-     misunderstood for variables *)
-  mutable noarg_constructors: string list;
+  mutable record_fields : (lsymbol list) Mls.t;
+  mutable constr_proj_id : string list Mls.t;
+  mutable constructors: lsymbol Mstr.t;
   info_cntexample_need_push : bool;
   info_cntexample: bool;
   info_incremental: bool;
@@ -290,12 +289,20 @@ let print_typed_var_list info fmt vsl =
 
 let collect_model_ls info ls =
   if Sls.mem ls info.meta_model_projection then
-    info.list_projs <- Mstr.add (sprintf "%a" (print_ident info) ls.ls_name)
-        ls.ls_name info.list_projs;
+    begin match ls.ls_args with
+    | [ty] ->
+      let coercions = Sls.add ls (Mty.find_def Sls.empty ty info.type_coercions) in
+      info.type_coercions <- Mty.add ty coercions info.type_coercions
+    | _ -> ()
+    end;
   if Sls.mem ls info.meta_record_def then
-    info.list_field_def <- Mstr.add (sprintf "%a" (print_ident info) ls.ls_name)
-        ls.ls_name info.list_field_def;
-  if ls.ls_args = [] && (relevant_for_counterexample ls.ls_name) then
+    begin match ls.ls_args with
+    | [ty] ->
+      let fields = ls :: (Mty.find_def [] ty info.type_fields) in
+      info.type_fields <- Mty.add ty fields info.type_fields
+    | _ -> ()
+    end;
+  if relevant_for_counterexample ls.ls_name then
     info.info_model <-
       add_model_element (ls, ls.ls_name.id_loc, ls.ls_name.id_attrs) info.info_model
 
@@ -334,8 +341,8 @@ let unambig_fs version fs =
     | _ -> ty_all inspect ty
   in
   match version with
-  | V20 | V26 -> true
-  | V26Par ->  inspect (Opt.get fs.ls_value)
+  | V20 -> true
+  | V26 | V26Par ->  inspect (Opt.get fs.ls_value)
 
 (** expr *)
 let rec print_term info fmt t =
@@ -426,21 +433,7 @@ let rec print_term info fmt t =
       fprintf fmt "@[<hv2>(ite %a@ %a@ %a)@]"
         (print_fmla info) f1 (print_term info) t1 (print_term info) t2
   | Tcase(t, bl) ->
-    let ty = t_type t in
-    begin
-      match ty.ty_node with
-      | Tyapp (ts,_) when ts_equal ts ts_bool ->
-        print_boolean_branches info t print_term fmt bl
-      | _ ->
-        match t.t_node with
-        | Tvar v -> print_branches info v print_term fmt bl
-        | _ ->
-          let subject = create_vsymbol (id_fresh "subject") (t_type t) in
-          fprintf fmt "@[<hv2>(let ((%a @[%a@]))@ %a)@]"
-            (print_var info) subject (print_term info) t
-            (print_branches info subject print_term) bl;
-          forget_var info subject
-    end
+     print_tcase info t print_term fmt bl
   | Teps _ -> unsupportedTerm t
       "smtv2: you must eliminate epsilon"
   | Tquant _ | Tbinop _ | Tnot _ | Ttrue | Tfalse -> raise (TermExpected t)
@@ -514,24 +507,51 @@ and print_fmla info fmt f =
         (print_term info) t1 (print_fmla info) f2;
       forget_var info v
   | Tcase(t, bl) ->
-    let ty = t_type t in
-    begin
-      match ty.ty_node with
-      | Tyapp (ts,_) when ts_equal ts ts_bool ->
-        print_boolean_branches info t print_fmla fmt bl
-      | _ ->
-        match t.t_node with
-        | Tvar v -> print_branches info v print_fmla fmt bl
-        | _ ->
-          let subject = create_vsymbol (id_fresh "subject") (t_type t) in
-          fprintf fmt "@[<hv2>(let ((%a @[%a@]))@ %a)@]"
-            (print_var info) subject (print_term info) t
-            (print_branches info subject print_fmla) bl;
-          forget_var info subject
-    end
+     print_tcase info t print_fmla fmt bl
   | Tvar _ | Tconst _ | Teps _ -> raise (FmlaExpected f) in
 
   check_exit_vc_term f info.info_in_goal info.info_vc_term
+
+and print_tcase info t pr fmt bl =
+     let ty = t_type t in
+     match ty.ty_node with
+     | Tyapp (ts,_) when ts_equal ts ts_bool ->
+        print_boolean_branches info t pr fmt bl
+     | _ ->
+        match info.info_version with
+        | V20 | V26Par -> begin
+            (* Use a chain of if-then-else constructs. *)
+            match t.t_node with
+            | Tvar v -> print_branches info v pr fmt bl
+            | _ ->
+               let subject = create_vsymbol (id_fresh "subject") (t_type t) in
+               fprintf fmt "@[<hv2>(let ((%a @[%a@]))@ %a)@]"
+                 (print_var info) subject (print_term info) t
+                 (print_branches info subject pr) bl;
+               forget_var info subject
+          end
+        | V26 ->
+           fprintf fmt "@[<hv2>(match %a (@[<hv0>%a@]))@]"
+             (print_term info) t
+             (print_list space (print_match_branch info ty pr)) bl
+
+and print_match_branch info ty pr fmt b =
+  let (p,t) = t_open_branch b in
+  let error () = unsupportedPattern p
+    "smtv2: you must compile nested pattern-matching" in
+  match p.pat_node with
+  | Pwild ->
+     let wild = create_vsymbol (id_fresh "wildcard") ty in
+     fprintf fmt "@[<hv2>(%a %a)@]" (print_var info) wild (pr info) t
+  | Papp(cs,[]) ->
+     fprintf fmt "@[<hv2>(%a %a)@]" (print_ident info) cs.ls_name (pr info) t;
+  | Papp(cs,args) ->
+     let args = List.map (function
+       | {pat_node = Pvar v} -> v | _ -> error ()) args in
+     fprintf fmt "@[<hv2>(@[<hv2>(%a %a)@] %a)@]"
+       (print_ident info) cs.ls_name (print_list space (print_var info)) args
+       (pr info) t
+  | _ -> error ()
 
 and print_boolean_branches info subject pr fmt bl =
   let error () = unsupportedTerm subject
@@ -544,10 +564,9 @@ and print_boolean_branches info subject pr fmt bl =
     begin
       match p1.pat_node with
       | Papp(cs,_) ->
-        let csname = if ls_equal cs fs_bool_true then "true" else "false" in
-        fprintf fmt "@[<hv2>(ite (= %a %s) %a %a)@]"
+        let t1, t2 = if ls_equal cs fs_bool_true then t1, t2 else t2, t1 in
+        fprintf fmt "@[<hv2>(ite %a %a %a)@]"
           (print_term info) subject
-          csname
           (pr info) t1
           (pr info) t2
       | _ -> error ()
@@ -568,9 +587,9 @@ and print_branches info subject pr fmt bl = match bl with
           if bl = [] then print_branch info subject pr fmt (cs,args,t)
           else
             begin match info.info_version with
-              | V20 | V26 (* It should be the same than V26Par but it was different *) ->
+              | V20 (* It was not defined at that time in the standard *) ->
                   fprintf fmt "@[<hv2>(ite (is-%a %a) %a %a)@]"
-              | V26Par ->
+              | V26 | V26Par ->
                   fprintf fmt "@[<hv2>(ite ((_ is %a) %a) %a %a)@]"
             end
               (print_ident info) cs.ls_name (print_var info) subject
@@ -582,12 +601,11 @@ and print_branch info subject pr fmt (cs,vars,t) =
   if vars = [] then pr info fmt t else
   let tvs = t_freevars Mvs.empty t in
   if List.for_all (fun v -> not (Mvs.mem v tvs)) vars then pr info fmt t else
-  let i = ref 0 in
-  let pr_proj fmt v = incr i;
-    if Mvs.mem v tvs then fprintf fmt "(%a (%a_proj_%d %a))"
-      (print_var info) v (print_ident info) cs.ls_name
-      !i (print_var info) subject in
-  fprintf fmt "@[<hv2>(let (%a) %a)@]" (print_list space pr_proj) vars (pr info) t
+  let pr_proj fmt (v, p) =
+    if Mvs.mem v tvs then fprintf fmt "(%a (%s %a))"
+      (print_var info) v p (print_var info) subject in
+  let l = List.combine vars (Mls.find cs info.constr_proj_id) in
+  fprintf fmt "@[<hv2>(let (%a) %a)@]" (print_list space pr_proj) l (pr info) t
 
 and print_expr info fmt =
   TermTF.t_select (print_term info fmt) (print_fmla info fmt)
@@ -634,11 +652,7 @@ let print_logic_decl_aux flag info fmt (ls,def) =
     collect_model_ls info ls;
     let vsl,expr = Decl.open_ls_defn def in
     if info.info_incremental && has_quantification expr then begin
-      fprintf fmt ";; %S@\n@[<hov2>(declare-fun %a (%a) %a)@]@\n@\n"
-        ls.ls_name.id_string
-        (print_ident info) ls.ls_name
-        (print_list space (print_type info)) (List.map (fun vs -> vs.vs_ty) vsl)
-        (print_type_value info) ls.ls_value;
+      print_param_decl info fmt ls;
       info.incr_list_ldecls <- (ls, vsl, expr) :: info.incr_list_ldecls
     end else
       let tvs = Term.ls_ty_freevars ls in
@@ -727,13 +741,21 @@ let add_check_sat info fmt =
     fprintf fmt "@[(get-model)@]@\n@\n"
 
 let print_ldecl_axiom info fmt (ls, vls, t) =
+  let tvs = Term.t_ty_freevars Ty.Stv.empty t in
+  let tvs = List.fold_left (fun acc vs -> Ty.ty_freevars acc vs.vs_ty) tvs vls in
   fprintf fmt ";; %S@\n" ls.ls_name.id_string;
   fprintf fmt
-    "@[<hv2>(assert@ @[<hv2>(forall @[(%a)@]@ @[<hv2>(= @[<h>(%a %a)@]@ %a)@])@])@]@\n@\n"
-    (print_typed_var_list info) vls
-    (print_ident info) ls.ls_name
-    (print_var_list info) vls
-    (print_expr info) t
+    "@[<hv2>(assert@ @[<hv2>%a@])@]@\n@\n"
+    (print_par info (fun fmt -> fprintf fmt
+      "(forall @[(%a)@]@ @[<hv2>(= @[<h>(%a %a)@]@ %a)@])"
+         (print_typed_var_list info) vls
+         (print_ident info) ls.ls_name
+         (print_var_list info) vls
+         (print_expr info) t
+     )) tvs
+
+
+
 
 (* TODO if the property doesnt begin with quantifier, then we print it first.
    Else, we print it afterwards. *)
@@ -742,7 +764,7 @@ let print_incremental_axiom info fmt =
   List.iter (print_ldecl_axiom info fmt) info.incr_list_ldecls;
   add_check_sat info fmt
 
-let print_prop_decl vc_loc vc_attrs printing_info info fmt k pr f = match k with
+let print_prop_decl vc_loc vc_attrs env printing_info info fmt k pr f = match k with
   | Paxiom ->
       if info.info_incremental && has_quantification f then
         info.incr_list_axioms <- (pr, f) :: info.incr_list_axioms
@@ -768,24 +790,24 @@ let print_prop_decl vc_loc vc_attrs printing_info info fmt k pr f = match k with
       let model_list = print_info_model info in
 
       printing_info := Some {
+        why3_env = env;
         vc_term_loc = vc_loc;
         vc_term_attrs = vc_attrs;
         queried_terms = model_list;
-        list_projections = info.list_projs;
-        list_fields = info.list_field_def;
-        Printer.list_records = info.list_records;
-        noarg_constructors = info.noarg_constructors;
+        Printer.type_coercions = info.type_coercions;
+        Printer.type_fields = info.type_fields;
+        Printer.record_fields = info.record_fields;
+        Printer.constructors = info.constructors;
         set_str = info.info_labels;
       }
   | Plemma -> assert false
 
-let print_constructor_decl info fmt (ls,args) =
+let print_constructor_decl info is_record fmt (ls,args) =
+  let cons_name = sprintf "%a" (print_ident info) ls.ls_name in
+  info.constructors <- Mstr.add cons_name ls info.constructors;
   let field_names =
     (match args with
-    | [] -> fprintf fmt "(%a)" (print_ident info) ls.ls_name;
-        let cons_name = sprintf "%a" (print_ident info) ls.ls_name in
-        info.noarg_constructors <- cons_name :: info.noarg_constructors;
-        []
+    | [] -> fprintf fmt "(%a)" (print_ident info) ls.ls_name; []
     | _ ->
         fprintf fmt "@[(%a@ " (print_ident info) ls.ls_name;
         let field_names, _ =
@@ -794,6 +816,8 @@ let print_constructor_decl info fmt (ls,args) =
             let field_name =
               match pr with
               | Some pr ->
+                  if not is_record then
+                    unsupported "smtv2: sum types should not have projections";
                   let field_name = sprintf "%a" (print_ident info) pr.ls_name in
                   fprintf fmt "(%s" field_name;
                   let field_trace =
@@ -807,7 +831,9 @@ let print_constructor_decl info fmt (ls,args) =
                   in
                   {field_name; field_trace; field_ident= Some pr.ls_name}
               | None ->
-                  let field_name = sprintf "%a_proj_%d" (print_ident info) ls.ls_name i in (* FIXME: is it possible to generate 2 same value with _proj_ inside it ? Need sanitizing and uniquifying ? *)
+                  let field_name = id_fresh (ls.ls_name.id_string^"_proj") in
+                  let field_name = create_vsymbol field_name ty(*dummy*) in
+                  let field_name = sprintf "%a" (print_var info) field_name in
                   fprintf fmt "(%s" field_name;
                   {field_name; field_trace= ""; field_ident= None}
             in
@@ -818,32 +844,38 @@ let print_constructor_decl info fmt (ls,args) =
         List.rev field_names)
   in
 
+  info.constr_proj_id <-
+    Mls.add ls (List.map (fun x -> x.field_name) field_names) info.constr_proj_id;
   if Strings.has_suffix "'mk" ls.ls_name.id_string then
-    begin
-      info.list_records <- Mstr.add (sprintf "%a" (print_ident info) ls.ls_name) field_names info.list_records;
+    begin try
+      let args = List.map (Opt.get) args in
+      info.record_fields <- Mls.add ls args info.record_fields
+    with _ -> ()
     end
 
 let print_data_decl info fmt (ts,cl) =
+  let is_record = match cl with [_] -> true | _ -> false in
   fprintf fmt "@[(%a@ %a)@]"
     (print_ident info) ts.ts_name
-    (print_list space (print_constructor_decl info)) cl
+    (print_list space (print_constructor_decl info is_record)) cl
 
 let print_data_def info fmt (ts,cl) =
+  let is_record = match cl with [_] -> true | _ -> false in
   if ts.ts_args <> [] then
     let args = List.map (fun arg -> arg.tv_name) ts.ts_args in
     fprintf fmt "@[(par (%a) (%a))@]"
       (print_list space (print_ident info)) args
-      (print_list space (print_constructor_decl info)) cl
+      (print_list space (print_constructor_decl info is_record)) cl
   else
     fprintf fmt "@[(%a)@]"
-      (print_list space (print_constructor_decl info)) cl
+      (print_list space (print_constructor_decl info is_record)) cl
 
 let print_sort_decl info fmt (ts,_) =
   fprintf fmt "@[(%a %d)@]"
     (print_ident info) ts.ts_name
     (List.length ts.ts_args)
 
-let print_decl vc_loc vc_attrs printing_info info fmt d =
+let print_decl vc_loc vc_attrs env printing_info info fmt d =
   match d.d_node with
   | Dtype ts ->
       print_type_decl info fmt ts
@@ -878,7 +910,7 @@ let print_decl vc_loc vc_attrs printing_info info fmt d =
       "smtv2: inductive definitions are not supported"
   | Dprop (k,pr,f) ->
       if Mid.mem pr.pr_name info.info_syn then () else
-      print_prop_decl vc_loc vc_attrs printing_info info fmt k pr f
+      print_prop_decl vc_loc vc_attrs env printing_info info fmt k pr f
 
 let set_produce_models fmt info =
   if info.info_cntexample then
@@ -926,13 +958,14 @@ let print_task version args ?old:_ fmt task =
     info_in_goal = false;
     info_vc_term = vc_info;
     info_printer = ident_printer ();
-    list_projs = Mstr.empty;
-    list_field_def = Mstr.empty;
+    type_coercions = Mty.empty;
+    type_fields = Mty.empty;
     info_version = version;
     meta_model_projection = Task.on_tagged_ls Theory.meta_projection task;
     meta_record_def = Task.on_tagged_ls Theory.meta_record task;
-    list_records = Mstr.empty;
-    noarg_constructors = [];
+    record_fields = Mls.empty;
+    constr_proj_id = Mls.empty;
+    constructors = Mstr.empty;
     info_cntexample_need_push = need_push;
     info_cntexample = cntexample;
     info_incremental = incremental;
@@ -955,7 +988,7 @@ let print_task version args ?old:_ fmt task =
         print_decls t.Task.task_prev;
         begin match t.Task.task_decl.Theory.td_node with
         | Theory.Decl d ->
-            begin try print_decl vc_loc vc_attrs args.printing_info info fmt d
+            begin try print_decl vc_loc vc_attrs args.env args.printing_info info fmt d
             with Unsupported s -> raise (UnsupportedDecl (d,s)) end
         | _ -> () end
     | None -> () in
