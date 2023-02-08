@@ -85,7 +85,7 @@
   <proof prover="3"><result status="valid" time="0.04" steps="158"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.18" expl="assertion" proved="true">
-  <proof prover="4"><result status="valid" time="0.88" steps="128255"/></proof>
+  <proof prover="4"><result status="valid" time="0.88" steps="127758"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.19" expl="loop variant decrease" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="44"/></proof>
@@ -100,7 +100,7 @@
   <proof prover="3"><result status="valid" time="0.05" steps="169"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.23" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.43" steps="76347"/></proof>
+  <proof prover="4"><result status="valid" time="0.43" steps="75596"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.24" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.40" steps="2043"/></proof>
@@ -117,16 +117,16 @@
   </transf>
   </goal>
   <goal name="cutpoints&#39;vc.27" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="1.24" steps="2663"/></proof>
+  <proof prover="3"><result status="valid" time="1.47" steps="3245"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.28" expl="assertion" proved="true">
   <proof prover="3"><result status="valid" time="0.50" steps="1744"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.29" expl="assertion" proved="true">
-  <proof prover="4"><result status="valid" time="0.73" steps="106166"/></proof>
+  <proof prover="4"><result status="valid" time="0.73" steps="105695"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.30" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.37" steps="63267"/></proof>
+  <proof prover="4"><result status="valid" time="0.37" steps="62798"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.31" expl="postcondition" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="40"/></proof>
@@ -138,10 +138,10 @@
   <proof prover="3"><result status="valid" time="0.07" steps="303"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.34" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="19.96" steps="182927"/></proof>
+  <proof prover="0"><result status="valid" time="61.46" steps="418475"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.35" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.78" steps="1584"/></proof>
+  <proof prover="3"><result status="valid" time="0.78" steps="1801"/></proof>
   </goal>
   <goal name="cutpoints&#39;vc.36" expl="assertion" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="34"/></proof>
@@ -209,7 +209,7 @@
   <proof prover="3"><result status="valid" time="0.01" steps="24"/></proof>
   </goal>
   <goal name="list_from&#39;vc.5" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.78" steps="2952"/></proof>
+  <proof prover="3"><result status="valid" time="0.78" steps="3328"/></proof>
   </goal>
   <goal name="list_from&#39;vc.6" expl="postcondition" proved="true">
   <proof prover="3"><result status="valid" time="0.06" steps="219"/></proof>
@@ -283,7 +283,7 @@
   <proof prover="3"><result status="valid" time="0.08" steps="158"/></proof>
   </goal>
   <goal name="sorted_lists&#39;vc.10" expl="precondition" proved="true">
-  <proof prover="4"><result status="valid" time="1.41" steps="213560"/></proof>
+  <proof prover="4"><result status="valid" time="1.41" steps="213334"/></proof>
   </goal>
   <goal name="sorted_lists&#39;vc.11" expl="precondition" proved="true">
   <proof prover="3"><result status="valid" time="0.51" steps="897"/></proof>
@@ -318,7 +318,7 @@
     <proof prover="3"><result status="valid" time="0.18" steps="424"/></proof>
     </goal>
     <goal name="sorted_lists&#39;vc.14.2.1" expl="postcondition" proved="true">
-    <proof prover="0" timelimit="1"><result status="valid" time="0.69" steps="4751"/></proof>
+    <proof prover="0" timelimit="1"><result status="valid" time="0.88" steps="5633"/></proof>
     </goal>
    </transf>
    </goal>

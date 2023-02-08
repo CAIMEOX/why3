@@ -23,6 +23,17 @@ API
   * `Whyconf.load_driver` has been replaced by `Driver.load_driver_for_prover` :x:
   * `Warning.emit` has been replaced by `Loc.warning` :x:
 
+Transformations
+  * The discrimination for eliminating polymorphism is improved so as
+    to keep algebraic datatypes as much as possible. This impacts the
+    SMT solvers CVC4, CVC5, Z3, from which me make better use of their
+    built-in support for ADTs.
+
+Drivers/printers
+  * The driver for Alt-Ergo >= 2.4.0 keeps algebraic datatypes. The
+    printer is extended accordingly. Why3 thus now makes use of the
+    built-in support for ADTs in Alt-Ergo.
+
 Provers
   * support for CVC5 1.0.0 (released April 6, 2022)
   * support for Alt-Ergo 2.4.2 (released August 1, 2022)

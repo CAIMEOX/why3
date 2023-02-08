@@ -16,7 +16,7 @@
  <proof prover="0"><result status="valid" time="0.00" steps="4"/></proof>
  </goal>
  <goal name="to_int_3" proved="true">
- <proof prover="0"><path name="720-A-to_int_3_1.ae"/><result status="valid" time="0.00" steps="44"/></proof>
+ <proof prover="0"><result status="valid" time="0.00" steps="44"/></proof>
  </goal>
  <goal name="g4" proved="true">
  <proof prover="0"><result status="valid" time="0.01" steps="30"/></proof>
@@ -35,7 +35,7 @@
 </theory>
 <theory name="B" proved="true">
  <goal name="reverse_append&#39;vc" expl="VC for reverse_append" proved="true">
- <proof prover="0"><result status="valid" time="1.08" steps="8401"/></proof>
+ <proof prover="0"><result status="valid" time="1.08" steps="8349"/></proof>
  </goal>
 </theory>
 <theory name="CaseOfRecord" proved="true">
@@ -53,7 +53,7 @@
  <proof prover="0"><result status="valid" time="0.00" steps="11"/></proof>
  </goal>
  <goal name="list_pos">
- <proof prover="0"><result status="timeout" time="5.00"/></proof>
+ <proof prover="0" obsolete="true"><result status="timeout" time="5.00"/></proof>
  </goal>
 </theory>
 <theory name="MutualDef" proved="true">
@@ -61,7 +61,7 @@
  <proof prover="0"><result status="valid" time="0.00" steps="0"/></proof>
  </goal>
  <goal name="size" proved="true">
- <proof prover="0"><result status="valid" time="0.00" steps="9"/></proof>
+ <proof prover="0"><path name="720-MutualDef-size_1.ae"/><result status="valid" time="0.00" steps="9"/></proof>
  </goal>
 </theory>
 </file>
