@@ -1,3 +1,6 @@
+
+(* several tests for Alt-Ergo support of Algebraic Data Types *)
+
 module A
   type nat = O | S nat
 
@@ -12,7 +15,17 @@ module A
      | _ -> false
      end
 
-   goal g3 : is2 (S (S O))
+  goal g3 : is2 (S (S O))
+
+  use int.Int
+
+  function to_int (x:nat) : int =
+    match x with
+    | O -> 0
+    | S n -> 1 + to_int n
+    end
+
+  goal to_int_3 : to_int (S (S (S O))) = 3
 
   use list.List
   use list.Nth
@@ -20,6 +33,7 @@ module A
 
   goal g4: nth 3 (Cons (S O) (Cons O (Cons (S O) (Cons (S (S O)) Nil)))) = Some (S (S O))
   goal g5: nth 4 (Cons (S O) (Cons O (Cons (S O) (Cons (S (S O)) Nil)))) = None
+
 end
 
 module AA
@@ -105,6 +119,22 @@ module MutualDef
 type t = A | B u
 with u = C | D t
 
-goal g : forall x:t. x = A
+goal discr : forall x:t. x <> B (D x)
+
+use int.Int
+
+function f (x:t) : int =
+  match x with
+  | A -> 1
+  | B y -> 1 + g y
+  end
+
+with g (y:u) : int =
+  match y with
+  | C -> 1
+  | D x -> 1 + f x
+  end
+
+goal size : f (B (D A)) = 3
 
 end

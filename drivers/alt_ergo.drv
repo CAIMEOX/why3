@@ -8,6 +8,7 @@ transformation "inline_trivial"
 
 transformation "remove_unused_keep_constants"
 transformation "eliminate_builtin"
+transformation "eliminate_mutual_recursion" (* Because of a bug in Alt-Ergo typer *)
 transformation "eliminate_inductive"
 transformation "eliminate_epsilon"
 transformation "eliminate_literal"

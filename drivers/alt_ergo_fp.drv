@@ -1,13 +1,15 @@
+(* Driver for Alt-Ergo with FPA support. For versions >= 2.4.0 *)
+
+prelude "(* this is the prelude for Alt-Ergo FPA, version >= 2.4.0 *)"
+
 filename "%f-%t-%g.ae"
 
 transformation "inline_trivial"
-
 transformation "eliminate_builtin"
-transformation "eliminate_recursion"
+transformation "eliminate_mutual_recursion" (* Because of a bug in Alt-Ergo typer *)
 transformation "eliminate_inductive"
 transformation "eliminate_epsilon"
 transformation "eliminate_literal"
-
 transformation "split_premise_right"
 transformation "simplify_formula"
 transformation "compile_match"

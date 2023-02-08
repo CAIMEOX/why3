@@ -43,7 +43,6 @@ type info = {
   mutable info_model: S.t;
   info_vc_term: vc_term_info;
   info_in_goal: bool;
-  meta_model_projection: Sls.t;
   info_cntexample: bool
   }
 
@@ -402,7 +401,7 @@ let print_logic_binder info fmt v =
   fprintf fmt "%a: %a" (print_ident info) v.vs_name (print_type info) v.vs_ty
 
 let print_type_decl ~first info fmt ts =
-  if first then fprintf fmt "type " else fprintf fmt "with ";
+  if first then fprintf fmt "type " else fprintf fmt " and ";
   match ts.ts_args with
   | [] -> print_ident info fmt ts.ts_name
   | [tv] -> fprintf fmt "%a %a"
@@ -490,28 +489,30 @@ let print_param_decl info fmt ls =
   if Mid.mem ls.ls_name info.info_syn then () else
   (print_param_decl info fmt ls; forget_tvs info)
 
-let print_logic_decl info fmt ls ld =
+let print_logic_decl ~first info fmt ls ld =
   collect_model_ls info ls;
   let vl,e = open_ls_defn ld in
   begin match e.t_ty with
     | Some _ ->
         (* TODO AC? *)
-        fprintf fmt "@[<hov 2>function %a(%a) : %a =@ %a@]@\n@\n"
+        fprintf fmt "@[<hov 2>%s %a(%a) : %a =@ %a@]@\n@\n"
+          (if first then "function" else "and")
           (print_ident info) ls.ls_name
           (print_list comma (print_logic_binder info)) vl
           (print_type info) (Opt.get ls.ls_value)
           (print_term info) e
     | None ->
-        fprintf fmt "@[<hov 2>predicate %a(%a) =@ %a@]@\n@\n"
+        fprintf fmt "@[<hov 2>%s %a(%a) =@ %a@]@\n@\n"
+          (if first then "predicate" else "and")
           (print_ident info) ls.ls_name
           (print_list comma (print_logic_binder info)) vl
           (print_fmla info) e
   end;
   List.iter (forget_var info) vl
 
-let print_logic_decl info fmt (ls,ld) =
+let print_logic_decl ~first info fmt (ls,ld) =
   if Mid.mem ls.ls_name info.info_syn then () else
-  (print_logic_decl info fmt ls ld; forget_tvs info)
+  (print_logic_decl ~first info fmt ls ld; forget_tvs info)
 
 let print_info_model info =
   (* Prints the content of info.info_model *)
@@ -571,8 +572,10 @@ let print_decl vc_loc vc_attrs env printing_info info fmt d =
   | Dparam ls ->
       collect_model_ls info ls;
       print_param_decl info fmt ls
-  | Dlogic dl ->
-      print_list nothing (print_logic_decl info) fmt dl
+  | Dlogic [] -> assert false
+  | Dlogic (d1::dl) ->
+      print_logic_decl ~first:true info fmt d1;
+      print_list nothing (print_logic_decl ~first:false info) fmt dl
   | Dind _ -> unsupportedDecl d
       "alt-ergo: inductive definitions are not supported"
   | Dprop (k,pr,f) -> print_prop_decl vc_loc vc_attrs env printing_info info fmt k pr f
@@ -602,7 +605,6 @@ let print_task args ?old:_ fmt task =
     info_model = S.empty;
     info_vc_term = vc_info;
     info_in_goal = false;
-    meta_model_projection = Task.on_tagged_ls Theory.meta_projection task;
     info_cntexample = cntexample;
   } in
   print_prelude fmt args.prelude;
