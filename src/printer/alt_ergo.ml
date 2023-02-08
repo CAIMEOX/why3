@@ -411,7 +411,7 @@ let print_type_decl ~first info fmt ts =
 
 let print_enum_decl ~first info fmt ts csl =
   let print_cs fmt (ls,_) = print_ident info fmt ls.ls_name in
-  fprintf fmt "@[<hov 2>type %a =@ %a@]@\n@\n" (print_type_decl ~first info) ts
+  fprintf fmt "@[<hov 2>%a =@ %a@]@\n@\n" (print_type_decl ~first info) ts
     (print_list alt2 print_cs) csl
 
 let print_ty_decl info fmt ts =
