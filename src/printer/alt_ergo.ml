@@ -401,29 +401,30 @@ and print_triggers info fmt tl =
 let print_logic_binder info fmt v =
   fprintf fmt "%a: %a" (print_ident info) v.vs_name (print_type info) v.vs_ty
 
-let print_type_decl info fmt ts = match ts.ts_args with
-  | [] -> fprintf fmt "type %a"
-      (print_ident info) ts.ts_name
-  | [tv] -> fprintf fmt "type %a %a"
+let print_type_decl ~first info fmt ts =
+  if first then fprintf fmt "type " else fprintf fmt "with ";
+  match ts.ts_args with
+  | [] -> print_ident info fmt ts.ts_name
+  | [tv] -> fprintf fmt "%a %a"
       (print_tvsymbol info) tv (print_ident info) ts.ts_name
-  | tl -> fprintf fmt "type (%a) %a"
+  | tl -> fprintf fmt "(%a) %a"
       (print_list comma (print_tvsymbol info)) tl (print_ident info) ts.ts_name
 
-let print_enum_decl info fmt ts csl =
+let print_enum_decl ~first info fmt ts csl =
   let print_cs fmt (ls,_) = print_ident info fmt ls.ls_name in
-  fprintf fmt "@[<hov 2>type %a =@ %a@]@\n@\n" (print_ident info) ts.ts_name
+  fprintf fmt "@[<hov 2>type %a =@ %a@]@\n@\n" (print_type_decl ~first info) ts
     (print_list alt2 print_cs) csl
 
 let print_ty_decl info fmt ts =
   if is_alias_type_def ts.ts_def then () else
   if Mid.mem ts.ts_name info.info_syn then () else
-  (fprintf fmt "%a@\n@\n" (print_type_decl info) ts; forget_tvs info)
+  (fprintf fmt "%a@\n@\n" (print_type_decl ~first:true info) ts; forget_tvs info)
 
-let print_data_decl info d fmt = function
+let print_data_decl ~first info d fmt = function
   | ts, csl
     when ts.ts_args = [] && List.for_all (fun (_,l) -> l = []) csl ->
        (* monomorphic enumeration *)
-      print_enum_decl info fmt ts csl
+      print_enum_decl ~first info fmt ts csl
   | ts, [(cs,pjl)] when List.for_all ((<>) None) pjl ->
       (* records *)
       if Sid.mem ts.ts_name (get_used_syms_decl d) then
@@ -445,7 +446,7 @@ let print_data_decl info d fmt = function
       let print_field fmt (pj,ty) =
         fprintf fmt "%s@ :@ %a" pj (print_type info) ty
       in
-      fprintf fmt "%a@ =@ {@ %a@ }@\n@\n" (print_type_decl info) ts
+      fprintf fmt "%a@ =@ {@ %a@ }@\n@\n" (print_type_decl ~first info) ts
         (print_list semi print_field) l
   | ts, csl ->
     let print_constructor info fmt (ls, args) =
@@ -469,13 +470,13 @@ let print_data_decl info d fmt = function
           (print_list semi print_field)
           fields
     in
-    fprintf fmt "@[<v 2>%a =@\n  %a@]@\n\n" (print_type_decl info) ts
+    fprintf fmt "@[<v 2>%a =@\n  %a@]@\n\n" (print_type_decl ~first info) ts
       (print_list alt2 (print_constructor info))
       csl
 
-let print_data_decl info d fmt ((ts, _csl) as p) =
+let print_data_decl ~first info d fmt ((ts, _csl) as p) =
   if Mid.mem ts.ts_name info.info_syn then () else
-  print_data_decl info d fmt p
+  print_data_decl ~first info d fmt p
 
 let print_param_decl info fmt ls =
   let sac = if Sls.mem ls info.info_ac then "ac " else "" in
@@ -563,8 +564,10 @@ let print_decl vc_loc vc_attrs env printing_info info fmt d =
   match d.d_node with
   | Dtype ts ->
       print_ty_decl info fmt ts
-  | Ddata dl ->
-      print_list nothing (print_data_decl info d) fmt dl
+  | Ddata [] -> assert false
+  | Ddata (d1::dl) ->
+      print_data_decl ~first:true info d fmt d1;
+      print_list nothing (print_data_decl ~first:false info d) fmt dl
   | Dparam ls ->
       collect_model_ls info ls;
       print_param_decl info fmt ls

@@ -53,5 +53,9 @@
  <proof prover="0"><result status="timeout" time="5.00"/></proof>
  </goal>
 </theory>
+<theory name="MutualDef">
+ <goal name="g">
+ </goal>
+</theory>
 </file>
 </why3session>

@@ -97,3 +97,14 @@ goal list_pos :
     end
 
 end
+
+
+module MutualDef
+
+
+type t = A | B u
+with u = C | D t
+
+goal g : forall x:t. x = A
+
+end
