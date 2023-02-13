@@ -133,7 +133,7 @@ run () {
     echo "OK (in ${elapsed}s)"
   else
     if $updateoracle; then
-      echo "Updating oracle"
+      echo "Updating oracle (in ${elapsed}s)"
       cp "$f.out" "${oracle_file}"
     else
       echo "FAILED"
@@ -184,8 +184,8 @@ for file in $files; do
       z3steps=1000000
       ;;
     "maps_mono")
-      cvc5steps=10000
-      z3steps=500000
+      cvc5steps=200
+      z3steps=1000000
       ;;
     "maps_poly")
       cvc5steps=10000
