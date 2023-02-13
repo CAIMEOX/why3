@@ -7,7 +7,7 @@
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 5, characters 40-52)
 File "bench/check-ce/floats.mlw", line 5, characters 40-52:
 Goal g1.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (18738 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -50,7 +50,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 7, characters 40-53)
 File "bench/check-ce/floats.mlw", line 7, characters 40-53:
 Goal g2.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (18785 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -93,7 +93,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 9, characters 24-42)
 File "bench/check-ce/floats.mlw", line 9, characters 24-42:
 Goal g3.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (18421 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -136,7 +136,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 11, characters 24-43)
 File "bench/check-ce/floats.mlw", line 11, characters 24-43:
 Goal g4.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (11783 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -179,7 +179,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 13, characters 24-43)
 File "bench/check-ce/floats.mlw", line 13, characters 24-43:
 Goal g5.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (19044 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -222,7 +222,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 15, characters 24-30)
 File "bench/check-ce/floats.mlw", line 15, characters 24-30:
 Goal g6.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (17806 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -265,7 +265,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 17, characters 40-64)
 File "bench/check-ce/floats.mlw", line 17, characters 40-64:
 Goal g7.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (36736 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -309,7 +309,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g8'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 19, characters 24-60:
 Goal g8.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (11805 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `g8'goal1` cannot be evaluated):
 File bv.mlw:
@@ -350,7 +350,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 21, characters 40-70)
 File "bench/check-ce/floats.mlw", line 21, characters 40-70:
 Goal g9.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (27183 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -394,7 +394,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 24, characters 24-98)
 File "bench/check-ce/floats.mlw", line 24, characters 24-98:
 Goal g10.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (48508 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -439,7 +439,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 26, characters 24-47)
 File "bench/check-ce/floats.mlw", line 26, characters 24-47:
 Goal g11.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (11783 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -482,7 +482,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 29, characters 24-54)
 File "bench/check-ce/floats.mlw", line 29, characters 24-54:
 Goal g12.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (11783 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -525,7 +525,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 32, characters 24-47)
 File "bench/check-ce/floats.mlw", line 32, characters 24-47:
 Goal g13.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (11783 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -568,7 +568,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 41, characters 40-52)
 File "bench/check-ce/floats.mlw", line 41, characters 40-52:
 Goal g1.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (27952 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -611,7 +611,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 43, characters 40-53)
 File "bench/check-ce/floats.mlw", line 43, characters 40-53:
 Goal g2.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (28051 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -654,7 +654,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 45, characters 24-42)
 File "bench/check-ce/floats.mlw", line 45, characters 24-42:
 Goal g3.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (27484 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -697,7 +697,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 47, characters 24-43)
 File "bench/check-ce/floats.mlw", line 47, characters 24-43:
 Goal g4.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (11783 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -740,7 +740,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 49, characters 24-43)
 File "bench/check-ce/floats.mlw", line 49, characters 24-43:
 Goal g5.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (28432 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -783,7 +783,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 51, characters 24-30)
 File "bench/check-ce/floats.mlw", line 51, characters 24-30:
 Goal g6.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (26851 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -826,7 +826,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 53, characters 40-64)
 File "bench/check-ce/floats.mlw", line 53, characters 40-64:
 Goal g7.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (67656 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -870,7 +870,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g8'goal3` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 55, characters 24-60:
 Goal g8.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (11805 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `g8'goal3` cannot be evaluated):
 File bv.mlw:
@@ -911,7 +911,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 57, characters 40-70)
 File "bench/check-ce/floats.mlw", line 57, characters 40-70:
 Goal g9.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (48949 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -955,7 +955,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 60, characters 24-98)
 File "bench/check-ce/floats.mlw", line 60, characters 24-98:
 Goal g10.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (142887 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -1000,7 +1000,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 62, characters 24-48)
 File "bench/check-ce/floats.mlw", line 62, characters 24-48:
 Goal g11.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (11783 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -1043,7 +1043,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 65, characters 24-62)
 File "bench/check-ce/floats.mlw", line 65, characters 24-62:
 Goal g12.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (11783 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -1086,7 +1086,7 @@ File floats.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 68, characters 24-48)
 File "bench/check-ce/floats.mlw", line 68, characters 24-48:
 Goal g13.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (11783 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:

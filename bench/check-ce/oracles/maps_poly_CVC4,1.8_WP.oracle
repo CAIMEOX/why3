@@ -7,7 +7,7 @@
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 8, characters 14-28)
 File "bench/check-ce/maps_poly.mlw", line 8, characters 14-28:
 Sub-goal Postcondition of goal test_map'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (5895 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -57,7 +57,7 @@ File maps_poly.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 14, characters 14-34)
 File "bench/check-ce/maps_poly.mlw", line 14, characters 14-34:
 Sub-goal Postcondition of goal test_map_multidim1'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (6010 steps).
 The program does not comply to the verification goal, or the contracts of
   some loop or function are too weak, for example during the following
   execution:
@@ -110,7 +110,7 @@ File maps_poly.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 19, characters 14-34)
 File "bench/check-ce/maps_poly.mlw", line 19, characters 14-34:
 Sub-goal Postcondition of goal test_map_multidim2'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (6135 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -237,7 +237,7 @@ File maps_poly.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 26, characters 14-28)
 File "bench/check-ce/maps_poly.mlw", line 26, characters 14-28:
 Sub-goal Postcondition of goal proj_map_test1'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (5895 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -287,7 +287,7 @@ File maps_poly.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 31, characters 14-28)
 File "bench/check-ce/maps_poly.mlw", line 31, characters 14-28:
 Sub-goal Postcondition of goal proj_map_test2'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (5885 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -340,7 +340,7 @@ File maps_poly.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 42, characters 3-31)
 File "bench/check-ce/maps_poly.mlw", line 42, characters 3-31:
 Goal t1.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (160 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File maps_poly.mlw:
@@ -366,5 +366,5 @@ File maps_poly.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g'goal` cannot be evaluated)
 File "bench/check-ce/maps_poly.mlw", line 50, characters 36-64:
 Goal g.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (192 steps).
 

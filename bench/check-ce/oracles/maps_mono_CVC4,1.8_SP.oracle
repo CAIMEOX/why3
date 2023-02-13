@@ -7,7 +7,7 @@
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 45, characters 14-54)
 File "bench/check-ce/maps_mono.mlw", line 45, characters 14-54:
 Sub-goal Postcondition of goal test_map'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (6204 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -65,7 +65,7 @@ File maps_mono.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 51, characters 14-88)
 File "bench/check-ce/maps_mono.mlw", line 51, characters 14-88:
 Sub-goal Postcondition of goal test_map_multidim1'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (6229 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -173,7 +173,7 @@ File maps_mono.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 56, characters 14-88)
 File "bench/check-ce/maps_mono.mlw", line 56, characters 14-88:
 Sub-goal Postcondition of goal test_map_multidim2'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (6757 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -322,7 +322,7 @@ File maps_mono.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 63, characters 14-54)
 File "bench/check-ce/maps_mono.mlw", line 63, characters 14-54:
 Sub-goal Postcondition of goal proj_map_test1'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (6204 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -382,7 +382,7 @@ File maps_mono.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 68, characters 14-56)
 File "bench/check-ce/maps_mono.mlw", line 68, characters 14-56:
 Sub-goal Postcondition of goal proj_map_test2'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (6262 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -450,7 +450,7 @@ File maps_mono.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 79, characters 3-31)
 File "bench/check-ce/maps_mono.mlw", line 79, characters 3-31:
 Goal t1.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (771 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File maps_mono.mlw:

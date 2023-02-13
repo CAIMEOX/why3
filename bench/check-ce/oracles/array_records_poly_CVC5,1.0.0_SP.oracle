@@ -7,7 +7,7 @@
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 27, characters 45-49:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (8435 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
@@ -43,7 +43,7 @@ File array_records_poly.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 27, characters 21-25:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (8459 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
@@ -82,7 +82,7 @@ File array_records_poly.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 27, characters 5-81:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (8596 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
@@ -126,7 +126,7 @@ File array_records_poly.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 28, characters 64-68:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (10044 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
@@ -162,7 +162,7 @@ File array_records_poly.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 28, characters 21-25:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (10116 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
@@ -201,7 +201,7 @@ File array_records_poly.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 28, characters 5-82:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (10208 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
@@ -245,7 +245,7 @@ File array_records_poly.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 29, characters 64-68:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (13625 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
@@ -290,7 +290,7 @@ File array_records_poly.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 29, characters 21-25:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (13707 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
@@ -338,7 +338,7 @@ File array_records_poly.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 29, characters 5-82:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (13799 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
@@ -391,7 +391,7 @@ File array_records_poly.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 30, characters 74-78:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (17755 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
@@ -445,7 +445,7 @@ File array_records_poly.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 30, characters 41-45:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (17849 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
@@ -502,7 +502,7 @@ File array_records_poly.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 30, characters 5-92:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (17943 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
@@ -557,7 +557,7 @@ File array_records_poly.mlw:
 
 File "bench/check-ce/array_records_poly.mlw", line 31, characters 13-35:
 Sub-goal Assertion of goal var_overwrite'vc.
-Prover result is: Valid.
+Prover result is: Valid (6446 steps).
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
@@ -568,7 +568,7 @@ Prover result is: Valid.
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
 File "bench/check-ce/array_records_poly.mlw", line 25, characters 15-36:
 Sub-goal Postcondition of goal var_overwrite'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (22139 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:

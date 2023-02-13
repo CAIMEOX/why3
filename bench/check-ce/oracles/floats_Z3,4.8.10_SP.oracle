@@ -7,7 +7,7 @@
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `g1'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 5, characters 40-52:
 Goal g1.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100054 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -50,7 +50,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `g2'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 7, characters 40-53:
 Goal g2.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100054 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -93,7 +93,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g3'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 9, characters 24-42:
 Goal g3.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100039 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -136,7 +136,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g4'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 11, characters 24-43:
 Goal g4.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100039 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -179,7 +179,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g5'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 13, characters 24-43:
 Goal g5.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100039 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -222,7 +222,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g6'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 15, characters 24-30:
 Goal g6.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100035 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -265,7 +265,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `g7'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 17, characters 40-64:
 Goal g7.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100056 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -309,7 +309,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g8'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 19, characters 24-60:
 Goal g8.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100043 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `g8'goal` cannot be evaluated):
 File bv.mlw:
@@ -348,52 +348,15 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `g9'goal` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 21, characters 40-70:
 Goal g9.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100046 steps).
 
 <check-ce-categorization>Categorizations of models:
-- Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 24, characters 24-98)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 24, characters 24-98)
-- Checked model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g10'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g10'goal1` cannot be evaluated)
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g10'goal` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g10'goal` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 24, characters 24-98:
 Goal g10.
-Prover result is: Unknown or time/memory/step limit.
-The program does not comply to the verification goal, for example during the
-  following execution:
-File int.mlw:
-  Line 13:
-    Constant zero initialization
-    zero = 0
-  Line 14:
-    Constant one initialization
-    one = 1
-File ieee_float.mlw:
-  Line 861:
-    Constant zeroF initialization
-  Line 63:
-    (giant-step) execution of unimplemented function with args:
-    result = UNDEFINED
-  Line 861:
-    zeroF = UNDEFINED
-File floats.mlw:
-  Line 24:
-    x = (0x1.99999Cp-4:t)
-    x = (0x1.99999Cp-4:t)
-    Execution of main function `g10'goal` with env:
-      x = (0x1.99999Cp-4:t)
-      zero = 0
-      one = 1
-      zeroF = UNDEFINED
-Unknown location:
-    Normal execution of function `Tuple0` with args:
-File floats.mlw:
-  Line 24:
-    Property failure at postcondition of `g10'goal` with:
-      RNE = UNDEFINED
-      RTZ = UNDEFINED
-      x = (0x1.99999Cp-4:t)
+Prover result is: Step limit exceeded (100049 steps).
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
@@ -404,7 +367,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g11'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 26, characters 24-47:
 Goal g11.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100039 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -447,7 +410,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g12'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 29, characters 24-54:
 Goal g12.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100039 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -490,7 +453,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g13'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 32, characters 24-47:
 Goal g13.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100039 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -528,12 +491,12 @@ File floats.mlw:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 41, characters 40-52)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 41, characters 40-52)
-- Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 41, characters 40-52)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 41, characters 40-52)
+- Checked model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `g1'goal3` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `g1'goal3` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 41, characters 40-52:
 Goal g1.
-Prover result is: Unknown (sat).
+Prover result is: Step limit exceeded (100054 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -571,12 +534,12 @@ File floats.mlw:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 43, characters 40-53)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 43, characters 40-53)
-- Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 43, characters 40-53)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 43, characters 40-53)
+- Checked model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `g2'goal3` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `g2'goal3` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 43, characters 40-53:
 Goal g2.
-Prover result is: Unknown (sat).
+Prover result is: Step limit exceeded (100054 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -619,7 +582,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g3'goal3` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 45, characters 24-42:
 Goal g3.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100039 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -657,12 +620,12 @@ File floats.mlw:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 47, characters 24-43)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 47, characters 24-43)
-- Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 47, characters 24-43)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 47, characters 24-43)
+- Checked model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g4'goal3` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g4'goal3` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 47, characters 24-43:
 Goal g4.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100039 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -700,12 +663,12 @@ File floats.mlw:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 49, characters 24-43)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 49, characters 24-43)
-- Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 49, characters 24-43)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 49, characters 24-43)
+- Checked model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g5'goal3` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g5'goal3` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 49, characters 24-43:
 Goal g5.
-Prover result is: Unknown (sat).
+Prover result is: Step limit exceeded (100039 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -748,7 +711,7 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g6'goal3` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 51, characters 24-30:
 Goal g6.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100035 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -788,26 +751,26 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `g7'goal2` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 53, characters 40-64:
 Goal g7.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100056 steps).
 
 <check-ce-categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
+- Selected model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g8'goal2` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g8'goal2` cannot be evaluated)
-- Selected model 1: INCOMPLETE
+- Checked model 1: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g8'goal3` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g8'goal3` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 55, characters 24-60:
 Goal g8.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100043 steps).
 The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `g8'goal3` cannot be evaluated):
+  (both RAC terminated because Postcondition of `g8'goal2` cannot be evaluated):
 File bv.mlw:
   Line 9:
     pow2 : int -> int = [|_ => 0|]
 File ieee_float.mlw:
   Line 194:
-    of_int : mode -> int -> t1 = fun x!094 x!171 -> NaN
+    of_int : mode -> int -> t1 = fun x!070 x!153 -> NaN
   Line 223:
     max_real : real = 0.0
   Line 224:
@@ -816,17 +779,17 @@ File ieee_float.mlw:
     in_int_range :
       int
       ->
-      bool = fun x!096 -> (int.Int.(<=) 0 x!096) /\ (int.Int.(<=) x!096 0)
+      bool = fun x!072 -> (int.Int.(<=) 0 x!072) /\ (int.Int.(<=) x!072 0)
   Line 269:
     in_safe_int_range :
       int
       ->
-      bool = fun x!096 ->
-              (int.Int.(<=) -9007199254740992 x!096) /\
-              (int.Int.(<=) x!096 9007199254740992)
+      bool = fun x!072 ->
+              (int.Int.(<=) -9007199254740992 x!072) /\
+              (int.Int.(<=) x!072 9007199254740992)
 File real.mlw:
   Line 201:
-    sqr : real -> real = fun x!094 -> (real.Real.( * ) x!094 x!094)
+    sqr : real -> real = fun x!070 -> (real.Real.( * ) x!070 x!070)
   Line 203:
     sqrt : real -> real = [|_ => 0.0|]
 File floats.mlw:
@@ -839,63 +802,26 @@ File floats.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `g9'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 57, characters 40-70:
 Goal g9.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100046 steps).
 
 <check-ce-categorization>Categorizations of models:
-- Selected model 0: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 60, characters 24-98)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 60, characters 24-98)
-- Checked model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g10'goal3` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g10'goal3` cannot be evaluated)
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g10'goal1` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g10'goal1` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 60, characters 24-98:
 Goal g10.
-Prover result is: Unknown or time/memory/step limit.
-The program does not comply to the verification goal, for example during the
-  following execution:
-File int.mlw:
-  Line 13:
-    Constant zero initialization
-    zero = 0
-  Line 14:
-    Constant one initialization
-    one = 1
-File ieee_float.mlw:
-  Line 902:
-    Constant zeroF initialization
-  Line 63:
-    (giant-step) execution of unimplemented function with args:
-    result = UNDEFINED
-  Line 902:
-    zeroF = UNDEFINED
-File floats.mlw:
-  Line 60:
-    x = (0x1.999999999999Bp-4:t1)
-    x = (0x1.999999999999Bp-4:t1)
-    Execution of main function `g10'goal` with env:
-      x = (0x1.999999999999Bp-4:t1)
-      zero = 0
-      one = 1
-      zeroF = UNDEFINED
-Unknown location:
-    Normal execution of function `Tuple0` with args:
-File floats.mlw:
-  Line 60:
-    Property failure at postcondition of `g10'goal2` with:
-      RNE = UNDEFINED
-      RTZ = UNDEFINED
-      x = (0x1.999999999999Bp-4:t1)
+Prover result is: Step limit exceeded (100049 steps).
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 62, characters 24-48)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 62, characters 24-48)
-- Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 62, characters 24-48)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 62, characters 24-48)
+- Checked model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g11'goal3` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g11'goal3` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 62, characters 24-48:
 Goal g11.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100039 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -933,12 +859,12 @@ File floats.mlw:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 65, characters 24-62)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 65, characters 24-62)
-- Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 65, characters 24-62)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 65, characters 24-62)
+- Checked model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g12'goal3` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g12'goal3` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 65, characters 24-62:
 Goal g12.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100039 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -976,12 +902,12 @@ File floats.mlw:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 68, characters 24-48)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 68, characters 24-48)
-- Checked model 1: NC
-  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 68, characters 24-48)
-  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/floats.mlw", line 68, characters 24-48)
+- Checked model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g13'goal3` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g13'goal3` cannot be evaluated)
 File "bench/check-ce/floats.mlw", line 68, characters 24-48:
 Goal g13.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (100039 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:

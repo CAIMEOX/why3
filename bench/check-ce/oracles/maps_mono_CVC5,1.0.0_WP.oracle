@@ -4,7 +4,7 @@
   - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to set at "bench/check-ce/maps_mono.mlw", line 47, characters 9-29)
 File "bench/check-ce/maps_mono.mlw", line 45, characters 14-54:
 Sub-goal Postcondition of goal test_map'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (206 steps).
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
@@ -12,7 +12,7 @@ Prover result is: Unknown or time/memory/step limit.
   - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to get at "bench/check-ce/maps_mono.mlw", line 53, characters 27-46)
 File "bench/check-ce/maps_mono.mlw", line 51, characters 14-88:
 Sub-goal Postcondition of goal test_map_multidim1'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (255 steps).
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
@@ -20,7 +20,7 @@ Prover result is: Unknown or time/memory/step limit.
   - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to get at "bench/check-ce/maps_mono.mlw", line 58, characters 13-30)
 File "bench/check-ce/maps_mono.mlw", line 56, characters 14-88:
 Sub-goal Postcondition of goal test_map_multidim2'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (332 steps).
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
@@ -28,7 +28,7 @@ Prover result is: Unknown or time/memory/step limit.
   - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to set at "bench/check-ce/maps_mono.mlw", line 65, characters 9-29)
 File "bench/check-ce/maps_mono.mlw", line 63, characters 14-54:
 Sub-goal Postcondition of goal proj_map_test1'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (206 steps).
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
@@ -36,7 +36,7 @@ Prover result is: Unknown or time/memory/step limit.
   - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call to set1 at "bench/check-ce/maps_mono.mlw", line 70, characters 9-33)
 File "bench/check-ce/maps_mono.mlw", line 68, characters 14-56:
 Sub-goal Postcondition of goal proj_map_test2'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (220 steps).
 
 <check-ce-categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
@@ -44,5 +44,5 @@ Prover result is: Unknown or time/memory/step limit.
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `t1'goal` cannot be evaluated)
 File "bench/check-ce/maps_mono.mlw", line 79, characters 3-31:
 Goal t1.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (211 steps).
 

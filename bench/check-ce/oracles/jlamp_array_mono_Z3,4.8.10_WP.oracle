@@ -1,6 +1,6 @@
 File bench/check-ce/jlamp_array_mono.mlw:
 Goal array'vc.
-Prover result is: Valid.
+Prover result is: Valid (609 steps).
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: INCOMPLETE
@@ -11,7 +11,7 @@ Prover result is: Valid.
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `f` cannot be evaluated)
 File "bench/check-ce/jlamp_array_mono.mlw", line 48, characters 4-16:
 Sub-goal Index in array bounds of goal f'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000041 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `f` cannot be evaluated):
 File jlamp_array_mono.mlw:
@@ -53,7 +53,7 @@ File jlamp_array_mono.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `f` cannot be evaluated)
 File "bench/check-ce/jlamp_array_mono.mlw", line 47, characters 14-27:
 Sub-goal Postcondition of goal f'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000066 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `f` cannot be evaluated):
 File jlamp_array_mono.mlw:
@@ -100,7 +100,7 @@ File jlamp_array_mono.mlw:
 
 File "bench/check-ce/jlamp_array_mono.mlw", line 54, characters 4-16:
 Sub-goal Index in array bounds of goal g'vc.
-Prover result is: Valid.
+Prover result is: Valid (851 steps).
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: INCOMPLETE
@@ -111,7 +111,7 @@ Prover result is: Valid.
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `g` cannot be evaluated)
 File "bench/check-ce/jlamp_array_mono.mlw", line 53, characters 14-27:
 Sub-goal Postcondition of goal g'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000071 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `g` cannot be evaluated):
 File jlamp_array_mono.mlw:
@@ -158,7 +158,7 @@ File jlamp_array_mono.mlw:
 
 File "bench/check-ce/jlamp_array_mono.mlw", line 60, characters 4-16:
 Sub-goal Index in array bounds of goal h'vc.
-Prover result is: Valid.
+Prover result is: Valid (851 steps).
 
 <check-ce-categorization>Categorizations of models:
 - Selected model 0: INCOMPLETE
@@ -169,7 +169,7 @@ Prover result is: Valid.
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `h` cannot be evaluated)
 File "bench/check-ce/jlamp_array_mono.mlw", line 59, characters 14-27:
 Sub-goal Postcondition of goal h'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000071 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `h` cannot be evaluated):
 File jlamp_array_mono.mlw:
