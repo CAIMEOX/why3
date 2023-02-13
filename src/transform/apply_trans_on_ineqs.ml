@@ -346,8 +346,8 @@ let merge_round_error_fmlas info t =
                                               + (1+eps+t1_factor)t2_cst
  *)
 (* TODO: Also take into account the underflows *)
-let combine_errors_with_addition symbols info t1 exact_t1 t1_factor t1' t1_cst
-    t2 exact_t2 t2_factor t2' t2_cst r =
+let combine_errors_with_addition symbols info f' t1 exact_t1 t1_factor t1'
+    t1_cst t2 exact_t2 t2_factor t2' t2_cst r =
   let eps = get_eps None in
   let to_real = get_to_real symbols None in
   let to_real t = fs_app to_real [ t ] ty_real in
@@ -402,12 +402,21 @@ let combine_errors_with_addition symbols info t1 exact_t1 t1_factor t1' t1_cst
         +. abs (to_real t2 +. (exact_t2 -. exact_t2))
   in
   let f2 =
-    t_by
-      (abs (to_real t1 +. to_real t2)
+    t_and f2
+      (abs (to_real t1 +. (exact_t1 -. exact_t1))
+       +. abs (to_real t2 +. (exact_t2 -. exact_t2))
+      <=. abs (to_real t1 -. exact_t1)
+          +. t1'
+          +. abs (to_real t2 +. (exact_t2 -. exact_t2)))
+  in
+  let f2 =
+    t_and f2
+      (abs (to_real t1 -. exact_t1)
+       +. t1'
+       +. abs (to_real t2 +. (exact_t2 -. exact_t2))
       <=. abs (to_real t1 -. exact_t1)
           +. t1'
           +. (abs (to_real t2 -. exact_t2) +. t2'))
-      f2
   in
   let f2 =
     t_and f2
@@ -423,7 +432,9 @@ let combine_errors_with_addition symbols info t1 exact_t1 t1_factor t1' t1_cst
          (eps *. (t2' +. t2_cst) <. t1' +. t1_cst))
       f2
   in
-  let f = t_by (delta <=. delta_upper_bound) (t_and (t_and f1 f1') f2) in
+  let f =
+    t_by (delta <=. delta_upper_bound) (t_so_simp f' (t_and (t_and f1 f1') f2))
+  in
   let rel_err = t1_factor +. t2_factor +. eps in
   let cst_err =
     ((one +. eps +. t2_factor) *. t1_cst)
@@ -457,7 +468,7 @@ let combine_errors_with_addition symbols info t1 exact_t1 t1_factor t1' t1_cst
  *)
 (* Perform error combination while assuming we don't underflow, so we don't have
    an eta *)
-let combine_errors_with_multiplication symbols info t1 exact_t1 t1_factor t1'
+let combine_errors_with_multiplication symbols info f' t1 exact_t1 t1_factor t1'
     t1_cst t2 exact_t2 t2_factor t2' t2_cst r =
   let eps = get_eps None in
   let to_real = get_to_real symbols None in
@@ -520,7 +531,7 @@ let combine_errors_with_multiplication symbols info t1 exact_t1 t1_factor t1'
   in
   (AbsRelative (exact_t1 *. exact_t2, rel_err, abs (t1' *. t2'), cst_err), f)
 
-let apply_multiplication_thm_for_overflow symbols info x y r = assert false
+let apply_multiplication_thm_for_overflow symbols info f x y r = assert false
 
 let apply_args symbols f t t_info =
   let to_real = get_to_real symbols None in
@@ -534,9 +545,9 @@ let apply_args symbols f t t_info =
     | AbsRelative (exact_t, t_factor, t', t_cst) ->
       f t exact_t t_factor t' t_cst)
 
-let apply_multiplication_thms prove_overflow symbols info x y r =
+let apply_multiplication_thms prove_overflow symbols info f x y r =
   if prove_overflow then
-    apply_multiplication_thm_for_overflow symbols info x y r
+    apply_multiplication_thm_for_overflow symbols info f x y r
   else
     let eps = get_eps None in
     let eta = get_eta None in
@@ -569,7 +580,7 @@ let apply_multiplication_thms prove_overflow symbols info x y r =
       (info, fmla)
     | _ ->
       let combine_errors_with_multiplication =
-        combine_errors_with_multiplication symbols info
+        combine_errors_with_multiplication symbols info f
       in
       let combine_errors_with_multiplication =
         apply_args symbols combine_errors_with_multiplication x x_info
@@ -702,7 +713,7 @@ let apply_multiplication_thms prove_overflow symbols info x y r =
 (*       in *)
 (*       (info, fmla))) *)
 (*  *)
-let apply_addition_thm_for_overflow symbols info x y r =
+let apply_addition_thm_for_overflow symbols info f x y r =
   let eps = get_eps None in
   let to_real = get_to_real symbols None in
   let to_real t = fs_app to_real [ t ] ty_real in
@@ -722,9 +733,9 @@ let apply_addition_thm_for_overflow symbols info x y r =
         (info, fmla) y_info.ineqs)
     (info, t_true) x_info.ineqs
 
-let apply_addition_thms prove_overflow symbols info x y r =
+let apply_addition_thms prove_overflow symbols info f x y r =
   if prove_overflow then
-    apply_addition_thm_for_overflow symbols info x y r
+    apply_addition_thm_for_overflow symbols info f x y r
   else
     let eps = get_eps None in
     let to_real = get_to_real symbols None in
@@ -758,7 +769,7 @@ let apply_addition_thms prove_overflow symbols info x y r =
       (info, left <=. right)
     | _ ->
       let combine_errors_with_addition =
-        combine_errors_with_addition symbols info
+        combine_errors_with_addition symbols info f
       in
       let combine_errors_with_addition =
         apply_args symbols combine_errors_with_addition x x_info
@@ -771,11 +782,11 @@ let apply_addition_thms prove_overflow symbols info x y r =
 (* t3 is a result of FP arithmetic operation involving t1 and t2 *)
 (* Compute new inequalities on t3 based on what we know on t1 and t2 *)
 (* TODO: Support "|x| <= max(|y|,|z|)" ??? *)
-let use_ieee_thms prove_overflow symbols info ieee_symbol t1 t2 r =
+let use_ieee_thms prove_overflow symbols info ieee_symbol f t1 t2 r =
   if ls_equal ieee_symbol symbols.add_post_double then
-    apply_addition_thms prove_overflow symbols info t1 t2 r
+    apply_addition_thms prove_overflow symbols info f t1 t2 r
   else if ls_equal ieee_symbol symbols.mul_post_double then
-    apply_multiplication_thms prove_overflow symbols info t1 t2 r
+    apply_multiplication_thms prove_overflow symbols info f t1 t2 r
   else
     failwith "Unsupported symbol"
 
@@ -813,10 +824,7 @@ let rec apply_theorems prove_overflow symbols info t =
     let info, f1 = apply info t1 in
     let info, f2 = apply info t2 in
     let f = t_and_simp f1 f2 in
-    let info, fmla =
-      use_ieee_thms prove_overflow symbols info ieee_post t1 t2 t
-    in
-    (info, t_so_simp f fmla)
+    use_ieee_thms prove_overflow symbols info ieee_post f t1 t2 t
   | None -> (
     match t_info.round_error with
     | None -> (info, t_true)
