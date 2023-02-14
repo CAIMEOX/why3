@@ -753,6 +753,41 @@ let find_provers data =
       Stdlib.compare (Util.split_version v2) (Util.split_version v1)
     ) provers
 
+let list_supported_provers data =
+  let open Prover_autodetection_data in
+  List.rev @@
+  List.fold_left
+    (fun ps { prover_name ; prover_altern ; versions_ok } ->
+       List.fold_left
+         (fun ps (v,_) ->
+            Wc.{ prover_name ; prover_altern ; prover_version = v } :: ps
+         ) ps versions_ok
+    ) [] data.skeletons
+
+let find_supported_prover data prover =
+  try
+    let Wc.{ prover_name ; prover_version ; prover_altern } = prover in
+    let skeleton =
+      let open Prover_autodetection_data in
+      List.find
+        (fun d ->
+           (d.prover_name = prover_name) &&
+           (d.prover_altern = prover_altern) &&
+           List.exists (fun (v,_) -> v = prover_version) d.versions_ok
+        ) data.skeletons in
+    Some Wc.{
+        prover ;
+        command = "" ;
+        command_steps = None ;
+        driver = skeleton.prover_driver ;
+        editor = skeleton.prover_editor;
+        in_place = skeleton.prover_in_place;
+        interactive = (match skeleton.kind with ITP -> true | ATP -> false);
+        extra_options = [];
+        extra_drivers = [];
+      }
+  with Not_found -> None
+
 let remove_auto_provers config =
   Partial.remove_auto config
 

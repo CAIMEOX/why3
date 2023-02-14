@@ -230,16 +230,16 @@ let memlimit m = m.memlimit
 let running_provers_max m = m.running_provers_max
 let default_editor m = m.default_editor
 
+exception NoCommandForExternalProver of string
 exception StepsCommandNotSpecified of string
 
 let get_complete_command pc ~with_steps =
   let comm = if not with_steps then pc.command
     else
       match pc.command_steps with
-      | None -> raise (StepsCommandNotSpecified
-          "The solver is used with a step limit and the command for \
-            running the solver with a step limit is not specified.")
+      | None -> raise (StepsCommandNotSpecified pc.prover.prover_name)
       | Some command_steps -> command_steps in
+  if comm = "" then raise (NoCommandForExternalProver pc.prover.prover_name) ;
   String.concat " " (comm :: pc.extra_options)
 
 let set_limits m time mem running =

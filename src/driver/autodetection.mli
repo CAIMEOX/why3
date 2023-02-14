@@ -47,6 +47,21 @@ val find_provers : Prover_autodetection_data.t -> (string * string * string) lis
 (** Detect the provers and return their path, name, and versions.
     The resulting list is sorted by names and versions. *)
 
+val list_supported_provers : Prover_autodetection_data.t -> Whyconf.prover list
+(** Returns the list of all supported provers. *)
+
+val find_supported_prover : Prover_autodetection_data.t ->
+  Whyconf.prover -> Whyconf.config_prover option
+(** [find_supported_prover data prover] looks for known
+    prover configuration with corresponding name, version and alternative.
+
+    The returned prover-config is {i not} suitable for executing the prover
+    since the command strings are empty. Indeed, the prover is {i not} checked
+    to be installed on the local computer.
+
+    However, the returned prover-config can be used for preparing and printing a
+    task for the specified prover. *)
+
 val remove_auto_provers: Whyconf.config -> Whyconf.config
 (** Remove all the non-manual provers from the configuration *)
 
