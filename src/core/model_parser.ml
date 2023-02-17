@@ -646,6 +646,7 @@ let rec json_of_concrete_term ct =
         "proj_value", json_of_concrete_term proj_value
       ]
     ]
+      [@@warning "-42"]
 
 let json_model_element me =
   let open Json_base in

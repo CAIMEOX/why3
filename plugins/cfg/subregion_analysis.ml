@@ -143,8 +143,6 @@ let rec generate_equality known f v (k : term -> term) : term list =
  *)
   | _, _ -> assert false (* unreachable *)
 
-open Wstdlib
-
 (* The domain maps symbols to their symbolic value *)
 type domain = domain_elt Mpv.t
 

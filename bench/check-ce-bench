@@ -177,6 +177,9 @@ for file in $files; do
     "668_projection")
       z3steps=500000
       ;;
+    "703_reduce_term")
+      z3steps=500000
+      ;;
     "array_records_mono")
       z3stepsrac=100
       ;;
@@ -187,14 +190,27 @@ for file in $files; do
       z3steps=100000
       ;;
     "floats")
-      cvc5stepsrac=10000
-      z3steps=100000
-      z3stepsrac=10000
+      #cvc4steps=15000
+      #cvc4stepsrac=1500
+      #cvc5steps=1000
+      #cvc5stepsrac=10
+      #z3steps=1000
+      #z3stepsrac=10
       ;;
     "int_overflow")
-      z3steps=400000
+      cvc5steps=10000
+      z3steps=100000
+      ;;
+    "jlamp_array_mono")
+      z3steps=40000
+      z3stepsrac=4000
       ;;
     "loop_inv_real")
+      z3steps=1000000
+      ;;
+    "loop_inv_real_mono")
+      cvc5steps=10000
+      cvc5stepsrac=10000
       z3steps=1000000
       ;;
     "maps_mono")
