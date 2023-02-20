@@ -2014,7 +2014,7 @@
    <proof prover="4"><result status="valid" time="0.31" steps="489"/></proof>
    </goal>
    <goal name="skolemize&#39;vc.121.5" expl="postcondition" proved="true">
-   <proof prover="4" timelimit="10"><result status="valid" time="7.32" steps="2873"/></proof>
+   <proof prover="4" timelimit="10"><result status="valid" time="6.44" steps="2873"/></proof>
    </goal>
   </transf>
   </goal>
@@ -2456,7 +2456,7 @@
    <proof prover="4"><result status="valid" time="0.08" steps="28"/></proof>
    </goal>
    <goal name="exists_quantify&#39;vc.3.4" expl="assertion" proved="true">
-   <proof prover="4"><result status="valid" time="0.22" steps="41"/></proof>
+   <proof prover="4"><result status="valid" time="0.10" steps="41"/></proof>
    </goal>
   </transf>
   </goal>

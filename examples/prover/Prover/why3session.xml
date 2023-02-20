@@ -1094,7 +1094,7 @@
     <proof prover="2" timelimit="5"><result status="valid" time="0.20" steps="62"/></proof>
     </goal>
     <goal name="decompose&#39;vc.67.0.4" expl="VC for decompose" proved="true">
-    <proof prover="1"><result status="valid" time="3.33"/></proof>
+    <proof prover="1"><result status="valid" time="3.30"/></proof>
     </goal>
     <goal name="decompose&#39;vc.67.0.5" expl="VC for decompose" proved="true">
     <proof prover="2" timelimit="5"><result status="valid" time="0.27" steps="159"/></proof>
@@ -5453,7 +5453,7 @@
   <proof prover="2"><result status="valid" time="0.12" steps="84"/></proof>
   </goal>
   <goal name="contradiction_find_neg_atom&#39;vc.191" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="6.91" steps="1802"/></proof>
+  <proof prover="2"><result status="valid" time="6.93" steps="1802"/></proof>
   </goal>
   <goal name="contradiction_find_neg_atom&#39;vc.192" expl="precondition" proved="true">
   <proof prover="6"><result status="valid" time="0.77"/></proof>
