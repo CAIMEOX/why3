@@ -992,6 +992,12 @@ let get_loc_kind oloc attrs () =
       try Some (Lists.first search (Sattr.elements attrs)) with
         Not_found -> None
 
+let get_loc_from_at_attr a =
+  try
+    Scanf.sscanf a.attr_string "at:%[^:]:loc:%[^:]:%d"
+      (fun label f' l' -> Some (f',l'))
+  with _ -> None
+
 let get_call_result_kind attrs () =
   Opt.map (fun l -> Call_result l)
     (search_attribute_value get_call_result_loc attrs)
@@ -1035,6 +1041,17 @@ let add_to_model_if_loc ?kind me model =
       let model_file = Mint.add line_number elements model_file in
       Mstr.add filename model_file model
 
+let add_to_model ?kind ~filename ~line_number me model =
+  let model_file = get_model_file model filename in
+  let me = match kind with
+    | None -> me
+    | Some me_kind -> {me with me_kind}
+  in
+  let elements = me :: get_elements model_file line_number in
+  let elements = elements in
+  let model_file = Mint.add line_number elements model_file in
+  Mstr.add filename model_file model
+
 let remove_field :
     ( Sattr.t * term * concrete_syntax_term ->
       Sattr.t * term * concrete_syntax_term ) ref =
@@ -1070,7 +1087,12 @@ let build_model_rec pm (elts: model_element list) : model_files =
   (* Add a model element at the relevant locations *)
   let add_model_elt model me =
     let kind = compute_kind vc_attrs me.me_location me.me_attrs in
-    let model = add_to_model_if_loc ~kind me model in
+    let add_at_attr_loc a =
+      match get_loc_from_at_attr a with
+      | Some (filename,line_number) ->
+        add_to_model ~kind ~filename ~line_number me
+      | None -> add_to_model_if_loc ~kind me in
+    let model = Sattr.fold add_at_attr_loc me.me_attrs model in
     let oloc = me.me_lsymbol.ls_name.id_loc in
     let model = add_with_loc_set_kind me oloc model in
     let add_written_loc a =
