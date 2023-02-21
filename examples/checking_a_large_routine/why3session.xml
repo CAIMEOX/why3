@@ -2,16 +2,60 @@
 <!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
-<prover id="0" name="Alt-Ergo" version="2.0.0" timelimit="10" steplimit="0" memlimit="1000"/>
 <prover id="1" name="Alt-Ergo" version="2.3.0" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="2" name="Alt-Ergo" version="2.4.2" timelimit="5" steplimit="0" memlimit="1000"/>
 <file format="whyml" proved="true">
 <path name=".."/><path name="checking_a_large_routine.mlw"/>
 <theory name="CheckingALargeRoutine" proved="true">
  <goal name="routine&#39;vc" expl="VC for routine" proved="true">
- <proof prover="0"><result status="valid" time="0.01" steps="26"/></proof>
+ <transf name="split_vc" proved="true" >
+  <goal name="routine&#39;vc.0" expl="loop invariant init" proved="true">
+  <proof prover="2"><result status="valid" time="0.00" steps="4"/></proof>
+  </goal>
+  <goal name="routine&#39;vc.1" expl="loop invariant init" proved="true">
+  <proof prover="2"><result status="valid" time="0.00" steps="14"/></proof>
+  </goal>
+  <goal name="routine&#39;vc.2" expl="loop variant decrease" proved="true">
+  <proof prover="2"><result status="valid" time="0.00" steps="40"/></proof>
+  </goal>
+  <goal name="routine&#39;vc.3" expl="loop invariant preservation" proved="true">
+  <proof prover="2"><result status="valid" time="0.00" steps="40"/></proof>
+  </goal>
+  <goal name="routine&#39;vc.4" expl="loop variant decrease" proved="true">
+  <proof prover="2"><result status="valid" time="0.01" steps="47"/></proof>
+  </goal>
+  <goal name="routine&#39;vc.5" expl="loop invariant preservation" proved="true">
+  <proof prover="2"><result status="valid" time="0.01" steps="113"/></proof>
+  </goal>
+  <goal name="routine&#39;vc.6" expl="postcondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.00" steps="14"/></proof>
+  </goal>
+ </transf>
  </goal>
  <goal name="routine2&#39;vc" expl="VC for routine2" proved="true">
- <proof prover="0"><result status="valid" time="0.01" steps="15"/></proof>
+ <transf name="split_vc" proved="true" >
+  <goal name="routine2&#39;vc.0" expl="loop invariant init" proved="true">
+  <proof prover="2"><result status="valid" time="0.00" steps="5"/></proof>
+  </goal>
+  <goal name="routine2&#39;vc.1" expl="loop invariant init" proved="true">
+  <proof prover="2"><result status="valid" time="0.00" steps="12"/></proof>
+  </goal>
+  <goal name="routine2&#39;vc.2" expl="loop invariant preservation" proved="true">
+  <proof prover="2"><result status="valid" time="0.00" steps="23"/></proof>
+  </goal>
+  <goal name="routine2&#39;vc.3" expl="loop invariant preservation" proved="true">
+  <proof prover="2"><result status="valid" time="0.01" steps="83"/></proof>
+  </goal>
+  <goal name="routine2&#39;vc.4" expl="loop invariant preservation" proved="true">
+  <proof prover="2"><result status="valid" time="0.00" steps="11"/></proof>
+  </goal>
+  <goal name="routine2&#39;vc.5" expl="postcondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.00" steps="7"/></proof>
+  </goal>
+  <goal name="routine2&#39;vc.6" expl="VC for routine2" proved="true">
+  <proof prover="2"><result status="valid" time="0.00" steps="4"/></proof>
+  </goal>
+ </transf>
  </goal>
  <goal name="downward&#39;vc" expl="VC for downward" proved="true">
  <proof prover="1"><result status="valid" time="0.04" steps="26"/></proof>

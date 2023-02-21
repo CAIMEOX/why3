@@ -2,9 +2,9 @@
 <!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
+<prover id="0" name="Alt-Ergo" version="2.4.2" timelimit="5" steplimit="0" memlimit="4000"/>
 <prover id="4" name="Z3" version="4.6.0" timelimit="5" steplimit="0" memlimit="4000"/>
 <prover id="5" name="Eprover" version="2.0" timelimit="5" steplimit="0" memlimit="1000"/>
-<prover id="6" name="Alt-Ergo" version="2.0.0" timelimit="5" steplimit="0" memlimit="4000"/>
 <prover id="7" name="CVC4" version="1.5" timelimit="5" steplimit="0" memlimit="4000"/>
 <file format="whyml" proved="true">
 <path name=".."/><path name="esterel.mlw"/>
@@ -13,59 +13,59 @@
  <proof prover="5"><result status="valid" time="0.02"/></proof>
  </goal>
  <goal name="union&#39;vc" expl="VC for union" proved="true">
- <proof prover="6"><result status="valid" time="0.16" steps="439"/></proof>
+ <proof prover="0"><result status="valid" time="0.16" steps="823"/></proof>
  </goal>
  <goal name="intersection&#39;vc" expl="VC for intersection" proved="true">
- <proof prover="6"><result status="valid" time="0.06" steps="311"/></proof>
+ <proof prover="0"><result status="valid" time="0.06" steps="867"/></proof>
  </goal>
  <goal name="aboveMin&#39;vc" expl="VC for aboveMin" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="aboveMin&#39;vc.0" expl="assertion" proved="true">
-  <proof prover="6"><result status="valid" time="0.15" steps="399"/></proof>
+  <proof prover="0"><result status="valid" time="0.15" steps="794"/></proof>
   </goal>
   <goal name="aboveMin&#39;vc.1" expl="assertion" proved="true">
-  <proof prover="7"><result status="valid" time="0.05" steps="19883"/></proof>
+  <proof prover="7"><result status="valid" time="0.05" steps="19563"/></proof>
   </goal>
   <goal name="aboveMin&#39;vc.2" expl="assertion" proved="true">
-  <proof prover="7"><result status="valid" time="2.11" steps="292260"/></proof>
+  <proof prover="7"><result status="valid" time="1.59" steps="290005"/></proof>
   </goal>
   <goal name="aboveMin&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.84" steps="1259"/></proof>
+  <proof prover="0"><result status="valid" time="0.43" steps="3979"/></proof>
   </goal>
   <goal name="aboveMin&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.01" steps="30931"/></proof>
-  <proof prover="6"><result status="valid" time="0.02" steps="76"/></proof>
-  <proof prover="7"><result status="valid" time="0.03" steps="9908"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="214"/></proof>
+  <proof prover="4"><result status="valid" time="0.01" steps="29088"/></proof>
+  <proof prover="7"><result status="valid" time="0.03" steps="9646"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="maxUnion&#39;vc" expl="VC for maxUnion" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="maxUnion&#39;vc.0" expl="precondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.02" steps="28636"/></proof>
-  <proof prover="6"><result status="valid" time="0.02" steps="72"/></proof>
-  <proof prover="7"><result status="valid" time="0.05" steps="9779"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="207"/></proof>
+  <proof prover="4"><result status="valid" time="0.02" steps="26626"/></proof>
+  <proof prover="7"><result status="valid" time="0.05" steps="9517"/></proof>
   </goal>
   <goal name="maxUnion&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.01" steps="28849"/></proof>
-  <proof prover="6"><result status="valid" time="0.01" steps="73"/></proof>
-  <proof prover="7"><result status="valid" time="0.05" steps="9839"/></proof>
+  <proof prover="0"><result status="valid" time="0.01" steps="208"/></proof>
+  <proof prover="4"><result status="valid" time="0.01" steps="26839"/></proof>
+  <proof prover="7"><result status="valid" time="0.05" steps="9577"/></proof>
   </goal>
   <goal name="maxUnion&#39;vc.2" expl="assertion" proved="true">
-  <proof prover="4"><result status="valid" time="5.13" steps="4810327"/></proof>
-  <proof prover="7"><result status="valid" time="0.72" steps="66840"/></proof>
+  <proof prover="4"><result status="valid" time="3.32" steps="4805958"/></proof>
+  <proof prover="7"><result status="valid" time="0.53" steps="66516"/></proof>
   </goal>
   <goal name="maxUnion&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.69" steps="1470"/></proof>
+  <proof prover="0"><result status="valid" time="0.69" steps="5253"/></proof>
   </goal>
   <goal name="maxUnion&#39;vc.4" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="maxUnion&#39;vc.4.0" expl="postcondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.06" steps="17085"/></proof>
+   <proof prover="7"><result status="valid" time="0.06" steps="16761"/></proof>
    </goal>
    <goal name="maxUnion&#39;vc.4.1" expl="postcondition" proved="true">
-   <proof prover="6"><result status="valid" time="0.67" steps="1003"/></proof>
-   <proof prover="7"><result status="valid" time="0.17" steps="27686"/></proof>
+   <proof prover="0"><result status="valid" time="0.15" steps="1324"/></proof>
+   <proof prover="7"><result status="valid" time="0.17" steps="27362"/></proof>
    </goal>
   </transf>
   </goal>
