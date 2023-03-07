@@ -59,13 +59,13 @@
  <proof prover="5" memlimit="2000"><result status="valid" time="0.02" steps="12"/></proof>
  </goal>
  <goal name="prod_compat_strict_lr&#39;vc" expl="VC for prod_compat_strict_lr" proved="true">
- <proof prover="2"><result status="valid" time="0.04" steps="13085"/></proof>
+ <proof prover="2"><result status="valid" time="0.04" steps="12665"/></proof>
  </goal>
  <goal name="prod_compat_lr&#39;vc" expl="VC for prod_compat_lr" proved="true">
- <proof prover="4"><result status="valid" time="0.30" steps="35255"/></proof>
+ <proof prover="4"><result status="valid" time="0.30" steps="33578"/></proof>
  </goal>
  <goal name="simp_compat_strict_l&#39;vc" expl="VC for simp_compat_strict_l" proved="true">
- <proof prover="4"><result status="valid" time="0.24" steps="24703"/></proof>
+ <proof prover="4"><result status="valid" time="0.24" steps="23801"/></proof>
  </goal>
  <goal name="value_sub&#39;vc" expl="VC for value_sub" proved="true">
  <transf name="split_goal_right" proved="true" >
@@ -107,7 +107,7 @@
    <transf name="inline_goal" proved="true" >
     <goal name="value_sub_frame_shift&#39;vc.4.0.0" expl="precondition" proved="true">
     <proof prover="0"><result status="valid" time="0.04"/></proof>
-    <proof prover="3"><result status="valid" time="0.02" steps="1694"/></proof>
+    <proof prover="3"><result status="valid" time="0.02" steps="1566"/></proof>
     </goal>
    </transf>
    </goal>
@@ -194,7 +194,7 @@
   <proof prover="5"><result status="valid" time="0.04" steps="27"/></proof>
   </goal>
   <goal name="value_zero&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.02" steps="26189"/></proof>
+  <proof prover="3"><result status="valid" time="0.02" steps="25233"/></proof>
   </goal>
  </transf>
  </goal>
@@ -227,7 +227,7 @@
   <proof prover="5"><result status="valid" time="0.03" steps="10"/></proof>
   </goal>
   <goal name="value_sub_lower_bound&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="2" timelimit="5"><result status="valid" time="0.06" steps="14241"/></proof>
+  <proof prover="2" timelimit="5"><result status="valid" time="0.06" steps="13861"/></proof>
   </goal>
  </transf>
  </goal>
@@ -266,7 +266,7 @@
   <proof prover="5"><result status="valid" time="0.04" steps="9"/></proof>
   </goal>
   <goal name="value_sub_upper_bound_tight&#39;vc.1" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="21400"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="20444"/></proof>
   </goal>
  </transf>
  </goal>
@@ -277,7 +277,7 @@
  <proof prover="5" timelimit="1"><result status="valid" time="0.04" steps="28"/></proof>
  </goal>
  <goal name="value_sub_eq&#39;vc" expl="VC for value_sub_eq" proved="true">
- <proof prover="2"><result status="valid" time="0.03" steps="12905"/></proof>
+ <proof prover="2"><result status="valid" time="0.03" steps="12624"/></proof>
  </goal>
 </theory>
 </file>

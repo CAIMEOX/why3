@@ -195,7 +195,7 @@
   <proof prover="3"><result status="valid" time="0.10" steps="664"/></proof>
   </goal>
   <goal name="list_seg_functional&#39;vc.6" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="5.30" steps="673"/></proof>
+  <proof prover="3"><result status="valid" time="5.39" steps="673"/></proof>
   </goal>
  </transf>
  </goal>
@@ -233,7 +233,7 @@
   <proof prover="3"><result status="valid" time="0.00" steps="10"/></proof>
   </goal>
   <goal name="list_seg_append&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="4.57" steps="14911"/></proof>
+  <proof prover="3"><result status="valid" time="2.83" steps="9641"/></proof>
   </goal>
  </transf>
  </goal>
@@ -258,7 +258,7 @@
   <proof prover="3"><result status="valid" time="0.02" steps="57"/></proof>
   </goal>
   <goal name="list_seg_prefix&#39;vc.5" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="3.89" steps="7533"/></proof>
+  <proof prover="3"><result status="valid" time="3.89" steps="7505"/></proof>
   </goal>
  </transf>
  </goal>
@@ -351,7 +351,7 @@
   <proof prover="3"><result status="valid" time="0.01" steps="13"/></proof>
   </goal>
   <goal name="list_seg_no_repet&#39;vc.9" expl="assertion" proved="true">
-  <proof prover="7"><result status="valid" time="0.52" steps="72632"/></proof>
+  <proof prover="7"><result status="valid" time="0.52" steps="73191"/></proof>
   </goal>
   <goal name="list_seg_no_repet&#39;vc.10" expl="postcondition" proved="true">
   <proof prover="3"><result status="valid" time="0.05" steps="321"/></proof>
@@ -412,11 +412,11 @@
   <proof prover="3"><result status="valid" time="0.05" steps="158"/></proof>
   </goal>
   <goal name="app&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="1.31" steps="1068"/></proof>
+  <proof prover="0"><result status="valid" time="1.75" steps="1068"/></proof>
   <transf name="remove" proved="true" arg1="zero,one,(-),(&gt;),(&lt;=),(&gt;=),get1,set1,([]&#39;),([&lt;-]&#39;),(!),([]),singleton,cons,snoc,(++),reverse,Assoc1,Unit_def_l,Unit_def_r,Inv_def_l,Inv_def_r,Comm1,Assoc,Mul_distr_l,Mul_distr_r,Comm,Unitary,NonTrivialRing,Refl,Trans,Antisymm,Total,ZeroLessOne,CompatOrderAdd,CompatOrderMult,length_nonnegative,create&#39;spec,empty&#39;def,set&#39;spec,set&#39;def,([&lt;-])&#39;def,singleton&#39;spec,cons&#39;spec,snoc&#39;spec,([..])&#39;def,([.._])&#39;def,mem_append,mem_tail,eq_loc&#39;spec,non_empty_seq,list_seg_frame_ext,list_seg_functional,list_seg_tail,list_seg_append,seq_tail_append,list_seg_prefix,list_seg_sublistl,get_tail,tail_suffix,Requires2,Requires1,Requires,Ensures11,H1,Ensures10,LoopInvariant8,LoopInvariant7,Ensures9,H,Assert,Ensures8,Ensures7,Ensures6,Ensures5,Ensures4,Ensures3,LoopInvariant3,LoopInvariant2,LoopInvariant1">
    <goal name="app&#39;vc.17.0" expl="loop invariant preservation" proved="true">
-   <proof prover="0"><result status="valid" time="0.04" steps="111"/></proof>
-   <proof prover="3"><result status="valid" time="0.05" steps="183"/></proof>
+   <proof prover="0"><result status="valid" time="0.04" steps="93"/></proof>
+   <proof prover="3"><result status="valid" time="0.05" steps="182"/></proof>
    </goal>
   </transf>
   </goal>
@@ -430,14 +430,14 @@
   <proof prover="3"><result status="valid" time="0.07" steps="280"/></proof>
   </goal>
   <goal name="app&#39;vc.21" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="2.06" steps="5758"/></proof>
+  <proof prover="3"><result status="valid" time="1.98" steps="5549"/></proof>
   </goal>
   <goal name="app&#39;vc.22" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="1.18" steps="1631"/></proof>
+  <proof prover="0"><result status="valid" time="1.49" steps="1631"/></proof>
   <transf name="remove" proved="true" arg1="zero,one,(-),(&gt;),(&lt;=),(&gt;=),get1,set1,([]&#39;),([&lt;-]&#39;),(!),([]),singleton,cons,snoc,(++),mem,reverse,disjoint,no_repet,Assoc1,Unit_def_l,Unit_def_r,Inv_def_l,Inv_def_r,Comm1,Assoc,Mul_distr_l,Mul_distr_r,Comm,Unitary,NonTrivialRing,Refl,Trans,Antisymm,Total,ZeroLessOne,CompatOrderAdd,CompatOrderMult,length_nonnegative,create&#39;spec,empty&#39;def,set&#39;spec,set&#39;def,([&lt;-])&#39;def,singleton&#39;spec,cons&#39;spec,snoc&#39;spec,([..])&#39;spec,([..])&#39;def,([_..])&#39;def,([.._])&#39;def,mem_append,mem_tail,eq_loc&#39;spec,non_empty_seq,list_seg_frame_ext,list_seg_functional,list_seg_tail,list_seg_append,seq_tail_append,list_seg_prefix,list_seg_sublistl,get_tail,tail_suffix,list_seg_no_repet,Requires1,Requires,Ensures3,H1,Ensures2,LoopInvariant4,LoopInvariant3,LoopInvariant">
    <goal name="app&#39;vc.22.0" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.74" steps="1515"/></proof>
-   <proof prover="3"><result status="valid" time="4.51" steps="6996"/></proof>
+   <proof prover="0"><result status="valid" time="1.09" steps="1792"/></proof>
+   <proof prover="3"><result status="valid" time="4.09" steps="5735"/></proof>
    </goal>
   </transf>
   </goal>
@@ -464,7 +464,7 @@
   <proof prover="3"><result status="valid" time="0.00" steps="14"/></proof>
   </goal>
   <goal name="in_place_reverse&#39;vc.6" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.34" steps="1843"/></proof>
+  <proof prover="3"><result status="valid" time="0.52" steps="1843"/></proof>
   </goal>
   <goal name="in_place_reverse&#39;vc.7" expl="precondition" proved="true">
   <proof prover="3"><result status="valid" time="0.01" steps="30"/></proof>
@@ -473,13 +473,13 @@
   <proof prover="3"><result status="valid" time="0.03" steps="124"/></proof>
   </goal>
   <goal name="in_place_reverse&#39;vc.9" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.28" steps="1090"/></proof>
+  <proof prover="3"><result status="valid" time="0.28" steps="990"/></proof>
   </goal>
   <goal name="in_place_reverse&#39;vc.10" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="5.03" steps="15268"/></proof>
+  <proof prover="3"><result status="valid" time="7.26" steps="15264"/></proof>
   </goal>
   <goal name="in_place_reverse&#39;vc.11" expl="loop invariant preservation" proved="true">
-  <proof prover="7"><result status="valid" time="0.36" steps="82505"/></proof>
+  <proof prover="7"><result status="valid" time="0.61" steps="85814"/></proof>
   </goal>
   <goal name="in_place_reverse&#39;vc.12" expl="loop invariant preservation" proved="true">
   <transf name="assert" proved="true" arg1="(length pM1 &gt; 0)">
@@ -489,7 +489,7 @@
    <goal name="in_place_reverse&#39;vc.12.1" expl="loop invariant preservation" proved="true">
    <transf name="remove" proved="true" arg1="LoopInvariant,LoopInvariant1,LoopInvariant2,LoopInvariant4,LoopInvariant5,LoopInvariant6,Ensures2,Ensures3,Ensures4,Ensures5,Ensures6,Ensures7,Ensures8">
     <goal name="in_place_reverse&#39;vc.12.1.0" expl="loop invariant preservation" proved="true">
-    <proof prover="0"><result status="valid" time="0.93" steps="1462"/></proof>
+    <proof prover="0"><result status="valid" time="1.18" steps="1462"/></proof>
     <transf name="remove" proved="true" arg1="zero,one,(-),(&gt;),(&lt;=),(&gt;=),get1,set1,([]&#39;),([&lt;-]&#39;),(!),([]),singleton,cons,snoc,(++),mem,disjoint,no_repet,list_seg,Assoc1,Unit_def_l,Unit_def_r,Inv_def_l,Inv_def_r,Comm1,Assoc,Mul_distr_l,Mul_distr_r,Comm,Unitary,NonTrivialRing,Refl,Trans,Antisymm,Total,ZeroLessOne,CompatOrderAdd,CompatOrderMult,length_nonnegative,empty&#39;def,set&#39;spec,set&#39;def,([&lt;-])&#39;def,singleton&#39;spec,snoc&#39;spec,([..])&#39;def,([.._])&#39;def,mem_append,mem_tail,eq_loc&#39;spec,non_empty_seq,list_seg_frame_ext,list_seg_functional,list_seg_tail,list_seg_append,seq_tail_append,list_seg_prefix,list_seg_sublistl,get_tail,tail_suffix,list_seg_no_repet,Requires,H,Assert">
      <goal name="in_place_reverse&#39;vc.12.1.0.0" expl="loop invariant preservation" proved="true">
      <proof prover="0"><result status="valid" time="0.02" steps="67"/></proof>
@@ -509,30 +509,30 @@
 </theory>
 <theory name="YetAnotherInPlaceRev" proved="true">
  <goal name="cdr&#39;vc" expl="VC for cdr" proved="true">
- <proof prover="2"><result status="valid" time="0.07" steps="143"/></proof>
+ <proof prover="2"><result status="valid" time="0.07" steps="48"/></proof>
  </goal>
  <goal name="set_cdr&#39;vc" expl="VC for set_cdr" proved="true">
- <proof prover="2"><result status="valid" time="0.09" steps="813"/></proof>
+ <proof prover="2"><result status="valid" time="0.09" steps="417"/></proof>
  </goal>
  <goal name="list_reversal&#39;vc" expl="VC for list_reversal" proved="true">
- <proof prover="1" timelimit="1"><result status="valid" time="0.18" steps="70261"/></proof>
+ <proof prover="1" timelimit="1"><result status="valid" time="0.06" steps="97951"/></proof>
  </goal>
  <goal name="is_list&#39;vc" expl="VC for is_list" proved="true">
- <proof prover="2"><result status="valid" time="0.07" steps="632"/></proof>
+ <proof prover="2"><result status="valid" time="0.07" steps="479"/></proof>
  </goal>
  <goal name="cells_of_list&#39;vc" expl="VC for cells_of_list" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="cells_of_list&#39;vc.0" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="1019"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="708"/></proof>
   </goal>
   <goal name="cells_of_list&#39;vc.1" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="412"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="317"/></proof>
   </goal>
   <goal name="cells_of_list&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="529"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="376"/></proof>
   </goal>
   <goal name="cells_of_list&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.58" steps="68548"/></proof>
+  <proof prover="2"><result status="valid" time="0.58" steps="52005"/></proof>
   </goal>
   <goal name="cells_of_list&#39;vc.4" expl="postcondition" proved="true">
   <proof prover="4"><result status="valid" time="0.73" steps="6979"/></proof>
@@ -543,180 +543,180 @@
  </transf>
  </goal>
  <goal name="list_of_cells&#39;vc" expl="VC for list_of_cells" proved="true">
- <proof prover="1" timelimit="1"><result status="valid" time="0.37" steps="619805"/></proof>
+ <proof prover="2" timelimit="5"><result status="valid" time="4.49" steps="335873"/></proof>
  <transf name="split_vc" proved="true" >
   <goal name="list_of_cells&#39;vc.0" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="2672"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="2299"/></proof>
   </goal>
   <goal name="list_of_cells&#39;vc.1" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="1433"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="1421"/></proof>
   </goal>
   <goal name="list_of_cells&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="1558"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="1489"/></proof>
   </goal>
   <goal name="list_of_cells&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.08" steps="4307"/></proof>
+  <proof prover="2"><result status="valid" time="0.08" steps="3791"/></proof>
   </goal>
   <goal name="list_of_cells&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.10" steps="4660"/></proof>
+  <proof prover="2"><result status="valid" time="0.10" steps="4362"/></proof>
   </goal>
   <goal name="list_of_cells&#39;vc.5" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.23" steps="28431"/></proof>
+  <proof prover="2"><result status="valid" time="0.23" steps="19259"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="list_reversal_final&#39;vc" expl="VC for list_reversal_final" proved="true">
- <proof prover="5"><result status="valid" time="0.34" steps="48422"/></proof>
+ <proof prover="5"><result status="valid" time="0.34" steps="48676"/></proof>
  </goal>
 </theory>
 <theory name="Termination" proved="true">
  <goal name="cdr&#39;vc" expl="VC for cdr" proved="true">
- <proof prover="2"><result status="valid" time="0.03" steps="1656"/></proof>
+ <proof prover="2"><result status="valid" time="0.03" steps="1561"/></proof>
  </goal>
  <goal name="set_cdr&#39;vc" expl="VC for set_cdr" proved="true">
- <proof prover="2"><result status="valid" time="0.03" steps="2338"/></proof>
+ <proof prover="2"><result status="valid" time="0.03" steps="1942"/></proof>
  </goal>
  <goal name="set_idx&#39;vc" expl="VC for set_idx" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="set_idx&#39;vc.0" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="set_idx&#39;vc.0.0" expl="assertion" proved="true">
-   <proof prover="2"><result status="valid" time="0.04" steps="3130"/></proof>
+   <proof prover="2"><result status="valid" time="0.04" steps="2784"/></proof>
    </goal>
    <goal name="set_idx&#39;vc.0.1" expl="VC for set_idx" proved="true">
-   <proof prover="2"><result status="valid" time="0.13" steps="23792"/></proof>
+   <proof prover="2"><result status="valid" time="0.13" steps="22621"/></proof>
    </goal>
    <goal name="set_idx&#39;vc.0.2" expl="VC for set_idx" proved="true">
-   <proof prover="2"><result status="valid" time="0.41" steps="68861"/></proof>
+   <proof prover="2"><result status="valid" time="0.57" steps="61719"/></proof>
    </goal>
    <goal name="set_idx&#39;vc.0.3" expl="VC for set_idx" proved="true">
-   <proof prover="1"><result status="valid" time="0.28" steps="839596"/></proof>
+   <proof prover="1"><result status="valid" time="0.28" steps="391273"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="set_idx&#39;vc.1" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="2114"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="2019"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="list_reversal&#39;vc" expl="VC for list_reversal" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="list_reversal&#39;vc.0" expl="loop invariant init" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="3247"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="2747"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.1" expl="loop invariant init" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="4009"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="3347"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.2" expl="loop invariant init" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="3256"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="2756"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.3" expl="loop invariant init" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="17776"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="15085"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.4" expl="loop invariant init" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="4815"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="4082"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.5" expl="loop invariant init" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="4639"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="3953"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.6" expl="loop invariant init" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="10676"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="9687"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.7" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="3862"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="3362"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.8" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="3863"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="3363"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.9" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="2363"/></proof>
-  <proof prover="2"><result status="valid" time="0.03" steps="3862"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="2228"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="3362"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.10" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="3865"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="3365"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.11" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="3877"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="3377"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.12" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="3976"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="3476"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.13" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="3986"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="3486"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.14" expl="loop variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.06" steps="8327"/></proof>
+  <proof prover="2"><result status="valid" time="0.06" steps="7161"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.15" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.08" steps="24539"/></proof>
+  <proof prover="2"><result status="valid" time="0.08" steps="6558"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.16" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="4438"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="3831"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.36" steps="59220"/></proof>
+  <proof prover="2"><result status="valid" time="0.09" steps="7632"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.18" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="4565"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="3944"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.19" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="6376"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="5406"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.20" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="5162"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="4504"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.21" expl="loop invariant preservation" proved="true">
   <transf name="case" proved="true" arg1="(idx l = 0)">
    <goal name="list_reversal&#39;vc.21.0" expl="true case (loop invariant preservation)" proved="true">
-   <proof prover="2"><result status="valid" time="0.04" steps="6360"/></proof>
+   <proof prover="2"><result status="valid" time="0.04" steps="5703"/></proof>
    </goal>
    <goal name="list_reversal&#39;vc.21.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="2"><result status="valid" time="0.09" steps="13985"/></proof>
+   <proof prover="2"><result status="valid" time="0.09" steps="12310"/></proof>
    </goal>
   </transf>
   <transf name="case" proved="true" arg1="(idx l = -1)">
    <goal name="list_reversal&#39;vc.21.0" expl="true case (loop invariant preservation)" proved="true">
-   <proof prover="2"><result status="valid" time="0.07" steps="8549"/></proof>
+   <proof prover="2"><result status="valid" time="0.07" steps="7487"/></proof>
    </goal>
    <goal name="list_reversal&#39;vc.21.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="2"><result status="valid" time="0.07" steps="8290"/></proof>
+   <proof prover="2"><result status="valid" time="0.07" steps="7343"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="list_reversal&#39;vc.22" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="3863"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="3363"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.23" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="3873"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="3373"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.24" expl="loop variant decrease" proved="true">
   <transf name="right" proved="true" >
    <goal name="list_reversal&#39;vc.24.0" expl="right case" proved="true">
    <transf name="split_vc" proved="true" >
     <goal name="list_reversal&#39;vc.24.0.0" expl="right case" proved="true">
-    <proof prover="2"><result status="valid" time="0.05" steps="6248"/></proof>
+    <proof prover="2"><result status="valid" time="0.05" steps="5393"/></proof>
     </goal>
     <goal name="list_reversal&#39;vc.24.0.1" expl="right case" proved="true">
-    <proof prover="2"><result status="valid" time="0.05" steps="6833"/></proof>
+    <proof prover="2"><result status="valid" time="0.05" steps="5820"/></proof>
     </goal>
    </transf>
    </goal>
   </transf>
   </goal>
   <goal name="list_reversal&#39;vc.25" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.08" steps="14751"/></proof>
+  <proof prover="2"><result status="valid" time="0.08" steps="5512"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.26" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="4254"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="3652"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.27" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.11" steps="19971"/></proof>
+  <proof prover="2"><result status="valid" time="0.11" steps="6646"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.28" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="3969"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="3469"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.29" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="5491"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="4730"/></proof>
   </goal>
   <goal name="list_reversal&#39;vc.30" expl="loop invariant preservation" proved="true">
   <proof prover="4" timelimit="5"><result status="valid" time="0.01" steps="47"/></proof>
@@ -728,14 +728,14 @@
     <goal name="list_reversal&#39;vc.31.0.0" expl="true case (loop invariant preservation)" proved="true">
     <transf name="compute_in_goal" proved="true" >
      <goal name="list_reversal&#39;vc.31.0.0.0" expl="true case (loop invariant preservation)" proved="true">
-     <proof prover="2"><result status="valid" time="0.04" steps="5017"/></proof>
+     <proof prover="2"><result status="valid" time="0.04" steps="4397"/></proof>
      </goal>
     </transf>
     </goal>
    </transf>
    </goal>
    <goal name="list_reversal&#39;vc.31.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="2"><result status="valid" time="0.20" steps="34385"/></proof>
+   <proof prover="2"><result status="valid" time="0.20" steps="29034"/></proof>
    </goal>
   </transf>
   </goal>

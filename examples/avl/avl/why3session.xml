@@ -136,7 +136,7 @@
  </transf>
  </goal>
  <goal name="decompose_front_node&#39;vc" expl="VC for decompose_front_node" proved="true">
- <proof prover="1"><result status="valid" time="1.21" steps="5894"/></proof>
+ <proof prover="1"><result status="valid" time="1.48" steps="5894"/></proof>
  </goal>
  <goal name="decompose_front&#39;vc" expl="VC for decompose_front" proved="true">
  <proof prover="1"><result status="valid" time="0.10" steps="286"/></proof>

@@ -71,7 +71,7 @@
   <proof prover="0" timelimit="1"><result status="valid" time="0.03" steps="105"/></proof>
   </goal>
   <goal name="olifts_composition_lemma_subst_subst_fo_term&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.26" steps="79684"/></proof>
+  <proof prover="1"><result status="valid" time="0.26" steps="78996"/></proof>
   </goal>
  </transf>
  </goal>
@@ -403,10 +403,10 @@
   <proof prover="0"><result status="valid" time="0.04" steps="31"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_fo_term_list&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.38"/></proof>
+  <proof prover="4"><result status="valid" time="0.37"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_fo_term_list&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.37"/></proof>
+  <proof prover="4"><result status="valid" time="0.38"/></proof>
   </goal>
  </transf>
  </goal>
@@ -416,16 +416,16 @@
   <proof prover="0"><result status="valid" time="0.05" steps="6"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_fo_term&#39;vc.1" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.08" steps="22"/></proof>
+  <proof prover="0"><result status="valid" time="0.07" steps="22"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_fo_term&#39;vc.2" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="31"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="31"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_fo_term&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.41"/></proof>
+  <proof prover="4"><result status="valid" time="0.40"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_fo_term&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.40"/></proof>
+  <proof prover="4"><result status="valid" time="0.41"/></proof>
   </goal>
  </transf>
  </goal>

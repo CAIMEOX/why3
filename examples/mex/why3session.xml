@@ -12,19 +12,19 @@
  <goal name="mex&#39;vc" expl="VC for mex" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="mex&#39;vc.0" expl="array creation size" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="3133"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="2763"/></proof>
   </goal>
   <goal name="mex&#39;vc.1" expl="loop invariant init" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="4891"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="4537"/></proof>
   </goal>
   <goal name="mex&#39;vc.2" expl="loop invariant init" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="4528"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="4241"/></proof>
   </goal>
   <goal name="mex&#39;vc.3" expl="index in array bounds" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="4691"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="4404"/></proof>
   </goal>
   <goal name="mex&#39;vc.4" expl="index in array bounds" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="5118"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="4764"/></proof>
   </goal>
   <goal name="mex&#39;vc.5" expl="loop invariant preservation" proved="true">
   <proof prover="2"><result status="valid" time="0.07" steps="153"/></proof>
@@ -39,61 +39,61 @@
   <proof prover="2"><result status="valid" time="0.01" steps="42"/></proof>
   </goal>
   <goal name="mex&#39;vc.9" expl="loop invariant init" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="4654"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="4367"/></proof>
   </goal>
   <goal name="mex&#39;vc.10" expl="loop invariant init" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="4743"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="4456"/></proof>
   </goal>
   <goal name="mex&#39;vc.11" expl="loop invariant init" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="4889"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="4602"/></proof>
   </goal>
   <goal name="mex&#39;vc.12" expl="index in array bounds" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="5380"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="5028"/></proof>
   </goal>
   <goal name="mex&#39;vc.13" expl="index in array bounds" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="5397"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="5057"/></proof>
   </goal>
   <goal name="mex&#39;vc.14" expl="loop variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="5210"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="4922"/></proof>
   </goal>
   <goal name="mex&#39;vc.15" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="5688"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="5348"/></proof>
   </goal>
   <goal name="mex&#39;vc.16" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.05" steps="7524"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="7161"/></proof>
   </goal>
   <goal name="mex&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="6032"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="5684"/></proof>
   </goal>
   <goal name="mex&#39;vc.18" expl="loop variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="5209"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="4921"/></proof>
   </goal>
   <goal name="mex&#39;vc.19" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="5673"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="5333"/></proof>
   </goal>
   <goal name="mex&#39;vc.20" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="8381"/></proof>
+  <proof prover="1"><result status="valid" time="0.05" steps="8019"/></proof>
   </goal>
   <goal name="mex&#39;vc.21" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.04" steps="6832"/></proof>
+  <proof prover="1"><result status="valid" time="0.04" steps="6470"/></proof>
   </goal>
   <goal name="mex&#39;vc.22" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="5196"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="4908"/></proof>
   </goal>
   <goal name="mex&#39;vc.23" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="6376"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="6022"/></proof>
   </goal>
   <goal name="mex&#39;vc.24" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="5442"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="5155"/></proof>
   </goal>
   <goal name="mex&#39;vc.25" expl="postcondition" proved="true">
   <proof prover="2"><result status="valid" time="0.03" steps="108"/></proof>
   </goal>
   <goal name="mex&#39;vc.26" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="8059"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="7705"/></proof>
   </goal>
   <goal name="mex&#39;vc.27" expl="out of loop bounds" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="10037"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="9683"/></proof>
   </goal>
  </transf>
  </goal>
@@ -102,44 +102,44 @@
  <goal name="mex&#39;vc" expl="VC for mex" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="mex&#39;vc.0" expl="loop invariant init" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="6874"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="6504"/></proof>
   </goal>
   <goal name="mex&#39;vc.1" expl="loop invariant init" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="6252"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="5942"/></proof>
   </goal>
   <goal name="mex&#39;vc.2" expl="loop invariant init" proved="true">
   <transf name="split_all_full" proved="true" >
    <goal name="mex&#39;vc.2.0" expl="loop invariant init" proved="true">
-   <proof prover="1"><result status="valid" time="0.01" steps="6806"/></proof>
+   <proof prover="1"><result status="valid" time="0.01" steps="6545"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="mex&#39;vc.3" expl="index in array bounds" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="6885"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="6519"/></proof>
   </goal>
   <goal name="mex&#39;vc.4" expl="loop variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="7553"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="7203"/></proof>
   </goal>
   <goal name="mex&#39;vc.5" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.04" steps="7129"/></proof>
+  <proof prover="1"><result status="valid" time="0.04" steps="6775"/></proof>
   </goal>
   <goal name="mex&#39;vc.6" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="7202"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="6835"/></proof>
   </goal>
   <goal name="mex&#39;vc.7" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.03" steps="25260"/></proof>
+  <proof prover="3"><result status="valid" time="0.03" steps="22192"/></proof>
   </goal>
   <goal name="mex&#39;vc.8" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="7137"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="6769"/></proof>
   </goal>
   <goal name="mex&#39;vc.9" expl="loop variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="7677"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="7327"/></proof>
   </goal>
   <goal name="mex&#39;vc.10" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="7287"/></proof>
+  <proof prover="1"><result status="valid" time="0.04" steps="6933"/></proof>
   </goal>
   <goal name="mex&#39;vc.11" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.22" steps="33913"/></proof>
+  <proof prover="1"><result status="valid" time="0.22" steps="33547"/></proof>
   </goal>
   <goal name="mex&#39;vc.12" expl="loop invariant preservation" proved="true">
   <transf name="split_all_full" proved="true" >
@@ -149,95 +149,95 @@
   </transf>
   </goal>
   <goal name="mex&#39;vc.13" expl="index in array bounds" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="7100"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="6732"/></proof>
   </goal>
   <goal name="mex&#39;vc.14" expl="loop variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="7690"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="7340"/></proof>
   </goal>
   <goal name="mex&#39;vc.15" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.04" steps="7301"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="6947"/></proof>
   </goal>
   <goal name="mex&#39;vc.16" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="7376"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="7010"/></proof>
   </goal>
   <goal name="mex&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.04" steps="9487"/></proof>
+  <proof prover="1"><result status="valid" time="0.04" steps="9121"/></proof>
   </goal>
   <goal name="mex&#39;vc.18" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="7223"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="6855"/></proof>
   </goal>
   <goal name="mex&#39;vc.19" expl="loop variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.30" steps="53828"/></proof>
+  <proof prover="1"><result status="valid" time="0.30" steps="53404"/></proof>
   </goal>
   <goal name="mex&#39;vc.20" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="6799"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="6490"/></proof>
   </goal>
   <goal name="mex&#39;vc.21" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.15" steps="25014"/></proof>
+  <proof prover="1"><result status="valid" time="0.15" steps="24646"/></proof>
   </goal>
   <goal name="mex&#39;vc.22" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.09" steps="15655"/></proof>
+  <proof prover="1"><result status="valid" time="0.09" steps="15287"/></proof>
   </goal>
   <goal name="mex&#39;vc.23" expl="assertion" proved="true">
   <proof prover="4"><result status="valid" time="0.04" steps="439"/></proof>
   </goal>
   <goal name="mex&#39;vc.24" expl="loop invariant init" proved="true">
-  <proof prover="1"><result status="valid" time="0.00" steps="6778"/></proof>
+  <proof prover="1"><result status="valid" time="0.00" steps="6469"/></proof>
   </goal>
   <goal name="mex&#39;vc.25" expl="index in array bounds" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="7216"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="6850"/></proof>
   </goal>
   <goal name="mex&#39;vc.26" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="7302"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="6931"/></proof>
   </goal>
   <goal name="mex&#39;vc.27" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="8698"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="8327"/></proof>
   </goal>
   <goal name="mex&#39;vc.28" expl="postcondition" proved="true">
   <transf name="assert" proved="true" arg1="(mem x a)">
    <goal name="mex&#39;vc.28.0" expl="asserted formula" proved="true">
    <transf name="assert" proved="true" arg1="(a[x] = x)">
     <goal name="mex&#39;vc.28.0.0" expl="asserted formula" proved="true">
-    <proof prover="1"><result status="valid" time="0.02" steps="8202"/></proof>
+    <proof prover="1"><result status="valid" time="0.02" steps="7831"/></proof>
     </goal>
     <goal name="mex&#39;vc.28.0.1" expl="asserted formula" proved="true">
-    <proof prover="1"><result status="valid" time="0.02" steps="8766"/></proof>
+    <proof prover="1"><result status="valid" time="0.02" steps="8395"/></proof>
     </goal>
    </transf>
    </goal>
    <goal name="mex&#39;vc.28.1" expl="postcondition" proved="true">
-   <proof prover="1"><result status="valid" time="0.02" steps="7407"/></proof>
+   <proof prover="1"><result status="valid" time="0.02" steps="7036"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="mex&#39;vc.29" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="8026"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="7658"/></proof>
   </goal>
   <goal name="mex&#39;vc.30" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="7146"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="6789"/></proof>
   </goal>
   <goal name="mex&#39;vc.31" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.03" steps="8515"/></proof>
+  <proof prover="1"><result status="valid" time="0.03" steps="8148"/></proof>
   </goal>
   <goal name="mex&#39;vc.32" expl="postcondition" proved="true">
   <transf name="assert" proved="true" arg1="(mem x a)">
    <goal name="mex&#39;vc.32.0" expl="asserted formula" proved="true">
    <transf name="assert" proved="true" arg1="(a[x] = x)">
     <goal name="mex&#39;vc.32.0.0" expl="asserted formula" proved="true">
-    <proof prover="1"><result status="valid" time="0.03" steps="7932"/></proof>
+    <proof prover="1"><result status="valid" time="0.03" steps="7566"/></proof>
     </goal>
     <goal name="mex&#39;vc.32.0.1" expl="asserted formula" proved="true">
-    <proof prover="1"><result status="valid" time="0.03" steps="8183"/></proof>
+    <proof prover="1"><result status="valid" time="0.03" steps="7817"/></proof>
     </goal>
    </transf>
    </goal>
    <goal name="mex&#39;vc.32.1" expl="postcondition" proved="true">
-   <proof prover="1"><result status="valid" time="0.02" steps="7269"/></proof>
+   <proof prover="1"><result status="valid" time="0.02" steps="6903"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="mex&#39;vc.33" expl="out of loop bounds" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="7183"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="6815"/></proof>
   </goal>
  </transf>
  </goal>

@@ -91,7 +91,7 @@
   <proof prover="1"><result status="valid" time="0.00" steps="11"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.26" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="9401"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="8954"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.27" expl="out of loop bounds" proved="true">
   <proof prover="1"><result status="valid" time="0.00" steps="5"/></proof>

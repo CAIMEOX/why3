@@ -421,22 +421,22 @@
      <goal name="branch_conflict_atom&#39;vc.39.0.0.0" expl="VC for branch_conflict_atom" proved="true">
      <transf name="split_vc" proved="true" >
       <goal name="branch_conflict_atom&#39;vc.39.0.0.0.0" expl="VC for branch_conflict_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.90" steps="154989"/></proof>
+      <proof prover="7"><result status="valid" time="0.90" steps="156065"/></proof>
       </goal>
       <goal name="branch_conflict_atom&#39;vc.39.0.0.0.1" expl="VC for branch_conflict_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.90" steps="154930"/></proof>
+      <proof prover="7"><result status="valid" time="0.90" steps="156006"/></proof>
       </goal>
       <goal name="branch_conflict_atom&#39;vc.39.0.0.0.2" expl="VC for branch_conflict_atom" proved="true">
       <proof prover="2" timelimit="1"><result status="valid" time="0.12" steps="77"/></proof>
       </goal>
       <goal name="branch_conflict_atom&#39;vc.39.0.0.0.3" expl="VC for branch_conflict_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.81" steps="154184"/></proof>
+      <proof prover="7"><result status="valid" time="0.81" steps="155287"/></proof>
       </goal>
       <goal name="branch_conflict_atom&#39;vc.39.0.0.0.4" expl="VC for branch_conflict_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.59" steps="142385"/></proof>
+      <proof prover="7"><result status="valid" time="0.59" steps="143744"/></proof>
       </goal>
       <goal name="branch_conflict_atom&#39;vc.39.0.0.0.5" expl="VC for branch_conflict_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.56" steps="142385"/></proof>
+      <proof prover="7"><result status="valid" time="0.56" steps="143744"/></proof>
       </goal>
      </transf>
      </goal>
@@ -479,7 +479,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.12" steps="104"/></proof>
   </goal>
   <goal name="branch_conflict_neg_atom&#39;vc.7" expl="assertion" proved="true">
-  <proof prover="7"><result status="valid" time="0.59" steps="172771"/></proof>
+  <proof prover="7"><result status="valid" time="0.59" steps="173610"/></proof>
   </goal>
   <goal name="branch_conflict_neg_atom&#39;vc.8" expl="precondition" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.11" steps="44"/></proof>
@@ -618,22 +618,22 @@
      <goal name="branch_conflict_neg_atom&#39;vc.42.0.0.0" expl="VC for branch_conflict_neg_atom" proved="true">
      <transf name="split_vc" proved="true" >
       <goal name="branch_conflict_neg_atom&#39;vc.42.0.0.0.0" expl="VC for branch_conflict_neg_atom" proved="true">
-      <proof prover="3"><result status="valid" time="0.13" steps="544712"/></proof>
+      <proof prover="3"><result status="valid" time="0.13" steps="545251"/></proof>
       </goal>
       <goal name="branch_conflict_neg_atom&#39;vc.42.0.0.0.1" expl="VC for branch_conflict_neg_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.89" steps="154930"/></proof>
+      <proof prover="7"><result status="valid" time="0.89" steps="156006"/></proof>
       </goal>
       <goal name="branch_conflict_neg_atom&#39;vc.42.0.0.0.2" expl="VC for branch_conflict_neg_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.86" steps="154184"/></proof>
+      <proof prover="7"><result status="valid" time="0.86" steps="155287"/></proof>
       </goal>
       <goal name="branch_conflict_neg_atom&#39;vc.42.0.0.0.3" expl="VC for branch_conflict_neg_atom" proved="true">
       <proof prover="2" timelimit="1"><result status="valid" time="0.14" steps="77"/></proof>
       </goal>
       <goal name="branch_conflict_neg_atom&#39;vc.42.0.0.0.4" expl="VC for branch_conflict_neg_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.55" steps="142385"/></proof>
+      <proof prover="7"><result status="valid" time="0.55" steps="143744"/></proof>
       </goal>
       <goal name="branch_conflict_neg_atom&#39;vc.42.0.0.0.5" expl="VC for branch_conflict_neg_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.58" steps="142385"/></proof>
+      <proof prover="7"><result status="valid" time="0.58" steps="143744"/></proof>
       </goal>
      </transf>
      </goal>
@@ -681,7 +681,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.12" steps="126"/></proof>
   </goal>
   <goal name="clause_conflicts&#39;vc.11" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.63" steps="181339"/></proof>
+  <proof prover="7"><result status="valid" time="0.63" steps="181611"/></proof>
   </goal>
   <goal name="clause_conflicts&#39;vc.12" expl="precondition" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.11" steps="30"/></proof>
@@ -729,7 +729,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.10" steps="10"/></proof>
   </goal>
   <goal name="clause_conflicts&#39;vc.27" expl="assertion" proved="true">
-  <proof prover="7"><result status="valid" time="0.60" steps="173338"/></proof>
+  <proof prover="7"><result status="valid" time="0.60" steps="174173"/></proof>
   </goal>
   <goal name="clause_conflicts&#39;vc.28" expl="precondition" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.11" steps="45"/></proof>
@@ -747,7 +747,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.20" steps="137"/></proof>
   </goal>
   <goal name="clause_conflicts&#39;vc.33" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.62" steps="181993"/></proof>
+  <proof prover="7"><result status="valid" time="0.62" steps="182296"/></proof>
   </goal>
   <goal name="clause_conflicts&#39;vc.34" expl="precondition" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.14" steps="35"/></proof>
@@ -836,22 +836,22 @@
      <goal name="clause_conflicts&#39;vc.50.0.0.0" expl="VC for clause_conflicts" proved="true">
      <transf name="split_vc" proved="true" >
       <goal name="clause_conflicts&#39;vc.50.0.0.0.0" expl="VC for clause_conflicts" proved="true">
-      <proof prover="7"><result status="valid" time="0.84" steps="154149"/></proof>
+      <proof prover="7"><result status="valid" time="0.84" steps="155225"/></proof>
       </goal>
       <goal name="clause_conflicts&#39;vc.50.0.0.0.1" expl="VC for clause_conflicts" proved="true">
-      <proof prover="7"><result status="valid" time="0.67" steps="154066"/></proof>
+      <proof prover="7"><result status="valid" time="0.67" steps="155142"/></proof>
       </goal>
       <goal name="clause_conflicts&#39;vc.50.0.0.0.2" expl="VC for clause_conflicts" proved="true">
-      <proof prover="7"><result status="valid" time="0.75" steps="153380"/></proof>
+      <proof prover="7"><result status="valid" time="0.75" steps="154483"/></proof>
       </goal>
       <goal name="clause_conflicts&#39;vc.50.0.0.0.3" expl="VC for clause_conflicts" proved="true">
-      <proof prover="7"><result status="valid" time="0.74" steps="153380"/></proof>
+      <proof prover="7"><result status="valid" time="0.74" steps="154483"/></proof>
       </goal>
       <goal name="clause_conflicts&#39;vc.50.0.0.0.4" expl="VC for clause_conflicts" proved="true">
-      <proof prover="7"><result status="valid" time="0.55" steps="142362"/></proof>
+      <proof prover="7"><result status="valid" time="0.55" steps="143721"/></proof>
       </goal>
       <goal name="clause_conflicts&#39;vc.50.0.0.0.5" expl="VC for clause_conflicts" proved="true">
-      <proof prover="7"><result status="valid" time="0.53" steps="142362"/></proof>
+      <proof prover="7"><result status="valid" time="0.53" steps="143721"/></proof>
       </goal>
      </transf>
      </goal>
@@ -1191,7 +1191,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.10" steps="85"/></proof>
   </goal>
   <goal name="decompose&#39;vc.96" expl="unreachable point" proved="true">
-  <proof prover="3"><result status="valid" time="0.24" steps="883329"/></proof>
+  <proof prover="3"><result status="valid" time="0.24" steps="835587"/></proof>
   </goal>
   <goal name="decompose&#39;vc.97" expl="unreachable point" proved="true">
   <proof prover="6" timelimit="20"><result status="valid" time="0.63"/></proof>
@@ -1212,7 +1212,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.17" steps="377"/></proof>
   </goal>
   <goal name="decompose&#39;vc.103" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.66" steps="2332247"/></proof>
+  <proof prover="3"><result status="valid" time="0.48" steps="2045554"/></proof>
   </goal>
   <goal name="decompose&#39;vc.104" expl="assertion" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.23" steps="255"/></proof>
@@ -1241,32 +1241,32 @@
    <proof prover="2" timelimit="5"><result status="valid" time="0.25" steps="261"/></proof>
    </goal>
    <goal name="decompose&#39;vc.107.5" expl="assertion" proved="true">
-   <proof prover="6" timelimit="20"><result status="valid" time="5.72"/></proof>
+   <proof prover="6" timelimit="20"><result status="valid" time="4.96"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="decompose&#39;vc.108" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="decompose&#39;vc.108.0" expl="assertion" proved="true">
-   <proof prover="7"><result status="valid" time="0.69" steps="152181"/></proof>
+   <proof prover="7"><result status="valid" time="0.69" steps="153516"/></proof>
    </goal>
    <goal name="decompose&#39;vc.108.1" expl="assertion" proved="true">
-   <proof prover="7"><result status="valid" time="0.38" steps="139968"/></proof>
+   <proof prover="7"><result status="valid" time="0.38" steps="141331"/></proof>
    </goal>
    <goal name="decompose&#39;vc.108.2" expl="assertion" proved="true">
-   <proof prover="7"><result status="valid" time="0.58" steps="154594"/></proof>
+   <proof prover="7"><result status="valid" time="0.58" steps="155807"/></proof>
    </goal>
    <goal name="decompose&#39;vc.108.3" expl="assertion" proved="true">
-   <proof prover="7"><result status="valid" time="0.66" steps="233664"/></proof>
+   <proof prover="7"><result status="valid" time="0.66" steps="223938"/></proof>
    </goal>
    <goal name="decompose&#39;vc.108.4" expl="assertion" proved="true">
    <proof prover="2" timelimit="1"><result status="valid" time="0.16" steps="116"/></proof>
    </goal>
    <goal name="decompose&#39;vc.108.5" expl="assertion" proved="true">
-   <proof prover="7"><result status="valid" time="0.50" steps="148472"/></proof>
+   <proof prover="7"><result status="valid" time="0.50" steps="149827"/></proof>
    </goal>
    <goal name="decompose&#39;vc.108.6" expl="assertion" proved="true">
-   <proof prover="7"><result status="valid" time="1.43" steps="200577"/></proof>
+   <proof prover="7"><result status="valid" time="1.43" steps="200449"/></proof>
    </goal>
    <goal name="decompose&#39;vc.108.7" expl="assertion" proved="true">
    <proof prover="2" timelimit="1"><result status="valid" time="0.19" steps="257"/></proof>
@@ -1279,7 +1279,7 @@
    </transf>
    </goal>
    <goal name="decompose&#39;vc.108.9" expl="assertion" proved="true">
-   <proof prover="7"><result status="valid" time="0.23" steps="136364"/></proof>
+   <proof prover="7"><result status="valid" time="0.23" steps="137631"/></proof>
    </goal>
   </transf>
   </goal>
@@ -1500,7 +1500,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.14" steps="33"/></proof>
   </goal>
   <goal name="decompose&#39;vc.181" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.50" steps="237032"/></proof>
+  <proof prover="7"><result status="valid" time="0.50" steps="223921"/></proof>
   </goal>
   <goal name="decompose&#39;vc.182" expl="precondition" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.11" steps="33"/></proof>
@@ -1600,7 +1600,7 @@
   <proof prover="2"><result status="valid" time="0.16" steps="11"/></proof>
   </goal>
   <goal name="decompose_literal&#39;vc.22" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.95" steps="236408"/></proof>
+  <proof prover="0"><result status="valid" time="0.95" steps="223545"/></proof>
   </goal>
   <goal name="decompose_literal&#39;vc.23" expl="postcondition" proved="true">
   <proof prover="2"><result status="valid" time="0.18" steps="78"/></proof>
@@ -1612,7 +1612,7 @@
   <proof prover="2"><result status="valid" time="0.16" steps="11"/></proof>
   </goal>
   <goal name="decompose_literal&#39;vc.26" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.68" steps="242421"/></proof>
+  <proof prover="7"><result status="valid" time="0.68" steps="229598"/></proof>
   </goal>
   <goal name="decompose_literal&#39;vc.27" expl="assertion" proved="true">
   <proof prover="2"><result status="valid" time="0.19" steps="200"/></proof>
@@ -1732,7 +1732,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.14" steps="10"/></proof>
   </goal>
   <goal name="decompose_literal&#39;vc.66" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.23" steps="982611"/></proof>
+  <proof prover="3"><result status="valid" time="0.23" steps="934665"/></proof>
   </goal>
   <goal name="decompose_literal&#39;vc.67" expl="assertion" proved="true">
   <proof prover="2"><result status="valid" time="0.16" steps="303"/></proof>
@@ -1836,10 +1836,10 @@
      <goal name="decompose_literal&#39;vc.98.0.0.0" expl="VC for decompose_literal" proved="true">
      <transf name="split_vc" proved="true" >
       <goal name="decompose_literal&#39;vc.98.0.0.0.0" expl="VC for decompose_literal" proved="true">
-      <proof prover="3"><result status="valid" time="0.15" steps="597060"/></proof>
+      <proof prover="3"><result status="valid" time="0.15" steps="597721"/></proof>
       </goal>
       <goal name="decompose_literal&#39;vc.98.0.0.0.1" expl="VC for decompose_literal" proved="true">
-      <proof prover="3"><result status="valid" time="0.16" steps="597056"/></proof>
+      <proof prover="3"><result status="valid" time="0.16" steps="597717"/></proof>
       </goal>
       <goal name="decompose_literal&#39;vc.98.0.0.0.2" expl="VC for decompose_literal" proved="true">
       <proof prover="2" timelimit="1"><result status="valid" time="0.23" steps="328"/></proof>
@@ -1848,13 +1848,13 @@
       <proof prover="2" timelimit="1"><result status="valid" time="0.24" steps="329"/></proof>
       </goal>
       <goal name="decompose_literal&#39;vc.98.0.0.0.4" expl="VC for decompose_literal" proved="true">
-      <proof prover="3"><result status="valid" time="0.15" steps="596297"/></proof>
+      <proof prover="3"><result status="valid" time="0.15" steps="596989"/></proof>
       </goal>
       <goal name="decompose_literal&#39;vc.98.0.0.0.5" expl="VC for decompose_literal" proved="true">
-      <proof prover="7"><result status="valid" time="0.51" steps="148862"/></proof>
+      <proof prover="7"><result status="valid" time="0.51" steps="150221"/></proof>
       </goal>
       <goal name="decompose_literal&#39;vc.98.0.0.0.6" expl="VC for decompose_literal" proved="true">
-      <proof prover="7"><result status="valid" time="0.54" steps="148862"/></proof>
+      <proof prover="7"><result status="valid" time="0.54" steps="150221"/></proof>
       </goal>
      </transf>
      </goal>
@@ -1904,7 +1904,7 @@
   <proof prover="2"><result status="valid" time="0.12" steps="91"/></proof>
   </goal>
   <goal name="decompose_literal&#39;vc.103" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.70" steps="242528"/></proof>
+  <proof prover="7"><result status="valid" time="0.70" steps="229705"/></proof>
   </goal>
   <goal name="decompose_literal&#39;vc.104" expl="assertion" proved="true">
   <proof prover="2"><result status="valid" time="0.12" steps="195"/></proof>
@@ -2028,7 +2028,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.13" steps="171"/></proof>
   </goal>
   <goal name="contradiction_atom&#39;vc.10" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.28" steps="1005949"/></proof>
+  <proof prover="3"><result status="valid" time="0.28" steps="953959"/></proof>
   </goal>
   <goal name="contradiction_atom&#39;vc.11" expl="assertion" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.13" steps="278"/></proof>
@@ -2049,7 +2049,7 @@
   <proof prover="2"><result status="valid" time="0.16" steps="48"/></proof>
   </goal>
   <goal name="contradiction_atom&#39;vc.17" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.28" steps="133281"/></proof>
+  <proof prover="7"><result status="valid" time="0.28" steps="134548"/></proof>
   </goal>
   <goal name="contradiction_atom&#39;vc.18" expl="precondition" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.12" steps="47"/></proof>
@@ -2197,7 +2197,7 @@
   </transf>
   </goal>
   <goal name="contradiction_atom&#39;vc.47" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="2.52" steps="538421"/></proof>
+  <proof prover="0"><result status="valid" time="2.52" steps="477796"/></proof>
   </goal>
   <goal name="contradiction_atom&#39;vc.48" expl="precondition" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.23" steps="60"/></proof>
@@ -2717,10 +2717,10 @@
      <goal name="contradiction_atom&#39;vc.187.0.0.0" expl="VC for contradiction_atom" proved="true">
      <transf name="split_vc" proved="true" >
       <goal name="contradiction_atom&#39;vc.187.0.0.0.0" expl="VC for contradiction_atom" proved="true">
-      <proof prover="3"><result status="valid" time="0.15" steps="569831"/></proof>
+      <proof prover="3"><result status="valid" time="0.15" steps="570369"/></proof>
       </goal>
       <goal name="contradiction_atom&#39;vc.187.0.0.0.1" expl="VC for contradiction_atom" proved="true">
-      <proof prover="3"><result status="valid" time="0.16" steps="569828"/></proof>
+      <proof prover="3"><result status="valid" time="0.16" steps="570366"/></proof>
       </goal>
       <goal name="contradiction_atom&#39;vc.187.0.0.0.2" expl="VC for contradiction_atom" proved="true">
       <proof prover="2" timelimit="1"><result status="valid" time="0.26" steps="305"/></proof>
@@ -2729,13 +2729,13 @@
       <proof prover="2" timelimit="1"><result status="valid" time="0.21" steps="306"/></proof>
       </goal>
       <goal name="contradiction_atom&#39;vc.187.0.0.0.4" expl="VC for contradiction_atom" proved="true">
-      <proof prover="3"><result status="valid" time="0.13" steps="569020"/></proof>
+      <proof prover="3"><result status="valid" time="0.13" steps="569590"/></proof>
       </goal>
       <goal name="contradiction_atom&#39;vc.187.0.0.0.5" expl="VC for contradiction_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.66" steps="149359"/></proof>
+      <proof prover="7"><result status="valid" time="0.66" steps="150718"/></proof>
       </goal>
       <goal name="contradiction_atom&#39;vc.187.0.0.0.6" expl="VC for contradiction_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.66" steps="149359"/></proof>
+      <proof prover="7"><result status="valid" time="0.66" steps="150718"/></proof>
       </goal>
      </transf>
      </goal>
@@ -2843,22 +2843,22 @@
      <goal name="contradiction_atom&#39;vc.213.0.0.0" expl="VC for contradiction_atom" proved="true">
      <transf name="split_vc" proved="true" >
       <goal name="contradiction_atom&#39;vc.213.0.0.0.0" expl="VC for contradiction_atom" proved="true">
-      <proof prover="3"><result status="valid" time="0.15" steps="559998"/></proof>
+      <proof prover="3"><result status="valid" time="0.15" steps="560536"/></proof>
       </goal>
       <goal name="contradiction_atom&#39;vc.213.0.0.0.1" expl="VC for contradiction_atom" proved="true">
-      <proof prover="3"><result status="valid" time="0.12" steps="559995"/></proof>
+      <proof prover="3"><result status="valid" time="0.12" steps="560533"/></proof>
       </goal>
       <goal name="contradiction_atom&#39;vc.213.0.0.0.2" expl="VC for contradiction_atom" proved="true">
-      <proof prover="7"><result status="valid" time="1.05" steps="162258"/></proof>
+      <proof prover="7"><result status="valid" time="1.05" steps="163394"/></proof>
       </goal>
       <goal name="contradiction_atom&#39;vc.213.0.0.0.3" expl="VC for contradiction_atom" proved="true">
       <proof prover="2" timelimit="1"><result status="valid" time="0.16" steps="123"/></proof>
       </goal>
       <goal name="contradiction_atom&#39;vc.213.0.0.0.4" expl="VC for contradiction_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.51" steps="146252"/></proof>
+      <proof prover="7"><result status="valid" time="0.51" steps="147611"/></proof>
       </goal>
       <goal name="contradiction_atom&#39;vc.213.0.0.0.5" expl="VC for contradiction_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.48" steps="146252"/></proof>
+      <proof prover="7"><result status="valid" time="0.48" steps="147611"/></proof>
       </goal>
      </transf>
      </goal>
@@ -2916,7 +2916,7 @@
   <proof prover="2"><result status="valid" time="0.16" steps="43"/></proof>
   </goal>
   <goal name="contradiction_neg_atom&#39;vc.14" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.22" steps="133281"/></proof>
+  <proof prover="7"><result status="valid" time="0.22" steps="134548"/></proof>
   </goal>
   <goal name="contradiction_neg_atom&#39;vc.15" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.11" steps="42"/></proof>
@@ -3061,7 +3061,7 @@
   <goal name="contradiction_neg_atom&#39;vc.44" expl="assertion" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="contradiction_neg_atom&#39;vc.44.0" expl="assertion" proved="true">
-   <proof prover="6"><result status="valid" time="1.59"/></proof>
+   <proof prover="6"><result status="valid" time="1.33"/></proof>
    </goal>
    <goal name="contradiction_neg_atom&#39;vc.44.1" expl="assertion" proved="true">
    <proof prover="2"><result status="valid" time="0.26" steps="739"/></proof>
@@ -3401,7 +3401,7 @@
     <proof prover="2"><result status="valid" time="0.12" steps="69"/></proof>
     </goal>
     <goal name="contradiction_neg_atom&#39;vc.133.0.4" expl="VC for contradiction_neg_atom" proved="true">
-    <proof prover="1"><result status="valid" time="3.22"/></proof>
+    <proof prover="1"><result status="valid" time="2.78"/></proof>
     </goal>
     <goal name="contradiction_neg_atom&#39;vc.133.0.5" expl="VC for contradiction_neg_atom" proved="true">
     <proof prover="1"><result status="valid" time="1.86"/></proof>
@@ -3648,22 +3648,22 @@
      <goal name="contradiction_neg_atom&#39;vc.209.0.0.0" expl="VC for contradiction_neg_atom" proved="true">
      <transf name="split_vc" proved="true" >
       <goal name="contradiction_neg_atom&#39;vc.209.0.0.0.0" expl="VC for contradiction_neg_atom" proved="true">
-      <proof prover="7"><result status="valid" time="1.10" steps="163932"/></proof>
+      <proof prover="7"><result status="valid" time="1.10" steps="165031"/></proof>
       </goal>
       <goal name="contradiction_neg_atom&#39;vc.209.0.0.0.1" expl="VC for contradiction_neg_atom" proved="true">
-      <proof prover="3"><result status="valid" time="0.14" steps="561233"/></proof>
+      <proof prover="3"><result status="valid" time="0.14" steps="561772"/></proof>
       </goal>
       <goal name="contradiction_neg_atom&#39;vc.209.0.0.0.2" expl="VC for contradiction_neg_atom" proved="true">
       <proof prover="2" timelimit="1"><result status="valid" time="0.15" steps="123"/></proof>
       </goal>
       <goal name="contradiction_neg_atom&#39;vc.209.0.0.0.3" expl="VC for contradiction_neg_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.90" steps="162690"/></proof>
+      <proof prover="7"><result status="valid" time="0.90" steps="163816"/></proof>
       </goal>
       <goal name="contradiction_neg_atom&#39;vc.209.0.0.0.4" expl="VC for contradiction_neg_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.51" steps="146438"/></proof>
+      <proof prover="7"><result status="valid" time="0.51" steps="147797"/></proof>
       </goal>
       <goal name="contradiction_neg_atom&#39;vc.209.0.0.0.5" expl="VC for contradiction_neg_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.60" steps="146438"/></proof>
+      <proof prover="7"><result status="valid" time="0.60" steps="147797"/></proof>
       </goal>
      </transf>
      </goal>
@@ -3730,7 +3730,7 @@
   <proof prover="2"><result status="valid" time="0.10" steps="24"/></proof>
   </goal>
   <goal name="extend_branch&#39;vc.17" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.22" steps="133281"/></proof>
+  <proof prover="7"><result status="valid" time="0.22" steps="134548"/></proof>
   </goal>
   <goal name="extend_branch&#39;vc.18" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.10" steps="41"/></proof>
@@ -3859,7 +3859,7 @@
   <proof prover="2"><result status="valid" time="0.14" steps="10"/></proof>
   </goal>
   <goal name="extend_branch&#39;vc.60" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.26" steps="928714"/></proof>
+  <proof prover="3"><result status="valid" time="0.26" steps="880889"/></proof>
   </goal>
   <goal name="extend_branch&#39;vc.61" expl="precondition" proved="true">
   <transf name="split_goal_right" proved="true" >
@@ -3914,7 +3914,7 @@
   <proof prover="2"><result status="valid" time="0.20" steps="155"/></proof>
   </goal>
   <goal name="extend_branch&#39;vc.77" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.92" steps="273340"/></proof>
+  <proof prover="7"><result status="valid" time="0.92" steps="259180"/></proof>
   </goal>
   <goal name="extend_branch&#39;vc.78" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.13" steps="164"/></proof>
@@ -3970,10 +3970,10 @@
      <goal name="extend_branch&#39;vc.93.0.0.0" expl="VC for extend_branch" proved="true">
      <transf name="split_vc" proved="true" >
       <goal name="extend_branch&#39;vc.93.0.0.0.0" expl="VC for extend_branch" proved="true">
-      <proof prover="3"><result status="valid" time="0.14" steps="557982"/></proof>
+      <proof prover="3"><result status="valid" time="0.14" steps="558521"/></proof>
       </goal>
       <goal name="extend_branch&#39;vc.93.0.0.0.1" expl="VC for extend_branch" proved="true">
-      <proof prover="3"><result status="valid" time="0.14" steps="557978"/></proof>
+      <proof prover="3"><result status="valid" time="0.14" steps="558517"/></proof>
       </goal>
       <goal name="extend_branch&#39;vc.93.0.0.0.2" expl="VC for extend_branch" proved="true">
       <proof prover="2" timelimit="1"><result status="valid" time="0.21" steps="227"/></proof>
@@ -3982,13 +3982,13 @@
       <proof prover="2" timelimit="1"><result status="valid" time="0.20" steps="228"/></proof>
       </goal>
       <goal name="extend_branch&#39;vc.93.0.0.0.4" expl="VC for extend_branch" proved="true">
-      <proof prover="3"><result status="valid" time="0.14" steps="557467"/></proof>
+      <proof prover="3"><result status="valid" time="0.14" steps="558037"/></proof>
       </goal>
       <goal name="extend_branch&#39;vc.93.0.0.0.5" expl="VC for extend_branch" proved="true">
-      <proof prover="7"><result status="valid" time="0.53" steps="146112"/></proof>
+      <proof prover="7"><result status="valid" time="0.53" steps="147471"/></proof>
       </goal>
       <goal name="extend_branch&#39;vc.93.0.0.0.6" expl="VC for extend_branch" proved="true">
-      <proof prover="7"><result status="valid" time="0.62" steps="146112"/></proof>
+      <proof prover="7"><result status="valid" time="0.62" steps="147471"/></proof>
       </goal>
      </transf>
      </goal>
@@ -4080,7 +4080,7 @@
   <proof prover="2"><result status="valid" time="0.10" steps="31"/></proof>
   </goal>
   <goal name="contradiction_find_atom&#39;vc.17" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.34" steps="133281"/></proof>
+  <proof prover="7"><result status="valid" time="0.34" steps="134548"/></proof>
   </goal>
   <goal name="contradiction_find_atom&#39;vc.18" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.18" steps="64"/></proof>
@@ -4202,10 +4202,10 @@
   <goal name="contradiction_find_atom&#39;vc.53" expl="precondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="contradiction_find_atom&#39;vc.53.0" expl="precondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.76" steps="212888"/></proof>
+   <proof prover="7"><result status="valid" time="0.76" steps="203956"/></proof>
    </goal>
    <goal name="contradiction_find_atom&#39;vc.53.1" expl="precondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.77" steps="212909"/></proof>
+   <proof prover="7"><result status="valid" time="0.77" steps="203977"/></proof>
    </goal>
   </transf>
   </goal>
@@ -4219,7 +4219,7 @@
   <proof prover="2"><result status="valid" time="0.09" steps="10"/></proof>
   </goal>
   <goal name="contradiction_find_atom&#39;vc.57" expl="assertion" proved="true">
-  <proof prover="3"><result status="valid" time="0.20" steps="987998"/></proof>
+  <proof prover="3"><result status="valid" time="0.20" steps="936008"/></proof>
   </goal>
   <goal name="contradiction_find_atom&#39;vc.58" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.12" steps="71"/></proof>
@@ -4240,7 +4240,7 @@
   <proof prover="2"><result status="valid" time="0.12" steps="48"/></proof>
   </goal>
   <goal name="contradiction_find_atom&#39;vc.64" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.27" steps="133281"/></proof>
+  <proof prover="7"><result status="valid" time="0.27" steps="134548"/></proof>
   </goal>
   <goal name="contradiction_find_atom&#39;vc.65" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.11" steps="47"/></proof>
@@ -4252,7 +4252,7 @@
   <proof prover="2"><result status="valid" time="0.16" steps="202"/></proof>
   </goal>
   <goal name="contradiction_find_atom&#39;vc.68" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.31" steps="955435"/></proof>
+  <proof prover="3"><result status="valid" time="0.31" steps="903727"/></proof>
   </goal>
   <goal name="contradiction_find_atom&#39;vc.69" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.15" steps="48"/></proof>
@@ -4505,10 +4505,10 @@
   <goal name="contradiction_find_atom&#39;vc.133" expl="precondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="contradiction_find_atom&#39;vc.133.0" expl="precondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.82" steps="221682"/></proof>
+   <proof prover="7"><result status="valid" time="0.82" steps="212558"/></proof>
    </goal>
    <goal name="contradiction_find_atom&#39;vc.133.1" expl="precondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.86" steps="221703"/></proof>
+   <proof prover="7"><result status="valid" time="0.86" steps="212579"/></proof>
    </goal>
   </transf>
   </goal>
@@ -4613,15 +4613,15 @@
   <proof prover="2"><result status="valid" time="0.21" steps="106"/></proof>
   </goal>
   <goal name="contradiction_find_atom&#39;vc.166" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.30" steps="1133610"/></proof>
+  <proof prover="3"><result status="valid" time="0.30" steps="1048216"/></proof>
   </goal>
   <goal name="contradiction_find_atom&#39;vc.167" expl="precondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="contradiction_find_atom&#39;vc.167.0" expl="precondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.80" steps="215827"/></proof>
+   <proof prover="7"><result status="valid" time="0.80" steps="206895"/></proof>
    </goal>
    <goal name="contradiction_find_atom&#39;vc.167.1" expl="precondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.84" steps="215848"/></proof>
+   <proof prover="7"><result status="valid" time="0.84" steps="206916"/></proof>
    </goal>
   </transf>
   </goal>
@@ -4724,10 +4724,10 @@
      <goal name="contradiction_find_atom&#39;vc.198.0.0.0" expl="VC for contradiction_find_atom" proved="true">
      <transf name="split_vc" proved="true" >
       <goal name="contradiction_find_atom&#39;vc.198.0.0.0.0" expl="VC for contradiction_find_atom" proved="true">
-      <proof prover="3"><result status="valid" time="0.16" steps="570899"/></proof>
+      <proof prover="3"><result status="valid" time="0.16" steps="571437"/></proof>
       </goal>
       <goal name="contradiction_find_atom&#39;vc.198.0.0.0.1" expl="VC for contradiction_find_atom" proved="true">
-      <proof prover="3"><result status="valid" time="0.15" steps="570896"/></proof>
+      <proof prover="3"><result status="valid" time="0.15" steps="571434"/></proof>
       </goal>
       <goal name="contradiction_find_atom&#39;vc.198.0.0.0.2" expl="VC for contradiction_find_atom" proved="true">
       <proof prover="2" timelimit="1"><result status="valid" time="0.24" steps="291"/></proof>
@@ -4736,13 +4736,13 @@
       <proof prover="2" timelimit="1"><result status="valid" time="0.21" steps="292"/></proof>
       </goal>
       <goal name="contradiction_find_atom&#39;vc.198.0.0.0.4" expl="VC for contradiction_find_atom" proved="true">
-      <proof prover="3"><result status="valid" time="0.16" steps="570115"/></proof>
+      <proof prover="3"><result status="valid" time="0.16" steps="570685"/></proof>
       </goal>
       <goal name="contradiction_find_atom&#39;vc.198.0.0.0.5" expl="VC for contradiction_find_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.64" steps="149089"/></proof>
+      <proof prover="7"><result status="valid" time="0.64" steps="150448"/></proof>
       </goal>
       <goal name="contradiction_find_atom&#39;vc.198.0.0.0.6" expl="VC for contradiction_find_atom" proved="true">
-      <proof prover="7"><result status="valid" time="0.55" steps="149089"/></proof>
+      <proof prover="7"><result status="valid" time="0.55" steps="150448"/></proof>
       </goal>
      </transf>
      </goal>
@@ -4842,7 +4842,7 @@
   <proof prover="2"><result status="valid" time="0.10" steps="31"/></proof>
   </goal>
   <goal name="contradiction_find_neg_atom&#39;vc.17" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.23" steps="133281"/></proof>
+  <proof prover="7"><result status="valid" time="0.23" steps="134548"/></proof>
   </goal>
   <goal name="contradiction_find_neg_atom&#39;vc.18" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.21" steps="64"/></proof>
@@ -4964,10 +4964,10 @@
   <goal name="contradiction_find_neg_atom&#39;vc.53" expl="precondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="contradiction_find_neg_atom&#39;vc.53.0" expl="precondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.81" steps="213054"/></proof>
+   <proof prover="7"><result status="valid" time="0.81" steps="204122"/></proof>
    </goal>
    <goal name="contradiction_find_neg_atom&#39;vc.53.1" expl="precondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.79" steps="213075"/></proof>
+   <proof prover="7"><result status="valid" time="0.79" steps="204143"/></proof>
    </goal>
   </transf>
   </goal>
@@ -4996,7 +4996,7 @@
   <proof prover="2"><result status="valid" time="0.17" steps="43"/></proof>
   </goal>
   <goal name="contradiction_find_neg_atom&#39;vc.62" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.32" steps="133281"/></proof>
+  <proof prover="7"><result status="valid" time="0.32" steps="134548"/></proof>
   </goal>
   <goal name="contradiction_find_neg_atom&#39;vc.63" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.11" steps="42"/></proof>
@@ -5257,10 +5257,10 @@
   <goal name="contradiction_find_neg_atom&#39;vc.131" expl="precondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="contradiction_find_neg_atom&#39;vc.131.0" expl="precondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.81" steps="220864"/></proof>
+   <proof prover="7"><result status="valid" time="0.81" steps="211738"/></proof>
    </goal>
    <goal name="contradiction_find_neg_atom&#39;vc.131.1" expl="precondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.83" steps="220885"/></proof>
+   <proof prover="7"><result status="valid" time="0.83" steps="211759"/></proof>
    </goal>
   </transf>
   </goal>
@@ -5365,15 +5365,15 @@
   <proof prover="2"><result status="valid" time="0.12" steps="101"/></proof>
   </goal>
   <goal name="contradiction_find_neg_atom&#39;vc.164" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.24" steps="1124403"/></proof>
+  <proof prover="3"><result status="valid" time="0.24" steps="1039011"/></proof>
   </goal>
   <goal name="contradiction_find_neg_atom&#39;vc.165" expl="precondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="contradiction_find_neg_atom&#39;vc.165.0" expl="precondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.82" steps="215123"/></proof>
+   <proof prover="7"><result status="valid" time="0.82" steps="206191"/></proof>
    </goal>
    <goal name="contradiction_find_neg_atom&#39;vc.165.1" expl="precondition" proved="true">
-   <proof prover="7"><result status="valid" time="0.83" steps="215144"/></proof>
+   <proof prover="7"><result status="valid" time="0.83" steps="206212"/></proof>
    </goal>
   </transf>
   </goal>
@@ -5520,7 +5520,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.12" steps="69"/></proof>
   </goal>
   <goal name="select_lemma&#39;vc.6" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.41" steps="231523"/></proof>
+  <proof prover="7"><result status="valid" time="0.41" steps="218412"/></proof>
   </goal>
   <goal name="select_lemma&#39;vc.7" expl="assertion" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.13" steps="32"/></proof>
@@ -5601,7 +5601,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.16" steps="68"/></proof>
   </goal>
   <goal name="select_lemma&#39;vc.33" expl="precondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.20" steps="851193"/></proof>
+  <proof prover="3"><result status="valid" time="0.20" steps="802831"/></proof>
   </goal>
   <goal name="select_lemma&#39;vc.34" expl="postcondition" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.12" steps="59"/></proof>

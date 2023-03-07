@@ -9,34 +9,34 @@
  <goal name="is_subsequence&#39;vc" expl="VC for is_subsequence" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="is_subsequence&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="11509"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="12143"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="12073"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="12712"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="12097"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="12744"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.28" steps="55829"/></proof>
+  <proof prover="2"><result status="valid" time="0.28" steps="51102"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="14950"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="16073"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.5" expl="variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="11452"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="12148"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.6" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="11407"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="12103"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.7" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="11992"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="12708"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.8" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="15440"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="15806"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.9" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="14151"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="15093"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.10" expl="postcondition" proved="true">
   <transf name="split_vc" proved="true" >
@@ -45,34 +45,34 @@
     <goal name="is_subsequence&#39;vc.10.0.0" expl="postcondition" proved="true">
     <transf name="exists" proved="true" arg1="f">
      <goal name="is_subsequence&#39;vc.10.0.0.0" proved="true">
-     <proof prover="2"><result status="valid" time="0.06" steps="21460"/></proof>
+     <proof prover="2"><result status="valid" time="0.06" steps="20314"/></proof>
      </goal>
     </transf>
     </goal>
     <goal name="is_subsequence&#39;vc.10.0.1" expl="postcondition" proved="true">
-    <proof prover="2" timelimit="5"><result status="valid" time="0.05" steps="12419"/></proof>
+    <proof prover="2" timelimit="5"><result status="valid" time="0.05" steps="13135"/></proof>
     </goal>
    </transf>
    </goal>
    <goal name="is_subsequence&#39;vc.10.1" expl="postcondition" proved="true">
-   <proof prover="2"><result status="valid" time="0.04" steps="14660"/></proof>
+   <proof prover="2"><result status="valid" time="0.04" steps="15500"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="is_subsequence&#39;vc.11" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="11184"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="11834"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.12" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="11228"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="11878"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.13" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="13098"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="12984"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.14" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.04" steps="13208"/></proof>
+  <proof prover="2"><result status="valid" time="0.04" steps="14066"/></proof>
   </goal>
   <goal name="is_subsequence&#39;vc.15" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="7409"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="7608"/></proof>
   </goal>
  </transf>
  </goal>

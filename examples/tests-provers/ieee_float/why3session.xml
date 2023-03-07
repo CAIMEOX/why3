@@ -52,13 +52,13 @@
   </goal>
   <goal name="triplet&#39;vc.2" expl="assertion" proved="true">
   <proof prover="0"><result status="valid" time="0.21"/></proof>
-  <proof prover="1"><result status="valid" time="2.72"/></proof>
+  <proof prover="1"><result status="valid" time="2.27"/></proof>
   <proof prover="3"><result status="valid" time="0.22"/></proof>
   <proof prover="5"><result status="valid" time="0.06"/></proof>
   <proof prover="10"><result status="valid" time="0.08" steps="184"/></proof>
   </goal>
   <goal name="triplet&#39;vc.3" expl="assertion" proved="true">
-  <proof prover="6"><result status="valid" time="4.52" steps="3622918"/></proof>
+  <proof prover="6"><result status="valid" time="3.86" steps="3622918"/></proof>
   </goal>
   <goal name="triplet&#39;vc.4" expl="assertion" proved="true">
   <proof prover="0"><result status="valid" time="0.14"/></proof>
@@ -228,8 +228,8 @@
 </theory>
 <theory name="Literals">
  <goal name="wrong">
- <proof prover="7"><result status="timeout" time="1.00" steps="229794"/></proof>
- <proof prover="8"><result status="timeout" time="1.00" steps="101989"/></proof>
+ <proof prover="7"><result status="timeout" time="1.00" steps="237272"/></proof>
+ <proof prover="8"><result status="timeout" time="1.00"/></proof>
  <proof prover="11"><result status="timeout" time="1.00"/></proof>
  <proof prover="14"><result status="unknown" time="0.06" steps="17539"/></proof>
  </goal>

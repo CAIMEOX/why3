@@ -9,111 +9,111 @@
 <path name=".."/><path name="equality_up_to_spaces.mlw"/>
 <theory name="Top" proved="true">
  <goal name="remove_spaces&#39;vc" expl="VC for remove_spaces" proved="true">
- <proof prover="0"><result status="valid" time="0.09" steps="17789"/></proof>
+ <proof prover="0"><result status="valid" time="0.09" steps="18171"/></proof>
  <proof prover="4"><result status="valid" time="0.01" steps="23"/></proof>
- <proof prover="5"><result status="valid" time="0.04" steps="62832"/></proof>
+ <proof prover="5"><result status="valid" time="0.04" steps="63693"/></proof>
  </goal>
  <goal name="compare_up_to_spaces&#39;vc" expl="VC for compare_up_to_spaces" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="compare_up_to_spaces&#39;vc.0" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="14224"/></proof>
+  <proof prover="0"><result status="valid" time="0.07" steps="13517"/></proof>
   <proof prover="4"><result status="valid" time="0.00" steps="2"/></proof>
-  <proof prover="5"><result status="valid" time="0.02" steps="61668"/></proof>
+  <proof prover="5"><result status="valid" time="0.02" steps="60284"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.1" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.08" steps="14439"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="13732"/></proof>
   <proof prover="4"><result status="valid" time="0.00" steps="5"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="61991"/></proof>
+  <proof prover="5"><result status="valid" time="0.03" steps="60607"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.2" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="0.92" steps="127575"/></proof>
+  <proof prover="0"><result status="valid" time="0.92" steps="124649"/></proof>
   <proof prover="4"><result status="valid" time="0.03" steps="128"/></proof>
-  <proof prover="5"><result status="valid" time="0.82" steps="760884"/></proof>
+  <proof prover="5"><result status="valid" time="0.35" steps="448403"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.3" expl="assertion" proved="true">
   <proof prover="4"><result status="valid" time="0.65" steps="1532"/></proof>
-  <proof prover="5"><result status="valid" time="2.29" steps="1866584"/></proof>
+  <proof prover="5"><result status="valid" time="1.64" steps="1394226"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.4" expl="loop variant decrease" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="14602"/></proof>
+  <proof prover="0"><result status="valid" time="0.07" steps="14400"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="30"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="75330"/></proof>
+  <proof prover="5"><result status="valid" time="0.03" steps="73930"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.5" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="14454"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="14266"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="30"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="76392"/></proof>
+  <proof prover="5"><result status="valid" time="0.04" steps="75023"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.6" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="14048"/></proof>
+  <proof prover="0"><result status="valid" time="0.06" steps="13965"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="32"/></proof>
-  <proof prover="5"><result status="valid" time="0.02" steps="7734"/></proof>
+  <proof prover="5"><result status="valid" time="0.02" steps="7982"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.7" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="14580"/></proof>
+  <proof prover="0"><result status="valid" time="0.07" steps="14375"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="45"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.8" expl="assertion" proved="true">
   <proof prover="4"><result status="valid" time="0.65" steps="1544"/></proof>
-  <proof prover="5"><result status="valid" time="1.96" steps="1872417"/></proof>
+  <proof prover="5"><result status="valid" time="1.96" steps="1402946"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.9" expl="loop variant decrease" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="14816"/></proof>
+  <proof prover="0"><result status="valid" time="0.07" steps="14614"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="30"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="81286"/></proof>
+  <proof prover="5"><result status="valid" time="0.03" steps="82479"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.10" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.05" steps="14191"/></proof>
+  <proof prover="0"><result status="valid" time="0.05" steps="14108"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="30"/></proof>
-  <proof prover="5"><result status="valid" time="0.02" steps="7870"/></proof>
+  <proof prover="5"><result status="valid" time="0.02" steps="8118"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.11" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="14697"/></proof>
+  <proof prover="0"><result status="valid" time="0.07" steps="14509"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="30"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="82391"/></proof>
+  <proof prover="5"><result status="valid" time="0.04" steps="83603"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.12" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.06" steps="14808"/></proof>
+  <proof prover="0"><result status="valid" time="0.06" steps="14603"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="52"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.13" expl="assertion" proved="true">
-  <proof prover="5"><result status="valid" time="4.41" steps="2860249"/></proof>
+  <proof prover="5"><result status="valid" time="2.39" steps="2059933"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.14" expl="assertion" proved="true">
-  <proof prover="5"><result status="valid" time="3.89" steps="2859347"/></proof>
+  <proof prover="5"><result status="valid" time="2.44" steps="2061055"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.15" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.38" steps="64135"/></proof>
+  <proof prover="0"><result status="valid" time="0.38" steps="59958"/></proof>
   <proof prover="4"><result status="valid" time="0.04" steps="194"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.16" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.08" steps="16611"/></proof>
+  <proof prover="0"><result status="valid" time="0.08" steps="16444"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="68"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="93722"/></proof>
+  <proof prover="5"><result status="valid" time="0.04" steps="93574"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.17" expl="loop variant decrease" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="15452"/></proof>
+  <proof prover="0"><result status="valid" time="0.07" steps="15244"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="30"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="85495"/></proof>
+  <proof prover="5"><result status="valid" time="0.04" steps="86613"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.18" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.08" steps="15315"/></proof>
+  <proof prover="0"><result status="valid" time="0.07" steps="15107"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="30"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="87139"/></proof>
+  <proof prover="5"><result status="valid" time="0.04" steps="88104"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.19" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.07" steps="15364"/></proof>
+  <proof prover="0"><result status="valid" time="0.06" steps="15152"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="32"/></proof>
-  <proof prover="5"><result status="valid" time="0.04" steps="87336"/></proof>
+  <proof prover="5"><result status="valid" time="0.04" steps="88301"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.20" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.09" steps="17095"/></proof>
+  <proof prover="0"><result status="valid" time="0.09" steps="16922"/></proof>
   <proof prover="4"><result status="valid" time="0.02" steps="100"/></proof>
   </goal>
   <goal name="compare_up_to_spaces&#39;vc.21" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.26" steps="47611"/></proof>
+  <proof prover="0"><result status="valid" time="0.26" steps="41988"/></proof>
   <proof prover="4"><result status="valid" time="0.01" steps="61"/></proof>
-  <proof prover="5"><result status="valid" time="0.03" steps="82807"/></proof>
+  <proof prover="5"><result status="valid" time="0.03" steps="80735"/></proof>
   </goal>
  </transf>
  </goal>
