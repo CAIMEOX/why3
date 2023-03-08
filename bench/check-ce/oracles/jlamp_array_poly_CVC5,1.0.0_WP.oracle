@@ -17,7 +17,7 @@ File array.mlw:
       ->
       uni
       ->
-      int = fun bOUND_VARIABLE_1630 bOUND_VARIABLE_1631 -> 0
+      int = fun bOUND_VARIABLE_1544 bOUND_VARIABLE_1545 -> 0
     length : array t -> int = [|_ => 0|]
   Line 20:
     mixfix [] :
@@ -57,7 +57,7 @@ File array.mlw:
       ->
       uni
       ->
-      int = fun bOUND_VARIABLE_1621 bOUND_VARIABLE_1622 -> 0
+      int = fun bOUND_VARIABLE_1578 bOUND_VARIABLE_1579 -> 0
     length : array t -> int = [|_ => 0|]
 File jlamp_array_poly.mlw:
   Line 8:

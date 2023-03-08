@@ -95,7 +95,7 @@ File array.mlw:
       ->
       uni
       ->
-      int = fun bOUND_VARIABLE_4701 bOUND_VARIABLE_4711 -> 2
+      int = fun bOUND_VARIABLE_4703 bOUND_VARIABLE_4711 -> 2
   Line 232:
     sorted : array int -> bool = [|_ => false|]
 
