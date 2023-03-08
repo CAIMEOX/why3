@@ -373,8 +373,8 @@ File array_records_poly.mlw:
       ->
       int
       ->
-      basic_record = fun bOUND_VARIABLE_5973 bOUND_VARIABLE_5974
-                      bOUND_VARIABLE_5975 ->
+      basic_record = fun bOUND_VARIABLE_5938 bOUND_VARIABLE_5939
+                      bOUND_VARIABLE_5940 ->
                       {flag = true; first_value = 3; second_value = 0}
   Line 16:
     flag : basic_record -> bool = [|_ => true|]
