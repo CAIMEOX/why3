@@ -15,6 +15,7 @@ open Ty
 open Theory
 open Ident
 open Task
+open Generic_arg_trans_utils
 
 type symbols = {
   add : lsymbol;
@@ -307,11 +308,12 @@ let rec add_fmlas symbols f info =
    (|y|,|z|)" *)
 (* If we have x <= y and z <= x, generate the ineq |x| <= max (|y|,|z|) *)
 (* Furthermore, resolve "max(|y|, |z|)" when those are constants *)
-let collect_info symbols d info =
+let collect_info symbols d (info, _) =
   match d.d_node with
   | Dprop (kind, pr, f) when kind = Paxiom || kind = Plemma ->
-    add_fmlas symbols f info
-  | _ -> info
+    (add_fmlas symbols f info, None)
+  | Dprop (kind, pr, f) when kind = Pgoal -> (info, Some d)
+  | _ -> (info, None)
 
 let t_by t1 t2 = t_implies (t_or_asym t2 t_true) t1
 
@@ -367,9 +369,10 @@ let combine_errors_with_addition symbols info f' t1 exact_t1 t1_factor t1'
     +. (((t2_factor +. eps) *. t1_cst) +. ((t1_factor +. eps) *. t2_cst))
   in
   let mk_f t1 exact_t1 t1' t1_factor t1_cst t2 exact_t2 t2' t2_factor t2_cst =
-    let f = delta <=. abs (to_real t1 +. (exact_t1 -. exact_t1)) in
-    let f = t_by (delta <=. abs (to_real t1 -. exact_t1) +. t1') f in
-    let f = t_by (delta <=. (t1' *. t1_factor) +. t1_cst +. t1') f in
+    (* let f = delta <=. abs (to_real t1 +. (exact_t1 -. exact_t1)) in *)
+    (* let f = t_by (delta <=. abs (to_real t1 -. exact_t1) +. t1') f in *)
+    (* let f = t_by (delta <=. (t1' *. t1_factor) +. t1_cst +. t1') f in *)
+    let f = delta <=. (t1' *. t1_factor) +. t1_cst +. t1' in
     let f =
       t_by
         (delta
@@ -819,6 +822,8 @@ let rec get_floats symbols t =
 let rec apply_theorems prove_overflow symbols info t =
   let apply = apply_theorems prove_overflow symbols in
   let t_info = get_info info t in
+
+  (* Trans.goal (fun _ _ -> [ g_t ]) *)
   match t_info.ieee_post with
   | Some (ieee_post, t1, t2) ->
     let info, f1 = apply info t1 in
@@ -854,14 +859,71 @@ let rec apply_theorems prove_overflow symbols info t =
         (* TODO: Apply round_error theorem on all floats *)
         (info, fmla)))
 
-let apply symbols info task =
-  let goal_tdecl, task = Task.task_separate_goal task in
+let apply env symbols info task =
+  let naming_table = Args_wrapper.build_naming_tables task in
+  (* Trans.return *)
+  Trans.apply_transform_args "apply" env [ "Assoc" ] naming_table "whatisthis"
+    task
+(* let goal_tdecl, task = Task.task_separate_goal task in *)
+(* let kind, pr, goal = *)
+(*   match goal_tdecl.td_node with *)
+(*   | Decl d -> ( *)
+(*     match d.d_node with *)
+(*     | Dprop p -> p *)
+(*     | _ -> assert false) *)
+(*   | _ -> assert false *)
+(* in *)
+(* let floats = get_floats symbols goal in *)
+(* let prove_overflow = *)
+(*   match goal.t_node with *)
+(*   | Tapp (ls, _) *)
+(*     when ls_equal symbols.add_pre_double ls *)
+(*          || ls_equal symbols.sub_pre_double ls *)
+(*          || ls_equal symbols.mul_pre_double ls *)
+(*          || ls_equal symbols.div_pre_double ls -> *)
+(*     true *)
+(*   | _ -> false *)
+(* in *)
+(* let _, fmla = *)
+(*   List.fold_left *)
+(*     (fun (info, fmla) t -> *)
+(*       let info, fmla' = apply_theorems prove_overflow symbols info t in *)
+(*       (info, t_and_simp fmla fmla')) *)
+(*     (info, t_true) floats *)
+(* in *)
+(* let goal = t_by_simp goal fmla in *)
+(* add_prop_decl task kind pr goal *)
+
+(* let goal_tdecl, task = Task.task_separate_goal task in *)
+(* in *)
+(* let floats = get_floats symbols goal in *)
+(* let prove_overflow = *)
+(*   match goal.t_node with *)
+(*   | Tapp (ls, _) *)
+(*     when ls_equal symbols.add_pre_double ls *)
+(*          || ls_equal symbols.sub_pre_double ls *)
+(*          || ls_equal symbols.mul_pre_double ls *)
+(*          || ls_equal symbols.div_pre_double ls -> *)
+(*     true *)
+(*   | _ -> false *)
+(* in *)
+(* let _, fmla = *)
+(*   List.fold_left *)
+(*     (fun (info, fmla) t -> *)
+(*       let info, fmla' = apply_theorems prove_overflow symbols info t in *)
+(*       (info, t_and_simp fmla fmla')) *)
+(*     (info, t_true) floats *)
+(* in *)
+(* let goal = t_by_simp goal fmla in *)
+(* add_prop_decl task kind pr goal *)
+
+let apply_transitivity env symbols (info, goal) =
+  (* TODO : Voir apply symbols info *)
+  let g = Opt.get goal in
+  let goal = Opt.get goal in
   let kind, pr, goal =
-    match goal_tdecl.td_node with
-    | Decl d -> (
-      match d.d_node with
-      | Dprop p -> p
-      | _ -> assert false)
+    match goal.d_node with
+    | Dprop (kind, pr, f) when kind = Pgoal -> (kind, pr, f)
     | _ -> assert false
   in
   let floats = get_floats symbols goal in
@@ -875,6 +937,7 @@ let apply symbols info task =
       true
     | _ -> false
   in
+
   let _, fmla =
     List.fold_left
       (fun (info, fmla) t ->
@@ -882,10 +945,28 @@ let apply symbols info task =
         (info, t_and_simp fmla fmla'))
       (info, t_true) floats
   in
-  let goal = t_by_simp goal fmla in
-  add_prop_decl task kind pr goal
 
-let apply_transitivity symbols info = Trans.store (apply symbols info)
+  (* let goal = t_by_simp goal fmla in *)
+  (* add_prop_decl task kind pr goal *)
+  let f pr goal =
+    let h1 = Decl.create_prsymbol (gen_ident "hello") in
+    let h2 = Decl.create_prsymbol (gen_ident "hello_again") in
+    let h1_1 = Decl.create_prsymbol (gen_ident "h1_1") in
+    let t = t_false in
+    let g_t1 = Decl.create_prop_decl Decl.Pgoal h1 t in
+    let h_t1 = Decl.create_prop_decl Decl.Paxiom h1 t in
+    let h_h1_1 = Decl.create_prop_decl Decl.Paxiom h1_1 t in
+    let g_h1_1 = Decl.create_prop_decl Decl.Pgoal h1_1 t in
+    let g_t2 = create_goal ~expl:"Also a good explanation" h2 t in
+    let h_t2 = Decl.create_prop_decl Decl.Paxiom h2 t in
+    let g = Decl.create_prop_decl Decl.Pgoal pr goal in
+    [ [ g_h1_1 ]; [ h_h1_1; g_t1 ]; [ g_t2 ]; [ h_t1; h_t2; g ] ]
+  in
+  (* let goal = Trans.add_decls [ h_t1; h_t2 ] in *)
+  (* let task = assert false in *)
+  Trans.compose_l (Trans.goal_l f) (Trans.store (apply env symbols info))
+(* (Trans.apply_transform_args "apply" env [ "hello" ] naming_table *)
+(* "whatisthis" task) *)
 
 let apply_trans_on_ineqs env =
   let real = Env.read_theory env [ "real" ] "Real" in
@@ -963,13 +1044,11 @@ let apply_trans_on_ineqs env =
   in
 
   let collect_info = collect_info symbols in
-  (* Trans.compose *)
   Trans.bind
-    (Trans.fold_decl collect_info Mterm.empty)
-    (apply_transitivity symbols)
-(* (Trans.lookup_transform "split_vc" env) *)
+    (Trans.fold_decl collect_info (Mterm.empty, None))
+    (apply_transitivity env symbols)
 
 let () =
-  Trans.register_env_transform "apply_trans_on_ineqs" apply_trans_on_ineqs
+  Trans.register_env_transform_l "apply_trans_on_ineqs" apply_trans_on_ineqs
     ~desc:
       "Try to apply transitivity of inequalities without losing information."
