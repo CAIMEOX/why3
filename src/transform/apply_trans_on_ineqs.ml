@@ -48,7 +48,7 @@ type symbols = {
   mul_pre_double : lsymbol;
   div_pre_double : lsymbol;
   (* round_error : lsymbol; *)
-  (* rel_round_error : lsymbol; *)
+  rel_round_error : lsymbol;
   type_double : tysymbol;
 }
 
@@ -86,6 +86,8 @@ type info = {
 
 let add_basic_attr = create_attribute "add_basic_attr"
 let add_attr = create_attribute "add_attr"
+let mul_basic_attr = create_attribute "mul_basic_attr"
+let mul_attr = create_attribute "mul_attr"
 
 let zero =
   t_const
@@ -299,9 +301,12 @@ let rec add_fmlas symbols f info =
     (* | Tapp (_ls, [ t1; t1' ]) when ls_equal _ls symbols.round_error -> *)
     (*   parse_round_error_fmla symbols info t1 t1' t2 *)
     | _ -> info (* Look for rel_round_error *))
-  (* | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls symbols.rel_round_error -> *)
-  (*   add_round_error info t1 *)
-  (*     { no_underflow = AbsRelative (t2, t4, t3, zero); underflow = [] } *)
+  | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls symbols.rel_round_error ->
+    add_round_error info t1
+      {
+        no_underflow = AbsRelative (t2, t4, (abs symbols) t3, zero);
+        underflow = [];
+      }
   (* Look for safe_64_*_post *)
   | Tapp (ls, [ t1; t2; t3 ]) when is_ieee_double symbols ls ->
     add_ieee_post info ls t3 t1 t2
@@ -373,6 +378,82 @@ let apply_addition_thm_for_overflow symbols info f x y r =
         (info, fmla) y_info.ineqs)
     (info, t_true) x_info.ineqs
 
+let apply_multiplication_thms prove_overflow symbols info x y r =
+  if prove_overflow then
+    assert false
+  else
+    let eps = get_eps None in
+    let eta = get_eta None in
+    let to_real = get_to_real symbols None in
+    let to_real t = fs_app to_real [ t ] ty_real in
+    (* let equ x y = ps_app ps_equ [ x; y ] in *)
+    let abs, ( +. ), ( -. ), ( *. ), ( <=. ) =
+      ( abs symbols,
+        ( +. ) symbols,
+        ( -. ) symbols,
+        ( *. ) symbols,
+        ( <=. ) symbols )
+    in
+    let x_info = get_info info x in
+    let y_info = get_info info y in
+    let attrs = Sattr.empty in
+    (* We potentially have an underflow on this operation *)
+    (* let underflow = [ (to_real r, one) ] in *)
+    match (x_info.round_error, y_info.round_error) with
+    | None, None ->
+      let left = abs (to_real r -. (to_real x *. to_real y)) in
+      let right = (eps *. abs (to_real x *. to_real y)) +. eta in
+      (* let underflow_fmla = t_and (equ (to_real r) zero) (left <=. eta) in *)
+      (* let fmla = t_or no_underflow_fmla underflow_fmla in *)
+      let info =
+        add_round_error info r
+          {
+            no_underflow =
+              AbsRelative
+                (to_real x *. to_real y, eps, abs (to_real x *. to_real y), eta);
+            underflow = [];
+          }
+      in
+      let attrs = Sattr.add mul_basic_attr attrs in
+      let pr = create_prsymbol (id_fresh ~attrs "MulErrBasic") in
+      (info, (pr, left <=. right))
+    | _ ->
+      let combine_errors_with_multiplication t1 exact_t1 t1_factor t1' t1_cst t2
+          exact_t2 t2_factor t2' t2_cst r =
+        let rel_err =
+          eps
+          +. (t1_factor +. t2_factor +. (t1_factor *. t2_factor))
+             *. (one +. eps)
+        in
+        let cst_err =
+          (((t2_cst +. (t2_cst *. t1_factor)) *. t1')
+          +. ((t1_cst +. (t1_cst *. t2_factor)) *. t2')
+          +. (t1_cst *. t2_cst))
+          *. (one +. eps)
+          +. eta
+        in
+        let left = abs (to_real r -. (exact_t1 *. exact_t2)) in
+        let right = (rel_err *. (t1' *. t2')) +. cst_err in
+        let info =
+          add_round_error info r
+            {
+              no_underflow =
+                AbsRelative (exact_t1 *. exact_t2, rel_err, t1' *. t2', cst_err);
+              underflow = [];
+            }
+        in
+        let attrs = Sattr.add mul_attr attrs in
+        let pr = create_prsymbol (id_fresh ~attrs "MulErr") in
+        (info, (pr, left <=. right))
+      in
+      let combine_errors_with_multiplication =
+        apply_args symbols combine_errors_with_multiplication x x_info
+      in
+      let combine_errors_with_multiplication =
+        apply_args symbols combine_errors_with_multiplication y y_info
+      in
+      combine_errors_with_multiplication r
+
 let apply_addition_thms prove_overflow symbols info x y r =
   if prove_overflow then
     assert false
@@ -443,6 +524,8 @@ let use_ieee_thms prove_overflow symbols info ieee_symbol t1 t2 r :
     info Mterm.t * (prsymbol * term) =
   if ls_equal ieee_symbol symbols.add_post_double then
     apply_addition_thms prove_overflow symbols info t1 t2 r
+  else if ls_equal ieee_symbol symbols.mul_post_double then
+    apply_multiplication_thms prove_overflow symbols info t1 t2 r
   else
     failwith "Unsupported symbol"
 (* else if ls_equal ieee_symbol symbols.mul_post_double then *)
@@ -515,7 +598,24 @@ let rec apply_theorems prove_overflow symbols info t :
     in
     let l = l @ [ Decl.create_prop_decl Pgoal pr3 t3 ] in
     (info, l1 @ l2 @ [ l ], Some (pr3, t3))
-  | None -> (info, [], None)
+  | None -> (
+    match t_info.round_error with
+    | None -> (info, [], None)
+    | Some round_error -> (
+      (* TODO: Management of underflow here ? *)
+      match round_error.no_underflow with
+      | AbsRelative (exact_t, t_factor, t', cst) ->
+        let floats = get_floats symbols exact_t in
+        (* let info, fmla = *)
+        (*   List.fold_left *)
+        (*     (fun (info, fmla) t -> *)
+        (*       let info, fmla' = apply info t in *)
+        (*       (info, t_and_simp fmla fmla')) *)
+        (*     (info, t_true) floats *)
+        (* in *)
+        (* TODO: Apply round_error theorem on all floats *)
+        (info, [], None)
+      | _ -> (info, [], None)))
 (* | None -> ( *)
 (*   match t_info.round_error with *)
 (*   | None -> (info, t_true) *)
@@ -547,10 +647,9 @@ let rec apply_theorems prove_overflow symbols info t :
 
 let apply env symbols info task =
   let naming_table = Args_wrapper.build_naming_tables task in
-  let get_float_name = get_float_name naming_table.printer in
   let attrs = (task_goal task).pr_name.id_attrs in
   let goal = task_goal_fmla task in
-  if Sattr.mem add_attr attrs then
+  if Sattr.mem add_attr attrs || Sattr.mem mul_attr attrs then
     let args =
       match goal.t_node with
       | Tapp (ls, [ t1; t2 ]) when is_ineq_ls symbols ls -> (
@@ -564,6 +663,7 @@ let apply env symbols info task =
               let t_info = get_info info t in
               match t_info.ieee_post with
               | Some (ieee_post, t1, t2) ->
+                let get_float_name = get_float_name naming_table.printer in
                 List.fold_left get_float_name "" [ t1; t2 ]
               | None -> assert false)
             | _ -> assert false)
@@ -571,9 +671,14 @@ let apply env symbols info task =
         | _ -> assert false)
       | _ -> assert false
     in
-    Trans.apply_transform_args "apply" env
-      [ "add_combine"; "with"; args ]
-      naming_table "whatisthis" task
+    if Sattr.mem add_attr attrs then
+      Trans.apply_transform_args "apply" env
+        [ "add_combine"; "with"; args ]
+        naming_table "whatisthis" task
+    else
+      Trans.apply_transform_args "apply" env
+        [ "mul_combine"; "with"; args ]
+        naming_table "whatisthis" task
   else
     [ task ]
 (* match goal with | Tapp (Tabs (Tapp (l))) -> *)
@@ -649,8 +754,11 @@ let apply_trans_on_ineqs env =
   let sub_pre_double = ns_find_ls safe64.th_export [ "safe64_sub_pre" ] in
   let mul_pre_double = ns_find_ls safe64.th_export [ "safe64_mul_pre" ] in
   let div_pre_double = ns_find_ls safe64.th_export [ "safe64_div_pre" ] in
+  let safe64_lemmas = Env.read_theory env [ "safe64_lemmas" ] "Safe64Lemmas" in
   (* let round_error = ns_find_ls safe64.th_export [ "round_error" ] in *)
-  (* let rel_round_error = ns_find_ls safe64.th_export [ "rel_round_error" ] in *)
+  let rel_round_error =
+    ns_find_ls safe64_lemmas.th_export [ "rel_round_error" ]
+  in
   let type_double = ns_find_ts safe64.th_export [ "t" ] in
   let symbols =
     {
@@ -684,7 +792,7 @@ let apply_trans_on_ineqs env =
       mul_pre_double;
       div_pre_double;
       (* round_error; *)
-      (* rel_round_error; *)
+      rel_round_error;
       type_double;
     }
   in
