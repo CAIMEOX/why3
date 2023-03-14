@@ -474,18 +474,20 @@ let rec get_floats symbols t =
   | Tapp (ls, tl) -> List.fold_left (fun l t -> l @ get_floats symbols t) [] tl
   | _ -> []
 
-let get_float_name s t =
+let get_float_name printer s t =
   match t.t_node with
   | Tvar v ->
+    let name = id_unique printer v.vs_name in
     if s = "" then
-      v.vs_name.id_string
+      name
     else
-      s ^ "," ^ v.vs_name.id_string
+      s ^ "," ^ name
   | Tapp (ls, []) ->
+    let name = id_unique printer ls.ls_name in
     if s = "" then
-      ls.ls_name.id_string
+      name
     else
-      s ^ "," ^ ls.ls_name.id_string
+      s ^ "," ^ name
   | _ -> assert false
 
 (* Apply theorems on FP term t depending on what we know about it *)
@@ -545,6 +547,7 @@ let rec apply_theorems prove_overflow symbols info t :
 
 let apply env symbols info task =
   let naming_table = Args_wrapper.build_naming_tables task in
+  let get_float_name = get_float_name naming_table.printer in
   let attrs = (task_goal task).pr_name.id_attrs in
   let goal = task_goal_fmla task in
   if Sattr.mem add_attr attrs then
