@@ -37,7 +37,7 @@ type symbols = {
   ge : lsymbol;
   ge_infix : lsymbol;
   abs : lsymbol;
-  min : lsymbol;
+  (* min : lsymbol; *)
   to_real_double : lsymbol;
   add_post_double : lsymbol;
   sub_post_double : lsymbol;
@@ -47,8 +47,8 @@ type symbols = {
   sub_pre_double : lsymbol;
   mul_pre_double : lsymbol;
   div_pre_double : lsymbol;
-  round_error : lsymbol;
-  rel_round_error : lsymbol;
+  (* round_error : lsymbol; *)
+  (* rel_round_error : lsymbol; *)
   type_double : tysymbol;
 }
 
@@ -84,6 +84,9 @@ type info = {
   ieee_post : (lsymbol * term * term) option;
 }
 
+let add_basic_attr = create_attribute "add_basic_attr"
+let add_attr = create_attribute "add_attr"
+
 let zero =
   t_const
     (Constant.ConstReal
@@ -97,38 +100,38 @@ let one =
     ty_real
 
 let add symbols t1 t2 =
-  if t_equal t1 zero then
-    t2
-  else if t_equal t2 zero then
-    t1
-  else
-    fs_app symbols.add [ t1; t2 ] ty_real
+  (* if t_equal t1 zero then *)
+  (*   t2 *)
+  (* else if t_equal t2 zero then *)
+  (*   t1 *)
+  (* else *)
+  fs_app symbols.add [ t1; t2 ] ty_real
 
 let sub symbols t1 t2 =
-  if t_equal t1 zero then
-    fs_app symbols.minus [ t2 ] ty_real
-  else if t_equal t2 zero then
-    t1
-  else
-    fs_app symbols.sub [ t1; t2 ] ty_real
+  (* if t_equal t1 zero then *)
+  (*   fs_app symbols.minus [ t2 ] ty_real *)
+  (* else if t_equal t2 zero then *)
+  (*   t1 *)
+  (* else *)
+  fs_app symbols.sub [ t1; t2 ] ty_real
 
 let mul symbols t1 t2 =
-  if t_equal t1 zero || t_equal t2 zero then
-    zero
-  else if t_equal t1 one then
-    t2
-  else if t_equal t2 one then
-    t1
-  else
-    fs_app symbols.mul [ t1; t2 ] ty_real
+  (* if t_equal t1 zero || t_equal t2 zero then *)
+  (*   zero *)
+  (* else if t_equal t1 one then *)
+  (*   t2 *)
+  (* else if t_equal t2 one then *)
+  (*   t1 *)
+  (* else *)
+  fs_app symbols.mul [ t1; t2 ] ty_real
 
 let div symbols t1 t2 =
-  if t_equal t1 zero then
-    zero
-  else if t_equal t2 one then
-    t1
-  else
-    fs_app symbols.div [ t1; t2 ] ty_real
+  (* if t_equal t1 zero then *)
+  (*   zero *)
+  (* else if t_equal t2 one then *)
+  (*   t1 *)
+  (* else *)
+  fs_app symbols.div [ t1; t2 ] ty_real
 
 let ( +. ) symbols x y = add symbols x y
 let ( -. ) symbols x y = sub symbols x y
@@ -293,12 +296,12 @@ let rec add_fmlas symbols f info =
       | Tapp (_ls, [ t ]) when is_to_real symbols _ls -> add_ineq info t ls t2
       | _ -> info)
     (* Look for "round_error t1 t1' <=. t2" *)
-    | Tapp (_ls, [ t1; t1' ]) when ls_equal _ls symbols.round_error ->
-      parse_round_error_fmla symbols info t1 t1' t2
+    (* | Tapp (_ls, [ t1; t1' ]) when ls_equal _ls symbols.round_error -> *)
+    (*   parse_round_error_fmla symbols info t1 t1' t2 *)
     | _ -> info (* Look for rel_round_error *))
-  | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls symbols.rel_round_error ->
-    add_round_error info t1
-      { no_underflow = AbsRelative (t2, t4, t3, zero); underflow = [] }
+  (* | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls symbols.rel_round_error -> *)
+  (*   add_round_error info t1 *)
+  (*     { no_underflow = AbsRelative (t2, t4, t3, zero); underflow = [] } *)
   (* Look for safe_64_*_post *)
   | Tapp (ls, [ t1; t2; t3 ]) when is_ieee_double symbols ls ->
     add_ieee_post info ls t3 t1 t2
@@ -338,204 +341,6 @@ let merge_round_error_fmlas info t =
     add_round_error info t
       { no_underflow = round_error.no_underflow; underflow = [] }
 
-(*
- * If we have :
- *  - |t1 - exact_t1| <= t1_factor * t1' + t1_cst
- *  - |t2 - exact_t2| <= t2_factor * t2' + t2_cst
- *  Then we get the following error on addition :
- *  |fl(t1 + t2) - (exact_t1 + exact_t2)| <= (eps + t1_factor + t2_factor)(t1'+t2')
-                                              + (1+eps+t2_factor)t1_cst
-                                              + (1+eps+t1_factor)t2_cst
- *)
-(* TODO: Also take into account the underflows *)
-let combine_errors_with_addition symbols info f' t1 exact_t1 t1_factor t1'
-    t1_cst t2 exact_t2 t2_factor t2' t2_cst r =
-  let eps = get_eps None in
-  let to_real = get_to_real symbols None in
-  let to_real t = fs_app to_real [ t ] ty_real in
-  let abs, ( +. ), ( -. ), ( *. ), ( /. ), ( <=. ), ( <. ) =
-    ( abs symbols,
-      ( +. ) symbols,
-      ( -. ) symbols,
-      ( *. ) symbols,
-      ( /. ) symbols,
-      ( <=. ) symbols,
-      ( <. ) symbols )
-  in
-  let delta = abs (to_real r -. (to_real t1 +. to_real t2)) in
-  let delta_upper_bound =
-    ((eps +. t1_factor) *. t2')
-    +. ((eps +. t2_factor) *. t1')
-    +. (((t2_factor +. eps) *. t1_cst) +. ((t1_factor +. eps) *. t2_cst))
-  in
-  let mk_f t1 exact_t1 t1' t1_factor t1_cst t2 exact_t2 t2' t2_factor t2_cst =
-    (* let f = delta <=. abs (to_real t1 +. (exact_t1 -. exact_t1)) in *)
-    (* let f = t_by (delta <=. abs (to_real t1 -. exact_t1) +. t1') f in *)
-    (* let f = t_by (delta <=. (t1' *. t1_factor) +. t1_cst +. t1') f in *)
-    let f = delta <=. (t1' *. t1_factor) +. t1_cst +. t1' in
-    let f =
-      t_by
-        (delta
-        <=. (t1' *. t1_factor) +. t1_cst +. ((eps *. (t2' +. t2_cst)) -. t1_cst)
-        )
-        f
-    in
-    let f =
-      t_by
-        (delta
-        <=. (eps *. (t2' +. t2_cst) *. t1_factor)
-            +. t1_cst
-            +. (eps *. (t2' +. t2_cst))
-            -. t1_cst)
-        f
-    in
-    let f = t_by (delta <=. delta_upper_bound) f in
-    let f = t_implies (t1' +. t1_cst <=. eps *. (t2' +. t2_cst)) f in
-    t_so (abs exact_t1 <=. t1') f
-  in
-  let f1 =
-    mk_f t1 exact_t1 t1' t1_factor t1_cst t2 exact_t2 t2' t2_factor t2_cst
-  in
-  let f1' =
-    mk_f t2 exact_t2 t2' t2_factor t2_cst t1 exact_t1 t1' t1_factor t1_cst
-  in
-  let f2 =
-    abs (to_real t1 +. to_real t2)
-    <=. abs (to_real t1 +. (exact_t1 -. exact_t1))
-        +. abs (to_real t2 +. (exact_t2 -. exact_t2))
-  in
-  let f2 =
-    t_and f2
-      (abs (to_real t1 +. (exact_t1 -. exact_t1))
-       +. abs (to_real t2 +. (exact_t2 -. exact_t2))
-      <=. abs (to_real t1 -. exact_t1)
-          +. t1'
-          +. abs (to_real t2 +. (exact_t2 -. exact_t2)))
-  in
-  let f2 =
-    t_and f2
-      (abs (to_real t1 -. exact_t1)
-       +. t1'
-       +. abs (to_real t2 +. (exact_t2 -. exact_t2))
-      <=. abs (to_real t1 -. exact_t1)
-          +. t1'
-          +. (abs (to_real t2 -. exact_t2) +. t2'))
-  in
-  let f2 =
-    t_and f2
-      (t_and
-         (t1' *. t1_factor <=. (t2' +. t2_cst) /. eps *. t1_factor)
-         (t2' *. t2_factor <=. (t1' +. t1_cst) /. eps *. t2_factor))
-  in
-  let f2 = t_by (delta <=. delta_upper_bound) f2 in
-  let f2 =
-    t_implies
-      (t_and
-         (eps *. (t1' +. t1_cst) <. t2' +. t2_cst)
-         (eps *. (t2' +. t2_cst) <. t1' +. t1_cst))
-      f2
-  in
-  let f =
-    t_by (delta <=. delta_upper_bound) (t_so_simp f' (t_and (t_and f1 f1') f2))
-  in
-  let rel_err = t1_factor +. t2_factor +. eps in
-  let cst_err =
-    ((one +. eps +. t2_factor) *. t1_cst)
-    +. ((one +. eps +. t1_factor) *. t2_cst)
-  in
-  let total_err = (rel_err *. (t1' +. t2')) +. cst_err in
-  let f =
-    t_and f
-      (abs (to_real r -. (exact_t1 +. exact_t2))
-      <=. delta
-          +. ((t1_factor *. t1') +. t1_cst +. ((t2_factor *. t2') +. t2_cst)))
-  in
-  let f = t_by (abs (to_real r -. (exact_t1 +. exact_t2)) <=. total_err) f in
-  let info =
-    add_round_error info r
-      {
-        no_underflow =
-          AbsRelative (exact_t1 +. exact_t2, rel_err, t1' +. t2', cst_err);
-        underflow = [];
-      }
-  in
-  (info, f)
-
-(*
- * If we have :
- *  - |t1 - exact_t1| <= t1_factor * t1' + t1_cst
- *  - |t2 - exact_t2| <= t2_factor * t2' + t2_cst
- *  Then we get the following error on multiplication :
- *  |fl(t1 * t2) - (exact_t1 * exact_t2)| <= (eps + t1_factor + t2_factor + t1_factor*t2_factor)(|t1'*t2'|)
-                                              + (1+eps)((t2_cst+t2_cst*t1_factor)|t1'| + (t1_cst+t1_cst*t2_factor)|t2'| + t1_cst*t2_cst)
- *)
-(* Perform error combination while assuming we don't underflow, so we don't have
-   an eta *)
-let combine_errors_with_multiplication symbols info f' t1 exact_t1 t1_factor t1'
-    t1_cst t2 exact_t2 t2_factor t2' t2_cst r =
-  let eps = get_eps None in
-  let to_real = get_to_real symbols None in
-  let to_real t = fs_app to_real [ t ] ty_real in
-  let abs, ( +. ), ( -. ), ( *. ), ( /. ), ( <=. ), ( <. ) =
-    ( abs symbols,
-      ( +. ) symbols,
-      ( -. ) symbols,
-      ( *. ) symbols,
-      ( /. ) symbols,
-      ( <=. ) symbols,
-      ( <. ) symbols )
-  in
-  let rel_err = t1_factor +. t2_factor +. (t1_factor *. t2_factor) +. eps in
-  let cst_err =
-    (one +. eps)
-    *. (((t2_cst +. (t2_cst *. t1_factor)) *. t1')
-       +. ((t1_cst +. (t1_cst *. t2_factor)) *. t2')
-       +. (t1_cst +. t2_cst))
-  in
-  let final_bound = (rel_err *. abs (t1' *. t2')) +. cst_err in
-  let upper_bound =
-    to_real t1 *. to_real t2
-    <=. (exact_t1 +. (t1_factor *. t1') +. t1_cst) *. to_real t2
-  in
-  let upper_bound =
-    t_by
-      (to_real t1 *. to_real t2
-      <=. (exact_t1 *. to_real t2)
-          +. (t1_factor *. t1' *. to_real t2)
-          +. (t1_cst *. to_real t2))
-      upper_bound
-  in
-  let lower_bound =
-    (exact_t1 -. (t1_factor *. t1') -. t1_cst) *. to_real t2
-    <=. to_real t1 *. to_real t2
-  in
-
-  let lower_bound =
-    t_by
-      (to_real t1 *. to_real t2
-      <=. (exact_t1 *. to_real t2)
-          -. (t1_factor *. t1' *. to_real t2)
-          -. (t1_cst *. to_real t2))
-      lower_bound
-  in
-  let f1 =
-    t_by
-      (abs (to_real r -. (exact_t1 *. exact_t2)) <=. final_bound)
-      (t_and lower_bound upper_bound)
-  in
-  let f1 = t_implies (to_real t2 <=. zero) f1 in
-  (* TODO: Build f1 and f2 with a function that just switch the terms for the
-     different cases *)
-  let f2 = t_true in
-  let f =
-    t_by
-      (abs (to_real r -. (exact_t1 *. exact_t2)) <=. final_bound)
-      (t_and f1 f2)
-  in
-  (AbsRelative (exact_t1 *. exact_t2, rel_err, abs (t1' *. t2'), cst_err), f)
-
-let apply_multiplication_thm_for_overflow symbols info f x y r = assert false
-
 let apply_args symbols f t t_info =
   let to_real = get_to_real symbols None in
   let to_real t = fs_app to_real [ t ] ty_real in
@@ -548,174 +353,6 @@ let apply_args symbols f t t_info =
     | AbsRelative (exact_t, t_factor, t', t_cst) ->
       f t exact_t t_factor t' t_cst)
 
-let apply_multiplication_thms prove_overflow symbols info f x y r =
-  if prove_overflow then
-    apply_multiplication_thm_for_overflow symbols info f x y r
-  else
-    let eps = get_eps None in
-    let eta = get_eta None in
-    let to_real = get_to_real symbols None in
-    let to_real t = fs_app to_real [ t ] ty_real in
-    let equ x y = ps_app ps_equ [ x; y ] in
-    let abs, ( -. ), ( *. ), ( <=. ) =
-      (abs symbols, ( -. ) symbols, ( *. ) symbols, ( <=. ) symbols)
-    in
-    let x_info = get_info info x in
-    let y_info = get_info info y in
-    let left = abs (to_real r -. (to_real x *. to_real y)) in
-    (* We potentially have an underflow on this operation *)
-    let underflow = [ (to_real r, one) ] in
-    match (x_info.round_error, y_info.round_error) with
-    | None, None ->
-      let right = eps *. abs (to_real x *. to_real y) in
-      let no_underflow_fmla = left <=. right in
-      let underflow_fmla = t_and (equ (to_real r) zero) (left <=. eta) in
-      let fmla = t_or no_underflow_fmla underflow_fmla in
-      let info =
-        add_round_error info r
-          {
-            no_underflow =
-              AbsRelative
-                (to_real x *. to_real y, eps, abs (to_real x *. to_real y), zero);
-            underflow;
-          }
-      in
-      (info, fmla)
-    | _ ->
-      let combine_errors_with_multiplication =
-        combine_errors_with_multiplication symbols info f
-      in
-      let combine_errors_with_multiplication =
-        apply_args symbols combine_errors_with_multiplication x x_info
-      in
-      let combine_errors_with_multiplication =
-        apply_args symbols combine_errors_with_multiplication y y_info
-      in
-      let round_error, fmla = combine_errors_with_multiplication r in
-      let combine_underflows fmla t1 t2 t1_info =
-        match t1_info with
-        | None -> (fmla, [])
-        | Some t1_round_error ->
-          List.fold_left_map
-            (fun fmla (t, underflow_err) ->
-              let fmla' = left <=. underflow_err *. to_real t2 *. eta in
-              ( t_or fmla (t_and (equ t zero) fmla'),
-                (t, underflow_err *. to_real t2) ))
-            fmla t1_round_error.underflow
-      in
-      let fmla, underflows = combine_underflows fmla x y x_info.round_error in
-      let fmla, underflows' = combine_underflows fmla y x y_info.round_error in
-      let underflow = underflow @ underflows' @ underflow in
-      let info =
-        add_round_error info r { no_underflow = round_error; underflow }
-      in
-      (info, fmla)
-
-(* None, Some y_round_error -> ( *)
-(*   match y_round_error.no_underflow with *)
-(*   | Absolute _ -> failwith "TODO Absolute mul 1" *)
-(*   | AbsRelative (exact_y, y_factor, y', y_cst) -> *)
-(*     let info, fmla = *)
-(*       combine_errors_with_multiplication symbols info x (to_real x) zero *)
-(*         (abs (to_real x)) *)
-(*         zero y exact_y y_factor y' y_cst r *)
-(*     in *)
-(*     let fmla, underflows = *)
-(*       List.fold_left_map *)
-(*         (fun fmla (t, underflow_err) -> *)
-(*           let fmla' = left <=. underflow_err *. to_real x *. eta in *)
-(*           ( t_or fmla (t_and (equ t zero) fmla'), *)
-(*             (t, underflow_err *. to_real x) )) *)
-(*         fmla y_round_error.underflow *)
-(*     in *)
-(*     let underflow = underflows @ underflow in *)
-(*     let info = *)
-(*       add_round_error info r *)
-(*         { *)
-(*           no_underflow = *)
-(*             AbsRelative *)
-(*               ( to_real x *. to_real y, *)
-(*                 eps, *)
-(*                 abs (to_real x *. to_real y), *)
-(*                 zero ); *)
-(*           underflow; *)
-(*         } *)
-(*     in *)
-(*     (info, fmla)) *)
-(* | Some x_round_error, None -> ( *)
-(*   match x_round_error.no_underflow with *)
-(*   | Absolute _ -> failwith "TODO Absolute mul 2" *)
-(*   | AbsRelative (exact_x, x_factor, x', x_cst) -> *)
-(*     let info, fmla = *)
-(*       combine_errors_with_multiplication symbols info x exact_x x_factor x' *)
-(*         x_cst y (to_real y) zero *)
-(*         (abs (to_real y)) *)
-(*         zero r *)
-(*     in *)
-(*     let fmla, underflows = *)
-(*       List.fold_left_map *)
-(*         (fun fmla (t, underflow_err) -> *)
-(*           let fmla' = left <=. underflow_err *. to_real y *. eta in *)
-(*           ( t_or fmla (t_and (equ t zero) fmla'), *)
-(*             (t, underflow_err *. to_real y) )) *)
-(*         fmla x_round_error.underflow *)
-(*     in *)
-(*     let underflow = underflows @ underflow in *)
-(*     let info = *)
-(*       add_round_error info r *)
-(*         { *)
-(*           no_underflow = *)
-(*             AbsRelative *)
-(*               ( to_real x *. to_real y, *)
-(*                 eps, *)
-(*                 abs (to_real x *. to_real y), *)
-(*                 zero ); *)
-(*           underflow; *)
-(*         } *)
-(*     in *)
-(*     (info, fmla)) *)
-(* | Some x_round_error, Some y_round_error -> ( *)
-(*   match x_round_error.no_underflow with *)
-(*   | Absolute _ -> failwith "TODO Absolute mul 3" *)
-(*   | AbsRelative (exact_x, x_factor, x', x_cst) -> ( *)
-(*     match y_round_error.no_underflow with *)
-(*     | Absolute _ -> failwith "TODO Absolute mul 4" *)
-(*     | AbsRelative (exact_y, y_factor, y', y_cst) -> *)
-(*       let info, fmla = *)
-(*         combine_errors_with_multiplication symbols info x exact_x x_factor *)
-(*           x' x_cst y exact_y y_factor y' y_cst r *)
-(*       in *)
-(*       let fmla, underflows = *)
-(*         List.fold_left_map *)
-(*           (fun fmla (t, underflow_err) -> *)
-(*             let fmla' = left <=. underflow_err *. to_real y *. eta in *)
-(*             ( t_or fmla (t_and (equ t zero) fmla'), *)
-(*               (t, underflow_err *. to_real y) )) *)
-(*           fmla x_round_error.underflow *)
-(*       in *)
-(*       let fmla, underflows = *)
-(*         List.fold_left_map *)
-(*           (fun fmla (t, underflow_err) -> *)
-(*             let fmla' = left <=. underflow_err *. to_real x *. eta in *)
-(*             ( t_or fmla (t_and (equ t zero) fmla'), *)
-(*               (t, underflow_err *. to_real x) )) *)
-(*           fmla y_round_error.underflow *)
-(*       in *)
-(*       let underflow = underflows @ underflow in *)
-(*       let info = *)
-(*         add_round_error info r *)
-(*           { *)
-(*             no_underflow = *)
-(*               AbsRelative *)
-(*                 ( to_real x *. to_real y, *)
-(*                   eps, *)
-(*                   abs (to_real x *. to_real y), *)
-(*                   zero ); *)
-(*             underflow; *)
-(*           } *)
-(*       in *)
-(*       (info, fmla))) *)
-(*  *)
 let apply_addition_thm_for_overflow symbols info f x y r =
   let eps = get_eps None in
   let to_real = get_to_real symbols None in
@@ -736,9 +373,10 @@ let apply_addition_thm_for_overflow symbols info f x y r =
         (info, fmla) y_info.ineqs)
     (info, t_true) x_info.ineqs
 
-let apply_addition_thms prove_overflow symbols info f x y r =
+let apply_addition_thms prove_overflow symbols info x y r =
   if prove_overflow then
-    apply_addition_thm_for_overflow symbols info f x y r
+    assert false
+  (* apply_addition_thm_for_overflow symbols info f x y r *)
   else
     let eps = get_eps None in
     let to_real = get_to_real symbols None in
@@ -750,12 +388,9 @@ let apply_addition_thms prove_overflow symbols info f x y r =
         ( *. ) symbols,
         ( <=. ) symbols )
     in
-    (* TODO: Do we really want to merge or can we still do better if we don't
-       merge ? *)
-    let info = merge_round_error_fmlas info x in
-    let info = merge_round_error_fmlas info y in
     let x_info = get_info info x in
     let y_info = get_info info y in
+    let attrs = Sattr.empty in
     match (x_info.round_error, y_info.round_error) with
     | None, None ->
       let left = abs (to_real r -. (to_real x +. to_real y)) in
@@ -769,10 +404,30 @@ let apply_addition_thms prove_overflow symbols info f x y r =
             underflow = [];
           }
       in
-      (info, left <=. right)
+      let attrs = Sattr.add add_basic_attr attrs in
+      let pr = create_prsymbol (id_fresh ~attrs "AddErrBasic") in
+      (info, (pr, left <=. right))
     | _ ->
-      let combine_errors_with_addition =
-        combine_errors_with_addition symbols info f
+      let combine_errors_with_addition t1 exact_t1 t1_factor t1' t1_cst t2
+          exact_t2 t2_factor t2' t2_cst r =
+        let rel_err = t1_factor +. t2_factor +. eps in
+        let cst_err =
+          ((one +. eps +. t2_factor) *. t1_cst)
+          +. ((one +. eps +. t1_factor) *. t2_cst)
+        in
+        let total_err = (rel_err *. (t1' +. t2')) +. cst_err in
+        let f = abs (to_real r -. (exact_t1 +. exact_t2)) <=. total_err in
+        let info =
+          add_round_error info r
+            {
+              no_underflow =
+                AbsRelative (exact_t1 +. exact_t2, rel_err, t1' +. t2', cst_err);
+              underflow = [];
+            }
+        in
+        let attrs = Sattr.add add_attr attrs in
+        let pr = create_prsymbol (id_fresh ~attrs "AddErr") in
+        (info, (pr, f))
       in
       let combine_errors_with_addition =
         apply_args symbols combine_errors_with_addition x x_info
@@ -784,14 +439,16 @@ let apply_addition_thms prove_overflow symbols info f x y r =
 
 (* t3 is a result of FP arithmetic operation involving t1 and t2 *)
 (* Compute new inequalities on t3 based on what we know on t1 and t2 *)
-(* TODO: Support "|x| <= max(|y|,|z|)" ??? *)
-let use_ieee_thms prove_overflow symbols info ieee_symbol f t1 t2 r =
+let use_ieee_thms prove_overflow symbols info ieee_symbol t1 t2 r :
+    info Mterm.t * (prsymbol * term) =
   if ls_equal ieee_symbol symbols.add_post_double then
-    apply_addition_thms prove_overflow symbols info f t1 t2 r
-  else if ls_equal ieee_symbol symbols.mul_post_double then
-    apply_multiplication_thms prove_overflow symbols info f t1 t2 r
+    apply_addition_thms prove_overflow symbols info t1 t2 r
   else
     failwith "Unsupported symbol"
+(* else if ls_equal ieee_symbol symbols.mul_post_double then *)
+(*   apply_multiplication_thms prove_overflow symbols info f t1 t2 r *)
+(* else *)
+(*   failwith "Unsupported symbol" *)
 
 let is_ty_float symbols ty =
   match ty.ty_node with
@@ -817,109 +474,112 @@ let rec get_floats symbols t =
   | Tapp (ls, tl) -> List.fold_left (fun l t -> l @ get_floats symbols t) [] tl
   | _ -> []
 
+let get_float_name s t =
+  match t.t_node with
+  | Tvar v ->
+    if s = "" then
+      v.vs_name.id_string
+    else
+      s ^ "," ^ v.vs_name.id_string
+  | Tapp (ls, []) ->
+    if s = "" then
+      ls.ls_name.id_string
+    else
+      s ^ "," ^ ls.ls_name.id_string
+  | _ -> assert false
+
 (* Apply theorems on FP term t depending on what we know about it *)
 (* TODO: Avoid traversing the same term twice. *)
-let rec apply_theorems prove_overflow symbols info t =
+let rec apply_theorems prove_overflow symbols info t :
+    info Mterm.t * decl list list * (prsymbol * term) option =
   let apply = apply_theorems prove_overflow symbols in
   let t_info = get_info info t in
-
-  (* Trans.goal (fun _ _ -> [ g_t ]) *)
   match t_info.ieee_post with
   | Some (ieee_post, t1, t2) ->
-    let info, f1 = apply info t1 in
-    let info, f2 = apply info t2 in
-    let f = t_and_simp f1 f2 in
-    use_ieee_thms prove_overflow symbols info ieee_post f t1 t2 t
-  | None -> (
-    match t_info.round_error with
-    | None -> (info, t_true)
-    | Some round_error -> (
-      (* TODO: Management of underflow here ? *)
-      match round_error.no_underflow with
-      | AbsRelative (exact_t, t_factor, t', cst) ->
-        let floats = get_floats symbols exact_t in
-        let info, fmla =
-          List.fold_left
-            (fun (info, fmla) t ->
-              let info, fmla' = apply info t in
-              (info, t_and_simp fmla fmla'))
-            (info, t_true) floats
-        in
-        (* TODO: Apply round_error theorem on all floats *)
-        (info, fmla)
-      | Absolute (exact_t, t') ->
-        let floats = get_floats symbols exact_t in
-        let info, fmla =
-          List.fold_left
-            (fun (info, fmla) t ->
-              let info, fmla' = apply info t in
-              (info, t_and_simp fmla fmla'))
-            (info, t_true) floats
-        in
-        (* TODO: Apply round_error theorem on all floats *)
-        (info, fmla)))
+    let info, l1, t1_info = apply info t1 in
+    let info, l2, t2_info = apply info t2 in
+    let l =
+      match t1_info with
+      | Some (pr1, t1) -> [ Decl.create_prop_decl Paxiom pr1 t1 ]
+      | None -> []
+    in
+    let l =
+      match t2_info with
+      | Some (pr2, t2) -> l @ [ Decl.create_prop_decl Paxiom pr2 t2 ]
+      | None -> l
+    in
+    let info, (pr3, t3) =
+      use_ieee_thms prove_overflow symbols info ieee_post t1 t2 t
+    in
+    let l = l @ [ Decl.create_prop_decl Pgoal pr3 t3 ] in
+    (info, l1 @ l2 @ [ l ], Some (pr3, t3))
+  | None -> (info, [], None)
+(* | None -> ( *)
+(*   match t_info.round_error with *)
+(*   | None -> (info, t_true) *)
+(*   | Some round_error -> ( *)
+(*     (* TODO: Management of underflow here ? *) *)
+(*     match round_error.no_underflow with *)
+(*     | AbsRelative (exact_t, t_factor, t', cst) -> *)
+(*       let floats = get_floats symbols exact_t in *)
+(*       let info, fmla = *)
+(*         List.fold_left *)
+(*           (fun (info, fmla) t -> *)
+(*             let info, fmla' = apply info t in *)
+(*             (info, t_and_simp fmla fmla')) *)
+(*           (info, t_true) floats *)
+(*       in *)
+(*       (* TODO: Apply round_error theorem on all floats *) *)
+(*       (info, fmla) *)
+(*     | Absolute (exact_t, t') -> *)
+(*       let floats = get_floats symbols exact_t in *)
+(*       let info, fmla = *)
+(*         List.fold_left *)
+(*           (fun (info, fmla) t -> *)
+(*             let info, fmla' = apply info t in *)
+(*             (info, t_and_simp fmla fmla')) *)
+(*           (info, t_true) floats *)
+(*       in *)
+(*       (* TODO: Apply round_error theorem on all floats *) *)
+(*       (info, fmla))) *)
 
 let apply env symbols info task =
   let naming_table = Args_wrapper.build_naming_tables task in
-  (* Trans.return *)
-  Trans.apply_transform_args "apply" env [ "Assoc" ] naming_table "whatisthis"
-    task
-(* let goal_tdecl, task = Task.task_separate_goal task in *)
-(* let kind, pr, goal = *)
-(*   match goal_tdecl.td_node with *)
-(*   | Decl d -> ( *)
-(*     match d.d_node with *)
-(*     | Dprop p -> p *)
-(*     | _ -> assert false) *)
-(*   | _ -> assert false *)
-(* in *)
-(* let floats = get_floats symbols goal in *)
-(* let prove_overflow = *)
-(*   match goal.t_node with *)
-(*   | Tapp (ls, _) *)
-(*     when ls_equal symbols.add_pre_double ls *)
-(*          || ls_equal symbols.sub_pre_double ls *)
-(*          || ls_equal symbols.mul_pre_double ls *)
-(*          || ls_equal symbols.div_pre_double ls -> *)
-(*     true *)
-(*   | _ -> false *)
-(* in *)
-(* let _, fmla = *)
-(*   List.fold_left *)
-(*     (fun (info, fmla) t -> *)
-(*       let info, fmla' = apply_theorems prove_overflow symbols info t in *)
-(*       (info, t_and_simp fmla fmla')) *)
-(*     (info, t_true) floats *)
-(* in *)
-(* let goal = t_by_simp goal fmla in *)
-(* add_prop_decl task kind pr goal *)
-
-(* let goal_tdecl, task = Task.task_separate_goal task in *)
-(* in *)
-(* let floats = get_floats symbols goal in *)
-(* let prove_overflow = *)
-(*   match goal.t_node with *)
-(*   | Tapp (ls, _) *)
-(*     when ls_equal symbols.add_pre_double ls *)
-(*          || ls_equal symbols.sub_pre_double ls *)
-(*          || ls_equal symbols.mul_pre_double ls *)
-(*          || ls_equal symbols.div_pre_double ls -> *)
-(*     true *)
-(*   | _ -> false *)
-(* in *)
-(* let _, fmla = *)
-(*   List.fold_left *)
-(*     (fun (info, fmla) t -> *)
-(*       let info, fmla' = apply_theorems prove_overflow symbols info t in *)
-(*       (info, t_and_simp fmla fmla')) *)
-(*     (info, t_true) floats *)
-(* in *)
-(* let goal = t_by_simp goal fmla in *)
-(* add_prop_decl task kind pr goal *)
+  let attrs = (task_goal task).pr_name.id_attrs in
+  let goal = task_goal_fmla task in
+  if Sattr.mem add_attr attrs then
+    let args =
+      match goal.t_node with
+      | Tapp (ls, [ t1; t2 ]) when is_ineq_ls symbols ls -> (
+        match t1.t_node with
+        | Tapp (_ls, [ t ]) when ls_equal _ls symbols.abs -> (
+          match t.t_node with
+          | Tapp (_ls, [ t1; t2 ])
+            when ls_equal _ls symbols.sub || ls_equal _ls symbols.sub_infix -> (
+            match t1.t_node with
+            | Tapp (_ls, [ t ]) when is_to_real symbols _ls -> (
+              let t_info = get_info info t in
+              match t_info.ieee_post with
+              | Some (ieee_post, t1, t2) ->
+                List.fold_left get_float_name "" [ t1; t2 ]
+              | None -> assert false)
+            | _ -> assert false)
+          | _ -> assert false)
+        | _ -> assert false)
+      | _ -> assert false
+    in
+    Trans.apply_transform_args "apply" env
+      [ "add_combine"; "with"; args ]
+      naming_table "whatisthis" task
+  else
+    [ task ]
+(* match goal with | Tapp (Tabs (Tapp (l))) -> *)
+(*  *)
+(* let t_info = get_info info t in *)
+(* match t_info.ieee_post with *)
+(* | Some (ieee_post, t1, t2) -> *)
 
 let apply_transitivity env symbols (info, goal) =
-  (* TODO : Voir apply symbols info *)
-  let g = Opt.get goal in
   let goal = Opt.get goal in
   let kind, pr, goal =
     match goal.d_node with
@@ -937,36 +597,19 @@ let apply_transitivity env symbols (info, goal) =
       true
     | _ -> false
   in
-
-  let _, fmla =
+  let l, hyps =
     List.fold_left
-      (fun (info, fmla) t ->
-        let info, fmla' = apply_theorems prove_overflow symbols info t in
-        (info, t_and_simp fmla fmla'))
-      (info, t_true) floats
+      (fun (l, hyps) t ->
+        let _, l', hyp = apply_theorems prove_overflow symbols info t in
+        match hyp with
+        | Some (pr, t) -> (l @ l', create_prop_decl Paxiom pr t :: hyps)
+        | None -> (l, hyps))
+      ([], []) floats
   in
-
-  (* let goal = t_by_simp goal fmla in *)
-  (* add_prop_decl task kind pr goal *)
-  let f pr goal =
-    let h1 = Decl.create_prsymbol (gen_ident "hello") in
-    let h2 = Decl.create_prsymbol (gen_ident "hello_again") in
-    let h1_1 = Decl.create_prsymbol (gen_ident "h1_1") in
-    let t = t_false in
-    let g_t1 = Decl.create_prop_decl Decl.Pgoal h1 t in
-    let h_t1 = Decl.create_prop_decl Decl.Paxiom h1 t in
-    let h_h1_1 = Decl.create_prop_decl Decl.Paxiom h1_1 t in
-    let g_h1_1 = Decl.create_prop_decl Decl.Pgoal h1_1 t in
-    let g_t2 = create_goal ~expl:"Also a good explanation" h2 t in
-    let h_t2 = Decl.create_prop_decl Decl.Paxiom h2 t in
-    let g = Decl.create_prop_decl Decl.Pgoal pr goal in
-    [ [ g_h1_1 ]; [ h_h1_1; g_t1 ]; [ g_t2 ]; [ h_t1; h_t2; g ] ]
-  in
-  (* let goal = Trans.add_decls [ h_t1; h_t2 ] in *)
-  (* let task = assert false in *)
+  let g = Decl.create_prop_decl Decl.Pgoal pr goal in
+  let f pr goal = l @ [ List.rev (g :: hyps) ] in
+  (* Trans.goal_l f *)
   Trans.compose_l (Trans.goal_l f) (Trans.store (apply env symbols info))
-(* (Trans.apply_transform_args "apply" env [ "hello" ] naming_table *)
-(* "whatisthis" task) *)
 
 let apply_trans_on_ineqs env =
   let real = Env.read_theory env [ "real" ] "Real" in
@@ -991,8 +634,8 @@ let apply_trans_on_ineqs env =
   let minus_infix = ns_find_ls real_infix.th_export [ Ident.op_prefix "-." ] in
   let real_abs = Env.read_theory env [ "real" ] "Abs" in
   let abs = ns_find_ls real_abs.th_export [ "abs" ] in
-  let real_minmax = Env.read_theory env [ "real" ] "MinMax" in
-  let min = ns_find_ls real_minmax.th_export [ "min" ] in
+  (* let real_minmax = Env.read_theory env [ "real" ] "MinMax" in *)
+  (* let min = ns_find_ls real_minmax.th_export [ "min" ] in *)
   let safe64 = Env.read_theory env [ "cfloat" ] "Safe64" in
   let to_real_double = ns_find_ls safe64.th_export [ "to_real" ] in
   let add_post_double = ns_find_ls safe64.th_export [ "safe64_add_post" ] in
@@ -1003,8 +646,8 @@ let apply_trans_on_ineqs env =
   let sub_pre_double = ns_find_ls safe64.th_export [ "safe64_sub_pre" ] in
   let mul_pre_double = ns_find_ls safe64.th_export [ "safe64_mul_pre" ] in
   let div_pre_double = ns_find_ls safe64.th_export [ "safe64_div_pre" ] in
-  let round_error = ns_find_ls safe64.th_export [ "round_error" ] in
-  let rel_round_error = ns_find_ls safe64.th_export [ "rel_round_error" ] in
+  (* let round_error = ns_find_ls safe64.th_export [ "round_error" ] in *)
+  (* let rel_round_error = ns_find_ls safe64.th_export [ "rel_round_error" ] in *)
   let type_double = ns_find_ts safe64.th_export [ "t" ] in
   let symbols =
     {
@@ -1027,7 +670,7 @@ let apply_trans_on_ineqs env =
       ge;
       ge_infix;
       abs;
-      min;
+      (* min; *)
       to_real_double;
       add_post_double;
       sub_post_double;
@@ -1037,8 +680,8 @@ let apply_trans_on_ineqs env =
       sub_pre_double;
       mul_pre_double;
       div_pre_double;
-      round_error;
-      rel_round_error;
+      (* round_error; *)
+      (* rel_round_error; *)
       type_double;
     }
   in
