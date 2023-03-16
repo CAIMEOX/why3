@@ -49,23 +49,22 @@ type symbols = {
   ge : lsymbol;
   ge_infix : lsymbol;
   abs : lsymbol;
-  rel_round_error : lsymbol;
+  rel_error : lsymbol;
   single_symbols : ieee_symbols;
   double_symbols : ieee_symbols;
 }
 
-(* TODO: Maybe later use "forward" and "backward" *)
-type round_error_fmla =
-  | AbsRelative of term * term * term * term
-  | Absolute of term * term
+(* Forward error associated to a real term t, eg. (x, rel, x', cst) stands for
+   |t - x| <= rel x' + cst *)
+type error_fmla = term * term * term * term
 
-(** We have different round_errors formulas depending of the occurence of
-    underflows. We distinguish each case with a separate formula. We have one
-    formula for the case where no underflow occured, and a list of formulas for
-    the case where underflow happened, with one formula per overflow. This is
-    done to have a better combination of errors with multiplication. *)
-type round_error = {
-  no_underflow : round_error_fmla;
+(** We have different errors formulas depending of the occurence of underflows.
+    We distinguish each case with a separate formula. We have one formula for
+    the case where no underflow occured, and a list of formulas for the case
+    where underflow happened, with one formula per overflow. This is done to
+    have a better combination of errors with multiplication. *)
+type error = {
+  no_underflow : error_fmla;
   (*
    * [ ab',cd; ab;cd'; abcd';1 ] means we potentially have an underflow on ab', on cd' and on (ab)(cd)'.
    * This causes 3 potential upper error bounds :
@@ -80,7 +79,7 @@ type round_error = {
 type info = {
   (* "(<=, y)" means "|to_real x| <= y" *)
   ineqs : (lsymbol * term) list;
-  round_error : round_error option;
+  error : error option;
   (* If x has an ieee_post, it means it is the result of an arithmetic FP
      operation *)
   ieee_post : (lsymbol * term * term) option;
@@ -244,27 +243,23 @@ let get_to_real symbols ieee_type =
 
 let get_info info t =
   try Mterm.find t info with
-  | Not_found -> { ineqs = []; round_error = None; ieee_post = None }
+  | Not_found -> { ineqs = []; error = None; ieee_post = None }
 
 let add_ineq info t ls t' =
   let t_info = get_info info t in
   let t_info =
     {
       ineqs = (ls, t') :: t_info.ineqs;
-      round_error = t_info.round_error;
+      error = t_info.error;
       ieee_post = t_info.ieee_post;
     }
   in
   Mterm.add t t_info info
 
-let add_round_error info t round_error =
+let add_error info t error =
   let t_info = get_info info t in
   let t_info =
-    {
-      ineqs = t_info.ineqs;
-      round_error = Some round_error;
-      ieee_post = t_info.ieee_post;
-    }
+    { ineqs = t_info.ineqs; error = Some error; ieee_post = t_info.ieee_post }
   in
   Mterm.add t t_info info
 
@@ -273,57 +268,60 @@ let add_ieee_post info ls t t1 t2 =
   let t_info =
     {
       ineqs = t_info.ineqs;
-      round_error = t_info.round_error;
+      error = t_info.error;
       ieee_post = Some (ls, t1, t2);
     }
   in
   Mterm.add t t_info info
 
-let parse_round_error_fmla symbols info t1 t1' t2 =
+(* Parse |t1 - t1'| <= t2 *)
+let parse_and_add_error_fmla symbols info t1 t1' t2 =
+  let abs_err = (t1', zero, zero, t2) in
   let rec parse t =
     if t_equal t t1' then
-      (AbsRelative (t, one, t1', zero), true)
+      (abs_err, true)
     else
       match t.t_node with
       | Tapp (_ls, [ t' ]) when ls_equal _ls symbols.abs ->
         if t_equal t' t1' then
-          (AbsRelative (t1', one, t, zero), true)
+          ((t1', one, t, zero), true)
         else
           (* TODO: Look inside abs ? *)
-          (Absolute (t1', t2), false)
-      | Tapp (_ls, [ t3; t4 ]) when is_add_ls symbols _ls -> (
-        match parse t3 with
-        | AbsRelative (a, factor, a', cst), _ ->
-          (AbsRelative (a, factor, a', add symbols cst t4), false)
-        | _ -> (
-          match parse t4 with
-          | AbsRelative (a, factor, a', cst), _ ->
-            (AbsRelative (a, factor, a', add symbols cst t3), false)
-          | _ -> (Absolute (t1', t2), false)))
-      | Tapp (_ls, [ t3; t4 ]) when is_sub_ls symbols _ls -> (
-        match parse t3 with
-        | AbsRelative (a, factor, a', cst), _ ->
-          (AbsRelative (a, factor, a', sub symbols cst t4), false)
-        | _ -> (Absolute (t1', t2), false))
-      | Tapp (_ls, [ t3; t4 ]) when is_mul_ls symbols _ls -> (
-        match parse t3 with
-        | AbsRelative (a, factor, a', cst), is_factor ->
-          if is_factor then
-            (AbsRelative (a, mul symbols factor t4, a', cst), true)
+          (abs_err, false)
+      | Tapp (_ls, [ t3; t4 ]) when is_add_ls symbols _ls ->
+        let (a, factor, a', cst), _ = parse t3 in
+        if t_equal factor zero then
+          let (a, factor, a', cst), _ = parse t4 in
+          if t_equal factor zero then
+            (abs_err, false)
           else
-            (AbsRelative (a, factor, a', mul symbols cst t4), false)
-        | _ -> (
-          match parse t4 with
-          | AbsRelative (a, factor, a', cst), is_factor ->
-            if is_factor then
-              (AbsRelative (a, mul symbols factor t3, a', cst), true)
-            else
-              (AbsRelative (a, factor, a', mul symbols cst t4), false)
-          | _ -> (Absolute (t1', t2), false)))
-      | _ -> (Absolute (t1', t2), false)
+            ((a, factor, a', add symbols cst t3), false)
+        else
+          ((a, factor, a', add symbols cst t4), false)
+      | Tapp (_ls, [ t3; t4 ]) when is_sub_ls symbols _ls ->
+        let (a, factor, a', cst), _ = parse t3 in
+        if t_equal factor zero then
+          (abs_err, false)
+        else
+          ((a, factor, a', sub symbols cst t4), false)
+      | Tapp (_ls, [ t3; t4 ]) when is_mul_ls symbols _ls ->
+        let (a, factor, a', cst), is_factor = parse t3 in
+        if t_equal factor zero then
+          let (a, factor, a', cst), is_factor = parse t4 in
+          if t_equal factor zero then
+            (abs_err, false)
+          else if is_factor then
+            ((a, mul symbols factor t3, a', cst), true)
+          else
+            ((a, factor, a', mul symbols cst t4), false)
+        else if is_factor then
+          ((a, mul symbols factor t4, a', cst), true)
+        else
+          ((a, factor, a', mul symbols cst t4), false)
+      | _ -> (abs_err, false)
   in
-  let round_error_fmla, _ = parse t2 in
-  add_round_error info t1 { no_underflow = round_error_fmla; underflow = [] }
+  let error_fmla, _ = parse t2 in
+  add_error info t1 { no_underflow = error_fmla; underflow = [] }
 
 let rec add_fmlas symbols info f =
   let rec add = add_fmlas symbols in
@@ -337,17 +335,16 @@ let rec add_fmlas symbols info f =
       match t.t_node with
       (* Look for "|to_real x| <= y" *)
       | Tapp (_ls, [ t ]) when is_to_real symbols _ls -> add_ineq info t ls t2
+      (* Look for "|x' - x| <= A" *)
+      | Tapp (_ls, [ t1'; t2' ])
+        when ls_equal _ls symbols.sub || ls_equal _ls symbols.sub_infix ->
+        parse_and_add_error_fmla symbols info t1' t2' t2
       | _ -> info)
-    (* Look for "round_error t1 t1' <=. t2" *)
-    (* | Tapp (_ls, [ t1; t1' ]) when ls_equal _ls symbols.round_error -> *)
-    (*   parse_round_error_fmla symbols info t1 t1' t2 *)
-    | _ -> info (* Look for rel_round_error *))
-  | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls symbols.rel_round_error ->
-    add_round_error info t1
-      {
-        no_underflow = AbsRelative (t2, t4, (abs symbols) t3, zero);
-        underflow = [];
-      }
+    | _ -> info)
+  (* Look for rel_error *)
+  | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls symbols.rel_error ->
+    add_error info t1
+      { no_underflow = (t2, t4, (abs symbols) t3, zero); underflow = [] }
   | Tapp (ls, [ t1; t2; t3 ]) when is_ieee_post symbols ls ->
     add_ieee_post info ls t3 t1 t2
   | _ -> info
@@ -372,13 +369,14 @@ let apply_args symbols f t t_info =
   let to_real = get_to_real symbols (get_ts t) in
   let to_real t = fs_app to_real [ t ] ty_real in
   let abs = abs symbols in
-  match t_info.round_error with
+  match t_info.error with
   | None -> f t (to_real t) zero (abs (to_real t)) zero
-  | Some round_error -> (
-    match round_error.no_underflow with
-    | Absolute _ -> assert false
-    | AbsRelative (exact_t, t_factor, t', t_cst) ->
-      f t exact_t t_factor t' t_cst)
+  | Some error ->
+    let exact_t, rel_err, t', cst_err = error.no_underflow in
+    if t_equal zero rel_err then
+      assert false
+    else
+      f t exact_t rel_err t' cst_err
 
 let get_mul_forward_error prove_overflow symbols info x y r =
   if prove_overflow then
@@ -400,16 +398,15 @@ let get_mul_forward_error prove_overflow symbols info x y r =
     let x_info = get_info info x in
     let y_info = get_info info y in
     let attrs = Sattr.empty in
-    match (x_info.round_error, y_info.round_error) with
+    match (x_info.error, y_info.error) with
     | None, None ->
       let left = abs (to_real r -. (to_real x *. to_real y)) in
       let right = (eps *. abs (to_real x *. to_real y)) +. eta in
       let info =
-        add_round_error info r
+        add_error info r
           {
             no_underflow =
-              AbsRelative
-                (to_real x *. to_real y, eps, abs (to_real x *. to_real y), eta);
+              (to_real x *. to_real y, eps, abs (to_real x *. to_real y), eta);
             underflow = [];
           }
       in
@@ -434,10 +431,9 @@ let get_mul_forward_error prove_overflow symbols info x y r =
         let left = abs (to_real r -. (exact_t1 *. exact_t2)) in
         let right = (rel_err *. (t1' *. t2')) +. cst_err in
         let info =
-          add_round_error info r
+          add_error info r
             {
-              no_underflow =
-                AbsRelative (exact_t1 *. exact_t2, rel_err, t1' *. t2', cst_err);
+              no_underflow = (exact_t1 *. exact_t2, rel_err, t1' *. t2', cst_err);
               underflow = [];
             }
         in
@@ -472,16 +468,15 @@ let get_add_forward_error prove_overflow symbols info x y r =
     let x_info = get_info info x in
     let y_info = get_info info y in
     let attrs = Sattr.empty in
-    match (x_info.round_error, y_info.round_error) with
+    match (x_info.error, y_info.error) with
     | None, None ->
       let left = abs (to_real r -. (to_real x +. to_real y)) in
       let right = eps *. abs (to_real x +. to_real y) in
       let info =
-        add_round_error info r
+        add_error info r
           {
             no_underflow =
-              AbsRelative
-                (to_real x +. to_real y, eps, abs (to_real x +. to_real y), zero);
+              (to_real x +. to_real y, eps, abs (to_real x +. to_real y), zero);
             underflow = [];
           }
       in
@@ -499,10 +494,9 @@ let get_add_forward_error prove_overflow symbols info x y r =
         let total_err = (rel_err *. (t1' +. t2')) +. cst_err in
         let f = abs (to_real r -. (exact_t1 +. exact_t2)) <=. total_err in
         let info =
-          add_round_error info r
+          add_error info r
             {
-              no_underflow =
-                AbsRelative (exact_t1 +. exact_t2, rel_err, t1' +. t2', cst_err);
+              no_underflow = (exact_t1 +. exact_t2, rel_err, t1' +. t2', cst_err);
               underflow = [];
             }
         in
@@ -528,8 +522,8 @@ let use_ieee_thms prove_overflow symbols info ieee_symbol t1 t2 r :
   then
     get_add_forward_error prove_overflow symbols info t1 t2 r
   else if
-    ls_equal ieee_symbol symbols.single_symbols.add_post
-    || ls_equal ieee_symbol symbols.double_symbols.add_post
+    ls_equal ieee_symbol symbols.single_symbols.mul_post
+    || ls_equal ieee_symbol symbols.double_symbols.mul_post
   then
     get_mul_forward_error prove_overflow symbols info t1 t2 r
   else
@@ -592,13 +586,14 @@ let rec get_error_fmlas prove_overflow symbols info t :
     let l = l @ [ Decl.create_prop_decl Pgoal pr3 t3 ] in
     (info, l1 @ l2 @ [ l ], Some (pr3, t3))
   | None -> (
-    match t_info.round_error with
+    match t_info.error with
     | None -> (info, [], None)
-    | Some round_error -> (
-      (* TODO: Management of underflow here ? *)
-      match round_error.no_underflow with
-      | AbsRelative (exact_t, t_factor, t', cst) -> (info, [], None)
-      | _ -> (info, [], None)))
+    | Some error ->
+      let exact_t, rel_err, t', cst_err = error.no_underflow in
+      if t_equal zero rel_err then
+        (info, [], None)
+      else
+        (info, [], None))
 
 let apply_theorems env symbols info task =
   let naming_table = Args_wrapper.build_naming_tables task in
@@ -670,7 +665,6 @@ let numeric env symbols (info, goal) =
   in
   let g = Decl.create_prop_decl Decl.Pgoal pr goal in
   let f pr goal = l @ [ List.rev (g :: hyps) ] in
-  (* Trans.goal_l f *)
   Trans.compose_l (Trans.goal_l f)
     (Trans.store (apply_theorems env symbols info))
 
@@ -730,10 +724,7 @@ let numeric_trans env =
     }
   in
   let safe64_lemmas = Env.read_theory env [ "safe64_lemmas" ] "Safe64Lemmas" in
-  (* let round_error = ns_find_ls safe64.th_export [ "round_error" ] in *)
-  let rel_round_error =
-    ns_find_ls safe64_lemmas.th_export [ "rel_round_error" ]
-  in
+  let rel_error = ns_find_ls safe64_lemmas.th_export [ "rel_error" ] in
   let symbols =
     {
       add;
@@ -755,8 +746,7 @@ let numeric_trans env =
       ge;
       ge_infix;
       abs;
-      (* round_error; *)
-      rel_round_error;
+      rel_error;
       single_symbols;
       double_symbols;
     }
