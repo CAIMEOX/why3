@@ -85,10 +85,10 @@ type info = {
   ieee_post : (lsymbol * term * term) option;
 }
 
-let add_basic_attr = create_attribute "add_basic_attr"
-let add_attr = create_attribute "add_attr"
-let mul_basic_attr = create_attribute "mul_basic_attr"
-let mul_attr = create_attribute "mul_attr"
+let add_basic_attr = create_attribute "expl:add_basic"
+let add_combine_attr = create_attribute "expl:add_combine"
+let mul_basic_attr = create_attribute "expl:mul_basic"
+let mul_combine_attr = create_attribute "expl:mul_combine"
 
 let zero =
   t_const
@@ -102,6 +102,7 @@ let one =
        (Number.real_literal ~radix:10 ~neg:false ~int:"1" ~frac:"0" ~exp:None))
     ty_real
 
+let is_zero t = t_equal zero t
 let add symbols t1 t2 = fs_app symbols.add [ t1; t2 ] ty_real
 
 let add_simp symbols t1 t2 =
@@ -148,6 +149,10 @@ let ( +. ) symbols x y = add symbols x y
 let ( -. ) symbols x y = sub symbols x y
 let ( *. ) symbols x y = mul symbols x y
 let ( /. ) symbols x y = div symbols x y
+let ( ++. ) symbols x y = add_simp symbols x y
+let ( --. ) symbols x y = sub_simp symbols x y
+let ( **. ) symbols x y = mul_simp symbols x y
+let ( //. ) symbols x y = div_simp symbols x y
 let ( <=. ) symbols x y = ps_app symbols.le [ x; y ]
 let ( <. ) symbols x y = ps_app symbols.lt [ x; y ]
 
@@ -284,6 +289,10 @@ let get_term_for_info symbols t1 =
 (* Parse |t1 - t1'| <= t2 *)
 let parse_and_add_error_fmla symbols info t1 t1' t2 =
   let abs_err = (t1', zero, zero, t2) in
+  let ( ++. ), ( --. ), ( **. ) =
+    (( ++. ) symbols, ( --. ) symbols, ( **. ) symbols)
+  in
+
   let rec parse t =
     if t_equal t t1' then
       (abs_err, true)
@@ -302,15 +311,15 @@ let parse_and_add_error_fmla symbols info t1 t1' t2 =
           if t_equal factor zero then
             (abs_err, false)
           else
-            ((a, factor, a', add_simp symbols cst t3), false)
+            ((a, factor, a', cst ++. t3), false)
         else
-          ((a, factor, a', add_simp symbols cst t4), false)
+          ((a, factor, a', cst ++. t4), false)
       | Tapp (_ls, [ t3; t4 ]) when is_sub_ls symbols _ls ->
         let (a, factor, a', cst), _ = parse t3 in
         if t_equal factor zero then
           (abs_err, false)
         else
-          ((a, factor, a', sub_simp symbols cst t4), false)
+          ((a, factor, a', cst --. t4), false)
       | Tapp (_ls, [ t3; t4 ]) when is_mul_ls symbols _ls ->
         let (a, factor, a', cst), is_factor = parse t3 in
         if t_equal factor zero then
@@ -318,13 +327,13 @@ let parse_and_add_error_fmla symbols info t1 t1' t2 =
           if t_equal factor zero then
             (abs_err, false)
           else if is_factor then
-            ((a, mul_simp symbols factor t3, a', cst), true)
+            ((a, factor **. t3, a', cst), true)
           else
-            ((a, factor, a', mul_simp symbols cst t4), false)
+            ((a, factor, a', cst **. t4), false)
         else if is_factor then
-          ((a, mul_simp symbols factor t4, a', cst), true)
+          ((a, factor **. t4, a', cst), true)
         else
-          ((a, factor, a', mul_simp symbols cst t4), false)
+          ((a, factor, a', cst **. t4), false)
       | _ -> (abs_err, false)
   in
   let error_fmla, _ = parse t2 in
@@ -387,7 +396,9 @@ let apply_args symbols f t t_info =
     else
       f t exact_t rel_err t' cst_err
 
-let get_mul_forward_error prove_overflow symbols info x y r =
+let get_mul_forward_error (prove_overflow : bool) (symbols : symbols)
+    (info : info Mterm.t) (x : term) (y : term) (r : term) :
+    info Mterm.t * (prsymbol * term) * (prsymbol * term) option =
   if prove_overflow then
     assert false
   else
@@ -397,11 +408,13 @@ let get_mul_forward_error prove_overflow symbols info x y r =
     let to_real = get_to_real symbols ts in
     let to_real t = fs_app to_real [ t ] ty_real in
     (* let equ x y = ps_app ps_equ [ x; y ] in *)
-    let abs, ( +. ), ( -. ), ( *. ), ( <=. ) =
+    let abs, ( +. ), ( -. ), ( *. ), ( ++. ), ( **. ), ( <=. ) =
       ( abs symbols,
         ( +. ) symbols,
         ( -. ) symbols,
         ( *. ) symbols,
+        ( ++. ) symbols,
+        ( **. ) symbols,
         ( <=. ) symbols )
     in
     let x_info = get_info info x in
@@ -421,7 +434,7 @@ let get_mul_forward_error prove_overflow symbols info x y r =
       in
       let attrs = Sattr.add mul_basic_attr attrs in
       let pr = create_prsymbol (id_fresh ~attrs "MulErrBasic") in
-      (info, (pr, left <=. right))
+      (info, (pr, left <=. right), None)
     | _ ->
       let combine_errors_with_multiplication t1 exact_t1 t1_factor t1' t1_cst t2
           exact_t2 t2_factor t2' t2_cst r =
@@ -437,18 +450,36 @@ let get_mul_forward_error prove_overflow symbols info x y r =
           *. (one +. eps)
           +. eta
         in
+        let rel_err' =
+          eps
+          ++. (t1_factor ++. t2_factor ++. (t1_factor **. t2_factor))
+              **. (one ++. eps)
+        in
+        let cst_err' =
+          (((t2_cst ++. (t2_cst **. t1_factor)) **. t1')
+          ++. ((t1_cst ++. (t1_cst **. t2_factor)) **. t2')
+          ++. (t1_cst **. t2_cst))
+          **. (one ++. eps)
+          ++. eta
+        in
         let left = abs (to_real r -. (exact_t1 *. exact_t2)) in
         let right = (rel_err *. (t1' *. t2')) +. cst_err in
+        let right' = (rel_err' **. t1' **. t2') ++. cst_err' in
         let info =
           add_error info r
             {
-              no_underflow = (exact_t1 *. exact_t2, rel_err, t1' *. t2', cst_err);
+              no_underflow =
+                (exact_t1 *. exact_t2, rel_err', t1' *. t2', cst_err');
               underflow = [];
             }
         in
-        let attrs = Sattr.add mul_attr attrs in
-        let pr = create_prsymbol (id_fresh ~attrs "MulErr") in
-        (info, (pr, left <=. right))
+        let attrs = Sattr.add mul_combine_attr attrs in
+        let pr = create_prsymbol (id_fresh ~attrs "MulErrCombine") in
+        if t_equal right right' && false then
+          (info, (pr, left <=. right), None)
+        else
+          let pr' = create_prsymbol (id_fresh "MulErrCombine") in
+          (info, (pr, left <=. right), Some (pr', left <=. right'))
       in
       let combine_errors_with_multiplication =
         apply_args symbols combine_errors_with_multiplication x x_info
@@ -467,11 +498,13 @@ let get_add_forward_error prove_overflow symbols info x y r =
     let eps = get_eps symbols ts in
     let to_real = get_to_real symbols ts in
     let to_real t = fs_app to_real [ t ] ty_real in
-    let abs, ( +. ), ( -. ), ( *. ), ( <=. ) =
+    let abs, ( +. ), ( -. ), ( *. ), ( ++. ), ( **. ), ( <=. ) =
       ( abs symbols,
         ( +. ) symbols,
         ( -. ) symbols,
         ( *. ) symbols,
+        ( ++. ) symbols,
+        ( **. ) symbols,
         ( <=. ) symbols )
     in
     let x_info = get_info info x in
@@ -491,7 +524,7 @@ let get_add_forward_error prove_overflow symbols info x y r =
       in
       let attrs = Sattr.add add_basic_attr attrs in
       let pr = create_prsymbol (id_fresh ~attrs "AddErrBasic") in
-      (info, (pr, left <=. right))
+      (info, (pr, left <=. right), None)
     | _ ->
       let combine_errors_with_addition t1 exact_t1 t1_factor t1' t1_cst t2
           exact_t2 t2_factor t2' t2_cst r =
@@ -501,17 +534,28 @@ let get_add_forward_error prove_overflow symbols info x y r =
           +. ((one +. eps +. t1_factor) *. t2_cst)
         in
         let total_err = (rel_err *. (t1' +. t2')) +. cst_err in
-        let f = abs (to_real r -. (exact_t1 +. exact_t2)) <=. total_err in
+        let rel_err' = t1_factor ++. t2_factor ++. eps in
+        let cst_err' =
+          ((one ++. eps ++. t2_factor) **. t1_cst)
+          ++. ((one ++. eps ++. t1_factor) **. t2_cst)
+        in
+        let total_err' = (rel_err' **. (t1' ++. t2')) ++. cst_err' in
+        let left = abs (to_real r -. (exact_t1 +. exact_t2)) in
         let info =
           add_error info r
             {
-              no_underflow = (exact_t1 +. exact_t2, rel_err, t1' +. t2', cst_err);
+              no_underflow =
+                (exact_t1 +. exact_t2, rel_err', t1' +. t2', cst_err');
               underflow = [];
             }
         in
-        let attrs = Sattr.add add_attr attrs in
-        let pr = create_prsymbol (id_fresh ~attrs "AddErr") in
-        (info, (pr, f))
+        let attrs = Sattr.add add_combine_attr attrs in
+        let pr = create_prsymbol (id_fresh ~attrs "AddErrCombine") in
+        if t_equal total_err total_err' && false then
+          (info, (pr, left <=. total_err), None)
+        else
+          let pr' = create_prsymbol (id_fresh "AddErrCombine") in
+          (info, (pr, left <=. total_err), Some (pr', left <=. total_err'))
       in
       let combine_errors_with_addition =
         apply_args symbols combine_errors_with_addition x x_info
@@ -524,7 +568,7 @@ let get_add_forward_error prove_overflow symbols info x y r =
 (* t3 is a result of FP arithmetic operation involving t1 and t2 *)
 (* Compute new inequalities on t3 based on what we know on t1 and t2 *)
 let use_ieee_thms prove_overflow symbols info ieee_symbol t1 t2 r :
-    info Mterm.t * (prsymbol * term) =
+    info Mterm.t * (prsymbol * term) * (prsymbol * term) option =
   if
     ls_equal ieee_symbol symbols.single_symbols.add_post
     || ls_equal ieee_symbol symbols.double_symbols.add_post
@@ -576,24 +620,36 @@ let rec get_error_fmlas prove_overflow symbols info t :
   let apply = get_error_fmlas prove_overflow symbols in
   let t_info = get_info info t in
   match t_info.ieee_post with
-  | Some (ieee_post, t1, t2) ->
-    let info, l1, t1_info = apply info t1 in
-    let info, l2, t2_info = apply info t2 in
+  | Some (ieee_post, t1, t2) -> (
+    let info, l1, f1 = apply info t1 in
+    let info, l2, f2 = apply info t2 in
     let l =
-      match t1_info with
+      match f1 with
       | Some (pr1, t1) -> [ Decl.create_prop_decl Paxiom pr1 t1 ]
       | None -> []
     in
     let l =
-      match t2_info with
+      match f2 with
       | Some (pr2, t2) -> l @ [ Decl.create_prop_decl Paxiom pr2 t2 ]
       | None -> l
     in
-    let info, (pr3, t3) =
+    let info, (pr3, t3), simplified =
       use_ieee_thms prove_overflow symbols info ieee_post t1 t2 t
     in
-    let l = l @ [ Decl.create_prop_decl Pgoal pr3 t3 ] in
-    (info, l1 @ l2 @ [ l ], Some (pr3, t3))
+    match simplified with
+    | None ->
+      let l = l @ [ Decl.create_prop_decl Pgoal pr3 t3 ] in
+      (info, l1 @ l2 @ [ l ], Some (pr3, t3))
+    (* We have a simplified version of t3. Then we prove it using t3 *)
+    | Some (pr3', t3') ->
+      let l = l @ [ Decl.create_prop_decl Pgoal pr3 t3 ] in
+      let l' =
+        [
+          Decl.create_prop_decl Paxiom pr3 t3;
+          Decl.create_prop_decl Pgoal pr3' t3';
+        ]
+      in
+      (info, l1 @ l2 @ [ l ] @ [ l' ], Some (pr3', t3')))
   | None -> (
     match t_info.error with
     | None -> (info, [], None)
@@ -608,7 +664,7 @@ let apply_theorems env symbols info task =
   let naming_table = Args_wrapper.build_naming_tables task in
   let attrs = (task_goal task).pr_name.id_attrs in
   let goal = task_goal_fmla task in
-  if Sattr.mem add_attr attrs || Sattr.mem mul_attr attrs then
+  if Sattr.mem add_combine_attr attrs || Sattr.mem mul_combine_attr attrs then
     let args =
       match goal.t_node with
       | Tapp (ls, [ t1; t2 ]) when is_ineq_ls symbols ls -> (
@@ -630,14 +686,24 @@ let apply_theorems env symbols info task =
         | _ -> assert false)
       | _ -> assert false
     in
-    if Sattr.mem add_attr attrs then
-      Trans.apply_transform_args "apply" env
-        [ "add_combine"; "with"; args ]
-        naming_table "" task
-    else
+    let add_expl s pr term =
+      let a = create_attribute ("expl:" ^ s) in
+      let t = t_attr_add a term in
+      [ create_prop_decl Pgoal pr t ]
+    in
+    if Sattr.mem add_combine_attr attrs then
+      let task_list =
+        Trans.apply_transform_args "apply" env
+          [ "add_combine"; "with"; args ]
+          naming_table "" task
+      in
+      List.map (Trans.apply (Trans.goal (add_expl "add"))) task_list
+    else if Sattr.mem mul_combine_attr attrs then
       Trans.apply_transform_args "apply" env
         [ "mul_combine"; "with"; args ]
         naming_table "" task
+    else
+      assert false
   else
     [ task ]
 
@@ -674,6 +740,7 @@ let numeric env symbols (info, goal) =
   in
   let g = Decl.create_prop_decl Decl.Pgoal pr goal in
   let f pr goal = l @ [ List.rev (g :: hyps) ] in
+  (* Trans.goal_l f *)
   Trans.compose_l (Trans.goal_l f)
     (Trans.store (apply_theorems env symbols info))
 
