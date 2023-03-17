@@ -274,6 +274,13 @@ let add_ieee_post info ls t t1 t2 =
   in
   Mterm.add t t_info info
 
+(* We don't want "to_real t" in info, we want to be able to distinguish
+   floats *)
+let get_term_for_info symbols t1 =
+  match t1.t_node with
+  | Tapp (ls, [ t ]) when is_to_real symbols ls -> t
+  | _ -> t1
+
 (* Parse |t1 - t1'| <= t2 *)
 let parse_and_add_error_fmla symbols info t1 t1' t2 =
   let abs_err = (t1', zero, zero, t2) in
@@ -295,15 +302,15 @@ let parse_and_add_error_fmla symbols info t1 t1' t2 =
           if t_equal factor zero then
             (abs_err, false)
           else
-            ((a, factor, a', add symbols cst t3), false)
+            ((a, factor, a', add_simp symbols cst t3), false)
         else
-          ((a, factor, a', add symbols cst t4), false)
+          ((a, factor, a', add_simp symbols cst t4), false)
       | Tapp (_ls, [ t3; t4 ]) when is_sub_ls symbols _ls ->
         let (a, factor, a', cst), _ = parse t3 in
         if t_equal factor zero then
           (abs_err, false)
         else
-          ((a, factor, a', sub symbols cst t4), false)
+          ((a, factor, a', sub_simp symbols cst t4), false)
       | Tapp (_ls, [ t3; t4 ]) when is_mul_ls symbols _ls ->
         let (a, factor, a', cst), is_factor = parse t3 in
         if t_equal factor zero then
@@ -311,16 +318,17 @@ let parse_and_add_error_fmla symbols info t1 t1' t2 =
           if t_equal factor zero then
             (abs_err, false)
           else if is_factor then
-            ((a, mul symbols factor t3, a', cst), true)
+            ((a, mul_simp symbols factor t3, a', cst), true)
           else
-            ((a, factor, a', mul symbols cst t4), false)
+            ((a, factor, a', mul_simp symbols cst t4), false)
         else if is_factor then
-          ((a, mul symbols factor t4, a', cst), true)
+          ((a, mul_simp symbols factor t4, a', cst), true)
         else
-          ((a, factor, a', mul symbols cst t4), false)
+          ((a, factor, a', mul_simp symbols cst t4), false)
       | _ -> (abs_err, false)
   in
   let error_fmla, _ = parse t2 in
+  let t1 = get_term_for_info symbols t1 in
   add_error info t1 { no_underflow = error_fmla; underflow = [] }
 
 let rec add_fmlas symbols info f =
@@ -343,6 +351,7 @@ let rec add_fmlas symbols info f =
     | _ -> info)
   (* Look for rel_error *)
   | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls symbols.rel_error ->
+    let t1 = get_term_for_info symbols t1 in
     add_error info t1
       { no_underflow = (t2, t4, (abs symbols) t3, zero); underflow = [] }
   | Tapp (ls, [ t1; t2; t3 ]) when is_ieee_post symbols ls ->
@@ -753,6 +762,8 @@ let numeric_trans env =
   in
 
   let collect_info = collect_info symbols in
+  (* Trans.compose *)
+  (* (Trans.lookup_transform "inline_trivial" env) *)
   Trans.bind
     (Trans.fold_decl collect_info (Mterm.empty, None))
     (numeric env symbols)
