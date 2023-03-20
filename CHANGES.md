@@ -1,5 +1,13 @@
 :x: marks a potential source of incompatibility
 
+Tools
+  * the driver files appearing in a config file specified using option
+    `--extra-config` are searched also in the sub-directory of that
+    config file
+
+Version 1.6.0, March 7 2023
+---------------------------
+
 Core
   * added meta `vc:proved_wf` for annotating well-founded relations, to make
     them easier to use in variants; see Section 8.2.3 of the manual
@@ -15,11 +23,15 @@ Tools
   * several debug flags have been renamed;
     use `why3 --list-debug-flags` to obtain the new names :x:
   * global directives in extra drivers are now taken into account
+  * time limits now have a sub-second accuracy, e.g., `--timelimit=0.5`
 
 IDE
   * pressing Tab now auto-completes commands
   * added menu item "File/Export as Zip" to export a zip archive of the
     current session and all the related files
+
+Web interface TryWhy3
+  * proof obligations are now displayed as a sequent rather than a full task
 
 Python language
   * added `by` and `so` connectives in predicates
