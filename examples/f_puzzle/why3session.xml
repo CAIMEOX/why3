@@ -5,6 +5,7 @@
 <prover id="0" name="Spass" version="3.9" timelimit="5" steplimit="0" memlimit="4000"/>
 <prover id="1" name="CVC3" version="2.4.1" timelimit="5" steplimit="0" memlimit="4000"/>
 <prover id="2" name="CVC4" version="1.4" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="3" name="Z3" version="4.11.0" timelimit="5" steplimit="0" memlimit="1000"/>
 <prover id="4" name="Z3" version="4.3.1" timelimit="5" steplimit="0" memlimit="1000"/>
 <prover id="5" name="Z3" version="3.2" timelimit="5" steplimit="0" memlimit="1000"/>
 <prover id="7" name="Vampire" version="0.6" timelimit="5" steplimit="0" memlimit="4000"/>
@@ -24,8 +25,8 @@
  <proof prover="9" memlimit="1000"><result status="valid" time="0.01" steps="6"/></proof>
  </goal>
  <goal name="I1.induction_step" proved="true">
- <proof prover="4"><result status="valid" time="0.86"/></proof>
- <proof prover="5"><result status="valid" time="0.20"/></proof>
+ <proof prover="4"><result status="valid" time="0.14"/></proof>
+ <proof prover="5"><result status="valid" time="0.03"/></proof>
  </goal>
 </theory>
 <theory name="Solution" proved="true">
@@ -37,7 +38,7 @@
  <goal name="L4" proved="true">
  <proof prover="1"><result status="valid" time="0.00"/></proof>
  <proof prover="2"><result status="valid" time="0.00"/></proof>
- <proof prover="4" memlimit="4000"><result status="valid" time="0.07"/></proof>
+ <proof prover="3"><result status="valid" time="0.02" steps="23193"/></proof>
  <proof prover="9"><result status="valid" time="0.01" steps="4"/></proof>
  </goal>
  <goal name="I2.base" proved="true">
@@ -50,7 +51,7 @@
  <proof prover="9" memlimit="1000"><result status="valid" time="0.00" steps="3"/></proof>
  </goal>
  <goal name="I2.induction_step" proved="true">
- <proof prover="9" timelimit="10" memlimit="1000"><result status="valid" time="1.10" steps="97"/></proof>
+ <proof prover="9" timelimit="10" memlimit="1000"><result status="valid" time="1.09" steps="97"/></proof>
  </goal>
  <goal name="L5" proved="true">
  <proof prover="0"><result status="valid" time="0.01"/></proof>
@@ -63,7 +64,7 @@
  <goal name="G" proved="true">
  <proof prover="1"><result status="valid" time="0.00"/></proof>
  <proof prover="2"><result status="valid" time="0.00"/></proof>
- <proof prover="4"><result status="valid" time="0.17"/></proof>
+ <proof prover="4"><result status="valid" time="0.31"/></proof>
  <proof prover="5" memlimit="4000"><result status="valid" time="0.14"/></proof>
  <proof prover="9"><result status="valid" time="0.00" steps="5"/></proof>
  </goal>

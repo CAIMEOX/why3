@@ -251,6 +251,8 @@ let bypass_pretty s id =
         id.Ident.id_string
   | Decl.NoTerminationProof ls ->
       fprintf fmt "Cannot prove the termination of %a" P.print_ls ls
+  | Decl.UnexpectedProjOrConstr ls ->
+      fprintf fmt "Unexpected projection or constructor symbol %a" P.print_ls ls
   | _ -> Format.fprintf fmt "Uncaught: %a" Exn_printer.exn_printer exn
   end
 
@@ -956,8 +958,8 @@ end
       | None          -> list_loc in
     let (source_result, list_loc) =
       Model_parser.interleave_with_source ~print_attrs ?start_comment:None ?end_comment:None
-        ?me_name_trans:None model ~rel_filename:filename
-      ~source_code:source_code ~locations:list_loc
+        model ~rel_filename:filename
+        ~source_code:source_code ~locations:list_loc
     in
     let goal_loc, list_loc = List.partition (fun (_, y) -> y = Goal_loc) list_loc in
     let goal_loc =
@@ -1027,7 +1029,7 @@ match pa.proof_state with
      let selected_model = Opt.get_def Model_parser.empty_model
          (Check_ce.select_model_last_non_empty res.pr_models) in
      let ce_result =
-       Pp.string_of (Model_parser.print_model_human ~filter_similar:true ~print_attrs ?me_name_trans:None)
+       Pp.string_of (Model_parser.print_model_human ~filter_similar:true ~print_attrs)
          selected_model in
      if ce_result = "" then
        let result_pr =
@@ -1402,6 +1404,14 @@ match pa.proof_state with
     Session_itp.save_session d.cont.controller_session;
     P.notify Saved
 
+  let export_as_zip () =
+    let d = get_server_data () in
+    try
+      let archive = Session_itp.export_as_zip d.cont.controller_session in
+      P.notify (Message (Information ("Zip archive " ^ archive ^ " created")))
+    with Sys_error msg ->
+        P.notify (Message (Error msg))
+
   (* ----------------- Reload session ------------------- *)
   let clear_tables () : unit =
     reset ();
@@ -1539,7 +1549,7 @@ match pa.proof_state with
    (* Check if a request is valid (does not suppose existence of obsolete node_id) *)
    let request_is_valid r =
      match r with
-     | Save_req | Check_need_saving_req | Reload_req
+     | Save_req | Export_as_zip | Check_need_saving_req | Reload_req
      | Get_file_contents _ | Save_file_req _
      | Interrupt_req | Add_file_req _ | Set_config_param _ | Set_prover_policy _
      | Exit_req | Get_global_infos | Itp_communication.Unfocus_req
@@ -1613,6 +1623,10 @@ match pa.proof_state with
     | Save_req                     ->
        save_session ();
        session_needs_saving := false
+    | Export_as_zip ->
+        save_session ();
+        session_needs_saving := false;
+        export_as_zip ()
     | Reload_req                   ->
        reload_session ();
        session_needs_saving := true

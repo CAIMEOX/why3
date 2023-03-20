@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T1'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T1'goal` cannot be evaluated)
@@ -12,9 +12,9 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T1'goal1` cannot be evaluated):
 File strings.mlw:
   Line 6:
-    s = "A"
+    s : string = "A"
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T2'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T2'goal` cannot be evaluated)
@@ -28,9 +28,9 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T2'goal1` cannot be evaluated):
 File strings.mlw:
   Line 7:
-    s = "AAAA"
+    s : string = "AAAA"
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T3'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T3'goal` cannot be evaluated)
@@ -44,10 +44,10 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T3'goal1` cannot be evaluated):
 File strings.mlw:
   Line 8:
-    s1 = "A"
-    s2 = "B"
+    s1 : string = "A"
+    s2 : string = "B"
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Precondition of `T4'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `T4'goal` cannot be evaluated)
@@ -61,9 +61,9 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `T4'goal1` cannot be evaluated):
 File strings.mlw:
   Line 9:
-    s = "AAAAAAAAAAA"
+    s : string = "AAAAAAAAAAA"
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T5'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T5'goal` cannot be evaluated)
@@ -77,10 +77,10 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T5'goal1` cannot be evaluated):
 File strings.mlw:
   Line 10:
-    s = "aAAAAAAAAA"
-    x = "b{uohu{5c}x09i"
+    s : string = "aAAAAAAAAA"
+    x : string = "b{uohu{5c}x09i"
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T6'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T6'goal` cannot be evaluated)
@@ -94,10 +94,10 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T6'goal1` cannot be evaluated):
 File strings.mlw:
   Line 11:
-    s = "aAAAAAAAAAA"
-    x = "b{uohu{5c}x09i"
+    s : string = "aAAAAAAAAAA"
+    x : string = "b{uohu{5c}x09i"
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T7'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T7'goal` cannot be evaluated)
@@ -111,10 +111,10 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T7'goal1` cannot be evaluated):
 File strings.mlw:
   Line 12:
-    s = ""
-    x = "b{uohu{5c}x09i"
+    s : string = ""
+    x : string = "b{uohu{5c}x09i"
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T8'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T8'goal` cannot be evaluated)
@@ -128,10 +128,10 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T8'goal1` cannot be evaluated):
 File strings.mlw:
   Line 13:
-    s = ""
-    x = "b{uohu{5c}x09i"
+    s : string = ""
+    x : string = "b{uohu{5c}x09i"
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T9'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T9'goal` cannot be evaluated)
@@ -145,10 +145,10 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T9'goal1` cannot be evaluated):
 File strings.mlw:
   Line 14:
-    s = "b{uohu{5c}x09i"
-    x = "b{uohu{5c}x09i"
+    s : string = "b{uohu{5c}x09i"
+    x : string = "b{uohu{5c}x09i"
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T10'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T10'goal` cannot be evaluated)
@@ -162,10 +162,10 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T10'goal1` cannot be evaluated):
 File strings.mlw:
   Line 15:
-    s = "aAAAAAAAAAA"
-    x = "b{uohu{5c}x09i"
+    s : string = "aAAAAAAAAAA"
+    x : string = "b{uohu{5c}x09i"
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T11'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T11'goal` cannot be evaluated)
@@ -179,10 +179,10 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T11'goal1` cannot be evaluated):
 File strings.mlw:
   Line 16:
-    s = ""
-    x = "b{uohu{5c}x09i"
+    s : string = ""
+    x : string = "b{uohu{5c}x09i"
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T12'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T12'goal` cannot be evaluated)
@@ -196,10 +196,10 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T12'goal1` cannot be evaluated):
 File strings.mlw:
   Line 17:
-    s = ""
-    x = "b{uohu{5c}x09i"
+    s : string = ""
+    x : string = "b{uohu{5c}x09i"
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 18, characters 22-28)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 18, characters 22-28)
@@ -220,10 +220,10 @@ File int.mlw:
     one = 1
 File strings.mlw:
   Line 18:
-    s = ""
-    s = ""
+    s = ("":string)
+    s = ("":string)
     Execution of main function `T13'goal` with env:
-      s = ""
+      s = ("":string)
       zero = 0
       one = 1
 Unknown location:
@@ -231,9 +231,9 @@ Unknown location:
 File strings.mlw:
   Line 18:
     Property failure at postcondition of `T13'goal` with:
-      s = ""
+      s = ("":string)
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 19, characters 22-34)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 19, characters 22-34)
@@ -254,10 +254,10 @@ File int.mlw:
     one = 1
 File strings.mlw:
   Line 19:
-    s = ""
-    s = ""
+    s = ("":string)
+    s = ("":string)
     Execution of main function `T14'goal` with env:
-      s = ""
+      s = ("":string)
       zero = 0
       one = 1
 Unknown location:
@@ -265,9 +265,9 @@ Unknown location:
 File strings.mlw:
   Line 19:
     Property failure at postcondition of `T14'goal` with:
-      s = ""
+      s = ("":string)
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 20, characters 24-45)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 20, characters 24-45)
@@ -288,13 +288,13 @@ File int.mlw:
     one = 1
 File strings.mlw:
   Line 20:
-    s = ""
+    s = ("":string)
     i = 0
-    s = ""
+    s = ("":string)
     i = 0
     Execution of main function `T15'goal` with env:
       i = 0
-      s = ""
+      s = ("":string)
       zero = 0
       one = 1
 Unknown location:
@@ -303,9 +303,9 @@ File strings.mlw:
   Line 20:
     Property failure at postcondition of `T15'goal` with:
       i = 0
-      s = ""
+      s = ("":string)
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T16'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T16'goal` cannot be evaluated)
@@ -319,9 +319,9 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T16'goal1` cannot be evaluated):
 File strings.mlw:
   Line 21:
-    s = ""
+    s : string = ""
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Precondition of `T17'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `T17'goal` cannot be evaluated)
@@ -335,5 +335,5 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `T17'goal1` cannot be evaluated):
 File strings.mlw:
   Line 22:
-    s = "abc"
+    s : string = "abc"
 

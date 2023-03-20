@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Precondition of `f` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `f` cannot be evaluated)
@@ -10,13 +10,35 @@ Sub-goal Index in array bounds of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `f` cannot be evaluated):
+File array.mlw:
+  Line 17:
+    length :
+      ty
+      ->
+      uni
+      ->
+      int = fun bOUND_VARIABLE_3804 bOUND_VARIABLE_3805 -> 0
+    length : array t -> int = [|_ => 0|]
+  Line 20:
+    mixfix [] :
+      array
+      t
+      ->
+      int
+      ->
+      t = fun _arg_1 _arg_2 -> {Array.to_int => 3}
 File jlamp_array_poly.mlw:
+  Line 8:
+    to_int :
+      t
+      ->
+      int = fun _arg_1 -> if {Array.to_int => 3} = _arg_1 then 3 else 2
   Line 11:
-    two = {to_int => 2}
+    two : t = {Array.to_int => 2}
   Line 14:
-    three = {to_int => 3}
+    three : t = {Array.to_int => 3}
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Precondition of `f` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `f` cannot be evaluated)
@@ -28,19 +50,33 @@ Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown or time/memory/step limit.
 The following counterexample model could not be verified
   (both RAC terminated because Precondition of `f` cannot be evaluated):
+File array.mlw:
+  Line 17:
+    length :
+      ty
+      ->
+      uni
+      ->
+      int = fun bOUND_VARIABLE_3543 bOUND_VARIABLE_3544 -> 0
+    length : array t -> int = [|_ => 0|]
 File jlamp_array_poly.mlw:
+  Line 8:
+    to_int :
+      t
+      ->
+      int = fun _arg_1 -> if {Array.to_int => 3} = _arg_1 then 3 else 2
   Line 11:
-    two = {to_int => 2}
+    two : t = {Array.to_int => 2}
   Line 14:
-    three = {to_int => 3}
+    three : t = {Array.to_int => 3}
   Line 21:
-    three = {to_int => 3}
+    three : t = {Array.to_int => 3}
 
 File "bench/check-ce/jlamp_array_poly.mlw", line 28, characters 4-16:
 Sub-goal Index in array bounds of goal g'vc.
 Prover result is: Valid.
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: BAD_CE
   - Concrete RAC: STUCK (failure in precondition of `g` at "bench/check-ce/jlamp_array_poly.mlw", line 24, characters 6-7)
   - Abstract RAC: STUCK (failure in precondition of `g` at "bench/check-ce/jlamp_array_poly.mlw", line 24, characters 6-7)
@@ -57,7 +93,7 @@ File "bench/check-ce/jlamp_array_poly.mlw", line 34, characters 4-16:
 Sub-goal Index in array bounds of goal h'vc.
 Prover result is: Valid.
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: BAD_CE
   - Concrete RAC: STUCK (failure in precondition of `h` at "bench/check-ce/jlamp_array_poly.mlw", line 30, characters 6-7)
   - Abstract RAC: STUCK (failure in precondition of `h` at "bench/check-ce/jlamp_array_poly.mlw", line 30, characters 6-7)

@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (precondition at "bench/check-ce/bv32_toBig.mlw", line 8, characters 27-40)
   - Abstract RAC: FAILURE (precondition at "bench/check-ce/bv32_toBig.mlw", line 8, characters 27-40)
@@ -18,50 +18,50 @@ File int.mlw:
     Constant one initialization
     one = 1
 File bv.mlw:
-  Line 617:
+  Line 632:
     Constant zeros initialization
   Line 192:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 617:
+  Line 632:
     zeros = 0
     Constant one initialization
   Line 197:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 617:
+  Line 632:
     one = 0
     Constant ones initialization
   Line 199:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 617:
+  Line 632:
     ones = 0
-  Line 638:
+  Line 653:
     Constant zeros initialization
   Line 192:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 638:
+  Line 653:
     zeros = 0
     Constant one initialization
   Line 197:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 638:
+  Line 653:
     one = 0
     Constant ones initialization
   Line 199:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 638:
+  Line 653:
     ones = 0
 File bv32_toBig.mlw:
   Line 8:
-    i = 0
-    i = 0
+    i = (0:t)
+    i = (0:t)
     Execution of main function `ok` with env:
-      i = 0
+      i = (0:t)
       zero = 0
       one = 1
       zeros = 0
@@ -71,14 +71,14 @@ File bv32_toBig.mlw:
       one = 0
       ones = 0
     (giant-step) execution of unimplemented function `toBig`
-      _ = 0
-    result of `toBig` = 0
+      _ = (0:t)
+    result of `toBig` = (0:t1)
     (giant-step) execution of unimplemented function `u`
-      i = 0
+      i = (0:t1)
     Property failure at precondition of `u` with:
-      i = 0
+      i = (0:t1)
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (precondition at "bench/check-ce/bv32_toBig.mlw", line 10, characters 27-41)
   - Abstract RAC: FAILURE (precondition at "bench/check-ce/bv32_toBig.mlw", line 10, characters 27-41)
@@ -98,50 +98,50 @@ File int.mlw:
     Constant one initialization
     one = 1
 File bv.mlw:
-  Line 617:
+  Line 632:
     Constant zeros initialization
   Line 192:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 617:
+  Line 632:
     zeros = 0
     Constant one initialization
   Line 197:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 617:
+  Line 632:
     one = 0
     Constant ones initialization
   Line 199:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 617:
+  Line 632:
     ones = 0
-  Line 638:
+  Line 653:
     Constant zeros initialization
   Line 192:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 638:
+  Line 653:
     zeros = 0
     Constant one initialization
   Line 197:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 638:
+  Line 653:
     one = 0
     Constant ones initialization
   Line 199:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 638:
+  Line 653:
     ones = 0
 File bv32_toBig.mlw:
   Line 10:
-    i = 0
-    i = 0
+    i = (0:t)
+    i = (0:t)
     Execution of main function `ko` with env:
-      i = 0
+      i = (0:t)
       zero = 0
       one = 1
       zeros = 0
@@ -151,14 +151,14 @@ File bv32_toBig.mlw:
       one = 0
       ones = 0
     (giant-step) execution of unimplemented function `stoBig`
-      _ = 0
-    result of `stoBig` = 0
+      _ = (0:t)
+    result of `stoBig` = (0:t1)
     (giant-step) execution of unimplemented function `u`
-      i = 0
+      i = (0:t1)
     Property failure at precondition of `u` with:
-      i = 0
+      i = (0:t1)
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/bv32_toBig.mlw", line 13, characters 14-40)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/bv32_toBig.mlw", line 13, characters 14-40)
@@ -178,50 +178,50 @@ File int.mlw:
     Constant one initialization
     one = 1
 File bv.mlw:
-  Line 617:
+  Line 632:
     Constant zeros initialization
   Line 192:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 617:
+  Line 632:
     zeros = 0
     Constant one initialization
   Line 197:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 617:
+  Line 632:
     one = 0
     Constant ones initialization
   Line 199:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 617:
+  Line 632:
     ones = 0
-  Line 638:
+  Line 653:
     Constant zeros initialization
   Line 192:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 638:
+  Line 653:
     zeros = 0
     Constant one initialization
   Line 197:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 638:
+  Line 653:
     one = 0
     Constant ones initialization
   Line 199:
     (giant-step) execution of unimplemented function with args:
     result = 0
-  Line 638:
+  Line 653:
     ones = 0
 File bv32_toBig.mlw:
   Line 12:
-    i = 2147483648
-    i = 2147483648
+    i = (2147483648:t)
+    i = (2147483648:t)
     Execution of main function `ko2` with env:
-      i = 2147483648
+      i = (2147483648:t)
       zero = 0
       one = 1
       zeros = 0
@@ -232,8 +232,8 @@ File bv32_toBig.mlw:
       ones = 0
   Line 13:
     (giant-step) execution of unimplemented function `stoBig`
-      _ = 2147483648
-    result of `stoBig` = 18446744071562067968
+      _ = (2147483648:t)
+    result of `stoBig` = (18446744071562067968:t1)
     Property failure at postcondition of `ko2` with:
-      result = 18446744071562067968
+      result = (18446744071562067968:t1)
 

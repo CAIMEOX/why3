@@ -19,7 +19,7 @@ open Ty
 open Pretty
 
 let debug_array_as_update_chains_not_epsilon =
-  Debug.register_flag "rac-array-as-update-chains"
+  Debug.register_flag "rac:array_as_update_chains"
     ~desc:"represent arrays in terms for RAC as chains of updates, not epsilons"
 
 let debug_trace_exec =
@@ -61,7 +61,7 @@ module rec Value : sig
 
   type value = {v_desc: value_desc; v_ty: ty}
   and value_desc =
-    | Vconstr of rsymbol * rsymbol list * field list
+    | Vconstr of rsymbol option * rsymbol list * field list
     | Vnum of BigInt.t
     | Vreal of Big_real.real
     | Vfloat_mode of float_mode
@@ -85,7 +85,7 @@ end = struct
 
   type value = {v_desc: value_desc; v_ty: ty}
   and value_desc =
-    | Vconstr of rsymbol * rsymbol list * field list
+    | Vconstr of rsymbol option * rsymbol list * field list
     | Vnum of BigInt.t
     | Vreal of Big_real.real
     | Vfloat_mode of float_mode
@@ -114,7 +114,7 @@ end = struct
     | Vproj (ls1, v1), Vproj (ls2, v2) ->
         cmp [cmptr fst ls_compare; cmptr snd compare_values] (ls1, v1) (ls2, v2)
     | Vproj _, _ -> -1 | _, Vproj _ -> 1
-    | Vconstr (rs1, _, fs1), Vconstr (rs2, _, fs2) ->
+    | Vconstr (Some rs1, _, fs1), Vconstr (Some rs2, _, fs2) ->
         let field_get (Field f) = !f in
         let cmp_fields = cmp_lists [cmptr field_get compare_values] in
         cmp [cmptr fst rs_compare; cmptr snd cmp_fields] (rs1, fs1) (rs2, fs2)
@@ -196,7 +196,10 @@ let purefun_value ~result_ity ~arg_ity mv v =
   value (ty_of_ity result_ity) (Vpurefun (ty_of_ity arg_ity, mv, v))
 
 let unit_value =
-  value (ty_tuple []) (Vconstr (Expr.rs_void, [], []))
+  value (ty_tuple []) (Vconstr (Some Expr.rs_void, [], []))
+
+let term_value ity t =
+  value (ty_of_ity ity) (Vterm t)
 
 (**********************************************************************)
 
@@ -211,23 +214,6 @@ let range_value ity n =
   | _ -> ()
   end;
   value (ty_of_ity ity) (Vnum n)
-
-let proj_value ity ls v =
-  let valid_range =
-    match ity_components ity, v with
-      | ({ its_def = Range r; its_ts= ts }, _, _), {v_desc= Vnum n}
-        when ls.ls_name.id_string = ts.ts_name.id_string ^ "'int"
-          && Opt.equal ty_equal ls.ls_value (Some ty_int) -> (
-          try
-            Number.(check_range { il_kind = ILitUnk; il_int = n } r);
-            true
-          with Number.OutOfRange _ ->
-            false )
-      | _ -> true in
-  if valid_range then
-    Some (value (ty_of_ity ity) (Vproj (ls, v)))
-  else
-    None
 
 let mode_to_string m =
   let open Mlmpfr_wrapper in
@@ -270,10 +256,11 @@ and print_value' fmt v =
         Pp.(let start = constant_formatted "@ with " in
             print_list_delim ~start ~sep:comma ~stop:nothing
               (print_pair_delim nothing equal nothing print_vs print_value))
-        (Mvs.bindings mvs)
+        (Mvs.bindings mvs);
+      forget_var vs
   | Vproj (ls, v) ->
       fprintf fmt "{%a => %a}" print_ls ls print_value v
-  | Vconstr (rs, fs, vs) ->
+  | Vconstr (Some rs, fs, vs) ->
       if is_rs_tuple rs then
         fprintf fmt "@[<hv1>(%a)@]" (Pp.print_list Pp.comma print_field) vs
       else if Strings.has_suffix "'mk" rs.rs_name.id_string then
@@ -285,6 +272,10 @@ and print_value' fmt v =
       else
         fprintf fmt "@[<h>(%a%a)@]" print_rs rs
           Pp.(print_list_pre space print_value) (List.map field_get vs)
+  | Vconstr (None, fs, vs) ->
+      let print_field fmt (rs, v) = fprintf fmt "@[%a=@ %a@]" print_rs rs print_field v in
+      fprintf fmt "@[<hv1>{%a}@]" (Pp.print_list Pp.semi print_field)
+        (List.combine fs vs)
   | Varray a ->
       fprintf fmt "@[[%a]@]"
         (Pp.print_list Pp.semi print_value) (Array.to_list a)
@@ -339,7 +330,7 @@ module Log = struct
     | Exec_pure of (lsymbol * exec_mode)
     | Exec_any of (rsymbol option * value Mvs.t)
     | Iter_loop of exec_mode
-    | Exec_main of (rsymbol * value Mvs.t * value_or_invalid Mrs.t)
+    | Exec_main of (rsymbol * value_or_invalid Mls.t * value Mvs.t * value_or_invalid Mrs.t)
     | Exec_stucked of (string * value Mid.t)
     | Exec_failed of (string * value Mid.t)
     | Exec_ended
@@ -383,9 +374,10 @@ module Log = struct
   let log_iter_loop log_uc kind loc =
     log_entry log_uc (Iter_loop kind) loc
 
-  let log_exec_main log_uc rs mvs mrs loc =
+  let log_exec_main log_uc rs mls mvs mrs loc =
+    let mls = Mls.map (fun v -> try Value (Lazy.force v) with _ -> Invalid) mls in
     let mrs = Mrs.map (fun v -> try Value (Lazy.force v) with _ -> Invalid) mrs in
-    log_entry log_uc (Exec_main (rs,mvs,mrs)) loc
+    log_entry log_uc (Exec_main (rs,mls,mvs,mrs)) loc
 
   let log_failed log_uc s mvs loc =
     log_entry log_uc (Exec_failed (s,mvs)) loc
@@ -425,19 +417,17 @@ module Log = struct
             consecutives key ~sofar:(to_list current @ sofar) ~current:(k, [x]) xs
 
   let print_log_entry_desc fmt e =
+    let ls2string ls = ls.ls_name.id_string in
     let vs2string vs = vs.vs_name.id_string in
     let rs2string rs = rs.rs_name.id_string in
     let id2string id = id.id_string in
-    let print_value_or_invalid fmt = function
-      | Value v -> print_value fmt v
-      | Invalid -> Pp.string fmt "invalid value" in
+    let filter_invalid_values l =
+      List.filter_map (function (x,Value v) -> Some (x,v) | (_,Invalid) -> None) l in
     let print_assoc key2string print_value fmt (k,v) =
       fprintf fmt "@[%a = %a@]"
         print_decoded (key2string k) print_value v in
     let print_list key2string =
       Pp.print_list_pre Pp.newline (print_assoc key2string print_value) in
-    let print_list_or_invalid =
-      Pp.print_list_pre Pp.newline (print_assoc rs2string print_value_or_invalid) in
     match e.log_desc with
     | Val_assumed (id, v) ->
         fprintf fmt "@[<h2>%a = %a@]" print_decoded id.id_string print_value v;
@@ -467,11 +457,12 @@ module Log = struct
            (print_list vs2string) (Mvs.bindings mvs)
     | Iter_loop k ->
         fprintf fmt "@[<h2>%s iteration of loop@]" (exec_kind_to_string k)
-    | Exec_main (rs, mvs, mrs) ->
-        fprintf fmt "@[<h2>Execution of main function `%a` with env:%a%a@]"
+    | Exec_main (rs, mls, mvs, mrs) ->
+        fprintf fmt "@[<h2>Execution of main function `%a` with env:%a%a%a@]"
           print_decoded rs.rs_name.id_string
+          (print_list ls2string) (filter_invalid_values (Mls.bindings mls))
           (print_list vs2string) (Mvs.bindings mvs)
-          print_list_or_invalid (Mrs.bindings mrs)
+          (print_list rs2string) (filter_invalid_values (Mrs.bindings mrs))
     | Exec_failed (msg,mid) ->
        fprintf fmt "@[<h2>Property failure at %s with:%a@]"
          msg (print_list id2string) (Mid.bindings mid)
@@ -484,6 +475,7 @@ module Log = struct
   let json_log entry_log =
     let open Json_base in
     let string f x = String (Format.asprintf "%a" f x) in
+    let ls2string ls = ls.ls_name.id_string in
     let vs2string vs = vs.vs_name.id_string in
     let id2string id = id.id_string in
     let rs2string rs = rs.rs_name.id_string in
@@ -498,9 +490,9 @@ module Log = struct
           "name", String (key2string k);
           "value", string print_value v
         ] in
-    let key_value_or_undefined (k,v) =
+    let key_value_or_undefined key2string (k,v) =
       Record [
-          "name", String (rs2string k);
+          "name", String (key2string k);
           "value", value_or_undefined v
         ] in
     let log_entry = function
@@ -554,12 +546,13 @@ module Log = struct
                 "kind", String "ITER_LOOP";
                 "exec", json_kind kind;
               ]
-        | Exec_main (rs,mvs,mrs) ->
+        | Exec_main (rs,mls,mvs,mrs) ->
             Record [
                 "kind", String "EXEC_MAIN";
                 "rs", string print_decoded rs.rs_name.id_string;
-                "env", List (List.map (key_value vs2string) (Mvs.bindings mvs));
-                "globals", List (List.map key_value_or_undefined (Mrs.bindings mrs))
+                "env", List (List.concat [(List.map (key_value_or_undefined ls2string) (Mls.bindings mls));
+                                          (List.map (key_value vs2string) (Mvs.bindings mvs))]);
+                "globals", List (List.map (key_value_or_undefined rs2string) (Mrs.bindings mrs))
               ]
         | Exec_failed (reason,mid) ->
             Record [
@@ -680,13 +673,14 @@ type env = {
   pmodule  : Pmodule.pmodule;
   funenv   : (cexp * rec_defn list option) Mrs.t;
   vsenv    : value Mvs.t;
+  lsenv    : value Lazy.t Mls.t; (* global logical functions and constants *)
   rsenv    : value Lazy.t Mrs.t; (* global constants *)
   premises : premises;
   log_uc   : Log.log_uc;
 }
 
 let mk_empty_env env pmodule =
-  {pmodule; funenv= Mrs.empty; vsenv= Mvs.empty; rsenv= Mrs.empty;
+  {pmodule; funenv= Mrs.empty; vsenv= Mvs.empty; lsenv= Mls.empty; rsenv= Mrs.empty;
    premises= mk_empty_premises (); why_env= env; log_uc= Log.empty_log_uc ()}
 
 let snapshot_env env =
@@ -706,6 +700,8 @@ let get_pvs env pvs =
   get_vs env pvs.pv_vs
 
 let bind_vs vs v ctx = {ctx with vsenv= Mvs.add vs v ctx.vsenv}
+
+let bind_ls ls v ctx = {ctx with lsenv= Mls.add ls v ctx.lsenv}
 
 let bind_rs rs v ctx = {ctx with rsenv= Mrs.add rs v ctx.rsenv}
 
@@ -757,7 +753,7 @@ let register_iter_loop env loc kind =
   Log.log_iter_loop env.log_uc kind loc
 
 let register_exec_main env rs =
-  Log.log_exec_main env.log_uc rs (Mvs.map snapshot env.vsenv)
+  Log.log_exec_main env.log_uc rs env.lsenv (Mvs.map snapshot env.vsenv)
     env.rsenv rs.rs_name.id_loc
 
 let register_failure env loc reason mvs =
@@ -880,14 +876,27 @@ let check_type_invs rac ?loc ~giant_steps env ity v =
   let ts = match ity.ity_node with
   | Ityapp (ts, _, _) | Ityreg {reg_its= ts} -> ts
   | Ityvar _ -> failwith "check_type_invs: type variable" in
-  let def = Pdecl.find_its_defn env.pmodule.Pmodule.mod_known ts in
-  if def.Pdecl.itd_invariant <> [] then
+  let opt_def =
+    try
+      let def = Pdecl.find_its_defn env.pmodule.Pmodule.mod_known ts in
+      if def.Pdecl.itd_invariant = [] then None
+      else Some def
+    with Not_found -> None (* case of abstract type, nothing to check *)
+  in
+  match opt_def with
+  | None -> ()
+  | Some def ->
     let fs_vs = match v.v_desc with
       | Vconstr (_, fs, vs) ->
           List.fold_right2 Mrs.add fs (List.map field_get vs) Mrs.empty
+      | Vundefined ->
+          incomplete "type invariant for undefined value of type %a cannot be checked"
+            print_ty v.v_ty;
       | _ -> failwith "check_type_invs: value is not record" in
     let bind_field env rs =
-      bind_pvs (Opt.get rs.rs_field) (Mrs.find rs fs_vs) env in
+      try bind_pvs (Opt.get rs.rs_field) (Mrs.find rs fs_vs) env
+      with Not_found -> env
+    in
     let env = List.fold_left bind_field env def.Pdecl.itd_fields in
     let desc = asprintf "of type %a" print_ity ity in
     let ctx = mk_cntr_ctx env ?loc:loc ~desc ~giant_steps:(Some giant_steps) Vc.expl_type_inv in
@@ -1083,22 +1092,39 @@ let rec term_of_value ?(ty_mt=Mtv.empty) (env: env) vsenv v : (vsymbol * term) l
       let ty_x = ty_inst ty_mt (v_ty x) in
       let t = t_equ (fs_app ls [t_var vs] ty_x) t_x in
       vsenv, t_eps (t_close_bound vs t)
-  | Vconstr (rs, field_rss, fs) -> (
-      let match_field mt pv f =
-        ty_match mt pv.pv_vs.vs_ty (ty_inst mt (v_ty (field_get f))) in
-      let ty_mt = List.fold_left2 match_field ty_mt rs.rs_cty.cty_args fs in
-      let term_of_field vsenv f = term_of_value ~ty_mt env vsenv (field_get f) in
-      let vsenv, fs = Lists.map_fold_left term_of_field vsenv fs in
-      match rs_kind rs with
-      | RKfunc ->
-          vsenv, fs_app (ls_of_rs rs) fs ty
-      | RKnone when Strings.has_suffix "'mk" rs.rs_name.id_string ->
-          let vs = create_vsymbol (id_fresh "v") ty in
-          let for_field rs = t_equ (t_app_infer (ls_of_rs rs) [t_var vs]) in
-          let t = t_and_l (List.map2 for_field field_rss fs) in
-          vsenv, t_eps (t_close_bound vs t)
-      | _ -> kasprintf failwith "Cannot construct term for constructor \
-                                 %a that is not a function" print_rs rs )
+  | Vconstr (ors, field_rss, fs) ->
+      let t_app_from_constr rs fs =
+        let match_field mt pv f =
+          ty_match mt pv.pv_vs.vs_ty (ty_inst mt (v_ty (field_get f))) in
+        let ty_mt = List.fold_left2 match_field ty_mt rs.rs_cty.cty_args fs in
+        let term_of_field vsenv f = term_of_value ~ty_mt env vsenv (field_get f) in
+        let vsenv, fs = Lists.map_fold_left term_of_field vsenv fs in
+        vsenv, fs_app (ls_of_rs rs) fs ty in
+      let t_eps_from_constr field_rss fs =
+        let match_field mt rs_field f =
+          ty_match mt
+            (ty_of_ity rs_field.rs_cty.cty_result)
+            (ty_inst mt (v_ty (field_get f))) in
+        let ty_mt = List.fold_left2 match_field ty_mt field_rss fs in
+        let term_of_field vsenv f = term_of_value ~ty_mt env vsenv (field_get f) in
+        let vsenv, fs = Lists.map_fold_left term_of_field vsenv fs in
+        let vs = create_vsymbol (id_fresh "v") ty in
+        let for_field rs = t_equ (t_app_infer (ls_of_rs rs) [t_var vs]) in
+        let t = t_and_l (List.map2 for_field field_rss fs) in
+        vsenv, t_eps (t_close_bound vs t) in
+      begin
+        match ors with
+        | None -> t_eps_from_constr field_rss fs
+        | Some rs ->
+            begin
+              match rs_kind rs with
+              | RKfunc -> t_app_from_constr rs fs
+              | RKnone when Strings.has_suffix "'mk" rs.rs_name.id_string ->
+                  t_eps_from_constr field_rss fs
+              | _ -> kasprintf failwith "Cannot construct term for constructor \
+                                        %a that is not a function" print_rs rs
+            end
+      end
   | Vfun (cl, arg, e) ->
       (* TERM: fun arg -> t *)
       let t = Opt.get_exn (Failure "Cannot convert function body to term")
@@ -1188,12 +1214,13 @@ let rec default_value_of_type env ity : value =
   match ity.ity_node with
   | Ityvar _ -> failwith "default_value_of_type: type variable"
   | Ityapp (ts, _, _) when its_equal ts its_int -> value ty (Vnum BigInt.zero)
-  | Ityapp (ts, _, _) when its_equal ts its_real -> assert false (* TODO *)
+  | Ityapp (ts, _, _) when its_equal ts its_real ->
+      value ty (Vreal (Big_real.real_from_str "0"))
   | Ityapp (ts, _, _) when its_equal ts its_bool -> value ty (Vbool false)
   | Ityapp (ts, _, _) when its_equal ts its_str -> value ty (Vstring "")
   | Ityapp (ts,ityl1,_) when is_ts_tuple ts.its_ts ->
       let vs = List.map (default_value_of_type env) ityl1 in
-      constr_value ity (rs_tuple (List.length ityl1)) [] vs
+      constr_value ity (Some (rs_tuple (List.length ityl1))) [] vs
   | Ityapp (its, l1, l2)
   | Ityreg {reg_its= its; reg_args= l1; reg_regs= l2} ->
       if is_array_its env.why_env its then
@@ -1208,7 +1235,7 @@ let rec default_value_of_type env ity : value =
             let ityl = List.map (fun pv -> pv.pv_ity) rs.rs_cty.cty_args in
             let tyl = List.map (ity_full_inst subst) ityl in
             let vs = List.map (default_value_of_type env) tyl in
-            constr_value ity rs fs vs
+            constr_value ity (Some rs) fs vs
         | {Pdecl.itd_constructors= []} ->
             value ty Vundefined
 
@@ -1217,7 +1244,7 @@ let rec undefined_value env ity : value =
   match ity.ity_node with
   | Ityapp (ts,ityl1,_) when is_ts_tuple ts.its_ts ->
       let vs = List.map (undefined_value env) ityl1 in
-      constr_value ity (rs_tuple (List.length ityl1)) [] vs
+      constr_value ity (Some (rs_tuple (List.length ityl1))) [] vs
   | Ityapp (its, l1, l2)
   | Ityreg { reg_its = its; reg_args = l1; reg_regs = l2 } ->
       begin match Pdecl.find_its_defn env.pmodule.Pmodule.mod_known its with
@@ -1226,7 +1253,7 @@ let rec undefined_value env ity : value =
           let ityl = List.map (fun pv -> pv.pv_ity) rs.rs_cty.cty_args in
           let tyl = List.map (ity_full_inst subst) ityl in
           let vs = List.map (undefined_value env) tyl in
-          constr_value ity rs fs vs
+          constr_value ity (Some rs) fs vs
       | _ -> value ty Vundefined
       end
   | _ -> value ty Vundefined

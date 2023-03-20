@@ -20,9 +20,9 @@ transformation "eliminate_builtin"
 transformation "detect_polymorphism"
 transformation "eliminate_definition_conditionally"
 transformation "eliminate_inductive"
+transformation "eliminate_epsilon"
 transformation "eliminate_algebraic_if_poly"
 transformation "eliminate_literal"
-transformation "eliminate_epsilon"
 
 transformation "simplify_formula"
 (*transformation "simplify_trivial_quantification"*)
@@ -46,6 +46,7 @@ outofmemory "Cannot allocate memory"
 (* not convenient: is more a problem of fork
 outofmemory "error while loading shared libraries:.*failed to map segment from shared object"
 *)
+timeout "^timeout$"
 timeout "interrupted by timeout"
 steps ":rlimit-count +\\([0-9]+\\)" 1
 steplimitexceeded "Maximal allocation counts [0-9]+ have been exceeded"

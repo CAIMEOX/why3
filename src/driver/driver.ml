@@ -26,7 +26,7 @@ let driver_debug =
     ~desc:"Print intermediate task generated during processing of a driver"
 
 let meta_get_counterexmp =
-  Theory.register_meta_excl "get_counterexmp" [Theory.MTstring]
+  Theory.register_meta_excl "get_counterexmp" []
   ~desc:"Set@ when@ counter-example@ should@ be@ get."
 
 let get_counterexmp task =
@@ -242,7 +242,10 @@ let load_driver_raw =
       thuse := Mid.add th.th_name (th, Theory.close_theory th_uc') !thuse
   in
   List.iter add_theory f.f_rules;
-  List.iter (fun f -> List.iter add_theory (load_file whyconf_main f).f_rules) extra_files;
+  List.iter (fun f ->
+      let c = load_file whyconf_main f in
+      List.iter add_global c.f_global;
+      List.iter add_theory c.f_rules) extra_files;
   incr driver_tag;
   {
     drv_env         = env;
@@ -303,14 +306,6 @@ let file_of_task drv input_file theory_name task =
 
 let file_of_theory drv input_file th =
   get_filename drv ~input_file ~theory_name:th.th_name.Ident.id_string ~goal_name:"null"
-
-let call_on_buffer
-      ~command ~config ~limit ~gen_new_file ?inplace ~filename
-    ~printing_info drv buffer =
-  Call_provers.call_on_buffer
-    ~command ~config ~limit ~gen_new_file
-    ~res_parser:drv.drv_res_parser
-    ~filename ~printing_info ?inplace buffer
 
 (** print'n'prove *)
 
@@ -387,7 +382,7 @@ let print_task_prepared ?old drv fmt task =
       printing_info = ref None;
     } in
   fprintf fmt "@[%a@]@?" (lookup_printer p ?old printer_args) task;
-  Opt.get_def default_printing_info !(printer_args.printing_info)
+  Opt.get_def (default_printing_info printer_args.env) !(printer_args.printing_info)
 
 let print_task ?old drv fmt task =
   let task = prepare_task drv task in
@@ -449,14 +444,29 @@ let prove_task_prepared
   Opt.iter close_in old_channel;
   let gen_new_file, filename =
     file_name_of_task ?old ?inplace ?interactive drv task in
-  let get_counterexmp = get_counterexmp task in
+  let get_model = if get_counterexmp task then Some printing_info else None in
   let res =
-    call_on_buffer
+    Call_provers.call_on_buffer
       ~command ~config ~limit ~gen_new_file ?inplace ~filename
-      ~get_counterexmp ~printing_info drv buf
+      ~res_parser:drv.drv_res_parser
+      ~get_model buf
   in
   Buffer.reset buf;
   res
+
+let prove_buffer_prepared
+    ~command ~config ~limit
+    ?(input_file="f")
+    ?(theory_name="T")
+    ?(goal_name="vc")
+    ?get_model
+    drv buffer =
+  let filename = get_filename drv ~input_file ~theory_name ~goal_name in
+  Call_provers.call_on_buffer
+    ~command ~config ~limit
+    ~gen_new_file:true ~filename
+    ~res_parser:drv.drv_res_parser
+    ~get_model buffer
 
 let prove_task
       ~command ~config ~limit ?old ?inplace ?interactive drv task =

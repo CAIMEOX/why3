@@ -101,6 +101,7 @@ let is_type_unit ity =
 let rec type_of ity =
   let open Ity in
   match ity.ity_node with
+  | Ityapp(id,[],[]) when its_equal id Ity.its_unit -> (false,Tunit)
   | Ityapp(id,[],[]) when its_equal id Ity.its_int -> (false,Tint)
   | Ityapp(id,[],[]) when its_equal id Ity.its_bool -> (false,Tbool)
   | Ityapp(id,[t1],[]) when id.Ity.its_ts.Ty.ts_name.Ident.id_string = "ref"->
@@ -223,10 +224,21 @@ let rec normalized_term_to_why1_expr ctx t =
      let ctx, e1 = normalized_term_to_why1_expr ctx t1 in
      let ctx, e2 = normalized_term_to_why1_expr ctx t2 in
      ctx, e_sub e1 e2
+  | Tapp(ls, [t1]) when ls.ls_name.Ident.id_string = "prefix -" ->
+     let ctx, e1 = normalized_term_to_why1_expr ctx t1 in
+     ctx, e_sub (e_cst "0") e1
   | Tapp(ls, [t1;t2]) when ls.ls_name.Ident.id_string = "infix *" ->
      let ctx, e1 = normalized_term_to_why1_expr ctx t1 in
      let ctx, e2 = normalized_term_to_why1_expr ctx t2 in
      ctx, e_mul e1 e2
+  | Tapp(ls, [t1;t2]) when ls.ls_name.Ident.id_string = "div" ->
+     let ctx, e1 = normalized_term_to_why1_expr ctx t1 in
+     let ctx, e2 = normalized_term_to_why1_expr ctx t2 in
+     ctx, e_div e1 e2
+  | Tapp(ls, [t1;t2]) when ls.ls_name.Ident.id_string = "mod" ->
+     let ctx, e1 = normalized_term_to_why1_expr ctx t1 in
+     let ctx, e2 = normalized_term_to_why1_expr ctx t2 in
+     ctx, e_mod e1 e2
   | Tapp(ls, [t1;t2]) when ls.ls_name.Ident.id_string = "andb" ->
      let ctx, e1 = normalized_term_to_why1_expr ctx t1 in
      let ctx, e2 = normalized_term_to_why1_expr ctx t2 in
@@ -307,8 +319,10 @@ let rec normalized_fmla_to_why1_cond ctx t =
      let ctx, t1 = normalized_fmla_to_why1_cond ctx t1 in
      let ctx, t2 = normalized_fmla_to_why1_cond ctx t2 in
      ctx, or_cond (neg_cond t1) t2
-  | Tbinop(Tiff,_,_) ->
-     unsupported "normalized_fmla_to_why1_cond: term `%a`" Pretty.print_term t
+  | Tbinop(Tiff,t1,t2) ->
+     let ctx, t1 = normalized_fmla_to_why1_cond ctx t1 in
+     let ctx, t2 = normalized_fmla_to_why1_cond ctx t2 in
+     ctx, or_cond (and_cond t1 t2) (and_cond (neg_cond t1) (neg_cond t2))
   | Tnot c ->
       let ctx, tc = normalized_fmla_to_why1_cond ctx c in
       ctx, neg_cond tc
@@ -350,7 +364,7 @@ let mk_if t = Term.(t_if t t_bool_true t_bool_false)
 let rec normalize_term t =
   let open Term in
   match t.t_node with
-  | Tapp(ls,[t1;t2]) when ls.ls_name.id_string = "orb" ->
+  | Tapp(ls,[t1;t2]) when ls.ls_name.Ident.id_string = "orb" ->
     let t1 = normalize_term t1 in
     let t2 = normalize_term t2 in
     begin
@@ -366,7 +380,7 @@ let rec normalize_term t =
         mk_if (t_or (t_equ t1 t21) c2)
       | _ -> t_app ls [t1;t2] t.t_ty
     end
-  | Tapp(ls,[t1;t2]) when ls.ls_name.id_string = "andb" ->
+  | Tapp(ls,[t1;t2]) when ls.ls_name.Ident.id_string = "andb" ->
     let t1 = normalize_term t1 in
     let t2 = normalize_term t2 in
     begin
@@ -382,7 +396,7 @@ let rec normalize_term t =
         mk_if (t_and (t_equ t1 t21) c2)
       | _ -> t_app ls [t1;t2] t.t_ty
     end
-  | Tapp(ls,[t1]) when ls.ls_name.id_string = "notb" ->
+  | Tapp(ls,[t1]) when ls.ls_name.Ident.id_string = "notb" ->
     let t1 = normalize_term t1 in
     begin
       match t1.t_node with
@@ -439,7 +453,6 @@ type simple_expr_node =
   | SEassign of Expr.assign list
   | SEseq of simple_expr * simple_expr
   | SElet of Ity.pvsymbol * simple_expr * simple_expr
-  | SEdrop of Ity.pvsymbol * simple_expr
   | SEif of simple_expr * simple_expr * simple_expr
   | SEwhile of simple_expr * Expr.invariant list * Expr.variant list * simple_expr
   | SEassert of assertion_kind * Term.term
@@ -456,7 +469,7 @@ let rec print_simple_expr fmt e =
   match e.simple_expr_node with
   | SEvar pv -> fprintf fmt "%a" Ity.print_pv pv
   | SEconst c -> fprintf fmt "%a" Constant.print_def c
-  | SEexec(cexp,_cty) -> fprintf fmt "%a" (print_cexp true 0) cexp
+  | SEexec(cexp,_cty) -> fprintf fmt "@[exec %a@]" (print_cexp true 0) cexp
   | SEassign l ->
     fprintf fmt "@[%a@]"
       (Pp.print_list Pp.comma (fun fmt (pv1,_,pv2) ->
@@ -465,10 +478,8 @@ let rec print_simple_expr fmt e =
     fprintf fmt "@[%a ;@ %a@]" print_simple_expr e1 print_simple_expr e2
   | SElet(pv,e1,e2) ->
     fprintf fmt "@[let %a = %a in@ %a@]" Ity.print_pv pv print_simple_expr e1 print_simple_expr e2
-  | SEdrop(pv,e2) ->
-    fprintf fmt "@[drop %a in@ %a@]" Ity.print_pv pv print_simple_expr e2
   | SEif(e1,e2,e3) ->
-    fprintf fmt "@[if %a then@ %a else@ %a" print_simple_expr e1 print_simple_expr e2 print_simple_expr e3
+    fprintf fmt "@[<hv 2>if @[%a@]@ then @[%a@]@ else @[%a@]@ endif@]" print_simple_expr e1 print_simple_expr e2 print_simple_expr e3
   | SEwhile(c,_invs,_vars,b) ->
     fprintf fmt "@[while %a <invs> <vars> do@ %a@ done@]" print_simple_expr c print_simple_expr b
   | SEassert(Assert,t) ->
@@ -538,20 +549,19 @@ let rec simple_expr_to_why1_expr ctx e =
         unsupported "simple_expr_to_why1_expr: execution of call to `any`"
      end
   | SEassign _ (* assign list *) ->
-     unsupported "simple_expr_to_why1_expr: execution of parallel assignments"
+     unsupported "simple_expr_to_why1_expr: assignments"
   | SElet(x,{simple_expr_node = SElet(y,e1,e2); _},e3) ->
     (* we interpret
        let x = (let y = e1 in e2) in e3
        as
-       let y = e1 in let x = e2 in (drop y in e3)
+       let y = e1 in let x = e2 in e3
     *)
     simple_expr_to_why1_expr ctx
       { simple_expr_tag = "";
         simple_expr_node =
           SElet(y,e1,{ simple_expr_tag = "";
                        simple_expr_node =
-                         SElet(x,e2, { simple_expr_tag = "";
-                                       simple_expr_node = SEdrop(y,e3)})})}
+                         SElet(x,e2,e3)})}
   | SElet(pv,e1,e2) ->
      if is_type_int pv.Ity.pv_ity || is_type_bool pv.Ity.pv_ity then
        let ctx, n = declare_why_var_for_pv ctx ~is_global:false ~is_mutable:false pv in
@@ -562,8 +572,6 @@ let rec simple_expr_to_why1_expr ctx e =
        unsupported
          "simple_expr_to_why1_expr: let on variable `%a` of type `%a`"
          print_vs pv.Ity.pv_vs Ity.print_ity pv.Ity.pv_ity
-  | SEdrop (_,e) ->
-    simple_expr_to_why1_expr ctx e
   | SEif(e1,e2,e3) ->
 (*
 if is_type_bool e2.e_ity && is_type_bool e3.e_ity then
@@ -590,8 +598,10 @@ else
       unsupported "simple_expr_to_why1_expr: SEassert"
   | SEbreak ->
       unsupported "simple_expr_to_why1_expr: SEbreak"
-  | SEseq _ ->
-      unsupported "simple_expr_to_why1_expr: SEseq"
+  | SEseq(e1,e2) ->
+    (* raise NotExpression *)
+    unsupported "simple_expr_to_why1_expr: SEseq(%a,%a)"
+      print_simple_expr e1 print_simple_expr e2
   in ctx, e'
 
 let p_expr_bool_operator ctx op pv1 pv2 =
@@ -618,6 +628,8 @@ let rec simple_expr_to_why1_cond ctx e =
      | Capp(rs,[pv1;pv2]) when rs.rs_name.Ident.id_string = "infix =" ->
         begin
           match type_of pv1.Ity.pv_ity with
+          | _,Tunit ->
+            unsupported "simple_expr_to_why1_cond: equality on type unit"
           | _,Tint -> p_expr_bool_operator ctx c_eq_int pv1 pv2
           | _,Tbool -> p_expr_bool_operator ctx c_eq_bool pv1 pv2
         end
@@ -643,20 +655,19 @@ let rec simple_expr_to_why1_cond ctx e =
         unsupported "simple_expr_to_why1_cond: execution of `any`"
      end
   | SEassign _ (* assign list *) ->
-     unsupported "simple_expr_to_why1_cond: parallel assignments"
+     unsupported "simple_expr_to_why1_cond: assignments"
   | SElet(x,{simple_expr_node = SElet(y,e1,e2); _},e3) ->
     (* we interpret
        let x = (let y = e1 in e2) in e3
        as
-       let y = e1 in let x = e2 in (drop y in e3)
+       let y = e1 in let x = e2 in e3
     *)
     simple_expr_to_why1_cond ctx
       { simple_expr_tag = "";
         simple_expr_node =
           SElet(y,e1,{ simple_expr_tag = "";
                        simple_expr_node =
-                         SElet(x,e2, { simple_expr_tag = "";
-                                       simple_expr_node = SEdrop(y,e3)})})}
+                         SElet(x,e2,e3)})}
   | SElet(pv,e1,e2) ->
     (*     if is_type_int pv.Ity.pv_ity || is_type_bool pv.Ity.pv_ity then *)
        let ctx, n = declare_why_var_for_pv ctx ~is_global:false ~is_mutable:false pv in
@@ -667,8 +678,6 @@ let rec simple_expr_to_why1_cond ctx e =
      else
        unsupported "simple_expr_to_why1_cond: local let on type `%a`" Ity.print_ity pv.Ity.pv_ity
 *)
-  | SEdrop(_,e) ->
-    simple_expr_to_why1_cond ctx e
   | SEif(e1,e2,e3) ->
      (*     if is_type_bool e2.e_ity && is_type_bool e3.e_ity then *)
      let ctx, e1 = simple_expr_to_why1_cond ctx e1 in
@@ -684,11 +693,16 @@ let rec simple_expr_to_why1_cond ctx e =
      unsupported "simple_expr_to_why1_cond: SEassert"
   | SEbreak ->
      unsupported "simple_expr_to_why1_cond: SEbreak"
-  | SEseq _ ->
-     unsupported "simple_expr_to_why1_cond: SEseq"
+  | SEseq(_e1,e2) ->
+    (* workaround for the time we don't support the unit type as a value
+          useful for the shape `let o = () in f o`
+    *)
+    simple_expr_to_why1_cond ctx e2
   in ctx, c'
 
 
+
+let mk_instr tag i = { simple_expr_tag = tag ; simple_expr_node = i }
 
 exception NotAFunctionCall
 
@@ -773,7 +787,7 @@ let rec simple_expr_to_why1_stmt ctx vars i =
                  ctx, v :: args)
                args (ctx, [])
         in
-        ctx, vars, s_call tag None name args
+        ctx, vars, s_call tag None [] name args
      | Cpur _ (* lsymbol * pvsymbol list *) ->
         unsupported "simple_expr_to_why1_stmt: Cpur"
      | Cfun _ (* expr *) ->
@@ -799,15 +813,14 @@ let rec simple_expr_to_why1_stmt ctx vars i =
     (* we interpret
        [tag] let x = (let y = e1 in e2) in e3
        as
-       [tag] let y = e1 in let x = e2 in (drop y in e3)
+       [tag] let y = e1 in let x = e2 in e3
     *)
     simple_expr_to_why1_stmt ctx vars
       { simple_expr_tag = tag;
         simple_expr_node =
           SElet(y,e1,{ simple_expr_tag = "";
                        simple_expr_node =
-                         SElet(x,e2, { simple_expr_tag = "";
-                                       simple_expr_node = SEdrop(y,e3)})})}
+                         SElet(x,e2,e3)})}
   | SElet(pv,e,i) ->
     begin
       match type_of pv.Ity.pv_ity with
@@ -837,18 +850,8 @@ let rec simple_expr_to_why1_stmt ctx vars i =
                     let ctx,a = mlw_pv_to_why1_expr ctx pv in
                     ctx,a::args) args (ctx,[])
              in
-             let post_call =
-               List.fold_right
-                 (fun (_ty,v,_e) acc -> s_drop tag v acc)
-                 lets s
-             in
-             let call = s_call tag (Some(ty,res_var,post_call)) name args in
-             let pre_call =
-               List.fold_right
-                 (fun (ty,v,e) acc -> s_let_in tag ty v e acc)
-                 lets call
-             in
-             ctx,vars,pre_call
+             let call = s_call tag (Some(ty,res_var,s)) lets name args in
+             ctx,vars,call
            with NotAFunctionCall ->
              try
                let ctx, e = simple_expr_to_why1_expr ctx e in
@@ -866,15 +869,24 @@ let rec simple_expr_to_why1_stmt ctx vars i =
                end
          end
     end
-  | SEdrop(v,e1) ->
-    let ctx, n = get_or_declare_why_var_for_pv ctx v in
-    let ctx,vars,s = simple_expr_to_why1_stmt ctx vars e1 in
-    ctx, vars, s_drop tag n s
   | SEif(e1,e2,e3) ->
-     let ctx, c = simple_expr_to_why1_cond ctx e1 in
-     let ctx,vars,s1 = simple_expr_to_why1_stmt ctx vars e2 in
-     let ctx,vars,s2 = simple_expr_to_why1_stmt ctx vars e3 in
-     ctx,vars,s_ite tag c s1 s2
+    begin
+      match simple_expr_to_why1_cond ctx e1 with
+      | ctx, c ->
+        let ctx,vars,s1 = simple_expr_to_why1_stmt ctx vars e2 in
+        let ctx,vars,s2 = simple_expr_to_why1_stmt ctx vars e3 in
+        ctx,vars,s_ite tag c s1 s2
+      | exception (Error ("unsupported feature",_)) ->
+        let pv = Ity.create_pvsymbol (Ident.id_fresh "cond") Ity.ity_bool in
+        let s =
+          mk_instr tag
+            (SElet(pv, e1,mk_instr tag (SEif(mk_instr "" (SEvar pv),e2,e3))))
+        in
+        if !verbose_level >= 4 then
+          Format.eprintf "@[converting if expression into@ `@[%a@]`@]@."
+            print_simple_expr s;
+        simple_expr_to_why1_stmt ctx vars s
+    end
   | SEwhile(cond,invs,_vars,body) ->
     let ctx, c = simple_expr_to_why1_cond ctx cond in
     let ctx, i =
@@ -891,8 +903,9 @@ let rec simple_expr_to_why1_stmt ctx vars i =
   | SEassert(Assume,t) ->
     let ctx, c = mlw_fmla_to_why1_cond ctx t in
     ctx,vars,s_assume tag c
-  | SEassert(_,_t) ->
-    unsupported "simple_expr_to_why1_stmt: SEassert"
+  | SEassert(Check,t) ->
+    let ctx, c = mlw_fmla_to_why1_cond ctx t in
+    ctx,vars,s_assert tag c
   | SEbreak -> ctx, vars, s_break tag
 
 
@@ -912,7 +925,6 @@ let record_loop tag e =
   loop_tags := Wstdlib.Mstr.add n e !loop_tags;
   n
 
-let mk_instr tag i = { simple_expr_tag = tag ; simple_expr_node = i }
 
 
 let rec mlw_expr_to_simple_expr (* ctx vars *)e =
@@ -931,12 +943,19 @@ let rec mlw_expr_to_simple_expr (* ctx vars *)e =
   | Eexec(cexp,cty) -> mk_instr tag (SEexec(cexp,cty))
   | Eassign l -> mk_instr tag (SEassign l)
   | Elet(LDvar(pv,e1),e2) ->
-     if is_type_unit pv.Ity.pv_ity then
+    if is_type_unit pv.Ity.pv_ity then
        let s1 = mlw_expr_to_simple_expr e1 in
        let s2 = mlw_expr_to_simple_expr e2 in
-       mk_instr tag (SEseq(s1,s2))
+       begin
+(* not a good solution to example/whyml/support5.mlw
+         match s1.simple_expr_node with
+         | SEexec({Expr.c_node=Capp(rs,[])},_) when Expr.is_rs_tuple rs -> s2
+         | SEexec({Expr.c_node=Cpur(ls,[])},_) when Term.is_fs_tuple ls -> s2
+         | _ -> *)
+         mk_instr tag (SEseq(s1,s2))
+       end
      else
-       let s1 = mlw_expr_to_simple_expr e1 in
+    let s1 = mlw_expr_to_simple_expr e1 in
        let s2 = mlw_expr_to_simple_expr e2 in
        mk_instr tag (SElet(pv,s1,s2))
   | Elet(LDsym _,_) ->
@@ -949,17 +968,31 @@ let rec mlw_expr_to_simple_expr (* ctx vars *)e =
      let s3 = mlw_expr_to_simple_expr e3 in
      mk_instr tag (SEif(s1,s2,s3))
   | Ewhile(cond,invs,vars,body) ->
-     let tag = record_loop tag e in
+     let looptag = record_loop tag e in
      let c = mlw_expr_to_simple_expr cond in
      let b = mlw_expr_to_simple_expr body in
-     mk_instr tag (SEwhile(c,invs,vars,b))
+(* we do not use
+
+     mk_instr looptag (SEwhile(c,invs,vars,b))
+
+  anymore, but the construct
+
+     while true do (if c then body else break) done
+
+  It has no impact on the generated invariants.
+  It avoids the support for function calls in condition of while.
+  (Yet, support for function calls in condition of if is required)
+*)
+       let b = mk_instr "" (SEif(c,b,mk_instr "" SEbreak)) in
+       let se_true = mlw_expr_to_simple_expr e_true in
+       mk_instr looptag (SEwhile(se_true,invs,vars,b))
   | Efor    _ (* pvsymbol * for_bounds * pvsymbol * invariant list * expr *) ->
      unsupported "mlw_expr_to_simple_expr: Efor"
   | Eassert(k,t) -> mk_instr tag (SEassert(k,t))
   (* ad-hoc support for "break" *)
-  | Eraise(xs, _e1) when xs.xs_name.id_string = "'Break" ->
+  | Eraise(xs, _e1) when xs.Ity.xs_name.Ident.id_string = "'Break" ->
      mk_instr tag SEbreak
-  | Eexn(xs, e1) when xs.xs_name.id_string = "'Break" ->
+  | Eexn(xs, e1) when xs.Ity.xs_name.Ident.id_string = "'Break" ->
     let open Ity in
     begin
       match e1.e_node with
@@ -1283,22 +1316,14 @@ and atomic_condition_to_term rev_map c =
       let e1' = expression_to_term rev_map e1 in
       let e2' = expression_to_term rev_map e2 in
       t_neq e1' e2'
-  | Ceq_bool(e1, e2) ->
-      let e1' = expression_to_term rev_map e1 in
-      let e2' = expression_to_term rev_map e2 in
-      t_equ e1' e2'
-  | Cne_bool(e1, e2) ->
-      let e1' = expression_to_term rev_map e1 in
-      let e2' = expression_to_term rev_map e2 in
-      t_neq e1' e2'
   | Clt(e1, e2) -> binop_to_term rev_map lt_int e1 e2
   | Cle(e1, e2) -> binop_to_term rev_map le_int e1 e2
   | Cgt(e1, e2) -> binop_to_term rev_map gt_int e1 e2
   | Cge(e1, e2) -> binop_to_term rev_map ge_int e1 e2
+  | C_is_true (Ebwnot e) ->
+     t_equ (expression_to_term rev_map e) t_bool_false
   | C_is_true e ->
      t_equ (expression_to_term rev_map e) t_bool_true
-  | C_is_false e ->
-     t_equ (expression_to_term rev_map e) t_bool_false
 
 
 let rec condition_to_term rev_map c =
@@ -1499,9 +1524,9 @@ let report ~verbosity report =
   (* generated loop invariants *)
   Wstdlib.Mstr.iter
     (fun tag (inv,doms) ->
-      Format.printf "@[<hov 2>Invariant for loop [%s] is@ @[%a@]@."
+      Format.printf "@[<hov 2>Invariant for loop [%s] is@ @[%a@]@]@."
         tag Pretty.print_term inv;
-      Format.printf "@[<hov 2>Domains for loop [%s] are@ @[%a@]@."
+      Format.printf "@[<hov 2>Domains for loop [%s] are@ @[%a@]@]@."
         tag print_domains doms)
     report.engine_invariants_and_domains;
   if verbosity >= 1 then
