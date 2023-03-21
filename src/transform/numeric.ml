@@ -29,6 +29,15 @@ type ieee_symbols = {
   div_pre : lsymbol;
 }
 
+type ufloat_symbols = {
+  ufloat_type : tysymbol;
+  to_real : lsymbol;
+  uadd : lsymbol;
+  usub : lsymbol;
+  umul : lsymbol;
+  udiv : lsymbol;
+}
+
 type symbols = {
   add : lsymbol;
   sub : lsymbol;
@@ -50,6 +59,8 @@ type symbols = {
   ge_infix : lsymbol;
   abs : lsymbol;
   rel_error : lsymbol;
+  usingle_symbols : ufloat_symbols;
+  udouble_symbols : ufloat_symbols;
   single_symbols : ieee_symbols;
   double_symbols : ieee_symbols;
 }
@@ -767,6 +778,30 @@ let numeric_trans env =
   let minus_infix = ns_find_ls real_infix.th_export [ Ident.op_prefix "-." ] in
   let real_abs = Env.read_theory env [ "real" ] "Abs" in
   let abs = ns_find_ls real_abs.th_export [ "abs" ] in
+  let usingle = Env.read_theory env [ "ufloat" ] "USingle" in
+  let f s = ns_find_ls usingle.th_export [ s ] in
+  let usingle_symbols =
+    {
+      ufloat_type = ns_find_ts usingle.th_export [ "usingle" ];
+      to_real = f "to_real";
+      uadd = f "uadd";
+      usub = f "usub";
+      umul = f "umul";
+      udiv = f "udiv";
+    }
+  in
+  let udouble = Env.read_theory env [ "ufloat" ] "UDouble" in
+  let f s = ns_find_ls udouble.th_export [ s ] in
+  let udouble_symbols =
+    {
+      ufloat_type = ns_find_ts udouble.th_export [ "udouble" ];
+      to_real = f "to_real";
+      uadd = f "uadd";
+      usub = f "usub";
+      umul = f "umul";
+      udiv = f "udiv";
+    }
+  in
   let safe32 = Env.read_theory env [ "cfloat" ] "Safe32" in
   let f s = ns_find_ls safe32.th_export [ s ] in
   let single_symbols =
@@ -823,6 +858,8 @@ let numeric_trans env =
       ge_infix;
       abs;
       rel_error;
+      usingle_symbols;
+      udouble_symbols;
       single_symbols;
       double_symbols;
     }
