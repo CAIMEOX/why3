@@ -58,7 +58,7 @@ type symbols = {
   ge : lsymbol;
   ge_infix : lsymbol;
   abs : lsymbol;
-  rel_error : lsymbol;
+  fw_error : lsymbol;
   usingle_symbols : ufloat_symbols;
   udouble_symbols : ufloat_symbols;
   single_symbols : ieee_symbols;
@@ -370,7 +370,7 @@ let rec add_fmlas symbols info f =
       | _ -> info)
     | _ -> info)
   (* Look for rel_error *)
-  | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls symbols.rel_error ->
+  | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls symbols.fw_error ->
     let t1 = get_term_for_info symbols t1 in
     add_error info t1
       { no_underflow = (t2, t4, (abs symbols) t3, zero); underflow = [] }
@@ -835,7 +835,7 @@ let numeric_trans env =
     }
   in
   let safe64_lemmas = Env.read_theory env [ "safe64_lemmas" ] "Safe64Lemmas" in
-  let rel_error = ns_find_ls safe64_lemmas.th_export [ "rel_error" ] in
+  let fw_error = ns_find_ls safe64_lemmas.th_export [ "fw_error" ] in
   let symbols =
     {
       add;
@@ -857,7 +857,7 @@ let numeric_trans env =
       ge;
       ge_infix;
       abs;
-      rel_error;
+      fw_error;
       usingle_symbols;
       udouble_symbols;
       single_symbols;
@@ -873,6 +873,5 @@ let numeric_trans env =
     (numeric env symbols)
 
 let () =
-  Trans.register_env_transform_l "numeric" numeric_trans
-    ~desc:
-      "Try to apply transitivity of inequalities without losing information."
+  Trans.register_env_transform_l "fw_error_propagation" numeric_trans
+    ~desc:"Apply forward error propagation"
