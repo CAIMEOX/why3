@@ -1,203 +1,330 @@
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T1'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T1'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T1'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T1'goal1` cannot be evaluated)
+- Selected model 0: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 6, characters 21-34)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 6, characters 21-34)
+- Checked model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 6, characters 21-34)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 6, characters 21-34)
 File "bench/check-ce/strings.mlw", line 6, characters 21-34:
 Goal T1.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `T1'goal1` cannot be evaluated):
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
 File strings.mlw:
   Line 6:
-    s : string = "A"
+    s = ("A":string)
+    s = ("A":string)
+    Execution of main function `T1'goal` with env:
+      s = ("A":string)
+      zero = 0
+      one = 1
+Unknown location:
+    Normal execution of function `Tuple0` with args:
+File strings.mlw:
+  Line 6:
+    Property failure at postcondition of `T1'goal` with:
+      s = ("A":string)
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T2'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T2'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T2'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T2'goal1` cannot be evaluated)
+- Selected model 0: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 7, characters 21-35)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 7, characters 21-35)
+- Checked model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 7, characters 21-35)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 7, characters 21-35)
 File "bench/check-ce/strings.mlw", line 7, characters 21-35:
 Goal T2.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `T2'goal1` cannot be evaluated):
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
 File strings.mlw:
   Line 7:
-    s : string = "AAAA"
+    s = ("AAAA":string)
+    s = ("AAAA":string)
+    Execution of main function `T2'goal` with env:
+      s = ("AAAA":string)
+      zero = 0
+      one = 1
+Unknown location:
+    Normal execution of function `Tuple0` with args:
+File strings.mlw:
+  Line 7:
+    Property failure at postcondition of `T2'goal` with:
+      s = ("AAAA":string)
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T3'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T3'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T3'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T3'goal1` cannot be evaluated)
+- Selected model 0: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 8, characters 25-52)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 8, characters 25-52)
+- Checked model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 8, characters 25-52)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 8, characters 25-52)
 File "bench/check-ce/strings.mlw", line 8, characters 25-52:
 Goal T3.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `T3'goal1` cannot be evaluated):
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
 File strings.mlw:
   Line 8:
-    s1 : string = "A"
-    s2 : string = "B"
+    s1 = ("A":string)
+    s2 = ("B":string)
+    s1 = ("A":string)
+    s2 = ("B":string)
+    Execution of main function `T3'goal` with env:
+      s2 = ("B":string)
+      s1 = ("A":string)
+      zero = 0
+      one = 1
+Unknown location:
+    Normal execution of function `Tuple0` with args:
+File strings.mlw:
+  Line 8:
+    Property failure at postcondition of `T3'goal` with:
+      s2 = ("B":string)
+      s1 = ("A":string)
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Precondition of `T4'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Precondition of `T4'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Precondition of `T4'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Precondition of `T4'goal1` cannot be evaluated)
+- Selected model 0: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 9, characters 38-55)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 9, characters 38-55)
+- Checked model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 9, characters 38-55)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 9, characters 38-55)
 File "bench/check-ce/strings.mlw", line 9, characters 38-55:
 Goal T4.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Precondition of `T4'goal1` cannot be evaluated):
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
 File strings.mlw:
   Line 9:
-    s : string = "AAAAAAAAAAA"
+    s = ("AAAAAAAAAAA":string)
+    s = ("AAAAAAAAAAA":string)
+    Execution of main function `T4'goal` with env:
+      s = ("AAAAAAAAAAA":string)
+      zero = 0
+      one = 1
+Unknown location:
+    Normal execution of function `Tuple0` with args:
+File strings.mlw:
+  Line 9:
+    Property failure at postcondition of `T4'goal` with:
+      s = ("AAAAAAAAAAA":string)
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T5'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T5'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T5'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T5'goal1` cannot be evaluated)
+- Checked model 0: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: NORMAL
+- Selected model 1: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: NORMAL
 File "bench/check-ce/strings.mlw", line 10, characters 59-78:
 Goal T5.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `T5'goal1` cannot be evaluated):
-File strings.mlw:
-  Line 10:
-    s : string = "u{0}AAAAAAAAA"
-    x : string = "b{uohu{5c}x09i"
+Sorry, we don't have a good counterexample for you :(
+
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T6'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T6'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T6'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T6'goal1` cannot be evaluated)
+- Checked model 0: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: NORMAL
+- Selected model 1: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: NORMAL
 File "bench/check-ce/strings.mlw", line 11, characters 59-79:
 Goal T6.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `T6'goal1` cannot be evaluated):
-File strings.mlw:
-  Line 11:
-    s : string = "u{0}AAAAAAAAAA"
-    x : string = "b{uohu{5c}x09i"
+Sorry, we don't have a good counterexample for you :(
+
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T7'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T7'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T7'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T7'goal1` cannot be evaluated)
+- Selected model 0: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 12, characters 21-78)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 12, characters 21-78)
+- Checked model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 12, characters 21-78)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 12, characters 21-78)
 File "bench/check-ce/strings.mlw", line 12, characters 59-78:
 Goal T7.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `T7'goal1` cannot be evaluated):
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
 File strings.mlw:
   Line 12:
-    s : string = ""
-    x : string = "b{uohu{5c}x09i"
+    s = ("":string)
+    s = ("":string)
+    Execution of main function `T7'goal` with env:
+      s = ("":string)
+      zero = 0
+      one = 1
+Unknown location:
+    Normal execution of function `Tuple0` with args:
+File strings.mlw:
+  Line 12:
+    Property failure at postcondition of `T7'goal` with:
+      s = ("":string)
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T8'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T8'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T8'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T8'goal1` cannot be evaluated)
+- Selected model 0: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 13, characters 21-79)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 13, characters 21-79)
+- Checked model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 13, characters 21-79)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 13, characters 21-79)
 File "bench/check-ce/strings.mlw", line 13, characters 59-79:
 Goal T8.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `T8'goal1` cannot be evaluated):
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
 File strings.mlw:
   Line 13:
-    s : string = ""
-    x : string = "b{uohu{5c}x09i"
+    s = ("":string)
+    s = ("":string)
+    Execution of main function `T8'goal` with env:
+      s = ("":string)
+      zero = 0
+      one = 1
+Unknown location:
+    Normal execution of function `Tuple0` with args:
+File strings.mlw:
+  Line 13:
+    Property failure at postcondition of `T8'goal` with:
+      s = ("":string)
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T9'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T9'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T9'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T9'goal1` cannot be evaluated)
+- Checked model 0: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: NORMAL
+- Selected model 1: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: NORMAL
 File "bench/check-ce/strings.mlw", line 14, characters 59-78:
 Goal T9.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `T9'goal1` cannot be evaluated):
-File strings.mlw:
-  Line 14:
-    s : string = "b{uohu{5c}x09i"
-    x : string = "b{uohu{5c}x09i"
+Sorry, we don't have a good counterexample for you :(
+
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T10'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T10'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T10'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T10'goal1` cannot be evaluated)
+- Checked model 0: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: NORMAL
+- Selected model 1: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: NORMAL
 File "bench/check-ce/strings.mlw", line 15, characters 60-80:
 Goal T10.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `T10'goal1` cannot be evaluated):
-File strings.mlw:
-  Line 15:
-    s : string = "u{0}AAAAAAAAAA"
-    x : string = "b{uohu{5c}x09i"
+Sorry, we don't have a good counterexample for you :(
+
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T11'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T11'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T11'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T11'goal1` cannot be evaluated)
+- Selected model 0: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 16, characters 22-79)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 16, characters 22-79)
+- Checked model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 16, characters 22-79)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 16, characters 22-79)
 File "bench/check-ce/strings.mlw", line 16, characters 60-79:
 Goal T11.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `T11'goal1` cannot be evaluated):
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
 File strings.mlw:
   Line 16:
-    s : string = ""
-    x : string = "b{uohu{5c}x09i"
+    s = ("":string)
+    s = ("":string)
+    Execution of main function `T11'goal` with env:
+      s = ("":string)
+      zero = 0
+      one = 1
+Unknown location:
+    Normal execution of function `Tuple0` with args:
+File strings.mlw:
+  Line 16:
+    Property failure at postcondition of `T11'goal` with:
+      s = ("":string)
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T12'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T12'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T12'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T12'goal1` cannot be evaluated)
+- Selected model 0: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 17, characters 22-80)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 17, characters 22-80)
+- Checked model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 17, characters 22-80)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 17, characters 22-80)
 File "bench/check-ce/strings.mlw", line 17, characters 60-80:
 Goal T12.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `T12'goal1` cannot be evaluated):
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
 File strings.mlw:
   Line 17:
-    s : string = ""
-    x : string = "b{uohu{5c}x09i"
+    s = ("":string)
+    s = ("":string)
+    Execution of main function `T12'goal` with env:
+      s = ("":string)
+      zero = 0
+      one = 1
+Unknown location:
+    Normal execution of function `Tuple0` with args:
+File strings.mlw:
+  Line 17:
+    Property failure at postcondition of `T12'goal` with:
+      s = ("":string)
 
 <check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
@@ -306,34 +433,70 @@ File strings.mlw:
       s = ("":string)
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T16'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T16'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Postcondition of `T16'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `T16'goal1` cannot be evaluated)
+- Selected model 0: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 21, characters 22-38)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 21, characters 22-38)
+- Checked model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 21, characters 22-38)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 21, characters 22-38)
 File "bench/check-ce/strings.mlw", line 21, characters 22-38:
 Goal T16.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Postcondition of `T16'goal1` cannot be evaluated):
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
 File strings.mlw:
   Line 21:
-    s : string = ""
+    s = ("":string)
+    s = ("":string)
+    Execution of main function `T16'goal` with env:
+      s = ("":string)
+      zero = 0
+      one = 1
+Unknown location:
+    Normal execution of function `Tuple0` with args:
+File strings.mlw:
+  Line 21:
+    Property failure at postcondition of `T16'goal` with:
+      s = ("":string)
 
 <check_ce:categorization>Categorizations of models:
-- Checked model 0: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Precondition of `T17'goal` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Precondition of `T17'goal` cannot be evaluated)
-- Selected model 1: INCOMPLETE
-  - Concrete RAC: INCOMPLETE (terminated because Precondition of `T17'goal1` cannot be evaluated)
-  - Abstract RAC: INCOMPLETE (terminated because Precondition of `T17'goal1` cannot be evaluated)
+- Selected model 0: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 22, characters 42-54)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 22, characters 42-54)
+- Checked model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 22, characters 42-54)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/strings.mlw", line 22, characters 42-54)
 File "bench/check-ce/strings.mlw", line 22, characters 42-54:
 Goal T17.
 Prover result is: Unknown or time/memory/step limit.
-The following counterexample model could not be verified
-  (both RAC terminated because Precondition of `T17'goal1` cannot be evaluated):
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
 File strings.mlw:
   Line 22:
-    s : string = "abc"
+    s = ("abc":string)
+    s = ("abc":string)
+    Execution of main function `T17'goal` with env:
+      s = ("abc":string)
+      zero = 0
+      one = 1
+Unknown location:
+    Normal execution of function `Tuple0` with args:
+File strings.mlw:
+  Line 22:
+    Property failure at postcondition of `T17'goal` with:
+      s = ("abc":string)
 

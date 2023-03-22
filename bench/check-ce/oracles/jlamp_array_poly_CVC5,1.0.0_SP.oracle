@@ -12,21 +12,8 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `f` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_1544 bOUND_VARIABLE_1545 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 2
     length : array t -> int = [|_ => 0|]
-  Line 20:
-    mixfix [] :
-      array
-      t
-      ->
-      int
-      ->
-      t = fun _arg_1 _arg_2 -> {Array.to_int => 3}
 File jlamp_array_poly.mlw:
   Line 8:
     to_int :
@@ -52,12 +39,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `f` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_1578 bOUND_VARIABLE_1579 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 2
     length : array t -> int = [|_ => 0|]
 File jlamp_array_poly.mlw:
   Line 8:

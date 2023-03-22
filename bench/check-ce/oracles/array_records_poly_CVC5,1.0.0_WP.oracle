@@ -12,12 +12,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_1758 bOUND_VARIABLE_1759 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
   Line 20:
     mixfix [] :
@@ -26,8 +21,7 @@ File array.mlw:
       ->
       int
       ->
-      basic_record = fun _arg_1 _arg_2 ->
-                      {flag = true; first_val = 3; sec_val = 5}
+      basic_record = fun $x1 $x2 -> {flag = true; first_val = 3; sec_val = 5}
 File array_records_poly.mlw:
   Line 23:
     i : int = -1
@@ -48,12 +42,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_1779 bOUND_VARIABLE_1780 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
   Line 20:
     mixfix [] :
@@ -62,8 +51,7 @@ File array.mlw:
       ->
       int
       ->
-      basic_record = fun _arg_1 _arg_2 ->
-                      {flag = true; first_val = 3; sec_val = 5}
+      basic_record = fun $x1 $x2 -> {flag = true; first_val = 3; sec_val = 5}
 File array_records_poly.mlw:
   Line 23:
     i : int = -1
@@ -87,12 +75,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_1811 bOUND_VARIABLE_1812 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
   Line 20:
     mixfix [] :
@@ -101,8 +84,7 @@ File array.mlw:
       ->
       int
       ->
-      basic_record = fun _arg_1 _arg_2 ->
-                      {flag = true; first_val = 3; sec_val = 5}
+      basic_record = fun $x1 $x2 -> {flag = true; first_val = 3; sec_val = 5}
 File array_records_poly.mlw:
   Line 23:
     i : int = -1
@@ -131,12 +113,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_2020 bOUND_VARIABLE_2021 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
 File array_records_poly.mlw:
   Line 23:
@@ -167,12 +144,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_2038 bOUND_VARIABLE_2039 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
 File array_records_poly.mlw:
   Line 23:
@@ -206,12 +178,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_2066 bOUND_VARIABLE_2067 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
 File array_records_poly.mlw:
   Line 23:
@@ -250,12 +217,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_2497 bOUND_VARIABLE_2498 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
 File array_records_poly.mlw:
   Line 23:
@@ -295,12 +257,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_2517 bOUND_VARIABLE_2518 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
 File array_records_poly.mlw:
   Line 23:
@@ -343,12 +300,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_2545 bOUND_VARIABLE_2546 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
 File array_records_poly.mlw:
   Line 23:
@@ -396,12 +348,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_3116 bOUND_VARIABLE_3117 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
 File array_records_poly.mlw:
   Line 23:
@@ -450,12 +397,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_3138 bOUND_VARIABLE_3139 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
 File array_records_poly.mlw:
   Line 23:
@@ -507,12 +449,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_3166 bOUND_VARIABLE_3167 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
 File array_records_poly.mlw:
   Line 23:
@@ -573,12 +510,7 @@ The following counterexample model could not be verified
   (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
 File array.mlw:
   Line 17:
-    length :
-      ty
-      ->
-      uni
-      ->
-      int = fun bOUND_VARIABLE_3926 bOUND_VARIABLE_3927 -> 0
+    length : ty -> uni -> int = fun $x1 $x2 -> 3
     length : array basic_record -> int = [|_ => 0|]
 File array_records_poly.mlw:
   Line 23:

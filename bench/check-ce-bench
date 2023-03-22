@@ -104,7 +104,7 @@ run () {
     printf "${file_path},SP,$1... "
   fi
   steps=$5
-  if [ "$3" = "strings" ] && [[ $1 == CVC* ]] ; then
+  if [ "$3" = "strings" ] && [[ $1 == CVC4* ]] ; then
     prover="$1,strings+counterexamples"
   else
     prover="$1,counterexamples"
