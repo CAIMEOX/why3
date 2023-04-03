@@ -86,8 +86,8 @@ type error = {
   underflow : (term * term) list;
 }
 
-(* This type corresponds to what we know about a certain FP variable "x" *)
-type info = {
+(* This type corresponds to the numeric info we have on a real of float term *)
+type term_info = {
   (* "(<=, y)" means "|to_real x| <= y" *)
   ineqs : (lsymbol * term) list;
   error : error option;
@@ -219,6 +219,8 @@ let is_ty_float symbols ty =
     if
       ts_equal v symbols.single_symbols.ieee_type
       || ts_equal v symbols.double_symbols.ieee_type
+      || ts_equal v symbols.usingle_symbols.ufloat_type
+      || ts_equal v symbols.udouble_symbols.ufloat_type
     then
       true
     else
@@ -378,6 +380,7 @@ let rec add_fmlas symbols info f =
     add_ieee_post info ls t3 t1 t2
   | _ -> info
 
+(* Collect numeric data about float and real terms of the task *)
 let collect_info symbols d (info, _) =
   match d.d_node with
   | Dprop (kind, pr, f) when kind = Paxiom || kind = Plemma ->
@@ -408,8 +411,8 @@ let apply_args symbols f t t_info =
       f t exact_t rel_err t' cst_err
 
 let get_mul_forward_error (prove_overflow : bool) (symbols : symbols)
-    (info : info Mterm.t) (x : term) (y : term) (r : term) :
-    info Mterm.t * (prsymbol * term) * (prsymbol * term) option =
+    (info : term_info Mterm.t) (x : term) (y : term) (r : term) :
+    term_info Mterm.t * (prsymbol * term) * (prsymbol * term) option =
   if prove_overflow then
     assert false
   else
@@ -579,7 +582,7 @@ let get_add_forward_error prove_overflow symbols info x y r =
 (* t3 is a result of FP arithmetic operation involving t1 and t2 *)
 (* Compute new inequalities on t3 based on what we know on t1 and t2 *)
 let use_ieee_thms prove_overflow symbols info ieee_symbol t1 t2 r :
-    info Mterm.t * (prsymbol * term) * (prsymbol * term) option =
+    term_info Mterm.t * (prsymbol * term) * (prsymbol * term) option =
   if
     ls_equal ieee_symbol symbols.single_symbols.add_post
     || ls_equal ieee_symbol symbols.double_symbols.add_post
@@ -594,19 +597,14 @@ let use_ieee_thms prove_overflow symbols info ieee_symbol t1 t2 r :
     failwith "Unsupported symbol"
 
 let rec get_floats symbols t =
+  let l =
+    match t.t_ty with
+    | Some ty when is_ty_float symbols ty -> [ t ]
+    | _ -> []
+  in
   match t.t_node with
-  | Tvar v ->
-    if is_ty_float symbols v.vs_ty then
-      [ t ]
-    else
-      []
-  | Tapp (ls, []) ->
-    if is_ty_float symbols (Opt.get ls.ls_value) then
-      [ t ]
-    else
-      []
-  | Tapp (ls, tl) -> List.fold_left (fun l t -> l @ get_floats symbols t) [] tl
-  | _ -> []
+  | Tapp (ls, tl) -> List.fold_left (fun l t -> l @ get_floats symbols t) l tl
+  | _ -> l
 
 let get_float_name printer s t =
   match t.t_node with
@@ -627,7 +625,7 @@ let get_float_name printer s t =
 (* Apply theorems on FP term t depending on what we know about it *)
 (* TODO: Avoid traversing the same term twice. *)
 let rec get_error_fmlas prove_overflow symbols info t :
-    info Mterm.t * decl list list * (prsymbol * term) option =
+    term_info Mterm.t * decl list list * (prsymbol * term) option =
   let apply = get_error_fmlas prove_overflow symbols in
   let t_info = get_info info t in
   match t_info.ieee_post with
