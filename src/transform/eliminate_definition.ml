@@ -98,10 +98,13 @@ let add_ld which meta_rewrite_def (ls,ld) (abst,defn,axl,metas) =
   if which ls then
     let vl,e = open_ls_defn ld in
     let nm = ls.ls_name.id_string ^ "'def" in
+    let lim = ls.ls_name.id_string ^ "'lim" in
+    let ls_lim  : lsymbol = create_lsymbol (Ident.id_derive lim ls.ls_name) ls.ls_args ls.ls_value  in
     let pr = create_prsymbol (id_derive nm ls.ls_name) in
     let hd = t_app ls (List.map t_var vl) e.t_ty in
     let ax = t_forall_close vl [] (t_insert hd e) in
     let ax = create_prop_decl Paxiom pr ax in
+    (* Create function symbol *)
     let ld = create_param_decl ls in
     let metas =
       if Sls.mem ls meta_rewrite_def then
