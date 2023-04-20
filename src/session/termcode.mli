@@ -106,7 +106,9 @@ val dumb_checksum: checksum
 
 val buffer_checksum : Buffer.t -> checksum
 
-val task_checksum : ?version:sum_shape_version -> Task.task -> checksum
+open Decl
+val task_checksum : ?toto:(checksum * (int * (int * int) list) Ident.Mid.t) Decl.Hdecl.t ->
+    ?version:sum_shape_version -> Task.task -> checksum
 
 (** Pairing algorithm *)
 
