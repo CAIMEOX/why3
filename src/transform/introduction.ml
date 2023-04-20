@@ -241,14 +241,20 @@ let rec intros kn knl pr mal old_pushed f =
 
 let intros kn mal pr f =
   let tvs = t_ty_freevars Stv.empty f in
-  let mk_ts tv () = create_tysymbol (id_clone tv.tv_name) [] NoDef in
-  let tvm = Mtv.mapi mk_ts tvs in
-  let decls = Mtv.map create_ty_decl tvm in
-  let subst = Mtv.map (fun ts -> ty_app ts []) tvm in
-  let f = t_ty_subst subst Mvs.empty f in
+  let decls, f =
+    if Mtv.is_empty tvs then
+      ([], f)
+    else
+      let mk_ts tv () = create_tysymbol (id_clone tv.tv_name) [] NoDef in
+      let tvm = Mtv.mapi mk_ts tvs in
+      let decls = Mtv.map create_ty_decl tvm in
+      let subst = Mtv.map (fun ts -> ty_app ts []) tvm in
+      let f = t_ty_subst subst Mvs.empty f in
+      (Mtv.values decls, f)
+  in
   let knl = Opt.get_def Mid.empty kn in
   let dl = intros kn knl pr mal Mstr.empty f in
-  Mtv.values decls @ dl
+  decls @ dl
 
 let rec introduce hd =
   match hd.Task.task_decl.Theory.td_node with
