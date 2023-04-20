@@ -108,9 +108,9 @@ module type S =
 
     val partition: (key -> 'a -> bool) -> 'a t -> 'a t * 'a t
     (** [partition p m] returns a pair of maps [(m1, m2)], where
-        [m1] contains all the bindings of [s] that satisfy the
+        [m1] contains all the bindings of [m] that satisfy the
         predicate [p], and [m2] is the map with all the bindings of
-        [s] that do not satisfy [p]. *)
+        [m] that do not satisfy [p]. *)
 
     val cardinal: 'a t -> int
     (** Return the number of bindings of a map. *)
