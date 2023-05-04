@@ -6,8 +6,8 @@
 <prover id="1" name="Eprover" version="1.6" timelimit="15" steplimit="0" memlimit="4000"/>
 <prover id="2" name="CVC4" version="1.4" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="3" name="Spass" version="3.7" timelimit="15" steplimit="0" memlimit="4000"/>
-<prover id="4" name="Z3" version="4.3.1" timelimit="15" steplimit="0" memlimit="4000"/>
 <prover id="5" name="Simplify" version="1.5.4" timelimit="15" steplimit="0" memlimit="4000"/>
+<prover id="6" name="Z3" version="4.8.10" timelimit="15" steplimit="0" memlimit="4000"/>
 <prover id="7" name="Yices" version="1.0.38" timelimit="15" steplimit="0" memlimit="4000"/>
 <prover id="8" name="Zenon" version="0.7.1" timelimit="15" steplimit="0" memlimit="4000"/>
 <prover id="9" name="Z3" version="4.5.0" timelimit="1" steplimit="0" memlimit="1000"/>
@@ -25,8 +25,8 @@
  <proof prover="0"><result status="unknown" time="0.00"/></proof>
  <proof prover="1"><result status="valid" time="0.00"/></proof>
  <proof prover="3"><result status="valid" time="0.00"/></proof>
- <proof prover="4"><result status="valid" time="0.00"/></proof>
  <proof prover="5"><result status="unknown" time="0.00"/></proof>
+ <proof prover="6"><result status="valid" time="0.00" steps="4745"/></proof>
  <proof prover="7"><result status="unknown" time="0.00"/></proof>
  <proof prover="8"><result status="valid" time="0.04"/></proof>
  <proof prover="9"><result status="valid" time="0.01" steps="2151"/></proof>
@@ -42,10 +42,10 @@
  <proof prover="0"><result status="unknown" time="0.00"/></proof>
  <proof prover="1"><result status="valid" time="0.00"/></proof>
  <proof prover="3"><result status="valid" time="0.01"/></proof>
- <proof prover="4"><result status="valid" time="0.00"/></proof>
  <proof prover="5"><result status="unknown" time="0.00"/></proof>
+ <proof prover="6"><result status="valid" time="0.00" steps="34558"/></proof>
  <proof prover="7"><result status="unknown" time="0.00"/></proof>
- <proof prover="8"><result status="valid" time="0.97"/></proof>
+ <proof prover="8"><result status="valid" time="1.23"/></proof>
  <proof prover="9"><result status="valid" time="0.01" steps="7775"/></proof>
  <proof prover="10"><result status="valid" time="0.00"/></proof>
  <proof prover="11"><result status="valid" time="0.00"/></proof>
@@ -59,8 +59,8 @@
  <proof prover="0"><result status="unknown" time="0.00"/></proof>
  <proof prover="1"><result status="valid" time="0.00"/></proof>
  <proof prover="3"><result status="valid" time="0.01"/></proof>
- <proof prover="4"><result status="valid" time="0.03"/></proof>
  <proof prover="5"><result status="unknown" time="0.00"/></proof>
+ <proof prover="6"><result status="valid" time="0.03" steps="207376"/></proof>
  <proof prover="7"><result status="unknown" time="0.00"/></proof>
  <proof prover="8"><result status="valid" time="7.89"/></proof>
  <proof prover="9"><result status="valid" time="0.04" steps="87238"/></proof>
@@ -75,8 +75,8 @@
  <proof prover="0"><result status="unknown" time="0.00"/></proof>
  <proof prover="1"><result status="valid" time="0.00"/></proof>
  <proof prover="3"><result status="valid" time="0.01"/></proof>
- <proof prover="4"><result status="valid" time="0.06"/></proof>
  <proof prover="5"><result status="unknown" time="0.00"/></proof>
+ <proof prover="6"><result status="valid" time="0.06" steps="579771"/></proof>
  <proof prover="7"><result status="unknown" time="0.00"/></proof>
  <proof prover="8"><result status="timeout" time="15.00"/></proof>
  <proof prover="9"><result status="valid" time="0.10" steps="200234"/></proof>
@@ -91,8 +91,8 @@
  <proof prover="0"><result status="unknown" time="0.00"/></proof>
  <proof prover="1"><result status="valid" time="0.00"/></proof>
  <proof prover="3"><result status="valid" time="0.00"/></proof>
- <proof prover="4"><result status="valid" time="0.35"/></proof>
  <proof prover="5"><result status="unknown" time="0.00"/></proof>
+ <proof prover="6"><result status="valid" time="0.35" steps="969332"/></proof>
  <proof prover="7"><result status="unknown" time="0.00"/></proof>
  <proof prover="8"><result status="timeout" time="15.00"/></proof>
  <proof prover="9"><result status="valid" time="0.31" steps="674528"/></proof>
@@ -107,13 +107,13 @@
  <proof prover="0"><result status="unknown" time="0.00"/></proof>
  <proof prover="1"><result status="valid" time="0.00"/></proof>
  <proof prover="3"><result status="valid" time="0.01"/></proof>
- <proof prover="4"><result status="valid" time="0.41"/></proof>
  <proof prover="5"><result status="unknown" time="0.00"/></proof>
+ <proof prover="6"><result status="valid" time="0.63" steps="2650280"/></proof>
  <proof prover="7"><result status="unknown" time="0.00"/></proof>
  <proof prover="8"><result status="timeout" time="15.00"/></proof>
  <proof prover="9"><result status="valid" time="0.47" steps="1038907"/></proof>
  <proof prover="10"><result status="valid" time="0.00"/></proof>
- <proof prover="11"><result status="valid" time="0.19"/></proof>
+ <proof prover="11"><result status="valid" time="0.05"/></proof>
  <proof prover="12"><result status="valid" time="0.00"/></proof>
  <proof prover="14"><result status="valid" time="10.04"/></proof>
  <proof prover="16"><result status="unknown" time="0.00" steps="163"/></proof>
@@ -124,13 +124,13 @@
  <proof prover="1"><result status="valid" time="0.00"/></proof>
  <proof prover="2"><result status="unknown" time="0.00"/></proof>
  <proof prover="3"><result status="valid" time="0.01"/></proof>
- <proof prover="4"><result status="valid" time="1.00"/></proof>
  <proof prover="5"><result status="unknown" time="0.00"/></proof>
+ <proof prover="6"><result status="valid" time="1.00" steps="4321624"/></proof>
  <proof prover="7"><result status="unknown" time="0.00"/></proof>
  <proof prover="8"><result status="timeout" time="15.00"/></proof>
- <proof prover="9"><result status="timeout" time="1.00" steps="1844429"/></proof>
+ <proof prover="9"><result status="timeout" time="1.00" steps="1477711"/></proof>
  <proof prover="10"><result status="valid" time="0.00"/></proof>
- <proof prover="11"><result status="valid" time="0.31"/></proof>
+ <proof prover="11"><result status="valid" time="0.99"/></proof>
  <proof prover="12"><result status="valid" time="0.00"/></proof>
  <proof prover="14"><result status="valid" time="10.04"/></proof>
  <proof prover="16"><result status="unknown" time="0.00" steps="171"/></proof>

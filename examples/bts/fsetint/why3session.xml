@@ -2,45 +2,54 @@
 <!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
-<prover id="0" name="CVC3" version="2.4.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="1" name="CVC4" version="1.8" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="2" name="Alt-Ergo" version="2.2.0" timelimit="1" steplimit="0" memlimit="1000"/>
-<prover id="4" name="Z3" version="3.2" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="3" name="Z3" version="4.12.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="5" name="CVC5" version="1.0.4" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="6" name="CVC4" version="1.4" timelimit="1" steplimit="0" memlimit="1000"/>
-<prover id="7" name="Z3" version="4.3.2" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="8" name="Alt-Ergo" version="2.4.2" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="9" name="Z3" version="4.8.10" timelimit="1" steplimit="0" memlimit="1000"/>
 <file format="whyml">
 <path name=".."/><path name="fsetint.why"/>
 <theory name="Th1">
  <goal name="l_false">
- <proof prover="0"><result status="timeout" time="1.00"/></proof>
+ <proof prover="1"><result status="unknown" time="0.05" steps="6540"/></proof>
  <proof prover="2"><result status="unknown" time="0.01"/></proof>
- <proof prover="4"><result status="timeout" time="1.00"/></proof>
+ <proof prover="3"><result status="timeout" time="1.00" steps="1941736"/></proof>
+ <proof prover="5"><result status="unknown" time="0.03" steps="4202"/></proof>
  <proof prover="6"><result status="unknown" time="0.01"/></proof>
- <proof prover="7"><result status="timeout" time="1.00"/></proof>
+ <proof prover="8"><result status="unknown" time="0.01"/></proof>
+ <proof prover="9"><result status="timeout" time="1.00" steps="1689029"/></proof>
  </goal>
 </theory>
 <theory name="Th2">
  <goal name="mem_integer">
- <proof prover="0"><result status="timeout" time="1.00"/></proof>
+ <proof prover="1"><result status="unknown" time="0.13" steps="22418"/></proof>
  <proof prover="2"><result status="unknown" time="0.00"/></proof>
- <proof prover="4"><result status="timeout" time="1.00"/></proof>
+ <proof prover="3"><result status="timeout" time="1.00" steps="2015899"/></proof>
+ <proof prover="5"><result status="timeout" time="1.00" steps="164008"/></proof>
  <proof prover="6"><result status="timeout" time="1.00"/></proof>
- <proof prover="7"><result status="timeout" time="1.00"/></proof>
+ <proof prover="8"><result status="timeout" time="1.00"/></proof>
+ <proof prover="9"><result status="timeout" time="1.00" steps="1596014"/></proof>
  </goal>
  <goal name="foo">
- <proof prover="0"><result status="timeout" time="1.00"/></proof>
+ <proof prover="1"><result status="unknown" time="0.04" steps="6575"/></proof>
  <proof prover="2"><result status="unknown" time="0.00"/></proof>
- <proof prover="4"><result status="timeout" time="1.00"/></proof>
+ <proof prover="3"><result status="timeout" time="1.00" steps="1626293"/></proof>
+ <proof prover="5"><result status="unknown" time="0.02" steps="4221"/></proof>
  <proof prover="6"><result status="unknown" time="0.02"/></proof>
- <proof prover="7"><result status="timeout" time="1.00"/></proof>
+ <proof prover="8"><result status="timeout" time="1.00"/></proof>
+ <proof prover="9"><result status="timeout" time="1.00" steps="1654068"/></proof>
  </goal>
 </theory>
-<theory name="Th3">
- <goal name="foo">
- <proof prover="0"><result status="unknown" time="0.00"/></proof>
+<theory name="Th3" proved="true">
+ <goal name="foo" proved="true">
+ <proof prover="1"><path name="fsetint-Th3-foo_1.smt2"/><result status="valid" time="0.02" steps="199"/></proof>
  <proof prover="2"><result status="unknown" time="0.00"/></proof>
- <proof prover="4"><result status="unknown" time="0.02"/></proof>
+ <proof prover="5" timelimit="5"><result status="valid" time="0.01" steps="147"/></proof>
  <proof prover="6"><result status="unknown" time="0.00"/></proof>
- <proof prover="7"><result status="unknown" time="0.00"/></proof>
+ <proof prover="8" timelimit="5"><result status="unknown" time="0.00"/></proof>
+ <proof prover="9" timelimit="5"><result status="unknown" time="1.00" steps="417708"/></proof>
  </goal>
 </theory>
 </file>
