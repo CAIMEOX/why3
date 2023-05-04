@@ -46,8 +46,9 @@ let do_action ~config ~env ~session action =
       Why3session_lib.session_iter_proof_attempt_by_filter
         session f
         (fun id _ ->
-           Format.eprintf "proof id %a marked as obsolete@."
+(*           Format.eprintf "proof id %a marked as obsolete@."
              Session_itp.print_proofAttemptID id;
+*)
            Session_itp.mark_obsolete session id)
 
 let run_update () =
