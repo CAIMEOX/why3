@@ -564,6 +564,7 @@ val t_v_any : (vsymbol -> bool) -> term -> bool
 val t_v_count : ('a -> vsymbol -> int -> 'a) -> 'a -> term -> 'a
 
 val t_v_occurs : vsymbol -> term -> int
+(** [t_v_occurs v t] returns the number of occurrences of [v] inside [t] *)
 
 (** {2 Variable substitution} *)
 

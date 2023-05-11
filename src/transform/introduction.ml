@@ -237,6 +237,26 @@ let rec intros kn knl pr mal old_pushed f =
       dl @ intros kn knl pr mal pushed f
   | Tlet (t,fb) ->
       let vs, f = t_open_bound fb in
+      let occ = t_v_occurs vs f in
+      let do_subst =
+        Sattr.mem proxy_attr vs.vs_name.id_attrs || occ <= 1
+      in
+      if do_subst then
+        let f = t_subst (Mvs.singleton vs t) f in
+        if relevant_for_counterexample vs.vs_name then
+          (* we keep a definition for the relevant variable even
+             if unused in the rest *)
+          let ls, mal = ls_of_vs knl mal vs (t_peek_bound fb) in
+          let d = create_logic_decl [make_ls_defn ls [] t] in
+          let knl = Mid.add_new clash_exn ls.ls_name d knl in
+          d :: intros kn knl pr mal pushed f
+        else
+          intros kn knl pr mal pushed f
+      else
+        (* we don't substitute but keep a definition
+           constant vs = t
+           in the context
+        *)
       let ls, mal = ls_of_vs knl mal vs (t_peek_bound fb) in
       let f = t_subst_single vs (fs_app ls [] vs.vs_ty) f in
       let d = create_logic_decl [make_ls_defn ls [] t] in
@@ -478,6 +498,7 @@ let () = Trans.register_transform
            (Trans.decl eliminate_exists None)
            ~desc:"Replace axioms of the form 'exists x. P' by 'constant x axiom P'."
 
+(*
 let subst_filter ls =
   Sattr.mem Inlining.intro_attr ls.ls_name.id_attrs &&
   not (relevant_for_counterexample ls.ls_name)
@@ -485,6 +506,7 @@ let subst_filter ls =
 let simplify_intros =
   Trans.compose introduce_premises
                 (Subst.subst_filtered ~subst_proxy:false subst_filter)
+*)
 
 let split_vc =
   Trans.compose_l
@@ -492,7 +514,7 @@ let split_vc =
     (Trans.compose Simplify_formula.simplify_trivial_wp_quantification
  *)
     (Trans.compose generalize_intro Split_goal.split_goal_right)
-    (Trans.singleton simplify_intros)
+    (Trans.singleton introduce_premises)
 
 let () = Trans.register_transform_l
            "split_vc" split_vc
