@@ -1,0 +1,11 @@
+module Test1
+  use int.Int
+  use mach.int.Int32
+  goal G: 0 < 1
+end
+
+module Test2
+  use int.Int
+  use int.ComputerDivision
+  goal G: 0 < 1
+end
