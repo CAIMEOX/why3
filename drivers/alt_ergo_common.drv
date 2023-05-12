@@ -52,6 +52,11 @@ theory int.Int
   meta "invalid trigger" predicate (>=)
   meta "invalid trigger" predicate (>)
 
+  meta "inline:no" function (-)
+  meta "inline:no" predicate (>)
+  meta "inline:no" predicate (<=)
+  meta "inline:no" predicate (>=)
+
   syntax predicate (<=) "(%1 <= %2)"
   syntax predicate (<)  "(%1 <  %2)"
   syntax predicate (>=) "(%1 >= %2)"
