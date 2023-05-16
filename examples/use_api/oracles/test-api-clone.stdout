@@ -100,6 +100,14 @@ Task 1: theory Task
           
           predicate (>=) (x:int) (y:int) = y <= x
           
+          (* meta inline:no function (-) *)
+          
+          (* meta inline:no predicate (>) *)
+          
+          (* meta inline:no predicate (<=) *)
+          
+          (* meta inline:no predicate (>=) *)
+          
           axiom Assoc :
             forall x:int, y:int, z:int. ((x + y) + z) = (x + (y + z))
           
@@ -340,6 +348,14 @@ Task 2: theory Task
           
           predicate (>=) (x:int) (y:int) = y <= x
           
+          (* meta inline:no function (-) *)
+          
+          (* meta inline:no predicate (>) *)
+          
+          (* meta inline:no predicate (<=) *)
+          
+          (* meta inline:no predicate (>=) *)
+          
           axiom Assoc :
             forall x:int, y:int, z:int. ((x + y) + z) = (x + (y + z))
           
@@ -579,6 +595,14 @@ Task 3: theory Task
           predicate (<=) (x:int) (y:int) = x < y \/ x = y
           
           predicate (>=) (x:int) (y:int) = y <= x
+          
+          (* meta inline:no function (-) *)
+          
+          (* meta inline:no predicate (>) *)
+          
+          (* meta inline:no predicate (<=) *)
+          
+          (* meta inline:no predicate (>=) *)
           
           axiom Assoc :
             forall x:int, y:int, z:int. ((x + y) + z) = (x + (y + z))
