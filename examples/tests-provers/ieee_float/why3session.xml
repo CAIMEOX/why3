@@ -223,7 +223,7 @@
 </theory>
 <theory name="Literals">
  <goal name="wrong">
- <proof prover="7"><result status="timeout" time="1.00" steps="230048"/></proof>
+ <proof prover="7"><result status="unknown" time="0.49" steps="255457"/></proof>
  <proof prover="8"><result status="timeout" time="1.00"/></proof>
  <proof prover="11"><result status="timeout" time="1.00"/></proof>
  <proof prover="14"><result status="unknown" time="0.06" steps="17533"/></proof>

@@ -868,14 +868,14 @@ module EulerSieveImpl
         if nn <= max / nn then begin
           assert { nn * nn <= max };
           ghost (previously_marked_multiples_impl_prime t.marked (to_int nn));
-          assert { (forall i. n < i < nn -> not prime i)
-                   by (forall i.
-                      n < i < nn ->
-                      (exists j k.
+          assert { (forall i. n < i < nn ->
+                      not prime i
+                      by (exists j. 2 <= j < i /\ divides j i)
+                      by (exists j k.
                          2 <= j < nn /\
                          2 <= k < Seq.length t.marked /\
                          j * k = i)
-                         by Seq.get t.marked i) };
+                      by Seq.get t.marked i) };
           loop (nn)
         end else begin
           ghost (not_prime_impl_divisor_under_sqrt (to_int nn));

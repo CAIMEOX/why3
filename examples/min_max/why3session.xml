@@ -58,13 +58,13 @@
   <proof prover="2"><result status="valid" time="0.04" steps="68"/></proof>
   </goal>
   <goal name="a_better_min_max&#39;vc.15" expl="loop variant decrease" proved="true">
-  <proof prover="1"><result status="valid" time="0.01" steps="27607"/></proof>
+  <proof prover="1"><result status="valid" time="0.01" steps="23395"/></proof>
   </goal>
   <goal name="a_better_min_max&#39;vc.16" expl="loop invariant preservation" proved="true">
   <proof prover="2"><result status="valid" time="0.01" steps="120"/></proof>
   </goal>
   <goal name="a_better_min_max&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="1.87" steps="11332508"/></proof>
+  <proof prover="1"><result status="valid" time="0.71" steps="11204288"/></proof>
   </goal>
   <goal name="a_better_min_max&#39;vc.18" expl="postcondition" proved="true">
   <proof prover="2"><result status="valid" time="0.01" steps="126"/></proof>
@@ -72,7 +72,7 @@
  </transf>
  </goal>
  <goal name="divide_and_conquer&#39;vc" expl="VC for divide_and_conquer" proved="true">
- <proof prover="2"><result status="valid" time="0.37" steps="985"/></proof>
+ <proof prover="2"><result status="valid" time="0.19" steps="989"/></proof>
  </goal>
  <goal name="a_similar_min_max&#39;vc" expl="VC for a_similar_min_max" proved="true">
  <proof prover="2"><result status="valid" time="0.02" steps="11"/></proof>

@@ -10,7 +10,7 @@
  <proof prover="1"><result status="valid" time="0.00" steps="8"/></proof>
  </goal>
  <goal name="remove&#39;vc" expl="VC for remove" proved="true">
- <proof prover="1"><result status="valid" time="1.21" steps="1929"/></proof>
+ <proof prover="1"><result status="valid" time="0.76" steps="1929"/></proof>
  <transf name="split_goal_right" proved="true" >
   <goal name="remove&#39;vc.0" expl="index in array bounds" proved="true">
   <proof prover="1"><result status="valid" time="0.01" steps="13"/></proof>
@@ -40,12 +40,12 @@
   <proof prover="1"><result status="valid" time="0.06" steps="211"/></proof>
   </goal>
   <goal name="remove&#39;vc.9" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.46" steps="1211"/></proof>
+  <proof prover="1"><result status="valid" time="0.30" steps="1211"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="put_back&#39;vc" expl="VC for put_back" proved="true">
- <proof prover="1"><result status="valid" time="0.71" steps="1564"/></proof>
+ <proof prover="1"><result status="valid" time="0.45" steps="1564"/></proof>
  </goal>
 </theory>
 </file>

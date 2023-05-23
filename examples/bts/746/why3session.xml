@@ -26,29 +26,29 @@
 </theory>
 <theory name="M1" proved="true">
  <goal name="seq_l&#39;vc" expl="VC for seq_l" proved="true">
- <proof prover="0"><result status="valid" time="0.02" steps="5712"/></proof>
- <proof prover="1"><result status="valid" time="0.01" steps="1994"/></proof>
- <proof prover="2"><result status="valid" time="0.02" steps="3622"/></proof>
+ <proof prover="0"><result status="valid" time="0.02" steps="5964"/></proof>
+ <proof prover="1"><result status="valid" time="0.01" steps="2158"/></proof>
+ <proof prover="2"><result status="valid" time="0.02" steps="3574"/></proof>
  <proof prover="3"><result status="valid" time="0.00" steps="0"/></proof>
  </goal>
  <goal name="double_a&#39;vc" expl="VC for double_a" proved="true">
- <proof prover="0"><result status="valid" time="0.02" steps="5876"/></proof>
- <proof prover="1"><result status="valid" time="0.01" steps="2037"/></proof>
- <proof prover="2"><result status="valid" time="0.01" steps="3732"/></proof>
+ <proof prover="0"><result status="valid" time="0.02" steps="6147"/></proof>
+ <proof prover="1"><result status="valid" time="0.01" steps="2213"/></proof>
+ <proof prover="2"><result status="valid" time="0.01" steps="3693"/></proof>
  <proof prover="3"><result status="valid" time="0.00" steps="0"/></proof>
  </goal>
 </theory>
 <theory name="M2" proved="true">
  <goal name="double_a&#39;vc" expl="VC for double_a" proved="true">
- <proof prover="0"><result status="valid" time="0.02" steps="5875"/></proof>
- <proof prover="1"><result status="valid" time="0.01" steps="2035"/></proof>
- <proof prover="2"><result status="valid" time="0.02" steps="3731"/></proof>
+ <proof prover="0"><result status="valid" time="0.02" steps="6146"/></proof>
+ <proof prover="1"><result status="valid" time="0.01" steps="2211"/></proof>
+ <proof prover="2"><result status="valid" time="0.02" steps="3692"/></proof>
  <proof prover="3"><result status="valid" time="0.00" steps="0"/></proof>
  </goal>
  <goal name="seq_l&#39;vc" expl="VC for seq_l" proved="true">
- <proof prover="0"><result status="valid" time="0.02" steps="5943"/></proof>
- <proof prover="1"><result status="valid" time="0.01" steps="2069"/></proof>
- <proof prover="2"><result status="valid" time="0.02" steps="3770"/></proof>
+ <proof prover="0"><result status="valid" time="0.02" steps="6195"/></proof>
+ <proof prover="1"><result status="valid" time="0.01" steps="2233"/></proof>
+ <proof prover="2"><result status="valid" time="0.02" steps="3722"/></proof>
  <proof prover="3"><result status="valid" time="0.00" steps="0"/></proof>
  </goal>
 </theory>

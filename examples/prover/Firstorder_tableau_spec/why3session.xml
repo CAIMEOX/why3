@@ -11,7 +11,7 @@
  <proof prover="2"><result status="valid" time="0.04" steps="208"/></proof>
  </goal>
  <goal name="renaming_composition_lemma_tableau&#39;vc" expl="VC for renaming_composition_lemma_tableau" proved="true">
- <proof prover="2"><result status="valid" time="0.15" steps="210"/></proof>
+ <proof prover="2"><result status="valid" time="0.03" steps="210"/></proof>
  </goal>
  <goal name="renaming_identity_lemma_tableau&#39;vc" expl="VC for renaming_identity_lemma_tableau" proved="true">
  <proof prover="2"><result status="valid" time="0.10" steps="224"/></proof>
@@ -39,13 +39,13 @@
  <proof prover="2"><result status="valid" time="0.14" steps="199"/></proof>
  </goal>
  <goal name="rename_free_var_constructive_inversion_symbol_tableau&#39;vc" expl="VC for rename_free_var_constructive_inversion_symbol_tableau" proved="true">
- <proof prover="2"><result status="valid" time="0.07" steps="196"/></proof>
+ <proof prover="2"><result status="valid" time="0.07" steps="180"/></proof>
  </goal>
  <goal name="rename_free_var_inversion_symbol_tableau&#39;vc" expl="VC for rename_free_var_inversion_symbol_tableau" proved="true">
  <proof prover="2"><result status="valid" time="0.10" steps="35"/></proof>
  </goal>
  <goal name="rename_free_var_constructive_inversion_fo_term_tableau&#39;vc" expl="VC for rename_free_var_constructive_inversion_fo_term_tableau" proved="true">
- <proof prover="2"><result status="valid" time="0.05" steps="196"/></proof>
+ <proof prover="2"><result status="valid" time="0.05" steps="180"/></proof>
  </goal>
  <goal name="rename_free_var_inversion_fo_term_tableau&#39;vc" expl="VC for rename_free_var_inversion_fo_term_tableau" proved="true">
  <proof prover="2"><result status="valid" time="0.10" steps="35"/></proof>
@@ -57,13 +57,13 @@
  <proof prover="2"><result status="valid" time="0.10" steps="177"/></proof>
  </goal>
  <goal name="subst_free_var_constructive_inversion_symbol_tableau&#39;vc" expl="VC for subst_free_var_constructive_inversion_symbol_tableau" proved="true">
- <proof prover="2"><result status="valid" time="2.17" steps="14661"/></proof>
+ <proof prover="2"><result status="valid" time="1.36" steps="13916"/></proof>
  </goal>
  <goal name="subst_free_var_inversion_symbol_tableau&#39;vc" expl="VC for subst_free_var_inversion_symbol_tableau" proved="true">
  <proof prover="2"><result status="valid" time="0.12" steps="73"/></proof>
  </goal>
  <goal name="subst_free_var_constructive_inversion_fo_term_tableau&#39;vc" expl="VC for subst_free_var_constructive_inversion_fo_term_tableau" proved="true">
- <proof prover="2"><result status="valid" time="0.20" steps="1648"/></proof>
+ <proof prover="2"><result status="valid" time="0.20" steps="1592"/></proof>
  </goal>
  <goal name="subst_free_var_inversion_fo_term_tableau&#39;vc" expl="VC for subst_free_var_inversion_fo_term_tableau" proved="true">
  <proof prover="2"><result status="valid" time="0.08" steps="32"/></proof>
@@ -132,7 +132,7 @@
  <proof prover="2"><result status="valid" time="0.04" steps="88"/></proof>
  </goal>
  <goal name="free_var_derive_equivalence_of_subst_tableau&#39;vc" expl="VC for free_var_derive_equivalence_of_subst_tableau" proved="true">
- <proof prover="2"><result status="valid" time="0.52" steps="4325"/></proof>
+ <proof prover="2"><result status="valid" time="0.35" steps="4325"/></proof>
  </goal>
  <goal name="free_var_derive_equivalence_of_rename_tableau&#39;vc" expl="VC for free_var_derive_equivalence_of_rename_tableau" proved="true">
  <transf name="split_goal_right" proved="true" >
@@ -146,10 +146,10 @@
   <proof prover="2"><result status="valid" time="0.12" steps="53"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_tableau&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.85"/></proof>
+  <proof prover="0"><result status="valid" time="0.43"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_tableau&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.87"/></proof>
+  <proof prover="0"><result status="valid" time="0.44"/></proof>
   </goal>
  </transf>
  </goal>

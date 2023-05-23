@@ -180,7 +180,7 @@
   <goal name="wrap_lines_plus&#39;vc.19" expl="loop invariant preservation" proved="true">
   <transf name="remove" proved="true" arg1="LoopInvariant15,LoopInvariant14,LoopInvariant9,LoopInvariant7,LoopInvariant6,LoopInvariant5,LoopInvariant4,LoopInvariant3,LoopInvariant2,LoopInvariant">
    <goal name="wrap_lines_plus&#39;vc.19.0" expl="loop invariant preservation" proved="true">
-   <proof prover="0"><result status="valid" time="0.56" steps="1007"/></proof>
+   <proof prover="0"><result status="valid" time="0.35" steps="1007"/></proof>
    </goal>
   </transf>
   </goal>
@@ -242,7 +242,7 @@
   <proof prover="0"><result status="valid" time="0.12" steps="431"/></proof>
   </goal>
   <goal name="wrap_lines_plus&#39;vc.39" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.10" steps="20791"/></proof>
+  <proof prover="1"><result status="valid" time="0.10" steps="20812"/></proof>
   </goal>
   <goal name="wrap_lines_plus&#39;vc.40" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.00" steps="24"/></proof>
