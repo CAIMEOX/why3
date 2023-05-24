@@ -30,6 +30,9 @@ let editor    = \"@EDITOR@\"
 let libdir    = $libdir
 let datadir   = $datadir
 let localdir  = $localdir
+
+let libdir = [libdir]
+let datadir = [datadir]
 " > $config.new
 
 if cmp -s $config $config.new; then

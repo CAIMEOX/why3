@@ -11,6 +11,6 @@
 
 val version : string
 val editor : string
-val libdir : string
-val datadir : string
+val libdir : string list
+val datadir : string list
 val localdir : string option

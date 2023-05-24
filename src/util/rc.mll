@@ -128,6 +128,8 @@ type simple_family = section list
 type ofamily  = (string option * section) list
 type t = ofamily Mstr.t
 
+let union t1 t2 = Mstr.union (fun _ l1 l2 -> Some (List.append l1 l2)) t1 t2
+
 let empty = Mstr.empty
 let empty_section = Mstr.empty
 
@@ -414,6 +416,8 @@ let () = Exn_printer.register (fun fmt e -> match e with
   | SyntaxErrorFile (f, s) ->
       Format.fprintf fmt "syntax error in %s: %s" f s
   | _ -> raise e)
+
+let from_files l = List.fold_left (fun acc e -> union acc (from_file e)) empty l
 
 let to_formatter fmt t =
   let print_kv k fmt v = fprintf fmt "%s = %a" k print_rc_value v in

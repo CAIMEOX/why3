@@ -376,6 +376,15 @@ let parse_prover_run res_parser signaled time outfile exitcode limit get_model =
     let out = read_and_delete_file outfile in
     parse_prover_run res_parser signaled time out exitcode limit get_model
 
+let cmd_regexp =
+  Re.compile
+    Re.(longest
+          (seq [ char '%';
+                  alt [ group (alt [any; Re.str ".t"]);
+                        seq [group(set "Lld"); char '/'; group (rep1 (compl [space]))]
+                      ]
+                ]))             
+
 let actualcommand ~config command limit file =
   let stime = string_of_int (Float.to_int (Float.ceil limit.limit_time)) in
   let stimef = string_of_float limit.limit_time in
@@ -384,21 +393,31 @@ let actualcommand ~config command limit file =
   let arglist = Cmdline.cmdline_split command in
   let use_stdin = ref true in
   let on_timelimit = ref false in
-  let cmd_regexp = Re.Str.regexp "%\\([.]?.\\)" in
-  let replace s = match Re.Str.matched_group 1 s with
-    | "%" -> "%"
-    | "f" -> use_stdin := false; file
-    | "t" -> on_timelimit := true; stime
-    | ".t" -> on_timelimit := true; stimef
-    | "T" -> on_timelimit := true; stimems
-    | "m" -> smem
-    | "l" -> Whyconf.libdir config
-    | "d" -> Whyconf.datadir config
-    | "S" -> string_of_int limit.limit_steps
-    | _ -> failwith "unknown specifier, use %%, %f, %t, %.t, %T, %m, %l, %d or %S"
+  let replace g =
+    if Re.Group.test g 1 then
+      match Re.Group.get g 1 with
+      | "%" -> "%"
+      | "f" -> use_stdin := false; file
+      | "t" -> on_timelimit := true; stime
+      | ".t" -> on_timelimit := true; stimef
+      | "T" -> on_timelimit := true; stimems
+      | "m" -> smem
+      | "S" -> string_of_int limit.limit_steps
+      | _ -> failwith "unknown specifier, use %%, %f, %t, %.t, %T, %m, %S, %l/..., %d/..., or %L/..."
+    else begin
+      assert ( Re.Group.test g 2 );
+      assert ( Re.Group.test g 3 );
+      let suffix = Sysutil.replace_dir_sep (Re.Group.get g 3) in
+      match Re.Group.get g 2 with
+      | "l" -> Sysutil.lookup_from_paths (Whyconf.libdir config) suffix
+      | "d" -> Sysutil.lookup_from_paths (Whyconf.datadir config) suffix
+      | "L" -> String.concat ":"
+                (List.map (fun p -> Sysutil.concat p suffix) (Whyconf.libdir config))
+      | _ -> assert false (* absurd matched by the regexp *)
+   end
   in
   let args =
-    List.map (Re.Str.global_substitute cmd_regexp replace) arglist
+    List.map (Re.replace cmd_regexp ~f:replace) arglist
   in
   args, !use_stdin, !on_timelimit
 

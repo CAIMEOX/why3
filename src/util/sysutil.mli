@@ -107,3 +107,18 @@ val resolve_from_paths : string list -> string -> string
    name as argument.
 
  *)
+
+exception Lookup_failed of string * string list
+
+val lookup_from_paths : string list -> string -> string
+(** same as [resolve_from_paths] but don't check ambiguity, first result is
+    returned.
+    
+    Raise [Lookup_in_dirs_failed] *)
+
+val lookups_from_paths : string list -> string -> string list
+(** [lookups_from_paths paths file] return all the existing [file] in the
+    directories [paths]  *)
+
+val replace_dir_sep: string -> string
+(** replace directory separator for the current system *)

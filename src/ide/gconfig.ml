@@ -418,7 +418,7 @@ let why_icon = ref !image_default
 let image ?size f =
   let main = get_main () in
   let n =
-    Filename.concat (datadir main)
+    Sysutil.lookup_from_paths (datadir main)
       (Filename.concat "images" (f^".png"))
   in
   try (
@@ -462,24 +462,26 @@ let iconname_reload = ref ""
 let iconname_remove = ref ""
 let iconname_cleaning = ref ""
 
-let iconsets () : (string * Why3.Rc.family) =
+let iconsets () : (string * Why3.Rc.family) list =
   let main = get_main () in
-  let dir = Filename.concat (datadir main) "images" in
-  let files = Sys.readdir dir in
-  let f = ref [] in
-  Array.iter
-    (fun fn ->
-       if Filename.check_suffix fn ".rc" then
-         let n = Filename.concat dir fn in
-         let d = Rc.from_file n in
-         f := List.rev_append (Rc.get_family d "iconset") !f)
-    files;
-  (dir, !f)
+  let map dir =
+    let files = Sys.readdir dir in
+    let f = ref [] in
+    Array.iter
+      (fun fn ->
+        if Filename.check_suffix fn ".rc" then
+          let n = Filename.concat dir fn in
+          let d = Rc.from_file n in
+          f := List.rev_append (Rc.get_family d "iconset") !f)
+      files;
+    (dir, !f)
+  in
+  List.map map (Sysutil.lookups_from_paths (datadir main) "images")
 
 let load_icon_names () =
   let ide = config () in
   let iconset = ide.iconset in
-  let _,iconsets = iconsets () in
+  let iconsets = List.concat (List.map snd (iconsets ())) in
   let iconset,d =
     try
       iconset, List.assoc iconset iconsets
@@ -675,7 +677,7 @@ let show_about_window ~parent () =
                 "Makarius Wenzel";
                ]
       ~copyright:"Copyright 2010-2023 Inria, CNRS, Paris-Saclay University"
-      ~license:("See file " ^ Filename.concat Config.datadir "LICENSE")
+      ~license:("See file " ^ Sysutil.lookup_from_paths Config.datadir "LICENSE")
       ~website:"http://why3.lri.fr/"
       ~website_label:"http://why3.lri.fr/"
       ~version:Config.version
@@ -944,9 +946,9 @@ let appearance_settings (c : t) (notebook:GPack.notebook) =
   let icon_sets_box_pack =
     icon_sets_box#pack ?from:None ?expand:None ?fill:None ?padding:None
   in
-  let dir,iconsets = iconsets () in
+  let iconsets = iconsets () in
   let set_icon_set s () = c.iconset <- s in
-  let (_,choices) = List.fold_left
+  let (_,choices) = List.fold_left (fun acc (dir,iconsets) -> List.fold_left
     (fun (acc,l) (s,fields) ->
       let name = Rc.get_string ~default:s fields "name" in
       let license = Rc.get_string ~default:"" fields "license" in
@@ -984,7 +986,7 @@ let appearance_settings (c : t) (notebook:GPack.notebook) =
           choice#misc#set_tooltip_markup text
         end;
       (acc,(s,choice)::l))
-    (None,[]) iconsets
+    acc iconsets) (None,[]) iconsets
   in
   List.iter
     (fun (s,c) ->

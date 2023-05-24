@@ -174,9 +174,9 @@ let set_strategies rc strategies =
 (** Main record *)
 
 type main = {
-  libdir   : string;
+  libdir   : string list;
   (* arch-dependent data, say "/usr/local/lib/why3/" *)
-  datadir  : string;
+  datadir  : string list;
   (* arch-independent data, say "/usr/local/share/why3/" *)
   loadpath  : string list;
   (* standard library, say "/usr/local/lib/why3/stdlib" *)
@@ -196,24 +196,26 @@ type main = {
   (* editor name used when no specific editor known for a prover *)
 }
 
+let split_path = String.split_on_char ':'
+
 let libdir =
-  let env_libdir = try Some (Sys.getenv "WHY3LIB") with Not_found -> None in
+  let env_libdir = try Some (split_path (Sys.getenv "WHY3LIB")) with Not_found -> None in
   fun m -> Opt.get_def m.libdir env_libdir
 
 let set_libdir m d = { m with libdir = d}
 
 let datadir =
-  let env_datadir = try Some (Sys.getenv "WHY3DATA") with Not_found -> None in
+  let env_datadir = try Some (split_path (Sys.getenv "WHY3DATA")) with Not_found -> None in
   fun m -> Opt.get_def m.datadir env_datadir
 
 let set_datadir m d = { m with datadir = d}
 
 let default_loadpath m =
-  [ Filename.concat (datadir m) "stdlib" ]
+  Sysutil.lookups_from_paths (datadir m) "stdlib"
 
 let loadpath =
   let env_loadpath =
-    try Some (Strings.split ':' (Sys.getenv "WHY3LOADPATH"))
+    try Some (split_path (Sys.getenv "WHY3LOADPATH"))
     with Not_found -> None
   in
   fun m ->
@@ -257,10 +259,9 @@ let add_plugin m p =
   then m
   else { m with plugins = List.rev (p::(List.rev m.plugins))}
 
-let pluginsdir m = Filename.concat (libdir m) "plugins"
+let pluginsdir m = Sysutil.lookups_from_paths (libdir m) "plugins"
 
-let plugins_auto_detection main =
-  let dir = pluginsdir main in
+let plugins_auto_detection dir =
   let ext = if Dynlink.is_native then ".cmxs" else ".cma" in
   let files = try Sys.readdir dir with Sys_error _ -> [||] in
   let fold acc p =
@@ -277,7 +278,11 @@ let load_plugins main =
     with exn ->
       Format.eprintf "%s cannot be loaded: %a@." x
         Exn_printer.exn_printer exn in
-  if main.load_default_plugins then List.iter load (plugins_auto_detection main);
+  if main.load_default_plugins then begin
+    let dirs = pluginsdir main in
+    List.iter (fun dir -> 
+       List.iter load (plugins_auto_detection dir)) dirs
+  end;
   List.iter load main.plugins
 
 type config = {
@@ -465,8 +470,13 @@ module RC_load = struct
   let load_main old dirname section =
     if get_int ~default:0 section "magic" <> magicnumber then
       raise WrongMagicNumber;
-    { libdir    = get_string ~default:old.libdir section "libdir";
-      datadir   = get_string ~default:old.datadir section "datadir";
+    let get_stringl_or ~default section name =
+      match get_stringl section name with
+      | [] -> default
+      | l -> l
+    in
+    { libdir    = get_stringl_or ~default:old.libdir section "libdir";
+      datadir   = get_stringl_or ~default:old.datadir section "datadir";
       loadpath  =
         begin match get_stringl section "loadpath" with
         | [] -> old.loadpath

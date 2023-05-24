@@ -191,6 +191,8 @@ val set_stringl : ?escape_eol:bool -> section -> string -> string list -> sectio
 
 val set_stringo : ?escape_eol:bool -> section -> string -> string option -> section
 
+val union : t -> t -> t
+
 (* val ident  : ?default:string      -> section -> string -> string *)
 (*   (\** raise Bad_value_type *)
 (*       raise Key_not_found *)
@@ -233,6 +235,14 @@ val from_file : string -> t
     @raise SyntaxErrorFile in case of incorrect syntax.
     @raise ExtraParameters if a section header has more than one argument.
 *)
+
+val from_files : string list -> t
+(** [from_file filenames] returns the concatenation of the Rc of the files [filename].
+    @raise CannotOpen if [filename] does not exist.
+    @raise SyntaxErrorFile in case of incorrect syntax.
+    @raise ExtraParameters if a section header has more than one argument.
+*)
+   
 
 val to_formatter : Format.formatter -> t -> unit
 (** [to_formatter fmt rc] writes the Rc [rc] to the formatter [fmt]. *)

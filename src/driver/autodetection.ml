@@ -157,9 +157,9 @@ module Prover_autodetection_data = struct
         (fp,shortcut)::acc
       ) acc shortcuts
 
-  let from_file filename =
+  let from_files filenames =
     try
-      let rc = Rc.from_file filename in
+      let rc = Rc.from_files filenames in
       { skeletons = List.rev (load rc);
         shortcuts =
           List.fold_left load_prover_shortcut [] (get_family rc "shortcut");
@@ -171,13 +171,18 @@ module Prover_autodetection_data = struct
     with
     | Failure _ ->
         Loc.errorm "Syntax error in provers-detection-data.conf@."
-    | Not_found ->
-        Loc.errorm "provers-detection-data.conf not found at %s@." filename
+
+  let from_file filename = from_files [filename]
 
   let read_auto_detection_data main =
-    let filename = Filename.concat (Whyconf.datadir main)
+    let filenames = Sysutil.lookups_from_paths (Whyconf.datadir main)
         "provers-detection-data.conf" in
-    from_file filename
+    match filenames with
+    | [] ->
+      Loc.errorm "provers-detection-data.conf not found at %a@."
+       (Pp.print_list Pp.space Format.pp_print_string) (Whyconf.datadir main)
+    | _ ->
+      from_files filenames
 
 
 
@@ -442,14 +447,24 @@ let generate_auto_strategies env =
   in
   [split ; auto0 ; auto1 ; auto2 ; auto3]
 
+  let cmd_regexp =
+    Re.compile
+      Re.(longest
+            (seq [ start; char '%';
+                    seq [group(set "ld"); char '/'; group (rep1 (compl [space]))]
+                  ]))
+  
+
 let check_support_library main (data:Prover_autodetection_data.data) ver =
-  let cmd_regexp = Re.Str.regexp "%\\(.\\)" in
-  let replace s = match Re.Str.matched_group 1 s with
-    | "l" -> Whyconf.libdir main
-    | "d" -> Whyconf.datadir main
-    | c -> c in
-  let sl = Re.Str.global_substitute cmd_regexp replace data.support_library in
   try
+    let replace g =
+      let suffix = Sysutil.replace_dir_sep (Re.Group.get g 2) in
+      match Re.Group.get g 1 with
+      | "l" -> Sysutil.lookup_from_paths (Whyconf.libdir main) suffix
+      | "d" -> Sysutil.lookup_from_paths (Whyconf.datadir main) suffix
+      | _ -> assert false (* absurd: due to regexp *)
+    in
+    let sl = Re.replace cmd_regexp ~f:replace data.support_library in
     let f = open_in sl in
     let support_ver = input_line f in
     close_in f;
@@ -461,7 +476,7 @@ let check_support_library main (data:Prover_autodetection_data.data) ver =
         data.prover_name ver support_ver;
       false
     end
-  with Sys_error _ | Not_found ->
+  with Sys_error _ | Not_found | Sysutil.Lookup_failed _ ->
     print_info
       "Found prover %s version %s, but no Why3 libraries were compiled for it@."
       data.prover_name ver;

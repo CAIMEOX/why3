@@ -92,10 +92,10 @@ val set_stdlib: bool -> config -> config
 val set_load_default_plugins: bool -> config -> config
 (** Set if the plugins in the default path should be loaded *)
 
-val libdir: main -> string
-val set_libdir : main -> string -> main
-val datadir: main -> string
-val set_datadir : main -> string -> main
+val libdir: main -> string list
+val set_libdir : main -> string list -> main
+val datadir: main -> string list
+val set_datadir : main -> string list -> main
 val loadpath: main -> string list
 val set_loadpath : main -> string list -> main
 val timelimit: main -> float
@@ -109,7 +109,7 @@ val default_editor: main -> string
 val set_default_editor: main -> string -> main
 
 val plugins : main -> string list
-val pluginsdir : main -> string
+val pluginsdir : main -> string list
 val set_plugins : main -> string list -> main
 val add_plugin : main -> string -> main
 val load_plugins : main -> unit

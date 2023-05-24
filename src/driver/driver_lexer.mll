@@ -125,12 +125,8 @@ rule token = parse
       match tok with
       | INPUT filename ->
          let current_dirname = Filename.dirname lexbuf.lex_curr_p.pos_fname in
-         let drivers_path = Filename.concat (Whyconf.datadir whyconf_main) "drivers" in
-         let paths =
-           if current_dirname = drivers_path then [drivers_path] else
-             [ current_dirname ; drivers_path ]
-         in
-         let filename = Sysutil.resolve_from_paths paths filename in
+         let paths = current_dirname :: (Whyconf.datadir whyconf_main) in
+         let filename = Sysutil.lookup_from_paths paths (Filename.concat "drivers" filename) in
          Stack.push (input_lexbuf filename) s;
          multifile lex_dumb
       | EOF ->

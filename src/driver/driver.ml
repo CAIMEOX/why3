@@ -57,12 +57,12 @@ let load_plugin dir (byte,nat) =
   Dynlink.loadfile_private file
 
 let resolve_driver_name whyconf_main drivers_subdir ?extra_dir name =
-  let drivers_path = Filename.concat (Whyconf.datadir whyconf_main) drivers_subdir in
+  let drivers_paths = Sysutil.lookups_from_paths (Whyconf.datadir whyconf_main) drivers_subdir in
   if Filename.check_suffix name ".drv" then
     (* driver file with extension .drv are searched in the current
        directory, the extra directory `extra_dir`, and finally in the
        drivers path of Why3 *)
-    let paths = [ drivers_path ] in
+    let paths = drivers_paths in
     let paths = match extra_dir with
         None -> paths
       | Some d -> d :: paths
@@ -72,8 +72,7 @@ let resolve_driver_name whyconf_main drivers_subdir ?extra_dir name =
   else
     (* driver names without extension are searched, with extension
        .drv, in the driver path of Why3 *)
-    let paths = [ drivers_path ] in
-    Sysutil.resolve_from_paths paths (name ^ ".drv")
+    Sysutil.resolve_from_paths drivers_paths (name ^ ".drv")
 
 let load_file whyconf_main ?extra_dir file =
   let file = resolve_driver_name whyconf_main "drivers" ?extra_dir file in

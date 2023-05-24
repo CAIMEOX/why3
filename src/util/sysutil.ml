@@ -247,6 +247,26 @@ let resolve_from_paths paths name =
     | [f] -> f
     | fl -> raise (AmbiguousResolve fl)
 
+
+exception Lookup_failed of string * string list
+
+let rec lookup_from_paths file alldirs = function
+  | [] -> raise (Lookup_failed(file,alldirs))
+  | d::dirs ->
+      let f = Filename.concat d file in
+      if Sys.file_exists f then f
+      else lookup_from_paths file alldirs dirs
+
+let lookup_from_paths dirs file = lookup_from_paths file dirs dirs
+
+let lookups_from_paths dirs file = 
+      List.filter_map (fun d ->
+        let f = Filename.concat d file in
+        if Sys.file_exists f then Some f
+        else None
+        ) dirs
+
+
 let () = Exn_printer.register (fun fmt exn -> match exn with
   | FailedResolve fl ->
      Format.fprintf fmt
@@ -254,4 +274,13 @@ let () = Exn_printer.register (fun fmt exn -> match exn with
   | AmbiguousResolve fl ->
      Format.fprintf fmt
        "Ambiguous file name found in [%a]" Pp.(print_list semi print_string) fl
-  | e -> raise e)
+  | Lookup_failed (n,fl) ->
+    Format.fprintf fmt
+     "File %s not found in [%a]" n Pp.(print_list semi print_string) fl
+| e -> raise e)
+
+let dir_sep =
+  assert (String.length Filename.dir_sep = 1);
+  Filename.dir_sep.[0]
+
+let replace_dir_sep = String.map (function | '/' -> dir_sep | c -> c)

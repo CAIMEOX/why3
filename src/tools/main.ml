@@ -16,9 +16,9 @@ open Whyconf
 let option_list =
   let open Getopt in
   Args.common_options @
-  [ KLong "print-libdir", Hnd0 (fun () -> printf "%s@." Config.libdir; exit 0),
+  [ KLong "print-libdir", Hnd0 (fun () -> List.iter (printf "%s@.") Config.libdir; exit 0),
     " print location of binary components (plugins, etc)";
-    KLong "print-datadir", Hnd0 (fun _ -> printf "%s@." Config.datadir; exit 0),
+    KLong "print-datadir", Hnd0 (fun _ -> List.iter (printf "%s@.") Config.datadir; exit 0),
     " print location of non-binary data (modules, etc)";
     KLong "version",
     Hnd0 (fun _ -> printf "Why3 platform, version %s@." Config.version; exit 0),
@@ -27,7 +27,7 @@ let option_list =
 
 let command_path = match Config.localdir with
   | Some p -> Filename.concat p "bin"
-  | None -> Filename.concat Config.libdir "commands"
+  | None -> Sysutil.lookup_from_paths Config.libdir "commands"
 
 let extra_help fmt commands =
   fprintf fmt "Available commands:@\n";

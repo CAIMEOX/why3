@@ -199,12 +199,12 @@ let env, gconfig =
 
 let get_extra_lang =
   let main = Whyconf.get_main gconfig.config in
-  let load_path = Filename.concat (Whyconf.datadir main) "lang" in
+  let load_paths = Sysutil.lookups_from_paths (Whyconf.datadir main) "lang" in
   let languages_manager =
     GSourceView.source_language_manager ~default:true
   in
   languages_manager#set_search_path
-    (load_path :: languages_manager#search_path);
+    (load_paths @ languages_manager#search_path);
   fun shortcut name ->
     let ll = ref None in
     fun () ->
@@ -213,8 +213,8 @@ let get_extra_lang =
     | None ->
        match languages_manager#language shortcut with
        | None ->
-          eprintf "language file for '%s' not found in directory %s@."
-            name load_path;
+          eprintf "language file for '%s' not found in directory %a@."
+            name (Pp.print_list Pp.space Format.pp_print_string) load_paths;
           exit 1
        | Some x as l -> ll := l; x
 
