@@ -36,7 +36,7 @@ Qed.
 (* Why3 goal *)
 Lemma Div_bound :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
-  (0%Z <= x)%Z /\ (0%Z < y)%Z ->
+  (x >= 0%Z)%Z /\ (y > 0%Z)%Z ->
   (0%Z <= (ZArith.BinInt.Z.quot x y))%Z /\
   ((ZArith.BinInt.Z.quot x y) <= x)%Z.
 Proof.
@@ -73,7 +73,7 @@ Qed.
 (* Why3 goal *)
 Lemma Div_sign_pos :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
-  (0%Z <= x)%Z /\ (0%Z < y)%Z -> (0%Z <= (ZArith.BinInt.Z.quot x y))%Z.
+  (x >= 0%Z)%Z /\ (y > 0%Z)%Z -> ((ZArith.BinInt.Z.quot x y) >= 0%Z)%Z.
 Proof.
 intros x y (Hx, Hy).
 now apply Z.quot_pos.
@@ -82,7 +82,7 @@ Qed.
 (* Why3 goal *)
 Lemma Div_sign_neg :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
-  (x <= 0%Z)%Z /\ (0%Z < y)%Z -> ((ZArith.BinInt.Z.quot x y) <= 0%Z)%Z.
+  (x <= 0%Z)%Z /\ (y > 0%Z)%Z -> ((ZArith.BinInt.Z.quot x y) <= 0%Z)%Z.
 Proof.
 intros x y (Hx, Hy).
 generalize (Z.quot_pos (-x) y).
@@ -93,7 +93,7 @@ Qed.
 (* Why3 goal *)
 Lemma Mod_sign_pos :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
-  (0%Z <= x)%Z /\ ~ (y = 0%Z) -> (0%Z <= (ZArith.BinInt.Z.rem x y))%Z.
+  (x >= 0%Z)%Z /\ ~ (y = 0%Z) -> ((ZArith.BinInt.Z.rem x y) >= 0%Z)%Z.
 Proof.
 intros x y (Hx, Zy).
 now apply Zrem_lt_pos.
@@ -154,7 +154,7 @@ Qed.
 (* Why3 goal *)
 Lemma Div_mult :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z) (z:Numbers.BinNums.Z),
-  (0%Z < x)%Z /\ (0%Z <= y)%Z /\ (0%Z <= z)%Z ->
+  (x > 0%Z)%Z /\ (y >= 0%Z)%Z /\ (z >= 0%Z)%Z ->
   ((ZArith.BinInt.Z.quot ((x * y)%Z + z)%Z x) =
    (y + (ZArith.BinInt.Z.quot z x))%Z).
 Proof.
@@ -173,7 +173,7 @@ Qed.
 (* Why3 goal *)
 Lemma Mod_mult :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z) (z:Numbers.BinNums.Z),
-  (0%Z < x)%Z /\ (0%Z <= y)%Z /\ (0%Z <= z)%Z ->
+  (x > 0%Z)%Z /\ (y >= 0%Z)%Z /\ (z >= 0%Z)%Z ->
   ((ZArith.BinInt.Z.rem ((x * y)%Z + z)%Z x) = (ZArith.BinInt.Z.rem z x)).
 Proof.
 intros x y z (Hx&Hy&Hz).

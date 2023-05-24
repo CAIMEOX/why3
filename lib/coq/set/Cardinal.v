@@ -378,7 +378,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma cardinal_nonneg {a:Type} {a_WT:WhyType a} :
-  forall (s:a -> Init.Datatypes.bool), (0%Z <= (cardinal s))%Z.
+  forall (s:a -> Init.Datatypes.bool), ((cardinal s) >= 0%Z)%Z.
 Proof.
 intros s.
 unfold cardinal. destruct ClassicalEpsilon.excluded_middle_informative.

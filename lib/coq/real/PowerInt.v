@@ -49,7 +49,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma Power_s :
-  forall (x:Reals.Rdefinitions.R) (n:Numbers.BinNums.Z), (0%Z <= n)%Z ->
+  forall (x:Reals.Rdefinitions.R) (n:Numbers.BinNums.Z), (n >= 0%Z)%Z ->
   ((Reals.Rfunctions.powerRZ x (n + 1%Z)%Z) =
    (x * (Reals.Rfunctions.powerRZ x n))%R).
 Proof.
@@ -60,7 +60,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma Power_s_alt :
-  forall (x:Reals.Rdefinitions.R) (n:Numbers.BinNums.Z), (0%Z < n)%Z ->
+  forall (x:Reals.Rdefinitions.R) (n:Numbers.BinNums.Z), (n > 0%Z)%Z ->
   ((Reals.Rfunctions.powerRZ x n) =
    (x * (Reals.Rfunctions.powerRZ x (n - 1%Z)%Z))%R).
 Proof.

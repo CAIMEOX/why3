@@ -40,7 +40,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma Power_s :
-  forall (x:Numbers.BinNums.Z) (n:Numbers.BinNums.Z), (0%Z <= n)%Z ->
+  forall (x:Numbers.BinNums.Z) (n:Numbers.BinNums.Z), (n >= 0%Z)%Z ->
   ((power x (n + 1%Z)%Z) = (x * (power x n))%Z).
 Proof.
 intros x n h1.
@@ -53,7 +53,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma Power_s_alt :
-  forall (x:Numbers.BinNums.Z) (n:Numbers.BinNums.Z), (0%Z < n)%Z ->
+  forall (x:Numbers.BinNums.Z) (n:Numbers.BinNums.Z), (n > 0%Z)%Z ->
   ((power x n) = (x * (power x (n - 1%Z)%Z))%Z).
 Proof.
 intros x n h1.
@@ -113,7 +113,7 @@ Qed.
 (* Why3 goal *)
 Lemma Power_non_neg :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
-  (0%Z <= x)%Z /\ (0%Z <= y)%Z -> (0%Z <= (power x y))%Z.
+  (x >= 0%Z)%Z /\ (y >= 0%Z)%Z -> ((power x y) >= 0%Z)%Z.
 Proof.
 intros x y (h1,h2).
 now apply Z.pow_nonneg.
@@ -122,7 +122,7 @@ Qed.
 (* Why3 goal *)
 Lemma Power_pos :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
-  (0%Z < x)%Z /\ (0%Z <= y)%Z -> (0%Z < (power x y))%Z.
+  (x > 0%Z)%Z /\ (y >= 0%Z)%Z -> ((power x y) > 0%Z)%Z.
 Proof.
 intros x y (h1,h2).
 eapply Z.pow_pos_nonneg; eauto.

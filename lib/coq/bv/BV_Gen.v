@@ -41,7 +41,7 @@ Lemma size_int_S : size = Z.succ (Z.of_nat last_bit).
 Qed.
 
 (* Why3 goal *)
-Lemma size_pos : (0%Z < size)%Z.
+Lemma size_pos : (size > 0%Z)%Z.
   rewrite size_int_S; lia.
 Qed.
 
@@ -218,7 +218,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma nth_out_of_bound :
-  forall (x:t) (n:Numbers.BinNums.Z), (n < 0%Z)%Z \/ (size <= n)%Z ->
+  forall (x:t) (n:Numbers.BinNums.Z), (n < 0%Z)%Z \/ (n >= size)%Z ->
   ((nth x n) = Init.Datatypes.false).
 intros.
 unfold nth.
@@ -367,7 +367,7 @@ Qed.
 (* Why3 goal *)
 Lemma Lsr_nth_high :
   forall (b:t) (n:Numbers.BinNums.Z) (s:Numbers.BinNums.Z), (0%Z <= s)%Z ->
-  (0%Z <= n)%Z -> (size <= (n + s)%Z)%Z ->
+  (0%Z <= n)%Z -> ((n + s)%Z >= size)%Z ->
   ((nth (lsr b s) n) = Init.Datatypes.false).
   intros b n s h1 h2 h3.
   unfold nth,lsr.
@@ -510,7 +510,7 @@ Qed.
 (* Why3 goal *)
 Lemma Asr_nth_high :
   forall (b:t) (n:Numbers.BinNums.Z) (s:Numbers.BinNums.Z), (0%Z <= s)%Z ->
-  (0%Z <= n)%Z /\ (n < size)%Z -> (size <= (n + s)%Z)%Z ->
+  (0%Z <= n)%Z /\ (n < size)%Z -> ((n + s)%Z >= size)%Z ->
   ((nth (asr b s) n) = (nth b (size - 1%Z)%Z)).
   unfold nth, asr.
   intros.
@@ -1476,7 +1476,7 @@ Qed.
 Definition ule (x:t) (y:t) : Prop := ((to_uint x) <= (to_uint y))%Z.
 
 (* Why3 assumption *)
-Definition ugt (x:t) (y:t) : Prop := ((to_uint y) < (to_uint x))%Z.
+Definition ugt (x:t) (y:t) : Prop := ((to_uint x) > (to_uint y))%Z.
 
 (* Why3 goal *)
 Definition ugt_closure : t -> t -> Init.Datatypes.bool.
@@ -1518,7 +1518,7 @@ apply Zlt_le_weak, to_uint_bounds.
 Qed.
 
 (* Why3 assumption *)
-Definition uge (x:t) (y:t) : Prop := ((to_uint y) <= (to_uint x))%Z.
+Definition uge (x:t) (y:t) : Prop := ((to_uint x) >= (to_uint y))%Z.
 
 (* Why3 assumption *)
 Definition slt (v1:t) (v2:t) : Prop := ((to_int v1) < (to_int v2))%Z.
@@ -1569,7 +1569,7 @@ Qed.
 Definition sle (v1:t) (v2:t) : Prop := ((to_int v1) <= (to_int v2))%Z.
 
 (* Why3 assumption *)
-Definition sgt (v1:t) (v2:t) : Prop := ((to_int v2) < (to_int v1))%Z.
+Definition sgt (v1:t) (v2:t) : Prop := ((to_int v1) > (to_int v2))%Z.
 
 (* Why3 goal *)
 Definition sgt_closure : t -> t -> Init.Datatypes.bool.
@@ -1614,7 +1614,7 @@ destruct Bsign ; generalize (to_uint_bounds y) ; lia.
 Qed.
 
 (* Why3 assumption *)
-Definition sge (v1:t) (v2:t) : Prop := ((to_int v2) <= (to_int v1))%Z.
+Definition sge (v1:t) (v2:t) : Prop := ((to_int v1) >= (to_int v2))%Z.
 
 Lemma zeros_sign_aux: forall A n (h: A), Vector.last (Vector.const h (S n)) = h.
   induction n; eauto.

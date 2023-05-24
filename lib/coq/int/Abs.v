@@ -23,17 +23,16 @@ Require Import Lia.
 (* Why3 goal *)
 Lemma abs'def :
   forall (x:Numbers.BinNums.Z),
-  ((0%Z <= x)%Z -> ((ZArith.BinInt.Z.abs x) = x)) /\
-  (~ (0%Z <= x)%Z -> ((ZArith.BinInt.Z.abs x) = (-x)%Z)).
+  ((x >= 0%Z)%Z -> ((ZArith.BinInt.Z.abs x) = x)) /\
+  (~ (x >= 0%Z)%Z -> ((ZArith.BinInt.Z.abs x) = (-x)%Z)).
 Proof.
 intros x.
 split ; intros H.
-now apply Z.abs_eq.
+apply Z.abs_eq; auto with zarith.
 apply Zabs_non_eq.
 apply Znot_gt_le.
 contradict H.
-apply Zlt_le_weak.
-now apply Z.gt_lt.
+auto with zarith.
 Qed.
 
 (* Why3 goal *)
@@ -47,8 +46,8 @@ Qed.
 
 (* Why3 goal *)
 Lemma Abs_pos :
-  forall (x:Numbers.BinNums.Z), (0%Z <= (ZArith.BinInt.Z.abs x))%Z.
+  forall (x:Numbers.BinNums.Z), ((ZArith.BinInt.Z.abs x) >= 0%Z)%Z.
 Proof.
-exact Zabs_pos.
+auto with zarith.
 Qed.
 

@@ -43,7 +43,7 @@ Qed.
 (* Why3 goal *)
 Lemma nth_none_2 {a:Type} {a_WT:WhyType a} :
   forall (l:Init.Datatypes.list a) (i:Numbers.BinNums.Z),
-  ((list.Length.length l) <= i)%Z ->
+  (i >= (list.Length.length l))%Z ->
   ((list.Nth.nth i l) = Init.Datatypes.None).
 Proof.
 intros l.
@@ -69,7 +69,7 @@ Qed.
 Lemma nth_none_3 {a:Type} {a_WT:WhyType a} :
   forall (l:Init.Datatypes.list a) (i:Numbers.BinNums.Z),
   ((list.Nth.nth i l) = Init.Datatypes.None) ->
-  (i < 0%Z)%Z \/ ((list.Length.length l) <= i)%Z.
+  (i < 0%Z)%Z \/ (i >= (list.Length.length l))%Z.
 Proof.
 intros l.
 induction l as [|h q].

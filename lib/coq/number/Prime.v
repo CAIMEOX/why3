@@ -181,7 +181,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma odd_prime :
-  forall (p:Numbers.BinNums.Z), prime p -> (3%Z <= p)%Z ->
+  forall (p:Numbers.BinNums.Z), prime p -> (p >= 3%Z)%Z ->
   number.Parity.odd p.
 Proof.
 intros p Pp Hp.

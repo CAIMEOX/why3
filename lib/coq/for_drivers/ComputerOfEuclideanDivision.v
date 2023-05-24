@@ -35,11 +35,11 @@ Qed.
 (* Why3 goal *)
 Lemma cdiv_cases :
   forall (n:Numbers.BinNums.Z) (d:Numbers.BinNums.Z),
-  ((0%Z <= n)%Z -> (0%Z < d)%Z ->
+  ((n >= 0%Z)%Z -> (d > 0%Z)%Z ->
    ((ZArith.BinInt.Z.quot n d) = (int.EuclideanDivision.div n d))) /\
-  ((n <= 0%Z)%Z -> (0%Z < d)%Z ->
+  ((n <= 0%Z)%Z -> (d > 0%Z)%Z ->
    ((ZArith.BinInt.Z.quot n d) = (-(int.EuclideanDivision.div (-n)%Z d))%Z)) /\
-  ((0%Z <= n)%Z -> (d < 0%Z)%Z ->
+  ((n >= 0%Z)%Z -> (d < 0%Z)%Z ->
    ((ZArith.BinInt.Z.quot n d) = (-(int.EuclideanDivision.div n (-d)%Z))%Z)) /\
   ((n <= 0%Z)%Z -> (d < 0%Z)%Z ->
    ((ZArith.BinInt.Z.quot n d) = (int.EuclideanDivision.div (-n)%Z (-d)%Z))).
@@ -70,11 +70,11 @@ Qed.
 (* Why3 goal *)
 Lemma cmod_cases :
   forall (n:Numbers.BinNums.Z) (d:Numbers.BinNums.Z),
-  ((0%Z <= n)%Z -> (0%Z < d)%Z ->
+  ((n >= 0%Z)%Z -> (d > 0%Z)%Z ->
    ((ZArith.BinInt.Z.rem n d) = (int.EuclideanDivision.mod1 n d))) /\
-  ((n <= 0%Z)%Z -> (0%Z < d)%Z ->
+  ((n <= 0%Z)%Z -> (d > 0%Z)%Z ->
    ((ZArith.BinInt.Z.rem n d) = (-(int.EuclideanDivision.mod1 (-n)%Z d))%Z)) /\
-  ((0%Z <= n)%Z -> (d < 0%Z)%Z ->
+  ((n >= 0%Z)%Z -> (d < 0%Z)%Z ->
    ((ZArith.BinInt.Z.rem n d) = (int.EuclideanDivision.mod1 n (-d)%Z))) /\
   ((n <= 0%Z)%Z -> (d < 0%Z)%Z ->
    ((ZArith.BinInt.Z.rem n d) =

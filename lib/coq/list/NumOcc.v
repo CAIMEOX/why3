@@ -54,7 +54,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma Num_Occ_NonNeg {a:Type} {a_WT:WhyType a} :
-  forall (x:a) (l:Init.Datatypes.list a), (0%Z <= (num_occ x l))%Z.
+  forall (x:a) (l:Init.Datatypes.list a), ((num_occ x l) >= 0%Z)%Z.
 Proof.
 intros x l.
 induction l as [|lh lt IHl].
@@ -68,7 +68,7 @@ Qed.
 (* Why3 goal *)
 Lemma Mem_Num_Occ {a:Type} {a_WT:WhyType a} :
   forall (x:a) (l:Init.Datatypes.list a),
-  list.Mem.mem x l <-> (0%Z < (num_occ x l))%Z.
+  list.Mem.mem x l <-> ((num_occ x l) > 0%Z)%Z.
 Proof.
 intros x l.
 induction l as [|lh lt IHl].

@@ -53,18 +53,18 @@ Qed.
 
 (* Why3 goal *)
 Lemma Power_s :
-  forall (x:t) (n:Numbers.BinNums.Z), (0%Z <= n)%Z ->
+  forall (x:t) (n:Numbers.BinNums.Z), (n >= 0%Z)%Z ->
   ((power x (n + 1%Z)%Z) = (infix_as x (power x n))).
 Proof.
 intros x n h1.
 unfold power.
 fold (Z.succ n).
-now rewrite Zabs_nat_Zsucc.
+rewrite Zabs_nat_Zsucc; auto with zarith.
 Qed.
 
 (* Why3 goal *)
 Lemma Power_s_alt :
-  forall (x:t) (n:Numbers.BinNums.Z), (0%Z < n)%Z ->
+  forall (x:t) (n:Numbers.BinNums.Z), (n > 0%Z)%Z ->
   ((power x n) = (infix_as x (power x (n - 1%Z)%Z))).
 Proof.
 intros x n h1.
@@ -92,7 +92,7 @@ intros n Hn IHn.
 replace (Z.succ n + m)%Z with ((n + m) + 1)%Z by ring.
 rewrite Power_s by auto with zarith.
 rewrite IHn.
-now rewrite <- Assoc, <- Power_s.
+rewrite <- Assoc, <- Power_s; auto with zarith.
 Qed.
 
 (* Why3 goal *)
@@ -108,7 +108,7 @@ intros m Hm IHm.
 replace (n * Z.succ m)%Z with (n + n * m)%Z by ring.
 rewrite Power_sum by auto with zarith.
 rewrite IHm.
-now rewrite <- Power_s.
+rewrite <- Power_s; auto with zarith.
 Qed.
 
 (* Why3 goal *)
@@ -122,7 +122,8 @@ apply natlike_ind.
 now rewrite Power_0, Unit_def_r, Unit_def_l.
 intros n Hn IHn.
 unfold Z.succ.
-rewrite (Power_s _ _ Hn).
+assert (Hn': (n>=0)%Z) by auto with zarith.
+rewrite (Power_s _ _ Hn').
 rewrite Assoc.
 rewrite IHn.
 rewrite <- Assoc.
@@ -142,7 +143,8 @@ rewrite 3!Power_0.
 now rewrite Unit_def_r.
 intros n Hn IHn.
 unfold Z.succ.
-rewrite 3!(Power_s _ _ Hn).
+assert (Hn': (n>=0)%Z) by auto with zarith.
+rewrite 3!(Power_s _ _ Hn').
 rewrite IHn.
 rewrite <- Assoc.
 rewrite (Assoc x).

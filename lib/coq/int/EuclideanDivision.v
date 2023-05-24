@@ -66,7 +66,7 @@ Qed.
 (* Why3 goal *)
 Lemma Div_unique :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z) (q:Numbers.BinNums.Z),
-  (0%Z < y)%Z -> ((q * y)%Z <= x)%Z /\ (x < ((q * y)%Z + y)%Z)%Z ->
+  (y > 0%Z)%Z -> ((q * y)%Z <= x)%Z /\ (x < ((q * y)%Z + y)%Z)%Z ->
   ((div x y) = q).
 Proof.
 intros x y q h1 (h2,h3).
@@ -91,7 +91,7 @@ Qed.
 (* Why3 goal *)
 Lemma Div_bound :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
-  (0%Z <= x)%Z /\ (0%Z < y)%Z -> (0%Z <= (div x y))%Z /\ ((div x y) <= x)%Z.
+  (x >= 0%Z)%Z /\ (y > 0%Z)%Z -> (0%Z <= (div x y))%Z /\ ((div x y) <= x)%Z.
 Proof.
 intros x y (Hx,Hy).
 unfold div.
@@ -187,7 +187,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma Div_1_left :
-  forall (y:Numbers.BinNums.Z), (1%Z < y)%Z -> ((div 1%Z y) = 0%Z).
+  forall (y:Numbers.BinNums.Z), (y > 1%Z)%Z -> ((div 1%Z y) = 0%Z).
 Proof.
 intros y Hy.
 rewrite Div_inf; auto with zarith.
@@ -195,7 +195,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma Div_minus1_left :
-  forall (y:Numbers.BinNums.Z), (1%Z < y)%Z -> ((div (-1%Z)%Z y) = (-1%Z)%Z).
+  forall (y:Numbers.BinNums.Z), (y > 1%Z)%Z -> ((div (-1%Z)%Z y) = (-1%Z)%Z).
 Proof.
 intros y Hy.
 unfold div.
@@ -211,7 +211,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma Mod_1_left :
-  forall (y:Numbers.BinNums.Z), (1%Z < y)%Z -> ((mod1 1%Z y) = 1%Z).
+  forall (y:Numbers.BinNums.Z), (y > 1%Z)%Z -> ((mod1 1%Z y) = 1%Z).
 Proof.
 intros y Hy.
 unfold mod1.
@@ -220,7 +220,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma Mod_minus1_left :
-  forall (y:Numbers.BinNums.Z), (1%Z < y)%Z ->
+  forall (y:Numbers.BinNums.Z), (y > 1%Z)%Z ->
   ((mod1 (-1%Z)%Z y) = (y - 1%Z)%Z).
 Proof.
 intros y Hy.
@@ -233,7 +233,7 @@ Open Scope Z_scope.
 (* Why3 goal *)
 Lemma Div_mult :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z) (z:Numbers.BinNums.Z),
-  (0%Z < x)%Z -> ((div ((x * y)%Z + z)%Z x) = (y + (div z x))%Z).
+  (x > 0%Z)%Z -> ((div ((x * y)%Z + z)%Z x) = (y + (div z x))%Z).
 Proof.
 intros x y z h.
 unfold div.
@@ -248,7 +248,7 @@ Qed.
 (* Why3 goal *)
 Lemma Mod_mult :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z) (z:Numbers.BinNums.Z),
-  (0%Z < x)%Z -> ((mod1 ((x * y)%Z + z)%Z x) = (mod1 z x)).
+  (x > 0%Z)%Z -> ((mod1 ((x * y)%Z + z)%Z x) = (mod1 z x)).
 Proof.
 intros x y z h.
 unfold mod1.

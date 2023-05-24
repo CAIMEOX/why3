@@ -274,7 +274,7 @@ Lemma numof_change_any :
     (b:Numbers.BinNums.Z),
   (forall (j:Numbers.BinNums.Z), (a <= j)%Z /\ (j < b)%Z ->
    ((p1 j) = Init.Datatypes.true) -> ((p2 j) = Init.Datatypes.true)) ->
-  ((numof p1 a b) <= (numof p2 a b))%Z.
+  ((numof p2 a b) >= (numof p1 a b))%Z.
 Proof.
   intros p1 p2 a b.
   case (Z_lt_le_dec a b); intro; [|rewrite Numof_empty, Numof_empty; lia].
@@ -302,7 +302,7 @@ Lemma numof_change_some :
   (forall (j:Numbers.BinNums.Z), (a <= j)%Z /\ (j < b)%Z ->
    ((p1 j) = Init.Datatypes.true) -> ((p2 j) = Init.Datatypes.true)) ->
   ~ ((p1 i) = Init.Datatypes.true) -> ((p2 i) = Init.Datatypes.true) ->
-  ((numof p1 a b) < (numof p2 a b))%Z.
+  ((numof p2 a b) > (numof p1 a b))%Z.
 Proof.
   intros p1 p2 a b i (h1,h2) h3 h4 h5.
   generalize (Z_le_lt_eq_dec _ _ (numof_change_any p1 p2 a b h3)).

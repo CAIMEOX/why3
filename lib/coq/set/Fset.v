@@ -457,7 +457,7 @@ Defined.
 
 (* Why3 goal *)
 Lemma cardinal_nonneg {a:Type} {a_WT:WhyType a} :
-  forall (s:fset a), (0%Z <= (cardinal s))%Z.
+  forall (s:fset a), ((cardinal s) >= 0%Z)%Z.
 Proof.
 intros s.
 unfold cardinal. destruct s.

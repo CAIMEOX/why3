@@ -256,7 +256,7 @@ Qed.
 Lemma occ_exists {a:Type} {a_WT:WhyType a} :
   forall (v:a) (m:Numbers.BinNums.Z -> a) (l:Numbers.BinNums.Z)
     (u:Numbers.BinNums.Z),
-  (0%Z < (occ v m l u))%Z ->
+  ((occ v m l u) > 0%Z)%Z ->
   exists i:Numbers.BinNums.Z, ((l <= i)%Z /\ (i < u)%Z) /\ ((m i) = v).
 Proof.
 intros v m l u h1.
@@ -283,7 +283,7 @@ Qed.
 Lemma occ_pos {a:Type} {a_WT:WhyType a} :
   forall (m:Numbers.BinNums.Z -> a) (l:Numbers.BinNums.Z)
     (u:Numbers.BinNums.Z) (i:Numbers.BinNums.Z),
-  (l <= i)%Z /\ (i < u)%Z -> (0%Z < (occ (m i) m l u))%Z.
+  (l <= i)%Z /\ (i < u)%Z -> ((occ (m i) m l u) > 0%Z)%Z.
 Proof.
 intros m l u i (h1,h2).
 pose (v := m i). fold v.

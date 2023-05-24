@@ -33,7 +33,7 @@ Qed.
 (* Why3 goal *)
 Lemma nth_cons_n {a:Type} {a_WT:WhyType a} :
   forall (x:a) (r:Init.Datatypes.list a) (n:Numbers.BinNums.Z),
-  (0%Z < n)%Z -> ((nth n (Init.Datatypes.cons x r)) = (nth (n - 1%Z)%Z r)).
+  (n > 0%Z)%Z -> ((nth n (Init.Datatypes.cons x r)) = (nth (n - 1%Z)%Z r)).
 Proof.
 intros x r n h1.
 simpl.

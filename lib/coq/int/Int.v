@@ -36,11 +36,28 @@ reflexivity.
 Qed.
 
 (* Why3 goal *)
+Lemma infix_gt'def :
+  forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z), (x > y)%Z <-> (y < x)%Z.
+Proof.
+intros x y.
+split; auto with zarith.
+Qed.
+
+(* Why3 goal *)
 Lemma infix_lseq'def :
   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
   (x <= y)%Z <-> (x < y)%Z \/ (x = y).
 Proof.
 exact Zle_lt_or_eq_iff.
+Qed.
+
+(* Why3 goal *)
+Lemma infix_gteq'def :
+  forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+  (x >= y)%Z <-> (y <= x)%Z.
+Proof.
+intros x y.
+split; auto with zarith.
 Qed.
 
 (* Why3 goal *)
