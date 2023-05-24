@@ -79,7 +79,7 @@
   <proof prover="2"><result status="valid" time="0.11" steps="28170"/></proof>
   </goal>
   <goal name="main&#39;vc.23" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.18" steps="3317"/></proof>
+  <proof prover="1"><result status="valid" time="0.34" steps="3317"/></proof>
   </goal>
   <goal name="main&#39;vc.24" expl="assertion" proved="true">
   <proof prover="2"><result status="valid" time="0.11" steps="32070"/></proof>

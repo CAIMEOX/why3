@@ -91,7 +91,7 @@
   <proof prover="1"><result status="valid" time="0.19" steps="484"/></proof>
   </goal>
   <goal name="balance&#39;vc.7" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.28" steps="1442"/></proof>
+  <proof prover="1"><result status="valid" time="0.45" steps="1442"/></proof>
   </goal>
   <goal name="balance&#39;vc.8" expl="unreachable point" proved="true">
   <proof prover="1"><result status="valid" time="0.07" steps="36"/></proof>
@@ -118,15 +118,15 @@
   <proof prover="1"><result status="valid" time="0.04" steps="13"/></proof>
   </goal>
   <goal name="balance&#39;vc.16" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.46" steps="3086"/></proof>
+  <proof prover="1"><result status="valid" time="0.69" steps="3086"/></proof>
   </goal>
   <goal name="balance&#39;vc.17" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="balance&#39;vc.17.0" expl="postcondition" proved="true">
-   <proof prover="1"><result status="valid" time="0.41" steps="2454"/></proof>
+   <proof prover="1"><result status="valid" time="0.61" steps="2454"/></proof>
    </goal>
    <goal name="balance&#39;vc.17.1" expl="postcondition" proved="true">
-   <proof prover="1"><result status="valid" time="0.53" steps="3188"/></proof>
+   <proof prover="1"><result status="valid" time="0.77" steps="3188"/></proof>
    </goal>
    <goal name="balance&#39;vc.17.2" expl="postcondition" proved="true">
    <proof prover="1"><result status="valid" time="0.05" steps="23"/></proof>
@@ -136,13 +136,13 @@
  </transf>
  </goal>
  <goal name="decompose_front_node&#39;vc" expl="VC for decompose_front_node" proved="true">
- <proof prover="1"><result status="valid" time="1.21" steps="5894"/></proof>
+ <proof prover="1"><result status="valid" time="1.44" steps="5894"/></proof>
  </goal>
  <goal name="decompose_front&#39;vc" expl="VC for decompose_front" proved="true">
  <proof prover="1"><result status="valid" time="0.10" steps="286"/></proof>
  </goal>
  <goal name="decompose_back_node&#39;vc" expl="VC for decompose_back_node" proved="true">
- <proof prover="1"><result status="valid" time="1.08" steps="6608"/></proof>
+ <proof prover="1"><result status="valid" time="1.62" steps="6608"/></proof>
  </goal>
  <goal name="decompose_back&#39;vc" expl="VC for decompose_back" proved="true">
  <proof prover="1"><result status="valid" time="0.05" steps="286"/></proof>
@@ -173,7 +173,7 @@
   <goal name="fuse&#39;vc.3" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="fuse&#39;vc.3.0" expl="postcondition" proved="true">
-   <proof prover="1"><result status="valid" time="0.62" steps="3602"/></proof>
+   <proof prover="1"><result status="valid" time="0.91" steps="3602"/></proof>
    </goal>
    <goal name="fuse&#39;vc.3.1" expl="postcondition" proved="true">
    <proof prover="1"><result status="valid" time="0.70" steps="3351"/></proof>
@@ -183,10 +183,10 @@
  </transf>
  </goal>
  <goal name="cons&#39;vc" expl="VC for cons" proved="true">
- <proof prover="1"><result status="valid" time="0.30" steps="1582"/></proof>
+ <proof prover="1"><result status="valid" time="0.46" steps="1582"/></proof>
  </goal>
  <goal name="snoc&#39;vc" expl="VC for snoc" proved="true">
- <proof prover="1"><result status="valid" time="0.36" steps="1890"/></proof>
+ <proof prover="1"><result status="valid" time="0.56" steps="1890"/></proof>
  </goal>
  <goal name="join&#39;vc" expl="VC for join" proved="true">
  <transf name="split_goal_right" proved="true" >
@@ -212,7 +212,7 @@
   <proof prover="1"><result status="valid" time="0.08" steps="454"/></proof>
   </goal>
   <goal name="join&#39;vc.7" expl="postcondition" proved="true">
-  <proof prover="1" timelimit="5"><result status="valid" time="1.10" steps="6581"/></proof>
+  <proof prover="1" timelimit="5"><result status="valid" time="1.79" steps="6581"/></proof>
   </goal>
  </transf>
  </goal>
@@ -354,7 +354,7 @@
  </transf>
  </goal>
  <goal name="get&#39;vc" expl="VC for get" proved="true">
- <proof prover="1"><result status="valid" time="0.38" steps="3211"/></proof>
+ <proof prover="1"><result status="valid" time="0.59" steps="3211"/></proof>
  </goal>
  <goal name="extract&#39;vc" expl="VC for extract" proved="true">
  <transf name="split_goal_right" proved="true" >
@@ -398,7 +398,7 @@
   <proof prover="1"><result status="valid" time="0.11" steps="561"/></proof>
   </goal>
   <goal name="extract&#39;vc.13" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.34" steps="1756"/></proof>
+  <proof prover="1"><result status="valid" time="0.59" steps="1756"/></proof>
   </goal>
   <goal name="extract&#39;vc.14" expl="precondition" proved="true">
   <proof prover="1"><result status="valid" time="0.02" steps="91"/></proof>

@@ -136,7 +136,7 @@
    <proof prover="5"><result status="valid" time="0.02" steps="25"/></proof>
    </goal>
    <goal name="valuation_pow.0.1" expl="recursive case" proved="true">
-   <proof prover="4"><result status="valid" time="0.77" steps="930285"/></proof>
+   <proof prover="4"><result status="valid" time="1.20" steps="930285"/></proof>
    </goal>
   </transf>
   </goal>

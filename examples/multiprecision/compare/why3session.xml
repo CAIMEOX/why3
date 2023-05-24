@@ -46,15 +46,15 @@
   <proof prover="5"><result status="valid" time="0.04" steps="51"/></proof>
   </goal>
   <goal name="wmpn_cmp&#39;vc.11" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="56596"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="63390"/></proof>
   <proof prover="5"><result status="valid" time="0.07" steps="23"/></proof>
   </goal>
   <goal name="wmpn_cmp&#39;vc.12" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="57073"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="63927"/></proof>
   <proof prover="5"><result status="valid" time="0.05" steps="24"/></proof>
   </goal>
   <goal name="wmpn_cmp&#39;vc.13" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="57581"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="64489"/></proof>
   <proof prover="5"><result status="valid" time="0.05" steps="26"/></proof>
   </goal>
   <goal name="wmpn_cmp&#39;vc.14" expl="assertion" proved="true">
@@ -70,7 +70,7 @@
    <proof prover="1" memlimit="2000"><result status="valid" time="0.17"/></proof>
    </goal>
    <goal name="wmpn_cmp&#39;vc.15.1" expl="VC for wmpn_cmp" proved="true">
-   <proof prover="2"><result status="valid" time="0.02" steps="67724"/></proof>
+   <proof prover="2"><result status="valid" time="0.02" steps="74748"/></proof>
    </goal>
   </transf>
   </goal>
@@ -78,7 +78,7 @@
   <proof prover="0"><result status="valid" time="0.16" steps="32752"/></proof>
   </goal>
   <goal name="wmpn_cmp&#39;vc.17" expl="assertion" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="57595"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="64515"/></proof>
   <proof prover="5"><result status="valid" time="0.05" steps="26"/></proof>
   </goal>
   <goal name="wmpn_cmp&#39;vc.18" expl="precondition" proved="true">
@@ -97,15 +97,15 @@
    <proof prover="1" memlimit="2000"><result status="valid" time="0.10"/></proof>
    </goal>
    <goal name="wmpn_cmp&#39;vc.20.1" expl="VC for wmpn_cmp" proved="true">
-   <proof prover="2"><result status="valid" time="0.02" steps="67957"/></proof>
+   <proof prover="2"><result status="valid" time="0.02" steps="74993"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="wmpn_cmp&#39;vc.21" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="87102"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="94162"/></proof>
   </goal>
   <goal name="wmpn_cmp&#39;vc.22" expl="loop variant decrease" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="57592"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="64166"/></proof>
   <proof prover="5"><result status="valid" time="0.03" steps="20"/></proof>
   </goal>
   <goal name="wmpn_cmp&#39;vc.23" expl="loop invariant preservation" proved="true">
@@ -118,7 +118,7 @@
   <proof prover="5"><result status="valid" time="0.04" steps="44"/></proof>
   </goal>
   <goal name="wmpn_cmp&#39;vc.26" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="58179"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="64361"/></proof>
   </goal>
  </transf>
  </goal>

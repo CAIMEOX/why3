@@ -99,7 +99,7 @@
   <proof prover="2"><result status="valid" time="0.06" steps="160"/></proof>
   </goal>
   <goal name="wmpz_neg&#39;vc.30" expl="postcondition" proved="true">
-  <proof prover="2" timelimit="5"><result status="valid" time="0.98" steps="2731"/></proof>
+  <proof prover="2" timelimit="5"><result status="valid" time="1.85" steps="2731"/></proof>
   </goal>
   <goal name="wmpz_neg&#39;vc.31" expl="postcondition" proved="true">
   <transf name="apply" proved="true" arg1="unchanged_transitive" arg2="with" arg3="mpz1">
@@ -114,7 +114,7 @@
     <goal name="wmpz_neg&#39;vc.31.1.1" expl="apply premises" proved="true">
     <transf name="apply" proved="true" arg1="unchanged_transitive" arg2="with" arg3="mpz4">
      <goal name="wmpz_neg&#39;vc.31.1.1.0" expl="apply premises" proved="true">
-     <proof prover="2"><result status="valid" time="0.73" steps="815"/></proof>
+     <proof prover="2"><result status="valid" time="1.27" steps="815"/></proof>
      </goal>
      <goal name="wmpz_neg&#39;vc.31.1.1.1" expl="apply premises" proved="true">
      <proof prover="2"><result status="valid" time="0.05" steps="166"/></proof>

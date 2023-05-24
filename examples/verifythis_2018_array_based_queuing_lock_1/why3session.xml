@@ -165,7 +165,7 @@
   <proof prover="0"><result status="valid" time="0.02" steps="76"/></proof>
   </goal>
   <goal name="main&#39;vc.29" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.02" steps="93510"/></proof>
+  <proof prover="6"><result status="valid" time="0.02" steps="103992"/></proof>
   </goal>
   <goal name="main&#39;vc.30" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="34"/></proof>
@@ -186,7 +186,7 @@
   <proof prover="2"><result status="valid" time="0.12" steps="37672"/></proof>
   </goal>
   <goal name="main&#39;vc.36" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.03" steps="99427"/></proof>
+  <proof prover="6"><result status="valid" time="0.03" steps="106550"/></proof>
   </goal>
   <goal name="main&#39;vc.37" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="67"/></proof>
@@ -213,7 +213,7 @@
   <proof prover="0"><result status="valid" time="0.03" steps="36"/></proof>
   </goal>
   <goal name="main&#39;vc.45" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.43" steps="3477"/></proof>
+  <proof prover="0"><result status="valid" time="0.76" steps="3477"/></proof>
   </goal>
   <goal name="main&#39;vc.46" expl="index in array bounds" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="26"/></proof>
@@ -222,10 +222,10 @@
   <proof prover="0"><result status="valid" time="0.03" steps="33"/></proof>
   </goal>
   <goal name="main&#39;vc.48" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.19" steps="205"/></proof>
+  <proof prover="0"><result status="valid" time="0.35" steps="205"/></proof>
   </goal>
   <goal name="main&#39;vc.49" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.02" steps="90648"/></proof>
+  <proof prover="6"><result status="valid" time="0.02" steps="97243"/></proof>
   </goal>
   <goal name="main&#39;vc.50" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="39"/></proof>
@@ -237,22 +237,22 @@
   <proof prover="2"><result status="valid" time="0.08" steps="37579"/></proof>
   </goal>
   <goal name="main&#39;vc.53" expl="loop invariant preservation" proved="true">
-  <proof prover="6" timelimit="5"><result status="valid" time="0.03" steps="117472"/></proof>
+  <proof prover="6" timelimit="5"><result status="valid" time="0.03" steps="124447"/></proof>
   </goal>
   <goal name="main&#39;vc.54" expl="loop invariant preservation" proved="true">
   <proof prover="2"><result status="valid" time="0.21" steps="37773"/></proof>
   </goal>
   <goal name="main&#39;vc.55" expl="loop invariant preservation" proved="true">
-  <proof prover="6" timelimit="5"><result status="valid" time="0.03" steps="110434"/></proof>
+  <proof prover="6" timelimit="5"><result status="valid" time="0.03" steps="115084"/></proof>
   </goal>
   <goal name="main&#39;vc.56" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.03" steps="105035"/></proof>
+  <proof prover="6"><result status="valid" time="0.03" steps="112222"/></proof>
   </goal>
   <goal name="main&#39;vc.57" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="65"/></proof>
   </goal>
   <goal name="main&#39;vc.58" expl="loop invariant preservation" proved="true">
-  <proof prover="6" timelimit="5"><result status="valid" time="0.02" steps="67074"/></proof>
+  <proof prover="6" timelimit="5"><result status="valid" time="0.02" steps="73133"/></proof>
   </goal>
   <goal name="main&#39;vc.59" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="31"/></proof>
@@ -282,7 +282,7 @@
   <goal name="main&#39;vc.65" expl="loop invariant preservation" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="main&#39;vc.65.0" expl="loop invariant preservation" proved="true">
-   <proof prover="6" timelimit="5"><result status="valid" time="0.04" steps="108431"/></proof>
+   <proof prover="6" timelimit="5"><result status="valid" time="0.04" steps="115090"/></proof>
    </goal>
    <goal name="main&#39;vc.65.1" expl="loop invariant preservation" proved="true">
    <proof prover="0" timelimit="5"><result status="valid" time="0.16" steps="308"/></proof>
@@ -302,10 +302,10 @@
   <proof prover="0"><result status="valid" time="0.02" steps="32"/></proof>
   </goal>
   <goal name="main&#39;vc.68" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.50" steps="527"/></proof>
+  <proof prover="0"><result status="valid" time="0.93" steps="527"/></proof>
   </goal>
   <goal name="main&#39;vc.69" expl="loop invariant preservation" proved="true">
-  <proof prover="6" timelimit="5"><result status="valid" time="0.02" steps="104501"/></proof>
+  <proof prover="6" timelimit="5"><result status="valid" time="0.02" steps="111186"/></proof>
   </goal>
   <goal name="main&#39;vc.70" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="39"/></proof>
@@ -317,16 +317,16 @@
   <proof prover="4"><result status="valid" time="0.16" steps="39139"/></proof>
   </goal>
   <goal name="main&#39;vc.73" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.05" steps="147219"/></proof>
+  <proof prover="6"><result status="valid" time="0.05" steps="244352"/></proof>
   </goal>
   <goal name="main&#39;vc.74" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.05" steps="197536"/></proof>
+  <proof prover="6"><result status="valid" time="0.05" steps="175351"/></proof>
   </goal>
   <goal name="main&#39;vc.75" expl="loop invariant preservation" proved="true">
   <proof prover="4"><result status="valid" time="0.20" steps="48190"/></proof>
   </goal>
   <goal name="main&#39;vc.76" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.03" steps="107164"/></proof>
+  <proof prover="6"><result status="valid" time="0.03" steps="114441"/></proof>
   </goal>
   <goal name="main&#39;vc.77" expl="index in array bounds" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="74"/></proof>
@@ -350,10 +350,10 @@
   <proof prover="0"><result status="valid" time="0.04" steps="117"/></proof>
   </goal>
   <goal name="main&#39;vc.84" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.02" steps="94371"/></proof>
+  <proof prover="6"><result status="valid" time="0.02" steps="105435"/></proof>
   </goal>
   <goal name="main&#39;vc.85" expl="loop invariant preservation" proved="true">
-  <proof prover="0" timelimit="5"><result status="valid" time="0.51" steps="1426"/></proof>
+  <proof prover="0" timelimit="5"><result status="valid" time="0.90" steps="1426"/></proof>
   </goal>
   <goal name="main&#39;vc.86" expl="loop invariant preservation" proved="true">
   <proof prover="2"><result status="valid" time="0.12" steps="42561"/></proof>
@@ -371,7 +371,7 @@
   <proof prover="2"><result status="valid" time="0.24" steps="60989"/></proof>
   </goal>
   <goal name="main&#39;vc.91" expl="loop invariant preservation" proved="true">
-  <proof prover="6" timelimit="5"><result status="valid" time="0.02" steps="115349"/></proof>
+  <proof prover="6" timelimit="5"><result status="valid" time="0.02" steps="123204"/></proof>
   </goal>
   <goal name="main&#39;vc.92" expl="unreachable point" proved="true">
   <proof prover="2"><result status="valid" time="0.13" steps="36608"/></proof>
@@ -385,7 +385,7 @@
    <proof prover="0" timelimit="5"><result status="valid" time="0.08" steps="153"/></proof>
    </goal>
    <goal name="main&#39;vc.94.1" expl="loop invariant preservation" proved="true">
-   <proof prover="6" timelimit="5"><result status="valid" time="0.03" steps="67700"/></proof>
+   <proof prover="6" timelimit="5"><result status="valid" time="0.03" steps="73719"/></proof>
    </goal>
    <goal name="main&#39;vc.94.2" expl="loop invariant preservation" proved="true">
    <proof prover="0" timelimit="5"><result status="valid" time="0.08" steps="153"/></proof>
@@ -414,7 +414,7 @@
   <proof prover="0"><result status="valid" time="0.02" steps="36"/></proof>
   </goal>
   <goal name="main&#39;vc.101" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.37" steps="3412"/></proof>
+  <proof prover="0"><result status="valid" time="0.69" steps="3412"/></proof>
   </goal>
   <goal name="main&#39;vc.102" expl="out of loop bounds" proved="true">
   <proof prover="0"><result status="valid" time="0.03" steps="14"/></proof>

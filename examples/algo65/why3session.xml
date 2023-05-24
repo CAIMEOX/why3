@@ -25,7 +25,7 @@
   <proof prover="0"><result status="valid" time="0.06" steps="13489"/></proof>
   </goal>
   <goal name="find&#39;vc.5" expl="assertion" proved="true">
-  <proof prover="2"><result status="valid" time="0.21" steps="1501"/></proof>
+  <proof prover="2"><result status="valid" time="0.21" steps="569"/></proof>
   </goal>
   <goal name="find&#39;vc.6" expl="variant decrease" proved="true">
   <proof prover="0"><result status="valid" time="0.05" steps="9985"/></proof>
@@ -91,7 +91,7 @@
   <proof prover="0"><result status="valid" time="0.08" steps="14754"/></proof>
   </goal>
   <goal name="find&#39;vc.27" expl="assertion" proved="true">
-  <proof prover="2"><result status="valid" time="0.18" steps="1190"/></proof>
+  <proof prover="2"><result status="valid" time="0.18" steps="1191"/></proof>
   </goal>
   <goal name="find&#39;vc.28" expl="postcondition" proved="true">
   <proof prover="0"><result status="valid" time="0.07" steps="11164"/></proof>

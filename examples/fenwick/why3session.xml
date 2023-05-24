@@ -46,7 +46,7 @@
   <proof prover="2"><result status="valid" time="0.05" steps="8382"/></proof>
   </goal>
   <goal name="add&#39;vc.11" expl="loop invariant preservation" proved="true">
-  <proof prover="0" timelimit="10"><result status="valid" time="1.31" steps="1329"/></proof>
+  <proof prover="0" timelimit="10"><result status="valid" time="1.70" steps="1329"/></proof>
   </goal>
   <goal name="add&#39;vc.12" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.11" steps="196"/></proof>

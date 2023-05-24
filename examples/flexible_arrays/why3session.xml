@@ -24,7 +24,7 @@
  <proof prover="2"><result status="valid" time="0.15" steps="1832"/></proof>
  </goal>
  <goal name="tail_tree&#39;vc" expl="VC for tail_tree" proved="true">
- <proof prover="3"><result status="valid" time="0.84" steps="98012"/></proof>
+ <proof prover="3"><result status="valid" time="1.24" steps="98012"/></proof>
  </goal>
  <goal name="snoc_tree&#39;vc" expl="VC for snoc_tree" proved="true">
  <proof prover="3"><result status="valid" time="0.22" steps="33147"/></proof>

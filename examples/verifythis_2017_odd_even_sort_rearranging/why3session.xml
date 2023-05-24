@@ -167,13 +167,13 @@
   </transf>
   </goal>
   <goal name="my_swap&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.41" steps="61"/></proof>
+  <proof prover="4"><result status="valid" time="0.72" steps="61"/></proof>
   </goal>
   <goal name="my_swap&#39;vc.6" expl="precondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.41" steps="58"/></proof>
+  <proof prover="4"><result status="valid" time="0.74" steps="58"/></proof>
   </goal>
   <goal name="my_swap&#39;vc.7" expl="precondition" proved="true">
-  <proof prover="4"><result status="valid" time="2.25" steps="59"/></proof>
+  <proof prover="4"><result status="valid" time="4.37" steps="59"/></proof>
   </goal>
   <goal name="my_swap&#39;vc.8" expl="postcondition" proved="true">
   <proof prover="4"><result status="valid" time="0.01" steps="14"/></proof>
@@ -319,7 +319,7 @@
   <proof prover="4"><result status="valid" time="0.01" steps="24"/></proof>
   </goal>
   <goal name="odd_even_sort&#39;vc.38" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.22" steps="383"/></proof>
+  <proof prover="4"><result status="valid" time="0.37" steps="383"/></proof>
   </goal>
   <goal name="odd_even_sort&#39;vc.39" expl="loop invariant preservation" proved="true">
   <proof prover="4"><result status="valid" time="0.01" steps="25"/></proof>

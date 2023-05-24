@@ -126,16 +126,16 @@
 </theory>
 <theory name="Impl" proved="true">
  <goal name="bind_var_symbol_in_tableau&#39;vc" expl="VC for bind_var_symbol_in_tableau" proved="true">
- <proof prover="1" timelimit="1"><result status="valid" time="0.39" steps="1946"/></proof>
+ <proof prover="1" timelimit="1"><result status="valid" time="0.66" steps="1946"/></proof>
  </goal>
  <goal name="bind_var_fo_term_in_tableau&#39;vc" expl="VC for bind_var_fo_term_in_tableau" proved="true">
- <proof prover="1" timelimit="1"><result status="valid" time="0.26" steps="1603"/></proof>
+ <proof prover="1" timelimit="1"><result status="valid" time="0.45" steps="1603"/></proof>
  </goal>
  <goal name="unbind_var_symbol_in_tableau&#39;vc" expl="VC for unbind_var_symbol_in_tableau" proved="true">
- <proof prover="9"><result status="valid" time="1.35"/></proof>
+ <proof prover="9"><result status="valid" time="2.03"/></proof>
  </goal>
  <goal name="unbind_var_fo_term_in_tableau&#39;vc" expl="VC for unbind_var_fo_term_in_tableau" proved="true">
- <proof prover="9"><result status="valid" time="1.37"/></proof>
+ <proof prover="9"><result status="valid" time="2.27"/></proof>
  </goal>
  <goal name="subst_base_symbol_in_tableau&#39;vc" expl="VC for subst_base_symbol_in_tableau" proved="true">
  <proof prover="1" timelimit="1"><result status="valid" time="0.32" steps="974"/></proof>
@@ -426,7 +426,7 @@
   <proof prover="1"><result status="valid" time="0.15" steps="149"/></proof>
   </goal>
   <goal name="destruct_tableau&#39;vc.46" expl="postcondition" proved="true">
-  <proof prover="1" timelimit="1"><result status="valid" time="0.30" steps="2099"/></proof>
+  <proof prover="1" timelimit="1"><result status="valid" time="0.48" steps="2099"/></proof>
   </goal>
   <goal name="destruct_tableau&#39;vc.47" expl="postcondition" proved="true">
   <proof prover="1"><result status="valid" time="0.15" steps="264"/></proof>
@@ -468,7 +468,7 @@
   <goal name="nlsubst_symbol_in_tableau&#39;vc.9" expl="assertion" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="nlsubst_symbol_in_tableau&#39;vc.9.0" expl="assertion" proved="true">
-   <proof prover="0"><result status="valid" time="0.53" steps="212822"/></proof>
+   <proof prover="0"><result status="valid" time="0.90" steps="212822"/></proof>
    </goal>
    <goal name="nlsubst_symbol_in_tableau&#39;vc.9.1" expl="assertion" proved="true">
    <proof prover="1"><result status="valid" time="0.19" steps="287"/></proof>
@@ -477,13 +477,13 @@
    <proof prover="1"><result status="valid" time="0.08" steps="62"/></proof>
    </goal>
    <goal name="nlsubst_symbol_in_tableau&#39;vc.9.3" expl="assertion" proved="true">
-   <proof prover="0"><result status="valid" time="0.21" steps="195257"/></proof>
+   <proof prover="0"><result status="valid" time="0.38" steps="195257"/></proof>
    </goal>
    <goal name="nlsubst_symbol_in_tableau&#39;vc.9.4" expl="assertion" proved="true">
-   <proof prover="0"><result status="valid" time="0.50" steps="211010"/></proof>
+   <proof prover="0"><result status="valid" time="0.83" steps="211010"/></proof>
    </goal>
    <goal name="nlsubst_symbol_in_tableau&#39;vc.9.5" expl="assertion" proved="true">
-   <proof prover="0"><result status="valid" time="0.52" steps="215891"/></proof>
+   <proof prover="0"><result status="valid" time="0.83" steps="215891"/></proof>
    </goal>
   </transf>
   </goal>
@@ -504,7 +504,7 @@
   <proof prover="1"><result status="valid" time="0.08" steps="104"/></proof>
   </goal>
   <goal name="nlsubst_symbol_in_tableau&#39;vc.12" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.23" steps="211588"/></proof>
+  <proof prover="0"><result status="valid" time="0.40" steps="211588"/></proof>
   </goal>
  </transf>
  </goal>
@@ -546,7 +546,7 @@
   <goal name="nlsubst_fo_term_in_tableau&#39;vc.11" expl="assertion" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="nlsubst_fo_term_in_tableau&#39;vc.11.0" expl="assertion" proved="true">
-   <proof prover="10"><result status="valid" time="0.33"/></proof>
+   <proof prover="10"><result status="valid" time="0.51"/></proof>
    </goal>
    <goal name="nlsubst_fo_term_in_tableau&#39;vc.11.1" expl="assertion" proved="true">
    <proof prover="1"><result status="valid" time="0.07" steps="65"/></proof>
@@ -555,7 +555,7 @@
    <proof prover="1"><result status="valid" time="0.08" steps="99"/></proof>
    </goal>
    <goal name="nlsubst_fo_term_in_tableau&#39;vc.11.3" expl="assertion" proved="true">
-   <proof prover="0"><result status="valid" time="0.52" steps="211297"/></proof>
+   <proof prover="0"><result status="valid" time="0.84" steps="211297"/></proof>
    </goal>
    <goal name="nlsubst_fo_term_in_tableau&#39;vc.11.4" expl="assertion" proved="true">
    <proof prover="1"><result status="valid" time="0.10" steps="25"/></proof>
@@ -574,7 +574,7 @@
    <proof prover="1" timelimit="20"><result status="valid" time="0.11" steps="214"/></proof>
    </goal>
    <goal name="nlsubst_fo_term_in_tableau&#39;vc.12.2" expl="assertion" proved="true">
-   <proof prover="2"><result status="valid" time="0.26"/></proof>
+   <proof prover="2"><result status="valid" time="0.40"/></proof>
    </goal>
    <goal name="nlsubst_fo_term_in_tableau&#39;vc.12.3" expl="assertion" proved="true">
    <proof prover="1"><result status="valid" time="0.06" steps="25"/></proof>
@@ -588,7 +588,7 @@
   <proof prover="1"><result status="valid" time="0.12" steps="105"/></proof>
   </goal>
   <goal name="nlsubst_fo_term_in_tableau&#39;vc.14" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.23" steps="211011"/></proof>
+  <proof prover="0"><result status="valid" time="0.39" steps="211011"/></proof>
   </goal>
  </transf>
  </goal>

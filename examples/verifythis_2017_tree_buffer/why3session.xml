@@ -13,11 +13,11 @@
  <goal name="take_lemma&#39;vc" expl="VC for take_lemma" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="take_lemma&#39;vc.0" expl="variant decrease" proved="true">
-  <proof prover="5"><result status="valid" time="0.01" steps="12783"/></proof>
+  <proof prover="5"><result status="valid" time="0.01" steps="14044"/></proof>
   <proof prover="6"><result status="valid" time="0.01" steps="34"/></proof>
   </goal>
   <goal name="take_lemma&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.01" steps="12967"/></proof>
+  <proof prover="5"><result status="valid" time="0.01" steps="14232"/></proof>
   <proof prover="6"><result status="valid" time="0.01" steps="10"/></proof>
   </goal>
   <goal name="take_lemma&#39;vc.2" expl="postcondition" proved="true">
@@ -29,7 +29,7 @@
    <proof prover="6" timelimit="1"><result status="valid" time="0.01" steps="79"/></proof>
    </goal>
    <goal name="take_lemma&#39;vc.2.2" expl="postcondition" proved="true">
-   <proof prover="5" timelimit="1"><result status="valid" time="0.01" steps="14609"/></proof>
+   <proof prover="5" timelimit="1"><result status="valid" time="0.01" steps="16028"/></proof>
    </goal>
   </transf>
   </goal>
@@ -57,7 +57,7 @@
    <proof prover="6"><result status="valid" time="0.01" steps="16"/></proof>
    </goal>
    <goal name="cat_add&#39;vc.0.3" expl="VC for cat_add" proved="true">
-   <proof prover="0"><result status="valid" time="0.86"/></proof>
+   <proof prover="0"><result status="valid" time="1.27"/></proof>
    </goal>
   </transf>
   </goal>

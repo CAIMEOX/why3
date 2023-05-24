@@ -12,7 +12,7 @@
 <theory name="Test">
  <goal name="test1">
  <proof prover="1"><result status="unknown" time="0.00"/></proof>
- <proof prover="4"><result status="unknown" time="0.36"/></proof>
+ <proof prover="4"><result status="unknown" time="0.03"/></proof>
  <proof prover="6"><result status="unknown" time="0.01"/></proof>
  <proof prover="7"><result status="unknown" time="0.03"/></proof>
  </goal>

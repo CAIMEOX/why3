@@ -68,7 +68,7 @@
   <proof prover="3"><result status="valid" time="0.29" steps="57870"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.19" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.22" steps="64705"/></proof>
+  <proof prover="3"><result status="valid" time="0.43" steps="64705"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.20" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.04" steps="12690"/></proof>
@@ -83,10 +83,10 @@
   <proof prover="3"><result status="valid" time="0.02" steps="11823"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.24" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.51"/></proof>
+  <proof prover="2"><result status="valid" time="0.85"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.25" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="3.21"/></proof>
+  <proof prover="2"><result status="valid" time="5.26"/></proof>
   </goal>
   <goal name="remove_duplicate&#39;vc.26" expl="out of loop bounds" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="11176"/></proof>

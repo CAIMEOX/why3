@@ -248,7 +248,7 @@
 </theory>
 <theory name="Algo5" proved="true">
  <goal name="maximum_subarray&#39;vc" expl="VC for maximum_subarray" proved="true">
- <proof prover="5"><result status="valid" time="0.83" steps="1376"/></proof>
+ <proof prover="5"><result status="valid" time="1.51" steps="1376"/></proof>
  </goal>
 </theory>
 <theory name="BoundedIntegers" proved="true">
@@ -279,7 +279,7 @@
   <proof prover="5"><result status="valid" time="0.03" steps="129"/></proof>
   </goal>
   <goal name="maximum_subarray&#39;vc.8" expl="loop invariant preservation" proved="true">
-  <proof prover="5" timelimit="60"><result status="valid" time="4.05" steps="3911"/></proof>
+  <proof prover="5" timelimit="60"><result status="valid" time="6.81" steps="3911"/></proof>
   </goal>
   <goal name="maximum_subarray&#39;vc.9" expl="loop invariant preservation" proved="true">
   <proof prover="5"><result status="valid" time="0.00" steps="29"/></proof>
@@ -297,7 +297,7 @@
   <proof prover="5"><result status="valid" time="0.01" steps="20"/></proof>
   </goal>
   <goal name="maximum_subarray&#39;vc.14" expl="loop invariant preservation" proved="true">
-  <proof prover="5" timelimit="120"><result status="valid" time="10.03" steps="11448"/></proof>
+  <proof prover="5" timelimit="120"><result status="valid" time="17.75" steps="11448"/></proof>
   </goal>
   <goal name="maximum_subarray&#39;vc.15" expl="loop invariant preservation" proved="true">
   <proof prover="5"><result status="valid" time="0.05" steps="118"/></proof>
@@ -351,7 +351,7 @@
     <goal name="maximum_subarray&#39;vc.23.0.0" expl="loop invariant preservation" proved="true">
     <transf name="inline_goal" proved="true" >
      <goal name="maximum_subarray&#39;vc.23.0.0.0" expl="loop invariant preservation" proved="true">
-     <proof prover="4" timelimit="30" memlimit="4000"><result status="valid" time="0.59" steps="109317"/></proof>
+     <proof prover="4" timelimit="30" memlimit="4000"><result status="valid" time="1.26" steps="109317"/></proof>
      </goal>
     </transf>
     </goal>

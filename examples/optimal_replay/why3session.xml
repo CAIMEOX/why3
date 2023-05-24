@@ -71,20 +71,20 @@
   <goal name="distance&#39;vc.17" expl="loop invariant preservation" proved="true">
   <proof prover="1"><result status="valid" time="0.04"/></proof>
   <proof prover="3"><result status="valid" time="0.02"/></proof>
-  <proof prover="6"><result status="valid" time="0.01" steps="19663"/></proof>
+  <proof prover="6"><result status="valid" time="0.01" steps="21272"/></proof>
   </goal>
   <goal name="distance&#39;vc.18" expl="loop invariant preservation" proved="true">
-  <proof prover="1" timelimit="17"><result status="valid" time="0.35"/></proof>
+  <proof prover="1" timelimit="17"><result status="valid" time="0.67"/></proof>
   </goal>
   <goal name="distance&#39;vc.19" expl="loop invariant preservation" proved="true">
   <transf name="unfold" proved="true" arg1="distance">
    <goal name="distance&#39;vc.19.0" expl="loop invariant preservation" proved="true">
    <transf name="split_goal_right" proved="true" >
     <goal name="distance&#39;vc.19.0.0" expl="loop invariant preservation" proved="true">
-    <proof prover="0"><result status="valid" time="0.20" steps="58168"/></proof>
+    <proof prover="0"><result status="valid" time="0.38" steps="58168"/></proof>
     </goal>
     <goal name="distance&#39;vc.19.0.1" expl="loop invariant preservation" proved="true">
-    <proof prover="3" timelimit="10" memlimit="4000"><result status="valid" time="0.67"/></proof>
+    <proof prover="3" timelimit="10" memlimit="4000"><result status="valid" time="1.27"/></proof>
     </goal>
    </transf>
    </goal>

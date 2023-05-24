@@ -9,7 +9,7 @@
 <path name=".."/><path name="dfs.mlw"/>
 <theory name="DFS" proved="true">
  <goal name="set&#39;vc" expl="VC for set" proved="true">
- <proof prover="0"><result status="valid" time="0.01" steps="2345"/></proof>
+ <proof prover="0"><result status="valid" time="0.01" steps="992"/></proof>
  </goal>
  <goal name="dfs&#39;vc" expl="VC for dfs" proved="true">
  <proof prover="1"><result status="valid" time="0.09" steps="16420"/></proof>
@@ -34,7 +34,7 @@
  </transf>
  </goal>
  <goal name="traverse&#39;vc" expl="VC for traverse" proved="true">
- <proof prover="0"><result status="valid" time="0.01" steps="9872"/></proof>
+ <proof prover="0"><result status="valid" time="0.01" steps="9569"/></proof>
  </goal>
 </theory>
 </file>

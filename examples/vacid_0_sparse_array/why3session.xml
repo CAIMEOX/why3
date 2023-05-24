@@ -26,7 +26,7 @@
   <proof prover="2"><result status="valid" time="0.06" steps="15057"/></proof>
   </goal>
   <goal name="permutation.1" proved="true">
-  <proof prover="0"><result status="valid" time="2.34" steps="36093"/></proof>
+  <proof prover="0"><result status="valid" time="3.89" steps="35885"/></proof>
   </goal>
   <goal name="permutation.2" proved="true">
   <proof prover="2"><result status="valid" time="0.04" steps="10857"/></proof>

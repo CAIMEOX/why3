@@ -112,7 +112,7 @@
   <proof prover="2"><result status="valid" time="0.09" steps="34736"/></proof>
   </goal>
   <goal name="pancake_sort&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="0.29" steps="79129"/></proof>
+  <proof prover="2"><result status="valid" time="0.56" steps="79129"/></proof>
   </goal>
   <goal name="pancake_sort&#39;vc.18" expl="loop invariant preservation" proved="true">
   <proof prover="2"><result status="valid" time="0.02" steps="15001"/></proof>

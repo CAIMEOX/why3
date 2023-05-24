@@ -59,7 +59,7 @@
   <proof prover="6" timelimit="10"><result status="valid" time="0.01" steps="56"/></proof>
   </goal>
   <goal name="pop&#39;vc.11" expl="type invariant" proved="true">
-  <proof prover="6" timelimit="10"><result status="valid" time="0.94" steps="4155"/></proof>
+  <proof prover="6" timelimit="10"><result status="valid" time="1.64" steps="4155"/></proof>
   </goal>
   <goal name="pop&#39;vc.12" expl="postcondition" proved="true">
   <proof prover="6" timelimit="10"><result status="valid" time="0.01" steps="48"/></proof>
@@ -117,7 +117,7 @@
   <proof prover="6"><result status="valid" time="0.02" steps="91"/></proof>
   </goal>
   <goal name="transfer&#39;vc.7" expl="type invariant" proved="true">
-  <proof prover="6"><result status="valid" time="0.27" steps="843"/></proof>
+  <proof prover="6"><result status="valid" time="0.45" steps="843"/></proof>
   </goal>
   <goal name="transfer&#39;vc.8" expl="postcondition" proved="true">
   <proof prover="2"><result status="valid" time="0.06" steps="19586"/></proof>

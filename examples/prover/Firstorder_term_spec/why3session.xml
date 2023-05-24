@@ -39,7 +39,7 @@
  <proof prover="2"><result status="valid" time="0.10" steps="976"/></proof>
  </goal>
  <goal name="olifts_composition_lemma_subst_rename_fo_term&#39;vc" expl="VC for olifts_composition_lemma_subst_rename_fo_term" proved="true">
- <proof prover="2"><result status="valid" time="1.01" steps="3332"/></proof>
+ <proof prover="2"><result status="valid" time="1.64" steps="3332"/></proof>
  </goal>
  <goal name="rename_then_subst_composition_lemma_fo_term_list&#39;vc" expl="VC for rename_then_subst_composition_lemma_fo_term_list" proved="true">
  <proof prover="2"><result status="valid" time="0.05" steps="368"/></proof>
@@ -201,7 +201,7 @@
  <proof prover="2"><result status="valid" time="0.05" steps="172"/></proof>
  </goal>
  <goal name="subst_free_var_constructive_inversion_symbol_fo_term_list&#39;vc" expl="VC for subst_free_var_constructive_inversion_symbol_fo_term_list" proved="true">
- <proof prover="2"><result status="valid" time="0.67" steps="6515"/></proof>
+ <proof prover="2"><result status="valid" time="1.04" steps="6515"/></proof>
  </goal>
  <goal name="subst_free_var_inversion_symbol_fo_term_list&#39;vc" expl="VC for subst_free_var_inversion_symbol_fo_term_list" proved="true">
  <proof prover="2"><result status="valid" time="0.04" steps="73"/></proof>
@@ -403,7 +403,7 @@
   <proof prover="2"><result status="valid" time="0.04" steps="53"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_fo_term_list&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.23"/></proof>
+  <proof prover="4"><result status="valid" time="0.37"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_fo_term_list&#39;vc.4" expl="postcondition" proved="true">
   <proof prover="4"><result status="valid" time="0.24"/></proof>
@@ -422,10 +422,10 @@
   <proof prover="2"><result status="valid" time="0.08" steps="53"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_fo_term&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.23"/></proof>
+  <proof prover="4"><result status="valid" time="0.39"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_fo_term&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.22"/></proof>
+  <proof prover="4"><result status="valid" time="0.38"/></proof>
   </goal>
  </transf>
  </goal>

@@ -57,7 +57,7 @@
  <proof prover="2" timelimit="1"><result status="valid" time="0.11" steps="170"/></proof>
  </goal>
  <goal name="subst_free_var_constructive_inversion_symbol_fo_formula_list&#39;vc" expl="VC for subst_free_var_constructive_inversion_symbol_fo_formula_list" proved="true">
- <proof prover="2"><result status="valid" time="0.91" steps="10232"/></proof>
+ <proof prover="2"><result status="valid" time="1.55" steps="10232"/></proof>
  </goal>
  <goal name="subst_free_var_inversion_symbol_fo_formula_list&#39;vc" expl="VC for subst_free_var_inversion_symbol_fo_formula_list" proved="true">
  <proof prover="2"><result status="valid" time="0.09" steps="73"/></proof>
@@ -139,10 +139,10 @@
   <proof prover="2"><result status="valid" time="0.09" steps="53"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_fo_formula_list&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.34"/></proof>
+  <proof prover="1"><result status="valid" time="0.60"/></proof>
   </goal>
   <goal name="free_var_derive_equivalence_of_rename_fo_formula_list&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.35"/></proof>
+  <proof prover="1"><result status="valid" time="0.58"/></proof>
   </goal>
  </transf>
  </goal>

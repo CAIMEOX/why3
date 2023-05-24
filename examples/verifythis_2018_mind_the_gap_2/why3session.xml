@@ -7,124 +7,124 @@
 <path name=".."/><path name="verifythis_2018_mind_the_gap_2.mlw"/>
 <theory name="GapBuffer" proved="true">
  <goal name="buffer&#39;vc" expl="VC for buffer" proved="true">
- <proof prover="2"><result status="valid" time="0.01" steps="30432"/></proof>
+ <proof prover="2"><result status="valid" time="0.01" steps="33111"/></proof>
  </goal>
  <goal name="left&#39;vc" expl="VC for left" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="left&#39;vc.0" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="30393"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="34345"/></proof>
   </goal>
   <goal name="left&#39;vc.1" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="30395"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="34353"/></proof>
   </goal>
   <goal name="left&#39;vc.2" expl="type invariant" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="38137"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="42923"/></proof>
   </goal>
   <goal name="left&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="16793"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="21615"/></proof>
   </goal>
   <goal name="left&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="50549"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="55693"/></proof>
   </goal>
   <goal name="left&#39;vc.5" expl="postcondition" proved="true">
   <proof prover="2"><result status="valid" time="0.01" steps="2633"/></proof>
   </goal>
   <goal name="left&#39;vc.6" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="36932"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="41134"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="right&#39;vc" expl="VC for right" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="right&#39;vc.0" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="30337"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="34283"/></proof>
   </goal>
   <goal name="right&#39;vc.1" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="30422"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="34374"/></proof>
   </goal>
   <goal name="right&#39;vc.2" expl="type invariant" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="38019"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="42793"/></proof>
   </goal>
   <goal name="right&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="16719"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="21535"/></proof>
   </goal>
   <goal name="right&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="2" memlimit="2000"><result status="valid" time="0.02" steps="61948"/></proof>
+  <proof prover="2" memlimit="2000"><result status="valid" time="0.02" steps="67086"/></proof>
   </goal>
   <goal name="right&#39;vc.5" expl="postcondition" proved="true">
   <proof prover="2"><result status="valid" time="0.01" steps="2820"/></proof>
   </goal>
   <goal name="right&#39;vc.6" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="37285"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="41695"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="grow&#39;vc" expl="VC for grow" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="grow&#39;vc.0" expl="array creation size" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="32464"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="36370"/></proof>
   </goal>
   <goal name="grow&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="34669"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="38847"/></proof>
   </goal>
   <goal name="grow&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="34538"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="38724"/></proof>
   </goal>
   <goal name="grow&#39;vc.3" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="37576"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="41934"/></proof>
   </goal>
   <goal name="grow&#39;vc.4" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="37532"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="41916"/></proof>
   </goal>
   <goal name="grow&#39;vc.5" expl="type invariant" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="39818"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="44416"/></proof>
   </goal>
   <goal name="grow&#39;vc.6" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="18995"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="23610"/></proof>
   </goal>
   <goal name="grow&#39;vc.7" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="19055"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="23686"/></proof>
   </goal>
   <goal name="grow&#39;vc.8" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="80211"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="85236"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="insert&#39;vc" expl="VC for insert" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="insert&#39;vc.0" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="39753"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="44247"/></proof>
   </goal>
   <goal name="insert&#39;vc.1" expl="type invariant" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="45211"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="50357"/></proof>
   </goal>
   <goal name="insert&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="21215"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="26397"/></proof>
   </goal>
   <goal name="insert&#39;vc.3" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.05" steps="211856"/></proof>
+  <proof prover="2"><result status="valid" time="0.05" steps="217292"/></proof>
   </goal>
   <goal name="insert&#39;vc.4" expl="index in array bounds" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="30412"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="34364"/></proof>
   </goal>
   <goal name="insert&#39;vc.5" expl="type invariant" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="38012"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="42792"/></proof>
   </goal>
   <goal name="insert&#39;vc.6" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="16611"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="21427"/></proof>
   </goal>
   <goal name="insert&#39;vc.7" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.02" steps="74551"/></proof>
+  <proof prover="2"><result status="valid" time="0.02" steps="79809"/></proof>
   </goal>
  </transf>
  </goal>
  <goal name="delete&#39;vc" expl="VC for delete" proved="true">
  <transf name="split_vc" proved="true" >
   <goal name="delete&#39;vc.0" expl="type invariant" proved="true">
-  <proof prover="2"><result status="valid" time="0.01" steps="30465"/></proof>
+  <proof prover="2"><result status="valid" time="0.01" steps="34423"/></proof>
   </goal>
   <goal name="delete&#39;vc.1" expl="postcondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.03" steps="80551"/></proof>
+  <proof prover="2"><result status="valid" time="0.03" steps="84983"/></proof>
   </goal>
   <goal name="delete&#39;vc.2" expl="postcondition" proved="true">
   <proof prover="2"><result status="valid" time="0.01" steps="3161"/></proof>

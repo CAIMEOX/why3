@@ -19,7 +19,7 @@
  <goal name="mantissa_of_j" proved="true">
  <proof prover="0"><result status="valid" time="0.16" steps="121"/></proof>
  <proof prover="3"><result status="valid" time="0.08"/></proof>
- <proof prover="5"><result status="valid" time="2.52"/></proof>
+ <proof prover="5"><result status="valid" time="3.15"/></proof>
  <proof prover="9"><result status="valid" time="0.78"/></proof>
  </goal>
  <goal name="exp_of_j" proved="true">

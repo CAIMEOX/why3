@@ -389,7 +389,7 @@
    <proof prover="3"><result status="valid" time="0.64" steps="3662"/></proof>
    </goal>
    <goal name="rev_sort&#39;vc.16.3" expl="postcondition" proved="true">
-   <proof prover="3"><result status="valid" time="0.65" steps="3547"/></proof>
+   <proof prover="3"><result status="valid" time="0.47" steps="3547"/></proof>
    </goal>
    <goal name="rev_sort&#39;vc.16.4" expl="postcondition" proved="true">
    <proof prover="3"><result status="valid" time="0.46" steps="3900"/></proof>
@@ -398,7 +398,7 @@
    <proof prover="3"><result status="valid" time="0.59" steps="3962"/></proof>
    </goal>
    <goal name="rev_sort&#39;vc.16.6" expl="postcondition" proved="true">
-   <proof prover="3"><result status="valid" time="0.66" steps="3562"/></proof>
+   <proof prover="3"><result status="valid" time="0.48" steps="3562"/></proof>
    </goal>
    <goal name="rev_sort&#39;vc.16.7" expl="postcondition" proved="true">
    <proof prover="3"><result status="valid" time="0.57" steps="3529"/></proof>

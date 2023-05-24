@@ -10,15 +10,15 @@
  <proof prover="0"><result status="valid" time="0.01" steps="15559"/></proof>
  </goal>
  <goal name="main&#39;vc" expl="VC for main" proved="true">
- <proof prover="0"><result status="valid" time="0.15" steps="116054"/></proof>
+ <proof prover="0"><result status="valid" time="0.34" steps="116054"/></proof>
  </goal>
 </theory>
 <theory name="AddListImp" proved="true">
  <goal name="sum&#39;vc" expl="VC for sum" proved="true">
- <proof prover="0"><result status="valid" time="0.01" steps="17675"/></proof>
+ <proof prover="0"><result status="valid" time="0.01" steps="16073"/></proof>
  </goal>
  <goal name="main&#39;vc" expl="VC for main" proved="true">
- <proof prover="0"><result status="valid" time="0.15" steps="116054"/></proof>
+ <proof prover="0"><result status="valid" time="0.33" steps="116054"/></proof>
  </goal>
 </theory>
 </file>

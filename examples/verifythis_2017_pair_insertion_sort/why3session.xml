@@ -102,7 +102,7 @@
   <proof prover="0"><result status="valid" time="0.01" steps="69"/></proof>
   </goal>
   <goal name="pair_insertion_sort&#39;vc.30" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="2.22" steps="2040"/></proof>
+  <proof prover="0"><result status="valid" time="3.35" steps="2040"/></proof>
   </goal>
   <goal name="pair_insertion_sort&#39;vc.31" expl="index in array bounds" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="42"/></proof>
@@ -135,7 +135,7 @@
   <proof prover="0"><result status="valid" time="0.02" steps="119"/></proof>
   </goal>
   <goal name="pair_insertion_sort&#39;vc.41" expl="loop invariant preservation" proved="true">
-  <proof prover="1"><result status="valid" time="0.02" steps="61043"/></proof>
+  <proof prover="1"><result status="valid" time="0.02" steps="65612"/></proof>
   <proof prover="5"><result status="valid" time="0.09" steps="27205"/></proof>
   </goal>
   <goal name="pair_insertion_sort&#39;vc.42" expl="index in array bounds" proved="true">
@@ -232,7 +232,7 @@
   <proof prover="0"><result status="valid" time="0.02" steps="77"/></proof>
   </goal>
   <goal name="pair_insertion_sort&#39;vc.73" expl="loop invariant init" proved="true">
-  <proof prover="0"><result status="valid" time="2.83" steps="2352"/></proof>
+  <proof prover="0"><result status="valid" time="4.52" steps="2352"/></proof>
   </goal>
   <goal name="pair_insertion_sort&#39;vc.74" expl="index in array bounds" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="40"/></proof>

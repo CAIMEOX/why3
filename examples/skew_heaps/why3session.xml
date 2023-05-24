@@ -18,7 +18,7 @@
 </theory>
 <theory name="SkewHeaps" proved="true">
  <goal name="root_is_min&#39;vc" expl="VC for root_is_min" proved="true">
- <proof prover="2"><result status="valid" time="0.41" steps="1393"/></proof>
+ <proof prover="2"><result status="valid" time="0.71" steps="1393"/></proof>
  </goal>
  <goal name="empty&#39;vc" expl="VC for empty" proved="true">
  <proof prover="2"><result status="valid" time="0.00" steps="6"/></proof>
@@ -52,7 +52,7 @@
    <proof prover="4"><result status="valid" time="0.04" steps="4003"/></proof>
    </goal>
    <goal name="merge&#39;vc.4.3" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="0.25" steps="58031"/></proof>
+   <proof prover="0"><result status="valid" time="0.44" steps="58031"/></proof>
    </goal>
   </transf>
   </goal>
@@ -127,7 +127,7 @@
   <goal name="heapsort&#39;vc.8" expl="loop invariant init" proved="true">
   <proof prover="1"><result status="valid" time="0.01" steps="14"/></proof>
   <proof prover="4"><result status="valid" time="0.07" steps="15941"/></proof>
-  <proof prover="6" timelimit="5"><result status="valid" time="0.02" steps="60480"/></proof>
+  <proof prover="6" timelimit="5"><result status="valid" time="0.02" steps="65418"/></proof>
   </goal>
   <goal name="heapsort&#39;vc.9" expl="loop invariant init" proved="true">
   <proof prover="1"><result status="valid" time="0.01" steps="27"/></proof>
@@ -145,7 +145,7 @@
   <proof prover="1"><result status="valid" time="0.01" steps="30"/></proof>
   </goal>
   <goal name="heapsort&#39;vc.14" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.03" steps="75082"/></proof>
+  <proof prover="6"><result status="valid" time="0.03" steps="80273"/></proof>
   </goal>
   <goal name="heapsort&#39;vc.15" expl="loop invariant preservation" proved="true">
   <proof prover="1"><result status="valid" time="0.02" steps="50"/></proof>
@@ -154,7 +154,7 @@
   <proof prover="3"><result status="valid" time="0.10" steps="29125"/></proof>
   </goal>
   <goal name="heapsort&#39;vc.17" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.03" steps="93075"/></proof>
+  <proof prover="6"><result status="valid" time="0.03" steps="98401"/></proof>
   </goal>
   <goal name="heapsort&#39;vc.18" expl="postcondition" proved="true">
   <proof prover="1"><result status="valid" time="0.01" steps="68"/></proof>

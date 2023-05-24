@@ -24,7 +24,7 @@
   <goal name="fib_even_3n&#39;vc.1" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.00"/></proof>
   <proof prover="3"><result status="valid" time="0.00"/></proof>
-  <proof prover="4"><result status="valid" time="0.01" steps="1006"/></proof>
+  <proof prover="4"><result status="valid" time="0.01" steps="1103"/></proof>
   <proof prover="6"><result status="valid" time="0.00" steps="5"/></proof>
   <proof prover="7"><result status="valid" time="0.01" steps="2033"/></proof>
   </goal>
@@ -34,7 +34,7 @@
  </transf>
  </goal>
  <goal name="fib_even0" proved="true">
- <proof prover="4" timelimit="6"><result status="valid" time="0.01" steps="7918"/></proof>
+ <proof prover="4" timelimit="6"><result status="valid" time="0.01" steps="8701"/></proof>
  </goal>
  <goal name="fib_even1" proved="true">
  <proof prover="7" timelimit="6"><result status="valid" time="0.03" steps="3772"/></proof>
@@ -65,41 +65,41 @@
   <proof prover="4"><result status="valid" time="0.01" steps="1278"/></proof>
   </goal>
   <goal name="f&#39;vc.6" expl="loop invariant init" proved="true">
-  <proof prover="4"><result status="valid" time="0.01" steps="10859"/></proof>
+  <proof prover="4"><result status="valid" time="0.01" steps="11908"/></proof>
   </goal>
   <goal name="f&#39;vc.7" expl="loop invariant init" proved="true">
   <proof prover="4"><result status="valid" time="0.01" steps="1310"/></proof>
   </goal>
   <goal name="f&#39;vc.8" expl="loop variant decrease" proved="true">
-  <proof prover="4"><result status="valid" time="0.01" steps="13689"/></proof>
+  <proof prover="4"><result status="valid" time="0.01" steps="14942"/></proof>
   </goal>
   <goal name="f&#39;vc.9" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.01" steps="12090"/></proof>
+  <proof prover="4"><result status="valid" time="0.01" steps="13349"/></proof>
   </goal>
   <goal name="f&#39;vc.10" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.01" steps="12161"/></proof>
+  <proof prover="4"><result status="valid" time="0.01" steps="13428"/></proof>
   </goal>
   <goal name="f&#39;vc.11" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.58" steps="2322568"/></proof>
+  <proof prover="4"><result status="valid" time="1.34" steps="6932897"/></proof>
   </goal>
   <goal name="f&#39;vc.12" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.01" steps="14129"/></proof>
+  <proof prover="4"><result status="valid" time="0.01" steps="15395"/></proof>
   </goal>
   <goal name="f&#39;vc.13" expl="loop invariant preservation" proved="true">
   <proof prover="1"><result status="valid" time="0.03" steps="10067"/></proof>
   </goal>
   <goal name="f&#39;vc.14" expl="loop invariant preservation" proved="true">
-  <proof prover="4" timelimit="1"><result status="valid" time="0.02" steps="59933"/></proof>
+  <proof prover="4" timelimit="1"><result status="valid" time="0.02" steps="80636"/></proof>
   <proof prover="6"><result status="timeout" time="5.00"/></proof>
   </goal>
   <goal name="f&#39;vc.15" expl="loop invariant preservation" proved="true">
-  <proof prover="2" timelimit="60"><result status="valid" time="7.12"/></proof>
+  <proof prover="2" timelimit="60"><result status="valid" time="10.10"/></proof>
   </goal>
   <goal name="f&#39;vc.16" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.01" steps="18093"/></proof>
+  <proof prover="4"><result status="valid" time="0.01" steps="18254"/></proof>
   </goal>
   <goal name="f&#39;vc.17" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.01" steps="15455"/></proof>
+  <proof prover="4"><result status="valid" time="0.01" steps="15743"/></proof>
   <proof prover="6"><result status="valid" time="0.01" steps="20"/></proof>
   </goal>
  </transf>

@@ -132,7 +132,7 @@
  <proof prover="0"><result status="valid" time="0.03" steps="35951"/></proof>
  </goal>
  <goal name="increment&#39;vc" expl="VC for increment" proved="true">
- <proof prover="2" timelimit="1"><result status="valid" time="0.59" steps="100852"/></proof>
+ <proof prover="2" timelimit="1"><result status="valid" time="0.80" steps="100852"/></proof>
  <transf name="split_vc" proved="true" >
   <goal name="increment&#39;vc.0" expl="assertion" proved="true">
   <proof prover="0"><result status="valid" time="0.03" steps="58581"/></proof>
@@ -247,7 +247,7 @@
    <proof prover="0"><result status="valid" time="0.02" steps="62157"/></proof>
    </goal>
    <goal name="space_saving_k&#39;vc.16.1" expl="loop invariant preservation" proved="true">
-   <proof prover="5"><result status="valid" time="0.74" steps="157692"/></proof>
+   <proof prover="5"><result status="valid" time="1.63" steps="157692"/></proof>
    </goal>
   </transf>
   </goal>
@@ -280,16 +280,16 @@
   <proof prover="0"><result status="valid" time="0.01" steps="56847"/></proof>
   </goal>
   <goal name="space_saving_k&#39;vc.25" expl="loop invariant preservation" proved="true">
-  <proof prover="5"><result status="valid" time="1.17" steps="303907"/></proof>
+  <proof prover="5"><result status="valid" time="2.33" steps="303907"/></proof>
   </goal>
   <goal name="space_saving_k&#39;vc.26" expl="loop invariant preservation" proved="true">
-  <proof prover="5"><result status="valid" time="0.09" steps="26706"/></proof>
+  <proof prover="5"><result status="valid" time="0.22" steps="26706"/></proof>
   </goal>
   <goal name="space_saving_k&#39;vc.27" expl="loop invariant preservation" proved="true">
   <proof prover="1"><result status="valid" time="0.92" steps="5476"/></proof>
   </goal>
   <goal name="space_saving_k&#39;vc.28" expl="loop invariant preservation" proved="true">
-  <proof prover="2"><result status="valid" time="1.61" steps="294230"/></proof>
+  <proof prover="2"><result status="valid" time="2.79" steps="294230"/></proof>
   </goal>
  </transf>
  </goal>

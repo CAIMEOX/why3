@@ -53,10 +53,10 @@
  <proof prover="2"><result status="valid" time="0.00" steps="18"/></proof>
  </goal>
  <goal name="string_of_array_concat&#39;vc" expl="VC for string_of_array_concat" proved="true">
- <proof prover="0"><result status="valid" time="0.46" steps="1053"/></proof>
+ <proof prover="0"><result status="valid" time="0.78" steps="1053"/></proof>
  </goal>
  <goal name="string_of_array_concat_right&#39;vc" expl="VC for string_of_array_concat_right" proved="true">
- <proof prover="4"><result status="valid" time="0.01" steps="27168"/></proof>
+ <proof prover="4"><result status="valid" time="0.01" steps="29059"/></proof>
  </goal>
  <goal name="string_of_array_length&#39;vc" expl="VC for string_of_array_length" proved="true">
  <proof prover="0"><result status="valid" time="0.02" steps="102"/></proof>
@@ -100,10 +100,10 @@
   <proof prover="0"><result status="valid" time="0.00" steps="36"/></proof>
   </goal>
   <goal name="insert&#39;vc.9" expl="assertion" proved="true">
-  <proof prover="4"><result status="valid" time="0.03" steps="136940"/></proof>
+  <proof prover="4"><result status="valid" time="0.03" steps="140400"/></proof>
   </goal>
   <goal name="insert&#39;vc.10" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.47" steps="464"/></proof>
+  <proof prover="0"><result status="valid" time="0.77" steps="464"/></proof>
   </goal>
   <goal name="insert&#39;vc.11" expl="variant decrease" proved="true">
   <proof prover="0"><result status="valid" time="0.01" steps="46"/></proof>
@@ -125,10 +125,10 @@
    <goal name="insert&#39;vc.16.0" expl="assertion" proved="true">
    <transf name="split_vc" proved="true" >
     <goal name="insert&#39;vc.16.0.0" expl="assertion" proved="true">
-    <proof prover="0"><result status="valid" time="0.53" steps="573"/></proof>
+    <proof prover="0"><result status="valid" time="0.92" steps="573"/></proof>
     </goal>
     <goal name="insert&#39;vc.16.0.1" expl="assertion" proved="true">
-    <proof prover="4" timelimit="1"><result status="valid" time="0.02" steps="47153"/></proof>
+    <proof prover="4" timelimit="1"><result status="valid" time="0.02" steps="50886"/></proof>
     </goal>
    </transf>
    </goal>
@@ -146,10 +146,10 @@
  </transf>
  </goal>
  <goal name="insert_leaves&#39;vc" expl="VC for insert_leaves" proved="true">
- <proof prover="0"><result status="valid" time="0.29" steps="2199"/></proof>
+ <proof prover="0"><result status="valid" time="0.49" steps="2199"/></proof>
  </goal>
  <goal name="balance&#39;vc" expl="VC for balance" proved="true">
- <proof prover="0"><result status="valid" time="0.25" steps="1270"/></proof>
+ <proof prover="0"><result status="valid" time="0.43" steps="1270"/></proof>
  </goal>
 </theory>
 </file>

@@ -16,7 +16,7 @@
   <proof prover="2"><result status="valid" time="0.10" steps="22100"/></proof>
   </goal>
   <goal name="inv_nonneg&#39;vc.2" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.04" steps="187619"/></proof>
+  <proof prover="0"><result status="valid" time="0.04" steps="192558"/></proof>
   </goal>
   <goal name="inv_nonneg&#39;vc.3" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
@@ -32,7 +32,7 @@
       <goal name="inv_nonneg&#39;vc.3.1.0.0.0" expl="apply premises" proved="true">
       <transf name="compute_specified" proved="true" >
        <goal name="inv_nonneg&#39;vc.3.1.0.0.0.0" expl="apply premises" proved="true">
-       <proof prover="0"><result status="valid" time="0.07" steps="352153"/></proof>
+       <proof prover="0"><result status="valid" time="0.07" steps="357276"/></proof>
        </goal>
       </transf>
       </goal>
@@ -75,7 +75,7 @@
    <proof prover="2" timelimit="5"><result status="valid" time="0.06" steps="16774"/></proof>
    </goal>
    <goal name="shearsort&#39;vc.6.1" expl="false case (loop invariant preservation)" proved="true">
-   <proof prover="2" timelimit="5"><result status="valid" time="0.74" steps="166450"/></proof>
+   <proof prover="2" timelimit="5"><result status="valid" time="1.11" steps="166450"/></proof>
    </goal>
   </transf>
   </goal>
@@ -223,7 +223,7 @@
   <proof prover="2"><result status="valid" time="0.04" steps="17858"/></proof>
   </goal>
   <goal name="shearsort&#39;vc.25" expl="postcondition" proved="true">
-  <proof prover="2" timelimit="5"><result status="valid" time="0.70" steps="167937"/></proof>
+  <proof prover="2" timelimit="5"><result status="valid" time="1.17" steps="167937"/></proof>
   </goal>
   <goal name="shearsort&#39;vc.26" expl="assertion" proved="true">
   <proof prover="2"><result status="valid" time="0.05" steps="19452"/></proof>

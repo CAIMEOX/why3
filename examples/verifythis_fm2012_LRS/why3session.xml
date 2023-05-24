@@ -10,7 +10,7 @@
 <path name=".."/><path name="verifythis_fm2012_LRS.mlw"/>
 <theory name="LCP" proved="true">
  <goal name="not_common_prefix_if_last_char_are_different" proved="true">
- <proof prover="4"><result status="valid" time="0.01" steps="9231"/></proof>
+ <proof prover="4"><result status="valid" time="0.01" steps="10038"/></proof>
  </goal>
  <goal name="longest_common_prefix_succ" proved="true">
  <proof prover="3"><result status="valid" time="0.00" steps="28"/></proof>
@@ -30,10 +30,10 @@
   <proof prover="2"><result status="valid" time="0.02" steps="3761"/></proof>
   </goal>
   <goal name="lcp&#39;vc.4" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.91" steps="1130565"/></proof>
+  <proof prover="4"><result status="valid" time="0.91" steps="6108258"/></proof>
   </goal>
   <goal name="lcp&#39;vc.5" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.01" steps="12821"/></proof>
+  <proof prover="4"><result status="valid" time="0.01" steps="13920"/></proof>
   </goal>
  </transf>
  </goal>
@@ -156,10 +156,10 @@
   <proof prover="2"><result status="valid" time="0.20" steps="39574"/></proof>
   </goal>
   <goal name="sort&#39;vc.23" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.41" steps="938"/></proof>
+  <proof prover="3"><result status="valid" time="0.69" steps="938"/></proof>
   </goal>
   <goal name="sort&#39;vc.24" expl="loop invariant preservation" proved="true">
-  <proof prover="3"><result status="valid" time="0.36" steps="925"/></proof>
+  <proof prover="3"><result status="valid" time="0.61" steps="925"/></proof>
   </goal>
   <goal name="sort&#39;vc.25" expl="assertion" proved="true">
   <proof prover="2"><result status="valid" time="0.05" steps="17803"/></proof>
@@ -198,7 +198,7 @@
  <proof prover="2"><result status="valid" time="0.04" steps="13252"/></proof>
  </goal>
  <goal name="permut_permutation" proved="true">
- <proof prover="4"><result status="valid" time="0.03" steps="91844"/></proof>
+ <proof prover="4"><result status="valid" time="0.03" steps="129768"/></proof>
  </goal>
  <goal name="create&#39;vc" expl="VC for create" proved="true">
  <transf name="split_goal_right" proved="true" >
@@ -221,7 +221,7 @@
   <proof prover="2"><result status="valid" time="0.06" steps="19567"/></proof>
   </goal>
   <goal name="create&#39;vc.6" expl="precondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.04" steps="69766"/></proof>
+  <proof prover="4"><result status="valid" time="0.04" steps="100498"/></proof>
   </goal>
   <goal name="create&#39;vc.7" expl="postcondition" proved="true">
   <proof prover="2"><result status="valid" time="0.02" steps="12462"/></proof>

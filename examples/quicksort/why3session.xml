@@ -118,7 +118,7 @@
 </theory>
 <theory name="Quicksort3way" proved="true">
  <goal name="quick_rec&#39;vc" expl="VC for quick_rec" proved="true">
- <proof prover="1"><result status="valid" time="2.26" steps="6357"/></proof>
+ <proof prover="1"><result status="valid" time="3.84" steps="6357"/></proof>
  <transf name="split_goal_right" proved="true" >
   <goal name="quick_rec&#39;vc.0" expl="index in array bounds" proved="true">
   <proof prover="1"><result status="valid" time="0.00" steps="5"/></proof>
@@ -551,7 +551,7 @@
   <proof prover="0"><result status="valid" time="0.01" steps="50"/></proof>
   </goal>
   <goal name="quick_rec&#39;vc.77" expl="postcondition" proved="true">
-  <proof prover="0" timelimit="10" memlimit="4000"><result status="valid" time="1.22" steps="4398"/></proof>
+  <proof prover="0" timelimit="10" memlimit="4000"><result status="valid" time="1.96" steps="4398"/></proof>
   </goal>
   <goal name="quick_rec&#39;vc.78" expl="postcondition" proved="true">
   <transf name="apply" proved="true" arg1="permut_sub_trans" arg2="with" arg3="a2">

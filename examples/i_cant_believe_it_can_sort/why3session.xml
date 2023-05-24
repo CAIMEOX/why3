@@ -48,7 +48,7 @@
   <proof prover="0"><result status="valid" time="0.19" steps="1139"/></proof>
   </goal>
   <goal name="i_cant_believe_it_can_sort&#39;vc.13" expl="loop invariant preservation" proved="true">
-  <proof prover="0"><result status="valid" time="0.42" steps="4037"/></proof>
+  <proof prover="0"><result status="valid" time="0.74" steps="4037"/></proof>
   </goal>
   <goal name="i_cant_believe_it_can_sort&#39;vc.14" expl="loop invariant preservation" proved="true">
   <proof prover="0"><result status="valid" time="0.00" steps="22"/></proof>

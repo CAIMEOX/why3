@@ -20,7 +20,7 @@
 </theory>
 <theory name="TheClassicalSudokuGrid" proved="true">
  <goal name="classical_sudoku&#39;vc" expl="VC for classical_sudoku" proved="true">
- <proof prover="0"><result status="valid" time="0.50" steps="1167653"/></proof>
+ <proof prover="0"><result status="valid" time="0.91" steps="1440016"/></proof>
  </goal>
 </theory>
 <theory name="Solver" proved="true">
@@ -162,7 +162,7 @@
  <proof prover="8"><result status="valid" time="0.04" steps="8844"/></proof>
  </goal>
  <goal name="valid_changed_chunks" proved="true">
- <proof prover="0"><result status="valid" time="0.01" steps="27877"/></proof>
+ <proof prover="0"><result status="valid" time="0.01" steps="29812"/></proof>
  </goal>
  <goal name="valid_up_to_change&#39;vc" expl="VC for valid_up_to_change" proved="true">
  <proof prover="8"><result status="valid" time="0.06" steps="13184"/></proof>
@@ -334,7 +334,7 @@
    <proof prover="8"><result status="valid" time="0.09" steps="16112"/></proof>
    </goal>
    <goal name="solve_aux&#39;vc.50.4" expl="assertion" proved="true">
-   <proof prover="8"><result status="valid" time="0.16" steps="41115"/></proof>
+   <proof prover="8"><result status="valid" time="0.30" steps="41115"/></proof>
    </goal>
   </transf>
   </goal>
@@ -470,7 +470,7 @@
  <proof prover="8"><result status="valid" time="0.03" steps="7724"/></proof>
  </goal>
  <goal name="test1&#39;vc" expl="VC for test1" proved="true">
- <proof prover="0"><result status="valid" time="0.06" steps="351561"/></proof>
+ <proof prover="0"><result status="valid" time="0.47" steps="756808"/></proof>
  </goal>
  <goal name="test2&#39;vc" expl="VC for test2" proved="true">
  <proof prover="8"><result status="valid" time="0.03" steps="7713"/></proof>

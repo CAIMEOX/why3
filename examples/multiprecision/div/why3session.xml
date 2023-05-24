@@ -1035,7 +1035,7 @@
    <proof prover="8" timelimit="5" memlimit="2000"><result status="valid" time="0.03" steps="10943"/></proof>
    </goal>
    <goal name="wmpn_divrem_1&#39;vc.51.1" expl="VC for wmpn_divrem_1" proved="true">
-   <proof prover="1"><result status="valid" time="0.71"/></proof>
+   <proof prover="1"><result status="valid" time="1.00"/></proof>
    </goal>
    <goal name="wmpn_divrem_1&#39;vc.51.2" expl="VC for wmpn_divrem_1" proved="true">
    <proof prover="4"><result status="valid" time="0.17"/></proof>
@@ -1129,7 +1129,7 @@
   <proof prover="1"><result status="valid" time="0.08"/></proof>
   </goal>
   <goal name="wmpn_divrem_1&#39;vc.74" expl="loop variant decrease" proved="true">
-  <proof prover="0" timelimit="10"><result status="valid" time="1.83"/></proof>
+  <proof prover="0" timelimit="10"><result status="valid" time="2.16"/></proof>
   </goal>
   <goal name="wmpn_divrem_1&#39;vc.75" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.02" steps="44079"/></proof>
@@ -1671,7 +1671,7 @@
      <proof prover="9"><result status="valid" time="0.04" steps="13210"/></proof>
      </goal>
      <goal name="div3by2_inv&#39;vc.15.94.0.1" expl="asserted formula" proved="true">
-     <proof prover="4"><result status="valid" time="0.72"/></proof>
+     <proof prover="4"><result status="valid" time="0.93"/></proof>
      </goal>
     </transf>
     </goal>
@@ -2660,13 +2660,13 @@
   </transf>
   </goal>
   <goal name="reciprocal_word_3by2&#39;vc.66" expl="precondition" proved="true">
-  <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="2.03" steps="266"/></proof>
+  <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="2.62" steps="266"/></proof>
   </goal>
   <goal name="reciprocal_word_3by2&#39;vc.67" expl="postcondition" proved="true">
   <proof prover="1"><result status="valid" time="0.04"/></proof>
   </goal>
   <goal name="reciprocal_word_3by2&#39;vc.68" expl="precondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.79" steps="199"/></proof>
+  <proof prover="5"><result status="valid" time="1.11" steps="199"/></proof>
   </goal>
   <goal name="reciprocal_word_3by2&#39;vc.69" expl="postcondition" proved="true">
   <proof prover="1" memlimit="1000"><result status="valid" time="0.06"/></proof>
@@ -2835,7 +2835,7 @@
    <proof prover="8"><result status="valid" time="0.46" steps="856124"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.28.2" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9"><result status="valid" time="0.44" steps="50275"/></proof>
+   <proof prover="9"><result status="valid" time="0.29" steps="50275"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.28.3" expl="VC for div_sb_qr" proved="true">
    <proof prover="7"><result status="valid" time="0.12" steps="170"/></proof>
@@ -2854,10 +2854,10 @@
    <proof prover="0" memlimit="1000"><result status="valid" time="0.46"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.30.2" expl="VC for div_sb_qr" proved="true">
-   <proof prover="5"><result status="valid" time="1.53" steps="342"/></proof>
+   <proof prover="5"><result status="valid" time="1.03" steps="342"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.30.3" expl="VC for div_sb_qr" proved="true">
-   <proof prover="5"><result status="valid" time="0.57" steps="157"/></proof>
+   <proof prover="5"><result status="valid" time="0.37" steps="157"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.30.4" expl="VC for div_sb_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.06" steps="15253"/></proof>
@@ -2866,7 +2866,7 @@
    <proof prover="9"><result status="valid" time="0.08" steps="20345"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.30.6" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="2.62"/></proof>
+   <proof prover="1"><result status="valid" time="1.64"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.30.7" expl="VC for div_sb_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.19" steps="29428"/></proof>
@@ -2895,7 +2895,7 @@
   <proof prover="7"><result status="valid" time="0.12" steps="347"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.34" expl="assertion" proved="true">
-  <proof prover="7"><result status="valid" time="0.85" steps="435"/></proof>
+  <proof prover="7"><result status="valid" time="0.53" steps="435"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.35" expl="precondition" proved="true">
   <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.18" steps="35668"/></proof>
@@ -2925,10 +2925,10 @@
    <proof prover="9"><result status="valid" time="0.22" steps="24703"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.40.1" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="0.92"/></proof>
+   <proof prover="1"><result status="valid" time="0.57"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.40.2" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="0.89"/></proof>
+   <proof prover="1"><result status="valid" time="0.55"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.40.3" expl="VC for div_sb_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.05" steps="16177"/></proof>
@@ -2946,10 +2946,10 @@
    <proof prover="9"><result status="valid" time="0.22" steps="38010"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.40.8" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="2.16"/></proof>
+   <proof prover="1"><result status="valid" time="1.62"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.40.9" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="2.33"/></proof>
+   <proof prover="1"><result status="valid" time="1.81"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.40.10" expl="VC for div_sb_qr" proved="true">
    <proof prover="1"><result status="valid" time="0.19"/></proof>
@@ -3021,7 +3021,7 @@
    <proof prover="4"><result status="valid" time="0.05"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.45.5" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.65" steps="67848"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.48" steps="67848"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.45.6" expl="VC for div_sb_qr" proved="true">
    <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="0.20" steps="127"/></proof>
@@ -3185,7 +3185,7 @@
   </transf>
   </goal>
   <goal name="div_sb_qr&#39;vc.73" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="1.09"/></proof>
+  <proof prover="1"><result status="valid" time="0.70"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.74" expl="precondition" proved="true">
   <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.20" steps="38977"/></proof>
@@ -3200,13 +3200,13 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.14" steps="45741"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.78" expl="precondition" proved="true">
-  <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="3.34" steps="244732"/></proof>
+  <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="2.35" steps="244732"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.79" expl="precondition" proved="true">
   <proof prover="9"><result status="valid" time="0.18" steps="39090"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.80" expl="precondition" proved="true">
-  <proof prover="9"><result status="valid" time="0.51" steps="60215"/></proof>
+  <proof prover="9"><result status="valid" time="0.27" steps="60215"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.81" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.26" steps="47037"/></proof>
@@ -3277,7 +3277,7 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.06" steps="16777"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.87.8" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.05" steps="87671"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.71" steps="87671"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.87.9" expl="VC for div_sb_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.05" steps="16312"/></proof>
@@ -3296,7 +3296,7 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.12" steps="18360"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.88.2" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.36" steps="36316"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.20" steps="36316"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.88.3" expl="VC for div_sb_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.30" steps="36319"/></proof>
@@ -3332,7 +3332,7 @@
    <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="3.48" steps="318"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.88.14" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.38" steps="36920"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.22" steps="36920"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.88.15" expl="VC for div_sb_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.24" steps="36959"/></proof>
@@ -3359,7 +3359,7 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.11" steps="17205"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.88.23" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="1.21"/></proof>
+   <proof prover="1"><result status="valid" time="0.66"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.88.24" expl="VC for div_sb_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.10" steps="16794"/></proof>
@@ -3383,10 +3383,10 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.12" steps="19698"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.88.31" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="0.79"/></proof>
+   <proof prover="1"><result status="valid" time="0.48"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.88.32" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="0.72"/></proof>
+   <proof prover="1"><result status="valid" time="0.47"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.88.33" expl="VC for div_sb_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.19" steps="19900"/></proof>
@@ -3397,10 +3397,10 @@
   <proof prover="3"><result status="valid" time="0.21" steps="210228"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.90" expl="precondition" proved="true">
-  <proof prover="9"><result status="valid" time="0.54" steps="76634"/></proof>
+  <proof prover="9"><result status="valid" time="0.37" steps="76634"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.91" expl="precondition" proved="true">
-  <proof prover="9"><result status="valid" time="0.55" steps="76503"/></proof>
+  <proof prover="9"><result status="valid" time="0.35" steps="76503"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.92" expl="precondition" proved="true">
   <proof prover="3"><result status="valid" time="0.12" steps="92719"/></proof>
@@ -3883,7 +3883,7 @@
   </transf>
   </goal>
   <goal name="div_sb_qr&#39;vc.121" expl="assertion" proved="true">
-  <proof prover="2" timelimit="5"><result status="valid" time="1.70" steps="161257"/></proof>
+  <proof prover="2" timelimit="5"><result status="valid" time="1.19" steps="161257"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.122" expl="precondition" proved="true">
   <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.28" steps="50601"/></proof>
@@ -3906,10 +3906,10 @@
    <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.14" steps="44361"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.127.1" expl="VC for div_sb_qr" proved="true">
-   <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="0.94" steps="242"/></proof>
+   <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="0.67" steps="242"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.127.2" expl="VC for div_sb_qr" proved="true">
-   <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="0.97" steps="243"/></proof>
+   <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="0.66" steps="243"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.127.3" expl="VC for div_sb_qr" proved="true">
    <proof prover="3"><result status="valid" time="0.10" steps="44898"/></proof>
@@ -3921,10 +3921,10 @@
    <proof prover="9"><result status="valid" time="0.33" steps="53446"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.127.6" expl="VC for div_sb_qr" proved="true">
-   <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="1.03" steps="244"/></proof>
+   <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="0.73" steps="244"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.127.7" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="0.57"/></proof>
+   <proof prover="1"><result status="valid" time="0.37"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.127.8" expl="VC for div_sb_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.06" steps="16308"/></proof>
@@ -3950,13 +3950,13 @@
   <proof prover="1" timelimit="10"><result status="valid" time="0.12"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.133" expl="precondition" proved="true">
-  <proof prover="2" timelimit="5"><result status="valid" time="2.39" steps="231344"/></proof>
+  <proof prover="2" timelimit="5"><result status="valid" time="1.87" steps="231344"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.134" expl="integer overflow" proved="true">
   <proof prover="0"><result status="valid" time="0.03"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.135" expl="precondition" proved="true">
-  <proof prover="2" timelimit="5"><result status="valid" time="0.88" steps="97004"/></proof>
+  <proof prover="2" timelimit="5"><result status="valid" time="0.55" steps="97004"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.136" expl="precondition" proved="true">
   <proof prover="3"><result status="valid" time="4.33" steps="3975236"/></proof>
@@ -3972,10 +3972,10 @@
   </transf>
   </goal>
   <goal name="div_sb_qr&#39;vc.138" expl="assertion" proved="true">
-  <proof prover="2" timelimit="5"><result status="valid" time="0.97" steps="116818"/></proof>
+  <proof prover="2" timelimit="5"><result status="valid" time="0.65" steps="116818"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.139" expl="precondition" proved="true">
-  <proof prover="9"><result status="valid" time="0.45" steps="71720"/></proof>
+  <proof prover="9"><result status="valid" time="0.29" steps="71720"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.140" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
@@ -4046,13 +4046,13 @@
    <proof prover="4"><result status="valid" time="0.04"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.154.2" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="2.21"/></proof>
+   <proof prover="1"><result status="valid" time="1.68"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.154.3" expl="VC for div_sb_qr" proved="true">
    <proof prover="1"><result status="valid" time="1.86"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.154.4" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.72" steps="102999"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.49" steps="102999"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.154.5" expl="VC for div_sb_qr" proved="true">
    <proof prover="1"><result status="valid" time="0.19"/></proof>
@@ -4075,13 +4075,13 @@
   </transf>
   </goal>
   <goal name="div_sb_qr&#39;vc.156" expl="assertion" proved="true">
-  <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.66" steps="106283"/></proof>
+  <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.46" steps="106283"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.157" expl="assertion" proved="true">
   <proof prover="9"><result status="valid" time="0.16" steps="28643"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.158" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="1.07"/></proof>
+  <proof prover="1"><result status="valid" time="0.75"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.159" expl="assertion" proved="true">
   <proof prover="4"><result status="valid" time="0.40"/></proof>
@@ -4093,7 +4093,7 @@
     <goal name="div_sb_qr&#39;vc.160.0.0" expl="postcondition" proved="true">
     <transf name="reflection_f" proved="true" arg1="mp_decision">
      <goal name="div_sb_qr&#39;vc.160.0.0.0" expl="postcondition" proved="true">
-     <proof prover="1"><result status="valid" time="0.60"/></proof>
+     <proof prover="1"><result status="valid" time="0.97"/></proof>
      <transf name="apply" proved="true" arg1="HR">
       <goal name="div_sb_qr&#39;vc.160.0.0.0.0" expl="apply premises" proved="true">
       <proof prover="9"><result status="valid" time="0.32" steps="74249"/></proof>
@@ -4650,7 +4650,7 @@
      </transf>
      </goal>
      <goal name="div_sb_qr&#39;vc.160.0.0.1" proved="true">
-     <proof prover="1"><result status="valid" time="0.53"/></proof>
+     <proof prover="1"><result status="valid" time="0.88"/></proof>
      </goal>
      <goal name="div_sb_qr&#39;vc.160.0.0.2" proved="true">
      <proof prover="9"><result status="valid" time="0.35" steps="81792"/></proof>
@@ -4727,7 +4727,7 @@
    <goal name="div_sb_qr&#39;vc.163.13" expl="VC for div_sb_qr" proved="true">
    <transf name="replace" proved="true" arg1="(power radix1 2)" arg2="(radix1 * radix1)">
     <goal name="div_sb_qr&#39;vc.163.13.0" expl="VC for div_sb_qr" proved="true">
-    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="3.04" steps="162036"/></proof>
+    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="2.35" steps="162036"/></proof>
     </goal>
     <goal name="div_sb_qr&#39;vc.163.13.1" expl="equality hypothesis" proved="true">
     <proof prover="9"><result status="valid" time="0.50" steps="53742"/></proof>
@@ -4741,7 +4741,7 @@
    <goal name="div_sb_qr&#39;vc.164.0" expl="postcondition" proved="true">
    <transf name="inline_goal" proved="true" >
     <goal name="div_sb_qr&#39;vc.164.0.0" expl="postcondition" proved="true">
-    <proof prover="1"><result status="valid" time="4.57"/></proof>
+    <proof prover="1"><result status="valid" time="3.25"/></proof>
     </goal>
    </transf>
    </goal>
@@ -4772,13 +4772,13 @@
    <proof prover="3"><result status="valid" time="0.05" steps="4802"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.169.3" expl="VC for div_sb_qr" proved="true">
-   <proof prover="0"><result status="valid" time="0.95"/></proof>
+   <proof prover="0"><result status="valid" time="0.70"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.169.4" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="0.76"/></proof>
+   <proof prover="1"><result status="valid" time="0.52"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.169.5" expl="VC for div_sb_qr" proved="true">
-   <proof prover="2"><result status="valid" time="0.71" steps="108978"/></proof>
+   <proof prover="2"><result status="valid" time="0.50" steps="108978"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.169.6" expl="VC for div_sb_qr" proved="true">
    <proof prover="3"><result status="valid" time="0.08" steps="77755"/></proof>
@@ -4793,13 +4793,13 @@
    <proof prover="3"><result status="valid" time="0.08" steps="77268"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.169.10" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.66" steps="181016"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.22" steps="181016"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.169.11" expl="VC for div_sb_qr" proved="true">
    <proof prover="3"><result status="valid" time="0.03" steps="122530"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.169.12" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="4.98"/></proof>
+   <proof prover="1"><result status="valid" time="3.46"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.169.13" expl="VC for div_sb_qr" proved="true">
    <proof prover="3"><result status="valid" time="0.07" steps="77605"/></proof>
@@ -4811,13 +4811,13 @@
    <proof prover="1"><result status="valid" time="0.15"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.169.16" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9"><result status="valid" time="0.59" steps="89105"/></proof>
+   <proof prover="9"><result status="valid" time="0.32" steps="89105"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.169.17" expl="VC for div_sb_qr" proved="true">
-   <proof prover="4"><result status="valid" time="1.52"/></proof>
+   <proof prover="4"><result status="valid" time="1.00"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.169.18" expl="VC for div_sb_qr" proved="true">
-   <proof prover="4"><result status="valid" time="1.24"/></proof>
+   <proof prover="4"><result status="valid" time="0.78"/></proof>
    </goal>
   </transf>
   </goal>
@@ -4828,7 +4828,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.42" steps="87796"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.172" expl="precondition" proved="true">
-  <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.51" steps="88048"/></proof>
+  <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.28" steps="88048"/></proof>
   <proof prover="3" memlimit="2000"><result status="valid" time="0.04" steps="75584"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.173" expl="assertion" proved="true">
@@ -4840,10 +4840,10 @@
    <proof prover="4"><result status="valid" time="0.04"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.173.2" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="2.44"/></proof>
+   <proof prover="1"><result status="valid" time="1.46"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.173.3" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="2.14"/></proof>
+   <proof prover="1"><result status="valid" time="1.49"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.173.4" expl="VC for div_sb_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.49" steps="87835"/></proof>
@@ -4895,13 +4895,13 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.40" steps="41929"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.175.13" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.43" steps="41861"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.27" steps="41861"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.175.14" expl="VC for div_sb_qr" proved="true">
-   <proof prover="4"><result status="valid" time="0.77"/></proof>
+   <proof prover="4"><result status="valid" time="0.56"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.175.15" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="1.29"/></proof>
+   <proof prover="1"><result status="valid" time="0.85"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.175.16" expl="VC for div_sb_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.11" steps="17613"/></proof>
@@ -4913,10 +4913,10 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.07" steps="17526"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.175.19" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.35" steps="116683"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.95" steps="116683"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.175.20" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.49" steps="42615"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.33" steps="42615"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.175.21" expl="VC for div_sb_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.10" steps="17977"/></proof>
@@ -4940,7 +4940,7 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.08" steps="17598"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.175.28" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="0.49"/></proof>
+   <proof prover="1"><result status="valid" time="0.34"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.175.29" expl="VC for div_sb_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.11" steps="17561"/></proof>
@@ -4951,7 +4951,7 @@
   </transf>
   </goal>
   <goal name="div_sb_qr&#39;vc.176" expl="postcondition" proved="true">
-  <proof prover="9"><result status="valid" time="0.50" steps="88792"/></proof>
+  <proof prover="9"><result status="valid" time="0.34" steps="88792"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.177" expl="assertion" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="1.97" steps="220723"/></proof>
@@ -4959,7 +4959,7 @@
   <goal name="div_sb_qr&#39;vc.178" expl="precondition" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="div_sb_qr&#39;vc.178.0" expl="precondition" proved="true">
-   <proof prover="2"><result status="valid" time="0.72" steps="113165"/></proof>
+   <proof prover="2"><result status="valid" time="0.49" steps="113165"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.178.1" expl="precondition" proved="true">
    <proof prover="2"><result status="valid" time="0.40" steps="88207"/></proof>
@@ -4977,19 +4977,19 @@
   </transf>
   </goal>
   <goal name="div_sb_qr&#39;vc.180" expl="precondition" proved="true">
-  <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="2.20" steps="197146"/></proof>
+  <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.42" steps="197146"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.181" expl="precondition" proved="true">
-  <proof prover="9"><result status="valid" time="0.92" steps="115795"/></proof>
+  <proof prover="9"><result status="valid" time="0.56" steps="115795"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.182" expl="precondition" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.45" steps="96513"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.183" expl="assertion" proved="true">
-  <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="2.95" steps="261111"/></proof>
+  <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="2.13" steps="261111"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.184" expl="precondition" proved="true">
-  <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.79" steps="134915"/></proof>
+  <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.51" steps="134915"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.185" expl="postcondition" proved="true">
   <proof prover="4"><result status="valid" time="0.03"/></proof>
@@ -5031,15 +5031,15 @@
   <goal name="div_sb_qr&#39;vc.189" expl="assertion" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="div_sb_qr&#39;vc.189.0" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1" memlimit="1000"><result status="valid" time="1.70"/></proof>
+   <proof prover="1" memlimit="1000"><result status="valid" time="1.20"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.189.1" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1" memlimit="1000"><result status="valid" time="1.27"/></proof>
+   <proof prover="1" memlimit="1000"><result status="valid" time="0.86"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="div_sb_qr&#39;vc.190" expl="precondition" proved="true">
-  <proof prover="2" timelimit="5"><result status="valid" time="0.62" steps="124533"/></proof>
+  <proof prover="2" timelimit="5"><result status="valid" time="0.41" steps="124533"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.191" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
@@ -5062,7 +5062,7 @@
    <proof prover="4"><result status="valid" time="0.02"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.191.6" expl="VC for div_sb_qr" proved="true">
-   <proof prover="1"><result status="valid" time="0.46"/></proof>
+   <proof prover="1"><result status="valid" time="0.30"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.191.7" expl="VC for div_sb_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.16" steps="23287"/></proof>
@@ -5151,7 +5151,7 @@
   </transf>
   </goal>
   <goal name="div_sb_qr&#39;vc.196" expl="precondition" proved="true">
-  <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.56" steps="117274"/></proof>
+  <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.34" steps="117274"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.197" expl="precondition" proved="true">
   <proof prover="9"><result status="valid" time="0.12" steps="20016"/></proof>
@@ -5396,22 +5396,22 @@
    <proof prover="1"><result status="valid" time="0.80"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.204.6" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.04" steps="164534"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.77" steps="164534"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.204.7" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.71" steps="138661"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.49" steps="138661"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.204.8" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.08" steps="164254"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.71" steps="164254"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.204.9" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.72" steps="137769"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.49" steps="137769"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.204.10" expl="VC for div_sb_qr" proved="true">
    <proof prover="4"><result status="valid" time="0.04"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.204.11" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.76" steps="139578"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.48" steps="139578"/></proof>
    </goal>
   </transf>
   </goal>
@@ -5427,7 +5427,7 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.12" steps="19825"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.205.3" expl="VC for div_sb_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.54" steps="55086"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.37" steps="55086"/></proof>
    </goal>
    <goal name="div_sb_qr&#39;vc.205.4" expl="VC for div_sb_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.10" steps="19675"/></proof>
@@ -5591,7 +5591,7 @@
    <goal name="div_sb_qr&#39;vc.228.1" expl="assertion" proved="true">
    <transf name="introduce_premises" proved="true" >
     <goal name="div_sb_qr&#39;vc.228.1.0" expl="assertion" proved="true">
-    <proof prover="4" timelimit="1" memlimit="1000"><result status="valid" time="0.50"/></proof>
+    <proof prover="4" timelimit="1" memlimit="1000"><result status="valid" time="0.83"/></proof>
     </goal>
    </transf>
    </goal>
@@ -5608,7 +5608,7 @@
     <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.05" steps="17810"/></proof>
     </goal>
     <goal name="div_sb_qr&#39;vc.229.1.1" expl="equality hypothesis" proved="true">
-    <proof prover="4"><result status="valid" time="2.07"/></proof>
+    <proof prover="4"><result status="valid" time="1.67"/></proof>
     </goal>
    </transf>
    </goal>
@@ -5618,7 +5618,7 @@
   <proof prover="9"><result status="valid" time="0.59" steps="117330"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.231" expl="integer overflow" proved="true">
-  <proof prover="2" timelimit="5"><result status="valid" time="0.67" steps="119191"/></proof>
+  <proof prover="2" timelimit="5"><result status="valid" time="0.46" steps="119191"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.232" expl="precondition" proved="true">
   <proof prover="3"><result status="valid" time="0.04" steps="135083"/></proof>
@@ -5815,7 +5815,7 @@
        <proof prover="9"><result status="valid" time="0.23" steps="83545"/></proof>
        </goal>
        <goal name="div_sb_qr&#39;vc.242.0.0.1.0.35" expl="apply premises" proved="true">
-       <proof prover="9"><result status="valid" time="0.13" steps="83545"/></proof>
+       <proof prover="9"><result status="valid" time="0.25" steps="83545"/></proof>
        </goal>
        <goal name="div_sb_qr&#39;vc.242.0.0.1.0.36" expl="apply premises" proved="true">
        <proof prover="9"><result status="valid" time="0.14" steps="83348"/></proof>
@@ -6479,7 +6479,7 @@
      <proof prover="2"><result status="valid" time="0.08" steps="21578"/></proof>
      </goal>
      <goal name="div_sb_qr&#39;vc.246.0.0.20" expl="VC for div_sb_qr" proved="true">
-     <proof prover="1"><result status="valid" time="0.42"/></proof>
+     <proof prover="1"><result status="valid" time="0.27"/></proof>
      </goal>
      <goal name="div_sb_qr&#39;vc.246.0.0.21" expl="VC for div_sb_qr" proved="true">
      <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.78" steps="159690"/></proof>
@@ -6554,7 +6554,7 @@
   <proof prover="2" timelimit="5"><result status="valid" time="0.85" steps="151701"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.250" expl="loop variant decrease" proved="true">
-  <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.52" steps="119176"/></proof>
+  <proof prover="2" timelimit="5" memlimit="2000"><result status="valid" time="0.36" steps="119176"/></proof>
   </goal>
   <goal name="div_sb_qr&#39;vc.251" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.21" steps="321343"/></proof>
@@ -7036,7 +7036,7 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.13" steps="14366"/></proof>
    </goal>
    <goal name="wmpn_divrem_2&#39;vc.56.1" expl="VC for wmpn_divrem_2" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.93" steps="179110"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.63" steps="179110"/></proof>
    </goal>
   </transf>
   </goal>
@@ -7128,7 +7128,7 @@
   <goal name="div_qr&#39;vc.10" expl="postcondition" proved="true">
   <transf name="introduce_premises" proved="true" >
    <goal name="div_qr&#39;vc.10.0" expl="postcondition" proved="true">
-   <proof prover="4"><result status="valid" time="5.90"/></proof>
+   <proof prover="4"><result status="valid" time="3.62"/></proof>
    </goal>
   </transf>
   </goal>
@@ -7225,7 +7225,7 @@
    <proof prover="7"><result status="valid" time="0.38" steps="160"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.33.1" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="5.38"/></proof>
+   <proof prover="4"><result status="valid" time="3.11"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.33.2" expl="VC for div_qr" proved="true">
    <proof prover="7"><result status="valid" time="0.47" steps="164"/></proof>
@@ -7249,7 +7249,7 @@
    <proof prover="9"><result status="valid" time="0.08" steps="13614"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.33.9" expl="VC for div_qr" proved="true">
-   <proof prover="7"><result status="valid" time="0.52" steps="173"/></proof>
+   <proof prover="7"><result status="valid" time="0.36" steps="173"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.33.10" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.05" steps="13635"/></proof>
@@ -7261,7 +7261,7 @@
    <proof prover="9"><result status="valid" time="0.08" steps="13649"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.33.13" expl="VC for div_qr" proved="true">
-   <proof prover="7"><result status="valid" time="0.59" steps="175"/></proof>
+   <proof prover="7"><result status="valid" time="0.38" steps="175"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.33.14" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.12" steps="15905"/></proof>
@@ -7367,7 +7367,7 @@
    <proof prover="9"><result status="valid" time="0.11" steps="15675"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.46.5" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="0.32"/></proof>
+   <proof prover="4"><result status="valid" time="0.15"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.46.6" expl="VC for div_qr" proved="true">
    <proof prover="7"><result status="valid" time="0.39" steps="108"/></proof>
@@ -7379,7 +7379,7 @@
    <proof prover="9"><result status="valid" time="0.15" steps="20905"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.46.9" expl="VC for div_qr" proved="true">
-   <proof prover="1"><result status="valid" time="0.70"/></proof>
+   <proof prover="1"><result status="valid" time="0.48"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.46.10" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.10" steps="15038"/></proof>
@@ -7388,7 +7388,7 @@
    <proof prover="9"><result status="valid" time="0.18" steps="21829"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.46.12" expl="VC for div_qr" proved="true">
-   <proof prover="7"><result status="valid" time="0.79" steps="121"/></proof>
+   <proof prover="7"><result status="valid" time="0.56" steps="121"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.46.13" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.16" steps="22091"/></proof>
@@ -7468,7 +7468,7 @@
   <proof prover="3"><result status="valid" time="0.02" steps="29464"/></proof>
   </goal>
   <goal name="div_qr&#39;vc.58" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.41"/></proof>
+  <proof prover="1"><result status="valid" time="0.25"/></proof>
   </goal>
   <goal name="div_qr&#39;vc.59" expl="postcondition" proved="true">
   <proof prover="2"><result status="valid" time="0.14" steps="13623"/></proof>
@@ -7536,7 +7536,7 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.10" steps="13691"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.73.4" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="0.51"/></proof>
+   <proof prover="4"><result status="valid" time="0.34"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.73.5" expl="VC for div_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.06" steps="13730"/></proof>
@@ -7579,7 +7579,7 @@
    <proof prover="4"><result status="valid" time="0.10"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.73.17" expl="VC for div_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.06" steps="96481"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.74" steps="96481"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.73.18" expl="VC for div_qr" proved="true">
    <proof prover="4"><result status="valid" time="0.02"/></proof>
@@ -7622,7 +7622,7 @@
    <proof prover="8"><result status="valid" time="0.10" steps="102573"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.74.2" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="1.19"/></proof>
+   <proof prover="4"><result status="valid" time="0.80"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.74.3" expl="VC for div_qr" proved="true">
    <proof prover="4"><result status="valid" time="0.02"/></proof>
@@ -7665,13 +7665,13 @@
    <proof prover="9"><result status="valid" time="0.27" steps="42107"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.76.8" expl="VC for div_qr" proved="true">
-   <proof prover="1"><result status="valid" time="1.57"/></proof>
+   <proof prover="1"><result status="valid" time="1.03"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.76.9" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.05" steps="13821"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.76.10" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="2.72"/></proof>
+   <proof prover="4"><result status="valid" time="1.86"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.76.11" expl="VC for div_qr" proved="true">
    <proof prover="1"><result status="valid" time="0.20"/></proof>
@@ -7680,19 +7680,19 @@
    <proof prover="1"><result status="valid" time="0.20"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.76.13" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="2.28"/></proof>
+   <proof prover="4"><result status="valid" time="1.46"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.76.14" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.08" steps="16182"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.76.15" expl="VC for div_qr" proved="true">
-   <proof prover="1"><result status="valid" time="0.59"/></proof>
+   <proof prover="1"><result status="valid" time="0.39"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.76.16" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.05" steps="13731"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.76.17" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="0.80"/></proof>
+   <proof prover="4"><result status="valid" time="0.54"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.76.18" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.08" steps="13783"/></proof>
@@ -7715,7 +7715,7 @@
    <goal name="div_qr&#39;vc.78.0" expl="postcondition" proved="true">
    <transf name="introduce_premises" proved="true" >
     <goal name="div_qr&#39;vc.78.0.0" expl="postcondition" proved="true">
-    <proof prover="1"><result status="valid" time="0.95"/></proof>
+    <proof prover="1"><result status="valid" time="0.60"/></proof>
     </goal>
    </transf>
    </goal>
@@ -7806,7 +7806,7 @@
    <goal name="div_qr&#39;vc.94.8" expl="VC for div_qr" proved="true">
    <transf name="assert" proved="true" arg1="(2 * dh &gt;= radix1)">
     <goal name="div_qr&#39;vc.94.8.0" expl="asserted formula" proved="true">
-    <proof prover="4"><result status="valid" time="4.18"/></proof>
+    <proof prover="4"><result status="valid" time="2.58"/></proof>
     </goal>
     <goal name="div_qr&#39;vc.94.8.1" expl="VC for div_qr" proved="true">
     <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.06" steps="13729"/></proof>
@@ -7817,7 +7817,7 @@
    <proof prover="9"><result status="valid" time="0.07" steps="13074"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.94.10" expl="VC for div_qr" proved="true">
-   <proof prover="1"><result status="valid" time="1.03"/></proof>
+   <proof prover="1"><result status="valid" time="0.72"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.94.11" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.33" steps="40866"/></proof>
@@ -7835,7 +7835,7 @@
    <proof prover="7"><result status="valid" time="0.23" steps="136"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.94.16" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="0.78"/></proof>
+   <proof prover="4"><result status="valid" time="0.50"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.94.17" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.06" steps="13704"/></proof>
@@ -7866,7 +7866,7 @@
   <proof prover="9"><result status="valid" time="0.08" steps="16939"/></proof>
   </goal>
   <goal name="div_qr&#39;vc.99" expl="precondition" proved="true">
-  <proof prover="9"><result status="valid" time="0.60" steps="59746"/></proof>
+  <proof prover="9"><result status="valid" time="0.42" steps="59746"/></proof>
   </goal>
   <goal name="div_qr&#39;vc.100" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.08" steps="19365"/></proof>
@@ -7891,7 +7891,7 @@
   <transf name="split_vc" proved="true" >
    <goal name="div_qr&#39;vc.106.0" expl="VC for div_qr" proved="true">
    <proof prover="7"><result status="valid" time="0.38" steps="170"/></proof>
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="2.03" steps="127064"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.43" steps="127064"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.106.1" expl="VC for div_qr" proved="true">
    <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="0.56" steps="475"/></proof>
@@ -7910,7 +7910,7 @@
    </goal>
    <goal name="div_qr&#39;vc.106.6" expl="VC for div_qr" proved="true">
    <proof prover="8"><result status="valid" time="0.28" steps="487853"/></proof>
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="2.79" steps="150851"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.96" steps="150851"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.106.7" expl="VC for div_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.08" steps="13840"/></proof>
@@ -7963,7 +7963,7 @@
    <proof prover="5"><result status="valid" time="0.11" steps="90"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.113.1" expl="postcondition" proved="true">
-   <proof prover="1"><result status="valid" time="1.89"/></proof>
+   <proof prover="1"><result status="valid" time="1.28"/></proof>
    </goal>
   </transf>
   </goal>
@@ -7977,10 +7977,10 @@
   <goal name="div_qr&#39;vc.116" expl="postcondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="div_qr&#39;vc.116.0" expl="postcondition" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="3.85" steps="196034"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="2.90" steps="196034"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.116.1" expl="postcondition" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="2.99" steps="174216"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="2.13" steps="174216"/></proof>
    </goal>
   </transf>
   </goal>
@@ -8044,10 +8044,10 @@
    <proof prover="2"><result status="valid" time="0.06" steps="17333"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.127.5" expl="VC for div_qr" proved="true">
-   <proof prover="1"><result status="valid" time="0.83"/></proof>
+   <proof prover="1"><result status="valid" time="0.47"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.127.6" expl="VC for div_qr" proved="true">
-   <proof prover="7"><result status="valid" time="0.64" steps="116"/></proof>
+   <proof prover="7"><result status="valid" time="0.41" steps="116"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.127.7" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.10" steps="12853"/></proof>
@@ -8068,7 +8068,7 @@
    <proof prover="3" timelimit="1"><result status="valid" time="0.04" steps="38380"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.127.13" expl="VC for div_qr" proved="true">
-   <proof prover="1"><result status="valid" time="1.49"/></proof>
+   <proof prover="1"><result status="valid" time="1.09"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.127.14" expl="VC for div_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.08" steps="14182"/></proof>
@@ -8077,7 +8077,7 @@
    <proof prover="2"><result status="valid" time="0.08" steps="23434"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.127.16" expl="VC for div_qr" proved="true">
-   <proof prover="7"><result status="valid" time="0.50" steps="121"/></proof>
+   <proof prover="7"><result status="valid" time="0.35" steps="121"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.127.17" expl="VC for div_qr" proved="true">
    <proof prover="0"><result status="valid" time="0.17"/></proof>
@@ -8173,7 +8173,7 @@
   <goal name="div_qr&#39;vc.139" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="div_qr&#39;vc.139.0" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="6.97"/></proof>
+   <proof prover="4"><result status="valid" time="4.28"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.139.1" expl="VC for div_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.15" steps="22801"/></proof>
@@ -8228,7 +8228,7 @@
    <proof prover="9"><result status="valid" time="0.23" steps="40258"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.141.13" expl="VC for div_qr" proved="true">
-   <proof prover="1"><result status="valid" time="0.54"/></proof>
+   <proof prover="1"><result status="valid" time="0.38"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.141.14" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.15" steps="15841"/></proof>
@@ -8263,7 +8263,7 @@
   </transf>
   </goal>
   <goal name="div_qr&#39;vc.142" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="1.38"/></proof>
+  <proof prover="1"><result status="valid" time="0.99"/></proof>
   </goal>
   <goal name="div_qr&#39;vc.143" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
@@ -8283,13 +8283,13 @@
    <proof prover="9"><result status="valid" time="0.21" steps="37700"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.143.5" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="1.53"/></proof>
+   <proof prover="4"><result status="valid" time="0.91"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.143.6" expl="VC for div_qr" proved="true">
-   <proof prover="7"><result status="valid" time="0.73" steps="149"/></proof>
+   <proof prover="7"><result status="valid" time="0.49" steps="149"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.143.7" expl="VC for div_qr" proved="true">
-   <proof prover="7"><result status="valid" time="0.80" steps="149"/></proof>
+   <proof prover="7"><result status="valid" time="0.57" steps="149"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.143.8" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.07" steps="13959"/></proof>
@@ -8307,19 +8307,19 @@
    <proof prover="7"><result status="valid" time="0.12" steps="145"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.143.13" expl="VC for div_qr" proved="true">
-   <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="1.62" steps="151"/></proof>
+   <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="1.15" steps="151"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.143.14" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="1.04"/></proof>
+   <proof prover="4"><result status="valid" time="0.67"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.143.15" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.10" steps="13402"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.143.16" expl="VC for div_qr" proved="true">
-   <proof prover="7"><result status="valid" time="0.78" steps="155"/></proof>
+   <proof prover="7"><result status="valid" time="0.52" steps="155"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.143.17" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="0.70"/></proof>
+   <proof prover="4"><result status="valid" time="0.43"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.143.18" expl="VC for div_qr" proved="true">
    <proof prover="9"><result status="valid" time="0.07" steps="13998"/></proof>
@@ -8336,13 +8336,13 @@
   <proof prover="9"><result status="valid" time="0.10" steps="22900"/></proof>
   </goal>
   <goal name="div_qr&#39;vc.146" expl="precondition" proved="true">
-  <proof prover="9"><result status="valid" time="0.50" steps="55226"/></proof>
+  <proof prover="9"><result status="valid" time="0.31" steps="55226"/></proof>
   </goal>
   <goal name="div_qr&#39;vc.147" expl="precondition" proved="true">
   <proof prover="3" timelimit="10"><result status="valid" time="0.01" steps="42471"/></proof>
   </goal>
   <goal name="div_qr&#39;vc.148" expl="precondition" proved="true">
-  <proof prover="9"><result status="valid" time="0.47" steps="54540"/></proof>
+  <proof prover="9"><result status="valid" time="0.32" steps="54540"/></proof>
   </goal>
   <goal name="div_qr&#39;vc.149" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.04" steps="22747"/></proof>
@@ -8403,7 +8403,7 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.17" steps="24419"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.158.9" expl="VC for div_qr" proved="true">
-   <proof prover="1"><result status="valid" time="1.15"/></proof>
+   <proof prover="1"><result status="valid" time="0.76"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.158.10" expl="VC for div_qr" proved="true">
    <proof prover="8" timelimit="5" memlimit="2000"><result status="valid" time="0.11" steps="120735"/></proof>
@@ -8431,7 +8431,7 @@
    <proof prover="8" timelimit="5" memlimit="2000"><result status="valid" time="0.07" steps="117498"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.158.17" expl="VC for div_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.93" steps="138464"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.43" steps="138464"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.158.18" expl="VC for div_qr" proved="true">
    <proof prover="4"><result status="valid" time="0.02"/></proof>
@@ -8471,10 +8471,10 @@
    <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="0.16" steps="190"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.159.1" expl="VC for div_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.98" steps="139320"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.40" steps="139320"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.159.2" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="0.51"/></proof>
+   <proof prover="4"><result status="valid" time="0.35"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.159.3" expl="VC for div_qr" proved="true">
    <proof prover="4"><result status="valid" time="0.02"/></proof>
@@ -8509,16 +8509,16 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.07" steps="13955"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.161.5" expl="VC for div_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.46" steps="49716"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.30" steps="49716"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.161.6" expl="VC for div_qr" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="2.03" steps="141299"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.54" steps="141299"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.161.7" expl="VC for div_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.10" steps="13980"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.161.8" expl="VC for div_qr" proved="true">
-   <proof prover="1"><result status="valid" time="4.18"/></proof>
+   <proof prover="1"><result status="valid" time="2.93"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.161.9" expl="VC for div_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.08" steps="14001"/></proof>
@@ -8536,7 +8536,7 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.10" steps="13966"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.161.14" expl="VC for div_qr" proved="true">
-   <proof prover="4"><result status="valid" time="0.69"/></proof>
+   <proof prover="4"><result status="valid" time="0.46"/></proof>
    </goal>
    <goal name="div_qr&#39;vc.161.15" expl="VC for div_qr" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.09" steps="14018"/></proof>
@@ -8573,7 +8573,7 @@
    <goal name="div_qr&#39;vc.168.0" expl="VC for div_qr" proved="true">
    <transf name="assert" proved="true" arg1="(value q (sx - sy) = value q1 (sx - sy))">
     <goal name="div_qr&#39;vc.168.0.0" expl="asserted formula" proved="true">
-    <proof prover="4"><result status="valid" time="4.12"/></proof>
+    <proof prover="4"><result status="valid" time="2.79"/></proof>
     </goal>
     <goal name="div_qr&#39;vc.168.0.1" expl="VC for div_qr" proved="true">
     <proof prover="1"><result status="valid" time="0.11"/></proof>
@@ -8609,7 +8609,7 @@
   <proof prover="1"><result status="valid" time="0.14"/></proof>
   </goal>
   <goal name="div_qr&#39;vc.172" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="2.12"/></proof>
+  <proof prover="1"><result status="valid" time="1.48"/></proof>
   </goal>
  </transf>
  </goal>
@@ -8713,7 +8713,7 @@
   <proof prover="1"><result status="valid" time="0.27"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.2" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.66"/></proof>
+  <proof prover="0"><result status="valid" time="0.43"/></proof>
   <proof prover="2"><result status="valid" time="0.14" steps="21048"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.3" expl="precondition" proved="true">
@@ -8751,7 +8751,7 @@
   <goal name="div_qr_in_place&#39;vc.10" expl="postcondition" proved="true">
   <transf name="introduce_premises" proved="true" >
    <goal name="div_qr_in_place&#39;vc.10.0" expl="postcondition" proved="true">
-   <proof prover="4"><result status="valid" time="5.25"/></proof>
+   <proof prover="4"><result status="valid" time="3.13"/></proof>
    </goal>
   </transf>
   </goal>
@@ -8884,7 +8884,7 @@
   <proof prover="9"><result status="valid" time="0.24" steps="28882"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.31" expl="precondition" proved="true">
-  <proof prover="9"><result status="valid" time="0.24" steps="28999"/></proof>
+  <proof prover="9"><result status="valid" time="0.11" steps="28999"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.32" expl="precondition" proved="true">
   <proof prover="5"><result status="valid" time="0.02" steps="77"/></proof>
@@ -8895,10 +8895,10 @@
    <proof prover="7"><result status="valid" time="0.25" steps="158"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.33.1" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="4"><result status="valid" time="4.88"/></proof>
+   <proof prover="4"><result status="valid" time="2.98"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.33.2" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="7"><result status="valid" time="0.53" steps="162"/></proof>
+   <proof prover="7"><result status="valid" time="0.37" steps="162"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.33.3" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.09" steps="13509"/></proof>
@@ -8919,19 +8919,19 @@
    <proof prover="9"><result status="valid" time="0.05" steps="13581"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.33.9" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="7"><result status="valid" time="0.57" steps="171"/></proof>
+   <proof prover="7"><result status="valid" time="0.34" steps="171"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.33.10" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.09" steps="13602"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.33.11" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="7"><result status="valid" time="0.55" steps="173"/></proof>
+   <proof prover="7"><result status="valid" time="0.36" steps="173"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.33.12" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.08" steps="13616"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.33.13" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="7"><result status="valid" time="0.55" steps="173"/></proof>
+   <proof prover="7"><result status="valid" time="0.36" steps="173"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.33.14" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.14" steps="15862"/></proof>
@@ -9015,7 +9015,7 @@
   <proof prover="3"><result status="valid" time="0.03" steps="26076"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.44" expl="precondition" proved="true">
-  <proof prover="0" memlimit="1000"><result status="valid" time="0.38"/></proof>
+  <proof prover="0" memlimit="1000"><result status="valid" time="0.23"/></proof>
   <proof prover="2"><result status="valid" time="0.03" steps="17252"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.45" expl="precondition" proved="true">
@@ -9042,7 +9042,7 @@
    <proof prover="4"><result status="valid" time="0.13"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.46.6" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="7"><result status="valid" time="0.51" steps="106"/></proof>
+   <proof prover="7"><result status="valid" time="0.35" steps="106"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.46.7" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.05" steps="12612"/></proof>
@@ -9060,7 +9060,7 @@
    <proof prover="9"><result status="valid" time="0.20" steps="21540"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.46.12" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="7"><result status="valid" time="0.77" steps="119"/></proof>
+   <proof prover="7"><result status="valid" time="0.53" steps="119"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.46.13" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.20" steps="21802"/></proof>
@@ -9198,7 +9198,7 @@
   <proof prover="9"><result status="valid" time="0.09" steps="21538"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.65" expl="precondition" proved="true">
-  <proof prover="7"><result status="valid" time="0.40" steps="141"/></proof>
+  <proof prover="7"><result status="valid" time="0.26" steps="141"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.66" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.07" steps="23434"/></proof>
@@ -9327,7 +9327,7 @@
    <proof prover="8"><result status="valid" time="0.08" steps="102167"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.74.2" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="4"><result status="valid" time="1.22"/></proof>
+   <proof prover="4"><result status="valid" time="0.85"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.74.3" expl="VC for div_qr_in_place" proved="true">
    <proof prover="4"><result status="valid" time="0.01"/></proof>
@@ -9371,13 +9371,13 @@
    <proof prover="9"><result status="valid" time="0.25" steps="41740"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.76.8" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="1"><result status="valid" time="1.45"/></proof>
+   <proof prover="1"><result status="valid" time="0.98"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.76.9" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.07" steps="13802"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.76.10" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="4"><result status="valid" time="2.73"/></proof>
+   <proof prover="4"><result status="valid" time="1.71"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.76.11" expl="VC for div_qr_in_place" proved="true">
    <proof prover="1"><result status="valid" time="0.18"/></proof>
@@ -9386,19 +9386,19 @@
    <proof prover="1"><result status="valid" time="0.18"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.76.13" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="4"><result status="valid" time="2.28"/></proof>
+   <proof prover="4"><result status="valid" time="1.46"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.76.14" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.14" steps="16148"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.76.15" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="1"><result status="valid" time="0.59"/></proof>
+   <proof prover="1"><result status="valid" time="0.37"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.76.16" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.08" steps="13712"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.76.17" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="4"><result status="valid" time="0.88"/></proof>
+   <proof prover="4"><result status="valid" time="0.54"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.76.18" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.09" steps="13764"/></proof>
@@ -9412,7 +9412,7 @@
   <proof prover="3"><result status="valid" time="0.03" steps="1990"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.78" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.48"/></proof>
+  <proof prover="1"><result status="valid" time="0.29"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.79" expl="integer overflow" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.04" steps="21033"/></proof>
@@ -9513,7 +9513,7 @@
    <goal name="div_qr_in_place&#39;vc.94.8" expl="VC for div_qr_in_place" proved="true">
    <transf name="assert" proved="true" arg1="(2 * dh &gt;= radix1)">
     <goal name="div_qr_in_place&#39;vc.94.8.0" expl="asserted formula" proved="true">
-    <proof prover="4"><result status="valid" time="3.86"/></proof>
+    <proof prover="4"><result status="valid" time="2.44"/></proof>
     </goal>
     <goal name="div_qr_in_place&#39;vc.94.8.1" expl="VC for div_qr_in_place" proved="true">
     <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.06" steps="13710"/></proof>
@@ -9524,7 +9524,7 @@
    <proof prover="9"><result status="valid" time="0.08" steps="13055"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.94.10" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="1"><result status="valid" time="0.86"/></proof>
+   <proof prover="1"><result status="valid" time="0.65"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.94.11" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.35" steps="40559"/></proof>
@@ -9559,7 +9559,7 @@
   <proof prover="9"><result status="valid" time="0.10" steps="19876"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.97" expl="precondition" proved="true">
-  <proof prover="9"><result status="valid" time="0.50" steps="53028"/></proof>
+  <proof prover="9"><result status="valid" time="0.34" steps="53028"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.98" expl="precondition" proved="true">
   <proof prover="2" timelimit="5"><result status="valid" time="0.13" steps="19194"/></proof>
@@ -9605,7 +9605,7 @@
   <transf name="split_vc" proved="true" >
    <goal name="div_qr_in_place&#39;vc.106.0" expl="VC for div_qr_in_place" proved="true">
    <proof prover="7"><result status="valid" time="0.36" steps="168"/></proof>
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.86" steps="125703"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.46" steps="125703"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.106.1" expl="VC for div_qr_in_place" proved="true">
    <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="0.55" steps="468"/></proof>
@@ -9624,7 +9624,7 @@
    </goal>
    <goal name="div_qr_in_place&#39;vc.106.6" expl="VC for div_qr_in_place" proved="true">
    <proof prover="8"><result status="valid" time="0.24" steps="487608"/></proof>
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="2.77" steps="149480"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.88" steps="149480"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.106.7" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.04" steps="13807"/></proof>
@@ -9782,7 +9782,7 @@
    <proof prover="2"><result status="valid" time="0.14" steps="23167"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.127.16" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="7"><result status="valid" time="0.51" steps="119"/></proof>
+   <proof prover="7"><result status="valid" time="0.35" steps="119"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.127.17" expl="VC for div_qr_in_place" proved="true">
    <proof prover="0"><result status="valid" time="0.19"/></proof>
@@ -9869,7 +9869,7 @@
    <transf name="unfold" proved="true" arg1="value">
     <goal name="div_qr_in_place&#39;vc.139.0.0" expl="VC for div_qr_in_place" proved="true">
     <proof prover="1"><result status="valid" time="0.11"/></proof>
-    <proof prover="4"><result status="valid" time="6.32"/></proof>
+    <proof prover="4"><result status="valid" time="4.24"/></proof>
     </goal>
    </transf>
    </goal>
@@ -9962,7 +9962,7 @@
   </transf>
   </goal>
   <goal name="div_qr_in_place&#39;vc.142" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.93"/></proof>
+  <proof prover="1"><result status="valid" time="0.62"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.143" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
@@ -9982,13 +9982,13 @@
    <proof prover="9"><result status="valid" time="0.22" steps="37335"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.143.5" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="4"><result status="valid" time="1.64"/></proof>
+   <proof prover="4"><result status="valid" time="1.00"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.143.6" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="7"><result status="valid" time="0.66" steps="147"/></proof>
+   <proof prover="7"><result status="valid" time="0.49" steps="147"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.143.7" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="7"><result status="valid" time="0.85" steps="147"/></proof>
+   <proof prover="7"><result status="valid" time="0.55" steps="147"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.143.8" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.09" steps="13940"/></proof>
@@ -10006,10 +10006,10 @@
    <proof prover="7"><result status="valid" time="0.11" steps="143"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.143.13" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="1.56" steps="149"/></proof>
+   <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="1.14" steps="149"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.143.14" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="4"><result status="valid" time="1.16"/></proof>
+   <proof prover="4"><result status="valid" time="0.69"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.143.15" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.10" steps="13383"/></proof>
@@ -10018,7 +10018,7 @@
    <proof prover="7"><result status="valid" time="0.61" steps="153"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.143.17" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="4"><result status="valid" time="0.75"/></proof>
+   <proof prover="4"><result status="valid" time="0.48"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.143.18" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9"><result status="valid" time="0.09" steps="13979"/></proof>
@@ -10029,7 +10029,7 @@
   </transf>
   </goal>
   <goal name="div_qr_in_place&#39;vc.144" expl="integer overflow" proved="true">
-  <proof prover="1"><result status="valid" time="0.67"/></proof>
+  <proof prover="1"><result status="valid" time="0.43"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.145" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.11" steps="24874"/></proof>
@@ -10042,7 +10042,7 @@
   <proof prover="9"><result status="valid" time="0.23" steps="30808"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.148" expl="precondition" proved="true">
-  <proof prover="9"><result status="valid" time="0.45" steps="54244"/></proof>
+  <proof prover="9"><result status="valid" time="0.30" steps="54244"/></proof>
   </goal>
   <goal name="div_qr_in_place&#39;vc.149" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.02"/></proof>
@@ -10104,7 +10104,7 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.20" steps="24194"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.158.9" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="1"><result status="valid" time="1.08"/></proof>
+   <proof prover="1"><result status="valid" time="0.74"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.158.10" expl="VC for div_qr_in_place" proved="true">
    <proof prover="8" timelimit="5" memlimit="2000"><result status="valid" time="0.10" steps="120166"/></proof>
@@ -10132,7 +10132,7 @@
    <proof prover="8" timelimit="5" memlimit="2000"><result status="valid" time="0.11" steps="116928"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.158.17" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="2.02" steps="137489"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.47" steps="137489"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.158.18" expl="VC for div_qr_in_place" proved="true">
    <proof prover="4"><result status="valid" time="0.02"/></proof>
@@ -10172,7 +10172,7 @@
    <proof prover="7" timelimit="5" memlimit="2000"><result status="valid" time="0.16" steps="188"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.159.1" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="2.06" steps="138322"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.44" steps="138322"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.159.2" expl="VC for div_qr_in_place" proved="true">
    <proof prover="4"><result status="valid" time="0.36"/></proof>
@@ -10212,13 +10212,13 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.29" steps="49250"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.161.6" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.89" steps="140319"/></proof>
+   <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="1.51" steps="140319"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.161.7" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.06" steps="13954"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.161.8" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="1"><result status="valid" time="3.52"/></proof>
+   <proof prover="1"><result status="valid" time="2.87"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.161.9" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.08" steps="13975"/></proof>
@@ -10236,7 +10236,7 @@
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.05" steps="13940"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.161.14" expl="VC for div_qr_in_place" proved="true">
-   <proof prover="4"><result status="valid" time="0.66"/></proof>
+   <proof prover="4"><result status="valid" time="0.45"/></proof>
    </goal>
    <goal name="div_qr_in_place&#39;vc.161.15" expl="VC for div_qr_in_place" proved="true">
    <proof prover="9" timelimit="5" memlimit="2000"><result status="valid" time="0.10" steps="13992"/></proof>

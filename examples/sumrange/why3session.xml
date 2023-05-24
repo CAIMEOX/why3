@@ -178,10 +178,10 @@
   <proof prover="3"><result status="valid" time="0.02" steps="6706"/></proof>
   </goal>
   <goal name="tree_of_array&#39;vc.7" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.08" steps="21020"/></proof>
+  <proof prover="1"><result status="valid" time="0.19" steps="21020"/></proof>
   </goal>
   <goal name="tree_of_array&#39;vc.8" expl="postcondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.11" steps="30373"/></proof>
+  <proof prover="1"><result status="valid" time="0.28" steps="30373"/></proof>
   </goal>
  </transf>
  </goal>
@@ -197,7 +197,7 @@
  <goal name="is_tree_for_frame" proved="true">
  <transf name="induction_ty_lex" proved="true" >
   <goal name="is_tree_for_frame.0" proved="true">
-  <proof prover="0"><result status="valid" time="0.72" steps="931"/></proof>
+  <proof prover="0"><result status="valid" time="1.23" steps="931"/></proof>
   </goal>
  </transf>
  </goal>
@@ -242,7 +242,7 @@
  </transf>
  </goal>
  <goal name="update&#39;vc" expl="VC for update" proved="true">
- <proof prover="1"><result status="valid" time="0.10" steps="27530"/></proof>
+ <proof prover="1"><result status="valid" time="0.23" steps="27530"/></proof>
  </goal>
  <goal name="depth_min" proved="true">
  <transf name="induction_ty_lex" proved="true" >
@@ -252,7 +252,7 @@
  </transf>
  </goal>
  <goal name="depth_is_log&#39;vc" expl="VC for depth_is_log" proved="true">
- <proof prover="0" timelimit="1"><result status="valid" time="0.56" steps="1034"/></proof>
+ <proof prover="0" timelimit="1"><result status="valid" time="0.90" steps="1034"/></proof>
  </goal>
  <goal name="update_aux_complexity&#39;vc" expl="VC for update_aux_complexity" proved="true">
  <transf name="split_goal_right" proved="true" >

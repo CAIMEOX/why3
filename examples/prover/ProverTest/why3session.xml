@@ -11,10 +11,10 @@
  <proof prover="3"><result status="valid" time="0.24" steps="1033"/></proof>
  </goal>
  <goal name="equiv&#39;vc" expl="VC for equiv" proved="true">
- <proof prover="3"><result status="valid" time="0.24" steps="2071"/></proof>
+ <proof prover="3"><result status="valid" time="0.39" steps="2071"/></proof>
  </goal>
  <goal name="drinker&#39;vc" expl="VC for drinker" proved="true">
- <proof prover="3"><result status="valid" time="0.78" steps="6183"/></proof>
+ <proof prover="3"><result status="valid" time="1.22" steps="6183"/></proof>
  </goal>
  <goal name="group&#39;vc" expl="VC for group" proved="true">
  <proof prover="1"><result status="valid" time="0.38"/></proof>
@@ -23,7 +23,7 @@
  <proof prover="3"><result status="valid" time="0.36" steps="1551"/></proof>
  </goal>
  <goal name="bidon2&#39;vc" expl="VC for bidon2" proved="true">
- <proof prover="3"><result status="valid" time="0.90" steps="6312"/></proof>
+ <proof prover="3"><result status="valid" time="1.50" steps="6312"/></proof>
  </goal>
  <goal name="bidon3&#39;vc" expl="VC for bidon3" proved="true">
  <proof prover="1"><result status="valid" time="0.32"/></proof>
@@ -32,7 +32,7 @@
  <proof prover="1"><result status="valid" time="0.33"/></proof>
  </goal>
  <goal name="pierce&#39;vc" expl="VC for pierce" proved="true">
- <proof prover="3"><result status="valid" time="0.50" steps="3429"/></proof>
+ <proof prover="3"><result status="valid" time="0.81" steps="3429"/></proof>
  </goal>
  <goal name="generate&#39;vc" expl="VC for generate" proved="true">
  <proof prover="3"><result status="valid" time="0.23" steps="876"/></proof>
@@ -41,10 +41,10 @@
  <proof prover="1"><result status="valid" time="0.31"/></proof>
  </goal>
  <goal name="zenon6&#39;vc" expl="VC for zenon6" proved="true">
- <proof prover="1"><result status="valid" time="0.24"/></proof>
+ <proof prover="1"><result status="valid" time="0.39"/></proof>
  </goal>
  <goal name="zenon10&#39;vc" expl="VC for zenon10" proved="true">
- <proof prover="1"><result status="valid" time="0.24"/></proof>
+ <proof prover="1"><result status="valid" time="0.39"/></proof>
  </goal>
  <goal name="test&#39;vc" expl="VC for test" proved="true">
  <proof prover="3"><result status="valid" time="0.13" steps="10"/></proof>

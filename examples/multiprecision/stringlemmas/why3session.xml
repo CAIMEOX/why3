@@ -55,7 +55,7 @@
   <proof prover="4"><result status="valid" time="0.05"/></proof>
   </goal>
   <goal name="svalue_le_sub_concat&#39;vc.5" expl="postcondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.12"/></proof>
+  <proof prover="4"><result status="valid" time="0.24"/></proof>
   </goal>
  </transf>
  </goal>
@@ -217,7 +217,7 @@
   <proof prover="1" memlimit="2000"><result status="valid" time="0.06" steps="76431"/></proof>
   </goal>
   <goal name="svalue_le_sub_upper_bound&#39;vc.8" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.27" steps="70651"/></proof>
+  <proof prover="3"><result status="valid" time="0.46" steps="70651"/></proof>
   </goal>
  </transf>
  </goal>
@@ -248,7 +248,7 @@
   <proof prover="1" timelimit="1"><result status="valid" time="0.02" steps="77215"/></proof>
   </goal>
   <goal name="svalue_sub_upper_bound&#39;vc.8" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.38" steps="79910"/></proof>
+  <proof prover="3"><result status="valid" time="0.64" steps="79910"/></proof>
   </goal>
  </transf>
  </goal>
@@ -473,7 +473,7 @@
     <proof prover="5"><result status="valid" time="0.11" steps="18853"/></proof>
     </goal>
     <goal name="tnt_up&#39;vc.1.1.1" expl="rewrite premises" proved="true">
-    <proof prover="5"><result status="valid" time="0.27" steps="84174"/></proof>
+    <proof prover="5"><result status="valid" time="0.52" steps="84174"/></proof>
     </goal>
     <goal name="tnt_up&#39;vc.1.1.2" expl="rewrite premises" proved="true">
     <proof prover="5"><result status="valid" time="0.09" steps="18825"/></proof>

@@ -7,22 +7,22 @@
 <path name=".."/><path name="insertion_sort_naive.mlw"/>
 <theory name="InsertionSortNaive" proved="true">
  <goal name="sort&#39;vc" expl="VC for sort" proved="true">
- <proof prover="0"><result status="valid" time="0.87" steps="948"/></proof>
+ <proof prover="0"><result status="valid" time="1.56" steps="948"/></proof>
  </goal>
 </theory>
 <theory name="InsertionSortNaiveGen" proved="true">
  <goal name="sort&#39;vc" expl="VC for sort" proved="true">
- <proof prover="0"><result status="valid" time="0.51" steps="1647"/></proof>
+ <proof prover="0"><result status="valid" time="0.86" steps="1647"/></proof>
  </goal>
 </theory>
 <theory name="InsertionSortParam" proved="true">
  <goal name="sort&#39;vc" expl="VC for sort" proved="true">
- <proof prover="0"><result status="valid" time="0.49" steps="1573"/></proof>
+ <proof prover="0"><result status="valid" time="0.85" steps="1573"/></proof>
  </goal>
 </theory>
 <theory name="InsertionSortParamBad" proved="true">
  <goal name="sort&#39;vc" expl="VC for sort" proved="true">
- <proof prover="0"><result status="valid" time="0.53" steps="2330"/></proof>
+ <proof prover="0"><result status="valid" time="0.88" steps="2330"/></proof>
  </goal>
 </theory>
 </file>

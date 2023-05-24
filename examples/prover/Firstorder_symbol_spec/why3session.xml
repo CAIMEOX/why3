@@ -72,7 +72,7 @@
  <proof prover="3"><result status="valid" time="0.02" steps="67"/></proof>
  </goal>
  <goal name="olifts_identity_symbol&#39;vc" expl="VC for olifts_identity_symbol" proved="true">
- <proof prover="3"><result status="valid" time="2.61" steps="3490"/></proof>
+ <proof prover="3"><result status="valid" time="4.42" steps="3490"/></proof>
  </goal>
  <goal name="left_rename_subst_identity_lemma_symbol&#39;vc" expl="VC for left_rename_subst_identity_lemma_symbol" proved="true">
  <proof prover="3"><result status="valid" time="0.03" steps="117"/></proof>
@@ -83,12 +83,12 @@
  <proof prover="3"><result status="valid" time="0.02" steps="8"/></proof>
  </goal>
  <goal name="left_subst_subst_identity_lemma_symbol&#39;vc" expl="VC for left_subst_subst_identity_lemma_symbol" proved="true">
- <proof prover="0"><result status="valid" time="1.62"/></proof>
- <proof prover="1"><result status="valid" time="0.35"/></proof>
+ <proof prover="0"><result status="valid" time="2.32"/></proof>
+ <proof prover="1"><result status="valid" time="0.63"/></proof>
  <proof prover="3"><result status="valid" time="0.03" steps="87"/></proof>
  </goal>
  <goal name="right_subst_subst_by_identity_lemma_symbol&#39;vc" expl="VC for right_subst_subst_by_identity_lemma_symbol" proved="true">
- <proof prover="0"><result status="valid" time="0.43"/></proof>
+ <proof prover="0"><result status="valid" time="0.75"/></proof>
  <proof prover="1"><result status="valid" time="0.14"/></proof>
  <proof prover="3"><result status="valid" time="0.02" steps="87"/></proof>
  </goal>

@@ -130,13 +130,13 @@
    <proof prover="5"><result status="valid" time="0.05" steps="54"/></proof>
    </goal>
    <goal name="selected_model&#39;vc.0.4" expl="postcondition" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="3.93" steps="6054"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="3.41" steps="6054"/></proof>
    </goal>
    <goal name="selected_model&#39;vc.0.5" expl="postcondition" proved="true">
    <proof prover="5"><result status="valid" time="0.15" steps="336"/></proof>
    </goal>
    <goal name="selected_model&#39;vc.0.6" expl="postcondition" proved="true">
-   <proof prover="3"><result status="valid" time="0.52" steps="3783"/></proof>
+   <proof prover="3"><result status="valid" time="0.52" steps="3786"/></proof>
    </goal>
    <goal name="selected_model&#39;vc.0.7" expl="postcondition" proved="true">
    <proof prover="5"><result status="valid" time="0.17" steps="294"/></proof>
@@ -165,10 +165,10 @@
   <goal name="selected_sorted&#39;vc.0" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="selected_sorted&#39;vc.0.0" expl="VC for selected_sorted" proved="true">
-   <proof prover="5"><result status="valid" time="1.43" steps="1843"/></proof>
+   <proof prover="5"><result status="valid" time="1.14" steps="1843"/></proof>
    </goal>
    <goal name="selected_sorted&#39;vc.0.1" expl="VC for selected_sorted" proved="true">
-   <proof prover="5"><result status="valid" time="1.05" steps="1378"/></proof>
+   <proof prover="5"><result status="valid" time="0.84" steps="1378"/></proof>
    </goal>
    <goal name="selected_sorted&#39;vc.0.2" expl="VC for selected_sorted" proved="true">
    <proof prover="5"><result status="valid" time="0.46" steps="779"/></proof>
@@ -275,10 +275,10 @@
   <proof prover="5" timelimit="5"><result status="valid" time="0.02" steps="14"/></proof>
   </goal>
   <goal name="remove&#39;vc.5" expl="postcondition" proved="true">
-  <proof prover="5" timelimit="20"><result status="valid" time="7.77" steps="6685"/></proof>
+  <proof prover="5" timelimit="20"><result status="valid" time="5.96" steps="6667"/></proof>
   </goal>
   <goal name="remove&#39;vc.6" expl="postcondition" proved="true">
-  <proof prover="5" timelimit="5"><result status="valid" time="5.81" steps="5622"/></proof>
+  <proof prover="5" timelimit="5"><result status="valid" time="4.96" steps="5622"/></proof>
   </goal>
  </transf>
  </goal>
@@ -353,7 +353,7 @@
  <goal name="view&#39;vc" expl="VC for view" proved="true">
  <transf name="split_goal_right" proved="true" >
   <goal name="view&#39;vc.0" expl="precondition" proved="true">
-  <proof prover="5" timelimit="5"><result status="valid" time="1.39" steps="1375"/></proof>
+  <proof prover="5" timelimit="5"><result status="valid" time="1.12" steps="1375"/></proof>
   </goal>
   <goal name="view&#39;vc.1" expl="precondition" proved="true">
   <proof prover="5" timelimit="5"><result status="valid" time="0.80" steps="941"/></proof>
@@ -373,40 +373,40 @@
    <proof prover="5" timelimit="5"><result status="valid" time="0.04" steps="62"/></proof>
    </goal>
    <goal name="view&#39;vc.2.4" expl="VC for view" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="0.94" steps="1210"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="0.73" steps="1210"/></proof>
    </goal>
    <goal name="view&#39;vc.2.5" expl="VC for view" proved="true">
    <proof prover="5" timelimit="5"><result status="valid" time="1.62" steps="1865"/></proof>
    </goal>
    <goal name="view&#39;vc.2.6" expl="VC for view" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="1.71" steps="1941"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="1.35" steps="1941"/></proof>
    </goal>
    <goal name="view&#39;vc.2.7" expl="VC for view" proved="true">
    <proof prover="5" timelimit="5"><result status="valid" time="0.76" steps="968"/></proof>
    </goal>
    <goal name="view&#39;vc.2.8" expl="VC for view" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="1.52" steps="1781"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="1.19" steps="1781"/></proof>
    </goal>
    <goal name="view&#39;vc.2.9" expl="VC for view" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="2.49" steps="2458"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="1.95" steps="2458"/></proof>
    </goal>
    <goal name="view&#39;vc.2.10" expl="VC for view" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="3.22" steps="3553"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="2.57" steps="3553"/></proof>
    </goal>
    <goal name="view&#39;vc.2.11" expl="VC for view" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="1.51" steps="1826"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="1.18" steps="1826"/></proof>
    </goal>
    <goal name="view&#39;vc.2.12" expl="VC for view" proved="true">
    <proof prover="5" timelimit="5"><result status="valid" time="0.58" steps="623"/></proof>
    </goal>
    <goal name="view&#39;vc.2.13" expl="VC for view" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="1.69" steps="1874"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="1.31" steps="1874"/></proof>
    </goal>
    <goal name="view&#39;vc.2.14" expl="VC for view" proved="true">
    <proof prover="5" timelimit="5"><result status="valid" time="1.89" steps="1283"/></proof>
    </goal>
    <goal name="view&#39;vc.2.15" expl="VC for view" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="2.88" steps="2196"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="2.28" steps="2196"/></proof>
    </goal>
   </transf>
   </goal>
@@ -418,19 +418,19 @@
   <proof prover="5"><result status="valid" time="0.29" steps="569"/></proof>
   </goal>
   <goal name="join&#39;vc.1" expl="precondition" proved="true">
-  <proof prover="5" timelimit="5"><result status="valid" time="2.87" steps="3052"/></proof>
+  <proof prover="5" timelimit="5"><result status="valid" time="2.16" steps="3052"/></proof>
   </goal>
   <goal name="join&#39;vc.2" expl="postcondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.89" steps="880"/></proof>
+  <proof prover="5"><result status="valid" time="0.70" steps="880"/></proof>
   </goal>
   <goal name="join&#39;vc.3" expl="postcondition" proved="true">
   <proof prover="5"><result status="valid" time="1.05" steps="963"/></proof>
   </goal>
   <goal name="join&#39;vc.4" expl="postcondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.98" steps="1073"/></proof>
+  <proof prover="5"><result status="valid" time="0.76" steps="1073"/></proof>
   </goal>
   <goal name="join&#39;vc.5" expl="postcondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.99" steps="929"/></proof>
+  <proof prover="5"><result status="valid" time="0.77" steps="929"/></proof>
   </goal>
   <goal name="join&#39;vc.6" expl="postcondition" proved="true">
   <proof prover="5"><result status="valid" time="0.65" steps="772"/></proof>
@@ -478,7 +478,7 @@
     </transf>
     </goal>
     <goal name="add_all&#39;vc.8.0.1" expl="postcondition" proved="true">
-    <proof prover="5" timelimit="5"><result status="valid" time="2.69" steps="5537"/></proof>
+    <proof prover="5" timelimit="5"><result status="valid" time="2.11" steps="5537"/></proof>
     </goal>
    </transf>
    </goal>
@@ -488,7 +488,7 @@
     <proof prover="5" timelimit="5"><result status="valid" time="0.03" steps="28"/></proof>
     </goal>
     <goal name="add_all&#39;vc.8.1.1" expl="postcondition" proved="true">
-    <proof prover="2" timelimit="5"><result status="valid" time="0.62" steps="145941"/></proof>
+    <proof prover="2" timelimit="5"><result status="valid" time="1.48" steps="145941"/></proof>
     </goal>
    </transf>
    </goal>
@@ -585,13 +585,13 @@
   <goal name="filter&#39;vc.10" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="filter&#39;vc.10.0" expl="postcondition" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="5.43" steps="9863"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="3.55" steps="9863"/></proof>
    </goal>
    <goal name="filter&#39;vc.10.1" expl="postcondition" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="4.75" steps="9471"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="3.30" steps="9471"/></proof>
    </goal>
    <goal name="filter&#39;vc.10.2" expl="postcondition" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="6.68" steps="13490"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="4.41" steps="13490"/></proof>
    </goal>
   </transf>
   </goal>
@@ -627,7 +627,7 @@
   </transf>
   </goal>
   <goal name="filter&#39;vc.12" expl="postcondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.52" steps="899"/></proof>
+  <proof prover="5"><result status="valid" time="0.33" steps="899"/></proof>
   </goal>
  </transf>
  </goal>
@@ -655,23 +655,23 @@
   <proof prover="5"><result status="valid" time="0.15" steps="250"/></proof>
   </goal>
   <goal name="remove_all&#39;vc.7" expl="precondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.37" steps="649"/></proof>
+  <proof prover="5"><result status="valid" time="0.23" steps="649"/></proof>
   </goal>
   <goal name="remove_all&#39;vc.8" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="remove_all&#39;vc.8.0" expl="postcondition" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="2.56" steps="5732"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="1.97" steps="5732"/></proof>
    </goal>
    <goal name="remove_all&#39;vc.8.1" expl="postcondition" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="5.02" steps="8704"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="3.59" steps="8704"/></proof>
    </goal>
    <goal name="remove_all&#39;vc.8.2" expl="postcondition" proved="true">
-   <proof prover="5" timelimit="5"><result status="valid" time="2.56" steps="6607"/></proof>
+   <proof prover="5" timelimit="5"><result status="valid" time="2.01" steps="6607"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="remove_all&#39;vc.9" expl="postcondition" proved="true">
-  <proof prover="5" timelimit="5"><result status="valid" time="5.14" steps="9639"/></proof>
+  <proof prover="5" timelimit="5"><result status="valid" time="3.57" steps="9639"/></proof>
   </goal>
   <goal name="remove_all&#39;vc.10" expl="postcondition" proved="true">
   <proof prover="5"><result status="valid" time="0.24" steps="379"/></proof>
@@ -708,7 +708,7 @@
   <proof prover="5"><result status="valid" time="0.14" steps="382"/></proof>
   </goal>
   <goal name="symdiff&#39;vc.9" expl="precondition" proved="true">
-  <proof prover="5" timelimit="5"><result status="valid" time="0.94" steps="1404"/></proof>
+  <proof prover="5" timelimit="5"><result status="valid" time="0.58" steps="1404"/></proof>
   </goal>
   <goal name="symdiff&#39;vc.10" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
@@ -746,7 +746,7 @@
   </transf>
   </goal>
   <goal name="symdiff&#39;vc.11" expl="postcondition" proved="true">
-  <proof prover="4" timelimit="1"><result status="valid" time="1.39" steps="137281"/></proof>
+  <proof prover="4" timelimit="1"><result status="valid" time="1.08" steps="137281"/></proof>
   </goal>
   <goal name="symdiff&#39;vc.12" expl="postcondition" proved="true">
   <transf name="split_goal_right" proved="true" >
@@ -758,7 +758,7 @@
    </transf>
    </goal>
    <goal name="symdiff&#39;vc.12.1" expl="postcondition" proved="true">
-   <proof prover="0"><result status="valid" time="1.67" steps="150125"/></proof>
+   <proof prover="0"><result status="valid" time="1.33" steps="150904"/></proof>
    </goal>
   </transf>
   </goal>
@@ -819,10 +819,10 @@
  <proof prover="5"><result status="valid" time="0.04" steps="51"/></proof>
  </goal>
  <goal name="decompose_min&#39;vc" expl="VC for decompose_min" proved="true">
- <proof prover="5"><result status="valid" time="0.66" steps="660"/></proof>
+ <proof prover="5"><result status="valid" time="0.40" steps="660"/></proof>
  </goal>
  <goal name="decompose_max&#39;vc" expl="VC for decompose_max" proved="true">
- <proof prover="5"><result status="valid" time="0.65" steps="643"/></proof>
+ <proof prover="5"><result status="valid" time="0.41" steps="643"/></proof>
  </goal>
  <goal name="add_min_binding&#39;vc" expl="VC for add_min_binding" proved="true">
  <proof prover="5"><result status="valid" time="0.17" steps="341"/></proof>
@@ -837,13 +837,13 @@
  <proof prover="5"><result status="valid" time="0.03" steps="108"/></proof>
  </goal>
  <goal name="insert&#39;vc" expl="VC for insert" proved="true">
- <proof prover="5"><result status="valid" time="0.65" steps="775"/></proof>
+ <proof prover="5"><result status="valid" time="0.38" steps="775"/></proof>
  </goal>
  <goal name="remove&#39;vc" expl="VC for remove" proved="true">
  <proof prover="5"><result status="valid" time="0.20" steps="378"/></proof>
  </goal>
  <goal name="split&#39;vc" expl="VC for split" proved="true">
- <proof prover="5"><result status="valid" time="0.76" steps="1070"/></proof>
+ <proof prover="5"><result status="valid" time="0.51" steps="1070"/></proof>
  </goal>
 </theory>
 <theory name="Set" proved="true">

@@ -53,7 +53,7 @@
   <goal name="wmpn_get_str_bits&#39;vc.12" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="wmpn_get_str_bits&#39;vc.12.0" expl="assertion" proved="true">
-   <proof prover="5"><result status="valid" time="0.31" steps="86751"/></proof>
+   <proof prover="5"><result status="valid" time="0.56" steps="86751"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.12.1" expl="assertion" proved="true">
    <proof prover="4" timelimit="1" memlimit="1000"><result status="valid" time="0.07" steps="79"/></proof>
@@ -68,10 +68,10 @@
    <proof prover="5"><result status="valid" time="0.23" steps="50258"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.12.5" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="5"><result status="valid" time="0.30" steps="84408"/></proof>
+   <proof prover="5"><result status="valid" time="0.51" steps="84408"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.12.6" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="5"><result status="valid" time="0.30" steps="84408"/></proof>
+   <proof prover="5"><result status="valid" time="0.52" steps="84408"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.12.7" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="5"><result status="valid" time="0.14" steps="31146"/></proof>
@@ -104,7 +104,7 @@
    <proof prover="1"><result status="valid" time="0.06"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.12.17" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="1"><result status="valid" time="0.31"/></proof>
+   <proof prover="1"><result status="valid" time="0.56"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.12.18" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="3"><result status="valid" time="0.13" steps="31414"/></proof>
@@ -191,7 +191,7 @@
    <proof prover="3"><result status="valid" time="0.18" steps="34623"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.17.10" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="6"><result status="valid" time="0.94" steps="107"/></proof>
+   <proof prover="6"><result status="valid" time="1.66" steps="107"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.17.11" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="3"><result status="valid" time="0.07" steps="35266"/></proof>
@@ -238,7 +238,7 @@
    <proof prover="5"><result status="valid" time="0.12" steps="44883"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.21.8" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="5"><result status="valid" time="0.33" steps="70085"/></proof>
+   <proof prover="5"><result status="valid" time="0.59" steps="70085"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.21.9" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="6"><result status="valid" time="0.18" steps="110"/></proof>
@@ -275,10 +275,10 @@
    <proof prover="5"><result status="valid" time="0.07" steps="34004"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.22.9" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="4"><result status="valid" time="0.21" steps="113"/></proof>
+   <proof prover="4"><result status="valid" time="0.40" steps="113"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.22.10" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="1"><result status="valid" time="0.47"/></proof>
+   <proof prover="1"><result status="valid" time="0.84"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.22.11" expl="VC for wmpn_get_str_bits" proved="true">
    <transf name="rewrite" proved="true" arg1="&lt;-" arg2="Power_sum">
@@ -297,7 +297,7 @@
    <proof prover="5"><result status="valid" time="0.07" steps="34128"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.22.13" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="4" timelimit="1" memlimit="1000"><result status="valid" time="0.24" steps="120"/></proof>
+   <proof prover="4" timelimit="1" memlimit="1000"><result status="valid" time="0.46" steps="120"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.22.14" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="4" timelimit="1" memlimit="1000"><result status="valid" time="0.25" steps="120"/></proof>
@@ -319,7 +319,7 @@
    <proof prover="3"><result status="valid" time="0.16" steps="34230"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.24.1" expl="assertion" proved="true">
-   <proof prover="2"><result status="valid" time="1.89"/></proof>
+   <proof prover="2"><result status="valid" time="2.43"/></proof>
    </goal>
   </transf>
   </goal>
@@ -404,7 +404,7 @@
   <proof prover="6"><result status="valid" time="0.15" steps="142"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.37" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="2.17" steps="150"/></proof>
+  <proof prover="6"><result status="valid" time="4.06" steps="150"/></proof>
   <transf name="split_vc" proved="true" >
    <goal name="wmpn_get_str_bits&#39;vc.37.0" expl="precondition" proved="true">
    <proof prover="0"><result status="valid" time="0.08" steps="128855"/></proof>
@@ -440,7 +440,7 @@
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.14" steps="32523"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.40.1" expl="assertion" proved="true">
-   <proof prover="2"><result status="valid" time="3.01"/></proof>
+   <proof prover="2"><result status="valid" time="3.85"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.40.2" expl="assertion" proved="true">
    <proof prover="0"><result status="valid" time="0.09" steps="134024"/></proof>
@@ -469,14 +469,14 @@
   <proof prover="0"><result status="valid" time="0.06" steps="136635"/></proof>
   <transf name="split_vc" proved="true" >
    <goal name="wmpn_get_str_bits&#39;vc.43.0" expl="integer overflow" proved="true">
-   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.17" steps="50965"/></proof>
+   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.29" steps="50965"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.44" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="wmpn_get_str_bits&#39;vc.44.0" expl="assertion" proved="true">
-   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.15" steps="48130"/></proof>
+   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.28" steps="48130"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.44.1" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.13" steps="45879"/></proof>
@@ -497,7 +497,7 @@
    <goal name="wmpn_get_str_bits&#39;vc.44.3" expl="VC for wmpn_get_str_bits" proved="true">
    <transf name="apply" proved="true" arg1="simp_compat_strict_l" arg2="with" arg3="(power 2 shift1)">
     <goal name="wmpn_get_str_bits&#39;vc.44.3.0" expl="apply premises" proved="true">
-    <proof prover="2"><result status="valid" time="2.60"/></proof>
+    <proof prover="2"><result status="valid" time="3.31"/></proof>
     </goal>
     <goal name="wmpn_get_str_bits&#39;vc.44.3.1" expl="apply premises" proved="true">
     <proof prover="5"><result status="valid" time="0.22" steps="45988"/></proof>
@@ -556,10 +556,10 @@
    <proof prover="0"><result status="valid" time="0.11" steps="155585"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.49.6" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="2"><result status="valid" time="0.82"/></proof>
+   <proof prover="2"><result status="valid" time="1.11"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.49.7" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.45" steps="91913"/></proof>
+   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.73" steps="91913"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.49.8" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.16" steps="33077"/></proof>
@@ -613,10 +613,10 @@
    <goal name="wmpn_get_str_bits&#39;vc.50.5" expl="VC for wmpn_get_str_bits" proved="true">
    <transf name="apply" proved="true" arg1="prod_compat_r">
     <goal name="wmpn_get_str_bits&#39;vc.50.5.0" expl="apply premises" proved="true">
-    <proof prover="5"><result status="valid" time="0.14" steps="50824"/></proof>
+    <proof prover="5"><result status="valid" time="0.26" steps="50824"/></proof>
     </goal>
     <goal name="wmpn_get_str_bits&#39;vc.50.5.1" expl="apply premises" proved="true">
-    <proof prover="5"><result status="valid" time="0.35" steps="87499"/></proof>
+    <proof prover="5"><result status="valid" time="0.62" steps="87499"/></proof>
     </goal>
    </transf>
    </goal>
@@ -642,7 +642,7 @@
    <goal name="wmpn_get_str_bits&#39;vc.52.0" expl="assertion" proved="true">
    <transf name="inline_goal" proved="true" >
     <goal name="wmpn_get_str_bits&#39;vc.52.0.0" expl="assertion" proved="true">
-    <proof prover="4"><result status="valid" time="0.50" steps="180"/></proof>
+    <proof prover="4"><result status="valid" time="0.88" steps="180"/></proof>
     </goal>
    </transf>
    </goal>
@@ -668,13 +668,13 @@
    <proof prover="1"><result status="valid" time="0.24"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.8" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="4"><result status="valid" time="0.56" steps="191"/></proof>
+   <proof prover="4"><result status="valid" time="0.96" steps="191"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.9" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.06" steps="34133"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.10" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="4"><result status="valid" time="0.56" steps="193"/></proof>
+   <proof prover="4"><result status="valid" time="0.97" steps="193"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.11" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="1"><result status="valid" time="0.26"/></proof>
@@ -699,7 +699,7 @@
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.16" steps="34200"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.15" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="4"><result status="valid" time="0.55" steps="193"/></proof>
+   <proof prover="4"><result status="valid" time="1.06" steps="193"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.16" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="1"><result status="valid" time="0.25"/></proof>
@@ -724,7 +724,7 @@
    <proof prover="2"><result status="valid" time="0.22"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.21" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="0"><result status="valid" time="0.19" steps="600942"/></proof>
+   <proof prover="0"><result status="valid" time="0.38" steps="600942"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.22" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="2"><result status="valid" time="0.44"/></proof>
@@ -777,7 +777,7 @@
    <proof prover="0"><result status="valid" time="0.12" steps="172656"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.34" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.19" steps="55905"/></proof>
+   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.32" steps="55905"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.35" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.32" steps="56571"/></proof>
@@ -812,7 +812,7 @@
    <proof prover="0"><result status="valid" time="0.07" steps="118487"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.41" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="2"><result status="valid" time="0.80"/></proof>
+   <proof prover="2"><result status="valid" time="1.19"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.42" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.10" steps="41432"/></proof>
@@ -821,7 +821,7 @@
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.11" steps="41422"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.44" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="0"><result status="valid" time="0.25" steps="817704"/></proof>
+   <proof prover="0"><result status="valid" time="0.47" steps="817704"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.52.45" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.17" steps="34312"/></proof>
@@ -871,20 +871,20 @@
   <goal name="wmpn_get_str_bits&#39;vc.54" expl="integer overflow" proved="true">
   <transf name="inline_goal" proved="true" >
    <goal name="wmpn_get_str_bits&#39;vc.54.0" expl="integer overflow" proved="true">
-   <proof prover="2"><result status="valid" time="2.78"/></proof>
+   <proof prover="2"><result status="valid" time="3.33"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.55" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="wmpn_get_str_bits&#39;vc.55.0" expl="assertion" proved="true">
-   <proof prover="2"><result status="valid" time="0.64"/></proof>
+   <proof prover="2"><result status="valid" time="0.84"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.55.1" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="0"><result status="valid" time="0.08" steps="113971"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.55.2" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="6"><result status="valid" time="0.56" steps="186"/></proof>
+   <proof prover="6"><result status="valid" time="0.98" steps="186"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.55.3" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="2"><result status="valid" time="0.60"/></proof>
@@ -919,14 +919,14 @@
   <goal name="wmpn_get_str_bits&#39;vc.60" expl="assertion" proved="true">
   <transf name="apply" proved="true" arg1="svalue_sub_frame">
    <goal name="wmpn_get_str_bits&#39;vc.60.0" expl="apply premises" proved="true">
-   <proof prover="5"><result status="valid" time="0.24" steps="59281"/></proof>
+   <proof prover="5"><result status="valid" time="0.41" steps="59281"/></proof>
    </goal>
   </transf>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.61" expl="precondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="wmpn_get_str_bits&#39;vc.61.0" expl="precondition" proved="true">
-   <proof prover="4"><result status="valid" time="0.61" steps="204"/></proof>
+   <proof prover="4"><result status="valid" time="1.11" steps="204"/></proof>
    </goal>
   </transf>
   </goal>
@@ -937,7 +937,7 @@
     <goal name="wmpn_get_str_bits&#39;vc.62.0.0" expl="precondition" proved="true">
     <transf name="inline_goal" proved="true" >
      <goal name="wmpn_get_str_bits&#39;vc.62.0.0.0" expl="precondition" proved="true">
-     <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.73" steps="102382"/></proof>
+     <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="1.19" steps="102382"/></proof>
      </goal>
     </transf>
     </goal>
@@ -959,10 +959,10 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.65" expl="loop variant decrease" proved="true">
-  <proof prover="6"><result status="valid" time="0.98" steps="211"/></proof>
+  <proof prover="6"><result status="valid" time="1.71" steps="211"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.66" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.99" steps="211"/></proof>
+  <proof prover="6"><result status="valid" time="1.72" steps="211"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.67" expl="loop invariant preservation" proved="true">
   <transf name="inline_goal" proved="true" >
@@ -983,7 +983,7 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.68" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.99" steps="215"/></proof>
+  <proof prover="6"><result status="valid" time="1.73" steps="215"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.69" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.10" steps="39007"/></proof>
@@ -1001,7 +1001,7 @@
      <proof prover="5"><result status="valid" time="0.20" steps="39709"/></proof>
      </goal>
      <goal name="wmpn_get_str_bits&#39;vc.71.0.0.1" expl="false case (loop invariant preservation)" proved="true">
-     <proof prover="5"><result status="valid" time="0.53" steps="94671"/></proof>
+     <proof prover="5"><result status="valid" time="0.86" steps="94671"/></proof>
      </goal>
     </transf>
     </goal>
@@ -1010,7 +1010,7 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.72" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="1.04" steps="221"/></proof>
+  <proof prover="6"><result status="valid" time="1.79" steps="221"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.73" expl="loop invariant preservation" proved="true">
   <proof prover="1"><result status="valid" time="0.25"/></proof>
@@ -1021,28 +1021,28 @@
    <proof prover="1"><result status="valid" time="0.18"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.74.1" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="4"><result status="valid" time="0.36" steps="167"/></proof>
+   <proof prover="4"><result status="valid" time="0.64" steps="167"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.74.2" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="1"><result status="valid" time="0.20"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.74.3" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="6"><result status="valid" time="0.49" steps="170"/></proof>
+   <proof prover="6"><result status="valid" time="0.83" steps="170"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.74.4" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="0"><result status="valid" time="0.04" steps="32515"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.74.5" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="6"><result status="valid" time="0.53" steps="172"/></proof>
+   <proof prover="6"><result status="valid" time="0.83" steps="172"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.74.6" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="4"><result status="valid" time="0.47" steps="172"/></proof>
+   <proof prover="4"><result status="valid" time="0.78" steps="172"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.74.7" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="6"><result status="valid" time="0.49" steps="172"/></proof>
+   <proof prover="6"><result status="valid" time="0.83" steps="172"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.74.8" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="4"><result status="valid" time="0.45" steps="175"/></proof>
+   <proof prover="4"><result status="valid" time="0.80" steps="175"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.74.9" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="0"><result status="valid" time="0.14" steps="295005"/></proof>
@@ -1054,7 +1054,7 @@
    <proof prover="0"><result status="valid" time="0.11" steps="141854"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.74.12" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="6"><result status="valid" time="0.50" steps="179"/></proof>
+   <proof prover="6"><result status="valid" time="0.88" steps="179"/></proof>
    </goal>
   </transf>
   </goal>
@@ -1064,7 +1064,7 @@
    <proof prover="5"><result status="valid" time="0.09" steps="36667"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.75.1" expl="assertion" proved="true">
-   <proof prover="4"><result status="valid" time="0.40" steps="167"/></proof>
+   <proof prover="4"><result status="valid" time="0.71" steps="167"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.75.2" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.09" steps="36772"/></proof>
@@ -1096,7 +1096,7 @@
    <goal name="wmpn_get_str_bits&#39;vc.75.11" expl="VC for wmpn_get_str_bits" proved="true">
    <transf name="apply" proved="true" arg1="simp_compat_strict_l" arg2="with" arg3="(uint32&#39;int bits)">
     <goal name="wmpn_get_str_bits&#39;vc.75.11.0" expl="apply premises" proved="true">
-    <proof prover="4"><result status="valid" time="0.40" steps="177"/></proof>
+    <proof prover="4"><result status="valid" time="0.72" steps="177"/></proof>
     </goal>
     <goal name="wmpn_get_str_bits&#39;vc.75.11.1" expl="apply premises" proved="true">
     <proof prover="5"><result status="valid" time="0.06" steps="32996"/></proof>
@@ -1118,7 +1118,7 @@
   <goal name="wmpn_get_str_bits&#39;vc.77" expl="integer overflow" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="wmpn_get_str_bits&#39;vc.77.0" expl="integer overflow" proved="true">
-   <proof prover="5"><result status="valid" time="0.26" steps="70701"/></proof>
+   <proof prover="5"><result status="valid" time="0.45" steps="70701"/></proof>
    </goal>
   </transf>
   </goal>
@@ -1131,7 +1131,7 @@
    <proof prover="0"><result status="valid" time="0.08" steps="112050"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.78.2" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="6"><result status="valid" time="0.51" steps="173"/></proof>
+   <proof prover="6"><result status="valid" time="0.87" steps="173"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.78.3" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="2"><result status="valid" time="0.46"/></proof>
@@ -1176,7 +1176,7 @@
      <proof prover="5"><result status="valid" time="0.15" steps="38387"/></proof>
      </goal>
      <goal name="wmpn_get_str_bits&#39;vc.85.0.0.1" expl="false case (precondition)" proved="true">
-     <proof prover="5"><result status="valid" time="0.49" steps="88361"/></proof>
+     <proof prover="5"><result status="valid" time="0.80" steps="88361"/></proof>
      </goal>
     </transf>
     </goal>
@@ -1198,7 +1198,7 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.88" expl="loop variant decrease" proved="true">
-  <proof prover="4"><result status="valid" time="1.07" steps="198"/></proof>
+  <proof prover="4"><result status="valid" time="1.87" steps="198"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.89" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.13" steps="38179"/></proof>
@@ -1207,7 +1207,7 @@
   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.14" steps="38207"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.91" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="1.11" steps="202"/></proof>
+  <proof prover="6"><result status="valid" time="2.02" steps="202"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.92" expl="loop invariant preservation" proved="true">
   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.06" steps="33765"/></proof>
@@ -1225,7 +1225,7 @@
      <proof prover="5"><result status="valid" time="0.10" steps="39313"/></proof>
      </goal>
      <goal name="wmpn_get_str_bits&#39;vc.94.0.0.1" expl="false case (loop invariant preservation)" proved="true">
-     <proof prover="5"><result status="valid" time="0.38" steps="82300"/></proof>
+     <proof prover="5"><result status="valid" time="0.57" steps="82300"/></proof>
      </goal>
     </transf>
     </goal>
@@ -1244,7 +1244,7 @@
    <goal name="wmpn_get_str_bits&#39;vc.97.0" expl="assertion" proved="true">
    <transf name="inline_goal" proved="true" >
     <goal name="wmpn_get_str_bits&#39;vc.97.0.0" expl="assertion" proved="true">
-    <proof prover="4"><result status="valid" time="0.36" steps="157"/></proof>
+    <proof prover="4"><result status="valid" time="0.70" steps="157"/></proof>
     </goal>
    </transf>
    </goal>
@@ -1267,7 +1267,7 @@
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.16" steps="33630"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.97.7" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="6"><result status="valid" time="0.40" steps="167"/></proof>
+   <proof prover="6"><result status="valid" time="0.77" steps="167"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.97.8" expl="VC for wmpn_get_str_bits" proved="true">
    <transf name="rewrite" proved="true" arg1="Power_sum">
@@ -1288,7 +1288,7 @@
    <goal name="wmpn_get_str_bits&#39;vc.97.10" expl="VC for wmpn_get_str_bits" proved="true">
    <transf name="revert" proved="true" arg1="Mod_bound">
     <goal name="wmpn_get_str_bits&#39;vc.97.10.0" expl="VC for wmpn_get_str_bits" proved="true">
-    <proof prover="2"><result status="valid" time="2.33"/></proof>
+    <proof prover="2"><result status="valid" time="3.29"/></proof>
     </goal>
    </transf>
    </goal>
@@ -1357,7 +1357,7 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.99" expl="integer overflow" proved="true">
-  <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.87" steps="152566"/></proof>
+  <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="1.43" steps="152566"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.100" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
@@ -1368,7 +1368,7 @@
    <proof prover="0"><result status="valid" time="0.07" steps="111821"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.100.2" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="6"><result status="valid" time="0.22" steps="163"/></proof>
+   <proof prover="6"><result status="valid" time="0.40" steps="163"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.100.3" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="2"><result status="valid" time="0.39"/></proof>
@@ -1411,7 +1411,7 @@
   <goal name="wmpn_get_str_bits&#39;vc.105" expl="assertion" proved="true">
   <transf name="apply" proved="true" arg1="svalue_sub_frame">
    <goal name="wmpn_get_str_bits&#39;vc.105.0" expl="apply premises" proved="true">
-   <proof prover="5"><result status="valid" time="0.24" steps="56955"/></proof>
+   <proof prover="5"><result status="valid" time="0.43" steps="56955"/></proof>
    </goal>
   </transf>
   </goal>
@@ -1425,7 +1425,7 @@
     <goal name="wmpn_get_str_bits&#39;vc.107.0.0" expl="precondition" proved="true">
     <transf name="inline_goal" proved="true" >
      <goal name="wmpn_get_str_bits&#39;vc.107.0.0.0" expl="precondition" proved="true">
-     <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.53" steps="92062"/></proof>
+     <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.84" steps="92062"/></proof>
      </goal>
     </transf>
     </goal>
@@ -1439,10 +1439,10 @@
   <goal name="wmpn_get_str_bits&#39;vc.109" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="wmpn_get_str_bits&#39;vc.109.0" expl="assertion" proved="true">
-   <proof prover="6"><result status="valid" time="0.42" steps="183"/></proof>
+   <proof prover="6"><result status="valid" time="0.77" steps="183"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.109.1" expl="assertion" proved="true">
-   <proof prover="6"><result status="valid" time="0.47" steps="185"/></proof>
+   <proof prover="6"><result status="valid" time="0.85" steps="185"/></proof>
    </goal>
   </transf>
   </goal>
@@ -1453,10 +1453,10 @@
   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.10" steps="33238"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.112" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.49" steps="188"/></proof>
+  <proof prover="6"><result status="valid" time="0.91" steps="188"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.113" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.50" steps="190"/></proof>
+  <proof prover="6"><result status="valid" time="0.91" steps="190"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.114" expl="loop invariant preservation" proved="true">
   <proof prover="3"><result status="valid" time="0.16" steps="37918"/></proof>
@@ -1474,7 +1474,7 @@
      <proof prover="3"><result status="valid" time="0.09" steps="38640"/></proof>
      </goal>
      <goal name="wmpn_get_str_bits&#39;vc.116.0.0.1" expl="false case (loop invariant preservation)" proved="true">
-     <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.55" steps="97499"/></proof>
+     <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.97" steps="97499"/></proof>
      </goal>
     </transf>
     </goal>
@@ -1485,7 +1485,7 @@
   <goal name="wmpn_get_str_bits&#39;vc.117" expl="loop invariant preservation" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="wmpn_get_str_bits&#39;vc.117.0" expl="loop invariant preservation" proved="true">
-   <proof prover="6"><result status="valid" time="0.49" steps="196"/></proof>
+   <proof prover="6"><result status="valid" time="0.93" steps="196"/></proof>
    </goal>
   </transf>
   </goal>
@@ -1529,7 +1529,7 @@
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.06" steps="33360"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.119.10" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="1.20" steps="196684"/></proof>
+   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="2.17" steps="196684"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.119.11" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="0"><result status="valid" time="0.10" steps="136384"/></proof>
@@ -1593,7 +1593,7 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.121" expl="precondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.24" steps="72048"/></proof>
+  <proof prover="5"><result status="valid" time="0.47" steps="72048"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.122" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" time="0.06" steps="129938"/></proof>
@@ -1610,13 +1610,13 @@
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.05" steps="33243"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.124.2" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.98" steps="177514"/></proof>
+   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="1.71" steps="177514"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.124.3" expl="VC for wmpn_get_str_bits" proved="true">
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.04" steps="32483"/></proof>
    </goal>
    <goal name="wmpn_get_str_bits&#39;vc.124.4" expl="VC for wmpn_get_str_bits" proved="true">
-   <proof prover="4"><result status="valid" time="0.49" steps="152"/></proof>
+   <proof prover="4"><result status="valid" time="0.91" steps="152"/></proof>
    </goal>
   </transf>
   </goal>
@@ -1627,10 +1627,10 @@
   <proof prover="3"><result status="valid" time="0.15" steps="37645"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.127" expl="postcondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.27" steps="155"/></proof>
+  <proof prover="6"><result status="valid" time="0.47" steps="155"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.128" expl="postcondition" proved="true">
-  <proof prover="3"><result status="valid" time="0.22" steps="75764"/></proof>
+  <proof prover="3"><result status="valid" time="0.39" steps="75764"/></proof>
   </goal>
   <goal name="wmpn_get_str_bits&#39;vc.129" expl="postcondition" proved="true">
   <proof prover="3"><result status="valid" time="0.14" steps="33341"/></proof>
@@ -1680,7 +1680,7 @@
   <proof prover="5"><result status="valid" time="0.05" steps="31881"/></proof>
   </goal>
   <goal name="wmpn_limb_get_str&#39;vc.7" expl="loop invariant init" proved="true">
-  <proof prover="1"><result status="valid" time="0.20"/></proof>
+  <proof prover="1"><result status="valid" time="0.37"/></proof>
   </goal>
   <goal name="wmpn_limb_get_str&#39;vc.8" expl="loop invariant init" proved="true">
   <proof prover="5"><result status="valid" time="0.08" steps="30987"/></proof>
@@ -1918,7 +1918,7 @@
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.08" steps="32272"/></proof>
    </goal>
    <goal name="wmpn_limb_get_str&#39;vc.34.2" expl="VC for wmpn_limb_get_str" proved="true">
-   <proof prover="2"><result status="valid" time="2.13"/></proof>
+   <proof prover="2"><result status="valid" time="3.68"/></proof>
    </goal>
    <goal name="wmpn_limb_get_str&#39;vc.34.3" expl="VC for wmpn_limb_get_str" proved="true">
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.20" steps="43989"/></proof>
@@ -1961,8 +1961,8 @@
    <proof prover="2"><result status="valid" time="0.03"/></proof>
    </goal>
    <goal name="wmpn_limb_get_str&#39;vc.36.1" expl="VC for wmpn_limb_get_str" proved="true">
-   <proof prover="1"><result status="valid" time="0.19"/></proof>
-   <proof prover="2"><result status="valid" time="2.53"/></proof>
+   <proof prover="1"><result status="valid" time="0.37"/></proof>
+   <proof prover="2"><result status="valid" time="3.39"/></proof>
    </goal>
    <goal name="wmpn_limb_get_str&#39;vc.36.2" expl="VC for wmpn_limb_get_str" proved="true">
    <proof prover="5"><result status="valid" time="0.09" steps="32335"/></proof>
@@ -1984,7 +1984,7 @@
    <proof prover="5"><result status="valid" time="0.14" steps="35398"/></proof>
    </goal>
    <goal name="wmpn_limb_get_str&#39;vc.37.1" expl="assertion" proved="true">
-   <proof prover="2"><result status="valid" time="1.77"/></proof>
+   <proof prover="2"><result status="valid" time="2.48"/></proof>
    </goal>
    <goal name="wmpn_limb_get_str&#39;vc.37.2" expl="VC for wmpn_limb_get_str" proved="true">
    <proof prover="5"><result status="valid" time="0.07" steps="35546"/></proof>
@@ -2084,7 +2084,7 @@
   <proof prover="3"><result status="valid" time="0.07" steps="33083"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.10" expl="loop invariant init" proved="true">
-  <proof prover="6"><result status="valid" time="0.53" steps="457"/></proof>
+  <proof prover="6"><result status="valid" time="0.94" steps="457"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.11" expl="loop invariant init" proved="true">
   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.09" steps="31068"/></proof>
@@ -2132,7 +2132,7 @@
   <goal name="wmpn_get_str_other&#39;vc.25" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="wmpn_get_str_other&#39;vc.25.0" expl="assertion" proved="true">
-   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.18" steps="62285"/></proof>
+   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.35" steps="62285"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.25.1" expl="assertion" proved="true">
    <proof prover="1"><result status="valid" time="0.07"/></proof>
@@ -2147,7 +2147,7 @@
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.16" steps="32632"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.25.5" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="1"><result status="valid" time="0.24"/></proof>
+   <proof prover="1"><result status="valid" time="0.44"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.25.6" expl="VC for wmpn_get_str_other" proved="true">
    <transf name="apply" proved="true" arg1="prod_compat_r">
@@ -2155,7 +2155,7 @@
     <proof prover="6" timelimit="1" memlimit="1000"><result status="valid" time="0.08" steps="164"/></proof>
     </goal>
     <goal name="wmpn_get_str_other&#39;vc.25.6.1" expl="apply premises" proved="true">
-    <proof prover="6" timelimit="1" memlimit="1000"><result status="valid" time="0.16" steps="166"/></proof>
+    <proof prover="6" timelimit="1" memlimit="1000"><result status="valid" time="0.31" steps="166"/></proof>
     </goal>
    </transf>
    </goal>
@@ -2169,7 +2169,7 @@
    <proof prover="0"><result status="valid" time="0.08" steps="123307"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.25.10" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.76" steps="153647"/></proof>
+   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="1.39" steps="153647"/></proof>
    </goal>
   </transf>
   </goal>
@@ -2193,7 +2193,7 @@
   <proof prover="5"><result status="valid" time="0.21" steps="45692"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.31" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.31" steps="495"/></proof>
+  <proof prover="6"><result status="valid" time="0.58" steps="495"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.32" expl="integer overflow" proved="true">
   <proof prover="5"><result status="valid" time="0.21" steps="46075"/></proof>
@@ -2219,13 +2219,13 @@
    <proof prover="3"><result status="valid" time="0.15" steps="36924"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.34.1" expl="assertion" proved="true">
-   <proof prover="6"><result status="valid" time="0.22" steps="198"/></proof>
+   <proof prover="6"><result status="valid" time="0.41" steps="198"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.34.2" expl="VC for wmpn_get_str_other" proved="true">
    <proof prover="6"><result status="valid" time="0.06" steps="192"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.34.3" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="6"><result status="valid" time="0.35" steps="197"/></proof>
+   <proof prover="6"><result status="valid" time="0.68" steps="197"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.34.4" expl="VC for wmpn_get_str_other" proved="true">
    <proof prover="0"><result status="valid" time="0.08" steps="126345"/></proof>
@@ -2244,7 +2244,7 @@
    <proof prover="6"><result status="valid" time="0.06" steps="194"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.35.2" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="0"><result status="valid" time="0.16" steps="505632"/></proof>
+   <proof prover="0"><result status="valid" time="0.33" steps="505632"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.35.3" expl="VC for wmpn_get_str_other" proved="true">
    <proof prover="1"><result status="valid" time="0.16"/></proof>
@@ -2253,10 +2253,10 @@
    <proof prover="6"><result status="valid" time="0.12" steps="199"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.35.5" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="6"><result status="valid" time="0.32" steps="205"/></proof>
+   <proof prover="6"><result status="valid" time="0.57" steps="205"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.35.6" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="6"><result status="valid" time="0.55" steps="207"/></proof>
+   <proof prover="6"><result status="valid" time="1.00" steps="207"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.35.7" expl="VC for wmpn_get_str_other" proved="true">
    <proof prover="3"><result status="valid" time="0.19" steps="36236"/></proof>
@@ -2271,7 +2271,7 @@
    <proof prover="3"><result status="valid" time="0.15" steps="33485"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.35.11" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="6"><result status="valid" time="0.37" steps="213"/></proof>
+   <proof prover="6"><result status="valid" time="0.62" steps="213"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.35.12" expl="VC for wmpn_get_str_other" proved="true">
    <proof prover="3"><result status="valid" time="0.16" steps="37057"/></proof>
@@ -2286,7 +2286,7 @@
    <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.45" steps="76092"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.35.16" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="0"><result status="valid" time="0.31" steps="754083"/></proof>
+   <proof prover="0"><result status="valid" time="0.58" steps="754083"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.35.17" expl="VC for wmpn_get_str_other" proved="true">
    <proof prover="3"><result status="valid" time="0.16" steps="34284"/></proof>
@@ -2295,7 +2295,7 @@
    <proof prover="0"><result status="valid" time="0.10" steps="175114"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.35.19" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="6"><result status="valid" time="0.37" steps="204"/></proof>
+   <proof prover="6"><result status="valid" time="0.65" steps="204"/></proof>
    </goal>
   </transf>
   </goal>
@@ -2305,10 +2305,10 @@
   <goal name="wmpn_get_str_other&#39;vc.37" expl="precondition" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="wmpn_get_str_other&#39;vc.37.0" expl="precondition" proved="true">
-   <proof prover="4"><result status="valid" time="0.21" steps="208"/></proof>
+   <proof prover="4"><result status="valid" time="0.36" steps="208"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.37.1" expl="precondition" proved="true">
-   <proof prover="4"><result status="valid" time="0.23" steps="210"/></proof>
+   <proof prover="4"><result status="valid" time="0.40" steps="210"/></proof>
    </goal>
   </transf>
   </goal>
@@ -2316,7 +2316,7 @@
   <proof prover="0"><result status="valid" time="0.06" steps="127489"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.39" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.26" steps="216"/></proof>
+  <proof prover="6"><result status="valid" time="0.44" steps="216"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.40" expl="precondition" proved="true">
   <proof prover="6"><result status="valid" time="0.08" steps="216"/></proof>
@@ -2334,18 +2334,18 @@
   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.16" steps="33561"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.45" expl="precondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.26" steps="80819"/></proof>
+  <proof prover="5"><result status="valid" time="0.49" steps="80819"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.46" expl="precondition" proved="true">
   <proof prover="5"><result status="valid" time="0.23" steps="49632"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.47" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.92" steps="228"/></proof>
+  <proof prover="6"><result status="valid" time="1.76" steps="228"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.48" expl="precondition" proved="true">
   <transf name="inline_goal" proved="true" >
    <goal name="wmpn_get_str_other&#39;vc.48.0" expl="precondition" proved="true">
-   <proof prover="6"><result status="valid" time="0.54" steps="255"/></proof>
+   <proof prover="6"><result status="valid" time="1.01" steps="255"/></proof>
    </goal>
   </transf>
   </goal>
@@ -2359,7 +2359,7 @@
     <goal name="wmpn_get_str_other&#39;vc.49.1.0" expl="asserted formula" proved="true">
     <transf name="split_vc" proved="true" >
      <goal name="wmpn_get_str_other&#39;vc.49.1.0.0" expl="asserted formula" proved="true">
-     <proof prover="6"><result status="valid" time="0.88" steps="255"/></proof>
+     <proof prover="6"><result status="valid" time="1.59" steps="255"/></proof>
      </goal>
      <goal name="wmpn_get_str_other&#39;vc.49.1.0.1" expl="asserted formula" proved="true">
      <proof prover="3"><result status="valid" time="0.12" steps="34674"/></proof>
@@ -2367,14 +2367,14 @@
     </transf>
     </goal>
     <goal name="wmpn_get_str_other&#39;vc.49.1.1" expl="VC for wmpn_get_str_other" proved="true">
-    <proof prover="6"><result status="valid" time="2.06" steps="645"/></proof>
+    <proof prover="6"><result status="valid" time="3.75" steps="645"/></proof>
     </goal>
    </transf>
    </goal>
   </transf>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.50" expl="assertion" proved="true">
-  <proof prover="4"><result status="valid" time="0.51" steps="253"/></proof>
+  <proof prover="4"><result status="valid" time="0.86" steps="253"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.51" expl="precondition" proved="true">
   <transf name="inline_goal" proved="true" >
@@ -2395,7 +2395,7 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.52" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.88" steps="257"/></proof>
+  <proof prover="6"><result status="valid" time="1.54" steps="257"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.53" expl="precondition" proved="true">
   <transf name="inline_goal" proved="true" >
@@ -2431,7 +2431,7 @@
   <proof prover="5"><result status="valid" time="0.25" steps="55120"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.58" expl="precondition" proved="true">
-  <proof prover="4"><result status="valid" time="0.57" steps="266"/></proof>
+  <proof prover="4"><result status="valid" time="0.96" steps="266"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.59" expl="integer overflow" proved="true">
   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.16" steps="55311"/></proof>
@@ -2492,10 +2492,10 @@
    <proof prover="6"><result status="valid" time="0.24" steps="270"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.67.3" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="0"><result status="valid" time="0.20" steps="583413"/></proof>
+   <proof prover="0"><result status="valid" time="0.41" steps="583413"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.67.4" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="1"><result status="valid" time="0.27"/></proof>
+   <proof prover="1"><result status="valid" time="0.46"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.67.5" expl="VC for wmpn_get_str_other" proved="true">
    <proof prover="3"><result status="valid" time="0.17" steps="34693"/></proof>
@@ -2536,7 +2536,7 @@
    <proof prover="1"><result status="valid" time="0.23"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.68.5" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="0"><result status="valid" time="0.45" steps="1013201"/></proof>
+   <proof prover="0"><result status="valid" time="0.89" steps="1013201"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.68.6" expl="VC for wmpn_get_str_other" proved="true">
    <proof prover="1"><result status="valid" time="0.24"/></proof>
@@ -2591,7 +2591,7 @@
    <goal name="wmpn_get_str_other&#39;vc.78.0" expl="precondition" proved="true">
    <transf name="introduce_premises" proved="true" >
     <goal name="wmpn_get_str_other&#39;vc.78.0.0" expl="precondition" proved="true">
-    <proof prover="1"><result status="valid" time="1.46"/></proof>
+    <proof prover="1"><result status="valid" time="2.41"/></proof>
     </goal>
    </transf>
    </goal>
@@ -2601,7 +2601,7 @@
   <proof prover="5"><result status="valid" time="0.33" steps="62261"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.80" expl="assertion" proved="true">
-  <proof prover="0"><result status="valid" time="0.34" steps="838906"/></proof>
+  <proof prover="0"><result status="valid" time="0.66" steps="838906"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.81" expl="integer overflow" proved="true">
   <proof prover="0"><result status="valid" time="0.08" steps="147911"/></proof>
@@ -2623,14 +2623,14 @@
    <goal name="wmpn_get_str_other&#39;vc.86.0" expl="loop invariant preservation" proved="true">
    <transf name="introduce_premises" proved="true" >
     <goal name="wmpn_get_str_other&#39;vc.86.0.0" expl="loop invariant preservation" proved="true">
-    <proof prover="1"><result status="valid" time="1.54"/></proof>
+    <proof prover="1"><result status="valid" time="2.51"/></proof>
     <transf name="case" proved="true" arg1="(i = offset sp + sn)">
      <goal name="wmpn_get_str_other&#39;vc.86.0.0.0" expl="true case (loop invariant preservation)" proved="true">
      <proof prover="0" timelimit="1" memlimit="1000"><result status="valid" time="0.04" steps="35595"/></proof>
      <proof prover="3" timelimit="1" memlimit="1000"><result status="valid" time="0.06" steps="36066"/></proof>
      </goal>
      <goal name="wmpn_get_str_other&#39;vc.86.0.0.1" expl="false case (loop invariant preservation)" proved="true">
-     <proof prover="1"><result status="valid" time="1.52"/></proof>
+     <proof prover="1"><result status="valid" time="2.49"/></proof>
      </goal>
     </transf>
     </goal>
@@ -2639,7 +2639,7 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.87" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.54" steps="323"/></proof>
+  <proof prover="6"><result status="valid" time="0.89" steps="323"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.88" expl="loop invariant preservation" proved="true">
   <proof prover="5"><result status="valid" time="0.32" steps="60539"/></proof>
@@ -2648,7 +2648,7 @@
   <proof prover="5"><result status="valid" time="0.17" steps="38406"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.90" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.45" steps="294"/></proof>
+  <proof prover="6"><result status="valid" time="0.77" steps="294"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.91" expl="loop invariant preservation" proved="true">
   <proof prover="5"><result status="valid" time="0.15" steps="38562"/></proof>
@@ -2666,7 +2666,7 @@
   <proof prover="5"><result status="valid" time="0.06" steps="35929"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.96" expl="loop invariant preservation" proved="true">
-  <proof prover="4"><result status="valid" time="0.48" steps="304"/></proof>
+  <proof prover="4"><result status="valid" time="0.85" steps="304"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.97" expl="loop invariant preservation" proved="true">
   <proof prover="5"><result status="valid" time="0.26" steps="57121"/></proof>
@@ -2685,13 +2685,13 @@
   <proof prover="5"><result status="valid" time="0.05" steps="32271"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.101" expl="postcondition" proved="true">
-  <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.62" steps="116177"/></proof>
+  <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.96" steps="116177"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.102" expl="postcondition" proved="true">
   <proof prover="5"><result status="valid" time="0.11" steps="43029"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.103" expl="postcondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.57" steps="434"/></proof>
+  <proof prover="6"><result status="valid" time="0.94" steps="434"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.104" expl="postcondition" proved="true">
   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.18" steps="40122"/></proof>
@@ -2713,7 +2713,7 @@
   <proof prover="5"><result status="valid" time="0.19" steps="41398"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.109" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="0.43"/></proof>
+  <proof prover="1"><result status="valid" time="0.73"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.110" expl="precondition" proved="true">
   <transf name="inline_all" proved="true" >
@@ -2728,7 +2728,7 @@
    <proof prover="6"><result status="valid" time="0.08" steps="120"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.111.1" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="6"><result status="valid" time="1.25" steps="564"/></proof>
+   <proof prover="6"><result status="valid" time="2.20" steps="564"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.111.2" expl="VC for wmpn_get_str_other" proved="true">
    <proof prover="3"><result status="valid" time="0.05" steps="32060"/></proof>
@@ -2737,7 +2737,7 @@
    <proof prover="6"><result status="valid" time="0.07" steps="125"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.111.4" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="6"><result status="valid" time="0.25" steps="541"/></proof>
+   <proof prover="6"><result status="valid" time="0.43" steps="541"/></proof>
    </goal>
   </transf>
   </goal>
@@ -2774,7 +2774,7 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.120" expl="precondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.17" steps="57944"/></proof>
+  <proof prover="5"><result status="valid" time="0.31" steps="57944"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.121" expl="precondition" proved="true">
   <proof prover="6"><result status="valid" time="0.18" steps="137"/></proof>
@@ -2796,7 +2796,7 @@
     <proof prover="6"><result status="valid" time="0.24" steps="165"/></proof>
     </goal>
     <goal name="wmpn_get_str_other&#39;vc.124.1.1" expl="VC for wmpn_get_str_other" proved="true">
-    <proof prover="6"><result status="valid" time="0.20" steps="412"/></proof>
+    <proof prover="6"><result status="valid" time="0.36" steps="412"/></proof>
     </goal>
    </transf>
    </goal>
@@ -2819,7 +2819,7 @@
      <proof prover="1"><result status="valid" time="0.12"/></proof>
      </goal>
      <goal name="wmpn_get_str_other&#39;vc.126.0.0.1" expl="equality hypothesis" proved="true">
-     <proof prover="6"><result status="valid" time="0.21" steps="169"/></proof>
+     <proof prover="6"><result status="valid" time="0.39" steps="169"/></proof>
      </goal>
     </transf>
     </goal>
@@ -2833,7 +2833,7 @@
    <proof prover="3"><result status="valid" time="0.09" steps="37238"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.127.1" expl="equality hypothesis" proved="true">
-   <proof prover="6"><result status="valid" time="0.25" steps="167"/></proof>
+   <proof prover="6"><result status="valid" time="0.46" steps="167"/></proof>
    </goal>
   </transf>
   </goal>
@@ -2846,7 +2846,7 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.129" expl="integer overflow" proved="true">
-  <proof prover="6"><result status="valid" time="0.27" steps="169"/></proof>
+  <proof prover="6"><result status="valid" time="0.53" steps="169"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.130" expl="precondition" proved="true">
   <proof prover="4"><result status="valid" time="0.12" steps="169"/></proof>
@@ -2858,7 +2858,7 @@
     <goal name="wmpn_get_str_other&#39;vc.131.0.0" expl="precondition" proved="true">
     <transf name="inline_goal" proved="true" >
      <goal name="wmpn_get_str_other&#39;vc.131.0.0.0" expl="precondition" proved="true">
-     <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.21" steps="71051"/></proof>
+     <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.40" steps="71051"/></proof>
      </goal>
     </transf>
     </goal>
@@ -2876,13 +2876,13 @@
   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.21" steps="47156"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.135" expl="assertion" proved="true">
-  <proof prover="6"><result status="valid" time="0.48" steps="177"/></proof>
+  <proof prover="6"><result status="valid" time="0.85" steps="177"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.136" expl="assertion" proved="true">
   <proof prover="2"><result status="valid" time="0.26"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.137" expl="assertion" proved="true">
-  <proof prover="1"><result status="valid" time="1.29"/></proof>
+  <proof prover="1"><result status="valid" time="2.18"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.138" expl="loop invariant init" proved="true">
   <proof prover="5"><result status="valid" time="0.09" steps="35724"/></proof>
@@ -2894,7 +2894,7 @@
   <proof prover="5"><result status="valid" time="0.14" steps="37519"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.141" expl="loop invariant init" proved="true">
-  <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.26" steps="77545"/></proof>
+  <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.42" steps="77545"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.142" expl="loop invariant init" proved="true">
   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.14" steps="49738"/></proof>
@@ -2908,7 +2908,7 @@
   <goal name="wmpn_get_str_other&#39;vc.145" expl="loop invariant init" proved="true">
   <transf name="inline_goal" proved="true" >
    <goal name="wmpn_get_str_other&#39;vc.145.0" expl="loop invariant init" proved="true">
-   <proof prover="4"><result status="valid" time="1.46" steps="840"/></proof>
+   <proof prover="4"><result status="valid" time="2.31" steps="840"/></proof>
    </goal>
   </transf>
   </goal>
@@ -2934,7 +2934,7 @@
   <goal name="wmpn_get_str_other&#39;vc.151" expl="assertion" proved="true">
   <transf name="inline_all" proved="true" >
    <goal name="wmpn_get_str_other&#39;vc.151.0" expl="assertion" proved="true">
-   <proof prover="5"><result status="valid" time="0.27" steps="82344"/></proof>
+   <proof prover="5"><result status="valid" time="0.46" steps="82344"/></proof>
    </goal>
   </transf>
   </goal>
@@ -2961,7 +2961,7 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.158" expl="assertion" proved="true">
-  <proof prover="6"><result status="valid" time="1.54" steps="827"/></proof>
+  <proof prover="6"><result status="valid" time="2.60" steps="827"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.159" expl="integer overflow" proved="true">
   <transf name="inline_all" proved="true" >
@@ -2971,7 +2971,7 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.160" expl="integer overflow" proved="true">
-  <proof prover="6"><result status="valid" time="0.37" steps="242"/></proof>
+  <proof prover="6"><result status="valid" time="0.58" steps="242"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.161" expl="precondition" proved="true">
   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.25" steps="53523"/></proof>
@@ -2986,7 +2986,7 @@
   <proof prover="5"><result status="valid" time="0.34" steps="59390"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.165" expl="precondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.33" steps="66846"/></proof>
+  <proof prover="5"><result status="valid" time="0.50" steps="66846"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.166" expl="precondition" proved="true">
   <transf name="inline_goal" proved="true" >
@@ -3041,7 +3041,7 @@
   <proof prover="5"><result status="valid" time="0.12" steps="35609"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.174" expl="precondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.75" steps="137037"/></proof>
+  <proof prover="5"><result status="valid" time="1.25" steps="137038"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.175" expl="precondition" proved="true">
   <transf name="split_vc" proved="true" >
@@ -3049,7 +3049,7 @@
    <proof prover="5"><result status="valid" time="0.31" steps="63405"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.175.1" expl="precondition" proved="true">
-   <proof prover="6"><result status="valid" time="0.88" steps="272"/></proof>
+   <proof prover="6"><result status="valid" time="1.45" steps="272"/></proof>
    </goal>
   </transf>
   </goal>
@@ -3117,14 +3117,14 @@
    <goal name="wmpn_get_str_other&#39;vc.181.0" expl="precondition" proved="true">
    <transf name="introduce_premises" proved="true" >
     <goal name="wmpn_get_str_other&#39;vc.181.0.0" expl="precondition" proved="true">
-    <proof prover="1"><result status="valid" time="1.30"/></proof>
+    <proof prover="1"><result status="valid" time="2.12"/></proof>
     </goal>
    </transf>
    </goal>
   </transf>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.182" expl="integer overflow" proved="true">
-  <proof prover="5"><result status="valid" time="0.21" steps="65131"/></proof>
+  <proof prover="5"><result status="valid" time="0.35" steps="65131"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.183" expl="loop variant decrease" proved="true">
   <proof prover="5"><result status="valid" time="0.10" steps="39143"/></proof>
@@ -3156,7 +3156,7 @@
   <proof prover="5"><result status="valid" time="0.18" steps="41387"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.190" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.27" steps="297"/></proof>
+  <proof prover="6"><result status="valid" time="0.43" steps="297"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.191" expl="loop invariant preservation" proved="true">
   <transf name="replace" proved="true" arg1="(pelts sp)[j]&#39;&#39;" arg2="(pelts sp2)[j]&#39;&#39;">
@@ -3164,7 +3164,7 @@
    <proof prover="0" timelimit="1" memlimit="1000"><result status="valid" time="0.05" steps="152603"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.191.1" expl="equality hypothesis" proved="true">
-   <proof prover="6" timelimit="1" memlimit="1000"><result status="valid" time="0.29" steps="299"/></proof>
+   <proof prover="6" timelimit="1" memlimit="1000"><result status="valid" time="0.47" steps="299"/></proof>
    </goal>
   </transf>
   </goal>
@@ -3173,7 +3173,7 @@
    <goal name="wmpn_get_str_other&#39;vc.192.0" expl="assertion" proved="true">
    <transf name="compute_in_goal" proved="true" >
     <goal name="wmpn_get_str_other&#39;vc.192.0.0" expl="assertion" proved="true">
-    <proof prover="1"><result status="valid" time="1.65"/></proof>
+    <proof prover="1"><result status="valid" time="2.75"/></proof>
     </goal>
    </transf>
    </goal>
@@ -3187,16 +3187,16 @@
    <proof prover="3"><result status="valid" time="0.14" steps="38125"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.192.4" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="6"><result status="valid" time="0.31" steps="219"/></proof>
+   <proof prover="6"><result status="valid" time="0.52" steps="219"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.192.5" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="6"><result status="valid" time="0.32" steps="219"/></proof>
+   <proof prover="6"><result status="valid" time="0.52" steps="219"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.192.6" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="6"><result status="valid" time="0.44" steps="217"/></proof>
+   <proof prover="6"><result status="valid" time="0.73" steps="217"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.192.7" expl="VC for wmpn_get_str_other" proved="true">
-   <proof prover="6"><result status="valid" time="0.44" steps="217"/></proof>
+   <proof prover="6"><result status="valid" time="0.74" steps="217"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.192.8" expl="VC for wmpn_get_str_other" proved="true">
    <proof prover="3"><result status="valid" time="0.09" steps="37856"/></proof>
@@ -3210,7 +3210,7 @@
   <proof prover="5" timelimit="5" memlimit="2000"><result status="valid" time="0.06" steps="34538"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.195" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.50" steps="526"/></proof>
+  <proof prover="6"><result status="valid" time="0.81" steps="526"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.196" expl="precondition" proved="true">
   <proof prover="6"><result status="valid" time="0.08" steps="215"/></proof>
@@ -3227,7 +3227,7 @@
   </transf>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.198" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.70" steps="540"/></proof>
+  <proof prover="6"><result status="valid" time="1.20" steps="540"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.199" expl="precondition" proved="true">
   <proof prover="5"><result status="valid" time="0.09" steps="37233"/></proof>
@@ -3246,7 +3246,7 @@
   <proof prover="6"><result status="valid" time="0.14" steps="219"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.203" expl="precondition" proved="true">
-  <proof prover="5"><result status="valid" time="0.38" steps="98230"/></proof>
+  <proof prover="5"><result status="valid" time="0.58" steps="98230"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.204" expl="precondition" proved="true">
   <transf name="inline_goal" proved="true" >
@@ -3266,7 +3266,7 @@
   <goal name="wmpn_get_str_other&#39;vc.205" expl="assertion" proved="true">
   <transf name="split_vc" proved="true" >
    <goal name="wmpn_get_str_other&#39;vc.205.0" expl="assertion" proved="true">
-   <proof prover="6"><result status="valid" time="1.33" steps="224"/></proof>
+   <proof prover="6"><result status="valid" time="2.40" steps="224"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.205.1" expl="assertion" proved="true">
    <proof prover="3"><result status="valid" time="0.06" steps="34824"/></proof>
@@ -3304,7 +3304,7 @@
    <proof prover="3"><result status="valid" time="0.15" steps="37985"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.206.2" expl="assertion" proved="true">
-   <proof prover="6"><result status="valid" time="0.74" steps="223"/></proof>
+   <proof prover="6"><result status="valid" time="1.34" steps="223"/></proof>
    </goal>
    <goal name="wmpn_get_str_other&#39;vc.206.3" expl="assertion" proved="true">
    <proof prover="3"><result status="valid" time="0.06" steps="35123"/></proof>
@@ -3321,7 +3321,7 @@
   <proof prover="3"><result status="valid" time="0.14" steps="37589"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.210" expl="postcondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.81" steps="233"/></proof>
+  <proof prover="6"><result status="valid" time="1.37" steps="233"/></proof>
   </goal>
   <goal name="wmpn_get_str_other&#39;vc.211" expl="postcondition" proved="true">
   <proof prover="1"><result status="valid" time="0.32"/></proof>
@@ -3395,13 +3395,13 @@
   <proof prover="4" timelimit="1" memlimit="1000"><result status="valid" time="0.06" steps="72"/></proof>
   </goal>
   <goal name="wmpn_get_str&#39;vc.7" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.29" steps="336"/></proof>
+  <proof prover="6"><result status="valid" time="0.47" steps="336"/></proof>
   </goal>
   <goal name="wmpn_get_str&#39;vc.8" expl="precondition" proved="true">
   <proof prover="3"><result status="valid" time="0.07" steps="33446"/></proof>
   </goal>
   <goal name="wmpn_get_str&#39;vc.9" expl="precondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.37" steps="365"/></proof>
+  <proof prover="6"><result status="valid" time="0.65" steps="365"/></proof>
   </goal>
   <goal name="wmpn_get_str&#39;vc.10" expl="precondition" proved="true">
   <proof prover="5"><result status="valid" time="0.12" steps="31989"/></proof>
@@ -3464,7 +3464,7 @@
   <proof prover="5"><result status="valid" time="0.08" steps="31603"/></proof>
   </goal>
   <goal name="wmpn_get_str&#39;vc.30" expl="postcondition" proved="true">
-  <proof prover="6"><result status="valid" time="0.58" steps="394"/></proof>
+  <proof prover="6"><result status="valid" time="1.08" steps="394"/></proof>
   </goal>
   <goal name="wmpn_get_str&#39;vc.31" expl="postcondition" proved="true">
   <proof prover="3"><result status="valid" time="0.12" steps="32427"/></proof>

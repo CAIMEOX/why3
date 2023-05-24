@@ -56,7 +56,7 @@
   <proof prover="9"><result status="valid" time="0.21" steps="547"/></proof>
   </goal>
   <goal name="periodicity&#39;vc.11" expl="loop invariant preservation" proved="true">
-  <proof prover="6"><result status="valid" time="0.20" steps="47794"/></proof>
+  <proof prover="6"><result status="valid" time="0.36" steps="47794"/></proof>
   </goal>
   <goal name="periodicity&#39;vc.12" expl="out of loop bounds" proved="true">
   <proof prover="6"><result status="valid" time="0.05" steps="16072"/></proof>
@@ -99,7 +99,7 @@
   <goal name="equality&#39;vc.6" expl="precondition" proved="true">
   <transf name="assert" proved="true" arg1="((k-1)*lambda &gt;= 0)">
    <goal name="equality&#39;vc.6.0" expl="asserted formula" proved="true">
-   <proof prover="3"><result status="valid" time="2.07"/></proof>
+   <proof prover="3"><result status="valid" time="3.24"/></proof>
    </goal>
    <goal name="equality&#39;vc.6.1" expl="precondition" proved="true">
    <proof prover="6"><result status="valid" time="0.03" steps="10175"/></proof>
@@ -163,10 +163,10 @@
    <goal name="equality&#39;vc.20.2" expl="postcondition" proved="true">
    <transf name="assert" proved="true" arg1="((k-1) * lambda &gt;= 0)">
     <goal name="equality&#39;vc.20.2.0" expl="asserted formula" proved="true">
-    <proof prover="3"><result status="valid" time="2.05"/></proof>
+    <proof prover="3"><result status="valid" time="3.22"/></proof>
     </goal>
     <goal name="equality&#39;vc.20.2.1" expl="postcondition" proved="true">
-    <proof prover="3"><result status="valid" time="0.47"/></proof>
+    <proof prover="3"><result status="valid" time="0.76"/></proof>
     </goal>
    </transf>
    </goal>
@@ -192,7 +192,7 @@
   <proof prover="9"><result status="valid" time="0.02" steps="38"/></proof>
   </goal>
   <goal name="tortoise_and_hare&#39;vc.5" expl="unreachable point" proved="true">
-  <proof prover="9"><result status="valid" time="0.40" steps="839"/></proof>
+  <proof prover="9"><result status="valid" time="0.69" steps="839"/></proof>
   </goal>
   <goal name="tortoise_and_hare&#39;vc.6" expl="loop variant decrease" proved="true">
   <proof prover="6"><result status="valid" time="0.02" steps="10949"/></proof>
@@ -290,7 +290,7 @@
        <goal name="tortoise_and_hare&#39;vc.19.1.1.0.1.0" expl="loop invariant preservation" proved="true">
        <transf name="assert" proved="true" arg1="((k-1) * lambda &gt;= 0)">
         <goal name="tortoise_and_hare&#39;vc.19.1.1.0.1.0.0" expl="asserted formula" proved="true">
-        <proof prover="7"><result status="valid" time="1.29"/></proof>
+        <proof prover="7"><result status="valid" time="2.07"/></proof>
         </goal>
         <goal name="tortoise_and_hare&#39;vc.19.1.1.0.1.0.1" expl="loop invariant preservation" proved="true">
         <transf name="assert" proved="true" arg1="(i1 &gt;= lambda)">
@@ -315,7 +315,7 @@
            </transf>
            </goal>
            <goal name="tortoise_and_hare&#39;vc.19.1.1.0.1.0.1.1.1.1" expl="false case (loop invariant preservation)" proved="true">
-           <proof prover="6"><result status="valid" time="0.31" steps="92750"/></proof>
+           <proof prover="6"><result status="valid" time="0.55" steps="92750"/></proof>
            </goal>
           </transf>
           </goal>

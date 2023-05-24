@@ -76,7 +76,7 @@
   <proof prover="2"><result status="valid" time="0.08" steps="15459"/></proof>
   </goal>
   <goal name="wmpz_abs&#39;vc.21" expl="precondition" proved="true">
-  <proof prover="2"><result status="valid" time="0.22" steps="49648"/></proof>
+  <proof prover="2"><result status="valid" time="0.40" steps="49648"/></proof>
   </goal>
   <goal name="wmpz_abs&#39;vc.22" expl="precondition" proved="true">
   <proof prover="2"><result status="valid" time="0.08" steps="15490"/></proof>
@@ -168,12 +168,12 @@
   <proof prover="2"><result status="valid" time="0.14" steps="13474"/></proof>
   </goal>
   <goal name="wmpz_abs&#39;vc.44" expl="postcondition" proved="true">
-  <proof prover="0"><result status="valid" time="0.02" steps="17342"/></proof>
+  <proof prover="0"><result status="valid" time="0.02" steps="38573"/></proof>
   <proof prover="1"><result status="valid" time="0.02" steps="75"/></proof>
   <proof prover="2"><result status="valid" time="0.06" steps="13520"/></proof>
   </goal>
   <goal name="wmpz_abs&#39;vc.45" expl="postcondition" proved="true">
-  <proof prover="1" timelimit="5" memlimit="2000"><result status="valid" time="0.37" steps="879"/></proof>
+  <proof prover="1" timelimit="5" memlimit="2000"><result status="valid" time="0.68" steps="879"/></proof>
   </goal>
   <goal name="wmpz_abs&#39;vc.46" expl="postcondition" proved="true">
   <transf name="apply" proved="true" arg1="unchanged_transitive" arg2="with" arg3="mpz1">
