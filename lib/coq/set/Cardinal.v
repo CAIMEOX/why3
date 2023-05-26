@@ -384,7 +384,8 @@ intros s.
 unfold cardinal. destruct ClassicalEpsilon.excluded_middle_informative.
 destruct ClassicalEpsilon.classical_indefinite_description.
 lia.
-reflexivity.
+unfold Z.zero.
+auto with zarith.
 Qed.
 
 (* Why3 goal *)
