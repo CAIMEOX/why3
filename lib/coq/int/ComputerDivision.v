@@ -42,11 +42,12 @@ Lemma Div_bound :
 Proof.
 intros x y (Hx,Hy).
 split.
-now apply Z.quot_pos.
+apply Z.quot_pos; auto with zarith.
 destruct (Z.eq_dec y 1) as [H|H].
 rewrite H, Z.quot_1_r.
 apply Z.le_refl.
-destruct (Zle_lt_or_eq 0 x Hx) as [H'|H'].
+assert (Hx': (0 <= x)%Z); auto with zarith.
+destruct (Zle_lt_or_eq 0 x Hx') as [H'|H'].
 apply Zlt_le_weak.
 apply Z.quot_lt with (1 := H').
 lia.
@@ -76,7 +77,7 @@ Lemma Div_sign_pos :
   (x >= 0%Z)%Z /\ (y > 0%Z)%Z -> ((ZArith.BinInt.Z.quot x y) >= 0%Z)%Z.
 Proof.
 intros x y (Hx, Hy).
-now apply Z.quot_pos.
+generalize (Z.quot_pos x y); auto with zarith.
 Qed.
 
 (* Why3 goal *)
@@ -96,7 +97,7 @@ Lemma Mod_sign_pos :
   (x >= 0%Z)%Z /\ ~ (y = 0%Z) -> ((ZArith.BinInt.Z.rem x y) >= 0%Z)%Z.
 Proof.
 intros x y (Hx, Zy).
-now apply Zrem_lt_pos.
+generalize (Zrem_lt_pos x y); auto with zarith.
 Qed.
 
 (* Why3 goal *)
@@ -160,14 +161,8 @@ Lemma Div_mult :
 Proof.
 intros x y z (Hx&Hy&Hz).
 rewrite (Zplus_comm y).
-rewrite <- Z_quot_plus.
-now rewrite Zplus_comm, Zmult_comm.
-apply Zmult_le_0_compat with (2 := Hz).
-apply Zplus_le_0_compat with (1 := Hz).
-apply Zmult_le_0_compat with (1 := Hy).
-now apply Zlt_le_weak.
-intros H.
-now rewrite H in Hx.
+rewrite <- Z_quot_plus; auto with zarith.
+rewrite Zplus_comm, Zmult_comm; auto with zarith.
 Qed.
 
 (* Why3 goal *)
@@ -178,10 +173,6 @@ Lemma Mod_mult :
 Proof.
 intros x y z (Hx&Hy&Hz).
 rewrite Zplus_comm, Zmult_comm.
-apply Z_rem_plus.
-apply Zmult_le_0_compat with (2 := Hz).
-apply Zplus_le_0_compat with (1 := Hz).
-apply Zmult_le_0_compat with (1 := Hy).
-now apply Zlt_le_weak.
+apply Z_rem_plus; auto with zarith.
 Qed.
 

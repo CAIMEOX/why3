@@ -44,11 +44,7 @@ Lemma Power_s :
   ((power x (n + 1%Z)%Z) = (x * (power x n))%Z).
 Proof.
 intros x n h1.
-rewrite Zpower_exp.
-change (power x 1) with (x * 1)%Z.
-ring.
-now apply Z.le_ge.
-easy.
+rewrite Zpower_exp; auto with zarith.
 Qed.
 
 (* Why3 goal *)
@@ -116,7 +112,7 @@ Lemma Power_non_neg :
   (x >= 0%Z)%Z /\ (y >= 0%Z)%Z -> ((power x y) >= 0%Z)%Z.
 Proof.
 intros x y (h1,h2).
-now apply Z.pow_nonneg.
+generalize (Z.pow_nonneg x y); auto with zarith.
 Qed.
 
 (* Why3 goal *)
@@ -125,7 +121,7 @@ Lemma Power_pos :
   (x > 0%Z)%Z /\ (y >= 0%Z)%Z -> ((power x y) > 0%Z)%Z.
 Proof.
 intros x y (h1,h2).
-eapply Z.pow_pos_nonneg; eauto.
+generalize (Z.pow_pos_nonneg x y); auto with zarith.
 Qed.
 
 Open Scope Z_scope.

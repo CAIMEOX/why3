@@ -97,17 +97,14 @@ intros x y (Hx,Hy).
 unfold div.
 case Z_le_dec ; intros H.
 split.
-apply Z_div_pos with (2 := Hx).
-now apply Z.lt_gt.
+generalize (Z_div_pos x y); auto with zarith.
 destruct (Z.eq_dec y 1) as [H'|H'].
 rewrite H', Zdiv_1_r.
 apply Z.le_refl.
 rewrite <- (Zdiv_1_r x) at 2.
-apply Zdiv_le_compat_l with (1 := Hx).
-lia.
+generalize (Zdiv_le_compat_l x 1 y); auto with zarith.
 elim H.
-apply Z_mod_lt.
-now apply Z.lt_gt.
+apply Z_mod_lt; auto with zarith.
 Qed.
 
 (* Why3 goal *)
@@ -200,7 +197,7 @@ Proof.
 intros y Hy.
 unfold div.
 assert (h1: (1 mod y = 1)%Z).
-apply Zmod_1_l; auto.
+apply Zmod_1_l; auto with zarith.
 assert (h2: ((-(1)) mod y = y-1)%Z).
   rewrite Z_mod_nz_opp_full; auto with zarith.
 case Z_le_dec; auto with zarith.

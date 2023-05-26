@@ -278,6 +278,8 @@ Lemma numof_change_any :
 Proof.
   intros p1 p2 a b.
   case (Z_lt_le_dec a b); intro; [|rewrite Numof_empty, Numof_empty; lia].
+  assert ((forall j : int, (a <= j < b)%Z -> p1 j = true -> p2 j = true) ->
+(numof p1 a b <= numof p2 a b)%Z).
   pattern b.
   apply Zlt_lower_bound_ind with (z := a); auto with zarith; intros.
   case (Z.eq_dec a x); intro eq.
@@ -285,12 +287,13 @@ Proof.
   rewrite Numof_append with (b := (x-1)%Z) by lia.
   rewrite Numof_append with (p := p2) (b := (x-1)%Z) by lia.
   apply Z.add_le_mono.
-  apply H; auto with zarith.
+  generalize (H (x-1)%Z); intros; auto with zarith.
   rewrite numof_pred, numof_pred.
   case (Bool.bool_dec (p1 (x - 1)%Z) true); intro e.
   rewrite e, H1; auto with zarith.
   apply Bool.not_true_is_false in e; rewrite e.
   case (p2 (x -1 )%Z); easy.
+  intro H1; generalize (H H1); auto with zarith.
 Qed.
 
 (* Why3 goal *)
@@ -305,7 +308,10 @@ Lemma numof_change_some :
   ((numof p2 a b) > (numof p1 a b))%Z.
 Proof.
   intros p1 p2 a b i (h1,h2) h3 h4 h5.
-  generalize (Z_le_lt_eq_dec _ _ (numof_change_any p1 p2 a b h3)).
+  assert ((numof p1 a b < numof p2 a b)%Z); auto with zarith.
+  generalize (numof_change_any p1 p2 a b h3); intro H1.
+  assert (H2 : (numof p1 a b <= numof p2 a b)%Z); auto with zarith.
+  generalize (Z_le_lt_eq_dec _ _ H2).
   intro H; destruct H; trivial.
   cut False; auto with zarith.
   rewrite Numof_append with (b := i) in e by lia.
@@ -318,7 +324,7 @@ Proof.
   lia.
 Qed.
 
-Lemma le_ge_eq: forall a b, (a <= b)%Z /\ (b <= a)%Z -> (a = b)%Z.
+Lemma le_ge_eq: forall a b, (a >= b)%Z /\ (b >= a)%Z -> (a = b)%Z.
 Proof.
   auto with zarith.
 Qed.
