@@ -213,15 +213,16 @@ val get_call_result_loc : attribute -> Loc.position option
 (** Get the call result location from an attribute. *)
 
 val has_rac_assume : Sattr.t -> bool
-(** Check if the attributes contain [[\@RAC:assume]]. When a program annotation
-   is a conjunction, conjuncts marked by this annotation are added to the
-   preconditions when checking the programannotation during giant-step RAC. *)
+(** Check if the attributes contain [[\@rac:assume]]. When a program
+   annotation is a conjunction, conjuncts marked by this annotation
+   are added to the preconditions when checking the program annotation
+   during giant-step RAC. *)
 
 val create_call_id_attr_string : int -> string
-(** Create the string of an attribute of the form [[\@RAC:call_id:<id>]]. *)
+(** Create the string of an attribute of the form [[\@rac:call_id:<id>]]. *)
 
 val get_call_id_value : attribute -> int option
-(** Get the call id of the form [[\@RAC:call_id:<id>]]. *)
+(** Get the call id of the form [[\@rac:call_id:<id>]]. *)
 
 val search_attribute_value : (attribute -> 'a option) -> Sattr.t -> 'a option
 (** [search_attribute_value f attrs] applies f to the attributes in [attr] and

@@ -9,7 +9,9 @@
 (*                                                                  *)
 (********************************************************************)
 
-(** {1 Specific instances of Set, Map, Hashtbl on int, string, float, and tagged types} *)
+(** {1 Why3-specific extensions over OCaml Standard Library} *)
+
+(** {1 Specific instances of Set, Map, Hashtbl on int, string and float} *)
 
 module Mint : Extmap.S with type key = int
 module Sint : Extset.S with module M = Mint
@@ -23,7 +25,7 @@ module Mfloat : Extmap.S with type key = float
 module Sfloat : Extset.S with module M = Mfloat
 module Hfloat : Exthtbl.S with type key = float
 
-(* Set, Map, Hashtbl on structures with a unique tag *)
+(** {2 Set, Map, Hashtbl on structures with a unique tag} *)
 
 module type TaggedType =
 sig
@@ -39,12 +41,14 @@ sig
   val compare : t -> t -> int
 end
 
+(** Ordered Hashed module derived from tagged types *)
 module OrderedHashed (X : TaggedType) :
   OrderedHashedType with type t = X.t
 
 module OrderedHashedList (X : TaggedType) :
   OrderedHashedType with type t = X.t list
 
+(** Map, Set and Hashtable modules derived from tagged types *)
 module MakeMSH (X : TaggedType) :
 sig
   module M : Extmap.S with type key = X.t
