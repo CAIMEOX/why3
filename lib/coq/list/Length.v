@@ -39,7 +39,7 @@ Qed.
 
 (* Why3 goal *)
 Lemma Length_nonnegative {a:Type} {a_WT:WhyType a} :
-  forall (l:Init.Datatypes.list a), ((length l) >= 0%Z)%Z.
+  forall (l:Init.Datatypes.list a), (0%Z <= (length l))%Z.
 Proof.
 intros l.
 rewrite length_std.
