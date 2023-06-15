@@ -222,7 +222,11 @@ Lemma nth_out_of_bound :
   ((nth x n) = Init.Datatypes.false).
 intros.
 unfold nth.
-rewrite nth_aux_out_of_bound; auto with zarith.
+rewrite nth_aux_out_of_bound.
+auto.
+destruct H.
+  - left. apply H.
+  - right. assert (size <= n)%Z. auto with zarith. auto.
 Qed.
 
 Definition zeros_aux {l} : Vector.t bool l.
@@ -594,8 +598,8 @@ Lemma max_int_nat : forall l, (0 <= Pow2int.pow2 (Z.of_nat l) - 1)%Z.
   intro.
   rewrite Z.sub_1_r.
   apply Zlt_0_le_0_pred.
-  apply Pow2int.pow2pos.
-  lia.
+  apply Pow2int.pow2poslt.
+  auto with zarith.
 Qed.
 
 Fixpoint bvec_to_nat n (v : Bvector n) {struct v} : nat :=
@@ -730,7 +734,7 @@ Lemma bvec_to_nat_range : forall {n} v, bvec_to_nat n v < Z.to_nat (Pow2int.pow2
   apply lem_time2.
   easy.
   easy.
-  apply Zlt_le_weak, Pow2int.pow2pos; lia.
+  apply Zlt_le_weak, Pow2int.pow2poslt; lia.
 Qed.
 
 Lemma twos_complement_neg : forall {n} v, Bsign n v = true -> (twos_complement (S n) v < 0)%Z.
@@ -743,7 +747,7 @@ Lemma twos_complement_neg : forall {n} v, Bsign n v = true -> (twos_complement (
   rewrite Nat2Z.id.
   apply bvec_to_nat_range.
   lia.
-  apply Zlt_le_weak, Pow2int.pow2pos; lia.
+  apply Zlt_le_weak, Pow2int.pow2poslt; lia.
   lia.
 Qed.
 
@@ -918,7 +922,7 @@ Lemma Nat_to_bvec_ones : forall {n}, Vector.const true n = nat_to_bvec n (Z.to_n
   rewrite <- Z2Nat.inj_succ by (apply max_int_nat).
   rewrite Z.sub_1_r, <- Zsucc_pred; trivial.
   easy.
-  apply Z.lt_le_incl, Pow2int.pow2pos; lia.
+  apply Z.lt_le_incl, Pow2int.pow2poslt; lia.
   rewrite odd_is_odd.
   rewrite Z2Nat.id by (apply max_int_nat).
   apply max_int_is_odd; easy.
@@ -1104,7 +1108,7 @@ Lemma bvec_to_nat_shiftout_mod1 : forall {l} v, Z.of_nat (bvec_to_nat l (Vector.
   rewrite Int.Comm1 with (y := Z.of_nat (bvec_to_nat (S n) v)), Z_div_plus_full, Zdiv_1_l by easy.
   rewrite H; easy.
   lia.
-  apply Pow2int.pow2pos; lia.
+  apply Pow2int.pow2poslt; lia.
   change (Z.of_nat (2 * bvec_to_nat n (Vector.shiftout v)) = (Z.of_nat (2 * bvec_to_nat (S n) v)) mod (Pow2int.pow2 (Z.of_nat (S n)))).
   rewrite Nat2Z.inj_succ with (n := n), <-Z.add_1_r with (n := Z.of_nat n), Pow2int.Power_s by lia.
   rewrite Nat2Z.inj_mul, Nat2Z.inj_mul.
@@ -1278,7 +1282,7 @@ Qed.
 Lemma to_uint_lsr_aux : forall (v:t) (n:nat), ((to_uint (lsr v
   (Z.of_nat n))) = (div (to_uint v) (Pow2int.pow2 (Z.of_nat n)))).
   unfold div.
-  intros; case Z_le_dec; [|intro e; destruct e; apply Z_mod_lt, lt_sym, Pow2int.pow2pos; lia].
+  intros; case Z_le_dec; [|intro e; destruct e; apply Z_mod_lt, lt_sym, Pow2int.pow2poslt; lia].
   revert v n.
   induction n; intro.
   simpl.
@@ -1297,8 +1301,8 @@ Lemma to_uint_lsr_aux : forall (v:t) (n:nat), ((to_uint (lsr v
   rewrite Nat2Z.id.
   rewrite IHn.
   lia.
-  apply Z_mod_lt, lt_sym, Pow2int.pow2pos; lia.
-  apply Z.lt_le_incl, Pow2int.pow2pos; lia.
+  apply Z_mod_lt, lt_sym, Pow2int.pow2poslt; lia.
+  apply Z.lt_le_incl, Pow2int.pow2poslt; lia.
   lia.
 Qed.
 
@@ -1350,7 +1354,7 @@ Proof.
   unfold two_power_size.
   rewrite size_int_S, <-Z.add_1_r, Pow2int.Power_s by lia.
   apply mod_mod_mult.
-  apply lt_sym, Pow2int.pow2pos; lia.
+  apply lt_sym, Pow2int.pow2poslt; lia.
   lia.
 Qed.
 (* end of to_uint helpers *)
@@ -1495,8 +1499,8 @@ Proof.
 intros y y1.
 unfold ugt_closure,ugt.
 case (Z_lt_dec (to_uint y1) (to_uint y)); intro H.
-split; auto.
-split; auto; discriminate.
+split; auto with zarith.
+split; auto with zarith; discriminate.
 Qed.
 
 (* Why3 goal *)
@@ -1513,7 +1517,9 @@ intros y HR.
 apply (H (to_uint y)).
 2: easy.
 split.
+assert (to_uint y > to_uint x).
 now apply -> ugt_closure_def.
+auto with zarith.
 apply Zlt_le_weak, to_uint_bounds.
 Qed.
 
@@ -1588,8 +1594,8 @@ Proof.
 intros y y1.
 unfold sgt_closure,sgt.
 case (Z_lt_dec (to_int y1) (to_int y)); intro H.
-split; auto.
-split; auto; discriminate.
+split; auto with zarith.
+split; auto with zarith; discriminate.
 Qed.
 
 (* Why3 goal *)
@@ -1606,7 +1612,9 @@ intros y HR.
 apply (H (to_int y)).
 2: easy.
 split.
+assert (to_int y > to_int x).
 now apply -> sgt_closure_def.
+auto with zarith.
 clear.
 generalize (to_int'def y).
 unfold is_signed_positive.
@@ -1760,15 +1768,19 @@ Proof.
   case Z_le_dec.
   intros _.
   rewrite e, Zdiv_0_r.
-  split; [easy|apply Pow2int.pow2pos;easy].
+  split; [easy|apply Pow2int.pow2poslt;easy].
   rewrite e, Zmod_0_r.
   intros H.
   elim H.
   try easy; apply to_uint_nat.
   split.
-  apply Div_bound; split;[|apply Z.le_neq;split;[|auto]];apply to_uint_nat.
+  apply Div_bound; assert (0 <= to_uint v1 /\ 0 < to_uint v2).
+  split; [|apply Z.le_neq;split;[|auto]];apply to_uint_nat.
+  auto with zarith.
   apply (Z.le_lt_trans _ (to_uint v1)).
-  apply Div_bound; split;[|apply Z.le_neq;split;[|auto]];apply to_uint_nat.
+  apply Div_bound; assert (0 <= to_uint v1 /\ 0 < to_uint v2).
+  split;[|apply Z.le_neq;split;[|auto]];apply to_uint_nat.
+  auto with zarith.  
   apply to_uint_bounds.
 Qed.
 
@@ -2224,8 +2236,10 @@ Lemma nth_bit_pred_low :
   apply to_uint_extensionality.
   rewrite to_uint_sub, to_uint_of_int, to_uint_of_int.
   apply mod1_out.
-  split; [lia|apply Pow2int.pow2pos, Z.lt_le_incl, size_pos].
-  split; [lia|apply Pow2int.pow2pos, Z.lt_le_incl, size_pos].
+  split; [lia|apply Pow2int.pow2poslt, Z.lt_le_incl]. assert (size > 0).
+   apply size_pos. auto with zarith.
+  split; [lia|apply Pow2int.pow2poslt, Z.lt_le_incl]. assert (size > 0).
+   apply size_pos. auto with zarith.
   apply in_range_1'.
   rewrite H0, <-Of_int_zeros.
   apply Nth_zeros.

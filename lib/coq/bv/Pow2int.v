@@ -29,7 +29,9 @@ Qed.
 Lemma Power_s :
   forall (n:Numbers.BinNums.Z), (n >= 0%Z)%Z ->
   ((pow2 (n + 1%Z)%Z) = (2%Z * (pow2 n))%Z).
+  intros.
   apply two_p_S.
+  auto with zarith.
 Qed.
 
 (* Why3 goal *)
@@ -44,16 +46,24 @@ Lemma Power_sum :
   ((pow2 (n + m)%Z) = ((pow2 n) * (pow2 m))%Z).
   unfold pow2.
   intros n m [H1 H2].
-  apply two_p_is_exp; easy.
+  apply two_p_is_exp.
+  auto with zarith.
+  auto with zarith.
 Qed.
 
 (* Why3 goal *)
 Lemma pow2pos :
   forall (i:Numbers.BinNums.Z), (i >= 0%Z)%Z -> ((pow2 i) > 0%Z)%Z.
-  intros i h1.
-  Require Import Zorder.
-  apply Z.gt_lt.
-  auto using two_p_gt_ZERO.
+  auto with zarith.
+Qed.
+
+(* Useful duplication of pow2pos with lt instead of gt *)
+Lemma pow2poslt :
+  forall (i:Numbers.BinNums.Z), (0%Z <= i)%Z -> (0%Z < pow2 i)%Z.
+  intros.
+  assert (pow2 i > 0)%Z.
+  auto with zarith.
+  auto with zarith.
 Qed.
 
 (* Why3 goal *)

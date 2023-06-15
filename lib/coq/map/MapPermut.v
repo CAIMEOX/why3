@@ -45,7 +45,7 @@ Lemma permut_exists {a:Type} {a_WT:WhyType a} :
 Proof.
 intros a1 a2 l u i h1 Hi.
 pose (v := a2 i).
-assert (0 < map.Occ.occ v a2 l u)%Z.
+assert (map.Occ.occ v a2 l u > 0)%Z.
   apply map.Occ.occ_pos. assumption.
 rewrite <- h1 in H.
 generalize (map.Occ.occ_exists v a1 l u H).

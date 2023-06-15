@@ -43,7 +43,7 @@ Lemma Length_nonnegative {a:Type} {a_WT:WhyType a} :
 Proof.
 intros l.
 rewrite length_std.
-apply Zle_0_nat.
+auto with zarith.
 Qed.
 
 (* Why3 goal *)
