@@ -2,13 +2,12 @@
 <!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
-<prover id="0" name="Z3" version="3.2" timelimit="5" steplimit="0" memlimit="1000"/>
 <prover id="1" name="CVC3" version="2.4.1" timelimit="5" steplimit="0" memlimit="1000"/>
-<prover id="2" name="Z3" version="4.3.2" timelimit="5" steplimit="0" memlimit="1000"/>
 <prover id="3" name="Alt-Ergo" version="2.2.0" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="4" name="CVC5" version="1.0.0" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="5" name="Z3" version="4.7.1" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="6" name="CVC4" version="1.4" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="7" name="CVC4" version="1.8" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="8" name="Eprover" version="1.8-001" timelimit="30" steplimit="0" memlimit="1000"/>
 <prover id="9" name="Z3" version="4.12.1" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="10" name="Vampire" version="0.6" timelimit="30" steplimit="0" memlimit="1000"/>
@@ -19,21 +18,7 @@
 <path name=".."/><path name="Unification.mlw"/>
 <theory name="Logic" proved="true">
  <goal name="smodel_depend_only_model&#39;vc" expl="VC for smodel_depend_only_model" proved="true">
- <transf name="split_goal_right" proved="true" >
-  <goal name="smodel_depend_only_model&#39;vc.0" expl="assertion" proved="true">
-  <transf name="inline_goal" proved="true" >
-   <goal name="smodel_depend_only_model&#39;vc.0.0" expl="assertion" proved="true">
-   <proof prover="0"><result status="valid" time="0.14"/></proof>
-   <proof prover="1"><result status="valid" time="0.22"/></proof>
-   <proof prover="2"><result status="valid" time="0.13"/></proof>
-   <proof prover="6"><result status="valid" time="0.32"/></proof>
-   </goal>
-  </transf>
-  </goal>
-  <goal name="smodel_depend_only_model&#39;vc.1" expl="postcondition" proved="true">
-  <proof prover="12"><result status="valid" time="0.08" steps="8"/></proof>
-  </goal>
- </transf>
+ <proof prover="7"><result status="valid" time="0.33" steps="80380"/></proof>
  </goal>
 </theory>
 <theory name="Impl" proved="true">
@@ -149,7 +134,7 @@
    <proof prover="12"><result status="valid" time="0.14" steps="39"/></proof>
    </goal>
    <goal name="check_unified_free_var&#39;vc.12.1" expl="VC for check_unified_free_var" proved="true">
-   <proof prover="1"><result status="valid" time="0.39"/></proof>
+   <proof prover="1"><result status="valid" time="0.61"/></proof>
    </goal>
   </transf>
   </goal>
@@ -169,7 +154,7 @@
   <proof prover="6"><result status="valid" time="0.16"/></proof>
   </goal>
   <goal name="check_unified_free_var&#39;vc.18" expl="assertion" proved="true">
-  <proof prover="12"><result status="valid" time="0.71" steps="136"/></proof>
+  <proof prover="12"><result status="valid" time="1.09" steps="136"/></proof>
   </goal>
   <goal name="check_unified_free_var&#39;vc.19" expl="precondition" proved="true">
   <proof prover="6"><result status="valid" time="0.32"/></proof>
@@ -203,7 +188,7 @@
   <proof prover="12"><result status="valid" time="0.04" steps="12"/></proof>
   </goal>
   <goal name="check_unified_free_var_list&#39;vc.5" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.13"/></proof>
+  <proof prover="1"><result status="valid" time="0.26"/></proof>
   </goal>
   <goal name="check_unified_free_var_list&#39;vc.6" expl="precondition" proved="true">
   <proof prover="1"><result status="valid" time="0.41"/></proof>
@@ -215,7 +200,7 @@
   <proof prover="12"><result status="valid" time="0.13" steps="14"/></proof>
   </goal>
   <goal name="check_unified_free_var_list&#39;vc.9" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="0.33"/></proof>
+  <proof prover="1"><result status="valid" time="0.51"/></proof>
   </goal>
   <goal name="check_unified_free_var_list&#39;vc.10" expl="postcondition" proved="true">
   <proof prover="12"><result status="valid" time="0.04" steps="99"/></proof>
@@ -241,7 +226,7 @@
   <proof prover="13"><result status="valid" time="0.20" steps="127465"/></proof>
   </goal>
   <goal name="assign&#39;vc.4" expl="assertion" proved="true">
-  <proof prover="13"><result status="valid" time="0.34" steps="131167"/></proof>
+  <proof prover="13"><result status="valid" time="0.51" steps="131167"/></proof>
   </goal>
   <goal name="assign&#39;vc.5" expl="assertion" proved="true">
   <proof prover="1"><result status="valid" time="0.30"/></proof>
@@ -285,7 +270,7 @@
    <proof prover="12"><result status="valid" time="0.12" steps="49"/></proof>
    </goal>
    <goal name="assign&#39;vc.12.6" expl="assertion" proved="true">
-   <proof prover="1"><result status="valid" time="0.40"/></proof>
+   <proof prover="1"><result status="valid" time="0.60"/></proof>
    </goal>
    <goal name="assign&#39;vc.12.7" expl="assertion" proved="true">
    <proof prover="12"><result status="valid" time="0.14" steps="49"/></proof>
@@ -307,7 +292,7 @@
    <proof prover="12"><result status="valid" time="0.06" steps="51"/></proof>
    </goal>
    <goal name="assign&#39;vc.13.4" expl="VC for assign" proved="true">
-   <proof prover="13"><result status="valid" time="0.59" steps="181243"/></proof>
+   <proof prover="13"><result status="valid" time="0.79" steps="181243"/></proof>
    </goal>
    <goal name="assign&#39;vc.13.5" expl="VC for assign" proved="true">
    <proof prover="12"><result status="valid" time="0.05" steps="51"/></proof>
@@ -338,7 +323,7 @@
    <proof prover="12"><result status="valid" time="0.12" steps="56"/></proof>
    </goal>
    <goal name="assign&#39;vc.16.3" expl="VC for assign" proved="true">
-   <proof prover="13"><result status="valid" time="0.67" steps="184540"/></proof>
+   <proof prover="13"><result status="valid" time="0.88" steps="184540"/></proof>
    </goal>
    <goal name="assign&#39;vc.16.4" expl="VC for assign" proved="true">
    <proof prover="12"><result status="valid" time="0.13" steps="56"/></proof>
@@ -350,7 +335,7 @@
    <proof prover="12"><result status="valid" time="0.12" steps="27"/></proof>
    </goal>
    <goal name="assign&#39;vc.16.7" expl="VC for assign" proved="true">
-   <proof prover="13"><result status="valid" time="0.48" steps="179541"/></proof>
+   <proof prover="13"><result status="valid" time="0.63" steps="179541"/></proof>
    </goal>
    <goal name="assign&#39;vc.16.8" expl="VC for assign" proved="true">
    <proof prover="12"><result status="valid" time="0.12" steps="66"/></proof>
@@ -415,19 +400,19 @@
   <goal name="assign&#39;vc.21" expl="assertion" proved="true">
   <transf name="split_goal_right" proved="true" >
    <goal name="assign&#39;vc.21.0" expl="assertion" proved="true">
-   <proof prover="13"><result status="valid" time="0.49" steps="181143"/></proof>
+   <proof prover="13"><result status="valid" time="0.65" steps="181143"/></proof>
    </goal>
    <goal name="assign&#39;vc.21.1" expl="assertion" proved="true">
    <proof prover="12"><result status="valid" time="0.06" steps="70"/></proof>
    </goal>
    <goal name="assign&#39;vc.21.2" expl="assertion" proved="true">
-   <proof prover="13"><result status="valid" time="0.45" steps="181163"/></proof>
+   <proof prover="13"><result status="valid" time="0.60" steps="181163"/></proof>
    </goal>
    <goal name="assign&#39;vc.21.3" expl="assertion" proved="true">
    <proof prover="13"><result status="valid" time="0.49" steps="181497"/></proof>
    </goal>
    <goal name="assign&#39;vc.21.4" expl="assertion" proved="true">
-   <proof prover="1"><result status="valid" time="1.10"/></proof>
+   <proof prover="1"><result status="valid" time="1.32"/></proof>
    </goal>
    <goal name="assign&#39;vc.21.5" expl="assertion" proved="true">
    <proof prover="13"><result status="valid" time="0.48" steps="181691"/></proof>
@@ -811,7 +796,7 @@
   </goal>
   <goal name="unification_term&#39;vc.34" expl="exceptional postcondition" proved="true">
   <proof prover="1"><result status="valid" time="0.10"/></proof>
-  <proof prover="12"><result status="valid" time="0.14" steps="5"/></proof>
+  <proof prover="12"><result status="valid" time="0.02" steps="5"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.35" expl="precondition" proved="true">
   <proof prover="12"><result status="valid" time="0.14" steps="23"/></proof>
@@ -875,7 +860,7 @@
   <proof prover="1"><result status="valid" time="0.29"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.55" expl="postcondition" proved="true">
-  <proof prover="12"><result status="valid" time="0.11" steps="44"/></proof>
+  <proof prover="12"><result status="valid" time="0.09" steps="44"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.56" expl="postcondition" proved="true">
   <proof prover="12"><result status="valid" time="0.12" steps="44"/></proof>
@@ -1055,7 +1040,7 @@
   <proof prover="12"><result status="valid" time="0.03" steps="38"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.115" expl="postcondition" proved="true">
-  <proof prover="13"><result status="valid" time="0.60" steps="184701"/></proof>
+  <proof prover="13"><result status="valid" time="0.62" steps="184701"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.116" expl="postcondition" proved="true">
   <proof prover="6"><result status="valid" time="0.50"/></proof>
@@ -1112,13 +1097,13 @@
   <proof prover="13"><result status="valid" time="0.62" steps="184401"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.134" expl="postcondition" proved="true">
-  <proof prover="12"><result status="valid" time="0.11" steps="79"/></proof>
+  <proof prover="12"><result status="valid" time="0.04" steps="79"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.135" expl="postcondition" proved="true">
   <proof prover="12"><result status="valid" time="0.15" steps="39"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.136" expl="postcondition" proved="true">
-  <proof prover="12"><result status="valid" time="0.08" steps="39"/></proof>
+  <proof prover="12"><result status="valid" time="0.10" steps="39"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.137" expl="exceptional postcondition" proved="true">
   <proof prover="12"><result status="valid" time="0.03" steps="5"/></proof>
@@ -1127,7 +1112,7 @@
   <proof prover="12"><result status="valid" time="0.10" steps="22"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.139" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="3.60"/></proof>
+  <proof prover="1"><result status="valid" time="2.56"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.140" expl="assertion" proved="true">
   <proof prover="12"><result status="valid" time="0.14" steps="102"/></proof>
@@ -1245,7 +1230,7 @@
   <proof prover="12"><result status="valid" time="0.07" steps="38"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.178" expl="postcondition" proved="true">
-  <proof prover="13"><result status="valid" time="0.62" steps="184679"/></proof>
+  <proof prover="13"><result status="valid" time="0.60" steps="184679"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.179" expl="postcondition" proved="true">
   <proof prover="12"><result status="valid" time="0.10" steps="79"/></proof>
@@ -1304,13 +1289,13 @@
   <proof prover="13"><result status="valid" time="0.54" steps="184356"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.197" expl="postcondition" proved="true">
-  <proof prover="12"><result status="valid" time="0.04" steps="79"/></proof>
+  <proof prover="12"><result status="valid" time="0.11" steps="79"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.198" expl="postcondition" proved="true">
   <proof prover="12"><result status="valid" time="0.12" steps="39"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.199" expl="postcondition" proved="true">
-  <proof prover="12"><result status="valid" time="0.10" steps="39"/></proof>
+  <proof prover="12"><result status="valid" time="0.08" steps="39"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.200" expl="exceptional postcondition" proved="true">
   <proof prover="12"><result status="valid" time="0.11" steps="5"/></proof>
@@ -1500,7 +1485,7 @@
   <proof prover="12"><result status="valid" time="0.15" steps="38"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.262" expl="postcondition" proved="true">
-  <proof prover="12"><result status="valid" time="0.09" steps="39"/></proof>
+  <proof prover="12"><result status="valid" time="0.11" steps="39"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.263" expl="postcondition" proved="true">
   <proof prover="12"><result status="valid" time="0.12" steps="39"/></proof>
@@ -1563,7 +1548,7 @@
   <proof prover="12"><result status="valid" time="0.11" steps="5"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.283" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="3.40"/></proof>
+  <proof prover="1"><result status="valid" time="2.87"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.284" expl="precondition" proved="true">
   <proof prover="12"><result status="valid" time="0.10" steps="21"/></proof>
@@ -1812,7 +1797,7 @@
   <proof prover="12"><result status="valid" time="0.11" steps="5"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.366" expl="precondition" proved="true">
-  <proof prover="1"><result status="valid" time="3.32"/></proof>
+  <proof prover="1"><result status="valid" time="2.86"/></proof>
   </goal>
   <goal name="unification_term&#39;vc.367" expl="precondition" proved="true">
   <proof prover="12"><result status="valid" time="0.11" steps="21"/></proof>
