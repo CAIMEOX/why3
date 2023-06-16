@@ -28,11 +28,12 @@ Lemma abs'def :
 Proof.
 intros x.
 split ; intros H.
-apply Z.abs_eq; auto with zarith.
+apply Z.abs_eq.
+lia.
 apply Zabs_non_eq.
 apply Znot_gt_le.
 contradict H.
-auto with zarith.
+lia.
 Qed.
 
 (* Why3 goal *)
@@ -48,6 +49,8 @@ Qed.
 Lemma Abs_pos :
   forall (x:Numbers.BinNums.Z), ((ZArith.BinInt.Z.abs x) >= 0%Z)%Z.
 Proof.
-auto with zarith.
+intros x.
+generalize (Zabs_pos x).
+lia.
 Qed.
 
