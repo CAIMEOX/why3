@@ -329,6 +329,34 @@ let axiom_of_invariant itd =
   let trl = Mvs.fold (fun _ t trl -> [t] :: trl) sbs [] in
   t_forall_close [u] trl (t_subst sbs inv)
 
+let record_injectivity eq_id pr_id itd =
+  if itd.itd_its.its_private then [] else
+    let ts = itd.itd_its.its_ts in
+    let ty = ty_app ts (List.map ty_var ts.ts_args) in
+    let a = create_vsymbol (id_fresh "a") ty in
+    let b = create_vsymbol (id_fresh "b") ty in
+    let xs = [a;b] in
+    let ta = t_var a in
+    let tb = t_var b in
+    let eq = create_psymbol eq_id [ty;ty] in
+    let pr = create_prsymbol pr_id in
+    let eq_fields =
+      let lta = [ta] in
+      let ltb = [tb] in
+      List.map
+        (fun fd ->
+           let pj = ls_of_rs fd in
+           let r = pj.ls_value in
+           t_equ (t_app pj lta r) (t_app pj ltb r)
+        ) itd.itd_fields in
+    let eq_axiom =
+      t_forall_close xs [] @@
+      t_implies (t_app eq [ta;tb] None) (t_equ ta tb) in
+    [
+      create_logic_decl [make_ls_defn eq xs (t_and_l eq_fields)] ;
+      create_prop_decl Paxiom pr eq_axiom ;
+    ]
+
 let create_type_decl dl =
   if dl = [] then invalid_arg "Pdecl.create_type_decl";
   let conv_itd ({itd_its = s} as itd) =
@@ -395,13 +423,19 @@ let create_type_decl dl =
         let meta = Theory.(meta_float, [MAts ts; MAls pj_ls; MAls iF_ls]) in
         mk_decl_meta [meta; meta_proj_pj] (PDtype [itd]) pure
     | fl, _, NoDef when itd.itd_invariant <> [] ->
-        let inv = axiom_of_invariant itd in
-        let pr =
+        let pinv =
           let attrs = suffix_attr_name ~attrs:id.id_attrs "'invariant" in
           create_prsymbol (id_fresh ~attrs ?loc:id.id_loc (nm ^ "'invariant")) in
-        let ax = create_prop_decl Paxiom pr inv in
+        let eq =
+          let attrs = suffix_attr_name ~attrs:id.id_attrs "'eq" in
+          id_fresh ~attrs ?loc:id.id_loc (nm ^ "'eq") in
+        let pinj =
+          let attrs = suffix_attr_name ~attrs:id.id_attrs "'inj" in
+          id_fresh ~attrs ?loc:id.id_loc (nm ^ "'inj") in
+        let inv = create_prop_decl Paxiom pinv (axiom_of_invariant itd) in
+        let inj = record_injectivity eq pinj itd in
         let add_fd s dl = create_param_decl (ls_of_rs s) :: dl in
-        let pure = create_ty_decl ts :: List.fold_right add_fd fl [ax] in
+        let pure = create_ty_decl ts :: List.fold_right add_fd fl (inv::inj) in
         mk_decl (PDtype [itd]) pure
     | fl, [], NoDef ->
         let add_fd s dl = create_param_decl (ls_of_rs s) :: dl in
