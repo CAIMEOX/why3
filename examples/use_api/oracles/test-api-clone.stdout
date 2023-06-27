@@ -17,6 +17,10 @@ theory Test
   
   constant a'minInt : int = 22
   
+  predicate a'eq (a:a) (b:a) = a'int a = a'int b
+  
+  axiom a'inj : forall a:a, b:a. a'eq a b -> a = b
+  
   (* meta range_type type a, function a'int *)
   
   (* meta model_projection function a'int *)
@@ -48,12 +52,17 @@ theory Test1
   
   constant a'minInt1 : int = 22
   
+  predicate a'eq1 (a:a1) (b:a1) = a'int1 a = a'int1 b
+  
+  axiom a'inj1 : forall a:a1, b:a1. a'eq1 a b -> a = b
+  
   (* meta range_type type a1, function a'int1 *)
   
   (* meta model_projection function a'int1 *)
   
-  (* clone Test with type a = a1, constant a'minInt = a'minInt1,
-    constant a'maxInt = a'maxInt1, function a'int = a'int1,  *)
+  (* clone Test with type a = a1, predicate a'eq = a'eq1,
+    constant a'minInt = a'minInt1, constant a'maxInt = a'maxInt1,
+    function a'int = a'int1,  *)
   
 end
 
@@ -278,12 +287,17 @@ theory Task
   
   constant a'minInt : int = 22
   
+  predicate a'eq (a:a) (b:a) = a'int a = a'int b
+  
+  axiom a'inj : forall a:a, b:a. a'eq a b -> a = b
+  
   (* meta range_type type a, function a'int *)
   
   (* meta model_projection function a'int *)
   
-  (* clone Test with type a1 = a, constant a'minInt1 = a'minInt,
-    constant a'maxInt1 = a'maxInt, function a'int1 = a'int,  *)
+  (* clone Test with type a1 = a, predicate a'eq1 = a'eq,
+    constant a'minInt1 = a'minInt, constant a'maxInt1 = a'maxInt,
+    function a'int1 = a'int, prop a'inj1 = a'inj,  *)
   
   type a1 = <range 22 46>
   
@@ -292,6 +306,10 @@ theory Task
   constant a'maxInt1 : int = 46
   
   constant a'minInt1 : int = 22
+  
+  predicate a'eq1 (a:a1) (b:a1) = a'int1 a = a'int1 b
+  
+  axiom a'inj1 : forall a:a1, b:a1. a'eq1 a b -> a = b
   
   (* meta range_type type a1, function a'int1 *)
   
@@ -521,12 +539,17 @@ theory Task
   
   constant a'minInt : int = 22
   
+  predicate a'eq (a:a) (b:a) = a'int a = a'int b
+  
+  axiom a'inj : forall a:a, b:a. a'eq a b -> a = b
+  
   (* meta range_type type a, function a'int *)
   
   (* meta model_projection function a'int *)
   
-  (* clone Test with type a1 = a, constant a'minInt1 = a'minInt,
-    constant a'maxInt1 = a'maxInt, function a'int1 = a'int,  *)
+  (* clone Test with type a1 = a, predicate a'eq1 = a'eq,
+    constant a'minInt1 = a'minInt, constant a'maxInt1 = a'maxInt,
+    function a'int1 = a'int, prop a'inj1 = a'inj,  *)
   
   type a1 = <range 22 46>
   
@@ -535,6 +558,10 @@ theory Task
   constant a'maxInt1 : int = 46
   
   constant a'minInt1 : int = 22
+  
+  predicate a'eq1 (a:a1) (b:a1) = a'int1 a = a'int1 b
+  
+  axiom a'inj1 : forall a:a1, b:a1. a'eq1 a b -> a = b
   
   (* meta range_type type a1, function a'int1 *)
   
@@ -764,12 +791,17 @@ theory Task
   
   constant a'minInt : int = 22
   
+  predicate a'eq (a:a) (b:a) = a'int a = a'int b
+  
+  axiom a'inj : forall a:a, b:a. a'eq a b -> a = b
+  
   (* meta range_type type a, function a'int *)
   
   (* meta model_projection function a'int *)
   
-  (* clone Test with type a1 = a, constant a'minInt1 = a'minInt,
-    constant a'maxInt1 = a'maxInt, function a'int1 = a'int,  *)
+  (* clone Test with type a1 = a, predicate a'eq1 = a'eq,
+    constant a'minInt1 = a'minInt, constant a'maxInt1 = a'maxInt,
+    function a'int1 = a'int, prop a'inj1 = a'inj,  *)
   
   type a1 = <range 22 46>
   
@@ -778,6 +810,10 @@ theory Task
   constant a'maxInt1 : int = 46
   
   constant a'minInt1 : int = 22
+  
+  predicate a'eq1 (a:a1) (b:a1) = a'int1 a = a'int1 b
+  
+  axiom a'inj1 : forall a:a1, b:a1. a'eq1 a b -> a = b
   
   (* meta range_type type a1, function a'int1 *)
   
