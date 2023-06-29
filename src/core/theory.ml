@@ -512,7 +512,6 @@ let warn_dubious_axiom uc k p syms =
   | Plemma | Pgoal -> ()
   | Paxiom ->
     try
-      if Strings.has_suffix "'inj" p.id_string then raise Exit ;
       Sid.iter
         (fun id ->
           if Sid.mem id uc.uc_local then

@@ -316,6 +316,14 @@ let mk_decl_meta = let r = ref 0 in fun meta node pure ->
 
 let mk_decl = mk_decl_meta []
 
+let meta_depends =
+  Theory.(
+    register_meta
+      ~desc:
+        "declares an dependency between a proposition and a logic symbol. Used \
+         by the transformation `remove_unused`"
+      "remove_unused:dependency" [ MTprsymbol; MTlsymbol ])
+
 let axiom_of_invariant itd =
   let ts = itd.itd_its.its_ts in
   let inv = t_and_simp_l itd.itd_invariant in
@@ -335,6 +343,7 @@ let injectivity ty id pjs =
     id_fresh ~attrs ?loc:id.id_loc (id.id_string ^ "'eq") in
   let pr_id =
     let attrs = suffix_attr_name ~attrs:id.id_attrs "'inj" in
+    let attrs = Sattr.add Theory.attr_w_non_conservative_extension_no attrs in
     id_fresh ~attrs ?loc:id.id_loc (id.id_string ^ "'inj") in
   let a = create_vsymbol (id_fresh "a") ty in
   let b = create_vsymbol (id_fresh "b") ty in
@@ -357,10 +366,11 @@ let injectivity ty id pjs =
   [
     create_logic_decl [make_ls_defn eq xs (t_and_l eq_fields)] ;
     create_prop_decl Paxiom pr eq_axiom ;
-  ]
+  ],
+  [(meta_depends,[Theory.MApr pr; Theory.MAls eq])]
 
 let record_injectivity id itd =
-  if itd.itd_its.its_private then [] else
+  if itd.itd_its.its_private then [],[] else
     let ts = itd.itd_its.its_ts in
     let ty = ty_app ts (List.map ty_var ts.ts_args) in
     injectivity ty id (List.map ls_of_rs itd.itd_fields)
@@ -398,11 +408,11 @@ let create_type_decl dl =
         let min_defn = t_const const ty_int in
         let min_decl = create_logic_decl [make_ls_defn min_ls [] min_defn] in
         (* injectivity of projection *)
-        let inj = injectivity ty id [pj_ls] in
+        let inj,meta_inj = injectivity ty id [pj_ls] in
         (* build *)
         let pure = create_ty_decl ts :: pj_decl :: max_decl :: min_decl :: inj in
         let meta = Theory.(meta_range, [MAts ts; MAls pj_ls]) in
-        mk_decl_meta [meta; meta_proj_pj] (PDtype [itd]) pure
+        mk_decl_meta (meta :: meta_proj_pj :: meta_inj) (PDtype [itd]) pure
     | _, _, Float ff ->
         let pj_id =
           let attrs = suffix_attr_name ~attrs:id.id_attrs "'real" in
@@ -443,11 +453,11 @@ let create_type_decl dl =
           create_prsymbol (id_fresh ~attrs ?loc:id.id_loc (nm ^ "'invariant")) in
         let inv = create_prop_decl Paxiom pinv (axiom_of_invariant itd) in
         (* injectivity *)
-        let inj = record_injectivity id itd in
+        let inj,meta_inj = record_injectivity id itd in
         (* build *)
         let add_fd s dl = create_param_decl (ls_of_rs s) :: dl in
         let pure = create_ty_decl ts :: List.fold_right add_fd fl (inv::inj) in
-        mk_decl (PDtype [itd]) pure
+        mk_decl_meta meta_inj (PDtype [itd]) pure
     | fl, [], NoDef ->
         let add_fd s dl = create_param_decl (ls_of_rs s) :: dl in
         let pure = create_ty_decl ts :: List.fold_right add_fd fl [] in
