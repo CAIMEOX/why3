@@ -25,6 +25,8 @@ theory Test
   
   (* meta model_projection function a'int *)
   
+  (* meta remove_unused:dependency prop a'inj, predicate a'eq *)
+  
   goal f2'vc : let result'unused = True in false
   
   goal f3'vc : forall b:a. let _result'unused = b in a'int b = 42
@@ -59,6 +61,8 @@ theory Test1
   (* meta range_type type a1, function a'int1 *)
   
   (* meta model_projection function a'int1 *)
+  
+  (* meta remove_unused:dependency prop a'inj1, predicate a'eq1 *)
   
   (* clone Test with type a = a1, predicate a'eq = a'eq1,
     constant a'minInt = a'minInt1, constant a'maxInt = a'maxInt1,
@@ -295,6 +299,8 @@ theory Task
   
   (* meta model_projection function a'int *)
   
+  (* meta remove_unused:dependency prop a'inj, predicate a'eq *)
+  
   (* clone Test with type a1 = a, predicate a'eq1 = a'eq,
     constant a'minInt1 = a'minInt, constant a'maxInt1 = a'maxInt,
     function a'int1 = a'int, prop a'inj1 = a'inj,  *)
@@ -314,6 +320,8 @@ theory Task
   (* meta range_type type a1, function a'int1 *)
   
   (* meta model_projection function a'int1 *)
+  
+  (* meta remove_unused:dependency prop a'inj1, predicate a'eq1 *)
   
   goal f2'vc : let result'unused = True in false
   
@@ -547,6 +555,8 @@ theory Task
   
   (* meta model_projection function a'int *)
   
+  (* meta remove_unused:dependency prop a'inj, predicate a'eq *)
+  
   (* clone Test with type a1 = a, predicate a'eq1 = a'eq,
     constant a'minInt1 = a'minInt, constant a'maxInt1 = a'maxInt,
     function a'int1 = a'int, prop a'inj1 = a'inj,  *)
@@ -566,6 +576,8 @@ theory Task
   (* meta range_type type a1, function a'int1 *)
   
   (* meta model_projection function a'int1 *)
+  
+  (* meta remove_unused:dependency prop a'inj1, predicate a'eq1 *)
   
   goal f3'vc : forall b:a1. let _result'unused = b in a'int1 b = 42
   
@@ -799,6 +811,8 @@ theory Task
   
   (* meta model_projection function a'int *)
   
+  (* meta remove_unused:dependency prop a'inj, predicate a'eq *)
+  
   (* clone Test with type a1 = a, predicate a'eq1 = a'eq,
     constant a'minInt1 = a'minInt, constant a'maxInt1 = a'maxInt,
     function a'int1 = a'int, prop a'inj1 = a'inj,  *)
@@ -818,6 +832,8 @@ theory Task
   (* meta range_type type a1, function a'int1 *)
   
   (* meta model_projection function a'int1 *)
+  
+  (* meta remove_unused:dependency prop a'inj1, predicate a'eq1 *)
   
   goal f1'vc :
     forall b:a1.
