@@ -684,7 +684,7 @@ end
     Pretty.forget_all ();
     capture_parse_or_type_errors
       (fun c ->
-        try let (_,_) = reload_files ~hard_reload c in [] with
+        try let (_,_) = reload_files ~hard_reload ~ignore_shapes:false c in [] with
         | Errors_list le -> le) cont
 
   let add_file cont ?format fname =
@@ -1290,10 +1290,7 @@ match pa.proof_state with
         if Session_itp.is_detached d.cont.controller_session nid then
           P.notify (Message (Information "Transformation cannot apply on detached node"))
         else
-          if Session_itp.check_if_already_exists d.cont.controller_session id t args then
-            P.notify (Message (Information "Transformation already applied"))
-          else
-            let callback = callback_update_tree_transform t args in
+          let callback = callback_update_tree_transform t args in
             C.schedule_transformation d.cont id t args ~callback
               ~notification:(notify_change_proved d.cont)
       | APa panid ->
@@ -1776,12 +1773,6 @@ match pa.proof_state with
     else
       try treat_request d r
       with
-      | C.TransAlreadyExists (name,args) ->
-         P.notify
-           (Message
-              (Error
-                 (Pp.sprintf "Transformation %s with arg [%s] already exists"
-                             name args)))
       | C.GoalNodeDetached _id ->
         P.notify
            (Message

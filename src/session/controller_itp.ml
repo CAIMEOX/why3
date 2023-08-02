@@ -244,7 +244,7 @@ let print_session fmt c =
     reloaded.
  *)
 
-let reload_files ?(hard_reload=false) (c : controller) =
+let reload_files ?(hard_reload=false) ~ignore_shapes (c : controller) =
   let old_ses = c.controller_session in
   if hard_reload then begin
     c.controller_env <- Env.create_env (Env.get_loadpath c.controller_env);
@@ -255,12 +255,12 @@ let reload_files ?(hard_reload=false) (c : controller) =
   (* FIXME: here we should compare [shape_version] with the version of shapes just loaded.
      OR: even better, this function has no reason to have a [shape_version] parameter
      and should always take the version from the file just loaded. *)
-  merge_files c.controller_env c.controller_session old_ses
+  merge_files ~ignore_shapes c.controller_env c.controller_session old_ses
 
 exception Errors_list of exn list
 
-let reload_files ?(hard_reload=false) (c: controller) =
-  let errors, b1, b2 = reload_files c ~hard_reload in
+let reload_files ?(hard_reload=false) ~ignore_shapes (c: controller) =
+  let errors, b1, b2 = reload_files c ~hard_reload ~ignore_shapes in
   match errors with
   | [] -> b1, b2
   | _ -> raise (Errors_list errors)
@@ -787,7 +787,6 @@ let schedule_edition c id pr ~callback ~notification =
   Queue.add (callback panid,call,old_res) prover_tasks_edited;
   run_idle_handler ()
 
-exception TransAlreadyExists of string * string
 exception GoalNodeDetached of proofNodeID
 
 (*** { 2 transformations} *)
@@ -826,8 +825,6 @@ let schedule_transformation c id name args ~callback ~notification =
   in
   if Session_itp.is_detached c.controller_session (APn id) then
     raise (GoalNodeDetached id);
-  if Session_itp.check_if_already_exists c.controller_session id name args then
-    raise (TransAlreadyExists (name, List.fold_left (fun acc s -> s ^ " " ^ acc) "" args));
   S.idle ~prio:0 apply_trans;
   callback TSscheduled
 
@@ -906,11 +903,7 @@ let run_strategy_on_goal
                  S.idle ~prio:0 run_next)
                 (get_sub_tasks c.controller_session tid)
          in
-         begin match Session_itp.get_transformation c.controller_session g trname [] with
-         | tid -> callback (TSdone tid)
-         | exception Not_found ->
-             schedule_transformation c g trname [] ~callback ~notification
-         end
+         schedule_transformation c g trname [] ~callback ~notification
       | Igoto pc ->
          callback (STSgoto (g,pc));
          exec_strategy pc strat g

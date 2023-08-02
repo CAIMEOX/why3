@@ -1,5 +1,15 @@
 :x: marks a potential source of incompatibility
 
+Core
+  * time taken by solvers is now uniformly reported with the precision
+    of a microseconds, at least internally, in particular in session
+    files. The statistics with cumulated times computed e.g. by `why3
+    session info --provers-stats` are mopre precise. Additionally, the
+    computation time reported for Alt-Ergo is, as for any other
+    solvers, the one reported by the Why3 server, and not the one
+    reported by Alt-Ergo itself. The use of the `time` regexp in
+    driver files should be considered as deprecated.
+
 MLCFG language
   * `variant` clauses are supported with the `stackify` backend.
   * `invariant` names are now optional and depreated.
@@ -35,11 +45,14 @@ Tools
     nodes via filters. See manual Section 5.5.4.
     New option `create`, which generates a new session for the specified files.
     See manual Section 5.5.5.
-  - New command `why3 bench` which runs all proofs attempts nodes that have not
+  * New command `why3 bench` which runs all proofs attempts nodes that have not
     been run before. See manual Section 5.13.
+  * New option `--ignore-shapes` for `why3 replay`. It disables the use of shapes
+	when merging the session with the old one.
 
 Provers
   * support for Coq 8.17.0 (released Mar 23, 2023)
+  * drop support for versions of Coq < 8.11
 
 Configuration
   * the `./configure` option `--disable-pp-sexp` is renamed into `--disable-sexp` :x:

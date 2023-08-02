@@ -384,6 +384,12 @@ let builtin_module =
   let m = close_module uc in
   { m with mod_theory = builtin_theory }
 
+let ignore_module =
+  let uc = empty_module dummy_env (id_fresh "Ignore") ["why3";"Ignore"] in
+  let uc = add_pdecl_no_logic uc pd_ignore_term in
+  let m = close_module uc in
+  { m with mod_theory = ignore_theory }
+
 let bool_module =
   let uc = empty_module dummy_env (id_fresh "Bool") ["why3";"Bool"] in
   let uc = add_pdecl_no_logic uc pd_bool in
@@ -516,7 +522,11 @@ let create_module env ?(path=[]) n =
   m
 
 let add_use uc syms = Sid.fold (fun id uc ->
-  if id_equal id ts_func.ts_name then
+  if id_equal id ps_acc.ls_name then
+    use_export uc wf_module
+  else if id_equal id ps_wf.ls_name then
+    use_export uc wf_module
+  else if id_equal id ts_func.ts_name then
     use_export uc highord_module
   else if id_equal id ts_ref.ts_name then
     use_export uc ref_module
@@ -529,11 +539,8 @@ let mk_vc uc d = Vc.vc uc.muc_env uc.muc_known uc.muc_theory d
 let add_pdecl ?(warn=true) ~vc uc d =
   let uc = add_use uc d.pd_syms in
   let dl = if vc then mk_vc uc d else [] in
-  (* verification conditions must not add additional dependencies
-     on built-in theories like TupleN or HighOrd. Also, we expect
-     int.Int or any other library theory to be in the context:
-     importing them automatically seems to be too invasive. *)
-  add_pdecl_raw ~warn (List.fold_left (add_pdecl_raw ~warn) uc dl) d
+  let add uc d = add_pdecl_raw ~warn (add_use uc d.pd_syms) d in
+  add_pdecl_raw ~warn (List.fold_left add uc dl) d
 
 let syms_of_ts s ts = Sid.add ts.ts_name s
 let syms_of_ty s ty = ty_s_fold syms_of_ts s ty
@@ -1653,6 +1660,7 @@ let mlw_language_builtin =
     if s = unit_module.mod_theory.th_name.id_string then unit_module else
     if s = ref_module.mod_theory.th_name.id_string then ref_module else
     if s = builtin_theory.th_name.id_string then builtin_module else
+    if s = ignore_theory.th_name.id_string then ignore_module else
     if s = highord_theory.th_name.id_string then highord_module else
     if s = wf_module.mod_theory.th_name.id_string then wf_module else
     if s = bool_theory.th_name.id_string then bool_module else

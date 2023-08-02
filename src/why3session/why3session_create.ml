@@ -94,12 +94,14 @@ let run () =
       !provers
   in
   let session = load_session dir in
+  let errors = ref [] in
   let add_file_and_vcs_to_session f =
     let f = Sysutil.concat (Sys.getcwd ()) f in
-    let ths, fformat = read_file env f in
-    let file =
-      add_file_section ~file_is_detached:false session f ths fformat
+    let file_is_detached,(theories,format) =
+      try false,(Session_itp.read_file env f)
+      with e -> errors := e :: !errors; true,([], Env.get_format f)
     in
+    let file = add_file_section ~file_is_detached session f theories format in
     let theories = file_theories file in
 
     (* Apply split_vc on goal then call each specified prover on the generated
@@ -125,13 +127,19 @@ let run () =
   (* FIXME: if the file is already present in the session, a new
      duplicate file node is added. We would prefer to modify the
      existing one *)
-  iter_files add_file_and_vcs_to_session;
-  save_session session
+  iter_session_files add_file_and_vcs_to_session;
+  save_session session;
+  match !errors with
+  | [] -> eprintf "Session created successfully@."
+  | _ ->
+      eprintf "Session created but with the following errors:@.";
+      List.iter (fun e -> eprintf "%a@." Exn_printer.exn_printer e) !errors
+
 
 let cmd =
   {
     cmd_spec = spec;
-    cmd_desc = "Create a session";
+    cmd_desc = "Create a session, arguments are source files to add";
     cmd_name = "create";
     cmd_run = run;
   }

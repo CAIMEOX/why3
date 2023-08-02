@@ -24,9 +24,10 @@ type cmd =
       cmd_run  : unit -> unit;
     }
 
-let files = Queue.create ()
-let iter_files f = Queue.iter f files
-let anon_fun (f:string) = Queue.add f files
+let session_files = Queue.create ()
+let iter_session_files f = Queue.iter f session_files
+let add_session_file (f:string) = Queue.add f session_files
+let no_session_file () = Queue.is_empty session_files
 
 let read_session fname =
   let q = Queue.create () in
@@ -47,7 +48,7 @@ let read_update_session ~allow_obsolete env config fname =
   let cont = Controller_itp.create_controller config env session in
   let found_obs, some_merge_miss =
     try
-      Controller_itp.reload_files cont
+      Controller_itp.reload_files ~ignore_shapes:true cont
     with
     | Controller_itp.Errors_list l ->
         List.iter (fun e -> Format.eprintf "%a@." Exn_printer.exn_printer e) l;
