@@ -59,7 +59,7 @@ let add_model_element el info_model =
     If an element with the same hash (the same set of attributes + the same
     location) as the element el already exists in info_model, replace it with el.
 
-    The reason is that  we do not want to display two model elements with the same
+    The reason is that we do not want to display two model elements with the same
     name in the same location and usually it is better to display the last one.
 
     Note that two model elements can have the same name and location if why is used

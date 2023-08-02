@@ -355,26 +355,23 @@ let search_model_element_for_id m ?loc id =
     then Some me else None in
   search_model_element m p
 
-let search_model_element_call_result model (call_id : Expr.expr_id option) =
-  match call_id with
-  | None -> None
-  | Some call_id ->
-      let matching_eid attrs =
-        match Ident.get_eid_attr attrs with
-        | Some i -> i = call_id
-        | _ -> false
-      in
-      let p me =
-        (* [@model_trace:result] [@eid:<eid>] *)
-        let has_model_trace_result attrs =
-          get_model_trace_string ~name:"" ~attrs = "result"
-        in
-        if has_model_trace_result me.me_attrs && matching_eid me.me_attrs then
-          Some me
-        else
-          None
-      in
-      search_model_element model p
+let search_model_element_call_result model (call_id : Expr.expr_id) =
+  let matching_eid attrs =
+    match Ident.get_eid_attr attrs with
+    | Some i -> i = call_id
+    | _ -> false
+  in
+  let p me =
+    (* [@model_trace:result] [@eid:<eid>] *)
+    let has_model_trace_result attrs =
+      get_model_trace_string ~name:"" ~attrs = "result"
+    in
+    if has_model_trace_result me.me_attrs && matching_eid me.me_attrs then
+      Some me
+    else
+      None
+  in
+  search_model_element model p
 
 (*
 ***************************************************************

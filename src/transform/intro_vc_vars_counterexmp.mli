@@ -32,7 +32,7 @@ val intro_vc_vars_counterexmp : Task.task Trans.trans
 
     Variables inside the term that triggers VC should be displayed in
     counterexample for that VC. However, many VCs (tasks) can be generated
-    for  a signle *.mlw file and only variables in the term that trigger
+    for a single *.mlw file and only variables in the term that trigger
     the VC (task) that is currently proven should be displayed. That means
     that the process of selecting variables inside the term that triggers
     VC for counterexample cannot be done before the task is processed.
