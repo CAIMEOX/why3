@@ -244,7 +244,7 @@ let print_session fmt c =
     reloaded.
  *)
 
-let reload_files ?(hard_reload=false) (c : controller) =
+let reload_files ?(hard_reload=false) ~ignore_shapes (c : controller) =
   let old_ses = c.controller_session in
   if hard_reload then begin
     c.controller_env <- Env.create_env (Env.get_loadpath c.controller_env);
@@ -255,12 +255,12 @@ let reload_files ?(hard_reload=false) (c : controller) =
   (* FIXME: here we should compare [shape_version] with the version of shapes just loaded.
      OR: even better, this function has no reason to have a [shape_version] parameter
      and should always take the version from the file just loaded. *)
-  merge_files c.controller_env c.controller_session old_ses
+  merge_files ~ignore_shapes c.controller_env c.controller_session old_ses
 
 exception Errors_list of exn list
 
-let reload_files ?(hard_reload=false) (c: controller) =
-  let errors, b1, b2 = reload_files c ~hard_reload in
+let reload_files ?(hard_reload=false) ~ignore_shapes (c: controller) =
+  let errors, b1, b2 = reload_files c ~hard_reload ~ignore_shapes in
   match errors with
   | [] -> b1, b2
   | _ -> raise (Errors_list errors)
@@ -530,11 +530,15 @@ let idle_handler () =
   !idle_handler_running
 
 let interrupt c =
+  Debug.dprintf debug_sched "interrupt called@.";
   let config = Whyconf.get_main c.controller_config in
   (* Interrupt provers *)
   Hashtbl.iter
     (fun call e ->
      Call_provers.interrupt_call ~config call;
+     Debug.dprintf debug_sched "interrupt running proof, calling callback with s=%a@."
+        print_status Interrupted;
+     if e.tp_started then decr number_of_running_provers;
      e.tp_callback Interrupted)
     prover_tasks_in_progress;
   (* Do not interrupt editors
@@ -545,8 +549,11 @@ let interrupt c =
   done;
   *)
   number_of_running_provers := 0;
+  Hashtbl.clear prover_tasks_in_progress;
   while not (Queue.is_empty scheduled_proof_attempts) do
     let spa = Queue.pop scheduled_proof_attempts in
+    Debug.dprintf debug_sched "interrupt scheduled proof, calling callback with s=%a@."
+        print_status Interrupted;
     spa.spa_callback Interrupted
   done;
   !observer 0 0 0
@@ -554,9 +561,19 @@ let interrupt c =
 let interrupt_proof_attempts_for_goal c id =
   let config = Whyconf.get_main c.controller_config in
   (* First kill running proof attempts. *)
-  Hashtbl.iter (fun call e ->
-    if e.tp_id = id then Call_provers.interrupt_call ~config call
-    ) prover_tasks_in_progress;
+  let l =
+    Hashtbl.fold (fun call e acc ->
+        if e.tp_id = id then
+          begin
+            Call_provers.interrupt_call ~config call;
+            if e.tp_started then decr number_of_running_provers;
+            e.tp_callback Interrupted;
+            call::acc
+          end
+        else acc)
+      prover_tasks_in_progress []
+  in
+  List.iter (fun x -> Hashtbl.remove prover_tasks_in_progress x) l;
   (* Remove relevant proof attempts from the queue. This requires rebuilding
   the queue as the Stdlib doesn't allow modifying the queue other than via
   push/pop and clear.  *)
@@ -585,8 +602,11 @@ let run_idle_handler () =
 
 let schedule_proof_attempt ?proof_script_filename c id pr ~limit ~callback ~notification =
   let ses = c.controller_session in
+  Debug.dprintf debug_sched "schedule_proof_attempt called@.";
   let callback panid s =
     begin
+      Debug.dprintf debug_sched "schedule_proof_attempt(callback): s=%a@."
+        print_status s;
       match s with
       | UpgradeProver _ | Removed _ -> ()
       | Scheduled ->
@@ -767,7 +787,6 @@ let schedule_edition c id pr ~callback ~notification =
   Queue.add (callback panid,call,old_res) prover_tasks_edited;
   run_idle_handler ()
 
-exception TransAlreadyExists of string * string
 exception GoalNodeDetached of proofNodeID
 
 (*** { 2 transformations} *)
@@ -806,13 +825,25 @@ let schedule_transformation c id name args ~callback ~notification =
   in
   if Session_itp.is_detached c.controller_session (APn id) then
     raise (GoalNodeDetached id);
-  if Session_itp.check_if_already_exists c.controller_session id name args then
-    raise (TransAlreadyExists (name, List.fold_left (fun acc s -> s ^ " " ^ acc) "" args));
   S.idle ~prio:0 apply_trans;
   callback TSscheduled
 
 
 open Strategy
+
+let call_one_prover c (p, timelimit, memlimit, steplimit) ~callback ~notification g =
+  let main = Whyconf.get_main c.controller_config in
+  let timelimit = Opt.get_def (Whyconf.timelimit main) timelimit in
+  let memlimit = Opt.get_def (Whyconf.memlimit main) memlimit in
+  let steplimit = Opt.get_def 0 steplimit in
+
+  let limit = {
+    Call_provers.limit_time = timelimit;
+    limit_mem  = memlimit;
+    limit_steps = steplimit;
+  } in
+
+  schedule_proof_attempt c g p ~limit ~callback ~notification
 
 let run_strategy_on_goal
     c id strat ~callback_pa ~callback_tr ~callback ~notification =
@@ -821,35 +852,36 @@ let run_strategy_on_goal
       callback STShalt
     else
       match Array.get strat pc with
-      | Icall_prover(p,timelimit,memlimit,steplimit) ->
-         let main = Whyconf.get_main c.controller_config in
-         let timelimit = Opt.get_def (Whyconf.timelimit main) timelimit in
-         let memlimit = Opt.get_def (Whyconf.memlimit main) memlimit in
-         let steplimit = Opt.get_def 0 steplimit in
-         let callback panid res =
+      | Icall_prover is ->
+        let already_done = ref (List.length is) in
+        let callback panid res =
            callback_pa panid res;
+           begin
            match res with
            | UpgradeProver _ | Scheduled | Running -> (* nothing to do yet *) ()
            | Done { Call_provers.pr_answer = Call_provers.Valid } ->
               (* proof succeeded, nothing more to do *)
+              interrupt_proof_attempts_for_goal c g;
+              already_done := 0;
               callback STShalt
            | Interrupted ->
+              already_done := 0;
               callback STShalt
            | Done _ | InternalFailure _ ->
-              (* proof did not succeed, goto to next step *)
-              callback (STSgoto (g,pc+1));
-              let run_next () = exec_strategy (pc+1) strat g; false in
-              S.idle ~prio:0 run_next
+              already_done := !already_done - 1;
+              if !already_done = 0 then begin
+                (* proof did not succeed, goto to next step *)
+                callback (STSgoto (g,pc+1));
+                let run_next () = exec_strategy (pc+1) strat g; false in
+                S.idle ~prio:0 run_next
+              end
            | Undone | Detached | Uninstalled _ | Removed _ ->
                          (* should not happen *)
                          assert false
-         in
-         let limit = {
-                       Call_provers.limit_time = timelimit;
-                       limit_mem  = memlimit;
-                       limit_steps = steplimit;
-                     } in
-         schedule_proof_attempt c g p ~limit ~callback ~notification
+            end
+        in
+        List.iter (fun i -> call_one_prover c i ~callback ~notification g) is
+
       | Itransform(trname,pcsuccess) ->
          let callback ntr =
            callback_tr trname [] ntr;
@@ -871,11 +903,7 @@ let run_strategy_on_goal
                  S.idle ~prio:0 run_next)
                 (get_sub_tasks c.controller_session tid)
          in
-         begin match Session_itp.get_transformation c.controller_session g trname [] with
-         | tid -> callback (TSdone tid)
-         | exception Not_found ->
-             schedule_transformation c g trname [] ~callback ~notification
-         end
+         schedule_transformation c g trname [] ~callback ~notification
       | Igoto pc ->
          callback (STSgoto (g,pc));
          exec_strategy pc strat g
@@ -1167,7 +1195,7 @@ let replay ~valid_only ~obsolete_only ?(use_steps=false) ?(filter=fun _ -> true)
 
   let need_replay id pa =
     filter pa &&
-      (pa.proof_obsolete || not obsolete_only) &&
+      (pa.proof_state = None || pa.proof_obsolete || not obsolete_only) &&
         (* When on a single proofattempt node, we want to always replay even non
            valid proofattempts.
         *)

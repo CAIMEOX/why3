@@ -15,6 +15,8 @@ type ident = Ptree.ident
 
 type label = Ptree.ident
 
+type loop_clause = Invariant | Variant
+
 type cfg_instr = {
     cfg_instr_desc : cfg_instr_desc;
     cfg_instr_loc  : Loc.position;
@@ -26,8 +28,8 @@ and cfg_term = {
   }
 
 and cfg_instr_desc =
-  | CFGinvariant of (ident * Ptree.term) list
-  (** named invariants *)
+  | CFGinvariant of (loop_clause * ident option * Ptree.term * int option ref) list
+  (** possibly named invariants *)
   | CFGexpr of Ptree.expr
   (** any other regular WhyML expressions *)
 

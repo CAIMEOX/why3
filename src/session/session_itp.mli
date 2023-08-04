@@ -96,7 +96,6 @@ val get_task : session -> proofNodeID -> Task.task
 val get_task_name_table : session -> proofNodeID -> Task.task * Trans.naming_table
 
 val get_transformations : session -> proofNodeID -> transID list
-val get_transformation : session -> proofNodeID -> string -> string list -> transID
 
 val get_proof_attempt_ids :
   session -> proofNodeID -> proofAttemptID Whyconf.Hprover.t
@@ -128,10 +127,6 @@ val is_detached: session -> any -> bool
 val get_encapsulating_theory: session -> any -> theory
 val get_encapsulating_file: session -> any -> file
 
-(* Check if a transformation already exists *)
-val check_if_already_exists:
-    session -> proofNodeID -> string -> string list -> bool
-
 (* true if the exception transformation is fatal (ie: caused by a bug in the
    code of the transformation) *)
 val is_fatal: exn -> bool
@@ -152,6 +147,9 @@ val any_iter_proof_attempt:
 
 val session_iter_proof_attempt:
     (proofAttemptID -> proof_attempt_node -> unit) -> session -> unit
+
+val session_iter_proof_node_id:
+    (proofNodeID -> unit) -> session -> unit
 
 val fold_all_any: session -> ('a -> any -> 'a) -> 'a -> any -> 'a
 (** [fold_all_any s f acc any] folds on all the subnodes of any *)
@@ -194,7 +192,7 @@ val read_file :
    The second returned element is the format of the file that was read.
 *)
 
-val merge_files :
+val merge_files : ignore_shapes:bool ->
   Env.env -> session -> session -> exn list * bool * bool
 (** [merge_files env ses old_ses] merges the file sections
     of session [s] with file sections of the same name in old session

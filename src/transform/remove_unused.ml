@@ -22,10 +22,26 @@ let meta_depends =
          by the transformation `remove_unused`"
       "remove_unused:dependency" [ MTprsymbol; MTlsymbol ])
 
+let meta_depends_remove_constant =
+  Theory.(
+    register_meta
+      ~desc:
+        "declares that a constant can be removed by the transformation `remove_unused_keep_constants`"
+      "remove_unused:remove_constant" [ MTlsymbol ])
+
+let meta_remove_unused_keep =
+  Theory.(
+    register_meta
+      ~desc:
+        "declares that a symbol should never be removed by the transformation `remove_unused`"
+      "remove_unused:keep" [ MTlsymbol ])
+
 type used_symbols = {
   keep_constants : bool;
   depends : Ident.Sid.t Decl.Mpr.t;
   closure : Ident.Sid.t Ident.Mid.t;
+  constants_to_remove : Ident.Sid.t;
+  symbols_to_keep : Ident.Sid.t;
   used_ids : Ident.Sid.t;
 }
 
@@ -45,7 +61,12 @@ let rec add_used_ids used_symbols ids =
 let initial keep_constants =
   let builtins = [ Term.(ps_equ.ls_name); Ty.(ts_int.ts_name) ] in
   let used_ids = List.fold_right Ident.Sid.add builtins Ident.Sid.empty in
-  { keep_constants; depends = Decl.Mpr.empty; closure = Ident.Mid.empty; used_ids }
+  { keep_constants;
+    depends = Decl.Mpr.empty;
+    closure = Ident.Mid.empty;
+    constants_to_remove = Ident.Sid.empty;
+    symbols_to_keep = Ident.Sid.empty;
+    used_ids }
 
 let add_dependency usymb l =
   match l with
@@ -61,8 +82,31 @@ let add_dependency usymb l =
       { usymb with depends = d }
   | _ -> assert false (* wrongly typed meta, impossible *)
 
+let add_removed_constant usymb l =
+  match l with
+  | Theory.[ MAls ls ] ->
+      let id = ls.Term.ls_name in
+      { usymb with constants_to_remove = Ident.Sid.add id usymb.constants_to_remove }
+  | _ -> assert false (* wrongly typed meta, impossible *)
+
+let add_kept_symbol usymb l =
+  match l with
+  | Theory.[ MAls ls ] ->
+      let id = ls.Term.ls_name in
+      { usymb with symbols_to_keep = Ident.Sid.add id usymb.symbols_to_keep }
+  | _ -> assert false (* wrongly typed meta, impossible *)
+
 (* The second step of the removal : transverse the task decls and keep
    only the ones we want *)
+
+let metas_keep_if_at_least_one_arg_is_used =
+  let open Theory in
+  List.fold_left
+    (fun acc mt -> Smeta.add mt acc)
+    Smeta.empty
+    [meta_range;
+     meta_float]
+
 let do_removal_unused_decl usymb (td : Theory.tdecl) : Theory.tdecl option =
   let open Ident in
   let open Decl in
@@ -70,17 +114,23 @@ let do_removal_unused_decl usymb (td : Theory.tdecl) : Theory.tdecl option =
   match td.td_node with
   | Meta (mt, [ MApr pr; MAls _ls ]) when meta_equal mt meta_depends ->
       if Sid.mem pr.pr_name usymb.used_ids then Some td else None
-  | Meta (_, margs) ->
-      let kept_arg = function
+  | Meta (mt, margs) ->
+      let kept_arg at_least_one = function
         | MApr pr -> Sid.mem pr.pr_name usymb.used_ids
         | MAty ty ->
             let s = Decl.get_used_syms_ty ty in
-            Sid.subset s usymb.used_ids
+            if at_least_one then
+              not (Ident.Sid.(is_empty (inter s usymb.used_ids)))
+            else
+              Sid.subset s usymb.used_ids
         | MAts ts -> Sid.mem ts.Ty.ts_name usymb.used_ids
         | MAls ls -> Sid.mem ls.Term.ls_name usymb.used_ids
         | MAstr _ | MAint _ | MAid _ -> true
       in
-      if List.for_all kept_arg margs then Some td else None
+      if Smeta.mem mt metas_keep_if_at_least_one_arg_is_used then
+        if List.exists (kept_arg true) margs then Some td else None
+      else
+      if List.for_all (kept_arg false) margs then Some td else None
   | Use _ | Clone _ -> Some td
   | Decl d -> (
       match d.d_node with
@@ -89,17 +139,8 @@ let do_removal_unused_decl usymb (td : Theory.tdecl) : Theory.tdecl option =
       | Ddata _ | Dlogic _ | Dtype _ | Dparam _ | Dind _ ->
           if Sid.is_empty (Sid.inter d.d_news usymb.used_ids) then None
           else Some td)
-(*
-let metas_remove =
-  let open Theory in
-  List.fold_left
-    (fun acc mt -> Smeta.add mt acc)
-    Smeta.empty
-    [meta_depends ;
-     Printer.meta_remove_prop;
-     Printer.meta_remove_logic;
-     Printer.meta_remove_type]
-*)
+
+
 (* The first step of the removal : compute the used identifiers *)
 let rec compute_used_ids usymb task : used_symbols =
   let open Theory in
@@ -111,24 +152,6 @@ let rec compute_used_ids usymb task : used_symbols =
       let usymb =
         match td.td_node with
         | Use _ | Clone _ | Meta _ -> usymb
-          (*
-        | Meta (mt, _) when Smeta.mem mt metas_remove -> usymb
-        | Meta (_, margs) ->
-            let used_ids =
-              List.fold_left
-                (fun acc arg ->
-                   match arg with
-                   | MApr pr -> Sid.add pr.pr_name acc
-                   | MAty ty ->
-                       let s = Decl.get_used_syms_ty ty in
-                       Sid.union s acc
-                   | MAts ts -> Sid.add ts.Ty.ts_name acc
-                   | MAls ls -> Sid.add ls.Term.ls_name acc
-                   | MAstr _ | MAint _ | MAid _ -> acc)
-                usymb.used_ids margs
-            in
-            { usymb with used_ids }
-*)
         | Decl d ->
             begin
             match d.d_node with
@@ -147,15 +170,26 @@ let rec compute_used_ids usymb task : used_symbols =
                     used_ids = Sid.add pr.pr_name usymb.used_ids;
                   })
             | Ddata _ | Dlogic _ | Dtype _ | Dparam _ | Dind _ ->
-                let declares_a_constant =
+                let keep_symbol ls =
+                  (* a symbol is kept if either
+                     - it is explicitly marked with "remove_unused:keep", or
+                     - it is a constant and we want to keep constants, unless
+                       it is explicitly marked with "remove_unused:remove_constant"
+                  *)
+                  Ident.Sid.mem ls.Term.ls_name usymb.symbols_to_keep ||
+                  (ls.Term.ls_args = [] && usymb.keep_constants &&
+                   not (Ident.Sid.mem ls.Term.ls_name usymb.constants_to_remove))
+                in
+                let declares_a_needed_symbol =
                   match d.d_node with
-                  | Dparam ls -> ls.Term.ls_args = []
+                  | Dparam ls -> keep_symbol ls
                   | Dlogic dl ->
-                      List.exists (fun (ls, _) -> ls.Term.ls_args = []) dl
+                      List.exists
+                        (fun (ls, _) -> keep_symbol ls) dl
                   | Dprop _ | Ddata _ | Dtype _ | Dind _ -> false
                 in
                 let is_needed =
-                  (declares_a_constant && usymb.keep_constants)
+                  declares_a_needed_symbol
                   || not (Sid.is_empty (Sid.inter d.d_news usymb.used_ids))
                 in
                 if is_needed then
@@ -180,6 +214,12 @@ let remove_unused_wrapper keep_constants =
   let o t =
     let usymb =
       Task.on_meta meta_depends add_dependency (initial keep_constants) t
+    in
+    let usymb =
+      Task.on_meta meta_depends_remove_constant add_removed_constant usymb t
+    in
+    let usymb =
+      Task.on_meta meta_remove_unused_keep add_kept_symbol usymb t
     in
     let usymb = compute_used_ids usymb t in
     Trans.apply (do_removal_wrapper usymb) t

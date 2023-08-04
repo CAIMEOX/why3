@@ -277,7 +277,7 @@ let get_exception_message ses id e =
       Pp.sprintf "Error in transformation function:\n%s \n" s, Loc.dummy_position, ""
   | Generic_arg_trans_utils.Arg_trans_decl (s, ld) ->
       Pp.sprintf "Error in transformation %s during inclusion of following declarations:\n%a" s
-        (Pp.print_list (fun fmt () -> Format.fprintf fmt "\n") P.print_tdecl) ld,
+        (Pp.print_list Pp.nothing P.print_tdecl) ld,
       Loc.dummy_position, ""
   | Generic_arg_trans_utils.Arg_trans_term (s, t) ->
       Pp.sprintf "Error in transformation %s during with term:\n %a : %a " s
@@ -684,7 +684,7 @@ end
     Pretty.forget_all ();
     capture_parse_or_type_errors
       (fun c ->
-        try let (_,_) = reload_files ~hard_reload c in [] with
+        try let (_,_) = reload_files ~hard_reload ~ignore_shapes:false c in [] with
         | Errors_list le -> le) cont
 
   let add_file cont ?format fname =
@@ -922,7 +922,7 @@ end
     reset_and_send_the_whole_tree ()
 
   (* -- send the task -- *)
-  let task_of_id d id show_full_context loc =
+  let task_of_id d id show_full_context show_uses_clones_metas loc =
     let task,tables = get_task_name_table d.cont.controller_session id in
     let lang = lang d.cont.controller_session (APn id) in
     (* This function also send source locations associated to the task *)
@@ -935,7 +935,7 @@ end
          identity). *)
       let module P =
         (val Pretty.create ~print_ext_any:(print_ext_any task lang)
-               ~do_forget_all:false ~shorten_axioms:true
+               ~do_forget_all:false ~shorten_axioms:true ~show_uses_clones_metas
                pr apr pr pr) in
       Pp.string_of (if show_full_context then P.print_task else P.print_sequent) task
     in
@@ -971,7 +971,7 @@ end
           match y with | Color_loc y -> (x, y) | _ -> assert false) list_loc in
     (source_result, list_loc, goal_loc, file_format)
 
-  let send_task nid show_full_context loc =
+  let send_task nid show_full_context show_uses_clones_metas loc =
     let d = get_server_data () in
     let any = any_from_node_ID nid in
     match any with
@@ -1004,7 +1004,7 @@ end
       let lang = lang d.cont.controller_session any in
       match any with
       | APn id ->
-          let s, list_loc, goal_loc = task_of_id d id show_full_context loc in
+          let s, list_loc, goal_loc = task_of_id d id show_full_context show_uses_clones_metas loc in
           P.notify (Task (nid, s, list_loc, goal_loc, lang))
       | ATh t ->
           let th_id   = theory_name t in
@@ -1017,7 +1017,7 @@ end
           let parid = pa.parent in
           let name = Pp.string_of Whyconf.print_prover pa.prover in
           let s, old_list_loc, old_goal_loc =
-            task_of_id d parid show_full_context loc in
+            task_of_id d parid show_full_context show_uses_clones_metas loc in
           let prover_text = s ^ "\n====================> Prover: " ^ name ^ "\n" in
           (* Display the result of the prover *)
           begin
@@ -1055,7 +1055,7 @@ match pa.proof_state with
           let name = get_transf_name d.cont.controller_session tid in
           let args = get_transf_args d.cont.controller_session tid in
           let parid = get_trans_parent d.cont.controller_session tid in
-          let s, list_loc, goal_loc = task_of_id d parid show_full_context loc in
+          let s, list_loc, goal_loc = task_of_id d parid show_full_context show_uses_clones_metas loc in
           P.notify (Task (nid, s ^ "\n====================> Transformation: " ^
                           String.concat " " (name :: args) ^ "\n",
                           list_loc, goal_loc, lang))
@@ -1187,6 +1187,8 @@ match pa.proof_state with
       let new_status =
         Proof_status_change (pa_status, pa.proof_obsolete, pa.limit)
       in
+      Debug.dprintf debug "callback_update_tree_proof: pa_status=%a@."
+        Controller_itp.print_status pa_status;
       P.notify (Node_change (node_id, new_status))
     with Return -> ()
 
@@ -1288,10 +1290,7 @@ match pa.proof_state with
         if Session_itp.is_detached d.cont.controller_session nid then
           P.notify (Message (Information "Transformation cannot apply on detached node"))
         else
-          if Session_itp.check_if_already_exists d.cont.controller_session id t args then
-            P.notify (Message (Information "Transformation already applied"))
-          else
-            let callback = callback_update_tree_transform t args in
+          let callback = callback_update_tree_transform t args in
             C.schedule_transformation d.cont id t args ~callback
               ~notification:(notify_change_proved d.cont)
       | APa panid ->
@@ -1560,7 +1559,7 @@ match pa.proof_state with
          Hint.mem model_any nid
      | Copy_paste (from_id, to_id) ->
          Hint.mem model_any from_id && Hint.mem model_any to_id
-     | Get_task(nid,_,_) ->
+     | Get_task(nid,_,_,_) ->
          Hint.mem model_any nid
      | Command_req (nid, _) ->
          if not (Itp_communication.is_root nid) then
@@ -1668,8 +1667,8 @@ match pa.proof_state with
        save_file name text
     | Check_need_saving_req ->
        P.notify (Saving_needed !session_needs_saving)
-    | Get_task(nid,b,loc)          ->
-       send_task nid b loc
+    | Get_task(nid,b,show_uses_clones_metas,loc)          ->
+       send_task nid b show_uses_clones_metas loc
     | Interrupt_req                ->
        C.interrupt d.cont
     | Reset_proofs_req             ->
@@ -1774,12 +1773,6 @@ match pa.proof_state with
     else
       try treat_request d r
       with
-      | C.TransAlreadyExists (name,args) ->
-         P.notify
-           (Message
-              (Error
-                 (Pp.sprintf "Transformation %s with arg [%s] already exists"
-                             name args)))
       | C.GoalNodeDetached _id ->
         P.notify
            (Message

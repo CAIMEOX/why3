@@ -24,9 +24,10 @@ type cmd =
       cmd_run  : unit -> unit;
     }
 
-let files = Queue.create ()
-let iter_files f = Queue.iter f files
-let anon_fun (f:string) = Queue.add f files
+let session_files = Queue.create ()
+let iter_session_files f = Queue.iter f session_files
+let add_session_file (f:string) = Queue.add f session_files
+let no_session_file () = Queue.is_empty session_files
 
 let read_session fname =
   let q = Queue.create () in
@@ -47,7 +48,7 @@ let read_update_session ~allow_obsolete env config fname =
   let cont = Controller_itp.create_controller config env session in
   let found_obs, some_merge_miss =
     try
-      Controller_itp.reload_files cont
+      Controller_itp.reload_files ~ignore_shapes:true cont
     with
     | Controller_itp.Errors_list l ->
         List.iter (fun e -> Format.eprintf "%a@." Exn_printer.exn_printer e) l;
@@ -86,6 +87,7 @@ type filter_three = | FT_Yes | FT_No | FT_All
 
 let opt_filter_obsolete = ref FT_All
 let opt_filter_verified = ref FT_All
+let opt_filter_is_leaf = ref FT_All
 
 let add_filter_three r = function
   | Some "no" -> r := FT_No
@@ -110,11 +112,13 @@ let status_filter x =
 let filter_spec =
   let open Getopt in
   [ KLong "filter-prover", Hnd1 (AString, add_filter_prover),
-    "[<name>,<version>[,<alternative>]|<id>] select proof attempts containing this prover";
+    "[<name>,[<version>[,<alternative>]]|<id>] select proof attempts with the given prover(s)";
     KLong "filter-obsolete", opt_three opt_filter_obsolete,
-    "[yes|no] select only (non-)obsolete goals";
-    KLong "filter-verified", opt_three opt_filter_verified,
-    "[yes|no] select only (non-)verified goals";
+    "[yes|no] select only (non-)obsolete proofs";
+    KLong "filter-proved", opt_three opt_filter_verified,
+    "[yes|no] select only proofs of (non-)proved goals";
+    KLong "filter-is-leaf", opt_three opt_filter_is_leaf,
+    "[yes|no] select only proofs of leaf goals, i.e., those without transformations";
     KLong "filter-status",
     Hnd1 (AList (',', ASymbol ["valid"; "invalid"; "highfailure"]),
           fun l -> opt_status := List.map status_filter l),
@@ -125,6 +129,7 @@ type filters =
     { provers : C.Sprover.t; (* if empty : every provers *)
       obsolete : filter_three;
       verified : filter_three;
+      is_leaf : filter_three;
       status : Call_provers.prover_answer list; (* if empty : any answer *)
     }
 
@@ -155,51 +160,66 @@ let read_filter_spec whyconf : filters * bool =
   {provers = !s;
    obsolete = !opt_filter_obsolete;
    verified = !opt_filter_verified;
+   is_leaf = !opt_filter_is_leaf;
    status = !opt_status;
   },!should_exit
 
 let iter_proof_attempt_by_filter ses iter filters f =
   (* provers *)
-  let iter_provers a =
-    if C.Sprover.mem a.S.prover filters.provers then f a in
+  let iter_provers id a =
+    if C.Sprover.mem a.S.prover filters.provers then f id a in
   let f = if C.Sprover.is_empty filters.provers then f else iter_provers in
   (* three value *)
   let three_value f v p =
-    let iter_obsolete a =
-      match v, p a with
-        | FT_No, false -> f a
-        | FT_Yes, true -> f a
+    let iter_obsolete id a =
+      match v, p id a with
+        | FT_No, false -> f id a
+        | FT_Yes, true -> f id a
         | _ -> () (* FT_All treated after *) in
     if v = FT_All then f else iter_obsolete in
   (* obsolete *)
-  let f = three_value f filters.obsolete (fun a -> a.S.proof_obsolete) in
+  let f = three_value f filters.obsolete (fun _ a -> a.S.proof_obsolete) in
   (* archived *)
 (*
-  let f = three_value f filters.archived (fun a -> a.S.proof_archived) in
+  let f = three_value f filters.archived (fun _ a -> a.S.proof_archived) in
  *)
   (* verified *)
   let f = three_value f filters.verified
-    (fun a -> S.pn_proved ses a.S.parent) in
+    (fun _ a -> S.pn_proved ses a.S.parent) in
   (* status *)
   let f = if filters.status = [] then f else
-      (fun a -> match a.S.proof_state with
-      | Some pr when List.mem pr.Call_provers.pr_answer filters.status -> f a
+      (fun id a -> match a.S.proof_state with
+      | Some pr when List.mem pr.Call_provers.pr_answer filters.status -> f id a
       | _ -> ()) in
   iter f ses
 
 let theory_iter_proof_attempt_by_filter s filters f th =
   iter_proof_attempt_by_filter
     s
-    (fun f s -> S.theory_iter_proof_attempt s (fun _ -> f))
+    (fun f s -> S.theory_iter_proof_attempt s f)
     filters f th
 
 let session_iter_proof_attempt_by_filter s filters f =
   iter_proof_attempt_by_filter
     s
     (fun f _s ->
-     S.session_iter_proof_attempt (fun _ x -> f x))
+     S.session_iter_proof_attempt f)
     filters f s
 
+let session_iter_proof_node_id_by_filter s filters f =
+  let f pn =
+    match filters.verified with
+    | FT_All -> f pn
+    | FT_No -> if not (S.pn_proved s pn) then f pn
+    | FT_Yes -> if S.pn_proved s pn then f pn
+  in
+  let f pn =
+    match filters.is_leaf with
+    | FT_All -> f pn
+    | FT_No -> if S.get_transformations s pn <> [] then f pn
+    | FT_Yes -> if S.get_transformations s pn = [] then f pn
+  in
+  S.session_iter_proof_node_id f s
 
 let opt_force_obsolete = ref false
 

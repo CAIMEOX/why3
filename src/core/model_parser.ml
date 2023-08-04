@@ -70,8 +70,8 @@ type concrete_syntax_frac = {
   frac_verbatim: string
 }
 
-type concrete_syntax_float =
-  | Infinity
+type concrete_syntax_float_value =
+  | Plus_infinity | Minus_infinity
   | Plus_zero | Minus_zero
   | NaN
   | Float_number of
@@ -81,6 +81,12 @@ type concrete_syntax_float =
       float_mant : concrete_syntax_bv;
       float_hex : string
     }
+
+type concrete_syntax_float = {
+    float_exp_size : int;
+    float_significand_size : int;
+    float_val : concrete_syntax_float_value
+  }
 
 type concrete_syntax_constant =
   | Boolean of bool
@@ -94,7 +100,23 @@ type concrete_syntax_constant =
 type concrete_syntax_quant = Forall | Exists
 type concrete_syntax_binop = And | Or | Implies | Iff
 
-type concrete_syntax_term =
+type concrete_syntax_funlit_elts =
+  {
+    elts_index : concrete_syntax_term;
+    elts_value : concrete_syntax_term;
+  }
+
+(** Function literal value *)
+and concrete_syntax_funlit =
+  {
+    elts : concrete_syntax_funlit_elts list;
+    others : concrete_syntax_term;
+  }
+
+(** Function arguments and body *)
+and concrete_syntax_fun = { args : string list; body : concrete_syntax_term; }
+
+and concrete_syntax_term =
   | Var of string
   | Const of concrete_syntax_constant
   | Apply of string * concrete_syntax_term list
@@ -103,11 +125,8 @@ type concrete_syntax_term =
   | Quant of concrete_syntax_quant * string list * concrete_syntax_term
   | Binop of concrete_syntax_binop * concrete_syntax_term * concrete_syntax_term
   | Not of concrete_syntax_term
-  | Function of { args: string list ; body: concrete_syntax_term }
-  | FunctionLiteral of {
-      elts: (concrete_syntax_term * concrete_syntax_term) list;
-      others: concrete_syntax_term
-    }
+  | Function of concrete_syntax_fun
+  | FunctionLiteral of concrete_syntax_funlit
   | Record of (string * concrete_syntax_term) list
   | Proj of (string * concrete_syntax_term)
 
@@ -118,8 +137,20 @@ let print_concrete_bv fmt { bv_value; bv_length; bv_verbatim } =
   ignore bv_value; ignore bv_length;
   fprintf fmt "%s" bv_verbatim
 
+let print_concrete_float_value fmt = function
+  | Plus_infinity -> pp_print_string fmt "+infty"
+  | Minus_infinity -> pp_print_string fmt "-infty"
+  | Plus_zero -> pp_print_string fmt "+0"
+  | Minus_zero -> pp_print_string fmt "-0"
+  | NaN -> pp_print_string fmt "NaN"
+  | Float_number {float_exp;float_sign;float_mant;float_hex} ->
+    fprintf fmt "number{exp=%a, sign=%a, mant=%a, hex=%s}"
+      print_concrete_bv float_exp
+      print_concrete_bv float_sign
+      print_concrete_bv float_mant
+      float_hex
+
 let rec print_concrete_term fmt ct =
-  let open Format in
   match ct with
   | Var v -> pp_print_string fmt v
   | Const (Boolean b) -> pp_print_bool fmt b
@@ -128,16 +159,12 @@ let rec print_concrete_term fmt ct =
       ignore int_value; pp_print_string fmt int_verbatim
   | Const (Real {real_value; real_verbatim}) ->
       ignore real_value; pp_print_string fmt real_verbatim
-  | Const (Float Infinity) -> pp_print_string fmt "∞"
-  | Const (Float Plus_zero) -> pp_print_string fmt "+0"
-  | Const (Float Minus_zero) -> pp_print_string fmt "-0"
-  | Const (Float NaN) -> pp_print_string fmt "NaN"
-  | Const (Float (Float_number {float_exp;float_sign;float_mant;float_hex})) ->
-    fprintf fmt "float{exp=%a, sign=%a, mant=%a, hex=%s}"
-      print_concrete_bv float_exp
-      print_concrete_bv float_sign
-      print_concrete_bv float_mant
-      float_hex
+  | Const (Float { float_exp_size; float_significand_size; float_val } ) ->
+    fprintf fmt
+      "float{ @[<hov>exp_size = %d;@ significand_size = %d;@ value = %a@] }"
+      float_exp_size
+      float_significand_size
+      print_concrete_float_value float_val
   | Const (BitVector bv) -> fprintf fmt "%a" print_concrete_bv bv
   | Const (Fraction {frac_num;frac_den;frac_verbatim}) ->
       ignore frac_num; ignore frac_den; fprintf fmt "%s" frac_verbatim
@@ -177,10 +204,10 @@ let rec print_concrete_term fmt ct =
       fprintf fmt "@[_ =>@ %a@]"
         print_concrete_term others
     in
-    let print_indice_value fmt (indice,value) =
+    let print_indice_value fmt { elts_index; elts_value } =
       fprintf fmt "@[%a =>@ %a@]"
-        print_concrete_term indice
-        print_concrete_term value
+        print_concrete_term elts_index
+        print_concrete_term elts_value
     in
     fprintf fmt "@[[|%a%a|]@]"
       (Pp.print_list_delim ~start:Pp.nothing ~stop:Pp.semi ~sep:Pp.semi print_indice_value) elts
@@ -226,7 +253,9 @@ let rec subst_concrete_term subst t =
   | FunctionLiteral {elts; others} ->
     let elts =
       List.map
-        (fun (c1,c2) -> (subst_concrete_term subst c1, subst_concrete_term subst c2))
+        (fun e ->
+            { elts_index = subst_concrete_term subst e.elts_index;
+              elts_value = subst_concrete_term subst e.elts_value })
         elts
     in
     let others = subst_concrete_term subst others in
@@ -326,26 +355,26 @@ let search_model_element_for_id m ?loc id =
     then Some me else None in
   search_model_element m p
 
-let matching_call_id id attrs =
-  Opt.equal Int.equal (Some id)
-    (search_attribute_value get_call_id_value attrs)
-
-let matching_call_result_loc attrs loc =
-  Opt.equal Loc.equal (Some loc)
-    (search_attribute_value get_call_result_loc attrs)
-
-let search_model_element_call_result model call_id loc =
-  let p me = (* [@model_trace:result] [@call_result_loc:<loc>] [@RAC:call_id:<id>] *)
-    let has_model_trace_result attrs =
-      get_model_trace_string ~name:"" ~attrs = "result" in
-    if (match call_id with
-        | Some call_id ->
-            matching_call_id call_id me.me_attrs
-        | None ->
-            has_model_trace_result me.me_attrs &&
-            matching_call_result_loc me.me_attrs loc)
-    then Some me else None in
-  search_model_element model p
+let search_model_element_call_result model (call_id : Expr.expr_id option) =
+  match call_id with
+  | None -> None
+  | Some call_id ->
+      let matching_eid attrs =
+        match Ident.get_eid_attr attrs with
+        | Some i -> i = call_id
+        | _ -> false
+      in
+      let p me =
+        (* [@model_trace:result] [@eid:<eid>] *)
+        let has_model_trace_result attrs =
+          get_model_trace_string ~name:"" ~attrs = "result"
+        in
+        if has_model_trace_result me.me_attrs && matching_eid me.me_attrs then
+          Some me
+        else
+          None
+      in
+      search_model_element model p
 
 (*
 ***************************************************************
@@ -550,6 +579,23 @@ let json_of_concrete_real { real_value; real_verbatim } =
       ]
   ]
 
+let json_of_float_value f =
+  let open Json_base in
+  match f with
+  | Plus_infinity -> Record [ "float_type", String "Plus_Infinity" ]
+  | Minus_infinity -> Record [ "float_type", String "Minus_infinity" ]
+  | Plus_zero -> Record [ "float_type", String "Plus_zero" ]
+  | Minus_zero -> Record [ "float_type", String "Minus_zero" ]
+  | NaN -> Record [ "float_type", String "NaN" ]
+  | Float_number {float_sign;float_exp;float_mant;float_hex} ->
+    Record [
+      "float_type", String "Float_value";
+      "float_sign", json_of_concrete_bv float_sign;
+      "float_exp", json_of_concrete_bv float_exp;
+      "float_mant", json_of_concrete_bv float_mant;
+      "float_hex", String float_hex
+    ]
+
 let [@warning "-42"] rec json_of_concrete_term ct =
   let open Json_base in
   match ct with
@@ -584,33 +630,10 @@ let [@warning "-42"] rec json_of_concrete_term ct =
         ]
     ]
 
-  | Const (Float Infinity) ->
+  | Const (Float { float_val; _ }) ->
     Record [
       "type", String "Float";
-      "val", Record [ "float_type", String "Infinity" ]
-    ]
-  | Const (Float Plus_zero) ->
-    Record [
-      "type", String "Float"; "val", Record [ "float_type", String "Plus_zero" ]
-    ]
-  | Const (Float Minus_zero) ->
-    Record [
-      "type", String "Float"; "val", Record [ "float_type", String "Minus_zero" ]
-    ]
-  | Const (Float NaN) ->
-    Record [
-      "type", String "Float"; "val", Record [ "float_type", String "NaN" ]
-    ]
-  | Const (Float (Float_number {float_sign;float_exp;float_mant;float_hex})) ->
-    Record [
-      "type", String "Float";
-      "val", Record [
-        "float_type", String "Float_value";
-        "float_sign", json_of_concrete_bv float_sign;
-        "float_exp", json_of_concrete_bv float_exp;
-        "float_mant", json_of_concrete_bv float_mant;
-        "float_hex", String float_hex
-      ]
+      "val", json_of_float_value float_val
     ]
 
   | Apply (ls, args) ->
@@ -671,10 +694,10 @@ let [@warning "-42"] rec json_of_concrete_term ct =
         "funliteral_elts",
           List (
             List.map
-              (fun (indice,value) ->
+              (fun { elts_index; elts_value }->
                 Record [
-                  "indice", json_of_concrete_term indice;
-                  "value", json_of_concrete_term value
+                  "indice", json_of_concrete_term elts_index;
+                  "value", json_of_concrete_term elts_value
                 ])
               elts
           );
@@ -1204,10 +1227,10 @@ class clean = object (self)
     Opt.bind (self#value body) @@ fun body ->
     Some (Function {args; body})
   method funliteral elts others =
-    let clean_elt (v1, v2) =
+    let clean_elt { elts_index = v1; elts_value = v2 } =
       Opt.bind (self#value v1) @@ fun v1 ->
       Opt.bind (self#value v2) @@ fun v2 ->
-      Some (v1, v2) in
+      Some { elts_index = v1; elts_value = v2 } in
     opt_bind_all (List.map clean_elt elts) @@ fun elts ->
     Opt.bind (self#value others) @@ fun others ->
     Some (FunctionLiteral {elts; others})

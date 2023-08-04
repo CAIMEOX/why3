@@ -55,7 +55,7 @@ let add_opt_theory x =
   match !opt_input, p with
   | None, [] ->
       let msg = "Option '-T'/'--theory' with a non-qualified \
-                 argument requires an input file.@." in
+                 argument requires an input file." in
       raise (Getopt.GetoptFailure msg)
   | Some tlist, [] ->
       let glist = Queue.create () in
@@ -75,7 +75,7 @@ let add_opt_goal x =
   let glist = match !opt_theory, !opt_input with
     | None, None ->
         let msg = "Option '-G'/'--goal' requires an input file or a library \
-                   theory.@." in
+                   theory." in
         raise (Getopt.GetoptFailure msg)
     | None, Some _ ->
         add_opt_theory "Top";
@@ -125,7 +125,7 @@ let add_sub_goal s =
   else
     failure "Invalid argument"
 
-let opt_driver = ref []
+let opt_driver : string list ref = ref []
 let opt_parser = ref None
 let opt_prover = ref None
 let opt_output = ref None
@@ -203,7 +203,7 @@ let config, env =
   Whyconf.Args.initialize option_list add_opt_file usage_msg
 
 let opt_driver = ref (match !opt_driver with
-  | f::ef -> Some (f, ["",ef])
+  | f::ef -> Some (None,f,["",ef])
   | [] -> None)
 
 let () = try
@@ -249,7 +249,8 @@ let () = try
     let prover = Whyconf.filter_one_prover config filter_prover in
     let with_steps = !opt_stepslimit <> None in
     opt_command := Some (Whyconf.get_complete_command prover ~with_steps);
-    opt_driver := Some (prover.driver, prover.extra_drivers)
+    let (d,f) = prover.driver in
+    opt_driver := Some(d,f,prover.extra_drivers)
   | None ->
       ()
   end;
@@ -282,7 +283,7 @@ let memlimit = match !opt_memlimit with
   | Some i -> i
 
 let print_th_namespace fmt th =
-  Pretty.print_namespace fmt th.th_name.Ident.id_string th
+  Pretty.print_namespace th.th_name.Ident.id_string fmt th
 
 let really_do_task (task: task) =
   let t = task_goal_fmla task in
@@ -521,7 +522,7 @@ let () =
       Format.set_formatter_stag_functions Util.ansi_color_tags;
       set_mark_tags true );
     let main = Whyconf.get_main config in
-    let load (f,ef) = Driver.load_driver_file_and_extras main env f ef in
+    let load (d,f,ef) = Driver.load_driver_file_and_extras main env ~extra_dir:d f ef in
     let drv = Opt.map load !opt_driver in
     Queue.iter (do_input main env drv) opt_queue;
     if !unproved then exit 2

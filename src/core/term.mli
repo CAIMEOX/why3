@@ -380,6 +380,10 @@ val t_neq : term -> term -> term
 val t_equ_simp : term -> term -> term
 val t_neq_simp : term -> term -> term
 
+(** {3 General-purpose 'ignore' predicate} *)
+
+val ps_ignore : lsymbol
+
 (** {3 Booleans} *)
 
 val fs_bool_true  : lsymbol
@@ -626,3 +630,10 @@ val t_case_fold :
 
 val t_occurs  : term -> term -> bool
 val t_replace : term -> term -> term -> term
+
+val remove_unused_in_term : bool -> term -> term
+(** [remove_unused_in_term polarity t] removes from [t] the
+   occurrences and uses of symbols marked with attribute
+   [Ident.unused_attr]. [polarity] is the polarity of [t]. Does
+   nothing on sub-terms where polarity cannot be determined, so there
+   might be some unused symbols left. *)

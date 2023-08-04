@@ -32,8 +32,9 @@ let debug_sp = Debug.register_flag "vc_sp"
 let debug_no_eval = Debug.register_flag "vc_no_eval"
   ~desc:"Do@ not@ simplify@ pattern@ matching@ on@ record@ datatypes@ in@ VCs."
 
-let debug_ignore_diverges = Debug.register_info_flag "ignore_missing_diverges"
-  ~desc:"Suppress@ warnings@ on@ missing@ diverges."
+let warn_missing_diverges = Loc.register_warning "missing_diverges"
+  "Warn about missing `diverges' clauses."
+
 
 let case_split = Ident.create_attribute "case_split"
 let add_case t = t_attr_add case_split t
@@ -59,23 +60,6 @@ let _print_pv_attr fmt v =
 
 let model_trace_result_attribute = create_model_trace_attr "result"
 
-let explicit_result loc attrs ce ity =
-  let name = match ce.c_node with
-    | Capp (rs, _) ->
-       Format.asprintf "%s'result" rs.rs_name.id_string
-    | Cpur (ls, _) ->
-       Format.asprintf "%s'result" ls.ls_name.id_string
-    | Cfun _ -> "anonymous'result"
-    | Cany -> "any'result"
-  in
-  let attrs = Sattr.filter (fun a -> Ident.get_call_id_value a <> None) attrs in
-  let attrs = Sattr.add model_trace_result_attribute attrs in
-  let attrs = match loc with
-    | Some l -> Sattr.add (create_call_result_attr l) attrs
-    | None -> attrs in
-  create_pvsymbol (id_fresh ?loc ~attrs name) ity
-
-
 let res_of_post loc ity ql = create_pvsymbol (result_id ?loc ~ql ()) ity
 
 let res_of_cty loc cty = res_of_post loc cty.cty_result cty.cty_post
@@ -90,6 +74,24 @@ let wp_attr = Ident.create_attribute "vc:wp"
 let wb_attr = Ident.create_attribute "vc:white_box"
 let kp_attr = Ident.create_attribute "vc:keep_precondition"
 let nt_attr = Ident.create_attribute "vc:divergent"
+
+let explicit_result loc ce ity eid =
+  let name =
+    match ce.c_node with
+    | Capp (rs, _) -> Format.asprintf "%s'result" rs.rs_name.id_string
+    | Cpur (ls, _) -> Format.asprintf "%s'result" ls.ls_name.id_string
+    | Cfun _ -> "anonymous'result"
+    | Cany -> "any'result"
+  in
+  let attrs = Sattr.empty in
+  let attrs = Sattr.add model_trace_result_attribute attrs in
+  let attrs = Sattr.add (create_eid_attr eid) attrs in
+  let attrs =
+    match loc with
+    | Some l -> Sattr.add (create_call_result_attr l) attrs
+    | None -> attrs
+  in
+  create_pvsymbol (id_fresh ?loc ~attrs name) ity
 
 let do_not_keep_trace_attr = Ident.create_attribute "vc:do_not_keep_trace"
 let do_not_keep_trace_flag = Debug.register_flag "vc:do_not_keep_trace"
@@ -307,18 +309,21 @@ let decrease_alg env loc old_t t =
 
 let decrease_def env loc old_t t =
   let ty = t_type t in
-  if ty_equal (t_type old_t) ty then
-    match ty.ty_node with
-    | Tyapp (ts,_) when ts_equal ts ts_int ->
-        t_and (ps_app env.ps_int_le [t_nat_const 0; old_t])
-              (ps_app env.ps_int_lt [t; old_t])
-    | Tyapp (ts, _) when is_range_type_def ts.ts_def ->
-        let ls = int_of_range env ts in
-        let proj t = fs_app ls [t] ty_int in
-        ps_app env.ps_int_lt [proj t; proj old_t]
-    | _ ->
-        decrease_alg env loc old_t t
-  else decrease_alg env loc old_t t
+  let f =
+    if ty_equal (t_type old_t) ty then
+      match ty.ty_node with
+      | Tyapp (ts,_) when ts_equal ts ts_int ->
+         t_and (ps_app env.ps_int_le [t_nat_const 0; old_t])
+           (ps_app env.ps_int_lt [t; old_t])
+      | Tyapp (ts, _) when is_range_type_def ts.ts_def ->
+         let ls = int_of_range env ts in
+         let proj t = fs_app ls [t] ty_int in
+         ps_app env.ps_int_lt [proj t; proj old_t]
+      | _ ->
+         decrease_alg env loc old_t t
+    else decrease_alg env loc old_t t
+  in
+  t_attr_copy t f
 
 let decrease env loc attrs expl olds news =
   if olds = [] && news = [] then t_true else
@@ -329,6 +334,7 @@ let decrease env loc attrs expl olds news =
         let dt =
           if Mls.mem r env.proved_wf then dt else
             t_and dt (accessible r old_t) in
+        let dt = t_attr_copy t dt in
         t_or_simp dt (t_and_simp (t_equ old_t t) (decr olds news))
     | (old_t, None)::olds, (t, None)::news when oty_equal old_t.t_ty t.t_ty ->
         if t_equal old_t t then decr olds news else
@@ -604,8 +610,7 @@ let rec k_expr env lps e res xmap =
   let var_or_proxy = var_or_proxy_case xmap in
   let check_divergence k =
     if diverges eff.eff_oneway && not env.divergent then begin
-      if Debug.test_noflag debug_ignore_diverges then
-      Loc.warning ?loc "termination@ of@ this@ expression@ \
+      Loc.warning ~id:warn_missing_diverges ?loc "termination@ of@ this@ expression@ \
         cannot@ be@ proved,@ but@ there@ is@ no@ `diverges'@ \
         clause@ in@ the@ outer@ specification";
       Kpar (Kstop (vc_expl loc attrs expl_divergent t_false), k)
@@ -710,7 +715,7 @@ let rec k_expr env lps e res xmap =
                Klet (v, t_tag t, List.fold_right sp_and rinv sp)
             | None ->  Kval ([v], List.fold_right sp_and rinv sp) in
           if env.keep_trace && need_trace then
-            let vv = explicit_result loc e.e_attrs ce v.pv_ity in
+            let vv = explicit_result loc ce v.pv_ity e.e_id in
             Kseq(k v,0,Klet(vv, t_var v.pv_vs, t_true))
           else
             k v
@@ -1541,6 +1546,15 @@ let rec sp_expr env k rdm dst = match k with
       let sp = Mpv.fold update dst t_true in
       let sp = sp_exists (Mvs.keys fvs) sp in
       let sp = t_attr_set ?loc sp.t_attrs sp in
+      let sp =
+        Sattr.fold_left
+          (fun sp attr ->
+            if Ident.is_eid_attr attr then
+              t_attr_add attr sp
+            else
+              sp)
+          sp attrs
+      in
       let add_rhs _ rhs rd = match rhs with
         | Some v -> Spv.add v rd | None -> rd in
       let add_rhs _ = Mpv.fold add_rhs in
