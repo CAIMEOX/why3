@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -35,11 +35,6 @@ let map_fold_right f l acc =
   List.fold_right
     (fun e (l, acc) -> let e, acc = f e acc in e :: l, acc)
     l ([], acc)
-
-let map_filter f l =
-  List.fold_right
-    (fun e l -> match f e with Some e -> e :: l | None -> l)
-    l []
 
 let equal pr l1 l2 =
   try List.for_all2 pr l1 l2 with Invalid_argument _ -> false
@@ -115,20 +110,6 @@ let rec drop_while p = function
   | [] -> []
   | a::l when p a -> drop_while p l
   | l -> l
-
-let iteri f l =
-  let rec iter i = function
-    | [] -> ()
-    | x :: l -> f i x; iter (i + 1) l
-  in
-  iter 0 l
-
-let mapi f l =
-  let rec map i = function
-    | [] -> []
-    | x :: l -> let v = f i x in v :: map (i + 1) l
-  in
-  map 0 l
 
 let fold_lefti f acc l =
   let rec fold_left acc i = function

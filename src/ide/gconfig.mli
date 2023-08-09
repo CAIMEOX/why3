@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -20,6 +20,7 @@ type t =
       mutable current_tab : int;
       mutable verbose : int;
       mutable show_full_context : bool;
+      mutable show_uses_clones_metas : bool;
       mutable show_attributes : bool;
       mutable show_coercions : bool;
       mutable show_locs : bool;
@@ -42,7 +43,7 @@ type t =
       (* mutable altern_provers : prover option Mprover.t; *)
       (* mutable replace_prover : conf_replace_prover; *)
       mutable hidden_provers : string list;
-      mutable session_time_limit : int;
+      mutable session_time_limit : float;
       mutable session_mem_limit : int;
       mutable session_nb_processes : int;
     }

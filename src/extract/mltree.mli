@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -14,6 +14,8 @@ type ty =
   | Tapp of Ident.ident * ty list
   | Tarrow of ty * ty
   | Ttuple of ty list
+
+val pp_ty : ty Pp.pp
 
 type is_ghost = bool
 
@@ -174,6 +176,8 @@ val e_assign : (expr * ty * Expr.rsymbol * expr) list -> ity -> Ity.mask -> Ity.
 val e_absurd : ity -> Ity.mask -> ty -> Ity.effect -> Ident.Sattr.t -> expr
 
 val e_seq : expr -> expr -> ity -> Ity.mask -> ty -> Ity.effect -> Ident.Sattr.t -> expr
+
+val e_coerce : expr -> ity -> Ity.mask -> ty -> Ity.effect -> Ident.Sattr.t -> expr
 
 val var_list_of_pv_list : Ity.pvsymbol list -> ty list -> expr list
 

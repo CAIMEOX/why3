@@ -864,9 +864,9 @@ module Float32
     type t = t,
     constant eb = t'eb,
     constant sb = t'sb,
+    constant pow2sb = pow2sb,
     constant max_int = max_int,
     constant max_real = max_real,
-    constant pow2sb = pow2sb,
     function to_real = t'real,
     predicate is_finite = t'isFinite,
     (* the following are lemmas and not goals, because we want to
@@ -906,9 +906,9 @@ module Float64
     type t = t,
     constant eb = t'eb,
     constant sb = t'sb,
+    constant pow2sb = pow2sb,
     constant max_int = max_int,
     constant max_real = max_real,
-    constant pow2sb = pow2sb,
     function to_real = t'real,
     predicate is_finite = t'isFinite,
     (* the following are lemmas and not goals, because we want to

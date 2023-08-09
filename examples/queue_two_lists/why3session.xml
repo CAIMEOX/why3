@@ -2,6 +2,7 @@
 <!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
+<prover id="0" name="CVC4" version="1.8" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="2" name="CVC4" version="1.6" timelimit="1" steplimit="0" memlimit="1000"/>
 <prover id="6" name="Alt-Ergo" version="2.3.0" timelimit="1" steplimit="0" memlimit="1000"/>
 <file format="whyml" proved="true">
@@ -58,7 +59,7 @@
   <proof prover="6" timelimit="10"><result status="valid" time="0.01" steps="56"/></proof>
   </goal>
   <goal name="pop&#39;vc.11" expl="type invariant" proved="true">
-  <proof prover="6" timelimit="10"><result status="valid" time="1.54" steps="4155"/></proof>
+  <proof prover="6" timelimit="10"><result status="valid" time="1.64" steps="4155"/></proof>
   </goal>
   <goal name="pop&#39;vc.12" expl="postcondition" proved="true">
   <proof prover="6" timelimit="10"><result status="valid" time="0.01" steps="48"/></proof>
@@ -87,7 +88,7 @@
  <proof prover="6"><result status="valid" time="0.02" steps="92"/></proof>
  </goal>
  <goal name="is_empty&#39;vc" expl="VC for is_empty" proved="true">
- <proof prover="6"><result status="valid" time="0.02" steps="123"/></proof>
+ <proof prover="0"><result status="valid" time="0.08" steps="31283"/></proof>
  </goal>
  <goal name="length&#39;vc" expl="VC for length" proved="true">
  <proof prover="6"><result status="valid" time="0.02" steps="137"/></proof>
@@ -141,10 +142,10 @@
  <proof prover="2"><result status="valid" time="0.05" steps="12007"/></proof>
  </goal>
  <goal name="Queue.safe_pop&#39;refn&#39;vc" expl="VC for safe_pop&#39;refn" proved="true">
- <proof prover="2"><result status="valid" time="0.04" steps="14929"/></proof>
+ <proof prover="2"><result status="valid" time="0.04" steps="11258"/></proof>
  </goal>
  <goal name="Queue.safe_peek&#39;refn&#39;vc" expl="VC for safe_peek&#39;refn" proved="true">
- <proof prover="2"><result status="valid" time="0.05" steps="14385"/></proof>
+ <proof prover="2"><result status="valid" time="0.05" steps="11258"/></proof>
  </goal>
  <goal name="Queue.clear&#39;refn&#39;vc" expl="VC for clear&#39;refn" proved="true">
  <proof prover="2"><result status="valid" time="0.05" steps="10235"/></proof>
@@ -153,7 +154,7 @@
  <proof prover="2"><result status="valid" time="0.02" steps="11398"/></proof>
  </goal>
  <goal name="Queue.is_empty&#39;refn&#39;vc" expl="VC for is_empty&#39;refn" proved="true">
- <proof prover="2"><result status="valid" time="0.05" steps="13118"/></proof>
+ <proof prover="2"><result status="valid" time="0.05" steps="12758"/></proof>
  </goal>
  <goal name="Queue.length&#39;refn&#39;vc" expl="VC for length&#39;refn" proved="true">
  <proof prover="2"><result status="valid" time="0.04" steps="10235"/></proof>

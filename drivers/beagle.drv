@@ -24,16 +24,22 @@ time "why3cpulimit time : %s s"
 
 (* transformations *)
 
+(* Performed introductions depending on whether counterexamples are
+   requested, as said by the meta "get_counterexmp". When this meta
+   set, this transformation introduces the model variables that are
+   still embedded in the goal. When it is not set, it removes all
+   these unused-ce-related variables, even in the context.  *)
+transformation "counterexamples_dependent_intros"
+
 transformation "inline_trivial"
 transformation "eliminate_builtin"
 transformation "eliminate_definition"
 transformation "eliminate_inductive"
-transformation "eliminate_algebraic"
-transformation "eliminate_literal"
-
 (* currently, princess does not support $let and $ite *)
 transformation "eliminate_if"
 transformation "eliminate_epsilon"
+transformation "eliminate_algebraic"
+transformation "eliminate_literal"
 transformation "eliminate_let"
 
 transformation "discriminate"
@@ -49,6 +55,10 @@ theory BuiltIn
   meta "encoding:kept" type int
   meta "encoding:kept" type real
   meta "eliminate_algebraic" "no_index"
+end
+
+theory Ignore
+  syntax predicate ignore'term  "true"
 end
 
 theory int.Int

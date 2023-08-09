@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -44,7 +44,8 @@ val find_prover : Prover_autodetection_data.t -> string -> string -> string opti
     according to an entry about [name] in [data] *)
 
 val find_provers : Prover_autodetection_data.t -> (string * string * string) list
-(** Detect the provers and return their path, name, and versions *)
+(** Detect the provers and return their path, name, and versions.
+    The resulting list is sorted by names and versions. *)
 
 val remove_auto_provers: Whyconf.config -> Whyconf.config
 (** Remove all the non-manual provers from the configuration *)

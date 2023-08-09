@@ -1,7 +1,7 @@
 ####################################################################
 #                                                                  #
 #  The Why3 Verification Platform   /   The Why3 Development Team  #
-#  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  #
+#  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  #
 #                                                                  #
 #  This software is distributed under the terms of the GNU Lesser  #
 #  General Public License version 2.1, with the special exception  #
@@ -62,6 +62,7 @@ OCAMLBEST = @OCAMLBEST@
 OCAMLVERSION = @OCAMLVERSION@
 COQC      = @COQC@
 COQDEP    = @COQDEP@
+COQFLAGS  = @COQFLAGS@
 FRAMAC_LIBDIR = $(DESTDIR)@FRAMAC_LIBDIR@
 MENHIR	  = @MENHIR@
 
@@ -103,7 +104,7 @@ EMACS = @EMACS@
 #PSVIEWER  = @PSVIEWER@
 #PDFVIEWER = @PDFVIEWER@
 
-EXTINCLUDES = @WHY3INCLUDE@ @SEQINCLUDE@ @REINCLUDE@ @ZIPINCLUDE@ @MENHIRINCLUDE@ @NUMINCLUDE@ @INFERINCLUDE@
+EXTINCLUDES = @WHY3INCLUDE@ @REINCLUDE@ @ZIPINCLUDE@ @MENHIRINCLUDE@ @NUMINCLUDE@ @INFERINCLUDE@
 
 # warnings are enabled and non fatal by default, except:
 # - disabled:
@@ -112,6 +113,7 @@ EXTINCLUDES = @WHY3INCLUDE@ @SEQINCLUDE@ @REINCLUDE@ @ZIPINCLUDE@ @MENHIRINCLUDE
 #        matched.
 #   9    Missing fields in a record pattern.
 #   41   Ambiguous constructor or label name.
+#   42   Reliance on type-directed disambiguation
 #   44   Open statement shadows an already defined identifier.
 #   45   Open statement shadows an already defined label or constructor.
 #   52   The argument of this constructor should not be matched against a
@@ -121,10 +123,11 @@ EXTINCLUDES = @WHY3INCLUDE@ @SEQINCLUDE@ @REINCLUDE@ @ZIPINCLUDE@ @MENHIRINCLUDE
 #   5    Partially applied function: expression whose result has function
 #        type and is ignored.
 #   8    Partial match: missing cases in pattern-matching.
+#   14   Illegal backslash escape in string
 #   48   Implicit elimination of optional arguments.
 #   50   Unexpected documentation comment.
 
-WARNINGS = A-4-9-41-44-45-52@5@8@48@50
+WARNINGS = A-4-9-41-42-44-45-52@5@8@14@48@50
 
 FLAGS = -w $(WARNINGS) -safe-string -keep-locs -bin-annot -dtypes -g -thread $(INCLUDES)
 OFLAGS = $(FLAGS)
@@ -140,9 +143,6 @@ OLINKFLAGS = -linkall $(EXTCMXA)
 BLINKFLAGS = -linkall $(EXTCMA)
 endif
 
-ifeq (@enable_profiling@,yes)
-OFLAGS += -g -p
-endif
 
 # see http://caml.inria.fr/mantis/view.php?id=4991
 CMIHACK = -intf-suffix .cmi
@@ -159,8 +159,8 @@ EXTOBJS =
 EXTLIBS = menhirLib
 endif
 
-EXTLIBS += @SEQLIB@ @RELIB@ unix nums dynlink @ZIPLIB@ @WHY3LIB@ @INFERLIB@
-EXTPKGS = menhirLib @SEQLIB@ @RELIB@ unix num dynlink @ZIPLIB@ @MLMPFR@ @WHY3LIB@ @INFERPKG@ @SEXPLIB@ @SEXPLIBPPX@
+EXTLIBS += @RELIB@ unix nums dynlink @ZIPLIB@ @WHY3LIB@ @INFERLIB@
+EXTPKGS = menhirLib @RELIB@ unix num dynlink @ZIPLIB@ @MLMPFR@ @WHY3LIB@ @INFERPKG@ @SEXPLIB@ @SEXPLIBPPX@
 
 EXTCMA	= $(addsuffix .cmo,$(EXTOBJS)) $(addsuffix .cma,$(EXTLIBS))
 EXTCMXA = $(addsuffix .cmx,$(EXTOBJS)) $(addsuffix .cmxa,$(EXTLIBS))
@@ -207,7 +207,7 @@ endif
 .PHONY: ide install-ide uninstall-ide
 .PHONY: coq install-coq uninstall-coq clean-coq
 .PHONY: pvs install-pvs uninstall-pvs clean-pvs
-.PHONY: install-isabelle
+.PHONY: install-isabelle clean-isabelle
 .PHONY: plugins plugins.byte plugins.opt
 .PHONY: trywhy3 clean-trywhy3
 
@@ -227,7 +227,6 @@ LIBGENERATED = \
 	src/util/rc.ml src/util/lexlib.ml src/util/mysexplib.ml \
 	src/util/json_parser.mli src/util/json_parser.ml \
 	src/util/json_lexer.ml src/util/mlmpfr_wrapper.ml \
-	src/util/dynlink_wrapper.ml \
 	src/parser/lexer.ml \
 	src/core/parser_tokens.mli src/core/parser_tokens.ml \
 	src/parser/parser.mli src/parser/parser.ml \
@@ -242,7 +241,7 @@ LIB_UTIL = mysexplib config bigInt mlmpfr_wrapper util opt lists strings \
 	   pp extmap extset exthtbl weakhtbl diffmap \
 	   hashcons wstdlib exn_printer getopt \
 	   json_base json_parser json_lexer \
-	   debug loc lexlib print_tree dynlink_wrapper \
+	   debug loc lexlib print_tree \
 	   cmdline sysutil rc plugin bigInt number constant vector pqueue
 
 ifeq (@enable_re@,no)
@@ -255,7 +254,7 @@ LIB_CORE = \
 	task pretty dterm env trans printer model_parser
 
 LIB_DRIVER = prove_client whyconf call_provers driver_parser driver_lexer driver \
-		autodetection smtv2_model_defs collect_data_model sexp smtv2_model_parser
+		autodetection smtv2_model_defs sexp smtv2_model_parser
 
 LIB_MLW = ity expr pdecl eval_match typeinv vc pmodule dexpr big_real \
           pinterp_core rac pinterp check_ce
@@ -265,7 +264,7 @@ LIB_INFER = o2oterm domain infer_why3 quant_domain union_find disjunctive_term_d
 endif
 
 ifeq (@enable_bddinfer@,yes)
-LIB_BDDINFER = bdd abstract ast interp_expression infer why3infer
+LIB_BDDINFER = bddparam abstract ast interp_expression infer why3infer
 endif
 
 LIB_EXTRACT = mltree compile mlinterp pdriver ml_printer \
@@ -274,15 +273,19 @@ LIB_EXTRACT = mltree compile mlinterp pdriver ml_printer \
 LIB_PARSER = ptree ptree_helpers glob typing \
 		parser_messages parser typing report lexer mlw_printer
 
+ifeq (@enable_sexp@,yes)
+LIB_PARSER += sexp_parser
+endif
+
 LIB_TRANSFORM = simplify_formula inlining split_goal \
 		args_wrapper reduction_engine compute \
 		remove_unused detect_polymorphism \
-		eliminate_definition eliminate_algebraic \
+		eliminate_definition \
 		abstract_quantifiers eliminate_unknown_types \
 		eliminate_unknown_lsymbols eliminate_symbol \
 		eliminate_inductive eliminate_let eliminate_if \
-		libencoding discriminate encoding encoding_select \
-		encoding_guards_full encoding_tags_full \
+		libencoding eliminate_algebraic discriminate encoding \
+		encoding_select encoding_guards_full encoding_tags_full \
 		encoding_guards encoding_tags encoding_twin \
 		encoding_sort simplify_array filter_trigger \
 		abstraction close_epsilon lift_epsilon \
@@ -292,7 +295,7 @@ LIB_TRANSFORM = simplify_formula inlining split_goal \
 		generic_arg_trans_utils case apply subst \
 		introduction ind_itp destruct cut congruence \
 		intro_vc_vars_counterexmp prepare_for_counterexmp \
-		induction induction_pr reflection
+		induction induction_pr reflection keep_only_arithmetic
 
 LIB_PRINTER = cntexmp_printer alt_ergo why3printer smtv1 smtv2 coq\
 	      pvs isabelle \
@@ -339,13 +342,8 @@ $(LIBCMX): OFLAGS += -for-pack Why3
 
 $(LIBDEP): $(LIBGENERATED)
 
-ifeq (@new_dynlink@,yes)
-src/util/dynlink_wrapper.ml: src/util/dynlink_new.ml Makefile
-	$(CMP_CP)
-else
-src/util/dynlink_wrapper.ml: src/util/dynlink_old.ml Makefile
-	$(CMP_CP)
-endif
+src/parser/ptree.cmx src/parser/ptree.cmo: FLAGS += -w -70
+src/util/mysexplib.cmx src/util/mysexplib.cmo: FLAGS += -w -70
 
 # Mlmpfr
 
@@ -374,9 +372,9 @@ src/session/compress.ml: src/session/compress_none.ml Makefile
 	$(CMP_CP)
 endif
 
-# pp_sexp_conv
+# sexp_conv
 
-ifeq (@enable_pp_sexp@, yes)
+ifeq (@enable_sexp@, yes)
 src/util/mysexplib.ml: src/util/mysexplib-real.ml Makefile
 	$(CMP_CP)
 src/tools/why3pp_sexp.ml: src/tools/why3pp_sexp-real.ml Makefile
@@ -560,7 +558,7 @@ PLUG_TRANSFORM =
 PLUG_TPTP = tptp_parser tptp_typing tptp_lexer tptp_printer
 PLUG_PYTHON = py_parser py_lexer py_main
 PLUG_MICROC = mc_parser mc_lexer mc_printer mc_main
-PLUG_CFG = cfg_parser cfg_lexer cfg_paths cfg_main
+PLUG_CFG = cfg_parser cfg_lexer cfg_paths subregion_analysis cfg_main
 ifeq (@enable_stackify@,yes)
 PLUG_CFG += stackify cfg_stackify
 endif
@@ -683,7 +681,7 @@ TOOLSGENERATED = src/tools/why3wc.ml
 
 TOOLS_BIN = \
 	why3config why3execute why3extract why3prove \
-	why3realize why3replay why3show why3wc
+	why3realize why3replay why3show why3wc why3bench
 
 TOOLS_FILES = main $(TOOLS_BIN)
 
@@ -805,7 +803,7 @@ gallery-subs:
 	  echo "exporting examples/$$d"; \
 	  mkdir -p $(GALLERYDIR)/$$d; \
 	  cd examples/$$d; \
-	  WHY3CONFIG="" ../../bin/why3.@OCAMLBEST@ doc --no-stdlib --no-load-default-plugins -L ../../stdlib -L . --stdlib-url http://why3.lri.fr/stdlib/ --debug ignore_unused_vars *.mlw -o $(GALLERYDIR)/$$d; \
+	  WHY3CONFIG="" ../../bin/why3.@OCAMLBEST@ doc --no-stdlib --no-load-default-plugins -L ../../stdlib -L . --stdlib-url http://why3.lri.fr/stdlib/ --warn-off=unused_variable *.mlw -o $(GALLERYDIR)/$$d; \
 	  cd ..; \
 	  rm -f $(GALLERYDIR)/$$d/$$d.zip; \
 	  git archive --format=zip -o $(GALLERYDIR)/$$d/$$d.zip HEAD $$d; \
@@ -824,7 +822,7 @@ xml-validate:
 	done
 
 xml-validate-local:
-	@for x in `find examples/ -path examples/in_progress -prune -o -name why3session.xml -print`; do \
+	@for x in `find examples/ -name why3session.xml -print`; do \
 	  xmllint --nonet --noout --path share --valid $$x 2>&1 | sed -e '/I.O error/d' | head -1; \
 	done
 
@@ -942,7 +940,7 @@ install_local:: bin/why3webserver.$(SHAREDBEST)
 ###############
 
 SESSION_FILES = why3session_lib why3session_info \
-		why3session_html why3session_latex why3session_update \
+		why3session_html why3session_latex why3session_update why3session_create \
 		why3session_main
 # TODO: why3session_copy why3session_rm why3session_csv why3session_run
 #       why3session_output
@@ -1024,9 +1022,8 @@ COQVERSIONSPECIFICTARGETS=$(addprefix lib/coq/, $(COQVERSIONSPECIFIC))
 $(COQVERSIONSPECIFICTARGETS): %: %.@coq_compat_version@
 	$(CMP_CP)
 
-clean::
+clean-coq::
 	rm -f $(COQVERSIONSPECIFICTARGETS)
-
 
 COQLIBS_INT_FILES = Abs ComputerDivision Div2 EuclideanDivision Int MinMax Power NumOf
 COQLIBS_INT_ALL_FILES = Exponentiation $(COQLIBS_INT_FILES)
@@ -1072,11 +1069,11 @@ endif
 COQLIBS_FOR_DRIVERS_FILES = ComputerOfEuclideanDivision
 COQLIBS_FOR_DRIVERS = $(addprefix lib/coq/for_drivers/, $(COQLIBS_FOR_DRIVERS_FILES))
 
-COQLIBS_FILES = lib/coq/BuiltIn lib/coq/HighOrd $(COQLIBS_INT) $(COQLIBS_BOOL) $(COQLIBS_REAL) $(COQLIBS_NUMBER) $(COQLIBS_SET) $(COQLIBS_MAP) $(COQLIBS_LIST) $(COQLIBS_OPTION) $(COQLIBS_FP)  $(COQLIBS_BV) $(COQLIBS_IEEEFLOAT) $(COQLIBS_FOR_DRIVERS)
+COQLIBS_FILES = lib/coq/BuiltIn lib/coq/HighOrd lib/coq/WellFounded $(COQLIBS_INT) $(COQLIBS_BOOL) $(COQLIBS_REAL) $(COQLIBS_NUMBER) $(COQLIBS_SET) $(COQLIBS_MAP) $(COQLIBS_LIST) $(COQLIBS_OPTION) $(COQLIBS_FP)  $(COQLIBS_BV) $(COQLIBS_IEEEFLOAT) $(COQLIBS_FOR_DRIVERS)
 
 %.vo: %.v
 	$(SHOW) 'Coqc     $<'
-	$(HIDE)$(COQC) -R lib/coq Why3 $<
+	$(HIDE)$(COQC) $(COQFLAGS) -R lib/coq Why3 $<
 
 %.vd: %.v
 	$(SHOW) 'Coqdep   $<'
@@ -1088,17 +1085,16 @@ COQVD = $(addsuffix .vd, $(COQLIBS_FILES))
 
 coq: $(COQVO) drivers/coq-realizations.aux lib/coq/version
 
-clean-coq:
+clean-coq::
 	rm -f $(COQVO) $(COQVD) $(addsuffix .glob, $(COQLIBS_FILES)) lib/coq/version \
 		$(foreach f,$(COQLIBS_FILES),$(dir $f).$(notdir $f).aux)
-
-clean:: clean-coq
 
 drivers/coq-realizations.aux: Makefile
 	$(SHOW) 'Generate $@'
 	$(HIDE)(echo "(* generated automatically at compilation time *)"; \
 	echo 'theory BuiltIn meta "realized_theory" "BuiltIn", "" end'; \
 	echo 'theory HighOrd meta "realized_theory" "HighOrd", "" end'; \
+	echo 'theory WellFounded meta "realized_theory" "WellFounded", "" end'; \
 	for f in $(COQLIBS_INT_FILES); do \
 	echo 'theory int.'"$$f"' meta "realized_theory" "int.'"$$f"'", "" end'; done; \
 	for f in $(COQLIBS_BOOL_FILES); do \
@@ -1173,7 +1169,7 @@ uninstall-coq:
 install-coq:
 	$(MKDIR_P) $(LIBDIR)/why3/coq
 	$(INSTALL_DATA) lib/coq/version $(LIBDIR)/why3/coq/
-	$(INSTALL_DATA) lib/coq/BuiltIn.vo lib/coq/HighOrd.vo $(LIBDIR)/why3/coq/
+	$(INSTALL_DATA) lib/coq/BuiltIn.vo lib/coq/HighOrd.vo lib/coq/WellFounded.vo $(LIBDIR)/why3/coq/
 	$(MKDIR_P) $(LIBDIR)/why3/coq/int
 	$(INSTALL_DATA) $(addsuffix .vo, $(COQLIBS_INT)) $(LIBDIR)/why3/coq/int/
 	$(MKDIR_P) $(LIBDIR)/why3/coq/bool
@@ -1219,7 +1215,7 @@ install-data::
 
 all: drivers/coq-realizations.aux
 
-clean::
+clean:: clean-coq
 	rm -f drivers/coq-realizations.aux
 
 ####################
@@ -1275,8 +1271,6 @@ pvs: lib/pvs/version
 clean-pvs:
 	rm -f lib/pvs/version
 
-clean:: clean-pvs
-
 ifeq (@enable_pvs_libs@,yes)
 
 uninstall-pvs:
@@ -1308,7 +1302,7 @@ install-data::
 
 all: drivers/pvs-realizations.aux
 
-clean::
+clean:: clean-pvs
 	rm -f drivers/pvs-realizations.aux
 
 #######################
@@ -1326,7 +1320,7 @@ ISABELLEREALIZEDRVPATH=drivers/$(ISABELLEREALIZEDRV).drv
 $(ISABELLEVERSIONSPECIFICTARGETS): %: %.@ISABELLEVERSION@
 	$(CMP_CP)
 
-clean::
+clean-isabelle::
 	rm -f $(ISABELLEVERSIONSPECIFICTARGETS)
 
 ISABELLELIBS_INT_FILES = Abs ComputerDivision Div2 EuclideanDivision Int MinMax Power
@@ -1350,7 +1344,8 @@ ISABELLELIBS_MAP = $(addsuffix .xml, $(addprefix $(GENERATED_PREFIX_ISABELLE)/ma
 ISABELLELIBS_LIST_FILES = List Length Mem Nth NthNoOpt NthLength HdTl NthHdTl Append NthLengthAppend Reverse HdTlNoOpt RevAppend Combine Distinct NumOcc Permut
 ISABELLELIBS_LIST = $(addsuffix .xml, $(addprefix $(GENERATED_PREFIX_ISABELLE)/list/, $(ISABELLELIBS_LIST_FILES)))
 
-ISABELLELIBS_BV_FILES = Pow2int BV8 BV16 BV32 BV64 BVConverter_32_64 BVConverter_16_64 BVConverter_8_64 BVConverter_16_32 BVConverter_8_32 BVConverter_8_16
+ISABELLELIBS_BV_FILES = Pow2int
+# BV8 BV16 BV32 BV64 BVConverter_32_64 BVConverter_16_64 BVConverter_8_64 BVConverter_16_32 BVConverter_8_32 BVConverter_8_16
 ISABELLELIBS_BV = $(addsuffix .xml, $(addprefix $(GENERATED_PREFIX_ISABELLE)/bv/, $(ISABELLELIBS_BV_FILES)))
 
 ISABELLELIBS = $(ISABELLELIBS_INT) $(ISABELLELIBS_BOOL) $(ISABELLELIBS_REAL) $(ISABELLELIBS_NUMBER) $(ISABELLELIBS_SET) $(ISABELLELIBS_MAP) $(ISABELLELIBS_LIST) $(ISABELLELIBS_OPTION) $(ISABELLELIBS_BV)
@@ -1465,9 +1460,6 @@ install-isabelle: $(GENERATED_PREFIX_ISABELLE)/last_build
 install_local:: install-isabelle
 install:: install-isabelle
 
-clean::
-	rm -f $(GENERATED_PREFIX_ISABELLE)/*/*.xml
-
 endif
 
 all: drivers/isabelle-realizations.aux
@@ -1475,7 +1467,10 @@ all: drivers/isabelle-realizations.aux
 install-data::
 	$(INSTALL_DATA) drivers/isabelle-realizations.aux $(DATADIR)/why3/drivers/
 
-clean::
+clean-isabelle::
+	rm -f $(GENERATED_PREFIX_ISABELLE)/*/*.xml
+
+clean:: clean-isabelle
 	rm -f drivers/isabelle-realizations.aux
 
 #######################
@@ -1764,7 +1759,7 @@ APITESTS = \
 	logic \
 	mlw_expr \
 	mlw_tree \
-	transform \
+	transform
 
 ifeq (@enable_infer@,yes)
 	APITESTS += mlw_tree_infer_invs
@@ -1772,6 +1767,10 @@ endif
 
 ifeq (@enable_infer@,yes)
 	APITESTS += mlw_tree_bddinfer_invs
+endif
+
+ifeq (@enable_sexp@,yes)
+	APITESTS += epsilon
 endif
 
 bench-api: $(addprefix test-api-, $(APITESTS))
@@ -1802,10 +1801,10 @@ test-api-%.opt: examples/use_api/%.ml lib/why3/why3.cmxa
 test-api-%: test-api-%.@OCAMLBEST@
 	$(HIDE)mkdir -p examples/use_api/results
 	$(HIDE)(./$< | sed -e 's/^\(Versions of Alt-Ergo found: \).*$$/\1<hidden>/' \
-		  	   -e 's/0\.0[0-9]/0.0x/' \
+			   -e 's/0\.0[0-9]/<hidden>/g;s/[0-9]\+ steps/<hidden> steps/' \
 			    > examples/use_api/results/$@.stdout ) \
 		|| (printf "Execution failed for API test $<. Please fix it.\n"; exit 2)
-	$(HIDE)(diff examples/use_api/oracles/$@.stdout examples/use_api/results/$@.stdout) \
+	$(HIDE)(diff -u examples/use_api/oracles/$@.stdout examples/use_api/results/$@.stdout) \
 		|| (printf "Oracle failed for API test $<. Please fix it.\n"; exit 2)
 	$(HIDE)rm -f $< why3session.xml why3shapes why3shapes.gz
 
@@ -1852,6 +1851,7 @@ update-doc-png:
 	export WHY3CONFIG=doc/why3ide-doc.conf; \
 	export WHY3LOADPATH=stdlib; \
 	export GTK_THEME=Adwaita; \
+	export WAYLAND_DISPLAY=; \
 	sed -n -e 's/^.. %EXECUTE \(.*\)/\1/p' $(DOCRST) | $(SHELL) -e
 
 ifeq (@enable_doc@,yes)
@@ -2003,7 +2003,8 @@ STDLIBS = \
 	ieee_float int io \
 	list \
 	map matrix \
-	null number option ocaml \
+	null number \
+	ocaml option \
 	pigeon pqueue \
 	queue \
 	random real ref regexp relations \
@@ -2014,7 +2015,6 @@ STDLIBS = \
 
 # NO NEED DOC:
 # debug: too basic, needs large improvement
-# io: too basic, needs large improvement
 # tptp: for TPTP provers ?
 # for_drivers: used only in drivers
 
@@ -2026,14 +2026,14 @@ stdlibdoc: $(STDLIBFILES) bin/why3.@OCAMLBEST@ bin/why3doc.$(SHAREDBEST)
 	sed -e "s/use Int/use int.Int/" stdlib/int.mlw > int.mlw
 	rm -f doc/stdlibdoc/style.css
 	WHY3CONFIG="" bin/why3.@OCAMLBEST@ doc $(LOCAL_STDLIB) \
-          -o doc/stdlibdoc --title="Why3 Standard Library" \
+	  -o doc/stdlibdoc --title="Why3 Standard Library" \
 	  $(subst stdlib/int.mlw,int.mlw,$(STDLIBFILES))
 	rm int.mlw
 	cd doc/stdlibdoc; \
 	  for f in stdlib.*.html; \
 	    do mv "$$f" "$${f#stdlib.}"; done
 	sed -i -e "s#stdlib.##g" doc/stdlibdoc/index.html
-	sed -i -e "s#int\.\(<a href=\"int\.html\)#\1#g" doc/stdlibdoc/int.html
+	sed -i -e "s#int\.\(<a href=\"\)int\.html#\1#g" doc/stdlibdoc/int.html
 
 clean::
 	rm -f doc/stdlibdoc/*

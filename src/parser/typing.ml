@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -30,8 +30,9 @@ let debug_parse_only = Debug.register_flag "parse_only"
 let debug_type_only  = Debug.register_flag "type_only"
   ~desc:"Stop@ after@ type-checking."
 
-let debug_ignore_useless_at = Debug.register_flag "ignore_useless_at"
-  ~desc:"Remove@ warning@ for@ useless@ at/old."
+
+let warn_useless_at = Loc.register_warning "useless_at"
+  "Warn about `at'/`old' operators used in locations where they have no impact."
 
 (** symbol lookup *)
 
@@ -277,7 +278,7 @@ let mk_closure crcmap loc ls =
   let mk_v i _ =
     Some (id_user ("y" ^ string_of_int i) loc), dty_fresh (), None in
   let mk_t (id, dty, _) = mk (DTvar ((Opt.get id).pre_name, dty)) in
-  let vl = Lists.mapi mk_v ls.ls_args in
+  let vl = List.mapi mk_v ls.ls_args in
   DTquant (DTlambda, vl, [], mk (DTapp (ls, List.map mk_t vl)))
 
 (* handle auto-dereference in logical terms *)
@@ -494,8 +495,8 @@ let rec dterm ns km crcmap gvars at denv {term_desc = desc; term_loc = loc} =
       (* check if the label has actually been defined *)
       ignore (Loc.try2 ~loc gvars (Some l) (Qident id));
       let e1 = dterm ns km crcmap gvars (Some l) denv e1 in
-      if not (Hstr.find at_uses l) && Debug.test_noflag debug_ignore_useless_at then
-        Loc.warning ~loc "this `at'/`old' operator is never used";
+      if not (Hstr.find at_uses l) then
+        Loc.warning ~id:warn_useless_at ~loc "this `at'/`old' operator is never used";
       Hstr.remove at_uses l;
       DTattr (e1, Sattr.empty)
   | Ptree.Tscope (q, e1) ->
@@ -514,7 +515,13 @@ let rec dterm ns km crcmap gvars at denv {term_desc = desc; term_loc = loc} =
       DTconst (c, dty_of_pty ns pty)
   | Ptree.Tcast (e1, pty) ->
       let d1 = dterm ns km crcmap gvars at denv e1 in
-      DTcast (d1, dty_of_pty ns pty))
+      DTcast (d1, dty_of_pty ns pty)
+  | Ptree.Teps (x, pty, e) ->
+      let id = create_user_id x in
+      let pty = dty_of_pty ns pty in
+      let denv = denv_add_var denv id pty in
+      let e = dterm ns km crcmap gvars at denv e in
+      DTeps (id, pty, e))
 
 let no_gvars at q = match at with
   | Some _ -> Loc.errorm ~loc:(qloc q)
@@ -905,7 +912,7 @@ let rec eff_dterm muc denv {term_desc = desc; term_loc = loc} =
   | Ptree.Tidapp _ | Ptree.Tconst _ | Ptree.Tinfix _ | Ptree.Tinnfix _
   | Ptree.Ttuple _ | Ptree.Tlet _ | Ptree.Tcase _ | Ptree.Tif _
   | Ptree.Ttrue | Ptree.Tfalse | Ptree.Tnot _ | Ptree.Tbinop _ | Ptree.Tbinnop _
-  | Ptree.Tquant _ | Ptree.Trecord _ | Ptree.Tupdate _ ->
+  | Ptree.Tquant _ | Ptree.Trecord _ | Ptree.Tupdate _ | Ptree.Teps _ ->
       Loc.errorm ~loc "unsupported effect expression")
 
 let tick_lemma id =
@@ -1150,10 +1157,7 @@ let rec dexpr muc denv {expr_desc = desc; expr_loc = loc} =
       let gvars _at q = try match find_prog_symbol muc q with
         | PV v -> Some v | _ -> None with _ -> None in
       let get_dty pure_denv =
-        let nw = Debug.test_noflag debug_ignore_useless_at in
-        if nw then Debug.set_flag debug_ignore_useless_at;
-        let dt = dterm muc gvars None pure_denv t in
-        if nw then Debug.unset_flag debug_ignore_useless_at;
+        let dt = Loc.without_warning warn_useless_at (fun () -> dterm muc gvars None pure_denv t) in
         match dt.dt_dty with Some dty -> dty | None -> dty_bool in
       DEpure (get_term, denv_pure denv get_dty)
   | Ptree.Eassert (ak, f) ->
@@ -1457,7 +1461,7 @@ let tyl_of_params {muc_theory = tuc} pl =
   List.map ty_of_param pl
 
 (* Used to check unused variables in logic declarations *)
-let check_unused_vars ldl =
+let check_unused_variable ldl =
   List.iter
     (fun (_name, ld) ->
        let (vsl, t) = open_ls_defn ld in
@@ -1501,7 +1505,7 @@ let add_logics muc dl =
   let add_param muc s = add_decl muc (create_param_decl s) in
   let add_logic muc l =
     (* Check for unused vars in logic declaration *)
-    check_unused_vars l;
+    check_unused_variable l;
     add_decl muc (create_logic_decl l) in
   let muc = List.fold_left add_param muc abst in
   if defn = [] then muc else add_logic muc defn
@@ -1735,20 +1739,36 @@ let type_mlw_file env path filename mlw_file =
   in
   file
 
+module Unsafe = struct
+  let dexpr = dexpr
+  let drec_defn = drec_defn
+
+  let create_user_id = create_user_id
+  let create_user_prog_id = create_user_prog_id
+  let add_decl = add_decl
+end
+
 (* incremental parsing *)
 
 type slice = {
-  env           : Env.env;
-  path          : Env.pathname;
-  mutable file  : pmodule Mstr.t;
-  mutable muc   : pmodule_uc option;
+  env              : Env.env;
+  path             : Env.pathname;
+  mutable file     : pmodule Mstr.t;
+  mutable muc      : pmodule_uc option;
+  mutable muc_intf : pmodule option
 }
 
 let state = (Stack.create () : slice Stack.t)
 
 let open_file env path =
   assert (Stack.is_empty state || (Stack.top state).muc <> None);
-  Stack.push { env = env; path = path; file = Mstr.empty; muc = None } state
+  Stack.push {
+      env = env;
+      path = path;
+      file = Mstr.empty;
+      muc = None;
+      muc_intf = None;
+    } state
 
 let close_file () =
   assert (not (Stack.is_empty state) && (Stack.top state).muc = None);
@@ -1758,24 +1778,122 @@ let discard_file () =
   assert (not (Stack.is_empty state));
   ignore (Stack.pop state)
 
-let open_module ({id_str = nm; id_loc = loc} as id) =
+let open_module ?intf ({id_str = nm; id_loc = loc} as id) =
   assert (not (Stack.is_empty state) && (Stack.top state).muc = None);
   let slice = Stack.top state in
   if Mstr.mem nm slice.file then Loc.errorm ~loc
     "module %s is already defined in this file" nm;
-  let muc = create_module slice.env ~path:slice.path (create_user_id id) in
-  slice.muc <- Some muc
+  let id = if intf = None
+           then create_user_id id
+           else id_user (nm ^ "'impl") loc in
+  let muc = create_module slice.env ~path:slice.path id in
+  slice.muc <- Some muc;
+  slice.muc_intf <- None;
+  if Debug.test_noflag debug_parse_only then begin
+    match intf with
+    | None -> ()
+    | Some qid ->
+       let mintf = Loc.try3 ~loc find_module slice.env slice.file qid in
+       slice.muc_intf <- Some mintf
+  end
+
+exception Invalid_unit
+exception Symbol_not_found of Ident.ident
+
+let intf_mod_inst muc intf =
+
+  let rec aux_units ns_muc ns_tuc inst ul =
+
+    let add_type inst its =
+      try
+        let its' = ns_find_its ns_muc [its.ts_name.id_string] in
+        { inst with mi_ts = Mts.add its its' inst.mi_ts }
+      with Not_found -> raise (Symbol_not_found its.ts_name) in
+
+    let add_logic inst ls =
+      try
+        let ls' = ns_find_ls ns_tuc [ls.ls_name.id_string] in
+        { inst with mi_ls = Mls.add ls ls' inst.mi_ls }
+      with Not_found -> raise (Symbol_not_found ls.ls_name) in
+
+    let add_routine inst rs =
+      try
+        let rs' = ns_find_rs ns_muc [rs.rs_name.id_string] in
+        { inst with mi_rs = Mrs.add rs rs' inst.mi_rs }
+      with Not_found ->
+        if Strings.has_suffix "'lemma" rs.rs_name.id_string
+        then inst (* do not raise for let lemma induced by lemmas *)
+        else raise (Symbol_not_found rs.rs_name) in
+
+    let aux_pure inst = function
+      | { d_node = Dtype tys } -> add_type inst tys
+      | { d_node = Dparam ls } -> add_logic inst ls
+      | { d_node = Dprop _ | Dlogic _ } -> inst
+      | _ -> raise Invalid_unit in
+
+    let aux_unit inst = function
+      | Udecl { pd_node = PDtype its_defn; _ } ->
+         List.fold_left (fun i d  -> add_type i d.itd_its.its_ts) inst its_defn
+      | Udecl { pd_node = PDlet (LDsym (rs, _)); _ } -> add_routine inst rs
+      | Udecl { pd_node = PDpure; pd_pure; _ } ->
+         List.fold_left aux_pure inst pd_pure
+      | Udecl _ -> raise Invalid_unit
+      | Uuse _ | Uscope (_, [Uuse _]) | Umeta _-> inst (* Nothing to do on use or meta ? *)
+      | Uscope (s, ul) ->
+         let ns_muc = try ns_find_ns ns_muc [s] with Not_found -> empty_ns in
+         let ns_tuc =
+           try Theory.ns_find_ns ns_tuc [s] with
+           | Not_found -> Theory.empty_ns in
+         aux_units ns_muc ns_tuc inst ul
+      | Uclone _ -> inst (* Nothing to do on clone ? *) in
+
+    List.fold_left aux_unit inst ul in
+
+  (* Are these the good namespaces ? *)
+  let ns_muc = List.hd muc.muc_export in
+  let ns_tuc = List.hd muc.muc_theory.uc_export in
+  aux_units ns_muc ns_tuc (empty_mod_inst intf) intf.mod_units
 
 let close_module loc =
   assert (not (Stack.is_empty state) && (Stack.top state).muc <> None);
   let slice = Stack.top state in
   if Debug.test_noflag debug_parse_only then begin
-    let m = Loc.try1 ~loc close_module (Opt.get slice.muc) in
-    if Debug.test_flag Glob.flag then
-      Glob.def ~kind:"theory" m.mod_theory.th_name;
-    slice.file <- Mstr.add m.mod_theory.th_name.id_string m slice.file;
+    match slice.muc_intf with
+    | None ->
+       let m = Loc.try1 ~loc close_module (Opt.get slice.muc) in
+       if Debug.test_flag Glob.flag then
+         Glob.def ~kind:"theory" m.mod_theory.th_name;
+       slice.file <- Mstr.add m.mod_theory.th_name.id_string m slice.file
+    | Some mintf ->
+       let muc = Opt.get slice.muc in
+       let inst =
+         try intf_mod_inst muc mintf with
+         | Invalid_unit -> Loc.errorm ~loc "Unsupported unit in interface"
+         | Symbol_not_found id ->
+            Loc.errorm ~loc "Symbol %s not found in implementation"
+              id.id_string in
+       let muc =
+         open_scope muc (mintf.mod_theory.th_name.id_string^"'impl_of") in
+       let muc = clone_export muc mintf inst in
+       let muc = close_scope ~import:false muc in
+       let id_str =
+         Strings.remove_suffix "'impl" muc.muc_theory.uc_name.id_string in
+       let id = id_fresh id_str in
+       let m' = create_module slice.env ~path:slice.path id in
+       let inst_axiom = { (empty_mod_inst mintf) with mi_df = Paxiom } in
+       let m' = clone_export m' mintf inst_axiom in
+       let m' = close_module m' in
+       let inst = intf_mod_inst muc m' in
+       let m = Loc.try1 ~loc close_module muc in
+       (* Not sure about this *)
+       if Debug.test_flag Glob.flag then
+         Glob.def ~kind:"theory" m.mod_theory.th_name;
+       slice.file <- Mstr.add m.mod_theory.th_name.id_string m slice.file;
+       mod_impl_register slice.env m' m inst;
+       slice.file <- Mstr.add id_str m' slice.file
   end;
-  slice.muc <- None
+  slice.muc <- None;
+  slice.muc_intf <- None
 
 let top_muc_on_demand loc slice = match slice.muc with
   | Some muc -> muc

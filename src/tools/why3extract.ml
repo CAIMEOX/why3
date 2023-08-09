@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -241,7 +241,7 @@ let print_mdecls ?fname m mdecls alldeps =
 let find_module_path mm path m = match path with
   | [] -> Mstr.find m mm
   | path -> let mm = Env.read_library Pmodule.mlw_language env path in
-      Mstr.find m mm
+      mod_impl env (Mstr.find m mm)
 
 let find_module_id mm id =
   let (path, m, _) = Pmodule.restore_path id in find_module_path mm path m
@@ -376,7 +376,7 @@ let read_mlw_file ?format env fname =
   let cin = open_in fname in
   let mm = Env.read_channel ?format mlw_language env fname cin in
   close_in cin;
-  mm
+  Mstr.map (mod_impl env) mm
 
 let do_modular target =
   let format = !opt_parser in

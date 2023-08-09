@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -473,11 +473,11 @@ let context_tools_menu = GMenu.menu ()
 
 let send_session_config_to_server () =
   let nb = gconfig.session_nb_processes in
-  send_request (Set_config_param("max_tasks",nb));
+  send_request (Set_config_param(Max_tasks nb));
   let nb = gconfig.session_time_limit in
-  send_request (Set_config_param("timelimit",nb));
+  send_request (Set_config_param(Timelimit nb));
   let nb = gconfig.session_mem_limit in
-  send_request (Set_config_param("memlimit",nb))
+  send_request (Set_config_param(Memlimit nb))
 
 let (_ : GtkSignal.id) =
   main_window#connect#destroy
@@ -682,7 +682,7 @@ let monitor =
 
 let command_entry =
   GEdit.entry
-    ~text:"type commands here"
+    ~placeholder_text:"type commands here"
     ~packing:hbox22221#add ()
 
 (* Part 2.2.2.2.2 contains messages returned by the IDE/server *)
@@ -1138,6 +1138,8 @@ let reload_unsafe () =
 
 let save_and_reload () = save_sources (); reload_unsafe ()
 
+let export_as_zip () = save_sources (); send_request Export_as_zip
+
 (****************************)
 (* command entry completion *)
 (****************************)
@@ -1481,15 +1483,6 @@ let (_ : GtkSignal.id) =
       end in
   command_entry#connect#activate ~callback
 
-(* remove the helper text from the command entry the first time it gets the focus *)
-let () =
-  let id = ref None in
-  let callback _ =
-    clear_command_entry ();
-    GtkSignal.disconnect command_entry#as_entry (Opt.get !id);
-    false in
-  id := Some (command_entry#event#connect#focus_in ~callback)
-
 let on_selected_row r =
   try
     let id = get_node_id r#iter in
@@ -1497,7 +1490,8 @@ let on_selected_row r =
     match typ with
     | NGoal ->
         let c = gconfig.show_full_context in
-        send_request (Get_task(id,c,true))
+        let show_uses_clones_metas = gconfig.show_uses_clones_metas in
+        send_request (Get_task(id,c,show_uses_clones_metas,true))
     | NProofAttempt ->
        let (pa, _obs, _l) = Hint.find node_id_pa id in
        let output_text =
@@ -1525,10 +1519,12 @@ let on_selected_row r =
        counterexample_view#source_buffer#set_text "(not yet available)";
        counterexample_view#scroll_to_mark `INSERT;
        let c = gconfig.show_full_context in
-       send_request (Get_task(id,c,true))
+       let show_uses_clones_metas = gconfig.show_uses_clones_metas in
+       send_request (Get_task(id,c,show_uses_clones_metas,true))
     | _ ->
        let c = gconfig.show_full_context in
-       send_request (Get_task(id,c,true))
+       let show_uses_clones_metas = gconfig.show_uses_clones_metas in
+       send_request (Get_task(id,c,show_uses_clones_metas,true))
   with
     | Not_found -> task_view#source_buffer#set_text ""
 
@@ -1802,7 +1798,7 @@ let set_status_and_time_column ?limit row =
              if gconfig.show_time_limit then
                match limit with
                  | Some l ->
-                    Format.sprintf "%.2f [%d.0]" time
+                    Format.sprintf "%.2f [%.2f]" time
                                    (l.Call_provers.limit_time)
                  | None ->
                     Format.sprintf "%.2f" time
@@ -1828,7 +1824,7 @@ let set_status_and_time_column ?limit row =
            begin
              match limit with
              | Some l -> t ^
-                Format.sprintf " [limit=%d sec., %d M]"
+                Format.sprintf " [limit=%.2f sec., %d M]"
                                (l.Call_provers.limit_time)
                                (l.Call_provers.limit_mem)
              | None -> t ^ " [no limit known]"
@@ -2066,8 +2062,13 @@ let (_: GMenu.menu_item) =
 let (_: GMenu.menu_item) =
   file_factory#add_item "Save all and _Refresh session"
     ~modi:primary_modifiers ~key:GdkKeysyms._R
-    ~tooltip:"Save the current proof session and the source files, then refresh the proof session with updated source files."
+    ~tooltip:"Save the current proof session and the source files, then refresh the proof session with updated source files"
     ~callback:save_and_reload
+
+let (_: GMenu.menu_item) =
+  file_factory#add_item "Export session as zip file"
+    ~tooltip:"Produces a zip archive of the current proof session"
+    ~callback:export_as_zip
 
 let (_: GMenu.menu_item) =
   file_factory#add_item "_Quit"

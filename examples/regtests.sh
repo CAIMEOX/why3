@@ -12,6 +12,9 @@ case "$1" in
   "--obsolete-only")
         REPLAYOPT="$REPLAYOPT --obsolete-only"
         ;;
+  "--ignore-shapes")
+        REPLAYOPT="$REPLAYOPT --ignore-shapes"
+        ;;
   "--prover")
         REPLAYOPT="$REPLAYOPT --prover $2"
         shift
@@ -89,7 +92,7 @@ run_dir foveoos11-cm ""
 run_dir vacid_0_binary_heaps "-L vacid_0_binary_heaps"
 run_dir verifythis_2016_matrix_multiplication "-L verifythis_2016_matrix_multiplication"
 run_dir WP_revisited ""
-run_dir prover "-L prover --debug=ignore_unused_vars"
+run_dir prover "-L prover --warn-off=unused_variable"
 run_dir multiprecision "-L multiprecision"
 echo ""
 

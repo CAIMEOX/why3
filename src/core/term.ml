@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -46,6 +46,7 @@ type lsymbol = {
   ls_args   : ty list;
   ls_value  : ty option;
   ls_constr : int;
+  ls_proj   : bool;
 }
 
 module Lsym = MakeMSHW (struct
@@ -66,18 +67,23 @@ let check_constr constr _args value =
   if constr = 0 || (constr > 0 && value <> None)
   then constr else invalid_arg "Term.create_lsymbol"
 
-let create_lsymbol ?(constr=0) name args value = {
+let check_proj proj constr args value =
+  if not proj || (constr = 0  && value <> None && List.length args = 1)
+  then proj else invalid_arg "Term.create_lsymbol"
+
+let create_lsymbol ?(constr=0) ?(proj=false) name args value = {
   ls_name   = id_register name;
   ls_args   = args;
   ls_value  = value;
   ls_constr = check_constr constr args value;
+  ls_proj   = check_proj proj constr args value;
 }
 
-let create_fsymbol ?constr nm al vl =
-  create_lsymbol ?constr nm al (Some vl)
+let create_fsymbol ?constr ?proj nm al vl =
+  create_lsymbol ?constr ?proj nm al (Some vl)
 
 let create_psymbol nm al =
-  create_lsymbol ~constr:0 nm al None
+  create_lsymbol nm al None
 
 let ls_ty_freevars ls =
   let acc = oty_freevars Stv.empty ls.ls_value in
@@ -278,7 +284,7 @@ let rec descend vml t = match t.t_node with
 let t_compare ~trigger ~attr ~loc ~const t1 t2 =
   let comp_raise c =
     if c < 0 then raise CompLT else if c > 0 then raise CompGT in
-  let perv_compare h1 h2 = comp_raise (Pervasives.compare h1 h2) in
+  let perv_compare h1 h2 = comp_raise (Stdlib.compare h1 h2) in
   let rec pat_compare (bnd,bv1,bv2 as state) p1 p2 =
     match p1.pat_node, p2.pat_node with
     | Pwild, Pwild ->
@@ -1008,6 +1014,10 @@ let ps_equ =
   let v = ty_var (create_tvsymbol (id_fresh "a")) in
   create_psymbol (id_fresh (op_infix "=")) [v; v]
 
+let ps_ignore =
+  let v = ty_var (create_tvsymbol (id_fresh "a")) in
+  create_psymbol (id_fresh "ignore'term") [v]
+
 let t_equ t1 t2 = ps_app ps_equ [t1; t2]
 let t_neq t1 t2 = t_not (ps_app ps_equ [t1; t2])
 
@@ -1016,6 +1026,14 @@ let fs_bool_false = create_fsymbol ~constr:2 (id_fresh "False") [] ty_bool
 
 let t_bool_true  = fs_app fs_bool_true [] ty_bool
 let t_bool_false = fs_app fs_bool_false [] ty_bool
+
+let to_prop t =
+  match t.t_ty with
+  | Some _ ->
+    if t_equal t t_bool_true then t_true
+    else if t_equal t t_bool_false then t_false
+    else t_attr_copy t (t_equ t t_bool_true)
+  | None -> t
 
 let fs_tuple_ids = Hid.create 17
 
@@ -1049,6 +1067,16 @@ let t_pred_app pr t = t_equ (t_func_app pr t) t_bool_true
 
 let t_func_app_l fn tl = List.fold_left t_func_app fn tl
 let t_pred_app_l pr tl = t_equ (t_func_app_l pr tl) t_bool_true
+
+let ps_acc =
+  let alpha = ty_var (create_tvsymbol (id_fresh "a")) in
+  let ty_rel = ty_func alpha (ty_pred alpha) in
+  create_psymbol (id_fresh "acc") [ty_rel;alpha]
+
+let ps_wf =
+  let alpha = ty_var (create_tvsymbol (id_fresh "a")) in
+  let ty_rel = ty_func alpha (ty_pred alpha) in
+  create_psymbol (id_fresh "well_founded") [ty_rel]
 
 (** Term library *)
 
@@ -1089,8 +1117,8 @@ let rec t_gen_map fnT fnL m t =
         let u = Mvs.find_def v v m in
         ty_equal_check (fnT v.vs_ty) u.vs_ty;
         t_var u
-    | Tconst _ ->
-        t
+    | Tconst c ->
+        t_const c (fnT (Opt.get t.t_ty))
     | Tapp (fs, tl) ->
         t_app (fnL fs) (List.map fn tl) (Opt.map fnT t.t_ty)
     | Tif (f, t1, t2) ->
@@ -1194,6 +1222,24 @@ let rec t_app_fold fn acc t =
   let acc = t_fold_unsafe (t_app_fold fn) acc t in
   match t.t_node with
     | Tapp (ls,tl) -> fn acc ls (List.map t_type tl) t.t_ty
+    | _ -> acc
+
+(* Fold over pattern matching *)
+
+let rec t_case_fold fn acc t =
+  let acc = t_fold_unsafe (t_case_fold fn) acc t in
+  match t.t_node with
+    | Tcase({ t_ty = Some({ty_node = Tyapp (tys, tyl)})}, bl) ->
+       let error () = failwith "t_case_fold: compiled pattern matching required." in
+       let check_branch = function
+         | ({pat_node = Pwild}, _, _) -> ()
+         | ({pat_node = Papp (_, args)}, _, _) ->
+            List.iter (function {pat_node = Pvar _} -> () | _ -> error ()) args
+         | _ -> error ()
+       in
+       List.iter check_branch bl;
+       fn acc tys tyl t.t_ty
+    | Tcase(_, _) -> assert false
     | _ -> acc
 
 (* Type- and binding-safe traversal *)
@@ -1500,7 +1546,7 @@ let t_open_lambda_cb t =
 
 let t_closure ls tyl ty =
   let mk_v i ty = create_vsymbol (id_fresh ("y" ^ string_of_int i)) ty in
-  let vl = Lists.mapi mk_v tyl in
+  let vl = List.mapi mk_v tyl in
   let t = t_app ls (List.map t_var vl) ty in
   t_lambda vl [] t
 
@@ -1618,6 +1664,7 @@ let t_if_simp f1 f2 f3 = match f1.t_node, f2.t_node, f3.t_node with
   | _, _, _ when t_equal f2 f3 -> f2
   | _, _, _ -> t_if f1 f2 f3
 
+
 let small t = match t.t_node with
   | Tvar _ | Tconst _ -> true
 (* NOTE: shouldn't we allow this?
@@ -1627,6 +1674,7 @@ let small t = match t.t_node with
 
 let v_copy_unused v =
   let id = v.vs_name in
+  if Sattr.mem Ident.unused_attr id.id_attrs then v else
   let attrs = Sattr.singleton Ident.unused_attr in
   let attrs =
     try
@@ -1760,8 +1808,10 @@ let t_map_simp fn f = t_attr_copy f (match f.t_node with
       t_not_simp (fn f1)
   | _ -> t_map fn f)
 
+
 let t_map_simp fn = t_map_simp (fun t ->
   let res = fn t in t_ty_check res t.t_ty; res)
+
 
 (** Traversal with separate functions for value-typed and prop-typed terms *)
 
@@ -1784,3 +1834,55 @@ module TermTF = struct
   let tr_fold fnT fnF = tr_fold (t_selecti fnT fnF)
   let tr_map_fold fnT fnF = tr_map_fold (t_selecti fnT fnF)
 end
+
+
+let term_size t =
+  let rec aux acc t =
+    let acc' = acc+1 in
+    assert (acc' > acc); (* to avoid integer overflow *)
+    t_fold_unsafe aux acc' t
+  in aux 0 t
+
+let term_branch_size (_,_,t) = term_size t
+
+
+
+let rec remove_unused_in_term polarity t =
+  t_attr_copy t (match t.t_node with
+  | Tbinop (Timplies, t1, t2) ->
+      t_implies_simp
+        (remove_unused_in_term (not polarity) t1)
+        (remove_unused_in_term polarity t2)
+  | Tbinop (Tiff, t1, t2) ->
+      let t1p = remove_unused_in_term polarity t1 in
+      let t1n = remove_unused_in_term (not polarity) t1 in
+      let t2p = remove_unused_in_term polarity t2 in
+      let t2n = remove_unused_in_term (not polarity) t2 in
+      if t_equal t1p t1n && t_equal t2p t2n then t_iff_simp t1p t2p
+      else if polarity
+        then t_and_simp (t_implies_simp t1n t2p) (t_implies_simp t2n t1p)
+        else t_implies_simp (t_or_simp t1n t2n) (t_and_simp t1p t2p)
+  | Tnot t1 ->
+      t_not_simp (remove_unused_in_term (not polarity) t1)
+  | Tlet(t,fb) ->
+      let vs, t1, cb = t_open_bound_cb fb in
+      let t1 = t_map_simp (remove_unused_in_term polarity) t1 in
+      if Sattr.mem unused_attr vs.vs_name.id_attrs then t1
+      else
+        t_let_simp_keep_var ~keep:true t (cb vs t1)
+  | (Tapp(ls,[{t_node=Tvar {vs_name = id; _ }; _ } ;_])
+    | Tapp(ls,[{t_node=Tapp({ls_name = id;_} ,[]); _ };_]))
+    when ls_equal ls ps_equ &&
+         Sattr.mem unused_attr id.id_attrs ->
+      if polarity then t_false else t_true
+  | Tif (t1, t2, t3) when t.t_ty = None ->
+      let t1p = remove_unused_in_term polarity t1 in
+      let t1n = remove_unused_in_term (not polarity) t1 in
+      let t2 = remove_unused_in_term polarity t2 in
+      let t3 = remove_unused_in_term polarity t3 in
+      if t_equal t1p t1n then t_if_simp t1p t2 t3 else
+      if polarity
+        then t_and_simp (t_implies_simp t1n t2) (t_implies_simp (t_not_simp t1p) t3)
+        else t_or_simp (t_and_simp t1p t2) (t_and_simp (t_not_simp t1n) t3)
+  | Tif _ | Teps _ -> t
+  | _ -> t_map_simp (remove_unused_in_term polarity) t)

@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -430,6 +430,7 @@ single_clone_subst:
 (* Meta declarations *)
 
 %public meta_decl:
+| META sident LEFTPAR RIGHTPAR       { Dmeta ($2, []) }
 | META sident comma_list1(meta_arg)  { Dmeta ($2, $3) }
 
 meta_arg:
@@ -1337,7 +1338,8 @@ type_invariant:
     { name_term $2 "TypeInvariant" $4 }
 
 variant:
-| VARIANT LEFTBRC comma_list1(single_variant) RIGHTBRC { $3 }
+| VARIANT option(ident_nq) LEFTBRC comma_list1(single_variant) RIGHTBRC
+    { List.map (fun (t,r) -> (name_term $2 "Variant" t,r)) $4 }
 
 single_variant:
 | single_term preceded(WITH,lqualid)?  { $1, $2 }

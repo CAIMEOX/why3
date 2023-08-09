@@ -56,6 +56,11 @@ The following commands are available:
 :why3:tool:`wc`
     Give some token statistics about a WhyML file.
 
+:why3:tool:`bench`
+    Run provers on all proof attempts in the given session which have
+    not been run yet, or whose result is obsolete. Typically to be
+    used after `why3 session create` or `why3 session update`.
+
 The commands accept a common subset of command-line options. In
 particular, option :option:`--help` displays the usage and options.
 
@@ -966,7 +971,7 @@ from failing proof attempts, for provers that are able to produce a
 *counter-model* of the proof task. Why3 attempts to turn this
 counter-model into values for the free variables of the original Why3
 input. Currently, this is supported for CVC4 prover version at least
-1.5, and Z3 prover version at least 4.4.0.
+1.5, CVC5, and Z3 prover version at least 4.4.0.
 
 The generation of counterexamples is fully integrated in Why3 IDE. The
 recommended usage is to first start a prover normally, as shown in
@@ -1007,13 +1012,13 @@ The counterexamples can contain values of various types.
 
 -  Integer or real variables are displayed in decimal.
 
--  Bitvectors are displayed in hexadecimal.
+-  Bitvectors are displayed in decimal and binary notations.
 
 -  Integer range types are displayed in a specific notation showing
    their projection to integers.
 
--  Floating-point numbers are displayed both under a decimal
-   approximation and an exact hexadecimal value. The special values
+-  Floating-point numbers are displayed both under a bitvector
+   representation and an hexadecimal value. The special values
    ``+oo``, ``-oo``, and ``NaN`` may occur too.
 
 -  Values from algebraic types and record types are displayed as in the
@@ -1026,38 +1031,36 @@ trivially false postcondition:
 
 .. code-block:: whyml
 
-      use int.Int
-      use ref.Ref
-      use map.Map
+    use int.Int
+    use map.Map
 
-      let ghost test_map (ghost x : ref (map int int)) : unit
-        ensures { !x[0] <> !x[1] }
-      =
-        x := Map.set !x 0 3
+    let ghost test_map (ghost x : (map int int)) : map int int
+      ensures { result[0] <> result[1] }
+     =
+       Map.set x 0 3
 
 Executing CVC4 with the “counterexamples” alternative on goal will
 trigger counterexamples:
 
 .. code-block:: whyml
 
-      use int.Int
-      use ref.Ref
-      use map.Map
+    let ghost test_map (ghost x : (map int int)) : map int int
+    (* x : int -> int = [|1 => 3; _ => 0|]; *)
+        ensures { result[0] <> result[1] }
+        (* result : int -> int = [|0 => 3; 1 => 3; _ => 0|] *)
+       =
+         Map.set x 0 3
+         (* result : int -> int = [|0 => 3; 1 => 3; _ => 0|];
+            result of call at line 7, characters 5-18 :
+              int
+              ->
+              int = [|0 => 3; 1 => 3; _ => 0|] *)
 
-      let ghost test_map (ghost x : ref (map int int)) : unit
-      (* x = (1 => 3,others => 0) *)
-        ensures { !x[0] <> !x[1] }
-        (* x = (0 => 3,1 => 3,others => 0) *)
-      =
-        x := Map.set !x 0 3
-        (* x = (0 => 3,1 => 3,others => 0) *)
-
-The notation for map is to be understood with indices on left of the
-arrows and values on the right “(index => value)”. The meaning of the
-keyword ``others`` is the value for all indices that were not mentioned
-yet. This shows that setting the parameter ``x`` to a map that has value
-3 for index 1 and zero for all other indices is a counterexample. We can
-check that this negates the ``ensures`` clause.
+The notation for map is the one for function literals presented in
+:numref:`sec.functionliterals`. This shows that setting the
+parameter ``x`` to a map that has value 3 for index 1 and zero for all
+other indices is a counterexample. We can check that this negates the
+``ensures`` clause.
 
 Known limitations
 ^^^^^^^^^^^^^^^^^
@@ -1245,8 +1248,15 @@ The available subcommands are as follows:
 :why3:tool:`session update`
     Update session contents.
 
-The first three commands do not modify the sessions, whereas the last
-modify them.
+:why3:tool:`session create`
+
+    Create a new session containing the set of files given. In this
+    particular case, the given arguments must be a set of source files
+    and not session directories. The session directory name itself
+    must be given with option `-o`.
+
+The first three commands do not modify the sessions, whereas the fourth
+on modify them, and the last one creates a new session.
 
 .. why3:tool:: session info
 
@@ -1266,9 +1276,13 @@ session, depending on the following specific options.
 
    Print all the files that appear in the session as edited proofs.
 
-.. option:: --stats
+.. option:: --session-stats
 
-   Print various proofs statistics, as detailed below.
+   Print proofs statistics for each given session, as detailed below.
+
+.. option:: --provers-stats
+
+   Print proofs statistics for used provers in all given sessions, as detailed below.
 
 .. option:: --print0
 
@@ -1294,7 +1308,7 @@ session, depending on the following specific options.
 Session Statistics
 ^^^^^^^^^^^^^^^^^^
 
-The proof statistics given by option :option:`--stats` are as follows:
+The proof statistics given by option :option:`--session-stats` are as follows:
 
 -  Number of goals: give both the total number of goals, and the number
    of those that are proved (possibly after a transformation).
@@ -1307,12 +1321,14 @@ The proof statistics given by option :option:`--stats` are as follows:
    successful is printed. This also includes the sub-goals generated by
    transformations.
 
--  Statistics per prover: for each of the prover used in the session,
-   the number of proved goals is given. This also includes the sub-goals
-   generated by transformations. The respective minimum, maximum and
-   average time and on average running time is shown. Beware that these
-   time data are computed on the goals *where the prover was
-   successful*.
+The proof statistics given by option :option:`--provers-stats` are
+   statistics per prover, aggregated on all sessions given on the
+   command ine. For each of the prover used in any of the sessions,
+   the number of proof attempts is given, followed by the number of
+   successful ones. This also includes the sub-goals generated by
+   transformations. The respective minimum, maximum and average time
+   and on average running time is shown. Beware that these time data
+   are computed on the proof attempts *where the prover was successful*.
 
 For example, here are the session statistics produced on the “hello
 proof” example of :numref:`chap.starting`.
@@ -1326,23 +1342,24 @@ proof” example of :numref:`chap.starting`.
       total: 2  proved: 1
 
     == Goals not proved ==
-      +-- file ../hello_proof.why
+      +-- file [../hello_proof.why]
         +-- theory HelloProof
           +-- goal G2
             +-- transformation split_goal_right
               +-- goal G2.0
 
     == Goals proved by only one prover ==
-      +-- file ../hello_proof.why
+      +-- file [../hello_proof.why]
         +-- theory HelloProof
-          +-- goal G1: Alt-Ergo 0.99.1
+          +-- goal G1: Alt-Ergo 2.1.0
           +-- goal G2
             +-- transformation split_goal_right
-              +-- goal G2.1: Alt-Ergo 0.99.1
-          +-- goal G3: Alt-Ergo 0.99.1
+              +-- goal G2.1: Alt-Ergo 2.1.0
+          +-- goal G3: Alt-Ergo 2.1.0
 
-    == Statistics per prover: number of proofs, time (minimum/maximum/average) in seconds ==
-      Alt-Ergo 0.99.1     :   3   0.00   0.00   0.00
+    == Statistics per prover: number of proof attempts, successful ones, time (minimum/maximum/average) in seconds ==
+      Alt-Ergo 2.1.0                :     5     3   0.00   0.00   0.00
+      Coq 8.11.2                    :     1     0   0.00   0.00   0.00
 
 .. why3:tool:: session latex
 
@@ -1511,6 +1528,74 @@ contents, depending on the following specific options.
 
    rename the file *<src>* to *<dst>* in the session. The file *<src>*
    itself is also renamed to *<dst>* in your filesystem.
+
+.. option:: --mark-obsolete
+
+   marks as obsolete all the proof attempts of the session. If a filter is provided by the options below, then only the proof attempts that match the filters are affected.
+
+.. option:: --remove-proofs
+
+   removes all the proof attempts. If a filter is provided by the options below, then only the proof attempts that match the filters are affected.
+
+.. option:: --add-provers=<provers>
+
+   for each proof node of the session, add a new proof attempt for the specified provers.
+
+.. option:: --filter-prover=[<name>[,<version>[,<alternative>]]|<id>]
+
+   selects proof attempts with this or these prover(s)
+
+.. option:: --filter-obsolete[=[yes|no]]
+
+   select only (non-)obsolete proofs
+
+.. option:: --filter-proved[=[yes|no]]
+
+   if yes (resp. no) selects only goals that are proved (resp. not proved)
+
+.. option:: --filter-is-leaf[=[yes|no]]
+
+   if yes (resp. no) selects only goals that are leaves of the proof
+   tree, i.e. do not have transformations (resp. do have
+   transformations)
+
+.. option:: --filter-status=[valid|invalid|highfailure]
+
+   select proofs attempts with the given status
+
+.. why3:tool:: session create
+
+Command ``create``
+~~~~~~~~~~~~~~~~~~
+
+.. program:: why3 session create
+
+The :program:`why3 session create` command creates a new session
+containing the source files specified as arguments. The transformation
+`split_vc` is systematically applied on the generated goals, and
+proofs attempts are added using provers specified using option
+below. But it does not run any of these provers. One should use the
+`why3 bench` command on the new session instead.
+
+.. option:: -P <prover1:prover2...>
+
+   Specify provers to use for proof attempts added to the session.
+
+.. option:: -o <output-dir>
+
+   Specify the session directory for the created session.
+
+.. option:: -t <sec>
+
+   Specify the timelimit for the added proof attempts.
+
+.. option:: -s <stepslimit>
+
+   Specify the stepslimit for the added proof attempts.
+
+.. option:: -m <MB>
+
+   Specify the memlimit for the added proof attempts.
 
 .. why3:tool:: doc
 .. _sec.why3doc:
@@ -1903,3 +1988,31 @@ Why3 can give some token statistics about WhyML source files.
 .. option:: -a, --do-not-skip-header
 
    Count heading comments as well.
+
+.. why3:tool:: bench
+.. _sec.why3bench:
+
+The ``bench`` Command
+----------------------
+
+.. program:: why3 bench
+
+The :program:`why3 bench` runs all proofs attempts of a session that have not
+been tried. It saves the session periodically so that it can be interrupted and
+resumed later.
+
+::
+
+    why3 bench [options] <session directory>
+
+The session file :file:`why3session.xml` stored in the given directory is
+loaded and all the proofs attempt nodes it contains are run.
+
+.. option:: -d
+
+   Set the delay between temporary session backups, in seconds. Default is 60.
+
+.. option:: -f
+
+   Force to rerun all proof attempt nodes, even the ones that have been run
+   before.

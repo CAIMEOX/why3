@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -195,25 +195,23 @@ module Partial = struct
 
   let section_name = "partial_prover"
 
-  let load_one acc section =
+  let load_one section =
     try
       let name = get_string section "name" in
       let path = get_string section "path" in
       let version = get_string section "version" in
       let shortcut = get_stringo section "shortcut" in
       let manual = get_bool ~default:false section "manual" in
-      { name; path; version; shortcut; manual } :: acc
+      Some { name; path; version; shortcut; manual }
     with MissingField s ->
       Loc.warning "cannot load a %s section: missing field '%s'@." section_name s;
-      acc
+      None
 
   let load_rc rc =
-    List.fold_left load_one
-      [] (get_simple_family rc section_name)
+    List.filter_map load_one (get_simple_family rc section_name)
 
   let load rc =
-    List.fold_left load_one
-      [] (Whyconf.User.get_simple_family rc section_name)
+    List.filter_map load_one (Whyconf.User.get_simple_family rc section_name)
 
   let set_one prover =
     let section = empty_section in
@@ -230,10 +228,13 @@ module Partial = struct
 
   let add rc m =
     let l =
-      List.map (fun x ->
-          if x.shortcut = m.shortcut then {x with shortcut = None} else x
-        ) (load rc) in
-    set rc (m::l)
+      List.fold_right (fun x acc ->
+          let x =
+            if x.shortcut = m.shortcut then { x with shortcut = None }
+            else x in
+          x :: acc
+        ) (load rc) [m] in
+    set rc l
 
     let remove_auto rc =
       let l = List.filter (fun x -> x.manual) (load rc) in
@@ -302,7 +303,8 @@ let check_version version (_,schema) = Re.Str.string_match schema version 0
 let known_version env path =
   Hstr.replace env.prover_unknown_version path None
 
-let unknown_version env path altern shortcut prover_config data priority =
+let unknown_version env path shortcut prover_config (data:Prover_autodetection_data.data) priority =
+  let altern = data.prover_altern in
   match Hstr.find_opt env.prover_unknown_version path with
   | None ->
       let h = Hstr.create 5 in
@@ -384,7 +386,7 @@ let generate_auto_strategies env =
          let name = Whyconf.prover_parseable_format p in name :: acc
        else acc) env.prover_auto_levels []
   in
-  List.iter (fun s -> fprintf str_formatter "c %s 1 1000@\n" s) provers_level1;
+  List.iter (fun s -> fprintf str_formatter "c %s 1. 1000@\n" s) provers_level1;
   let code = flush_str_formatter () in
   let auto0 = {
       strategy_name = "Auto_level_0";
@@ -392,7 +394,7 @@ let generate_auto_strategies env =
       strategy_shortcut = "0";
       strategy_code = code }
   in
-  List.iter (fun s -> fprintf str_formatter "c %s 5 1000@\n" s) provers_level1;
+  List.iter (fun s -> fprintf str_formatter "c %s 5. 1000@\n" s) provers_level1;
   let code = flush_str_formatter () in
   let auto1 = {
       strategy_name = "Auto_level_1";
@@ -401,9 +403,9 @@ let generate_auto_strategies env =
       strategy_code = code }
   in
   fprintf str_formatter "start:@\n";
-  List.iter (fun s -> fprintf str_formatter "c %s 1 1000@\n" s) provers_level1;
+  List.iter (fun s -> fprintf str_formatter "c %s 1. 1000@\n" s) provers_level1;
   fprintf str_formatter "t split_vc start@\n";
-  List.iter (fun s -> fprintf str_formatter "c %s 10 4000@\n" s) provers_level1;
+  List.iter (fun s -> fprintf str_formatter "c %s 10. 4000@\n" s) provers_level1;
   let code = flush_str_formatter () in
   let auto2 = {
       strategy_name = "Auto_level_2";
@@ -420,9 +422,9 @@ let generate_auto_strategies env =
        else acc) env.prover_auto_levels []
   in
   fprintf str_formatter "start:@\n";
-  List.iter (fun s -> fprintf str_formatter "c %s 1 1000@\n" s) provers_level3;
+  List.iter (fun s -> fprintf str_formatter "c %s 1. 1000@\n" s) provers_level3;
   fprintf str_formatter "t split_vc start@\n";
-  List.iter (fun s -> fprintf str_formatter "c %s 5 2000@\n" s) provers_level3;
+  List.iter (fun s -> fprintf str_formatter "c %s 5. 2000@\n" s) provers_level3;
   fprintf str_formatter "t introduce_premises afterintro@\n";
   fprintf str_formatter "afterintro:@\n";
   fprintf str_formatter "t inline_goal afterinline@\n";
@@ -430,7 +432,7 @@ let generate_auto_strategies env =
   fprintf str_formatter "afterinline:@\n";
   fprintf str_formatter "t split_all_full start@\n";
   fprintf str_formatter "trylongertime:@\n";
-  List.iter (fun s -> fprintf str_formatter "c %s 30 4000@\n" s) provers_level3;
+  List.iter (fun s -> fprintf str_formatter "c %s 30. 4000@\n" s) provers_level3;
   let code = flush_str_formatter () in
   let auto3 = {
       strategy_name = "Auto_level_3";
@@ -464,6 +466,13 @@ let check_support_library main (data:Prover_autodetection_data.data) ver =
       "Found prover %s version %s, but no Why3 libraries were compiled for it@."
       data.prover_name ver;
     false
+
+let expand_aux env provers prover prover_config shortcut priority (data:Prover_autodetection_data.data) =
+  add_prover_shortcuts env prover;
+  add_id_prover_shortcut env shortcut prover priority;
+  let level = data.use_at_auto_level in
+  if level > 0 then record_prover_for_auto_mode env prover level;
+  Mprover.add prover { prover_config with prover } provers
 
 let expand_partial env main (data:Prover_autodetection_data.data) provers (p:Partial.t) =
   let binary = p.path in
@@ -506,7 +515,7 @@ let expand_partial env main (data:Prover_autodetection_data.data) provers (p:Par
           { prover = prover;
             command = c;
             command_steps = c_steps;
-            driver = data.prover_driver;
+            driver = (None, data.prover_driver);
             editor = data.prover_editor;
             in_place = data.prover_in_place;
             interactive = (match data.kind with ITP -> true | ATP -> false);
@@ -517,7 +526,7 @@ let expand_partial env main (data:Prover_autodetection_data.data) provers (p:Par
         if not (good || old) then begin
           (* Unknown, temporarily put the prover away *)
           let priority = next_priority () in
-          unknown_version env binary data.prover_altern shortcut prover_config data priority;
+          unknown_version env binary shortcut prover_config data priority;
           provers
         end
         else if data.support_library <> ""
@@ -528,7 +537,6 @@ let expand_partial env main (data:Prover_autodetection_data.data) provers (p:Par
         end else
           (* The prover can be added with a uniq id *)
           let prover = find_prover_altern provers prover in
-          let prover_config = { prover_config with prover } in
           let priority = next_priority () in
           print_info "Found prover %s%t version %s%s@."
             data.prover_name pp_shortcut p.version
@@ -541,12 +549,8 @@ let expand_partial env main (data:Prover_autodetection_data.data) provers (p:Par
                 else
                   ", OK.")
                data.message);
-          add_prover_shortcuts env prover;
-          add_id_prover_shortcut env shortcut prover priority;
-          let level = data.use_at_auto_level in
-          if level > 0 then record_prover_for_auto_mode env prover level;
           known_version env binary;
-          Mprover.add prover prover_config provers
+          expand_aux env provers prover prover_config shortcut priority data
 
 let expand_partial env main acc (data:Prover_autodetection_data.data) =
   List.fold_left (fun acc p ->
@@ -568,7 +572,6 @@ let expand_unknown env main provers uv =
     provers
   end else begin
     let prover = find_prover_altern provers uv.prover_config.prover in
-    let prover_config = { uv.prover_config with prover } in
     print_info
       "@[<v 2>@[Prover %s%t version %s is not recognized.@]@,\
        @[Known versions for this prover:@ %a.@]%t@]@."
@@ -582,9 +585,7 @@ let expand_unknown env main provers uv =
         if uv.data.versions_old <> [] then
           Format.fprintf fmt "@,@[Known old versions for this prover:@ %a.@]"
             pp_versions uv.data.versions_old);
-    add_prover_shortcuts env prover;
-    add_id_prover_shortcut env uv.shortcut prover uv.priority;
-    Mprover.add prover prover_config provers
+    expand_aux env provers prover uv.prover_config uv.shortcut uv.priority uv.data
   end
 
 let detect_unknown env main detected =
@@ -744,7 +745,13 @@ let find_provers data =
               Opt.fold (fun acc x -> Mstr.add exec_name (name, x) acc) acc r
           ) acc binaries
       ) binaries Mstr.empty in
-  List.map (fun (path, (name, version)) -> (path, name, version)) (Mstr.bindings provers)
+  let provers = Mstr.bindings provers in
+  let provers = List.map (fun (path, (name, version)) -> (path, name, version)) provers in
+  List.sort (fun (_, n1, v1) (_, n2, v2) ->
+      let c = String.compare n1 n2 in
+      if c <> 0 then c else
+      Stdlib.compare (Util.split_version v2) (Util.split_version v1)
+    ) provers
 
 let remove_auto_provers config =
   Partial.remove_auto config

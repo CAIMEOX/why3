@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -72,12 +72,14 @@ let list_transforms () =
       (List.rev_append (Trans.list_transforms_with_args ()) (Trans.list_transforms_with_args_l ()))
   in List.sort sort_pair l
 
-let list_transforms_query _cont _args =
+let print_list_transforms fmt () =
   let l = list_transforms () in
   let print_trans_desc fmt (x,r) =
     Format.fprintf fmt "@[<hov 2>%s@\n@[<hov>%a@]@]" x Pp.formatted r
   in
-  Pp.string_of (Pp.print_list Pp.newline2 print_trans_desc) l
+  Pp.print_list Pp.newline2 print_trans_desc fmt l
+
+let list_transforms_query _ _ = Pp.string_of print_list_transforms ()
 
 let list_provers cont _args =
   let l =
@@ -269,7 +271,7 @@ let return_prover name config =
   (* all provers that have the name/version/altern name *)
   let provers = Whyconf.filter_provers config fp in
   if Whyconf.Mprover.is_empty provers then begin
-    Debug.dprintf debug "Prover corresponding to %s has not been found@." name;
+    Debug.dprintf debug "no prover name corresponding to `%s` was found@." name;
     None
   end else
     Some (snd (Whyconf.Mprover.choose provers))
@@ -301,11 +303,11 @@ let parse_prover_name config name args : command_prover =
             let limit_mem = Whyconf.memlimit (Whyconf.get_main config) in
             Prover (prover_config,
                     Call_provers.{empty_limit with
-                                  limit_time = int_of_string timeout;
+                                  limit_time = float_of_string timeout;
                                   limit_mem = limit_mem})
         | [timeout; oom ] ->
             Prover (prover_config, Call_provers.{empty_limit with
-                                                 limit_time = int_of_string timeout;
+                                                 limit_time = float_of_string timeout;
                                                  limit_mem = int_of_string oom})
         | _ -> Bad_Arguments prover
       with

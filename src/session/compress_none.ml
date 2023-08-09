@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -40,6 +40,6 @@ val close_in: in_channel -> unit
 
 end
 
-module Compress_none = Pervasives
+module Compress_none = Stdlib
 
-module Compress_z = Pervasives
+module Compress_z = Stdlib

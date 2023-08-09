@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -67,8 +67,6 @@ val extract_param : string -> char -> string list -> string
     is a character ending the request line. For example, the string
     request has been obtained by: [extract_param "GET /" ' '].
     Answers the empty string if the parameter is not found. *)
-
-val get_request_and_content : char Stream.t -> string list * string
 
 val string_of_sockaddr : Unix.sockaddr -> string
 val sockaddr_of_string : string -> Unix.sockaddr

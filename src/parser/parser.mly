@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -105,7 +105,8 @@ mlw_module_parsing_only:
 
 module_head:
 | THEORY attrs(uident_nq)  { Typing.open_module $2 }
-| MODULE attrs(uident_nq)  { Typing.open_module $2 }
+| MODULE attrs(uident_nq) intf = option(preceded(COLON, tqualid))
+    { Typing.open_module ?intf $2 }
 
 scope_head:
 | SCOPE boption(IMPORT) attrs(uident_nq)

@@ -2,7 +2,7 @@ File "bench/check-ce/multifile1.mlw", line 6, characters 14-24:
 Sub-goal Postcondition of goal decr'vc.
 Prover result is: Valid.
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/multifile1.mlw", line 10, characters 14-24)
@@ -32,9 +32,9 @@ File multifile1.mlw:
   Line 11:
     Giant-step execution of function `decr` with args:
       x = 0
-    result of `decr` = (-2)
+    result of `decr` = (- 2)
     Normal execution of function `(+)` with args:
-      _ = (-2)
+      _ = (- 2)
       _ = 2
   Line 10:
     Property failure at postcondition of `incr` with:

@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -97,9 +97,12 @@ let command cur =
   Whyconf.Args.add_command sscmd;
   try
     Dynlink.allow_unsafe_modules true;
-    Dynlink_wrapper.loadfile cmd;
+    Dynlink.loadfile cmd;
     exit 0
-  with Dynlink.Error e ->
+  with
+  | Dynlink.Error (Dynlink.Library's_module_initializers_failed e) ->
+      Printexc.raise_with_backtrace e (Printexc.get_raw_backtrace ())
+  | Dynlink.Error e ->
     Printf.eprintf "Failed to load %s: %s\n%!" cmd (Dynlink.error_message e);
     exit 1
 

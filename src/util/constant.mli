@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -16,7 +16,7 @@ type constant =
   | ConstInt  of int_constant
   | ConstReal of real_constant
   | ConstStr  of string
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 val compare_const : ?structural:bool -> constant -> constant -> int
 (** if [structural] then it is structural comparison, two
@@ -26,6 +26,8 @@ val compare_const : ?structural:bool -> constant -> constant -> int
 val int_const : ?il_kind:int_literal_kind -> BigInt.t -> constant
 val int_const_of_int : int -> constant
 val real_const : ?pow2:BigInt.t -> ?pow5:BigInt.t -> BigInt.t -> constant
+val real_const_from_string :
+  radix:int -> neg:bool -> int:string -> frac:string -> exp:string option -> constant
 val string_const : string -> constant
 
 (** Pretty-printing *)

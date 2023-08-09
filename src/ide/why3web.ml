@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -69,8 +69,9 @@ let interp_request args =
       | _ -> invalid_arg ("Why3web.interp_request '" ^ args ^ "'"))
   | args when Strings.has_prefix "gettask_" args ->
      let c = false in
+     let show_uses_clones_metas = false in
      let loc = true in
-     Get_task (int_of_string (Strings.remove_prefix "gettask_" args),c,loc)
+     Get_task (int_of_string (Strings.remove_prefix "gettask_" args),c,show_uses_clones_metas,loc)
   | _ -> invalid_arg ("Why3web.interp_request '" ^ args ^ "'")
 
 let handle_script s args =

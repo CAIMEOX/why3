@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -78,6 +78,8 @@ module type Printer = sig
     val print_pr_qualified : formatter -> prsymbol -> unit
     val print_th_qualified : formatter -> theory -> unit
     val print_ty_qualified : formatter -> ty -> unit
+    val print_vs_qualified : formatter -> vsymbol -> unit
+    val print_tv_qualified : formatter -> tvsymbol -> unit
 
     val print_quant : formatter -> quant -> unit      (* quantifier *)
     val print_binop : asym:bool -> formatter -> binop -> unit (* binary operator *)
@@ -95,7 +97,7 @@ module type Printer = sig
     val print_data_decl : formatter -> data_decl -> unit
     val print_param_decl : formatter -> lsymbol -> unit
     val print_logic_decl : formatter -> logic_decl -> unit
-    val print_ind_decl : formatter -> ind_sign -> ind_decl -> unit
+    val print_ind_decl : ind_sign -> formatter -> ind_decl -> unit
     val print_next_data_decl : formatter -> data_decl -> unit
     val print_next_logic_decl : formatter -> logic_decl -> unit
     val print_next_ind_decl : formatter -> ind_decl -> unit
@@ -109,7 +111,7 @@ module type Printer = sig
 
     val print_theory : formatter -> theory -> unit
 
-    val print_namespace : formatter -> string -> theory -> unit
+    val print_namespace : string -> formatter -> theory -> unit
 
   end
 
@@ -132,7 +134,7 @@ let debug_print_qualifs = Debug.register_info_flag "print_qualifs"
 let create
       ?(print_ext_any = (fun (printer: any_pp Pp.pp) -> printer))
       ?(do_forget_all = true) ?(shorten_axioms = false)
-      sprinter aprinter tprinter pprinter =
+      ?(show_uses_clones_metas = true) sprinter aprinter tprinter pprinter =
   (module (struct
 
 (* Using a reference for customized external printer. This avoids changing the
@@ -244,6 +246,12 @@ let print_ls_qualified fmt ls =
 
 let print_pr_qualified fmt pr =
   try print_qualified true fmt pr.pr_name with Not_found -> print_pr fmt pr
+
+let print_vs_qualified fmt vs =
+  try print_qualified true fmt vs.vs_name with Not_found -> print_vs fmt vs
+
+let print_tv_qualified fmt tv =
+  try print_qualified true fmt tv.tv_name with Not_found -> print_tv fmt tv
 
 (** Types *)
 
@@ -610,7 +618,7 @@ let print_data_decl       = print_data_decl_aux true
 let print_next_logic_decl = print_logic_decl false
 let print_logic_decl      = print_logic_decl true
 let print_next_ind_decl   = print_ind_decl Ind false
-let print_ind_decl fmt s  = print_ind_decl s true fmt
+let print_ind_decl s      = print_ind_decl s true
 
 let print_inst_ty fmt (ts1,ty2) =
   fprintf fmt "type %a%a = %a" print_ts ts1
@@ -652,32 +660,38 @@ let print_qt fmt th =
 
 let print_tdecl fmt td = match td.td_node with
   | Decl d ->
-      print_decl fmt d
+      fprintf fmt "@\n@[<hov 2>%a@]@\n" print_decl d
   | Use th ->
-      fprintf fmt "@[<hov 2>(* use %a *)@]" print_qt th
+      if show_uses_clones_metas then
+        fprintf fmt "@\n@[<hov 2>(* use %a *)@]@\n" print_qt th
   | Clone (th,sm) ->
-      let tm = Mts.fold (fun x y a -> (x,y)::a) sm.sm_ts [] in
-      let ym = Mts.fold (fun x y a -> (x,y)::a) sm.sm_ty [] in
-      let lm = Mls.fold (fun x y a -> (x,y)::a) sm.sm_ls [] in
-      let pm = Mpr.fold (fun x y a -> (x,y)::a) sm.sm_pr [] in
-      fprintf fmt "@[<hov 2>(* clone %a with %a%a%a%a *)@]"
-        print_qt th (print_list_suf comma print_inst_ts) tm
-                    (print_list_suf comma print_inst_ty) ym
-                    (print_list_suf comma print_inst_ls) lm
-                    (print_list_suf comma print_inst_pr) pm
+      if show_uses_clones_metas then
+        let tm = Mts.fold (fun x y a -> (x,y)::a) sm.sm_ts [] in
+        let ym = Mts.fold (fun x y a -> (x,y)::a) sm.sm_ty [] in
+        let lm = Mls.fold (fun x y a -> (x,y)::a) sm.sm_ls [] in
+        let pm = Mpr.fold (fun x y a -> (x,y)::a) sm.sm_pr [] in
+        fprintf fmt "@\n@[<hov 2>(* clone %a with %a%a%a%a *)@]@\n"
+          print_qt th (print_list_suf comma print_inst_ts) tm
+          (print_list_suf comma print_inst_ty) ym
+          (print_list_suf comma print_inst_ls) lm
+          (print_list_suf comma print_inst_pr) pm
   | Meta (m,al) ->
-      fprintf fmt "@[<hov 2>(* meta %s %a *)@]"
-        m.meta_name (print_list comma print_meta_arg) al
+      if show_uses_clones_metas then
+        fprintf fmt "@\n@[<hov 2>(* meta %s%a *)@]@\n"
+          m.meta_name
+          (print_list_delim ~start:space ~stop:nothing ~sep:comma print_meta_arg) al
 
 let print_theory fmt th =
-  fprintf fmt "@[<hov 2>theory %a%a@\n%a@]@\nend@."
-    print_th th print_id_attrs th.th_name
-    (print_list newline2 print_tdecl) th.th_decls
+  let th_decls = th.th_decls in
+  fprintf fmt "@[<v 0>theory %a%a@\n@[<v 2>  %a@]@\nend@]@." print_th th
+    print_id_attrs th.th_name (print_list nothing print_tdecl) th_decls
 
 let print_task fmt task =
   forget_all ();
-  fprintf fmt "@[<hov 2>theory Task@\n%a@]@\nend@."
-    (print_list newline2 print_tdecl) (task_tdecls task)
+  let th_decls = task_tdecls task in
+  fprintf fmt "@[<v 0>theory Task@\n@[<v 2>  %a@]@\nend@]@."
+  (print_list nothing print_tdecl) th_decls
+
 
 module NsTree = struct
   type t =
@@ -708,7 +722,7 @@ module NsTree = struct
     | Leaf s              -> s, []
 end
 
-let print_namespace fmt name th =
+let print_namespace name fmt th =
   let module P = Print_tree.Make(NsTree) in
   fprintf fmt "@[<hov>%a@]@." P.print
     (NsTree.Namespace (name, th.th_export, th.th_known))
@@ -716,43 +730,33 @@ let print_namespace fmt name th =
 
 (* print task under the form of a sequent, with only local context, for the IDE *)
 
-(*
-let print_goal fmt d =
-   match d.d_node with
-   | Dprop (Pgoal,_pr,f) -> fprintf fmt "@[%a@]@\n" print_term f
-   | _ -> assert false
-*)
-
-let useful_decl d =
+let print_decl_filter_unused fmt d =
   match d.d_node with
-  | Dparam ls | Dlogic([ls,_]) ->
-    not (Sattr.mem Ident.unused_attr ls.ls_name.Ident.id_attrs)
-  | _ -> true
+  | (Dparam ls | Dlogic [ls,_]) when Sattr.mem Ident.unused_attr ls.ls_name.Ident.id_attrs ->
+      ()
+  | Ddata _ | Dtype _ | Dparam _ -> fprintf fmt "@[<v 0>%a@\n@\n@]" print_decl d
+  | Dlogic _ -> fprintf fmt "@[<v 0>%a@\n@\n@]" print_decl d  (* TODO filter d ? *)
+  | Dind _ -> fprintf fmt "@[<v 0>%a@\n@\n@]" print_decl d (* TODO filter d ? *)
+  | Dprop(k,pr,f) ->
+      let pol = match k with Pgoal -> true | Paxiom -> false | Plemma -> assert false in
+      let f = Term.remove_unused_in_term pol f in
+      fprintf fmt "@[<v 0>%a@\n@\n@]" print_prop_decl (k,pr,f)
+
+let rec print_decls_filter_unused fmt dl =
+  match dl with
+  | [] -> ()
+  | [g] ->
+      fprintf fmt "------------------------------- Goal --------------------------------@\n@\n";
+      print_decl_filter_unused fmt g
+  | h::rem ->
+      print_decl_filter_unused fmt h;
+      print_decls_filter_unused fmt rem
+
 
 let print_sequent fmt task =
   let ut = Task.used_symbols (Task.used_theories task) in
-  let ld = Task.local_decls task ut in
-  let rec aux fmt l =
-    match l with
-      | [] -> ()
-      | [_] -> ()
-      | d :: r ->
-         if useful_decl d then
-           fprintf fmt "@[%a@]@\n@\n" print_decl d;
-         aux fmt r
-  in
-  let rec last fmt l =
-    match l with
-      | [] -> ()
-      | [d] ->
-         fprintf fmt "@[%a@]@\n@\n" print_decl d
-      | _ :: r ->
-         last fmt r
-  in
   fprintf fmt "--------------------------- Local Context ---------------------------@\n@\n";
-  fprintf fmt "@[<v 0>%a@]" aux ld;
-  fprintf fmt "------------------------------- Goal --------------------------------@\n@\n";
-  fprintf fmt "@[<v 0>%a@]" last ld
+  print_decls_filter_unused fmt (Task.local_decls task ut)
 
 (* TODO this needs to be completed in the other cases *)
 let print_any fmt t =
@@ -928,6 +932,8 @@ let () = Exn_printer.register
         Ident.print_decoded s
   | Decl.NoTerminationProof ls ->
       fprintf fmt "Cannot prove termination for %a" print_ls ls
+  | Decl.UnexpectedProjOrConstr ls ->
+      fprintf fmt "Unexpected projection or constructor symbol %a" print_ls ls
   | NonLocal id -> Format.fprintf fmt
       "Non-local symbol: %a" print_id id
   | CannotInstantiate id -> Format.fprintf fmt
@@ -1088,6 +1094,13 @@ let () = Exn_printer.register
   | FloatConflict ts ->
       Format.fprintf fmt "Conflicting definitions for float type %a"
         print_ts ts
+  | ProvedWfConflict ls ->
+      Format.fprintf fmt "Conflicting definitions for well-foundedness of relation %a"
+        print_ls ls
+  | IllFormedWf(pr,ls) ->
+      Format.fprintf fmt
+        "meta \"vc:proved_wf\" requires that proposition %a has the form (well_founded %a)"
+        print_pr pr print_ls ls
   | _ -> raise exn
   end
 

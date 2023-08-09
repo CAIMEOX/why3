@@ -1,4 +1,5 @@
-# If you modify this file, make sure to update the BUILD_IMAGE variable in .gitlab-ci.yml.
+# If you modify this file, make sure to update the BUILD_IMAGE variable in `.gitlab-ci.yml`.
+# Follow the detailed instructions given in `ci.md`.
 
 FROM debian:bullseye-slim
 
@@ -12,9 +13,9 @@ RUN apt-get update -yq && \
     apt-get clean
 
 # install provers
-## CVC5 1.0.0
-RUN wget --quiet https://github.com/cvc5/cvc5/releases/download/cvc5-1.0.0/cvc5-Linux -O /usr/local/bin/cvc5-1.0.0 && \
-    chmod a+x /usr/local/bin/cvc5-1.0.0
+## CVC5 1.0.5
+RUN wget --quiet https://github.com/cvc5/cvc5/releases/download/cvc5-1.0.5/cvc5-Linux -O /usr/local/bin/cvc5-1.0.5 && \
+    chmod a+x /usr/local/bin/cvc5-1.0.5
 ## CVC4 1.8
 RUN wget --quiet https://github.com/CVC4/CVC4/releases/download/1.8/cvc4-1.8-x86_64-linux-opt -O /usr/local/bin/cvc4-1.8 && \
     chmod a+x /usr/local/bin/cvc4-1.8
@@ -45,6 +46,11 @@ RUN wget --quiet https://github.com/Z3Prover/z3/releases/download/z3-4.8.10/z3-4
     unzip z3-4.8.10-x64-ubuntu-18.04.zip && \
     mv z3-4.8.10-x64-ubuntu-18.04/bin/z3 /usr/local/bin/z3-4.8.10 && \
     rm -r z3-4.8.10-x64-ubuntu-18.04.zip z3-4.8.10-x64-ubuntu-18.04
+## Z3 4.11.2
+RUN wget --quiet https://github.com/Z3Prover/z3/releases/download/z3-4.11.2/z3-4.11.2-x64-glibc-2.31.zip && \
+    unzip z3-4.11.2-x64-glibc-2.31.zip && \
+    mv z3-4.11.2-x64-glibc-2.31/bin/z3 /usr/local/bin/z3-4.11.2 && \
+    rm -r z3-4.11.2-x64-glibc-2.31.zip z3-4.11.2-x64-glibc-2.31
 
 # create user
 RUN adduser --disabled-password --gecos '' why3
@@ -53,14 +59,14 @@ ENV HOME /home/why3
 WORKDIR /home/why3
 
 # install opam
-ENV OPAM_PACKAGES="num menhir mlmpfr.4.1.0+bugfix1 lablgtk3-sourceview3 zarith camlzip conf-autoconf"
+ENV OPAM_PACKAGES="num menhir mlmpfr.4.1.0+bugfix2 lablgtk3-sourceview3 zarith camlzip conf-autoconf"
 RUN opam init -y --no-setup -j4 --bare --disable-sandboxing && \
-    opam switch create latest ocaml-base-compiler.4.14.0 && \
+    opam switch create latest ocaml-base-compiler.5.0.0 && \
     opam switch create bench  ocaml-base-compiler.4.08.1 && \
     opam switch create full   ocaml-base-compiler.4.13.1 && \
     opam repository add coq-released https://coq.inria.fr/opam/released --all-switches && \
     opam install -y --switch=latest $OPAM_PACKAGES && \
-    opam install -y --switch=bench  $OPAM_PACKAGES zenon.0.8.4 coq.8.7.2 && \
+    opam install -y --switch=bench  $OPAM_PACKAGES zenon.0.8.5 coq.8.11.2 && \
     opam install -y --switch=full   $OPAM_PACKAGES re coq.8.15.1 coq-flocq.4.1.0 js_of_ocaml-ppx alt-ergo.2.3.3 sexplib ppx_deriving ppx_sexp_conv ocamlgraph && \
     opam clean -a -c -r -s --logs
 

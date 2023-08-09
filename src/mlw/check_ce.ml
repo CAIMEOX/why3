@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -10,7 +10,6 @@
 (********************************************************************)
 
 open Format
-open Wstdlib
 open Ident
 open Term
 open Ity
@@ -19,10 +18,10 @@ open Model_parser
 open Pinterp_core
 open Pinterp
 
-let debug_check_ce_rac_results = Debug.register_info_flag "check-ce-rac-results"
+let debug_check_ce_rac_results = Debug.register_info_flag "check_ce:rac_results"
     ~desc:"Debug@ info@ about@ RAC@ results@ for@ --check-ce"
 
-let debug_check_ce_categorization = Debug.register_info_flag "check-ce-categorization"
+let debug_check_ce_categorization = Debug.register_info_flag "check_ce:categorization"
     ~desc:"Debug@ info@ about@ categorization@ of@ RAC@ results@ for@ --check-ce"
 
 (** Result of checking solvers' counterexample models *)
@@ -196,140 +195,164 @@ let print_model_classification ?verb_lvl ?json ?check_ce fmt (m, c) =
   fprintf fmt "@ %a"
     (print_classification_log_or_model ?verb_lvl ~print_attrs ?json) (m, c)
 
-(* Import values from solver counterexample model *)
+(** Import values from SMT solver models to interpreter values. *)
 
 let cannot_import f =
   incomplete ("cannot import value from model: " ^^ f)
 
-let trace_or_name id =
-  match get_model_element_name ~attrs:id.id_attrs with
-  | name -> if name = "" then id.id_string else name
-  | exception Not_found -> id.id_string
-
-let get_or_stuck loc env ity desc = function
-  | Some v -> v
-  | None ->
-      let desc = asprintf "for %s %a" desc print_ity ity in
-      let cntr_ctx = mk_cntr_ctx env ~desc ~giant_steps:None Vc.expl_pre in
-      stuck ?loc cntr_ctx "%s" desc
-
-let import_model_const ity = function
-  | Integer {int_value= v} | Bitvector {bv_value= v} ->
-      if ity_equal ity ity_int then
-        int_value v
-      else if is_range_ty (ty_of_ity ity) then
-        range_value ity v
-      else
-        cannot_import "type %a instead of int or range type" print_ity ity
-  | String s ->
-      if ity_equal ity ity_str then
-        string_value s
-      else
-        cannot_import "type %a instead of string" print_ity ity
-  | Boolean b ->
-      if ity_equal ity ity_bool then
-        bool_value b
-      else
-        cannot_import "type %a instead of bool" print_ity ity
-  | Decimal _ | Fraction _ | Float _ as v ->
-      cannot_import "not implemented for value %a" print_model_const_human v
-
-(** Import a value from the prover model to an interpreter value.
-
-    @raise Exit when the type [ity] and the shape of the the value [v] do not
-    match. This may happen when a module that contains a value with an abstract
-    type is cloned with different types as instantiations of the abstract type.
-
-    @raise CannotImportModelValue when the value cannot be imported *)
-let rec import_model_value loc env check known th_known ity v =
-  let ts, l1, l2 = ity_components ity in
-  let subst = its_match_regs ts l1 l2 in
-  let def = Pdecl.find_its_defn known ts in
-  let res = match v with
-      | Const c -> import_model_const ity c
-      | Var _ -> undefined_value env ity
-      | Record r ->
-          let rs = match def.Pdecl.itd_constructors with [rs] -> rs | _ ->
-            cannot_import "type with not exactly one constructors %a/%d"
-              print_its ts (List.length def.Pdecl.itd_constructors) in
-          let aux field_rs =
-            let field_name = trace_or_name field_rs.rs_name in
-            let field_ity = ity_full_inst subst (fd_of_rs field_rs).pv_ity in
-            match List.assoc field_name r with
-            | v -> import_model_value loc env check known th_known field_ity v
-            | exception Not_found ->
-                (* TODO Better create a default value? *)
-                undefined_value env field_ity in
-          let vs = List.map aux def.Pdecl.itd_fields in
-          constr_value ity rs def.Pdecl.itd_fields vs
-      | Apply (s, vs) ->
-          let matching_name rs = String.equal rs.rs_name.id_string s in
-          let rs = List.find matching_name def.Pdecl.itd_constructors in
-          let itys = List.map (fun pv -> ity_full_inst subst pv.pv_ity)
-              rs.rs_cty.cty_args in
-          let vs =
-            List.map2 (import_model_value loc env check known th_known) itys vs
-          in
-          constr_value ity rs [] vs
-      | Proj (p, x) ->
-          (* {p : ity -> ty_res => x: ty_res} : ITY *)
-          let search (id, decl) = match decl.Decl.d_node with
-            | Decl.Dparam ls when String.equal (trace_or_name id) p ->
-              begin match ls.ls_value with
-              | None -> None
-              | Some ty_res ->
-                begin match ls.ls_args with
-                | [] | _ :: _ :: _ -> None
-                | [ty_arg] ->
-                  if (Ty.ty_equal ty_arg (ty_of_ity ity)) then Some (ls, ty_res)
-                  else None
-                end
-              end
-            | _ -> None in
-          let ls, ty_res =
-            let iter f = Mid.iter (fun id x -> f (id, x)) th_known in
-            try Util.iter_first iter search with Not_found ->
-              cannot_import "Projection %s not found" p in
-          let x =
-            import_model_value loc env check known th_known (ity_of_ty ty_res) x
-          in
-          get_or_stuck loc env ity "range projection" (proj_value ity ls x)
-      | Array a ->
-          let open Ty in
-          if not (its_equal def.Pdecl.itd_its its_func) then
-            cannot_import "Cannot import array as %a" print_its def.Pdecl.itd_its;
-          let key_ity, value_ity = match def.Pdecl.itd_its.its_ts.ts_args with
-            | [ts1; ts2] -> Mtv.find ts1 subst.isb_var, Mtv.find ts2 subst.isb_var
-            | _ -> assert false in
-          let key_value ix = ix.arr_index_key, ix.arr_index_value in
-          let keys, values = List.split (List.map key_value a.arr_indices) in
-          let keys =
-            List.map (import_model_value loc env check known th_known key_ity)
-              keys in
-          let values =
-            List.map (import_model_value loc env check known th_known value_ity)
-              values in
-          let mv = Mv.of_list (List.combine keys values) in
-          let v0 = import_model_value loc env check known th_known value_ity
-              a.arr_others in
-          purefun_value ~result_ity:ity ~arg_ity:key_ity mv v0
-      | Unparsed s -> cannot_import "unparsed value %s" s
-      | Undefined -> undefined_value env ity in
+let rec import_model_value loc env check known ity t =
+  Debug.dprintf debug_check_ce_rac_results "[import_model_value] importing term %a with type %a@."
+    Pretty.print_term t
+    (Pp.print_option Pretty.print_ty) t.t_ty;
+  Debug.dprintf debug_check_ce_rac_results "[import_model_value] expected type = %a@."
+    Ity.print_ity ity;
+  let res =
+    if Opt.equal Ty.ty_equal (Some (ty_of_ity ity)) t.t_ty then
+      match t.t_node with
+      | Tvar _ -> undefined_value env ity
+      | Ttrue -> bool_value true
+      | Tfalse -> bool_value false
+      | _ when t_equal t t_bool_true -> bool_value true
+      | _ when t_equal t t_bool_false -> bool_value false
+      | Tapp (ls, args) -> (
+          (* create a constructor value if ls corresponds to a constructor,
+             otherwise create a term value *)
+          let ts, l1, l2 = ity_components ity in
+          let subst = its_match_regs ts l1 l2 in
+          let def = Pdecl.find_its_defn known ts in
+          let matching_name rs = String.equal rs.rs_name.id_string ls.ls_name.id_string in
+          match List.find matching_name def.Pdecl.itd_constructors with
+          | rs -> (
+            let itys = List.map (fun pv -> ity_full_inst subst pv.pv_ity)
+                rs.rs_cty.cty_args in
+            let args =
+              List.map2 (import_model_value loc env check known) itys args
+            in
+            constr_value ity (Some rs) def.Pdecl.itd_fields args)
+          | exception Not_found -> term_value ity t)
+      | Teps tb ->
+        begin
+          let exception UnexpectedPattern in
+          match Term.t_open_lambda t with
+          | [], _, _ ->
+            (* special cases for range types and records represented as epsilon terms *)
+            begin
+              let x_eps, t' = t_open_bound tb in
+              (* special case for range types:
+                if t is of the form epsilon x:ty. ty'int x = v, check that v is in the
+                range of values defined by type ty *)
+              try
+                let (proj_ls, proj_v) =
+                  match t'.t_node with
+                  | Tapp (ls, [proj;term_value]) when ls_equal ls ps_equ -> (
+                    match proj.t_node with
+                    | Tapp (ls, [x]) when t_equal x (t_var x_eps) -> (ls,term_value)
+                    | _ -> raise UnexpectedPattern
+                  )
+                  | _ -> raise UnexpectedPattern
+                in
+                let valid_range =
+                  match ity_components ity, proj_v with
+                  | ({ its_def = Ty.Range r; its_ts= ts }, _, _),
+                    { t_node= Tconst (Constant.ConstInt c) }
+                    when proj_ls.ls_name.id_string = ts.Ty.ts_name.id_string ^ "'int"
+                      && Opt.equal Ty.ty_equal proj_ls.ls_value (Some Ty.ty_int) -> (
+                      try Number.(check_range c r); true
+                      with Number.OutOfRange _ -> false )
+                  | _ -> raise UnexpectedPattern
+                in
+                if valid_range then
+                  term_value ity t
+                else
+                  let desc = asprintf "for range projection %a" print_ity ity in
+                  let cntr_ctx = mk_cntr_ctx env ~desc ~giant_steps:None Vc.expl_pre in
+                  stuck ?loc cntr_ctx "%s" desc
+              with
+              | UnexpectedPattern ->
+              (* check if t is of the form epsilon x:ty. x.f1 = v1 /\ ... /\ x.fn = vn
+              with f1,...,fn the fields associated to the record type ity *)
+              let ts, l1, l2 = ity_components ity in
+              let subst = its_match_regs ts l1 l2 in
+              let def = Pdecl.find_its_defn known ts in
+              let rec get_conjuncts t' = match t'.t_node with
+                | Tbinop (Tand, t1, t2) -> t1 :: (get_conjuncts t2)
+                | _ -> [t']
+              in
+              try
+                let list_of_fields_values =
+                  List.fold_left
+                    (fun acc c ->
+                      match c.t_node with
+                      | Tapp (ls, [proj;term_value]) when ls_equal ls ps_equ -> (
+                        match proj.t_node with
+                        | Tapp (ls, [x]) when t_equal x (t_var x_eps) ->
+                          (ls,term_value) :: acc
+                        | _ -> raise UnexpectedPattern
+                      )
+                      | _ -> raise UnexpectedPattern
+                    )
+                    []
+                    (get_conjuncts t')
+                in
+                let field_values =
+                  List.map
+                    (fun field_rs ->
+                      let field_ity = ity_full_inst subst (fd_of_rs field_rs).pv_ity in
+                      let matching_field_name rs (ls,_) =
+                        String.equal ls.ls_name.id_string rs.rs_name.id_string in
+                      match List.find_all (matching_field_name field_rs) list_of_fields_values with
+                      | [(_ls,term_value)] ->
+                        import_model_value loc env check known field_ity term_value
+                      | [] ->
+                        (* if the epsilon term does not define a value for field_rs,
+                          use undefined value *)
+                        undefined_value env field_ity
+                      | _ -> raise UnexpectedPattern
+                      )
+                    def.Pdecl.itd_fields
+                in
+                if (List.length field_values > 0) then
+                  constr_value ity None def.Pdecl.itd_fields field_values
+                else raise UnexpectedPattern
+              with
+              | UnexpectedPattern -> term_value ity t
+            end
+          | _ -> term_value ity t
+        end
+      | _ -> term_value ity t
+    else
+      (* [ity] and the type of [t] may not match for the following reason:
+         [t] is actually the content of a reference (i.e. a record with a single field) *)
+      let ts, l1, l2 = ity_components ity in
+      let subst = its_match_regs ts l1 l2 in
+      let def = Pdecl.find_its_defn known ts in
+      match def.Pdecl.itd_constructors, def.Pdecl.itd_fields with
+        | [rs], [field_rs] ->
+          let field_ity = ity_full_inst subst (fd_of_rs field_rs).pv_ity in
+          constr_value ity (Some rs) [field_rs]
+            [import_model_value loc env check known field_ity t]
+        | _ ->
+          cannot_import "type %a with %d constructor(s) and %d field(s) while expecting a single field record"
+            print_its ts
+            (List.length def.Pdecl.itd_constructors)
+            (List.length def.Pdecl.itd_fields)
+  in
   check ity res;
+  Debug.dprintf debug_check_ce_rac_results "[import_model_value] res = %a@."
+    Pinterp_core.print_value res;
   res
 
 let oracle_of_model pm model =
   let import check oid loc env ity me =
     let loc = if loc <> None then loc else
         match oid with Some id -> id.id_loc | None -> None in
-    import_model_value loc env check pm.Pmodule.mod_known
-      pm.Pmodule.mod_theory.Theory.th_known ity me.me_value in
+    import_model_value loc env check pm.Pmodule.mod_known ity me.me_value in
   let for_variable env ?(check=fun _ _ -> ()) ~loc id ity =
     Opt.map (import check (Some id) loc env ity)
       (search_model_element_for_id model ?loc id) in
   let for_result env ?(check=fun _ _ -> ()) ~loc ~call_id ity =
     Opt.map (import check None (Some loc) env ity)
-      (search_model_element_call_result model call_id loc) in
+      (search_model_element_call_result model call_id) in
   { for_variable; for_result }
 
 (** Check and select solver counterexample models *)
@@ -470,6 +493,9 @@ let rac_execute ctx rs =
       Res_stuck reason, Log.flush_log ctx.cntr_env.log_uc
   | Incomplete reason ->
       let reason = sprintf "terminated because %s" reason in
+      Res_incomplete reason, Log.empty_log
+  | _ ->
+      let reason = sprintf "terminated with uncaught exception" in
       Res_incomplete reason, Log.empty_log
 
 let print_verdict_summary fmt (normal_state, giant_state, v) =
@@ -655,11 +681,10 @@ let get_rac_results ?timelimit ?steplimit ?verb_lvl ?compute_term
                         ?timelimit ?steplimit () in
                   rac_execute ctx rs
                 in
-                let me_name_trans men = men.Model_parser.men_name in
                 let print_attrs = Debug.test_flag Call_provers.debug_attrs in
                 Debug.dprintf debug_check_ce_rac_results
                   "@[Checking model:@\n@[<hv2>%a@]@]@\n"
-                  (print_model ~filter_similar:false ~me_name_trans ~print_attrs) m;
+                  (print_model ~filter_similar:false ~print_attrs) m;
                 begin
                 let giant_state,giant_log = rac_execute ~giant_steps:true rs m in
                 match only_giant_step with
@@ -683,11 +708,10 @@ let get_rac_results ?timelimit ?steplimit ?verb_lvl ?compute_term
                         ?timelimit ?steplimit () in
                   rac_execute ctx rs
                 in
-                let me_name_trans men = men.Model_parser.men_name in
                 let print_attrs = Debug.test_flag Call_provers.debug_attrs in
                 Debug.dprintf debug_check_ce_rac_results
                   "@[Checking model:@\n@[<hv2>%a@]@]@\n"
-                  (print_model ~filter_similar:false ~me_name_trans ~print_attrs) m;
+                  (print_model ~filter_similar:false ~print_attrs) m;
                 begin
                 let state,log = rac_execute ~giant_steps:false rs m in
                 RAC_done (state,log), RAC_done (state,log)
@@ -715,44 +739,12 @@ let select_model ?timelimit ?steplimit ?verb_lvl ?compute_term ~check_ce
     | None -> None
     | Some m -> Some (m, (INCOMPLETE "not checking CE model", Pinterp_core.Log.empty_log))
 
-(** Transformations interpretation log and prover models *)
-
-let rec model_value v =
-  let open Value in
-  let id_name {id_string= name; id_attrs= attrs} =
-    Ident.get_model_trace_string ~name ~attrs in
-  match v_desc v with
-  | Vnum i -> Const (Integer { int_value= i; int_verbatim= BigInt.to_string i })
-  | Vstring s -> Const (String s)
-  | Vbool b -> Const (Boolean b)
-  | Vproj (ls, v) -> Proj (ls.ls_name.id_string, model_value v)
-  | Varray a ->
-      let aux i v = {
-        arr_index_key= Const (Integer {
-            int_value= BigInt.of_int i;
-            int_verbatim= string_of_int i
-          });
-        arr_index_value= model_value v
-      } in
-      Array {
-        arr_indices= List.mapi aux (Array.to_list a);
-        arr_others= Undefined;
-      }
-  | Vconstr (rs, frs, fs) -> (
-      let vs = List.map (fun f -> model_value (field_get f)) fs in
-      if Strings.has_suffix "'mk" rs.rs_name.id_string then
-        (* same test for record-ness as in smtv2.ml *)
-        let ns = List.map (fun rs -> rs.rs_name.id_string) frs in
-        Record (List.combine ns vs)
-      else
-        Apply (id_name rs.rs_name, vs) )
-  | Vreal _ | Vfloat _ | Vfloat_mode _
-  | Vfun _ | Vpurefun _ | Vterm _ | Vundefined ->
-      failwith "Cannot convert interpreter value to model value"
-
 (** Transform an interpretation log into a prover model.
     TODO fail if the log doesn't fail at the location of the original model *)
-let model_of_exec_log ~original_model log =
+let model_of_exec_log ~original_model log = ignore original_model; ignore log; assert false
+(** NOT MAINTAINED since the change of data types in Model_parser.model_value
+    to use Term.term *)
+(*
   let me loc id value =
     let name = asprintf "%a" print_decoded id.id_string in
     let men_name = get_model_trace_string ~name ~attrs:id.id_attrs in
@@ -779,3 +771,4 @@ let model_of_exec_log ~original_model log =
     if Mint.is_empty res then None else Some res in
   let model_files = (Mstr.map_filter aux_mint (Log.sort_log_by_loc log)) in
   set_model_files original_model model_files
+*)

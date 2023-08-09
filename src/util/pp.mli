@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -121,10 +121,10 @@ val string_of_wnl : 'a pp -> 'a -> string
 val wnl : formatter -> unit
 
 val sprintf :
-  ('b,  formatter, unit, string) Pervasives.format4 -> 'b
+  ('b,  formatter, unit, string) Stdlib.format4 -> 'b
 
 val sprintf_wnl :
-  ('b,  formatter, unit, string) Pervasives.format4 -> 'b
+  ('b,  formatter, unit, string) Stdlib.format4 -> 'b
 
 val html_char : char pp
 val html_string : string pp

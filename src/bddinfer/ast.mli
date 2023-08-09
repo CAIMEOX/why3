@@ -4,8 +4,6 @@
 
 TODO list:
 
-- unify constructors [Sassign] and [Sassign_bool]
-
 - separate integer expressions and Boolean expressions in two
    different types
 
@@ -16,8 +14,9 @@ TODO list:
 (** {2 Variables} *)
 
 type var_type =
-    | Tint
-    | Tbool
+  | Tunit
+  | Tint
+  | Tbool
 
 type label = Here | Old
 
@@ -62,20 +61,14 @@ val e_let_in_expression : Abstract.why_var -> expression -> expression -> expres
 type atomic_condition = private
     | Ceq of expression * expression
     | Cne of expression * expression
-    | Ceq_bool of expression * expression
-    | Cne_bool of expression * expression
     | Clt of expression * expression
     | Cle of expression * expression
     | Cgt of expression * expression
     | Cge of expression * expression
     | C_is_true of expression
-    | C_is_false of expression
 
 val c_eq_int : expression -> expression -> atomic_condition
 val c_ne_int : expression -> expression -> atomic_condition
-
-val c_eq_bool : expression -> expression -> atomic_condition
-val c_ne_bool : expression -> expression -> atomic_condition
 
 val c_le : expression -> expression -> atomic_condition
 val c_lt : expression -> expression -> atomic_condition
@@ -85,12 +78,17 @@ val c_gt : expression -> expression -> atomic_condition
 val c_is_true : expression -> atomic_condition
 val c_is_false : expression -> atomic_condition
 
+val c_eq_bool : expression -> expression -> atomic_condition
+val c_ne_bool : expression -> expression -> atomic_condition
+
+
 type condition = private
     | BTrue
     | BFalse
     | BAnd of condition * condition
     | BOr of condition * condition
     | BAtomic of atomic_condition
+    | Bite of condition * condition * condition (* For printing only ! *)
 
 val true_cond : condition
 val false_cond : condition
@@ -105,6 +103,8 @@ val e_let_in_condition : Abstract.why_var -> expression -> condition -> conditio
 
 val ternary_condition : condition -> condition -> condition -> condition
 
+val ternary_condition_no_simpl : condition -> condition -> condition -> condition
+
 
 (** {2 Statements} *)
 
@@ -114,30 +114,40 @@ type fun_id = private {
     fun_tag : int;
   }
 
+module FuncMap : Map.S with type key = fun_id
+
 val create_fun_id : string -> fun_id
 
 val print_fun_id : Format.formatter -> fun_id -> unit
 
+type memo_env = Abstract.why_env * condition
+
 type statement_node = private
-    | Sassign of Abstract.why_var * expression
-    | Sassign_bool of Abstract.why_var * Bdd.variable * expression
     | Swhile of condition * (string option * condition) list * statement
-    | Sfcall of (Abstract.why_var * statement * Abstract.var_value) option * fun_id * expression list
-    (** first argument is [None] for procedures. For functions returning values,
-        the triple [(v,s,av)] denotes the program variable [v] in which the result
-        is stored, the statement [s] to execute afterwards, in which [v] is bound,
-        and an abstract variable [av] used when interpreting this call *)
+    | Sfcall of (Abstract.why_var * statement * Abstract.var_value) option *
+                (Abstract.why_var * Abstract.var_value * expression) list *
+                fun_id * expression list * memo_env option ref *
+                Abstract.memo_add_env option ref * Abstract.memo_add_env option ref *
+                Abstract.memo_havoc option ref * statement option ref
+    (** First argument is [None] for procedures. For functions
+       returning values, the triple [(v,s,av)] denotes the program
+       variable [v] in which the result is stored, the statement [s]
+       to execute afterwards, in which [v] is bound, and an abstract
+       variable [av] used when interpreting this call. Second argument
+       is a list of local bindings for the arguments. *)
     | Site of condition * statement * statement
     | Sblock of statement list
     | Sassert of condition
     | Sassume of condition
-    | Shavoc of Abstract.why_env * condition
+    | Shavoc of Abstract.why_env * condition * Abstract.memo_havoc option ref
     (** first argument is the set of written variables, each of them
        being associated to an abstract variable needed during
        interpretation of this havoc instruction.*)
     | Sletin of Abstract.why_var * Abstract.var_value * expression * statement
     (** first argument is the bound variable, second argument is a fresh
        abstract value to be used for interpretation *)
+    | Sbreak
+    (** break statement inside loops *)
 
 and statement = private {
     stmt_tag : string;
@@ -171,10 +181,12 @@ val s_while : string -> condition -> (string option * condition) list -> stateme
    tag [t] and a possibly empty list of user invariants [invs] *)
 
 val s_call : string -> (var_type * Abstract.why_var * statement) option ->
+             (var_type * Abstract.why_var * expression) list ->
              fun_id -> expression list -> statement
-(** [s_call t None f el] builds the procedure call [f el], with tag
-   [t]. The variant [s_call (Some(ty,v,e)) f el] builds the function
-   call [let v:ty = f el in e] *)
+(** [s_call t None lets f el] builds the procedure call [f el], with
+   tag [t]. [lets] is a list of local assignments of variables for the
+   arguments [el].  The variant [s_call (Some(ty,v,e)) lets f el]
+   builds the function call [let v:ty = (local lets in) f el in e] *)
 
 val s_havoc : string -> var_type Abstract.VarMap.t -> condition -> statement
 (** [s_havoc t w c] builds the non-deterministic statement [any unit
@@ -184,6 +196,10 @@ val s_let_in : string -> var_type -> Abstract.why_var -> expression -> statement
 (** [s_let_in t ty v e s] builds the local binding statement [let v:ty
    = e in s], with tag [t].  *)
 
+val s_break : string -> statement
+(** [s_break] creates the break statement. *)
+
+val copy_stmt : statement -> statement
 
 type fun_kind = private
   | Fun_let of statement * expression option
@@ -224,14 +240,14 @@ val declare_function_val :
 type why1program = private
   { name : string;
     vars : Abstract.why_env;
-    functions : func list;
+    functions : func FuncMap.t;
     statements : statement }
 (** whole programs *)
 
 val mk_program :
   name:string ->
   variables:var_type Abstract.VarMap.t ->
-  functions:func list ->
+  functions:func FuncMap.t ->
   main:statement ->
   why1program
 

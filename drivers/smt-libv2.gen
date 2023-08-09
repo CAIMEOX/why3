@@ -31,6 +31,11 @@ theory BuiltIn
   meta "encoding:ignore_polymorphism_ls" predicate (=)
 end
 
+theory Ignore
+  syntax predicate ignore'term  "true"
+  meta "encoding:ignore_polymorphism_ls" predicate ignore'term
+end
+
 theory int.Int
 
   prelude ";;; SMT-LIB2: integer arithmetic"
@@ -144,7 +149,7 @@ theory Bool
   syntax function True  "true"
   syntax function False "false"
 
-  meta "encoding:kept" type bool
+  meta "algebraic:kept" type bool
 end
 
 theory bool.Bool
@@ -177,6 +182,19 @@ theory HighOrd
   meta "encoding:ignore_polymorphism_ts" type (->)
   meta "encoding:ignore_polymorphism_ls" function (@)
 end
+
+
+theory bv.BV_Gen
+
+  (* removing well-founded properties, they cannot be useful
+     for SMT solvers, and they imply polymorphism *)
+  remove prop ult_wf
+  remove prop ugt_wf
+  remove prop slt_wf
+  remove prop sgt_wf
+
+end
+
 
 theory map.Map
   syntax function get "(select %1 %2)"

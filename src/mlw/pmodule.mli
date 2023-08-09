@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -32,6 +32,8 @@ type namespace = {
   ns_xs : xsymbol     Mstr.t;  (* exception symbols *)
   ns_ns : namespace   Mstr.t;  (* inner namespaces *)
 }
+
+val empty_ns : namespace
 
 val ns_find_prog_symbol : namespace -> string list -> prog_symbol
 
@@ -139,6 +141,10 @@ val add_meta : pmodule_uc -> meta -> meta_arg list -> pmodule_uc
 val add_pdecl : ?warn:bool -> vc:bool -> pmodule_uc -> pdecl -> pmodule_uc
 (** [add_pdecl ~vc m d] adds declaration [d] in module [m].
     If [vc] is [true], VC is computed and added to [m]. *)
+
+val mod_impl : Env.env -> pmodule -> pmodule
+
+val mod_impl_register : Env.env -> pmodule -> pmodule -> mod_inst -> unit
 
 (** {2 Builtin symbols} *)
 
