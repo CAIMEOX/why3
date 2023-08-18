@@ -263,7 +263,7 @@ let eta ieee_type =
   let value =
     if ts_equal ieee_type symbols.single_symbols.ieee_type then
       "-150"
-    else if ts_equal ieee_type symbols.single_symbols.ieee_type then
+    else if ts_equal ieee_type symbols.double_symbols.ieee_type then
       "-1075"
     else
       failwith (Format.asprintf "Unsupported type %a" Pretty.print_ts ieee_type)
@@ -279,7 +279,7 @@ let to_real ieee_type t =
   let to_real =
     if ts_equal ieee_type symbols.single_symbols.ieee_type then
       symbols.single_symbols.to_real
-    else if ts_equal ieee_type symbols.single_symbols.ieee_type then
+    else if ts_equal ieee_type symbols.double_symbols.ieee_type then
       symbols.double_symbols.to_real
     else
       failwith (Format.asprintf "Unsupported type %a" Pretty.print_ts ieee_type)
