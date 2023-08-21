@@ -68,23 +68,25 @@ type symbols = {
 let symbols = ref None
 
 (* Forward error associated to a real term t, eg. (x, rel, x', cst) stands for
-   |t - x| <= rel x' + cst *)
+   |t - x| <= rel * x' + cst *)
 type error_fmla = term * term * term * term
 
-(** We have different errors formulas depending of the occurence of underflows.
-    We distinguish each case with a separate formula. We have one formula for
-    the case where no underflow occured, and a list of formulas for the case
-    where underflow happened, with one formula per overflow. This is done to
-    have a better combination of errors with multiplication. *)
+(** We have different errors formulas for a term depending of the occurence of
+    underflows. This is useful when performing several multiplications in a row.
+    For instance, when we have "a * b * c" then if an underflow occur, it is
+    either on "a * b" or on "b * c", but not on both. More generally, if a
+    underflow happens when we have several multiplications then the float number
+    computed will always be 0, no matter where the underflow occured. Therefore,
+    we can bound the "underflow error" by "eta + eta |c|". This is preferable
+    than using only one formula because it avoids mixing eta and epsilon, giving
+    us very slightly better but more importantly simpler error bound. When we
+    need to find a general bound for a term, we just need to combine the
+    no_underflow and the underflow errors. *)
 type error = {
   no_underflow : error_fmla;
-  (*
-   * [ ab',cd; ab;cd'; abcd';1 ] means we potentially have an underflow on ab', on cd' and on (ab)(cd)'.
-   * This causes 3 potential upper error bounds :
-   * - eta |cd|
-   * - eta |ab|
-   * - eta
-   *)
+      (* An underflow error of "[ (ab,cd); (cd,ab); (abcd;1) ]" means we
+         potentially have an underflow on "ab" with error "eta|cd|", on "cd"
+         with error "eta|ab|" and on "(ab)(cd)" with error "eta". *)
   underflow : (term * term) list;
 }
 
@@ -286,8 +288,30 @@ let to_real ieee_type t =
   in
   fs_app to_real [ t ] ty_real
 
-let get_info info t =
-  try Mterm.find t info with
+(* Merging the underflows means that if we have several error bounds (eg. one in
+   no_underflow and at least one in underflow) we add all underflow errors as
+   cst error in no_underflow, effectively keeping only one error bound. This is
+   done when we want to use the bound error of t to compute a new bound for
+   something else than multiplication *)
+let get_info info ?(merge_underflows = false) t =
+  try
+    let t_info = Mterm.find t info in
+    if merge_underflows then
+      match t_info.error with
+      | None -> t_info
+      | Some error ->
+        let a, b, c, cst = error.no_underflow in
+        let cst =
+          List.fold_left (fun t (_, err) -> t +. err) cst error.underflow
+        in
+        {
+          ineqs = t_info.ineqs;
+          error = Some { no_underflow = (a, b, c, cst); underflow = [] };
+          ieee_post = t_info.ieee_post;
+        }
+    else
+      t_info
+  with
   | Not_found -> { ineqs = []; error = None; ieee_post = None }
 
 let add_ineq info t ls t' =
@@ -446,13 +470,17 @@ let get_mul_forward_error (prove_overflow : bool) (info : term_info Mterm.t)
         add_error info r
           {
             no_underflow =
-              (to_real x *. to_real y, eps, abs (to_real x *. to_real y), eta);
-            underflow = [];
+              (to_real x *. to_real y, eps, abs (to_real x *. to_real y), zero);
+            underflow = [ (to_real x *. to_real y, eta) ];
           }
       in
       let attrs = Sattr.add mul_basic_attr attrs in
       let pr = create_prsymbol (id_fresh ~attrs "MulErrBasic") in
-      (info, (pr, left <=. right), None)
+      ( info,
+        ( pr,
+          t_or (left <=. right) (t_and (t_equ (to_real r) zero) (left <=. eta))
+        ),
+        None )
     | _ ->
       let combine_errors_with_multiplication t1 exact_t1 t1_factor t1' t1_cst t2
           exact_t2 t2_factor t2' t2_cst r =
@@ -466,7 +494,6 @@ let get_mul_forward_error (prove_overflow : bool) (info : term_info Mterm.t)
           +. ((t1_cst +. (t1_cst *. t2_factor)) *. t2')
           +. (t1_cst *. t2_cst))
           *. (one +. eps)
-          +. eta
         in
         let rel_err' =
           eps
@@ -478,26 +505,54 @@ let get_mul_forward_error (prove_overflow : bool) (info : term_info Mterm.t)
           ++. ((t1_cst ++. (t1_cst **. t2_factor)) **. t2')
           ++. (t1_cst **. t2_cst))
           **. (one ++. eps)
-          ++. eta
         in
         let left = abs (to_real r -. (exact_t1 *. exact_t2)) in
         let right = (rel_err *. (t1' *. t2')) +. cst_err in
         let right' = (rel_err' **. t1' **. t2') ++. cst_err' in
+        let x_underflow =
+          match x_info.error with
+          | None -> []
+          | Some error -> error.underflow
+        in
+        let y_underflow =
+          match y_info.error with
+          | None -> []
+          | Some error -> error.underflow
+        in
+        let t, underflow =
+          List.fold_left
+            (fun (term, underflow) (t, value) ->
+              ( t_or term (left <=. value *. abs exact_t2),
+                (t, value *. abs exact_t2) :: underflow ))
+            (left <=. eta, [])
+            x_underflow
+        in
+        let t, underflow =
+          List.fold_left
+            (fun (term, underflow) (t, value) ->
+              ( t_or term (left <=. value *. abs exact_t1),
+                (t, value *. abs exact_t1) :: underflow ))
+            (t, underflow) y_underflow
+        in
+        let underflow = (exact_t1 *. exact_t2, eta) :: underflow in
+        let t = t_and (t_equ (to_real r) zero) t in
+        let t' = t_or (left <=. right') t in
+        let t = t_or (left <=. right) t in
         let info =
           add_error info r
             {
               no_underflow =
                 (exact_t1 *. exact_t2, rel_err', t1' *. t2', cst_err');
-              underflow = [];
+              underflow;
             }
         in
         let attrs = Sattr.add mul_combine_attr attrs in
         let pr = create_prsymbol (id_fresh ~attrs "MulErrCombine") in
-        if t_equal right right' && false then
-          (info, (pr, left <=. right), None)
+        if t_equal right right' then
+          (info, (pr, t), None)
         else
           let pr' = create_prsymbol (id_fresh "MulErrCombine") in
-          (info, (pr, left <=. right), Some (pr', left <=. right'))
+          (info, (pr, t), Some (pr', t'))
       in
       let combine_errors_with_multiplication =
         apply_args symbols combine_errors_with_multiplication x x_info
@@ -515,8 +570,8 @@ let get_sub_forward_error prove_overflow info x y r =
     let ts = get_ts r in
     let eps = eps ts in
     let to_real = to_real ts in
-    let x_info = get_info info x in
-    let y_info = get_info info y in
+    let x_info = get_info info ~merge_underflows:true x in
+    let y_info = get_info info ~merge_underflows:true y in
     let attrs = Sattr.empty in
     match (x_info.error, y_info.error) with
     | None, None ->
@@ -526,7 +581,7 @@ let get_sub_forward_error prove_overflow info x y r =
         add_error info r
           {
             no_underflow =
-              (to_real x -. to_real y, eps, abs (to_real x +. to_real y), zero);
+              (to_real x -. to_real y, eps, abs (to_real x -. to_real y), zero);
             underflow = [];
           }
       in
@@ -582,8 +637,8 @@ let get_add_forward_error prove_overflow info x y r =
     let ts = get_ts r in
     let eps = eps ts in
     let to_real = to_real ts in
-    let x_info = get_info info x in
-    let y_info = get_info info y in
+    let x_info = get_info info ~merge_underflows:true x in
+    let y_info = get_info info ~merge_underflows:true y in
     let attrs = Sattr.empty in
     match (x_info.error, y_info.error) with
     | None, None ->
@@ -707,6 +762,7 @@ let rec get_error_fmlas prove_overflow info t :
       in
       (info, l1 @ l2 @ [ l ] @ [ l' ], Some (pr3', t3')))
   | None -> (
+    (* TODO *)
     match t_info.error with
     | None -> (info, [], None)
     | Some error ->
@@ -725,7 +781,7 @@ let rec get_error_fmlas prove_overflow info t :
    necessary steps to prove it. *)
 let compute_errors env (info, goal) =
   let goal = Opt.get goal in
-  let kind, pr, goal =
+  let _, pr, goal =
     match goal.d_node with
     | Dprop (kind, pr, f) when kind = Pgoal -> (kind, pr, f)
     | _ -> assert false
