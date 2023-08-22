@@ -120,12 +120,13 @@ let one =
     ty_real
 
 let is_zero t = t_equal zero t
+let is_one t = t_equal one t
 let add t1 t2 = fs_app (Opt.get !symbols).add [ t1; t2 ] ty_real
 
 let add_simp t1 t2 =
-  if t_equal t1 zero then
+  if is_zero t1 then
     t2
-  else if t_equal t2 zero then
+  else if is_zero t2 then
     t1
   else
     add t1 t2
@@ -133,9 +134,9 @@ let add_simp t1 t2 =
 let sub t1 t2 = fs_app (Opt.get !symbols).sub [ t1; t2 ] ty_real
 
 let sub_simp t1 t2 =
-  if t_equal t1 zero then
+  if is_zero t1 then
     fs_app (Opt.get !symbols).minus [ t2 ] ty_real
-  else if t_equal t2 zero then
+  else if is_zero t2 then
     t1
   else
     sub t1 t2
@@ -143,11 +144,11 @@ let sub_simp t1 t2 =
 let mul t1 t2 = fs_app (Opt.get !symbols).mul [ t1; t2 ] ty_real
 
 let mul_simp t1 t2 =
-  if t_equal t1 zero || t_equal t2 zero then
+  if is_zero t1 || is_zero t2 then
     zero
-  else if t_equal t1 one then
+  else if is_one t1 then
     t2
-  else if t_equal t2 one then
+  else if is_one t2 then
     t1
   else
     mul t1 t2
@@ -155,9 +156,9 @@ let mul_simp t1 t2 =
 let div t1 t2 = fs_app (Opt.get !symbols).div [ t1; t2 ] ty_real
 
 let div_simp t1 t2 =
-  if t_equal t1 zero then
+  if is_zero t1 then
     zero
-  else if t_equal t2 one then
+  else if is_one t2 then
     t1
   else
     div t1 t2
@@ -348,7 +349,7 @@ let get_ts t =
   | None -> assert false
   | Some ty -> (
     match ty.ty_node with
-    | Tyvar tv -> assert false
+    | Tyvar _ -> assert false
     | Tyapp (ts, []) -> ts
     | _ -> assert false)
 
@@ -359,7 +360,7 @@ let rec get_floats t =
     | _ -> []
   in
   match t.t_node with
-  | Tapp (ls, tl) -> List.fold_left (fun l t -> l @ get_floats t) l tl
+  | Tapp (_, tl) -> List.fold_left (fun l t -> l @ get_floats t) l tl
   | _ -> l
 
 let get_float_name printer s t =
@@ -391,21 +392,20 @@ let apply_theorems env info task =
     || Sattr.mem sub_combine_attr attrs
     || Sattr.mem mul_combine_attr attrs
   then
+    (* For an ieee_float theorem, the args are the floats operands *)
     let args =
       match goal.t_node with
-      | Tapp (ls, [ t1; t2 ]) when is_ineq_ls ls -> (
+      | Tapp (ls, [ t1; _ ]) when is_ineq_ls ls -> (
         match t1.t_node with
-        | Tapp (_ls, [ t ]) when is_abs_ls _ls -> (
+        | Tapp (ls, [ t ]) when is_abs_ls ls -> (
           match t.t_node with
-          | Tapp (_ls, [ t1; t2 ]) when is_sub_ls _ls -> (
+          | Tapp (ls, [ t1; _ ]) when is_sub_ls ls -> (
             match t1.t_node with
-            | Tapp (_ls, [ t ]) when is_to_real_ls _ls -> (
+            | Tapp (ls, [ t ]) when is_to_real_ls ls ->
               let t_info = get_info info t in
-              match t_info.ieee_post with
-              | Some (ieee_post, t1, t2) ->
-                let get_float_name = get_float_name naming_table.printer in
-                List.fold_left get_float_name "" [ t1; t2 ]
-              | None -> assert false)
+              let _, t1, t2 = Opt.get t_info.ieee_post in
+              let get_float_name = get_float_name naming_table.Trans.printer in
+              List.fold_left get_float_name "" [ t1; t2 ]
             | _ -> assert false)
           | _ -> assert false)
         | _ -> assert false)
@@ -435,16 +435,16 @@ let apply_theorems env info task =
   else
     [ task ]
 
-let apply_args symbols f t t_info =
+let apply_args f t t_info =
   let to_real = to_real (get_ts t) in
   match t_info.error with
-  | None -> f t (to_real t) zero (abs (to_real t)) zero
+  | None -> f (to_real t) zero (abs (to_real t)) zero
   | Some error ->
     let exact_t, rel_err, t', cst_err = error.no_underflow in
-    if t_equal zero rel_err then
+    if is_zero rel_err then
       assert false
     else
-      f t exact_t rel_err t' cst_err
+      f exact_t rel_err t' cst_err
 
 (* Generates the formula for the forward error of r = x .* y. 2 formulas are
    created, one that matches the multiplication theorem and one with a bit of
@@ -482,7 +482,7 @@ let get_mul_forward_error (prove_overflow : bool) (info : term_info Mterm.t)
         ),
         None )
     | _ ->
-      let combine_errors_with_multiplication t1 exact_t1 t1_factor t1' t1_cst t2
+      let combine_errors_with_multiplication exact_t1 t1_factor t1' t1_cst
           exact_t2 t2_factor t2' t2_cst r =
         let rel_err =
           eps
@@ -555,10 +555,10 @@ let get_mul_forward_error (prove_overflow : bool) (info : term_info Mterm.t)
           (info, (pr, t), Some (pr', t'))
       in
       let combine_errors_with_multiplication =
-        apply_args symbols combine_errors_with_multiplication x x_info
+        apply_args combine_errors_with_multiplication x x_info
       in
       let combine_errors_with_multiplication =
-        apply_args symbols combine_errors_with_multiplication y y_info
+        apply_args combine_errors_with_multiplication y y_info
       in
       combine_errors_with_multiplication r
 
@@ -589,7 +589,7 @@ let get_sub_forward_error prove_overflow info x y r =
       let pr = create_prsymbol (id_fresh ~attrs "SubErrBasic") in
       (info, (pr, left <=. right), None)
     | _ ->
-      let combine_errors_with_substraction t1 exact_t1 t1_factor t1' t1_cst t2
+      let combine_errors_with_substraction exact_t1 t1_factor t1' t1_cst
           exact_t2 t2_factor t2' t2_cst r =
         let rel_err = t1_factor +. t2_factor +. eps in
         let cst_err =
@@ -621,12 +621,12 @@ let get_sub_forward_error prove_overflow info x y r =
           (info, (pr, left <=. total_err), Some (pr', left <=. total_err'))
       in
       let combine_errors_with_substraction =
-        apply_args symbols combine_errors_with_substraction x x_info
+        apply_args combine_errors_with_substraction x x_info
       in
-      let combine_errors_with_addition =
-        apply_args symbols combine_errors_with_substraction y y_info
+      let combine_errors_with_substraction =
+        apply_args combine_errors_with_substraction y y_info
       in
-      combine_errors_with_addition r
+      combine_errors_with_substraction r
 
 (* Generates the formula for the forward error of r = x .- y *)
 let get_add_forward_error prove_overflow info x y r =
@@ -656,8 +656,8 @@ let get_add_forward_error prove_overflow info x y r =
       let pr = create_prsymbol (id_fresh ~attrs "AddErrBasic") in
       (info, (pr, left <=. right), None)
     | _ ->
-      let combine_errors_with_addition t1 exact_t1 t1_factor t1' t1_cst t2
-          exact_t2 t2_factor t2' t2_cst r =
+      let combine_errors_with_addition exact_t1 t1_factor t1' t1_cst exact_t2
+          t2_factor t2' t2_cst r =
         let rel_err = t1_factor +. t2_factor +. eps in
         let cst_err =
           ((one +. eps +. t2_factor) *. t1_cst)
@@ -688,10 +688,10 @@ let get_add_forward_error prove_overflow info x y r =
           (info, (pr, left <=. total_err), Some (pr', left <=. total_err'))
       in
       let combine_errors_with_addition =
-        apply_args symbols combine_errors_with_addition x x_info
+        apply_args combine_errors_with_addition x x_info
       in
       let combine_errors_with_addition =
-        apply_args symbols combine_errors_with_addition y y_info
+        apply_args combine_errors_with_addition y y_info
       in
       combine_errors_with_addition r
 
@@ -761,16 +761,7 @@ let rec get_error_fmlas prove_overflow info t :
         ]
       in
       (info, l1 @ l2 @ [ l ] @ [ l' ], Some (pr3', t3')))
-  | None -> (
-    (* TODO *)
-    match t_info.error with
-    | None -> (info, [], None)
-    | Some error ->
-      let exact_t, rel_err, t', cst_err = error.no_underflow in
-      if t_equal zero rel_err then
-        (info, [], None)
-      else
-        (info, [], None))
+  | None -> (* TODO *) (info, [], None)
 
 (* The second part of the transformation looks for the floats that are in the
    goal. For each of float `f'`, it tries to compute a formula of the form |f' -
@@ -781,9 +772,9 @@ let rec get_error_fmlas prove_overflow info t :
    necessary steps to prove it. *)
 let compute_errors env (info, goal) =
   let goal = Opt.get goal in
-  let _, pr, goal =
+  let pr, goal =
     match goal.d_node with
-    | Dprop (kind, pr, f) when kind = Pgoal -> (kind, pr, f)
+    | Dprop (kind, pr, f) when kind = Pgoal -> (pr, f)
     | _ -> assert false
   in
   let floats = get_floats goal in
@@ -802,7 +793,7 @@ let compute_errors env (info, goal) =
       ([], []) floats
   in
   let g = Decl.create_prop_decl Decl.Pgoal pr goal in
-  let f pr goal = l @ [ List.rev (g :: hyps) ] in
+  let f _ _ = l @ [ List.rev (g :: hyps) ] in
   Trans.compose_l (Trans.goal_l f) (Trans.store (apply_theorems env info))
 
 let get_term_for_info t1 =
@@ -826,9 +817,9 @@ let parse_and_add_error_fmla info t1 t1' t2 =
           (abs_err, false)
       | Tapp (_ls, [ t3; t4 ]) when is_add_ls _ls ->
         let (a, factor, a', cst), _ = parse t3 in
-        if t_equal factor zero then
+        if is_zero factor then
           let (a, factor, a', cst), _ = parse t4 in
-          if t_equal factor zero then
+          if is_zero factor then
             (abs_err, false)
           else
             ((a, factor, a', cst ++. t3), false)
@@ -836,15 +827,15 @@ let parse_and_add_error_fmla info t1 t1' t2 =
           ((a, factor, a', cst ++. t4), false)
       | Tapp (_ls, [ t3; t4 ]) when is_sub_ls _ls ->
         let (a, factor, a', cst), _ = parse t3 in
-        if t_equal factor zero then
+        if is_zero factor then
           (abs_err, false)
         else
           ((a, factor, a', cst --. t4), false)
       | Tapp (_ls, [ t3; t4 ]) when is_mul_ls _ls ->
         let (a, factor, a', cst), is_factor = parse t3 in
-        if t_equal factor zero then
+        if is_zero factor then
           let (a, factor, a', cst), is_factor = parse t4 in
-          if t_equal factor zero then
+          if is_zero factor then
             (abs_err, false)
           else if is_factor then
             ((a, factor **. t3, a', cst), true)
@@ -896,9 +887,9 @@ let rec collect info f =
  *)
 let collect_info d (info, _) =
   match d.d_node with
-  | Dprop (kind, pr, f) when kind = Paxiom || kind = Plemma ->
+  | Dprop (kind, _, f) when kind = Paxiom || kind = Plemma ->
     (collect info f, None)
-  | Dprop (kind, pr, f) when kind = Pgoal -> (info, Some d)
+  | Dprop (kind, _, _) when kind = Pgoal -> (info, Some d)
   | _ -> (info, None)
 
 let init_symbols env =
