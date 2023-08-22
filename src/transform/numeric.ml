@@ -392,6 +392,7 @@ let apply_theorems env info task =
     || Sattr.mem sub_combine_attr attrs
     || Sattr.mem mul_combine_attr attrs
   then
+    let () = Format.printf "%a@." Pretty.print_term goal in
     (* For an ieee_float theorem, the args are the floats operands *)
     let args =
       match goal.t_node with
@@ -438,20 +439,18 @@ let apply_theorems env info task =
 let apply_args f t t_info =
   let to_real = to_real (get_ts t) in
   match t_info.error with
-  | None -> f (to_real t) zero (abs (to_real t)) zero
+  | None -> f t (to_real t) zero (abs (to_real t)) zero
   | Some error ->
     let exact_t, rel_err, t', cst_err = error.no_underflow in
     if is_zero rel_err then
       assert false
     else
-      f exact_t rel_err t' cst_err
+      f t exact_t rel_err t' cst_err
 
 (* Generates the formula for the forward error of r = x .* y. 2 formulas are
    created, one that matches the multiplication theorem and one with a bit of
    simplification. *)
-let get_mul_forward_error (prove_overflow : bool) (info : term_info Mterm.t)
-    (x : term) (y : term) (r : term) :
-    term_info Mterm.t * (prsymbol * term) * (prsymbol * term) option =
+let get_mul_forward_error prove_overflow info x y r =
   if prove_overflow then
     assert false
   else
@@ -465,7 +464,7 @@ let get_mul_forward_error (prove_overflow : bool) (info : term_info Mterm.t)
     match (x_info.error, y_info.error) with
     | None, None ->
       let left = abs (to_real r -. (to_real x *. to_real y)) in
-      let right = (eps *. abs (to_real x *. to_real y)) +. eta in
+      let right = eps *. abs (to_real x *. to_real y) in
       let info =
         add_error info r
           {
@@ -477,12 +476,15 @@ let get_mul_forward_error (prove_overflow : bool) (info : term_info Mterm.t)
       let attrs = Sattr.add mul_basic_attr attrs in
       let pr = create_prsymbol (id_fresh ~attrs "MulErrBasic") in
       ( info,
-        ( pr,
-          t_or (left <=. right) (t_and (t_equ (to_real r) zero) (left <=. eta))
-        ),
-        None )
+        [
+          [
+            Decl.create_prop_decl Pgoal pr
+              (t_or (left <=. right)
+                 (t_and (t_equ (to_real r) zero) (left <=. eta)));
+          ];
+        ] )
     | _ ->
-      let combine_errors_with_multiplication exact_t1 t1_factor t1' t1_cst
+      let combine_errors_with_multiplication t1 exact_t1 t1_factor t1' t1_cst t2
           exact_t2 t2_factor t2' t2_cst r =
         let rel_err =
           eps
@@ -519,25 +521,24 @@ let get_mul_forward_error (prove_overflow : bool) (info : term_info Mterm.t)
           | None -> []
           | Some error -> error.underflow
         in
-        let t, underflow =
+        let f1, f, underflow =
           List.fold_left
-            (fun (term, underflow) (t, value) ->
-              ( t_or term (left <=. value *. abs exact_t2),
+            (fun (f1, f, underflow) (t, value) ->
+              ( t_or_simp f1 (abs (to_real t1 -. exact_t1) <=. value),
+                t_or f (left <=. value *. abs exact_t2),
                 (t, value *. abs exact_t2) :: underflow ))
-            (left <=. eta, [])
+            (t_true, left <=. eta, [])
             x_underflow
         in
-        let t, underflow =
+        let f2, f, underflow =
           List.fold_left
-            (fun (term, underflow) (t, value) ->
-              ( t_or term (left <=. value *. abs exact_t1),
+            (fun (f2, f, underflow) (t, value) ->
+              ( t_or_simp f2 (abs (to_real t2 -. exact_t2) <=. value),
+                t_or f2 (left <=. value *. abs exact_t1),
                 (t, value *. abs exact_t1) :: underflow ))
-            (t, underflow) y_underflow
+            (t_true, f, underflow) y_underflow
         in
         let underflow = (exact_t1 *. exact_t2, eta) :: underflow in
-        let t = t_and (t_equ (to_real r) zero) t in
-        let t' = t_or (left <=. right') t in
-        let t = t_or (left <=. right) t in
         let info =
           add_error info r
             {
@@ -546,13 +547,36 @@ let get_mul_forward_error (prove_overflow : bool) (info : term_info Mterm.t)
               underflow;
             }
         in
+        let f = t_and (t_equ (to_real r) zero) f in
+        let f1 = t_and (t_equ (to_real r) zero) (t_and f1 f2) in
+        let f1 = t_implies f1 f in
+        let b1 =
+          abs (to_real t1 -. exact_t1) <=. (t1_factor *. t1') +. t1_cst
+        in
+        let b2 =
+          abs (to_real t2 -. exact_t2) <=. (t2_factor *. t2') +. t2_cst
+        in
+        let f2 = t_implies (t_and b1 b2) (left <=. right) in
+        let pr1 = create_prsymbol (id_fresh "MulErrCombine") in
         let attrs = Sattr.add mul_combine_attr attrs in
-        let pr = create_prsymbol (id_fresh ~attrs "MulErrCombine") in
+        let pr2 = create_prsymbol (id_fresh ~attrs "MulErrCombine") in
+        let pr = create_prsymbol (id_fresh "MulErrCombine") in
+        let f' = t_or (left <=. right') f in
+        let f = t_or (left <=. right) f in
+        let l =
+          [
+            [
+              Decl.create_prop_decl Pgoal pr1 f1;
+              Decl.create_prop_decl Pgoal pr2 f2;
+            ];
+            [ Decl.create_prop_decl Pgoal pr f ];
+          ]
+        in
         if t_equal right right' then
-          (info, (pr, t), None)
+          (info, l)
         else
           let pr' = create_prsymbol (id_fresh "MulErrCombine") in
-          (info, (pr, t), Some (pr', t'))
+          (info, l @ [ [ Decl.create_prop_decl Pgoal pr' f' ] ])
       in
       let combine_errors_with_multiplication =
         apply_args combine_errors_with_multiplication x x_info
@@ -587,9 +611,9 @@ let get_sub_forward_error prove_overflow info x y r =
       in
       let attrs = Sattr.add sub_basic_attr attrs in
       let pr = create_prsymbol (id_fresh ~attrs "SubErrBasic") in
-      (info, (pr, left <=. right), None)
+      (info, [ [ Decl.create_prop_decl Pgoal pr (left <=. right) ] ])
     | _ ->
-      let combine_errors_with_substraction exact_t1 t1_factor t1' t1_cst
+      let combine_errors_with_substraction _t1 exact_t1 t1_factor t1' t1_cst _t2
           exact_t2 t2_factor t2' t2_cst r =
         let rel_err = t1_factor +. t2_factor +. eps in
         let cst_err =
@@ -614,11 +638,13 @@ let get_sub_forward_error prove_overflow info x y r =
         in
         let attrs = Sattr.add sub_combine_attr attrs in
         let pr = create_prsymbol (id_fresh ~attrs "SubErrCombine") in
+        let l = [ [ Decl.create_prop_decl Pgoal pr (left <=. total_err) ] ] in
         if t_equal total_err total_err' then
-          (info, (pr, left <=. total_err), None)
+          (info, l)
         else
           let pr' = create_prsymbol (id_fresh "SubErrCombine") in
-          (info, (pr, left <=. total_err), Some (pr', left <=. total_err'))
+          ( info,
+            l @ [ [ Decl.create_prop_decl Pgoal pr' (left <=. total_err') ] ] )
       in
       let combine_errors_with_substraction =
         apply_args combine_errors_with_substraction x x_info
@@ -654,10 +680,10 @@ let get_add_forward_error prove_overflow info x y r =
       in
       let attrs = Sattr.add add_basic_attr attrs in
       let pr = create_prsymbol (id_fresh ~attrs "AddErrBasic") in
-      (info, (pr, left <=. right), None)
+      (info, [ [ Decl.create_prop_decl Pgoal pr (left <=. right) ] ])
     | _ ->
-      let combine_errors_with_addition exact_t1 t1_factor t1' t1_cst exact_t2
-          t2_factor t2' t2_cst r =
+      let combine_errors_with_addition _t1 exact_t1 t1_factor t1' t1_cst _t2
+          exact_t2 t2_factor t2' t2_cst r =
         let rel_err = t1_factor +. t2_factor +. eps in
         let cst_err =
           ((one +. eps +. t2_factor) *. t1_cst)
@@ -681,11 +707,13 @@ let get_add_forward_error prove_overflow info x y r =
         in
         let attrs = Sattr.add add_combine_attr attrs in
         let pr = create_prsymbol (id_fresh ~attrs "AddErrCombine") in
+        let l = [ [ Decl.create_prop_decl Pgoal pr (left <=. total_err) ] ] in
         if t_equal total_err total_err' then
-          (info, (pr, left <=. total_err), None)
+          (info, l)
         else
           let pr' = create_prsymbol (id_fresh "AddErrCombine") in
-          (info, (pr, left <=. total_err), Some (pr', left <=. total_err'))
+          ( info,
+            l @ [ [ Decl.create_prop_decl Pgoal pr' (left <=. total_err') ] ] )
       in
       let combine_errors_with_addition =
         apply_args combine_errors_with_addition x x_info
@@ -698,7 +726,7 @@ let get_add_forward_error prove_overflow info x y r =
 (* r is a result of FP arithmetic operation involving t1 and t2 *)
 (* Compute new inequalities on r based on what we know on t1 and t2 *)
 let use_ieee_thms prove_overflow info ieee_symbol t1 t2 r :
-    term_info Mterm.t * (prsymbol * term) * (prsymbol * term) option =
+    term_info Mterm.t * decl list list =
   let symbols = Opt.get !symbols in
   if
     ls_equal ieee_symbol symbols.single_symbols.add_post
@@ -726,42 +754,41 @@ let use_ieee_thms prove_overflow info ieee_symbol t1 t2 r :
    `t` to get a formula relating `t` to `v`. *)
 (* TODO: Avoid traversing the same term twice. *)
 let rec get_error_fmlas prove_overflow info t :
-    term_info Mterm.t * decl list list * (prsymbol * term) option =
+    term_info Mterm.t * decl list list =
   let apply = get_error_fmlas prove_overflow in
   let t_info = get_info info t in
   match t_info.ieee_post with
-  | Some (ieee_post, t1, t2) -> (
-    let info, l1, f1 = apply info t1 in
-    let info, l2, f2 = apply info t2 in
-    let l =
-      match f1 with
-      | Some (pr1, t1) -> [ Decl.create_prop_decl Paxiom pr1 t1 ]
-      | None -> []
+  | Some (ieee_post, t1, t2) ->
+    let info, l1 = apply info t1 in
+    let info, l2 = apply info t2 in
+    let info, formulas = use_ieee_thms prove_overflow info ieee_post t1 t2 t in
+    let prev =
+      match l1 with
+      | [] -> []
+      | _ -> List.nth l1 (List.length l1 - 1)
     in
-    let l =
-      match f2 with
-      | Some (pr2, t2) -> l @ [ Decl.create_prop_decl Paxiom pr2 t2 ]
-      | None -> l
+    let prev =
+      match l2 with
+      | [] -> prev
+      | _ -> prev @ List.nth l2 (List.length l2 - 1)
     in
-    let info, (pr3, t3), simplified =
-      use_ieee_thms prove_overflow info ieee_post t1 t2 t
+    let l, _ =
+      List.fold_left
+        (fun (l1, prev) l2 ->
+          let l =
+            List.fold_left
+              (fun l decl ->
+                match decl.d_node with
+                | Dprop (Pgoal, pr, f) -> Decl.create_prop_decl Paxiom pr f :: l
+                | _ -> l)
+              [] prev
+          in
+          (l1 @ [ l @ prev ], l2))
+        (l1 @ l2, prev)
+        formulas
     in
-    match simplified with
-    | None ->
-      let l = l @ [ Decl.create_prop_decl Pgoal pr3 t3 ] in
-      (info, l1 @ l2 @ [ l ], Some (pr3, t3))
-    (* We have a simplified version of t3 (eg. a formula with simplified error
-       bounds). We assert it and prove it using t3. *)
-    | Some (pr3', t3') ->
-      let l = l @ [ Decl.create_prop_decl Pgoal pr3 t3 ] in
-      let l' =
-        [
-          Decl.create_prop_decl Paxiom pr3 t3;
-          Decl.create_prop_decl Pgoal pr3' t3';
-        ]
-      in
-      (info, l1 @ l2 @ [ l ] @ [ l' ], Some (pr3', t3')))
-  | None -> (* TODO *) (info, [], None)
+    (info, l)
+  | None -> (* TODO *) (info, [])
 
 (* The second part of the transformation looks for the floats that are in the
    goal. For each of float `f'`, it tries to compute a formula of the form |f' -
@@ -786,10 +813,20 @@ let compute_errors env (info, goal) =
   let l, hyps =
     List.fold_left
       (fun (l, hyps) t ->
-        let _, l', hyp = get_error_fmlas prove_overflow info t in
-        match hyp with
-        | Some (pr, t) -> (l @ l', create_prop_decl Paxiom pr t :: hyps)
-        | None -> (l, hyps))
+        let _, l' = get_error_fmlas prove_overflow info t in
+        match l' with
+        | [] -> (l, hyps)
+        | _ ->
+          let prev = List.nth l' (List.length l' - 1) in
+          let hyps =
+            List.fold_left
+              (fun hyps decl ->
+                match decl.d_node with
+                | Dprop (Pgoal, pr, f) -> create_prop_decl Paxiom pr f :: hyps
+                | _ -> hyps)
+              hyps prev
+          in
+          (l @ l', hyps))
       ([], []) floats
   in
   let g = Decl.create_prop_decl Decl.Pgoal pr goal in
