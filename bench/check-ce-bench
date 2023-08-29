@@ -170,12 +170,12 @@ run () {
   # the debug flags below to test cont_invariant in reduction engine
   # (note that stack trace may be more detailed with bytecode)
   record_time
-  cmd="$WHY3_BIN" prove -a split_vc -P "$prover" \
+  cmd="$WHY3_BIN prove -a split_vc -P $prover \
       --stepslimit=$steps --timelimit=10 \
       --rac-steplimit=$steps --rac-timelimit=10 \
-      --check-ce --rac-prover="$1" --ce-log-verbosity=5 \
-      --library="$2" "${file_path}.mlw" \
-      --debug=check-ce-categorization${debug_vc_sp}"
+      --check-ce --rac-prover=$1 --ce-log-verbosity=5 \
+      --library=$2 ${file_path}.mlw \
+      --debug=check_ce:categorization${debug_vc_sp}"
   record_time
   if $debug; then echo $cmd ; fi
   ($cmd || true) 2>&1 \
@@ -213,9 +213,9 @@ start=$(date +%s)
 for file in $files; do
   filedir="$(realpath --relative-to="$PWD" $(dirname $file))"
   filebase=`basename $file .mlw`
-  if [ "$filebase" = "maps_poly" -o "$filebase" = "maps_mono" ] ; then
-    echo "Skipping tests on $filedir/$filebase.mlw";
-  else
+  # if [ "$filebase" = "maps_poly" -o "$filebase" = "maps_mono" ] ; then
+  #   echo "Skipping tests on $filedir/$filebase.mlw";
+  # else
     printf "# Running provers on $filedir/$filebase.mlw\n";
     cvc4steps=150000
     cvc5steps=150000
@@ -260,13 +260,13 @@ for file in $files; do
       *)
         ;;
     esac
-    run CVC4,1.8    $filedir $filebase true  $cvc4steps
-    run CVC4,1.8    $filedir $filebase false $cvc4steps
-    run CVC5,1.0.5  $filedir $filebase true  $cvc5steps
-    run CVC5,1.0.5  $filedir $filebase false $cvc5steps
-    run Z3,4.8.10   $filedir $filebase true  $z3steps
-    run Z3,4.8.10   $filedir $filebase false $z3steps
-  fi
+    run CVC4,1.8    $filedir $filebase true  $cvc4steps $cvc4steps
+    run CVC4,1.8    $filedir $filebase false $cvc4steps $cvc4steps
+    run CVC5,1.0.5  $filedir $filebase true  $cvc5steps $cvc5steps
+    run CVC5,1.0.5  $filedir $filebase false $cvc5steps $cvc5steps
+    run Z3,4.8.10   $filedir $filebase true  $z3steps $z3steps
+    run Z3,4.8.10   $filedir $filebase false $z3steps $z3steps
+  # fi
 done
 
 # Check the reproduction of the experiments by Petiot (2018).
