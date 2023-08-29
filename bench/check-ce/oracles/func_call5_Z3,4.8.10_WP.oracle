@@ -1,10 +1,10 @@
 File "bench/check-ce/func_call5.mlw", line 8, characters 12-24:
 Sub-goal Postcondition of goal g1'vc.
-Prover result is: Valid (42 steps).
+Prover result is: Valid (41 steps).
 
 File "bench/check-ce/func_call5.mlw", line 14, characters 10-14:
 Sub-goal Precondition of goal f1'vc.
-Prover result is: Valid (52 steps).
+Prover result is: Valid (51 steps).
 
 <check_ce:categorization>Categorizations of models:
 - Selected model 0: INCOMPLETE

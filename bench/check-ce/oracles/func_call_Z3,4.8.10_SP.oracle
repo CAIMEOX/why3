@@ -1,6 +1,6 @@
 File "bench/check-ce/func_call.mlw", line 8, characters 12-21:
 Sub-goal Postcondition of goal g'vc.
-Prover result is: Valid (148 steps).
+Prover result is: Valid (147 steps).
 
 <check_ce:categorization>Categorizations of models:
 - Selected model 0: SW

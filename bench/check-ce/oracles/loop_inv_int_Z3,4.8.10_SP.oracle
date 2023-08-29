@@ -1,6 +1,6 @@
 File "bench/check-ce/loop_inv_int.mlw", line 13, characters 16-25:
 Sub-goal Loop invariant init of goal f'vc.
-Prover result is: Valid (132 steps).
+Prover result is: Valid (131 steps).
 
 <check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
@@ -107,7 +107,7 @@ File loop_inv_int.mlw:
 
 File "bench/check-ce/loop_inv_int.mlw", line 34, characters 16-25:
 Sub-goal Loop invariant init of goal f'vc.
-Prover result is: Valid (114 steps).
+Prover result is: Valid (113 steps).
 
 <check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
@@ -225,5 +225,5 @@ File loop_inv_int.mlw:
 
 File "bench/check-ce/loop_inv_int.mlw", line 29, characters 12-22:
 Sub-goal Postcondition of goal f'vc.
-Prover result is: Valid (1377 steps).
+Prover result is: Valid (1132 steps).
 

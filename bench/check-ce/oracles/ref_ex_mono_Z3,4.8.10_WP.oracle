@@ -221,7 +221,7 @@ File ref_ex_mono.mlw:
 
 File "bench/check-ce/ref_ex_mono.mlw", line 42, characters 12-15:
 Sub-goal Loop variant decrease of goal test_loop'vc.
-Prover result is: Valid (3281 steps).
+Prover result is: Valid (3036 steps).
 
 <check_ce:categorization>Categorizations of models:
 - Checked model 0: BAD_CE

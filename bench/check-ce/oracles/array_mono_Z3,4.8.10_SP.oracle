@@ -1,6 +1,6 @@
 File bench/check-ce/array_mono.mlw:
 Goal array'vc.
-Prover result is: Valid (513 steps).
+Prover result is: Valid (259 steps).
 
 <check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
@@ -39,7 +39,7 @@ File array_mono.mlw:
 
 File "bench/check-ce/array_mono.mlw", line 41, characters 4-14:
 Sub-goal Index in array bounds of goal f2'vc.
-Prover result is: Valid (705 steps).
+Prover result is: Valid (460 steps).
 
 <check_ce:categorization>Categorizations of models:
 - Selected model 0: INCOMPLETE

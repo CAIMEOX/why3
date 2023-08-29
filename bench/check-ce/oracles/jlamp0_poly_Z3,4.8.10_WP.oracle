@@ -265,7 +265,7 @@ File jlamp0_poly.mlw:
 
 File "bench/check-ce/jlamp0_poly.mlw", line 23, characters 18-31:
 Sub-goal Loop invariant init of goal p2'vc.
-Prover result is: Valid (135 steps).
+Prover result is: Valid (134 steps).
 
 <check_ce:categorization>Categorizations of models:
 - Selected model 0: BAD_CE

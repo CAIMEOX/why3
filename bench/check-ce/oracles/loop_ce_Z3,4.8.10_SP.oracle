@@ -1,10 +1,10 @@
 File "bench/check-ce/loop_ce.mlw", line 16, characters 16-25:
 Sub-goal Loop invariant init of goal f'vc.
-Prover result is: Valid (130 steps).
+Prover result is: Valid (129 steps).
 
 File "bench/check-ce/loop_ce.mlw", line 15, characters 14-20:
 Sub-goal Loop variant decrease of goal f'vc.
-Prover result is: Valid (1668 steps).
+Prover result is: Valid (1423 steps).
 
 <check_ce:categorization>Categorizations of models:
 - Selected model 0: NC

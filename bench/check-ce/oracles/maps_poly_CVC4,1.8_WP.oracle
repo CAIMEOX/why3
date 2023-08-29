@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 8, characters 14-28)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 8, characters 14-28)
@@ -7,7 +7,7 @@
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 8, characters 14-28)
 File "bench/check-ce/maps_poly.mlw", line 8, characters 14-28:
 Sub-goal Postcondition of goal test_map'vc.
-Prover result is: Unknown (unknown + incomplete) (5895 steps).
+Prover result is: Unknown (unknown + incomplete) (1288 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -48,7 +48,7 @@ File maps_poly.mlw:
            (fun y -> if pure { if y = x then True else False } then v
               else f y) with f = fun (x1:int) -> if x1 = 1 then 3 else 0, x = 0, v = 3}
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC_SW
   - Concrete RAC: INCOMPLETE (terminated because unexpected arguments passed to (@))
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 14, characters 14-34)
@@ -57,7 +57,7 @@ File maps_poly.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 14, characters 14-34)
 File "bench/check-ce/maps_poly.mlw", line 14, characters 14-34:
 Sub-goal Postcondition of goal test_map_multidim1'vc.
-Prover result is: Unknown (unknown + incomplete) (6010 steps).
+Prover result is: Unknown (unknown + incomplete) (1389 steps).
 The program does not comply to the verification goal, or the contracts of
   some loop or function are too weak, for example during the following
   execution:
@@ -101,7 +101,7 @@ File maps_poly.mlw:
     Property failure at postcondition of `test_map_multidim1` with:
       x = {contents= fun (x1:int) -> fun (x2:int) -> 0}
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 19, characters 14-34)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 19, characters 14-34)
@@ -110,7 +110,7 @@ File maps_poly.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 19, characters 14-34)
 File "bench/check-ce/maps_poly.mlw", line 19, characters 14-34:
 Sub-goal Postcondition of goal test_map_multidim2'vc.
-Prover result is: Unknown (unknown + incomplete) (6135 steps).
+Prover result is: Unknown (unknown + incomplete) (1527 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -228,7 +228,7 @@ File maps_poly.mlw:
                                                                     (x1:
                                                                     int) -> 0, x = 0, v = 3}
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 26, characters 14-28)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 26, characters 14-28)
@@ -237,7 +237,7 @@ File maps_poly.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 26, characters 14-28)
 File "bench/check-ce/maps_poly.mlw", line 26, characters 14-28:
 Sub-goal Postcondition of goal proj_map_test1'vc.
-Prover result is: Unknown (unknown + incomplete) (5895 steps).
+Prover result is: Unknown (unknown + incomplete) (1288 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -278,7 +278,7 @@ File maps_poly.mlw:
            (fun y -> if pure { if y = x then True else False } then v
               else f y) with f = fun (x1:int) -> if x1 = 1 then 3 else 0, x = 0, v = 3}
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 31, characters 14-28)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 31, characters 14-28)
@@ -287,7 +287,7 @@ File maps_poly.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 31, characters 14-28)
 File "bench/check-ce/maps_poly.mlw", line 31, characters 14-28:
 Sub-goal Postcondition of goal proj_map_test2'vc.
-Prover result is: Unknown (unknown + incomplete) (5885 steps).
+Prover result is: Unknown (unknown + incomplete) (1309 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -331,7 +331,7 @@ File maps_poly.mlw:
               else f y) with f = fun (x1:int) ->
                                   if x1 = 1 then True else False, x = 0, v = true}
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 42, characters 3-31)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_poly.mlw", line 42, characters 3-31)
@@ -360,7 +360,7 @@ File maps_poly.mlw:
       i = 0
       t = fun (x1:int) -> if x1 = 0 then 43 else 0
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `g'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `g'goal` cannot be evaluated)

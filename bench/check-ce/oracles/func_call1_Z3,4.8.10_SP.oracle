@@ -1,11 +1,11 @@
 Warning, file "bench/check-ce/func_call1.mlw", line 15, characters 6-7: unused variable w
 File "bench/check-ce/func_call1.mlw", line 8, characters 12-21:
 Sub-goal Postcondition of goal g'vc.
-Prover result is: Valid (182 steps).
+Prover result is: Valid (181 steps).
 
 File "bench/check-ce/func_call1.mlw", line 9, characters 12-26:
 Sub-goal Postcondition of goal g'vc.
-Prover result is: Valid (196 steps).
+Prover result is: Valid (195 steps).
 
 <check_ce:categorization>Categorizations of models:
 - Selected model 0: SW

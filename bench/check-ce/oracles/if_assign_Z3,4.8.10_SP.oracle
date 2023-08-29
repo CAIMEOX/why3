@@ -139,7 +139,7 @@ File if_assign.mlw:
 
 File "bench/check-ce/if_assign.mlw", line 30, characters 23-30:
 Sub-goal Assertion of goal fTest2'vc.
-Prover result is: Valid (92 steps).
+Prover result is: Valid (91 steps).
 
 <check_ce:categorization>Categorizations of models:
 - Selected model 0: NC

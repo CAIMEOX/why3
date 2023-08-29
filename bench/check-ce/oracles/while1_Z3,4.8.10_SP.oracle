@@ -1,14 +1,14 @@
 File "bench/check-ce/while1.mlw", line 10, characters 18-24:
 Sub-goal Loop invariant init of goal f'vc.
-Prover result is: Valid (38 steps).
+Prover result is: Valid (37 steps).
 
 File "bench/check-ce/while1.mlw", line 9, characters 16-21:
 Sub-goal Loop variant decrease of goal f'vc.
-Prover result is: Valid (1836 steps).
+Prover result is: Valid (1591 steps).
 
 File "bench/check-ce/while1.mlw", line 10, characters 18-24:
 Sub-goal Loop invariant preservation of goal f'vc.
-Prover result is: Valid (1795 steps).
+Prover result is: Valid (1550 steps).
 
 <check_ce:categorization>Categorizations of models:
 - Selected model 0: SW
