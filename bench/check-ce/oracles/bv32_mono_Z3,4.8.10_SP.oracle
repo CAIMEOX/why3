@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/bv32_mono.mlw", line 11, characters 14-31)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/bv32_mono.mlw", line 11, characters 14-31)
@@ -17,45 +17,6 @@ File int.mlw:
   Line 14:
     Constant one initialization
     one = 1
-File bv.mlw:
-  Line 596:
-    Constant zeros initialization
-  Line 192:
-    (giant-step) execution of unimplemented function with args:
-    result = 0
-  Line 596:
-    zeros = 0
-    Constant one initialization
-  Line 197:
-    (giant-step) execution of unimplemented function with args:
-    result = 0
-  Line 596:
-    one = 0
-    Constant ones initialization
-  Line 199:
-    (giant-step) execution of unimplemented function with args:
-    result = 0
-  Line 596:
-    ones = 0
-  Line 638:
-    Constant zeros initialization
-  Line 192:
-    (giant-step) execution of unimplemented function with args:
-    result = 0
-  Line 638:
-    zeros = 0
-    Constant one initialization
-  Line 197:
-    (giant-step) execution of unimplemented function with args:
-    result = 0
-  Line 638:
-    one = 0
-    Constant ones initialization
-  Line 199:
-    (giant-step) execution of unimplemented function with args:
-    result = 0
-  Line 638:
-    ones = 0
 File bv32_mono.mlw:
   Line 9:
     r = {c= (34:t)}
@@ -64,12 +25,6 @@ File bv32_mono.mlw:
       r = {c= (34:t)}
       zero = 0
       one = 1
-      zeros = 0
-      one = 0
-      ones = 0
-      zeros = 0
-      one = 0
-      ones = 0
   Line 13:
     Normal execution of function `c` with args:
       arg = {c= 66}
@@ -83,7 +38,7 @@ File bv32_mono.mlw:
     Property failure at postcondition of `dummy_update` with:
       r = {c= (132:t)}
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/bv32_mono.mlw", line 17, characters 14-30)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/bv32_mono.mlw", line 17, characters 14-30)
@@ -102,45 +57,6 @@ File int.mlw:
   Line 14:
     Constant one initialization
     one = 1
-File bv.mlw:
-  Line 596:
-    Constant zeros initialization
-  Line 192:
-    (giant-step) execution of unimplemented function with args:
-    result = 0
-  Line 596:
-    zeros = 0
-    Constant one initialization
-  Line 197:
-    (giant-step) execution of unimplemented function with args:
-    result = 0
-  Line 596:
-    one = 0
-    Constant ones initialization
-  Line 199:
-    (giant-step) execution of unimplemented function with args:
-    result = 0
-  Line 596:
-    ones = 0
-  Line 638:
-    Constant zeros initialization
-  Line 192:
-    (giant-step) execution of unimplemented function with args:
-    result = 0
-  Line 638:
-    zeros = 0
-    Constant one initialization
-  Line 197:
-    (giant-step) execution of unimplemented function with args:
-    result = 0
-  Line 638:
-    one = 0
-    Constant ones initialization
-  Line 199:
-    (giant-step) execution of unimplemented function with args:
-    result = 0
-  Line 638:
-    ones = 0
 File bv32_mono.mlw:
   Line 15:
     r = {c= (34:t)}
@@ -149,12 +65,6 @@ File bv32_mono.mlw:
       r = {c= (34:t)}
       zero = 0
       one = 1
-      zeros = 0
-      one = 0
-      ones = 0
-      zeros = 0
-      one = 0
-      ones = 0
   Line 19:
     Normal execution of function `c` with args:
       arg = {c= 66}

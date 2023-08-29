@@ -2,12 +2,134 @@
 <!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
-<prover id="1" name="Alt-Ergo" version="2.0.0" timelimit="10" steplimit="0" memlimit="1000"/>
+<prover id="0" name="CVC4" version="1.8" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="2" name="Alt-Ergo" version="2.4.2" timelimit="1" steplimit="0" memlimit="1000"/>
 <file format="whyml" proved="true">
 <path name=".."/><path name="algo65.mlw"/>
 <theory name="Algo65" proved="true">
  <goal name="find&#39;vc" expl="VC for find" proved="true">
- <proof prover="1"><result status="valid" time="0.52" steps="1769"/></proof>
+ <transf name="split_vc" proved="true" >
+  <goal name="find&#39;vc.0" expl="precondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="8876"/></proof>
+  </goal>
+  <goal name="find&#39;vc.1" expl="variant decrease" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="9505"/></proof>
+  </goal>
+  <goal name="find&#39;vc.2" expl="precondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="9491"/></proof>
+  </goal>
+  <goal name="find&#39;vc.3" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.060000" steps="10629"/></proof>
+  </goal>
+  <goal name="find&#39;vc.4" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.060000" steps="13690"/></proof>
+  </goal>
+  <goal name="find&#39;vc.5" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.210000" steps="569"/></proof>
+  </goal>
+  <goal name="find&#39;vc.6" expl="variant decrease" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="10186"/></proof>
+  </goal>
+  <goal name="find&#39;vc.7" expl="precondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.060000" steps="10182"/></proof>
+  </goal>
+  <goal name="find&#39;vc.8" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="10427"/></proof>
+  </goal>
+  <goal name="find&#39;vc.9" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.060000" steps="10539"/></proof>
+  </goal>
+  <goal name="find&#39;vc.10" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="10750"/></proof>
+  </goal>
+  <goal name="find&#39;vc.11" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="10803"/></proof>
+  </goal>
+  <goal name="find&#39;vc.12" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="10891"/></proof>
+  </goal>
+  <goal name="find&#39;vc.13" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="10998"/></proof>
+  </goal>
+  <goal name="find&#39;vc.14" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.070000" steps="13253"/></proof>
+  </goal>
+  <goal name="find&#39;vc.15" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.040000" steps="10091"/></proof>
+  </goal>
+  <goal name="find&#39;vc.16" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.080000" steps="17077"/></proof>
+  </goal>
+  <goal name="find&#39;vc.17" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.060000" steps="11368"/></proof>
+  </goal>
+  <goal name="find&#39;vc.18" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.060000" steps="11864"/></proof>
+  </goal>
+  <goal name="find&#39;vc.19" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.060000" steps="14894"/></proof>
+  </goal>
+  <goal name="find&#39;vc.20" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.060000" steps="11192"/></proof>
+  </goal>
+  <goal name="find&#39;vc.21" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.030000" steps="9414"/></proof>
+  </goal>
+  <goal name="find&#39;vc.22" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.060000" steps="10658"/></proof>
+  </goal>
+  <goal name="find&#39;vc.23" expl="variant decrease" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="9803"/></proof>
+  </goal>
+  <goal name="find&#39;vc.24" expl="precondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="9812"/></proof>
+  </goal>
+  <goal name="find&#39;vc.25" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="10994"/></proof>
+  </goal>
+  <goal name="find&#39;vc.26" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.080000" steps="14955"/></proof>
+  </goal>
+  <goal name="find&#39;vc.27" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.180000" steps="1191"/></proof>
+  </goal>
+  <goal name="find&#39;vc.28" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.070000" steps="11365"/></proof>
+  </goal>
+  <goal name="find&#39;vc.29" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.070000" steps="14258"/></proof>
+  </goal>
+  <goal name="find&#39;vc.30" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.060000" steps="11857"/></proof>
+  </goal>
+  <goal name="find&#39;vc.31" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.040000" steps="9646"/></proof>
+  </goal>
+  <goal name="find&#39;vc.32" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.040000" steps="9695"/></proof>
+  </goal>
+  <goal name="find&#39;vc.33" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="11109"/></proof>
+  </goal>
+  <goal name="find&#39;vc.34" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.040000" steps="9892"/></proof>
+  </goal>
+  <goal name="find&#39;vc.35" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.060000" steps="11283"/></proof>
+  </goal>
+  <goal name="find&#39;vc.36" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.060000" steps="11504"/></proof>
+  </goal>
+  <goal name="find&#39;vc.37" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="10031"/></proof>
+  </goal>
+  <goal name="find&#39;vc.38" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.050000" steps="9188"/></proof>
+  </goal>
+  <goal name="find&#39;vc.39" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.040000" steps="9298"/></proof>
+  </goal>
+ </transf>
  </goal>
 </theory>
 </file>

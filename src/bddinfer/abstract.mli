@@ -5,6 +5,8 @@
 
 *)
 
+(* open Why3 *)
+(* to comment out when inside Why3 *)
 
 
 (** {2 Environments} *)
@@ -17,9 +19,14 @@ type why_var = private {
 
 val create_var : string -> why_var
 
+val compare_var : why_var -> why_var -> int
+
 module VarMap : Map.S with type key = why_var
 
+module Bdd = Bddparam
+
 type var_value =
+  | UnitValue
   | IntValue of Apron.Var.t
   | RefValue of why_var
   | BoolValue of Bdd.variable
@@ -42,55 +49,35 @@ type t
 val why_env : t -> why_env
 (** [why_env s] returns the environment stored by [s] *)
 
-val apron_env_of_why_env : why_env -> Apron.Environment.t
-(** [@deprecated] *)
-
-val apron_env : t -> Apron.Environment.t
-(** [@deprecated] *)
-
 (** {2 Modification of state environnement} *)
 
-val add_in_environment : t -> why_env -> t
+type memo_add_env
+
+val add_in_environment : memo_add_env option ref -> t -> why_env -> t
 (** [add_in_environment s env] returns a state equivalent to [s] with
    extra variables from [env] added. Raises a failure if some
    variables of [env] are already present in [s].  *)
 
-val restrict_environment : t -> why_env -> t
-(** [restrict_environment s env] reduces the state [s] to the
-   variables that are present in the domain of [env]. Note that the
-   codomain of [env] is not taken into account. A variable in [env]
-   that is not in the environnement of [s] is also ignored. *)
-
+val restrict_environment : t -> t -> t
+(** [restrict_environment s s'] reduces the state [s] to the
+   variables that are present in [s']. *)
 
 (** Handling of an havoc statement, that modifies a set of variables
    non-deterministically, following a post-condition.  See usage in
    [Infer], interpretation of [Shavoc].  *)
 
-type havoc_data
+type memo_havoc
 
-val prepare_havoc : var_value VarMap.t -> t -> t * why_env * havoc_data
-(** [prepare_havoc vars state] returns a triple [res,old,data] [vars]
+val prepare_havoc : memo_havoc option ref -> var_value VarMap.t -> t -> t * why_env
+(** [prepare_havoc memo vars state] returns a pair [res,old]. [vars]
    must be a map that associate to a given variable [x] a fresh
    abstract variable of the appropriate type. The result state [res]
    is a state with appropriate environment to interpret a
    post-condition. [old] is an environment that maps the variables of
    [vars] to their current values, to be used as the old values for
-   havoc.  [data] is an information to suppply to the next function
-   [finalize_havoc]. *)
-
-val finalize_havoc : t -> havoc_data -> t
-(** [finalize_havoc state data] produces the appropriate final state
-   after an havoc. [data] should be the result of previous call to
-   [prepare_havoc]. *)
-
+   havoc.  *)
 
 (** {2 State operations} *)
-
-val top : why_env -> t
-(** [top env] is the state over [env] accepting all values *)
-
-val bottom : why_env -> t
-(** [bottom env] is the state over [env] accepting no values *)
 
 val is_bottom : t -> bool
 (** [is_bottom s] is true when [s] represents an empty set of program
@@ -104,6 +91,25 @@ val is_leq : t -> t -> bool
 (** [is_leq s1 s2] is true when [s1] represents a subset of the
    program states represented by [s2] *)
 
+
+
+val top : t -> t
+(** [top s] is the state in the same context as [s] accepting all values *)
+
+val top_new_ctx : why_env -> t
+(** [top_new_ctx env] is the state over [env] accepting all values *)
+
+val bottom : t -> t
+(** [bottom s] is the state in the same context as [s] accepting no values *)
+
+val singleton_boolean_var_true : t -> Bdd.variable -> t
+(** [singleton_boolean_var_true s v] represents the simple state where
+   [v] is true, in the same context as [s] *)
+
+val meet_with_apron_constraint : t -> Apron.Tcons1.t -> t
+(** [meet_with_apron_constraint s c] returns a fonction that meets a
+   given apron state to the given constraint [c] *)
+
 val join : t -> t -> t
 (** [join s1 s2] represents a set that includes the union of states
    represented by [s1] and [s2] *)
@@ -116,13 +122,15 @@ val widening : t -> t -> t
 (** [widening s1 s2] denotes a *widening* operation from [s1] to [s2].
    [s1] should be included in [s2].  *)
 
+val complement : t -> t
+(** [complement s] represents the complement of states represented by
+   [s]. *)
+
 (** Deal with the integer part of the state (via Apron) *)
 
-val meet_with_tcons_array : t -> Apron.Environment.t -> Apron.Tcons1.earray -> t
-
-val assign_texpr : t -> Apron.Var.t -> Apron.Texpr1.t -> t
-
 val fresh_apron_var : unit -> Apron.Var.t
+
+val of_apron_expr : t -> Apron.Texpr1.expr -> Apron.Texpr1.t
 
 (** Deal with the Boolean part of the state (via BDD) *)
 
@@ -130,18 +138,7 @@ val fresh_bdd_var : unit -> Bdd.variable
 
 val reset_fresh_var_generators : unit -> unit
 
-module B : Bdd.BDD
-
-val meet_with_bdd : t -> B.t -> t
-
-val interp_bool_var_intro : t -> why_var -> Bdd.variable -> B.t -> t
-(** [interp_bool_var_intro s x v e] interprets Boolean variable
-   introduction [let x = e in ...] using [v] as BDD variable to
-   represent [x].  Both [x] and [v] are assumed fresh, that is not
-   present yet in state [s].  *)
-
-val interp_bool_assign : t -> Bdd.variable -> Bdd.variable -> B.t -> t
-(** interprets Boolean variable introduction [v <- e] *)
+module B : Bddparam.BDD
 
 val bdd_stats : unit -> int * (int * int * int * int * int * int) array
 (** returns statistics on the usage of BDDs. The first number is the
@@ -166,20 +163,11 @@ val invert_varmap_int : t -> why_var ApronVarMap.t
 
 val invert_varmap_bool : t -> why_var Bdd.BddVarMap.t
 
-val boolean_substate : t -> B.t
-(** extract the BDD underlying the given state *)
+type linear_constraint =
+  Apron.Lincons0.typ * (ApronVarMap.key option * Z.t) list *
+   (ApronVarMap.key option * Z.t) list
 
-val get_lincons : t -> (Apron.Lincons0.typ *
-                          (Apron.Var.t option * Z.t) list *
-                            (Apron.Var.t option * Z.t) list
-                       ) array
-(** extract the linear integer constraints underlying the given state
-   *)
-
-val of_tcons_array : var_value VarMap.t -> Apron.Tcons1.earray -> t
-(** [of_tcons_array env c] converts the integer constraints [c] over
-   the environment [env] into an abstract state *)
-
+val as_formula : t -> B.formula * linear_constraint list Wstdlib.Mint.t
 
 (** {2 domains} *)
 
@@ -194,3 +182,15 @@ val print_domain : Format.formatter -> domain -> unit
 val print_domains : Format.formatter -> domain VarMap.t -> unit
 
 val get_domains : t -> domain VarMap.t
+
+(** statistics *)
+
+val time_in_meet_with_param_constraint : float ref
+val time_in_meet_with_apron_constraint : float ref
+val time_in_is_leq : float ref
+val time_in_join : float ref
+val time_in_meet : float ref
+val time_in_widening : float ref
+val time_in_add_in_environment : float ref
+val time_in_restrict_environment : float ref
+val time_in_prepare_havoc : float ref

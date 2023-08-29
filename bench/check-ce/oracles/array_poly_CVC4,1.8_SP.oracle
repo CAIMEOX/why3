@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (precondition at "bench/check-ce/array_poly.mlw", line 8, characters 4-8)
   - Abstract RAC: FAILURE (precondition at "bench/check-ce/array_poly.mlw", line 8, characters 4-8)
@@ -37,7 +37,7 @@ File "bench/check-ce/array_poly.mlw", line 13, characters 4-14:
 Sub-goal Index in array bounds of goal f2'vc.
 Prover result is: Valid (2219 steps).
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: BAD_CE
   - Concrete RAC: STUCK (failure in precondition of `f2` at "bench/check-ce/array_poly.mlw", line 10, characters 6-8)
   - Abstract RAC: STUCK (failure in precondition of `f2` at "bench/check-ce/array_poly.mlw", line 10, characters 6-8)
@@ -53,7 +53,7 @@ Prover result is: Step limit exceeded (150346 steps).
 Sorry, we don't have a good counterexample for you :(
 
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated with uncaught exception)
   - Abstract RAC: INCOMPLETE (terminated with uncaught exception)
@@ -72,11 +72,11 @@ File array.mlw:
       ->
       uni
       ->
-      int = fun bOUND_VARIABLE_466 bOUND_VARIABLE_467 -> 2
+      int = fun bOUND_VARIABLE_4661 bOUND_VARIABLE_4671 -> 2
   Line 232:
     sorted : array int -> bool = [|_ => false|]
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated with uncaught exception)
   - Abstract RAC: INCOMPLETE (terminated with uncaught exception)
@@ -95,7 +95,7 @@ File array.mlw:
       ->
       uni
       ->
-      int = fun bOUND_VARIABLE_470 bOUND_VARIABLE_471 -> 2
+      int = fun bOUND_VARIABLE_4701 bOUND_VARIABLE_4711 -> 2
   Line 232:
     sorted : array int -> bool = [|_ => false|]
 

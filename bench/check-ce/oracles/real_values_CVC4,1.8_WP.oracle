@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/real_values.mlw", line 3, characters 28-43)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/real_values.mlw", line 3, characters 28-43)
@@ -7,7 +7,7 @@
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/real_values.mlw", line 3, characters 28-43)
 File "bench/check-ce/real_values.mlw", line 3, characters 28-43:
 Goal test1.
-Prover result is: Unknown (unknown + incomplete) (7680 steps).
+Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
   following execution:
 File real_values.mlw:
@@ -23,7 +23,7 @@ File real_values.mlw:
     Property failure at postcondition of `test1'goal` with:
       x = (- 1.0) / 2.0
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/real_values.mlw", line 5, characters 28-37)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/real_values.mlw", line 5, characters 28-37)
@@ -32,7 +32,7 @@ File real_values.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/real_values.mlw", line 5, characters 28-37)
 File "bench/check-ce/real_values.mlw", line 5, characters 28-37:
 Goal test2.
-Prover result is: Unknown (unknown + incomplete) (7664 steps).
+Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
   following execution:
 File real_values.mlw:
@@ -48,7 +48,7 @@ File real_values.mlw:
     Property failure at postcondition of `test2'goal` with:
       x = 10.0
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/real_values.mlw", line 7, characters 28-47)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/real_values.mlw", line 7, characters 28-47)
@@ -57,7 +57,7 @@ File real_values.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/real_values.mlw", line 7, characters 28-47)
 File "bench/check-ce/real_values.mlw", line 7, characters 28-47:
 Goal test3.
-Prover result is: Unknown (unknown + incomplete) (7627 steps).
+Prover result is: Unknown (sat).
 The program does not comply to the verification goal, for example during the
   following execution:
 File real_values.mlw:
@@ -73,7 +73,7 @@ File real_values.mlw:
     Property failure at postcondition of `test3'goal` with:
       x = 1.0 / 4.0
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `test4'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `test4'goal` cannot be evaluated)
@@ -82,7 +82,7 @@ File real_values.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `test4'goal1` cannot be evaluated)
 File "bench/check-ce/real_values.mlw", line 9, characters 28-39:
 Goal test4.
-Prover result is: Unknown (unknown + incomplete) (6766 steps).
+Prover result is: Unknown or time/memory/step limit.
 The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `test4'goal1` cannot be evaluated):
 File real_values.mlw:

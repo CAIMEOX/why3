@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -18,7 +18,7 @@ type constant =
   | ConstInt  of int_constant
   | ConstReal of real_constant
   | ConstStr  of string
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 let compare_const ?(structural=true) c1 c2 =
   match c1, c2 with

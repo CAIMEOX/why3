@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -20,11 +20,11 @@ open Pinterp_core
 open Value
 
 let debug_rac_values =
-  Debug.register_info_flag "rac-values"
+  Debug.register_info_flag "rac:values"
     ~desc:"print values that are taken into account during interpretation"
 
 let debug_disable_builtin_mach =
-  Debug.register_flag "execute-no-builtin-mach"
+  Debug.register_flag "rac:execute_no_builtin_mach"
     ~desc:"don't register builtins for modules under stdlib/mach"
 
 let pp_typed pp ty fmt x =
@@ -638,7 +638,7 @@ let gen_model_variable ?check ({giant_steps} as ctx) ?loc id ity : value_gen =
     with Stuck _ when is_ignore_id id -> None
 
 (** Generate a value by querying the model for a result *)
-let gen_model_result ({giant_steps} as ctx) oid loc ity : value_gen =
+let gen_model_result ({giant_steps} as ctx) (oid:expr_id option) loc ity : value_gen =
   "value from model", fun () ->
     if ity_equal ity ity_unit
     then Some unit_value
@@ -715,11 +715,11 @@ let get_and_register_variable ctx ?def ?loc id ity =
   register_used_value ctx.env oloc id value;
   value
 
-let get_and_register_result ?def ?rs ctx posts oid loc ity =
-  let ctx_desc = asprintf "return value of call%t at %a%t"
+let get_and_register_result ?def ?rs ctx posts (oid:expr_id option) loc ity =
+  let ctx_desc = asprintf "return value of call%t at %a"
       (fun fmt -> Opt.iter (fprintf fmt " to %a" print_rs) rs)
       Loc.pp_position loc
-      (fun fmt -> Opt.iter (fprintf fmt " call id %d") oid) in
+  in
   let gens = [
     gen_model_result ctx oid loc ity;
     gen_default ity def;
@@ -756,7 +756,9 @@ let get_and_register_global check_model_variable ctx exec_expr id oexp post ity 
       let cntr_ctx = mk_cntr_ctx ctx ~desc Vc.expl_post in
       check_assume_posts ctx.rac cntr_ctx value post );
     lazy value
-  with (* Incomplete _ | *) Stuck _ as e ->
+  with Incomplete _ | Stuck _ as e ->
+    (* We should not need to capture these exceptions if this function was not
+       executed on logic constants and logic functions. *)
     lazy Printexc.(raise_with_backtrace e (get_raw_backtrace ()))
 
 (******************************************************************************)
@@ -966,7 +968,7 @@ and exec_expr' ctx e =
              if ctx.giant_steps then begin
                  register_call ctx.env e.e_loc None mvs Log.Exec_giant_steps;
                  exec_call_abstract ?loc:e.e_loc ~attrs:e'.e_attrs
-                   ~snapshot:cty.cty_oldies ctx ce.c_cty [] e.e_ity
+                   ~snapshot:cty.cty_oldies (Some e.e_id) ctx ce.c_cty [] e.e_ity
                end
              else begin
                  register_call ctx.env e.e_loc None mvs Log.Exec_normal;
@@ -992,7 +994,7 @@ and exec_expr' ctx e =
          register_any_call ctx.env e.e_loc None Mvs.empty;
          if ctx.do_rac then
            exec_call_abstract ?loc:e.e_loc ~attrs:e.e_attrs
-             ~snapshot:cty.cty_oldies ctx cty [] e.e_ity
+             ~snapshot:cty.cty_oldies (Some e.e_id) ctx cty [] e.e_ity
          else
            Normal (undefined_value ctx.env e.e_ity)
       | Capp (rs, pvsl) when
@@ -1020,7 +1022,7 @@ and exec_expr' ctx e =
             incomplete "no support for partial function applications (%a)"
               (Pp.print_option_or_default "unknown location" Loc.pp_position)
               e.e_loc;
-          exec_call ?loc:e.e_loc ~attrs:e.e_attrs ctx rs pvsl e.e_ity
+          exec_call ?loc:e.e_loc ~attrs:e.e_attrs (Some e.e_id) ctx rs pvsl e.e_ity
     end
   | Eassign l ->
       let search_and_assign (pvs, rs, v) =
@@ -1359,7 +1361,7 @@ and exec_match ctx t ebl =
       with NoMatch -> iter rem ) in
   iter ebl
 
-and exec_call ?(main_function=false) ?loc ?attrs ctx rs arg_pvs ity_result =
+and exec_call ?(main_function=false) ?loc ?attrs (eid:expr_id option) ctx rs arg_pvs ity_result =
   let arg_vs = List.map (get_pvs ctx.env) arg_pvs in
   Debug.dprintf debug_trace_exec "@[<h>%tExec call %a %a@]@."
     pp_indent print_rs rs Pp.(print_list space print_value) arg_vs;
@@ -1415,7 +1417,7 @@ and exec_call ?(main_function=false) ?loc ?attrs ctx rs arg_pvs ity_result =
   match mode with
   | Log.Exec_giant_steps ->
       check_pre_and_register_call Log.Exec_giant_steps;
-      exec_call_abstract ?loc ?attrs ~rs ctx rs.rs_cty arg_pvs ity_result
+      exec_call_abstract ?loc ?attrs ~rs eid ctx rs.rs_cty arg_pvs ity_result
   | Log.Exec_normal ->
       let res =
         if rs_equal rs rs_func_app then begin
@@ -1476,7 +1478,7 @@ and exec_call ?(main_function=false) ?loc ?attrs ctx rs arg_pvs ity_result =
                     Debug.dprintf debug_trace_exec "@[<h>%tEXEC CALL %a: Capp %a]@."
                       pp_indent print_rs rs print_rs rs';
                     check_pre_and_register_call Log.Exec_normal;
-                    exec_call ?loc ?attrs ctx rs' (pvl @ arg_pvs) ity_result
+                    exec_call ?loc ?attrs eid ctx rs' (pvl @ arg_pvs) ity_result
                 | Cfun body ->
                     Debug.dprintf debug_trace_exec "@[<hv2>%tEXEC CALL %a: FUN/%d %a@]@."
                       pp_indent print_rs rs (List.length ce.c_cty.cty_args) (pp_limited print_expr) body;
@@ -1486,7 +1488,7 @@ and exec_call ?(main_function=false) ?loc ?attrs ctx rs arg_pvs ity_result =
                 | Cany ->
                     if ctx.do_rac then (
                       check_pre_and_register_call ~any_function:true Log.Exec_giant_steps;
-                      exec_call_abstract ?loc ?attrs ~rs ctx rs.rs_cty arg_pvs ity_result )
+                      exec_call_abstract ?loc ?attrs ~rs eid ctx rs.rs_cty arg_pvs ity_result )
                     else (* We can't check the postcondition *)
                       incomplete "cannot apply an any-function %a with RAC disabled"
                         print_rs rs
@@ -1570,7 +1572,7 @@ and exec_call ?(main_function=false) ?loc ?attrs ctx rs arg_pvs ity_result =
   add_post_premises rs.rs_cty res ctx.env;
   res
 
-and exec_call_abstract ?snapshot ?loc ?attrs ?rs ctx cty arg_pvs ity_result =
+and exec_call_abstract ?snapshot ?loc ?attrs ?rs (eid:expr_id option) ctx cty arg_pvs ity_result =
   (* let f (x1: ...) ... (xn: ...) = e
      ~>
      assert1 {f_pre};
@@ -1596,8 +1598,7 @@ and exec_call_abstract ?snapshot ?loc ?attrs ?rs ctx cty arg_pvs ity_result =
   let asgn_wrt =
     assign_written_vars ~vars_map cty.cty_effect.eff_writes loc ctx in
   List.iter asgn_wrt (Mvs.keys ctx.env.vsenv);
-  let oid = Opt.bind attrs (Ident.search_attribute_value Ident.get_call_id_value) in
-  let res_v = get_and_register_result ?rs ctx cty.cty_post oid loc ity_result in
+  let res_v = get_and_register_result ?rs ctx cty.cty_post eid loc ity_result in
   (* assert2 *)
   let desc = match rs with
     | None -> "of anonymous function"
@@ -1676,6 +1677,32 @@ let bind_globals ?rs_main ctx =
         let v = get_and_register_global (Sidpos.check locs) ctx exec_expr id
             oexp ce.c_cty.cty_post ce.c_cty.cty_result in
         {ctx with env= bind_rs rs v ctx.env}, Sidpos.add_id id locs )
+    | PDpure ->
+      begin match d.pd_pure with
+      | [Decl.{d_node = Dparam ls}] when ls.ls_args = [] ->
+        begin match ls.ls_value with
+        | None -> ctx, locs
+        | Some ty ->
+          Debug.dprintf debug_trace_exec "EVAL GLOBAL LOGICAL CONST %a at %a@."
+            print_decoded id.id_string
+            Pp.(print_option_or_default "NO LOC" Loc.pp_position) id.id_loc;
+          let v = get_and_register_global (Sidpos.check locs) ctx exec_expr id None [] (Ity.ity_of_ty ty) in
+          {ctx with env= bind_ls ls v ctx.env}, Sidpos.add_id id locs
+        end
+      | [Decl.{d_node = Dparam ls}] ->
+        let ty = match ls.ls_value with
+          | None -> ty_bool
+          | Some ty -> ty
+        in
+        let ls_ty = List.fold_right ty_func ls.ls_args ty in
+        Debug.dprintf debug_trace_exec "EVAL GLOBAL LOGICAL FUN %a of type @[%a@] at %a@."
+          print_decoded id.id_string
+          Pretty.print_ty ls_ty
+          Pp.(print_option_or_default "NO LOC" Loc.pp_position) id.id_loc;
+        let v = get_and_register_global (Sidpos.check locs) ctx exec_expr id None [] (Ity.ity_of_ty ls_ty) in
+        {ctx with env= bind_ls ls v ctx.env}, Sidpos.add_id id locs
+      | _ -> ctx, locs
+      end
     | _ -> ctx, locs in
   let mod_known, _ =
     Mid.fold is_before ctx.env.pmodule.Pmodule.mod_known (Mid.empty, false) in
@@ -1701,7 +1728,7 @@ let exec_rs ctx rs =
     {ctx with env} in
   register_exec_main ctx.env rs;
   let loc = Opt.get_def Loc.dummy_position rs.rs_name.id_loc in
-  let res = exec_call ~main_function:true ~loc ctx rs rs.rs_cty.cty_args
+  let res = exec_call ~main_function:true ~loc None ctx rs rs.rs_cty.cty_args
       rs.rs_cty.cty_result in
   register_ended ctx.env rs.rs_name.id_loc;
   res, ctx

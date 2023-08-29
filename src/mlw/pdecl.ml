@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -590,6 +590,10 @@ let pd_int, pd_real, pd_str, pd_equ = match builtin_theory.th_decls with
       mk_decl (PDtype [mk_itd its_real [] [] [] None]) [dr],
       mk_decl (PDtype [mk_itd its_str  [] [] [] None]) [ds],
       mk_decl PDpure [de]
+  | _ -> assert false
+
+let pd_ignore_term = match ignore_theory.th_decls with
+  | [{td_node = Decl di}] -> mk_decl PDpure [di]
   | _ -> assert false
 
 let pd_func, pd_func_app = match highord_theory.th_decls with

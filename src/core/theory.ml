@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -15,6 +15,9 @@ open Ident
 open Ty
 open Term
 open Decl
+
+let warning_clone_not_abstract =
+  Loc.register_warning "clone_not_abstract" "Warn about theories cloned without substituting any abstract symbols."
 
 (** Namespace *)
 
@@ -162,6 +165,10 @@ let meta_range = register_meta "range_type" [MTtysymbol; MTlsymbol]
 let meta_float = register_meta "float_type" [MTtysymbol; MTlsymbol; MTlsymbol]
     ~desc:"Projection@ and@ finiteness@ of@ a@ floating-point@ type."
 
+let meta_proved_wf =
+  register_meta "vc:proved_wf" [MTlsymbol; MTprsymbol]
+    ~desc:"Declares that the given predicate is proved well-founded by the given goal"
+
 let meta_projection = register_meta "model_projection" [MTlsymbol]
   ~desc:"Declare@ the@ projection."
 
@@ -177,6 +184,7 @@ type theory = {
   th_ranges : tdecl Mts.t;    (* range type projections *)
   th_floats : tdecl Mts.t;    (* float type projections *)
   th_crcmap : Coercion.t;     (* implicit coercions *)
+  th_proved_wf : (prsymbol * lsymbol) Mls.t; (* predicates proved well-founded *)
   th_export : namespace;      (* exported namespace *)
   th_known  : known_map;      (* known identifiers *)
   th_local  : Sid.t;          (* locally declared idents *)
@@ -284,6 +292,7 @@ type theory_uc = {
   uc_ranges : tdecl Mts.t;
   uc_floats : tdecl Mts.t;
   uc_crcmap : Coercion.t;
+  uc_proved_wf : (prsymbol * lsymbol) Mls.t;
   uc_prefix : string list;
   uc_import : namespace list;
   uc_export : namespace list;
@@ -302,6 +311,7 @@ let empty_theory n p = {
   uc_ranges = Mts.empty;
   uc_floats = Mts.empty;
   uc_crcmap = Coercion.empty;
+  uc_proved_wf = Mls.empty;
   uc_prefix = [];
   uc_import = [empty_ns];
   uc_export = [empty_ns];
@@ -318,6 +328,7 @@ let close_theory uc = match uc.uc_export with
       th_ranges = uc.uc_ranges;
       th_floats = uc.uc_floats;
       th_crcmap = uc.uc_crcmap;
+      th_proved_wf = uc.uc_proved_wf;
       th_export = e;
       th_known  = uc.uc_known;
       th_local  = uc.uc_local;
@@ -382,6 +393,8 @@ let meta_coercion = register_meta ~desc:"coercion" "coercion" [MTlsymbol]
 
 exception RangeConflict of tysymbol
 exception FloatConflict of tysymbol
+exception ProvedWfConflict of lsymbol
+exception IllFormedWf of prsymbol * lsymbol
 
 let add_tdecl uc td = match td.td_node with
   | Decl d -> { uc with
@@ -414,6 +427,26 @@ let add_tdecl uc td = match td.td_node with
   | Meta (m,([MAls ls] as al)) when meta_equal m meta_coercion ->
       known_meta uc.uc_known al;
       { uc with uc_crcmap = Coercion.add uc.uc_crcmap ls;
+                uc_decls = td :: uc.uc_decls }
+  | Meta (m,([MAls ls; MApr pr] as al)) when meta_equal m meta_proved_wf ->
+      let p =
+        match (Mid.find pr.pr_name uc.uc_known).d_node with
+        | exception Not_found ->
+            raise (UnknownIdent pr.pr_name)
+        | Dprop (_,_,{ t_node = Tapp(p,[t])}) ->
+            let (vl,_,u) = t_open_lambda t in
+            begin match vl,u.t_node with
+              | [x;y],Tapp(r,[{t_node = Tvar a};{t_node = Tvar b}])
+                when vs_equal x a && vs_equal y b && ls_equal r ls ->
+                  p
+              | _ ->
+                  raise (IllFormedWf(pr,ls))
+            end
+        | _ ->
+            raise (IllFormedWf(pr,ls))
+      in
+      known_meta uc.uc_known al;
+      { uc with uc_proved_wf = Mls.add ls (pr,p) uc.uc_proved_wf;
                 uc_decls = td :: uc.uc_decls }
   | Meta (_,al) ->
       known_meta uc.uc_known al;
@@ -471,6 +504,9 @@ let create_decl d = mk_tdecl (Decl d)
 
 let print_id fmt id = Ident.print_decoded fmt id.id_string
 
+let warn_axiom_abstract =
+  Loc.register_warning "axiom_abstract" "Warn about axioms that are free of abstract symbols."
+
 let warn_dubious_axiom uc k p syms =
   match k with
   | Plemma | Pgoal -> ()
@@ -483,7 +519,7 @@ let warn_dubious_axiom uc k p syms =
           | Dtype { ts_def = NoDef } | Dparam _ -> raise Exit
           | _ -> ())
         syms;
-      Loc.warning ?loc:p.id_loc
+      Loc.warning ~id:warn_axiom_abstract ?loc:p.id_loc
         "@[axiom %s does not contain any local abstract symbol@ \
           (contains: @[%a@])@]" p.id_string
         (Pp.print_list Pp.comma print_id) (Sid.elements syms)
@@ -547,12 +583,15 @@ let use_export uc th =
                       else raise (RangeConflict ts) in
   let uflt ts d1 d2 = if td_equal d1 d2 then Some d1
                       else raise (FloatConflict ts) in
+  let upwf ls (pr1,ls1) (pr2,ls2) = if pr_equal pr1 pr2 && ls_equal ls1 ls2 then Some (pr1,ls1)
+                      else raise (ProvedWfConflict ls) in
   match uc.uc_import, uc.uc_export with
   | i0 :: sti, e0 :: ste -> { uc with
       uc_import = merge_ns false th.th_export i0 :: sti;
       uc_export = merge_ns true  th.th_export e0 :: ste;
       uc_ranges = Mts.union urng uc.uc_ranges th.th_ranges;
       uc_floats = Mts.union uflt uc.uc_floats th.th_floats;
+      uc_proved_wf = Mls.union upwf uc.uc_proved_wf th.th_proved_wf;
       uc_crcmap = Coercion.union uc.uc_crcmap th.th_crcmap }
   | _ -> assert false
 
@@ -835,7 +874,7 @@ let warn_clone_not_abstract loc th =
         end
       | _ -> ()
     ) th.th_decls;
-    Loc.warning ~loc "cloned theory %a.%s does not contain \
+    Loc.warning ~id:warning_clone_not_abstract ~loc "cloned theory %a.%s does not contain \
         any abstract symbol; it should be used instead"
       (Pp.print_list (Pp.constant_string ".") Pp.string) th.th_path
       th.th_name.id_string
@@ -930,10 +969,15 @@ let create_meta m al =
     let mt = get_meta_arg_type a in
     if at = mt then a else raise (MetaTypeMismatch (m,at,mt))
   in
-  let al = try List.map2 get_meta_arg m.meta_type al with
-    | Invalid_argument _ -> raise (BadMetaArity (m, List.length al))
-  in
-  mk_tdecl (Meta (m,al))
+  if m.meta_type = [] && al = [MAstr ""] then
+    (* backward compatibility *)
+    mk_tdecl (Meta (m, []))
+  else
+    let al = try
+        List.map2 get_meta_arg m.meta_type al
+      with Invalid_argument _ ->
+        raise (BadMetaArity (m, List.length al)) in
+    mk_tdecl (Meta (m,al))
 
 let add_meta uc s al = add_tdecl uc (create_meta s al)
 
@@ -968,6 +1012,11 @@ let builtin_theory =
 
 let create_theory ?(path=[]) n =
   use_export (empty_theory n path) builtin_theory
+
+let ignore_theory =
+  let uc = empty_theory (id_fresh "Ignore") ["why3";"Ignore"] in
+  let uc = add_param_decl uc ps_ignore in
+  close_theory uc
 
 let bool_theory =
   let uc = empty_theory (id_fresh "Bool") ["why3";"Bool"] in

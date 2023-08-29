@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -20,18 +20,21 @@ open Pretty
 open Value
 
 let debug_rac_check_sat =
-  Debug.register_info_flag "rac-check-term-sat"
+  Debug.register_info_flag "rac:check_term_sat"
     ~desc:"satisfiability of terms in rac"
 (* print debug information when checking the satisfiability of terms
    during rac *)
 
 let debug_rac_check_term_result =
-  Debug.register_info_flag "rac-check-term-result"
+  Debug.register_info_flag "rac:check_term_result"
     ~desc:"print the result when terms are checked for validity"
 
 type oracle_quant_var = env -> Term.vsymbol -> Value.value option
 
 let oracle_quant_var_dummy _ _ = None
+
+let warn_model_not_checked =
+  Loc.register_warning "model_not_checked" "Warn that the model for a quantified variable has not been checked"
 
 (* Get the value of a vsymbol with env.rac.get_value or a default value *)
 let oracle_quant_var
@@ -44,7 +47,7 @@ let oracle_quant_var
       let value =
         if bind_univ_quant_vars then
           let check _ _ =
-            Loc.warning "Model value for all-quantified variable not checked" in
+            Loc.warning ~id:warn_model_not_checked "Model value for all-quantified variable not checked" in
           oracle.for_variable env ~check ~loc:(Some loc) vs.vs_name (ity_of_ty vs.vs_ty)
         else None in
       let value =
@@ -129,18 +132,17 @@ let bind_fun rs (cexp, _) (task, ls_mv) =
 let task_of_term ?(vsenv=[]) metas (env: env) t =
   let open Task in let open Decl in
   let th = env.pmodule.Pmodule.mod_theory in
-  let rec t_free_sls sofar t =
-    t_fold (fun sofar t ->
-        match t.t_node with
-        | Tapp (ls, []) -> Sls.add ls sofar
-        | _ -> t_free_sls sofar t) sofar t in
-  let free_sls = t_free_sls Sls.empty t in
+  let free_sls = t_app_fold (fun sls ls _ _ -> Sls.add ls sls) Sls.empty t in
   let lsenv =
     let aux rs v mls =
       match rs.rs_logic with
       | RLls ls when Sls.mem ls free_sls -> Mls.add ls v mls
       | _ -> mls in
     Mrs.fold aux env.rsenv Mls.empty in
+  (* Add to lsenv the logical symbols from env.lsenv that are in free_sls *)
+  let lsenv =
+    let aux ls v mls = if Sls.mem ls free_sls then Mls.add ls v mls else mls in
+    Mls.fold aux env.lsenv lsenv in
   let add_used task td =
     let open Theory in
     match td.td_node with
@@ -156,11 +158,18 @@ let task_of_term ?(vsenv=[]) metas (env: env) t =
   let add_known _ decl (task, ls_mt, ls_mv) =
     match decl.d_node with
     | Dparam ls when Mls.contains lsenv ls ->
-        (* Take value from lsenv (i.e. env.rsenv) for declaration *)
+        (* Take value from lsenv (i.e. env.rsenv and env.lsenv) for declaration *)
         let vsenv, t = term_of_value env [] (Lazy.force (Mls.find ls lsenv)) in
         let task, ls_mt, ls_mv = List.fold_right bind_term vsenv (task, ls_mt, ls_mv) in
         let t = t_ty_subst ls_mt ls_mv t in
-        let ldecl = Decl.make_ls_defn ls [] t in
+        let ldecl = match ls.ls_args with
+          | [] -> Decl.make_ls_defn ls [] t
+          | _ ->
+            begin match t_open_lambda t with
+              | [], _, _ -> assert false
+              | vsl, _, t' -> Decl.make_ls_defn ls vsl t'
+            end
+        in
         let decl = create_logic_decl [ldecl] in
         let task = add_decl task decl in
         task, ls_mt, ls_mv
@@ -175,7 +184,7 @@ let task_of_term ?(vsenv=[]) metas (env: env) t =
       | Decl.{d_node = Dparam _} -> true
       | _ -> false in
     match rs.rs_logic with
-    | Expr.RLls ls when is_undefined_constant ls && Sls.mem ls free_sls  ->
+    | Expr.RLls ls when is_undefined_constant ls ->
         let pr = create_prsymbol (id_fresh (asprintf "def_%a" print_rs rs)) in
         let vsenv, t = term_of_value env [] (Lazy.force v) in
         let task, ls_mt, ls_mv = List.fold_right bind_term vsenv (task, ls_mt, ls_mv) in
@@ -256,10 +265,10 @@ module Why = struct
         let name, limit_time, limit_mem =
           match Strings.split ' ' prover_string with
           | [name; limit_time; limit_mem] ->
-              name, int_of_string limit_time, int_of_string limit_mem
+              name, float_of_string limit_time, int_of_string limit_mem
           | [name; limit_time] ->
-              name, int_of_string limit_time, 1000
-          | [name] -> name, 1, 1000
+              name, float_of_string limit_time, 1000
+          | [name] -> name, 1., 1000
           | _ -> failwith "RAC reduce prover config must have format <prover>[ <time limit>[ <mem limit>]]" in
         let pr = Whyconf.filter_one_prover config (Whyconf.parse_filter_prover name) in
         let command = String.concat " " (pr.Whyconf.command :: pr.Whyconf.extra_options) in

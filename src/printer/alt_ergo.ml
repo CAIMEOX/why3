@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -43,7 +43,6 @@ type info = {
   mutable info_model: S.t;
   info_vc_term: vc_term_info;
   info_in_goal: bool;
-  meta_model_projection: Sls.t;
   info_cntexample: bool
   }
 
@@ -166,7 +165,17 @@ let rec print_term info fmt t =
 
   let () = match t.t_node with
   | Tconst c ->
-      Constant.(print number_format unsupported_escape) fmt c
+      let ts = match t.t_ty with
+        | Some { ty_node = Tyapp (ts, []) } ->
+            ts
+        | _ -> assert false (* impossible *)
+      in
+      if ts_equal ts ts_int || ts_equal ts ts_real || ts_equal ts ts_str then
+        Constant.(print number_format unsupported_escape) fmt c
+      else
+        unsupportedTerm t
+          "alt-ergo printer: don't know how to print this literal, consider adding a syntax rule in the driver"
+
   | Tvar { vs_name = id } ->
       print_ident info fmt id
   | Tapp (ls, tl) ->
@@ -451,6 +460,7 @@ let print_prop_decl vc_loc vc_attrs env printing_info info fmt k pr f =
         queried_terms = model_list;
         type_coercions = Mty.empty;
         type_fields = Mty.empty;
+        type_sorts = Mstr.empty;
         record_fields = Mls.empty;
         constructors = Mstr.empty;
         set_str = Mstr.empty;
@@ -503,7 +513,6 @@ let print_task args ?old:_ fmt task =
     info_model = S.empty;
     info_vc_term = vc_info;
     info_in_goal = false;
-    meta_model_projection = Task.on_tagged_ls Theory.meta_projection task;
     info_cntexample = cntexample;
   } in
   print_prelude fmt args.prelude;

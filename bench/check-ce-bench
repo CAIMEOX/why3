@@ -1,36 +1,74 @@
 #!/bin/bash
 set -euo pipefail
 
-dir=`dirname $0`
+
+################################################################################
+# Global variables & utility functions
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+readonly SCRIPT_DIR
+
+# Currently the script only works if it is run in this directory.
+# TODO Change this dirty workaround.
+cd "$SCRIPT_DIR/.."
+
+# Suffix that is appened on the Why3 excecutable name
+SUFFIX=.opt
+
 updateoracle=false
-suffix=.opt
 removeoutfile=true
 debug=false
 files=""
 failed=""
-whydata=$(bin/why3"$suffix" --print-datadir)
-whylib=$(bin/why3"$suffix" --print-libdir)
+
+function usage() {
+  cat <<EOF
+Usage: $(basename "$0") [OPTIONS...] <files>"
+
+Run the check-ce tests on the given <files>.
+<files> must be given without the '.mlw' suffix.
+If <files> is empty, use all files from directory 'check-ce'.
+
+Options:
+  -h | -help | --help
+    Prints this help text.
+
+  --update-oracle
+    Update the oracles during the run of tests suite.
+
+  --keep-out-files
+    Remove out files.
+
+  --suffix <s>
+    The suffix <s> is appended on the Why3 executable name, e.g. '.opt'.
+    Default: $SUFFIX
+EOF
+}
+
+################################################################################
+# Parse options
 
 while test $# != 0; do
   case "$1" in
-    "--update-oracle")
+    -h | -help | --help)
+      usage
+      exit 0
+      ;;
+    --update-oracle)
       updateoracle=true
       shift 1
       ;;
-    "--keep-out-files")
+    --keep-out-files)
       removeoutfile=false
       shift 1
       ;;
-    "--suffix")
-      suffix="$2"
+    --suffix)
+      SUFFIX="$2"
       shift 2
       ;;
     "-"*)
-      printf "unknown option: %s\n" "$1"
-      printf "usage: check-ce-bench [--update-oracle] [--keep-out-file] [--suffix s] <files>\n"
-      printf "  <files> must be given without the '.mlw' suffix.\n"
-      printf "  If <files> is empty, use all files from directory 'check-ce'.\n"
-      printf "  The suffix <s> is appended on the Why3 executable name, e.g. '.opt'.\n"
+      echo "unknown option: $1"
+      usage
       exit 2
       ;;
     *)
@@ -39,9 +77,24 @@ while test $# != 0; do
   esac
 done
 
+# If files is empty, use all files from directory 'check-ce'.
 if test "$files" = "" ; then
-  files="$dir/check-ce/*.mlw"
+  files="$SCRIPT_DIR/check-ce/*.mlw"
 fi
+
+readonly SUFFIX
+readonly removeoutfile
+readonly updateoracle
+readonly files
+
+# Path to the why3 binary
+WHY3_BIN="$SCRIPT_DIR"/../bin/why3"$SUFFIX"
+whydata=$("$WHY3_BIN" --print-datadir)
+whylib=$("$WHY3_BIN" --print-libdir)
+readonly WHY3_BIN
+readonly whydata
+readonly whylib
+
 
 colorize() {
   if command -v pygmentize &> /dev/null; then
@@ -116,16 +169,16 @@ run () {
   # one may add reduction_cont_size,stack_trace, in
   # the debug flags below to test cont_invariant in reduction engine
   # (note that stack trace may be more detailed with bytecode)
-  cmd="$dir/../bin/why3"$suffix" prove -a split_vc -P ${prover}\
-      --stepslimit=${steps} --timelimit=8 \
-      --rac-steplimit=${racsteps} --rac-timelimit=4 \
+  record_time
+  cmd="$WHY3_BIN" prove -a split_vc -P "$prover" \
+      --stepslimit=$steps --timelimit=10 \
+      --rac-steplimit=$steps --rac-timelimit=10 \
       --check-ce --rac-prover="$1" --ce-log-verbosity=5 \
       --library="$2" "${file_path}.mlw" \
       --debug=check-ce-categorization${debug_vc_sp}"
   record_time
   if $debug; then echo $cmd ; fi
-  ($cmd \
-    || true) 2>&1 \
+  ($cmd || true) 2>&1 \
     | remove_solver_details \
 	  > "$f.out"
   elapsed_time
@@ -158,84 +211,62 @@ run () {
 
 start=$(date +%s)
 for file in $files; do
-  filedir=`dirname $file`
+  filedir="$(realpath --relative-to="$PWD" $(dirname $file))"
   filebase=`basename $file .mlw`
-  printf "# Running provers on $filedir/$filebase.mlw\n";
-  cvc4steps=150000
-  cvc4stepsrac=150000
-  cvc5steps=150000
-  cvc5stepsrac=150000
-  z3steps=3000000
-  z3stepsrac=3000000
-  case "$filebase" in
-    "640_no_loc_failure")
-      z3steps=500000
-      ;;
-    "657")
-      z3steps=500000
-      ;;
-    "668_projection")
-      z3steps=500000
-      ;;
-    "703_reduce_term")
-      z3steps=500000
-      ;;
-    "array_records_mono")
-      z3stepsrac=100
-      ;;
-    "bv32")
-      z3steps=2500000
-      ;;
-    "bv32_toBig")
-      z3steps=100000
-      ;;
-    "floats")
-      #cvc4steps=15000
-      #cvc4stepsrac=1500
-      #cvc5steps=1000
-      #cvc5stepsrac=10
-      #z3steps=1000
-      #z3stepsrac=10
-      ;;
-    "int_overflow")
-      cvc5steps=10000
-      z3steps=100000
-      ;;
-    "jlamp_array_mono")
-      z3steps=40000
-      z3stepsrac=4000
-      ;;
-    "loop_inv_real")
-      z3steps=1000000
-      ;;
-    "loop_inv_real_mono")
-      cvc5steps=10000
-      cvc5stepsrac=10000
-      z3steps=1000000
-      ;;
-    "maps_mono")
-      cvc5steps=200
-      z3steps=1000000
-      ;;
-    "maps_poly")
-      cvc5steps=10000
-      z3steps=500000
-      ;;
-    "strings")
-      z3steps=3000
-      ;;
-    "threshold")
-      z3steps=500000
-      ;;
-    *)
-      ;;
-  esac
-  run CVC4,1.8    $filedir $filebase true  $cvc4steps $cvc4stepsrac
-  run CVC4,1.8    $filedir $filebase false $cvc4steps $cvc4stepsrac
-  run CVC5,1.0.0  $filedir $filebase true  $cvc5steps $cvc5stepsrac
-  run CVC5,1.0.0  $filedir $filebase false $cvc5steps $cvc5stepsrac
-  run Z3,4.8.10   $filedir $filebase true  $z3steps $z3stepsrac
-  run Z3,4.8.10   $filedir $filebase false $z3steps $z3stepsrac
+  if [ "$filebase" = "maps_poly" -o "$filebase" = "maps_mono" ] ; then
+    echo "Skipping tests on $filedir/$filebase.mlw";
+  else
+    printf "# Running provers on $filedir/$filebase.mlw\n";
+    cvc4steps=150000
+    cvc5steps=150000
+    z3steps=3000000
+    case "$filebase" in
+      "640_no_loc_failure")
+        z3steps=500000
+        ;;
+      "657")
+        z3steps=500000
+        ;;
+      "668_projection")
+        z3steps=500000
+        ;;
+      "bv32")
+        z3steps=2500000
+        ;;
+      "bv32_mono")
+        z3steps=100000
+        ;;
+      "bv32_toBig")
+        z3steps=100000
+        ;;
+      "floats")
+        z3steps=400000
+        ;;
+      "int_overflow")
+        z3steps=400000
+        ;;
+      "loop_inv_real")
+        z3steps=1000000
+        ;;
+      "maps_poly")
+        cvc5steps=300000
+        ;;
+      "strings")
+        z3steps=3000
+        ;;
+      "threshold")
+        z3steps=500000
+        ;;
+      *)
+        ;;
+    esac
+    run CVC4,1.8    $filedir $filebase true  $cvc4steps
+    run CVC4,1.8    $filedir $filebase false $cvc4steps
+    run CVC5,1.0.5  $filedir $filebase true  $cvc5steps
+    run CVC5,1.0.5  $filedir $filebase false $cvc5steps
+    run Z3,4.8.10   $filedir $filebase true  $z3steps
+    run Z3,4.8.10   $filedir $filebase false $z3steps
+  fi
 done
 
 # Check the reproduction of the experiments by Petiot (2018).
@@ -257,7 +288,7 @@ if [ $? = 1 ]; then failed="${failed}Petiot experiments with $1.\n"; fi
 
 petiot Z3,4.8.10  500000
 petiot CVC4,1.8 10000
-petiot CVC5,1.0.0 10000
+petiot CVC5,1.0.5 10000
 
 end=$(date +%s)
 

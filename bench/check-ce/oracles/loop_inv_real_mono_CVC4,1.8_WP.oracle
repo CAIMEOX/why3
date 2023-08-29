@@ -1,8 +1,8 @@
 File "bench/check-ce/loop_inv_real_mono.mlw", line 19, characters 16-31:
 Sub-goal Loop invariant init of goal f'vc.
-Prover result is: Valid (2195 steps).
+Prover result is: Valid.
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Loop invariant init cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Loop invariant init cannot be evaluated)
@@ -11,7 +11,7 @@ Prover result is: Valid (2195 steps).
   - Abstract RAC: INCOMPLETE (terminated because Loop invariant init cannot be evaluated)
 File "bench/check-ce/loop_inv_real_mono.mlw", line 19, characters 16-31:
 Sub-goal Loop invariant preservation of goal f'vc.
-Prover result is: Unknown (unknown + incomplete) (6995 steps).
+Prover result is: Unknown (sat).
 The following counterexample model could not be verified
   (both RAC terminated because Loop invariant init cannot be evaluated):
 File loop_inv_real_mono.mlw:
@@ -39,5 +39,5 @@ File loop_inv_real_mono.mlw:
 
 File "bench/check-ce/loop_inv_real_mono.mlw", line 14, characters 12-24:
 Sub-goal Postcondition of goal f'vc.
-Prover result is: Valid (2435 steps).
+Prover result is: Valid.
 

@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -94,7 +94,7 @@ let keep_field_types =
             in
             List.fold_left csl_fold sty csl
           in
-          Sty.fold inst_fold (Mts.find_def Sty.empty ts kept_m) sty
+          Sty.fold inst_fold (Mts.find ts kept_m) sty
         in
         List.fold_left dl_fold sty dl
       | _ -> sty

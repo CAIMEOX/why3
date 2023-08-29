@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because missing value for return value of call at "WHY3DATA/stdlib/mach/int.mlw", line 432, character 22 to line 433, character 45)
   - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call at "WHY3DATA/stdlib/mach/int.mlw", line 432, character 22 to line 433, character 45)
@@ -15,12 +15,12 @@ File int.mlw:
     int63'int :
       int63
       ->
-      int = fun bOUND_VARIABLE_456 ->
-             if {mach.int.Int63.int63'int => -4611686018427387903} = bOUND_VARIABLE_456
+      int = fun bOUND_VARIABLE_4561 ->
+             if {mach.int.Int63.int63'int => -4611686018427387903} = bOUND_VARIABLE_4561
              then -4611686018427387903
-             else if {mach.int.Int63.int63'int => -4611686018427387904} = bOUND_VARIABLE_456
+             else if {mach.int.Int63.int63'int => -4611686018427387904} = bOUND_VARIABLE_4561
                   then -4611686018427387904
-                  else if {mach.int.Int63.int63'int => 4611686018427387903} = bOUND_VARIABLE_456
+                  else if {mach.int.Int63.int63'int => 4611686018427387903} = bOUND_VARIABLE_4561
                        then 4611686018427387903 else -4611686018427387902
   Line 432:
     max_int : int63 = {mach.int.Int63.int63'int => 4611686018427387903}

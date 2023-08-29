@@ -1,7 +1,7 @@
 ####################################################################
 #                                                                  #
 #  The Why3 Verification Platform   /   The Why3 Development Team  #
-#  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  #
+#  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  #
 #                                                                  #
 #  This software is distributed under the terms of the GNU Lesser  #
 #  General Public License version 2.1, with the special exception  #
@@ -9,7 +9,7 @@
 #                                                                  #
 ####################################################################
 
-AC_INIT([Why3], [1.5.1+git])
+AC_INIT([Why3], [1.6.0+git])
 
 # verbosemake
 
@@ -83,11 +83,11 @@ AC_ARG_ENABLE(re,
     AS_HELP_STRING([--disable-re], [use Str instead of Re for regular expressions]),,
     enable_re=check)
 
-# pp_sexp
+# sexp
 
-AC_ARG_ENABLE(pp-sexp,
-    AS_HELP_STRING([--disable-pp-sexp], [disable S-expression output for why3pp]),,
-    enable_pp_sexp=yes)
+AC_ARG_ENABLE(sexp,
+    AS_HELP_STRING([--disable-sexp], [disable S-expression support for `Ptree` and `why3 pp`]),,
+    enable_sexp=yes)
 
 # IDE
 
@@ -903,30 +903,30 @@ fi
 # ppx_sexp_conv (only with ocamlfind)
 SEXPLIBPPX=
 SEXPLIB=
-if test "$enable_pp_sexp" = no; then
-    reason_pp_sexp=" (disabled by user)"
+if test "$enable_sexp" = no; then
+    reason_sexp=" (disabled by user)"
 else
     if test "$enable_ocamlfind" != yes; then
-        enable_pp_sexp=no
-        reason_pp_sexp=" (ocamlfind not available)"
+        enable_sexp=no
+        reason_sexp=" (ocamlfind not available)"
     elif test "$enable_ppx" != yes; then
-        enable_pp_sexp=no
-        reason_pp_sexp=" (requires ppx)"
+        enable_sexp=no
+        reason_sexp=" (requires ppx)"
     else
         for p in ppx_sexp_conv sexplib ppx_deriving; do
             AC_MSG_CHECKING([for $p using ocamlfind])
             DIR=$($OCAMLFIND query $p 2> /dev/null)
             if test -z "$DIR"; then
                AC_MSG_RESULT([no])
-               enable_pp_sexp=no
-               reason_pp_sexp=" ($p not found)"
+               enable_sexp=no
+               reason_sexp=" ($p not found)"
                break
             else
                AC_MSG_RESULT([yes])
             fi
         done
     fi
-    if test "$enable_pp_sexp" = yes; then
+    if test "$enable_sexp" = yes; then
         SEXPLIBPPX="ppx_sexp_conv"
         SEXPLIB="sexplib sexplib.num"
     fi
@@ -959,22 +959,23 @@ if test "$enable_coq_support" = yes; then
    AC_MSG_RESULT($COQVERSION)
 
    case $COQVERSION in
-      8.7*)
-         coq_compat_version="COQ87"
-         enable_coq_fp_libs=no
-         ;;
-      8.8*)
-         coq_compat_version="COQ88"
-         enable_coq_fp_libs=no
-         ;;
-      8.9*)
-         coq_compat_version="COQ89"
-         enable_coq_fp_libs=no
-         ;;
-      8.10*)
-         coq_compat_version="COQ810"
-         enable_coq_fp_libs=no
-         ;;
+dnl not supported anymore
+dnl       8.7*)
+dnl          coq_compat_version="COQ87"
+dnl          enable_coq_fp_libs=no
+dnl          ;;
+dnl       8.8*)
+dnl          coq_compat_version="COQ88"
+dnl          enable_coq_fp_libs=no
+dnl          ;;
+dnl       8.9*)
+dnl          coq_compat_version="COQ89"
+dnl          enable_coq_fp_libs=no
+dnl          ;;
+dnl       8.10*)
+dnl          coq_compat_version="COQ810"
+dnl          enable_coq_fp_libs=no
+dnl          ;;
       8.11*)
          coq_compat_version="COQ811"
          ;;
@@ -993,10 +994,14 @@ if test "$enable_coq_support" = yes; then
       8.16*)
          coq_compat_version="COQ816"
          ;;
+      8.17*)
+         coq_compat_version="COQ817"
+         COQFLAGS="-w deprecated-instance-without-locality,deprecated-hint-without-locality"
+         ;;
       *)
          enable_coq_support=no
-         AC_MSG_WARN([You need Coq 8.7 or later; Coq discarded.])
-         reason_coq_support=" (need version >= 8.7)"
+         AC_MSG_WARN([You need Coq 8.11 or later; Coq discarded.])
+         reason_coq_support=" (need version >= 8.11)"
          ;;
    esac
    if test "$enable_coq_fp_libs" = no; then
@@ -1089,6 +1094,10 @@ else
                 ;;
           2021-1*)
 	        enable_isabelle_support=yes
+                ISABELLEVERSION=2021-1
+                ;;
+          2022*)
+                enable_isabelle_support=yes
                 ISABELLEVERSION=2021-1
                 ;;
           *)
@@ -1200,7 +1209,7 @@ AC_SUBST(JSOFOCAMLPKG)
 AC_SUBST(META_OCAMLGRAPH)
 
 AC_SUBST(enable_ppx)
-AC_SUBST(enable_pp_sexp)
+AC_SUBST(enable_sexp)
 AC_SUBST(SEXPLIB)
 AC_SUBST(SEXPLIBPPX)
 
@@ -1238,6 +1247,7 @@ AC_SUBST(COQC)
 AC_SUBST(COQDEP)
 AC_SUBST(COQLIB)
 AC_SUBST(COQVERSION)
+AC_SUBST(COQFLAGS)
 
 AC_SUBST(enable_pvs_libs)
 AC_SUBST(PVS)
@@ -1310,7 +1320,7 @@ echo "    Ocamlfind               : $enable_ocamlfind$reason_ocamlfind"
 echo "    Native compilation      : $enable_native_code"
 echo "    Memory profiling        : $enable_statmemprof$reason_statmemprof"
 echo "    PPX                     : $enable_ppx$reason_ppx"
-echo "    S-expr for why3pp       : $enable_pp_sexp$reason_pp_sexp"
+echo "    S-expressions support   : $enable_sexp$reason_sexp"
 echo "    Javascript support      : $enable_js_of_ocaml$reason_js_of_ocaml"
 echo "    MPFR support            : $enable_mpfr$reason_mpfr"
 echo "    Re support              : $enable_re$reason_re"

@@ -369,6 +369,8 @@ val t_exists_close_merge : vsymbol list -> term -> term
 
 (** {2 Built-in symbols} *)
 
+(** {3 equality} *)
+
 val ps_equ : lsymbol
 (** equality predicate *)
 
@@ -378,29 +380,58 @@ val t_neq : term -> term -> term
 val t_equ_simp : term -> term -> term
 val t_neq_simp : term -> term -> term
 
+(** {3 General-purpose 'ignore' predicate} *)
+
+val ps_ignore : lsymbol
+
+(** {3 Booleans} *)
+
 val fs_bool_true  : lsymbol
 val fs_bool_false : lsymbol
 
 val t_bool_true  : term
 val t_bool_false : term
 
-val fs_tuple : int -> lsymbol   (* n-tuple *)
+val to_prop : term -> term
+(** [to_prop t] converts the term [t] of type [bool] or [prop] into a
+   term of type [prop]. Raises a typing error if [t] is not a Boolean
+   term. *)
+
+(** {3 Tuples} *)
+
+val fs_tuple : int -> lsymbol
+(** n-tuple *)
+
 val t_tuple : term list -> term
 
 val is_fs_tuple : lsymbol -> bool
 val is_fs_tuple_id : ident -> int option
 
-val fs_func_app : lsymbol  (* higher-order application symbol *)
+(** {3 Higher order} *)
 
-val t_func_app : term -> term -> term  (* value-typed application *)
-val t_pred_app : term -> term -> term  (* prop-typed application *)
+val fs_func_app : lsymbol
+(** higher-order application symbol *)
 
-val t_func_app_l : term -> term list -> term  (* value-typed application *)
-val t_pred_app_l : term -> term list -> term  (* prop-typed application *)
+val t_func_app : term -> term -> term
+(** value-typed application *)
 
-val to_prop : term -> term
-(** [to_prop t] converts the term of type [bool] or [prop] into a term of type [prop].
-    raises a typing error if [t] is not a Boolean term. *)
+val t_pred_app : term -> term -> term
+(** prop-typed application *)
+
+val t_func_app_l : term -> term list -> term
+(** value-typed application *)
+
+val t_pred_app_l : term -> term list -> term
+(** prop-typed application *)
+
+(** {3 well-founded relations} *)
+
+val ps_acc : lsymbol
+(** [acc r x] means [x] is accessible for relation [r] *)
+
+val ps_wf : lsymbol
+(** [well_founded r] means relation [r] is well-founded, that is, all
+   elements are accessible *)
 
 (** {2 Lambda-term manipulation} *)
 
@@ -599,3 +630,10 @@ val t_case_fold :
 
 val t_occurs  : term -> term -> bool
 val t_replace : term -> term -> term -> term
+
+val remove_unused_in_term : bool -> term -> term
+(** [remove_unused_in_term polarity t] removes from [t] the
+   occurrences and uses of symbols marked with attribute
+   [Ident.unused_attr]. [polarity] is the polarity of [t]. Does
+   nothing on sub-terms where polarity cannot be determined, so there
+   might be some unused symbols left. *)

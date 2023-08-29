@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -55,11 +55,11 @@ and dpattern_node =
 
 type dbinop =
   | DTand | DTand_asym | DTor | DTor_asym | DTimplies | DTiff | DTby | DTso
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 type dquant =
   | DTforall | DTexists | DTlambda
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 type dbinder = preid option * dty * Loc.position option
 
@@ -119,7 +119,10 @@ val dpattern : ?loc:Loc.position -> dpattern_node -> dpattern
 val dterm : Coercion.t -> ?loc:Loc.position -> dterm_node -> dterm
 
 (** Unused variables *)
-val debug_ignore_unused_var : Debug.flag
+val warn_unused_variable : Loc.warning_id
+
+val warn_exists_implies : Loc.warning_id
+
 val attr_w_unused_var_no : attribute
 
 (* Emit a warning if the variable is unused *)

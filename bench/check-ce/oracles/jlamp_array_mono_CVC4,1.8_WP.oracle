@@ -2,7 +2,7 @@ File bench/check-ce/jlamp_array_mono.mlw:
 Goal array'vc.
 Prover result is: Valid (305 steps).
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Precondition of `f` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `f` cannot be evaluated)
@@ -19,8 +19,8 @@ File jlamp_array_mono.mlw:
     to_int :
       t
       ->
-      int = fun bOUND_VARIABLE_406 ->
-             if {Array.to_int => 3} = bOUND_VARIABLE_406 then 3 else 2
+      int = fun bOUND_VARIABLE_4061 ->
+             if {Array.to_int => 3} = bOUND_VARIABLE_4061 then 3 else 2
   Line 11:
     two : t = {Array.to_int => 2}
   Line 14:
@@ -42,7 +42,8 @@ File jlamp_array_mono.mlw:
       ->
       t
       ->
-      array = fun bOUND_VARIABLE_440 bOUND_VARIABLE_441 bOUND_VARIABLE_442 ->
+      array = fun bOUND_VARIABLE_4401 bOUND_VARIABLE_4411
+               bOUND_VARIABLE_4421 ->
                {Array.elts =
                 [|42 => {Array.to_int => 3}; _ => {Array.to_int => 2}|];
                 Array.length = 0}
@@ -62,7 +63,7 @@ File jlamp_array_mono.mlw:
                [|42 => {Array.to_int => 3}; _ => {Array.to_int => 2}|];
                Array.length = 0}
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Precondition of `f` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `f` cannot be evaluated)
@@ -79,8 +80,8 @@ File jlamp_array_mono.mlw:
     to_int :
       t
       ->
-      int = fun bOUND_VARIABLE_495 ->
-             if {Array.to_int => 3} = bOUND_VARIABLE_495 then 3 else 2
+      int = fun bOUND_VARIABLE_4951 ->
+             if {Array.to_int => 3} = bOUND_VARIABLE_4951 then 3 else 2
   Line 11:
     two : t = {Array.to_int => 2}
   Line 14:
@@ -91,8 +92,8 @@ File jlamp_array_mono.mlw:
       ->
       int
       ->
-      t = fun bOUND_VARIABLE_510 ->
-           if {Array.elts = [|_ => {Array.to_int => 3}|]; Array.length = 0} = bOUND_VARIABLE_510
+      t = fun bOUND_VARIABLE_5101 ->
+           if {Array.elts = [|_ => {Array.to_int => 3}|]; Array.length = 0} = bOUND_VARIABLE_5101
            then [|_ => {Array.to_int => 3}|]
            else [|42 => {Array.to_int => 2}; _ => {Array.to_int => 3}|]
   Line 19:
@@ -105,7 +106,8 @@ File jlamp_array_mono.mlw:
       ->
       t
       ->
-      array = fun bOUND_VARIABLE_532 bOUND_VARIABLE_533 bOUND_VARIABLE_534 ->
+      array = fun bOUND_VARIABLE_5321 bOUND_VARIABLE_5331
+               bOUND_VARIABLE_5341 ->
                {Array.elts =
                 [|42 => {Array.to_int => 2}; _ => {Array.to_int => 3}|];
                 Array.length = 0}
@@ -136,7 +138,7 @@ File "bench/check-ce/jlamp_array_mono.mlw", line 54, characters 4-16:
 Sub-goal Index in array bounds of goal g'vc.
 Prover result is: Valid (560 steps).
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Precondition of `g` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `g` cannot be evaluated)
@@ -156,8 +158,8 @@ File jlamp_array_mono.mlw:
     to_int :
       t
       ->
-      int = fun bOUND_VARIABLE_479 ->
-             if {Array.to_int => 3} = bOUND_VARIABLE_479 then 3 else 2
+      int = fun bOUND_VARIABLE_4791 ->
+             if {Array.to_int => 3} = bOUND_VARIABLE_4791 then 3 else 2
   Line 11:
     two : t = {Array.to_int => 2}
   Line 14:
@@ -179,7 +181,8 @@ File jlamp_array_mono.mlw:
       ->
       t
       ->
-      array = fun bOUND_VARIABLE_508 bOUND_VARIABLE_509 bOUND_VARIABLE_510 ->
+      array = fun bOUND_VARIABLE_5081 bOUND_VARIABLE_5091
+               bOUND_VARIABLE_5103 ->
                {Array.elts =
                 [|17 => {Array.to_int => 3}; _ => {Array.to_int => 2}|];
                 Array.length = 43}
@@ -218,7 +221,7 @@ File "bench/check-ce/jlamp_array_mono.mlw", line 60, characters 4-16:
 Sub-goal Index in array bounds of goal h'vc.
 Prover result is: Valid (621 steps).
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Precondition of `h` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Precondition of `h` cannot be evaluated)
@@ -235,8 +238,8 @@ File jlamp_array_mono.mlw:
     to_int :
       t
       ->
-      int = fun bOUND_VARIABLE_519 ->
-             if {Array.to_int => 3} = bOUND_VARIABLE_519 then 3 else 2
+      int = fun bOUND_VARIABLE_5193 ->
+             if {Array.to_int => 3} = bOUND_VARIABLE_5193 then 3 else 2
   Line 11:
     two : t = {Array.to_int => 2}
   Line 14:
@@ -247,11 +250,11 @@ File jlamp_array_mono.mlw:
       ->
       int
       ->
-      t = fun bOUND_VARIABLE_534 ->
+      t = fun bOUND_VARIABLE_5343 ->
            if {Array.elts =
                [|17 => {Array.to_int => 3}; 42 => {Array.to_int => 2};
                _ => {Array.to_int => 2}|];
-               Array.length = 43} = bOUND_VARIABLE_534
+               Array.length = 43} = bOUND_VARIABLE_5343
            then [|17 => {Array.to_int => 3}; 42 => {Array.to_int => 2};
                 _ => {Array.to_int => 2}|]
            else [|42 => {Array.to_int => 2}; _ => {Array.to_int => 2}|]
@@ -265,7 +268,8 @@ File jlamp_array_mono.mlw:
       ->
       t
       ->
-      array = fun bOUND_VARIABLE_556 bOUND_VARIABLE_557 bOUND_VARIABLE_558 ->
+      array = fun bOUND_VARIABLE_5561 bOUND_VARIABLE_5571
+               bOUND_VARIABLE_5581 ->
                {Array.elts =
                 [|42 => {Array.to_int => 2}; _ => {Array.to_int => 2}|];
                 Array.length = 43}

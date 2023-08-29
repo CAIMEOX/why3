@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because missing value for return value of call at "WHY3DATA/stdlib/mach/int.mlw", line 432, character 22 to line 433, character 45)
   - Abstract RAC: INCOMPLETE (terminated because missing value for return value of call at "WHY3DATA/stdlib/mach/int.mlw", line 432, character 22 to line 433, character 45)

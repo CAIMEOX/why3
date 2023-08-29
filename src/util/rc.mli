@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -60,6 +60,7 @@ exception IntExpected of string * rc_value
 exception BoolExpected of string * rc_value
 (** [BoolExpected key value] is raised if a boolean was expected. *)
 
+val warn_missing_field: Loc.warning_id
 
 (** {2 RC API} *)
 
@@ -114,6 +115,10 @@ val set_simple_family : t -> string -> simple_family -> t
 (** [set_simple_family rc name family] adds all the section in [family]
     using the associated [string] as argument of the family [name] in [rc].
     It overwrites any former section of family [name]. *)
+
+val get_float : ?default:float -> section -> string -> float
+
+val set_float : ?default:float -> section -> string -> float -> section
 
 val get_int : ?default:int -> section -> string -> int
 (** [get_int ?default section key] returns the integer value associated to key [key].

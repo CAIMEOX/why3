@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -59,7 +59,7 @@ let convert_prover_answer (pa: prover_answer) =
 
 let convert_limit (l: Call_provers.resource_limit) =
   Record
-    ["limit_time", Int l.Call_provers.limit_time;
+    ["limit_time", Float l.Call_provers.limit_time;
      "limit_mem", Int l.Call_provers.limit_mem;
      "limit_steps", Int l.Call_provers.limit_steps]
 
@@ -172,6 +172,12 @@ let parse_strat j =
   | String "Clever" -> Clever
   | _ -> assert false
 
+let convert_config_param (p : config_param)  =
+  match p with
+  | Max_tasks m -> ["param", String "max_tasks"; "value", Int m]
+  | Timelimit f -> ["param", String "timelimit"; "value", Float f]
+  | Memlimit m ->  ["param", String "memlimit"; "value", Int m]
+
 let convert_request (r: ide_request): Json_base.json =
   Record (
   match r with
@@ -185,16 +191,16 @@ let convert_request (r: ide_request): Json_base.json =
   | Save_file_req (f,_) ->
       ["ide_request", String "Save_file_req";
        "file", String f]
-  | Set_config_param(s,n) ->
-      ["ide_request", String "Set_config_param";
-       "param", String s; "value", Int n]
+  | Set_config_param p ->
+      ["ide_request", String "Set_config_param"] @ convert_config_param p
   | Set_prover_policy(p,u) ->
       ["ide_request", String "Set_prover_policy"] @
         convert_prover_aux "" p @ convert_policy u
-  | Get_task(n,b,loc) ->
+  | Get_task(n,b,show_uses_clones_metas,loc) ->
       ["ide_request", String "Get_task";
        "node_ID", Int n;
        "full_context", Bool b;
+       "show_uses_clones_metas", Bool show_uses_clones_metas;
        "loc", Bool loc]
   | Get_file_contents s ->
       ["ide_request", String "Get_file_contents";
@@ -219,6 +225,8 @@ let convert_request (r: ide_request): Json_base.json =
       ["ide_request", String "Unfocus_req"]
   | Save_req ->
       ["ide_request", String "Save_req"]
+  | Export_as_zip ->
+      ["ide_request", String "Export_as_zip"]
   | Reload_req ->
       ["ide_request", String "Reload_req"]
   | Exit_req ->
@@ -444,7 +452,7 @@ exception NotLimit
 
 let parse_limit_from_json (j: json) =
   try
-    let t = get_int_field j "limit_time" in
+    let t = get_float_field j "limit_time" in
     let m = get_int_field j "limit_mem" in
     let s = get_int_field j "limit_steps" in
     {limit_time = t; limit_mem = m; limit_steps = s}
@@ -470,8 +478,13 @@ let parse_request (constr: string) j =
 
   | "Set_config_param" ->
     let s = get_string_field j "param" in
-    let n = get_int_field j "value" in
-    Set_config_param(s,n)
+    let p = begin match s with
+      | "max_tasks" -> Max_tasks (get_int_field j "value")
+      | "timelimit" -> Timelimit (get_float_field j "value")
+      | "memlimit" -> Memlimit (get_int_field j "value")
+      | _ -> raise (NotRequest constr)
+    end in
+    Set_config_param p
 
   | "Set_prover_policy" ->
     let p = parse_prover_from_json "" j in
@@ -494,8 +507,9 @@ let parse_request (constr: string) j =
   | "Get_task" ->
     let n = get_int_field j "node_ID" in
     let b = get_bool_opt (get_field j "full_context") false in
+    let show_uses_clones_metas = get_bool_opt (get_field j "show_uses_clones_metas") false in
     let loc = get_bool_opt (get_field j "loc") false in
-    Get_task(n,b,loc)
+    Get_task(n,b,show_uses_clones_metas,loc)
 
   | "Remove_subtree" ->
     let n = get_int_field j "node_ID" in
@@ -512,6 +526,8 @@ let parse_request (constr: string) j =
     Interrupt_req
   | "Save_req" ->
     Save_req
+  | "Export_as_zip" ->
+    Export_as_zip
   | "Reload_req" ->
     Reload_req
   | "Reset_proofs_req" ->

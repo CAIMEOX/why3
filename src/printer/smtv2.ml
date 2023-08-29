@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -201,6 +201,8 @@ type info = {
   info_printer : ident_printer;
   mutable type_coercions : Sls.t Mty.t;
   mutable type_fields : (lsymbol list) Mty.t;
+  mutable type_sorts  : tysymbol Mstr.t;
+  mutable ty_tysymbol : ty Mts.t;
   info_version : version;
   meta_model_projection : Sls.t;
   meta_record_def : Sls.t;
@@ -212,6 +214,7 @@ type info = {
   info_incremental: bool;
   info_set_incremental: bool;
   info_supports_reason_unknown : bool;
+  info_supports_minimize: bool;
   mutable info_labels: Sattr.t Mstr.t;
   mutable incr_list_axioms: (prsymbol * term) list;
   mutable incr_list_ldecls: (lsymbol * vsymbol list * term) list;
@@ -257,7 +260,10 @@ let rec print_type info fmt ty = match ty.ty_node with
       end
   | Tyapp (ts, l) ->
       begin match query_syntax info.info_syn ts.ts_name, l with
-      | Some s, _ -> syntax_arguments s (print_type info) fmt l
+      | Some s, _ ->
+        info.type_sorts <- Mstr.add s ts info.type_sorts;
+        info.ty_tysymbol <- Mts.add ts ty info.ty_tysymbol;
+        syntax_arguments s (print_type info) fmt l
       | None, [] -> print_ident info fmt ts.ts_name
       | None, _ -> fprintf fmt "(%a %a)" (print_ident info) ts.ts_name
           (print_list space (print_type info)) l
@@ -355,28 +361,49 @@ let rec print_term info fmt t =
     | _ -> assert false (* cannot happen because check_for_counterexample is true *)
     end;
 
+  begin
+   let ty = t.t_ty in
+    match ty with
+    | None -> ()
+    | Some ty ->
+      match ty.ty_node with
+      | Tyvar _ -> ()
+      | Tyapp (ts, _) ->
+    info.ty_tysymbol <- Mts.add ts ty info.ty_tysymbol
+  end;
+
   check_enter_vc_term t info.info_in_goal info.info_vc_term;
 
   let () = match t.t_node with
   | Tconst c ->
       let ts = match t.t_ty with
-        | Some { ty_node = Tyapp (ts, []) } -> ts
+        | Some ({ ty_node = Tyapp (ts, []) } as ty) ->
+          info.ty_tysymbol <- Mts.add ts ty info.ty_tysymbol;
+          ts
         | _ -> assert false (* impossible *) in
       (* look for syntax literal ts in driver *)
       begin match query_syntax info.info_rliteral ts.ts_name, c with
         | Some st, Constant.ConstInt c ->
+          info.type_sorts <- Mstr.add st ts info.type_sorts;
           syntax_range_literal st fmt c
         | Some st, Constant.ConstReal c ->
+          info.type_sorts <- Mstr.add st ts info.type_sorts;
           let fp = match ts.ts_def with
             | Float fp -> fp
             | _ -> assert false in
           syntax_float_literal st fp fmt c
         | _, Constant.ConstStr _
-        | None, _ -> Constant.print number_format escape fmt c
-        (* TODO/FIXME: we must assert here that the type is either
-            ty_int or ty_real, otherwise it makes no sense to print
-            the literal. Do we ensure that preserved literal types
-            are exactly those that have a dedicated syntax? *)
+        | None, _ ->
+            (* we must check here that the type is either ty_int or
+               ty_real, otherwise it makes no sense to print the
+               literal. This may happen since we can't ensure that
+               preserved literal types are exactly those that have a
+               dedicated syntax rule *)
+            if ts_equal ts ts_int || ts_equal ts ts_real || ts_equal ts ts_str then
+              Constant.print number_format escape fmt c
+            else
+              unsupportedTerm t
+                "smtv2: don't know how to print this literal, consider adding a syntax rule in the driver"
       end
   | Tvar v -> print_var info fmt v
   | Tapp (ls, tl) ->
@@ -622,6 +649,8 @@ and print_triggers info fmt = function
 let print_type_decl info fmt ts =
   if is_alias_type_def ts.ts_def then () else
   if Mid.mem ts.ts_name info.info_syn then () else
+  let sort_name = sprintf "%a" (print_ident info) ts.ts_name in
+  info.type_sorts <- Mstr.add sort_name ts info.type_sorts;
   fprintf fmt "(declare-sort %a %i)@\n@\n"
     (print_ident info) ts.ts_name (List.length ts.ts_args)
 
@@ -789,15 +818,22 @@ let print_prop_decl vc_loc vc_attrs env printing_info info fmt k pr f = match k 
 
       let model_list = print_info_model info in
 
+      let type_sorts =
+        Mstr.map_filter
+          (fun ts -> Mts.find_opt ts info.ty_tysymbol)
+          info.type_sorts
+      in
+
       printing_info := Some {
         why3_env = env;
         vc_term_loc = vc_loc;
         vc_term_attrs = vc_attrs;
         queried_terms = model_list;
-        Printer.type_coercions = info.type_coercions;
-        Printer.type_fields = info.type_fields;
-        Printer.record_fields = info.record_fields;
-        Printer.constructors = info.constructors;
+        type_coercions = info.type_coercions;
+        type_fields = info.type_fields;
+        type_sorts = type_sorts;
+        record_fields = info.record_fields;
+        constructors = info.constructors;
         set_str = info.info_labels;
       }
   | Plemma -> assert false
@@ -855,6 +891,8 @@ let print_constructor_decl info is_record fmt (ls,args) =
 
 let print_data_decl info fmt (ts,cl) =
   let is_record = match cl with [_] -> true | _ -> false in
+  let sort_name = sprintf "%a" (print_ident info) ts.ts_name in
+  info.type_sorts <- Mstr.add sort_name ts info.type_sorts;
   fprintf fmt "@[(%a@ %a)@]"
     (print_ident info) ts.ts_name
     (print_list space (print_constructor_decl info is_record)) cl
@@ -871,15 +909,46 @@ let print_data_def info fmt (ts,cl) =
       (print_list space (print_constructor_decl info is_record)) cl
 
 let print_sort_decl info fmt (ts,_) =
+  let sort_name = sprintf "%a" (print_ident info) ts.ts_name in
+  info.type_sorts <- Mstr.add sort_name ts info.type_sorts;
   fprintf fmt "@[(%a %d)@]"
     (print_ident info) ts.ts_name
     (List.length ts.ts_args)
+
+let set_produce_models fmt info =
+  if info.info_cntexample then
+    fprintf fmt "(set-option :produce-models true)@\n"
+
+let set_incremental fmt info =
+  if info.info_set_incremental then
+    fprintf fmt "(set-option :incremental true)@\n"
+
+let meta_counterexmp_need_push =
+  Theory.register_meta_excl "counterexample_need_smtlib_push" []
+                            ~desc:"Internal@ use@ only"
+
+let meta_incremental =
+  Theory.register_meta_excl "meta_incremental" []
+                            ~desc:"Internal@ use@ only"
+
+let meta_supports_minimize =
+  Theory.register_meta_excl "supports_smtlib_minimize" []
+                            ~desc:"solver supports SMTLIB `(minimize term)`"
+
+let smtlib_minimize_attr = Ident.create_attribute "smtlib:minimize"
+
+let meta_supports_reason_unknown =
+  Theory.register_meta_excl "supports_smt_get_info_unknown_reason" []
+                            ~desc:"Internal@ use@ only"
+
 
 let print_decl vc_loc vc_attrs env printing_info info fmt d =
   match d.d_node with
   | Dtype ts ->
       print_type_decl info fmt ts
-  | Ddata [(ts,_)] when query_syntax info.info_syn ts.ts_name <> None -> ()
+  | Ddata [(ts,_)] when query_syntax info.info_syn ts.ts_name <> None ->
+      let st = Option.get (query_syntax info.info_syn ts.ts_name) in
+      info.type_sorts <- Mstr.add st ts info.type_sorts
   | Ddata dl ->
       begin match info.info_version with
       | V20 ->
@@ -907,30 +976,14 @@ let print_decl vc_loc vc_attrs env printing_info info fmt d =
         end
     end
   | Dind _ -> unsupportedDecl d
-      "smtv2: inductive definitions are not supported"
+                "smtv2: inductive definitions are not supported"
+  | Dprop(Paxiom,_,({t_node = Tapp(_ps,[t]); t_attrs = a }))
+    when Sattr.mem smtlib_minimize_attr a ->
+      if info.info_supports_minimize then
+        fprintf fmt "@[<v2>(minimize %a)@]@\n@\n" (print_term info) t
   | Dprop (k,pr,f) ->
       if Mid.mem pr.pr_name info.info_syn then () else
       print_prop_decl vc_loc vc_attrs env printing_info info fmt k pr f
-
-let set_produce_models fmt info =
-  if info.info_cntexample then
-    fprintf fmt "(set-option :produce-models true)@\n"
-
-let set_incremental fmt info =
-  if info.info_set_incremental then
-    fprintf fmt "(set-option :incremental true)@\n"
-
-let meta_counterexmp_need_push =
-  Theory.register_meta_excl "counterexample_need_smtlib_push" [Theory.MTstring]
-                            ~desc:"Internal@ use@ only"
-
-let meta_incremental =
-  Theory.register_meta_excl "meta_incremental" [Theory.MTstring]
-                            ~desc:"Internal@ use@ only"
-
-let meta_supports_reason_unknown =
-  Theory.register_meta_excl "supports_smt_get_info_unknown_reason" [Theory.MTstring]
-                            ~desc:"Internal@ use@ only"
 
 
 let print_task version args ?old:_ fmt task =
@@ -948,6 +1001,10 @@ let print_task version args ?old:_ fmt task =
     let m = Task.find_meta_tds task meta_supports_reason_unknown in
     not (Theory.Stdecl.is_empty m.Task.tds_set)
   in
+  let supports_minimize =
+    let m = Task.find_meta_tds task meta_supports_minimize in
+    not (Theory.Stdecl.is_empty m.Task.tds_set)
+  in
   let vc_loc = Intro_vc_vars_counterexmp.get_location_of_vc task in
   let vc_attrs = (Task.task_goal_fmla task).t_attrs in
   let vc_info = {vc_inside = false; vc_loc; vc_func_name = None} in
@@ -960,6 +1017,8 @@ let print_task version args ?old:_ fmt task =
     info_printer = ident_printer ();
     type_coercions = Mty.empty;
     type_fields = Mty.empty;
+    type_sorts = Mstr.empty;
+    ty_tysymbol = Mts.empty;
     info_version = version;
     meta_model_projection = Task.on_tagged_ls Theory.meta_projection task;
     meta_record_def = Task.on_tagged_ls Theory.meta_record task;
@@ -975,6 +1034,7 @@ let print_task version args ?old:_ fmt task =
     *)
     info_set_incremental = not need_push && incremental;
     info_supports_reason_unknown = supports_reason_unknown;
+    info_supports_minimize = supports_minimize;
     incr_list_axioms = [];
     incr_list_ldecls = [];
     }

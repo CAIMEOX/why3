@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -144,7 +144,7 @@ let result1 : Call_provers.prover_result =
        task1)
 
 (* prints Alt-Ergo answer *)
-let () = printf "@[On task 1, Alt-Ergo answers %a@."
+let () = printf "@[On task 1, Alt-Ergo answers %a@]@."
     (Call_provers.print_prover_result ?json:None) result1
 (* END{callprover} *)
 
@@ -154,14 +154,15 @@ let result2 : Call_provers.prover_result =
     (Driver.prove_task
        ~command:alt_ergo.Whyconf.command
        ~config:main
-       ~limit:{Call_provers.empty_limit with Call_provers.limit_time = 10}
+       ~limit:{Call_provers.empty_limit with Call_provers.limit_time = 10.}
        alt_ergo_driver
        task2)
 
-let () = printf "@[On task 2, Alt-Ergo answers %a in %5.2f seconds@."
+let () = printf "@[On task 2, Alt-Ergo answers %a in %.2f seconds, %d steps@]@."
   Call_provers.print_prover_answer result1.Call_provers.pr_answer
-  result1.Call_provers.pr_time
+  result1.Call_provers.pr_time result1.Call_provers.pr_steps
 (* END{calltimelimit} *)
+
 
 
 
@@ -206,7 +207,7 @@ let result3 =
        alt_ergo_driver
        task3)
 
-let () = printf "@[On task 3, Alt-Ergo answers %a@."
+let () = printf "@[On task 3, Alt-Ergo answers %a@]@."
   (Call_provers.print_prover_result ?json:None) result3
 
 (* quantifiers: let's build "forall x:int. x*x >= 0" *)
@@ -247,7 +248,7 @@ let result4 =
        alt_ergo_driver
        task4)
 
-let () = printf "@[On task 4, Alt-Ergo answers %a@."
+let () = printf "@[On task 4, Alt-Ergo answers %a@]@."
   (Call_provers.print_prover_result ?json:None) result4
 
 (* build a theory with all these goals *)
@@ -328,7 +329,7 @@ let () =
   printf "Tasks are:@.";
   let _ =
     List.fold_left
-      (fun i t -> printf "Task %d: %a@." i Pretty.print_task t; i+1)
+      (fun i t -> printf "@[<v 0>== Task %d ==@\n@\n%a@]@." i Pretty.print_task t; i+1)
       1 my_tasks
   in ()
 (* END{printalltasks} *)
