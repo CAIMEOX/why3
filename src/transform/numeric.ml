@@ -121,58 +121,6 @@ let one =
 
 let is_zero t = t_equal zero t
 let is_one t = t_equal one t
-let add t1 t2 = fs_app (Opt.get !symbols).add [ t1; t2 ] ty_real
-
-let add_simp t1 t2 =
-  if is_zero t1 then
-    t2
-  else if is_zero t2 then
-    t1
-  else
-    add t1 t2
-
-let sub t1 t2 = fs_app (Opt.get !symbols).sub [ t1; t2 ] ty_real
-
-let sub_simp t1 t2 =
-  if is_zero t1 then
-    fs_app (Opt.get !symbols).minus [ t2 ] ty_real
-  else if is_zero t2 then
-    t1
-  else
-    sub t1 t2
-
-let mul t1 t2 = fs_app (Opt.get !symbols).mul [ t1; t2 ] ty_real
-
-let mul_simp t1 t2 =
-  if is_zero t1 || is_zero t2 then
-    zero
-  else if is_one t1 then
-    t2
-  else if is_one t2 then
-    t1
-  else
-    mul t1 t2
-
-let div t1 t2 = fs_app (Opt.get !symbols).div [ t1; t2 ] ty_real
-
-let div_simp t1 t2 =
-  if is_zero t1 then
-    zero
-  else if is_one t2 then
-    t1
-  else
-    div t1 t2
-
-let ( +. ) x y = add x y
-let ( -. ) x y = sub x y
-let ( *. ) x y = mul x y
-let ( /. ) x y = div x y
-let ( ++. ) x y = add_simp x y
-let ( --. ) x y = sub_simp x y
-let ( **. ) x y = mul_simp x y
-let ( //. ) x y = div_simp x y
-let ( <=. ) x y = ps_app (Opt.get !symbols).le [ x; y ]
-let ( <. ) x y = ps_app (Opt.get !symbols).lt [ x; y ]
 
 let abs t =
   let symbols = Opt.get !symbols in
@@ -229,6 +177,63 @@ let is_ieee_pre ls =
   || ls_equal ls symbols.double_symbols.sub_pre
   || ls_equal ls symbols.double_symbols.mul_pre
   || ls_equal ls symbols.double_symbols.div_pre
+
+let add t1 t2 = fs_app (Opt.get !symbols).add [ t1; t2 ] ty_real
+
+let add_simp t1 t2 =
+  if is_zero t1 then
+    t2
+  else if is_zero t2 then
+    t1
+  else
+    add t1 t2
+
+let sub t1 t2 = fs_app (Opt.get !symbols).sub [ t1; t2 ] ty_real
+
+let sub_simp t1 t2 =
+  if is_zero t1 then
+    fs_app (Opt.get !symbols).minus [ t2 ] ty_real
+  else if is_zero t2 then
+    t1
+  else
+    sub t1 t2
+
+let mul t1 t2 = fs_app (Opt.get !symbols).mul [ t1; t2 ] ty_real
+
+let mul_simp t1 t2 =
+  if is_zero t1 || is_zero t2 then
+    zero
+  else if is_one t1 then
+    t2
+  else if is_one t2 then
+    t1
+  else
+    match (t1.t_node, t2.t_node) with
+    | Tapp (ls1, [ t1 ]), Tapp (ls2, [ t2 ]) when is_abs_ls ls1 && is_abs_ls ls2
+      ->
+      abs (mul t1 t2)
+    | _ -> mul t1 t2
+
+let div t1 t2 = fs_app (Opt.get !symbols).div [ t1; t2 ] ty_real
+
+let div_simp t1 t2 =
+  if is_zero t1 then
+    zero
+  else if is_one t2 then
+    t1
+  else
+    div t1 t2
+
+let ( +. ) x y = add x y
+let ( -. ) x y = sub x y
+let ( *. ) x y = mul x y
+let ( /. ) x y = div x y
+let ( ++. ) x y = add_simp x y
+let ( --. ) x y = sub_simp x y
+let ( **. ) x y = mul_simp x y
+let ( //. ) x y = div_simp x y
+let ( <=. ) x y = ps_app (Opt.get !symbols).le [ x; y ]
+let ( <. ) x y = ps_app (Opt.get !symbols).lt [ x; y ]
 
 let is_ty_float ty =
   let symbols = Opt.get !symbols in
@@ -450,78 +455,85 @@ let apply_theorems env info task =
                     _,
                     {
                       t_node =
-                        Tbinop
-                          ( Tor,
-                            {
-                              t_node =
-                                Tapp
-                                  ( _,
-                                    [
-                                      {
-                                        t_node =
-                                          Tapp
-                                            ( _,
-                                              [
-                                                {
-                                                  t_node =
-                                                    Tapp
-                                                      ( _,
-                                                        [
-                                                          {
-                                                            t_node =
-                                                              Tapp (_, [ t ]);
-                                                          };
-                                                          _;
-                                                        ] );
-                                                };
-                                              ] );
-                                      };
-                                      _;
-                                    ] );
-                            },
-                            _ );
+                        Tapp
+                          ( _,
+                            [
+                              {
+                                t_node =
+                                  Tapp
+                                    ( _,
+                                      [
+                                        {
+                                          t_node =
+                                            Tapp
+                                              ( _,
+                                                [
+                                                  { t_node = Tapp (_, [ t ]) };
+                                                  _;
+                                                ] );
+                                        };
+                                      ] );
+                              };
+                              _;
+                            ] );
                     } );
-            } ) ->
+            } ) -> (
         let t_info = get_info info t in
         let _, t1, t2 = Opt.get t_info.ieee_post in
         let args = List.fold_left get_float_name "" [ t1; t2 ] in
 
         let task_list = Trans.apply_transform "split_vc" env task in
-        task_list
-      (* let l = *)
-      (*   match task_list with *)
-      (*   | [ t1; _ ] -> assert false *)
-      (*   | _ -> assert false *)
-      (* in *)
-      (* List.map *)
-      (*   (Trans.apply (Trans.goal (add_expl "split vc of mult"))) *)
-      (*   task_list *)
-      (* let task_list = *)
-      (*   Trans.apply_transform_args "apply" env *)
-      (*     [ "mul_combine"; "with"; args ] *)
-      (*     naming_table "" task *)
-      (* in *)
-      (* List.map *)
-      (*   (Trans.apply (Trans.goal (add_expl "ieee mul error"))) *)
-      (*   task_list *)
-      (* let args = *)
-      (*   match t.t_node with *)
-      (*   | Tapp (ls, [ t1; _ ]) when is_ineq_ls ls -> ( *)
-      (*     match t1.t_node with *)
-      (*     | Tapp (ls, [ t ]) when is_abs_ls ls -> ( *)
-      (*       match t.t_node with *)
-      (*       | Tapp (ls, [ t1; _ ]) when is_sub_ls ls -> ( *)
-      (*         match t1.t_node with *)
-      (*         | Tapp (ls, [ t ]) when is_to_real_ls ls -> *)
-      (*           let t_info = get_info info t in *)
-      (*           let _, t1, t2 = Opt.get t_info.ieee_post in *)
-      (*           let get_float_name = get_float_name naming_table.Trans.printer in *)
-      (*           List.fold_left get_float_name "" [ t1; t2 ] *)
-      (*         | _ -> assert false) *)
-      (*       | _ -> assert false) *)
-      (*     | _ -> assert false) *)
-      (*   | Tbinop (Timplies, f1, f2) -> assert false *)
+        (* let task_list = *)
+        (*   Trans.apply_transform_args "apply" env *)
+        (*     [ "mul_combine"; "with"; args ] *)
+        (*     naming_table "" task *)
+        (* in *)
+        let task_list =
+          List.map
+            (Trans.apply (Trans.goal (add_expl "split vc of mult")))
+            task_list
+        in
+        match task_list with
+        | [ a; b; c; task ] ->
+          [ a; b; c ]
+          @ Trans.apply_transform_args "apply" env
+              [ "mul_combine"; "with"; args ]
+              naming_table "" task
+        | _ -> failwith (Format.asprintf "%d" (List.length task_list)))
       | _ -> assert false
+    (* task_list *)
+    (* task_list *)
+    (* let l = *)
+    (*   match task_list with *)
+    (*   | [ t1; _ ] -> assert false *)
+    (*   | _ -> assert false *)
+    (* in *)
+    (* List.map *)
+    (*   (Trans.apply (Trans.goal (add_expl "split vc of mult"))) *)
+    (*   task_list *)
+    (* let task_list = *)
+    (*   Trans.apply_transform_args "apply" env *)
+    (* in *)
+    (* List.map *)
+    (*   (Trans.apply (Trans.goal (add_expl "ieee mul error"))) *)
+    (*   task_list *)
+    (* let args = *)
+    (*   match t.t_node with *)
+    (*   | Tapp (ls, [ t1; _ ]) when is_ineq_ls ls -> ( *)
+    (*     match t1.t_node with *)
+    (*     | Tapp (ls, [ t ]) when is_abs_ls ls -> ( *)
+    (*       match t.t_node with *)
+    (*       | Tapp (ls, [ t1; _ ]) when is_sub_ls ls -> ( *)
+    (*         match t1.t_node with *)
+    (*         | Tapp (ls, [ t ]) when is_to_real_ls ls -> *)
+    (*           let t_info = get_info info t in *)
+    (*           let _, t1, t2 = Opt.get t_info.ieee_post in *)
+    (*           let get_float_name = get_float_name naming_table.Trans.printer in *)
+    (*           List.fold_left get_float_name "" [ t1; t2 ] *)
+    (*         | _ -> assert false) *)
+    (*       | _ -> assert false) *)
+    (*     | _ -> assert false) *)
+    (*   | Tbinop (Timplies, f1, f2) -> assert false *)
   else
     [ task ]
 
@@ -559,7 +571,7 @@ let get_mul_forward_error prove_overflow info x y r =
           {
             no_underflow =
               (to_real x *. to_real y, eps, abs (to_real x *. to_real y), zero);
-            underflow = [ (to_real x *. to_real y, eta) ];
+            underflow = [ (to_real x *. to_real y, one) ];
           }
       in
       let attrs = Sattr.add mul_basic_attr attrs in
@@ -599,7 +611,7 @@ let get_mul_forward_error prove_overflow info x y r =
         in
         let left = abs (to_real r -. (exact_t1 *. exact_t2)) in
         let right = (rel_err *. (t1' *. t2')) +. cst_err in
-        (* let right' = (rel_err' **. t1' **. t2') ++. cst_err' in *)
+        let right' = (rel_err' **. t1' **. t2') ++. cst_err' in
         let x_underflow =
           match x_info.error with
           | None -> []
@@ -610,35 +622,34 @@ let get_mul_forward_error prove_overflow info x y r =
           | None -> []
           | Some error -> error.underflow
         in
-        (* "h" is the conjuction of all possible previous underflows on "x" and
-           "y". It will be used as hypothesis to prove "f". "f" is a conjunction
-           of all the possible bounds when an underflow occurs (either on "x",
-           "y" or on the current operation *)
         let t_or_simp f1 f2 =
           match f1.t_node with
           | Ttrue -> f2
           | _ -> t_or f1 f2
         in
-        let h, f, underflow =
-          List.fold_left
-            (fun (h, f, underflow) (t, value) ->
-              ( t_or_simp h (abs (to_real t1 -. exact_t1) <=. value),
-                t_or f (left <=. value *. abs exact_t2),
-                (t, value *. abs exact_t2) :: underflow ))
-            (t_true, left <=. eta, [])
-            x_underflow
+        (* "h" is the conjuction of all possible previous underflows on "x" and
+           "y". It will be used as hypothesis to prove "f". "f" is a conjunction
+           of all the possible bounds for the new operation when an underflow
+           occurs has previously occured *)
+        let generate_underflow_fmlas exact_t1 t1 exact_t2
+            (f_with_hyps, f, underflow) (t, value) =
+          let ineq = left <=. eta **. value **. abs exact_t2 in
+          ( t_and_simp f_with_hyps
+              (t_implies (abs (to_real t1 -. exact_t1) <=. eta **. value) ineq),
+            t_or_simp f ineq,
+            (t, value **. abs exact_t2) :: underflow )
         in
-        Format.printf "H = %a@." Pretty.print_term h;
-        let h', f, underflow =
+        let f_with_hyps, f, underflow =
           List.fold_left
-            (fun (h', f, underflow) (t, value) ->
-              ( t_or_simp h' (abs (to_real t2 -. exact_t2) <=. value),
-                t_or f (left <=. value *. abs exact_t1),
-                (t, value *. abs exact_t1) :: underflow ))
-            (t_true, f, underflow) y_underflow
+            (generate_underflow_fmlas exact_t1 t1 exact_t2)
+            (t_true, t_true, []) x_underflow
         in
-        Format.printf "H' = %a@." Pretty.print_term h';
-        let underflow = (exact_t1 *. exact_t2, eta) :: underflow in
+        let f'_with_hyps, f, underflow =
+          List.fold_left
+            (generate_underflow_fmlas exact_t2 t2 exact_t1)
+            (t_true, t_true, []) y_underflow
+        in
+        let underflow = (exact_t1 *. exact_t2, one) :: underflow in
         let info =
           add_error info r
             {
@@ -647,36 +658,52 @@ let get_mul_forward_error prove_overflow info x y r =
               underflow;
             }
         in
-        let f = t_and (t_equ (to_real r) zero) f in
-        let h = t_and (t_equ (to_real r) zero) (t_and_simp h h') in
-        let undeflow_fmla = t_implies h f in
+        (* let h_underflow = *)
+        (*   t_and (t_equ (to_real r) zero) (t_and_simp f_with_hyps h'') *)
+        (* in *)
+        (* let undeflow_fmla = *)
+        (*   t_implies h_underflow (t_and (t_equ (to_real r) zero) f) *)
+        (* in *)
+        let undeflow_fmla = t_and f_with_hyps f'_with_hyps in
         let b1 =
           abs (to_real t1 -. exact_t1) <=. (t1_factor *. t1') +. t1_cst
         in
         let b2 =
           abs (to_real t2 -. exact_t2) <=. (t2_factor *. t2') +. t2_cst
         in
-        let no_underflow_fmla =
-          t_implies (t_and b1 b2) (t_or (left <=. right) (left <=. eta))
+        let h' =
+          match x_info.error with
+          | None -> b2
+          | Some _ -> (
+            match y_info.error with
+            | None -> b1
+            | Some _ -> t_and b1 b2)
         in
+        let no_underflow_fmla = t_implies h' (left <=. right) in
         let attrs = Sattr.add mul_combine_attr attrs in
         let pr1 = create_prsymbol (id_fresh ~attrs "MulErrCombine") in
-        let pr2 = create_prsymbol (id_fresh "MulErrCombineFinal") in
-        (* let f' = t_or (left <=. right') f in *)
-        let f = t_or (left <=. right) f in
+        let pr2 = create_prsymbol (id_fresh "MulErrCombine") in
+        let f1 =
+          t_or (left <=. right)
+            (t_and (t_equ (to_real r) zero) (t_or f (left <=. eta)))
+        in
         let f3 = t_and undeflow_fmla no_underflow_fmla in
         let l =
           [
-            (* [ Decl.create_prop_decl Pgoal pr2 f2 ]; *)
             [ Decl.create_prop_decl Pgoal pr1 f3 ];
-            [ Decl.create_prop_decl Pgoal pr2 f ];
+            [ Decl.create_prop_decl Pgoal pr2 f1 ];
           ]
         in
-        (* if t_equal right right' then *)
-        (info, l)
-        (* else *)
-        (*   let pr' = create_prsymbol (id_fresh "MulErrCombine") in *)
-        (*   (info, l @ [ [ Decl.create_prop_decl Pgoal pr' f' ] ]) *)
+        if t_equal right right' then
+          (info, l)
+        else
+          (* f' is the same as f but with bounds simplified if possible *)
+          let f' =
+            t_or (left <=. right')
+              (t_and (t_equ (to_real r) zero) (t_or f (left <=. eta)))
+          in
+          let pr' = create_prsymbol (id_fresh "MulErrCombineSimplified") in
+          (info, l @ [ [ Decl.create_prop_decl Pgoal pr' f' ] ])
       in
       let combine_errors_with_multiplication =
         apply_args combine_errors_with_multiplication x x_info
