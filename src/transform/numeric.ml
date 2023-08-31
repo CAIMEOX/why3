@@ -447,8 +447,6 @@ let apply_theorems env info task =
           ( Tand,
             _,
             {
-              (* t_implies (t_and b1 b2) (t_or (left <=. right) (left <=.
-                 eta)) *)
               t_node =
                 Tbinop
                   ( Timplies,
@@ -477,63 +475,28 @@ let apply_theorems env info task =
                               _;
                             ] );
                     } );
-            } ) -> (
+            } ) ->
         let t_info = get_info info t in
         let _, t1, t2 = Opt.get t_info.ieee_post in
         let args = List.fold_left get_float_name "" [ t1; t2 ] in
 
         let task_list = Trans.apply_transform "split_vc" env task in
-        (* let task_list = *)
-        (*   Trans.apply_transform_args "apply" env *)
-        (*     [ "mul_combine"; "with"; args ] *)
-        (*     naming_table "" task *)
-        (* in *)
         let task_list =
           List.map
             (Trans.apply (Trans.goal (add_expl "split vc of mult")))
             task_list
         in
-        match task_list with
-        | [ a; b; c; task ] ->
-          [ a; b; c ]
-          @ Trans.apply_transform_args "apply" env
+        let rec f l =
+          match l with
+          | [ task ] ->
+            Trans.apply_transform_args "apply" env
               [ "mul_combine"; "with"; args ]
               naming_table "" task
-        | _ -> failwith (Format.asprintf "%d" (List.length task_list)))
+          | hd :: tl -> hd :: f tl
+          | _ -> []
+        in
+        f task_list
       | _ -> assert false
-    (* task_list *)
-    (* task_list *)
-    (* let l = *)
-    (*   match task_list with *)
-    (*   | [ t1; _ ] -> assert false *)
-    (*   | _ -> assert false *)
-    (* in *)
-    (* List.map *)
-    (*   (Trans.apply (Trans.goal (add_expl "split vc of mult"))) *)
-    (*   task_list *)
-    (* let task_list = *)
-    (*   Trans.apply_transform_args "apply" env *)
-    (* in *)
-    (* List.map *)
-    (*   (Trans.apply (Trans.goal (add_expl "ieee mul error"))) *)
-    (*   task_list *)
-    (* let args = *)
-    (*   match t.t_node with *)
-    (*   | Tapp (ls, [ t1; _ ]) when is_ineq_ls ls -> ( *)
-    (*     match t1.t_node with *)
-    (*     | Tapp (ls, [ t ]) when is_abs_ls ls -> ( *)
-    (*       match t.t_node with *)
-    (*       | Tapp (ls, [ t1; _ ]) when is_sub_ls ls -> ( *)
-    (*         match t1.t_node with *)
-    (*         | Tapp (ls, [ t ]) when is_to_real_ls ls -> *)
-    (*           let t_info = get_info info t in *)
-    (*           let _, t1, t2 = Opt.get t_info.ieee_post in *)
-    (*           let get_float_name = get_float_name naming_table.Trans.printer in *)
-    (*           List.fold_left get_float_name "" [ t1; t2 ] *)
-    (*         | _ -> assert false) *)
-    (*       | _ -> assert false) *)
-    (*     | _ -> assert false) *)
-    (*   | Tbinop (Timplies, f1, f2) -> assert false *)
   else
     [ task ]
 
@@ -658,12 +621,6 @@ let get_mul_forward_error prove_overflow info x y r =
               underflow;
             }
         in
-        (* let h_underflow = *)
-        (*   t_and (t_equ (to_real r) zero) (t_and_simp f_with_hyps h'') *)
-        (* in *)
-        (* let undeflow_fmla = *)
-        (*   t_implies h_underflow (t_and (t_equ (to_real r) zero) f) *)
-        (* in *)
         let undeflow_fmla = t_and f_with_hyps f'_with_hyps in
         let b1 =
           abs (to_real t1 -. exact_t1) <=. (t1_factor *. t1') +. t1_cst
@@ -688,6 +645,9 @@ let get_mul_forward_error prove_overflow info x y r =
             (t_and (t_equ (to_real r) zero) (t_or f (left <=. eta)))
         in
         let f3 = t_and undeflow_fmla no_underflow_fmla in
+        (* First we prove that each possible case implies a certain error bound
+           (except for eta). Then we prove that we have either one of this bound
+           at then end (this time including eta). *)
         let l =
           [
             [ Decl.create_prop_decl Pgoal pr1 f3 ];
