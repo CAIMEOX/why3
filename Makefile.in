@@ -558,6 +558,7 @@ PLUG_PARSER = genequlin dimacs
 PLUG_PRINTER =
 PLUG_TRANSFORM =
 PLUG_TPTP = tptp_parser tptp_typing tptp_lexer tptp_printer
+PLUG_COMA = coma_main
 PLUG_MOME = mome_syntax mome_parser mome_lexer mome_main
 PLUG_PYTHON = py_parser py_lexer py_main
 PLUG_MICROC = mc_parser mc_lexer mc_printer mc_main
@@ -568,9 +569,10 @@ endif
 
 PLUG_CMIONLY = tptp/tptp_ast python/py_ast microc/mc_ast cfg/cfg_ast
 
-PLUGINS = genequlin dimacs tptp mome python microc cfg
+PLUGINS = genequlin dimacs tptp coma mome python microc cfg
 
 TPTPMODULES = $(addprefix plugins/tptp/, $(PLUG_TPTP))
+COMAMODULES = $(addprefix plugins/coma/, $(PLUG_COMA))
 MOMEMODULES = $(addprefix plugins/mome/, $(PLUG_MOME))
 PYTHONMODULES = $(addprefix plugins/python/, $(PLUG_PYTHON))
 MICROCMODULES = $(addprefix plugins/microc/, $(PLUG_MICROC))
@@ -578,6 +580,9 @@ CFGMODULES = $(addprefix plugins/cfg/, $(PLUG_CFG))
 
 TPTPCMO = $(addsuffix .cmo, $(TPTPMODULES))
 TPTPCMX = $(addsuffix .cmx, $(TPTPMODULES))
+
+COMACMO = $(addsuffix .cmo, $(COMAMODULES))
+COMACMX = $(addsuffix .cmx, $(COMAMODULES))
 
 MOMECMO = $(addsuffix .cmo, $(MOMEMODULES))
 MOMECMX = $(addsuffix .cmx, $(MOMEMODULES))
@@ -605,7 +610,7 @@ endif
 PLUGMODULES = $(addprefix plugins/parser/, $(PLUG_PARSER)) \
 	      $(addprefix plugins/printer/, $(PLUG_PRINTER)) \
 	      $(addprefix plugins/transform/, $(PLUG_TRANSFORM)) \
-	      $(TPTPMODULES) $(MOMEMODULES) \
+	      $(TPTPMODULES) $(COMAMODULES) $(MOMEMODULES) \
 	      $(PYTHONMODULES) $(MICROCMODULES) $(CFGMODULES)
 
 PLUGDEP = $(addsuffix .dep, $(PLUGMODULES)) $(PLUG_CMIONLY:%=plugins/%.dep)
@@ -613,7 +618,7 @@ PLUGCMO = $(addsuffix .cmo, $(PLUGMODULES))
 PLUGCMX = $(addsuffix .cmx, $(PLUGMODULES))
 PLUGCMI = $(addsuffix .cmi, $(PLUGMODULES)) $(PLUG_CMIONLY:%=plugins/%.cmi)
 
-PLUGDIRS = parser printer transform tptp mome python microc cfg
+PLUGDIRS = parser printer transform tptp coma mome python microc cfg
 PLUGINCLUDES = $(addprefix -I plugins/, $(PLUGDIRS))
 
 ifeq (@enable_stackify@,yes)
@@ -658,6 +663,8 @@ $(PLUG_TRANSFORM:%=lib/plugins/%.cmxs): lib/plugins/%.cmxs: plugins/transform/%.
 $(PLUG_TRANSFORM:%=lib/plugins/%.cma): lib/plugins/%.cma: plugins/transform/%.cmo
 lib/plugins/tptp.cmxs: $(TPTPCMX)
 lib/plugins/tptp.cma: $(TPTPCMO)
+lib/plugins/coma.cmxs: $(COMACMX)
+lib/plugins/coma.cma: $(COMACMO)
 lib/plugins/mome.cmxs: $(MOMECMX)
 lib/plugins/mome.cma: $(MOMECMO)
 lib/plugins/python.cmxs: $(PYTHONCMX)
