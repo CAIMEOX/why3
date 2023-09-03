@@ -216,24 +216,37 @@ let vs_i = create_vsymbol (id_fresh "i") ty_int
 let vs_j = create_vsymbol (id_fresh "j") ty_int
 let vs_b = create_vsymbol (id_fresh "b") ty_bool
 
+let tv_a = tv_of_string "a"
+let vs_ia = create_vsymbol (id_fresh "i") (ty_var tv_a)
+let vs_ja = create_vsymbol (id_fresh "j") (ty_var tv_a)
+let vs_ka = create_vsymbol (id_fresh "k") (ty_var tv_a)
+let vs_la = create_vsymbol (id_fresh "l") (ty_var tv_a)
+let vs_ma = create_vsymbol (id_fresh "m") (ty_var tv_a)
+
 let hs_if = create_hsymbol (id_fresh "if") []
   (SGval (vs_b, SGcnt (hs_then, SGcnt (hs_else, SGend))))
 
 let hs_break = create_hsymbol (id_fresh "break") [] (SGval (vs_i, SGend))
-let hs_ret = create_hsymbol (id_fresh "ret") [] (SGval (vs_i, SGend))
-let hs_re0 = create_hsymbol (id_fresh "re0") [] (SGval (vs_j, SGend))
+let hs_ret = create_hsymbol (id_fresh "ret") [] (SGval (vs_ia, SGend))
+let hs_re0 = create_hsymbol (id_fresh "re0") [] (SGval (vs_ja, SGend))
 
-let hs_loop = create_hsymbol (id_fresh "loop") [] (SGval (vs_i, SGcnt (hs_ret, SGend)))
+let hs_loop = create_hsymbol (id_fresh "loop") []
+  (SGtyp (tv_a, SGval (vs_ia, SGcnt (hs_ret,
+    SGval (vs_ka, SGval (vs_la, SGval (vs_ma, SGend)))))))
 
 let expr1 =
   Edef (Edef (Edef (Edef (Edef (
-      Ecnt (Eval (Esym hs_loop, t_nat_const 17), Esym hs_break)
-  , hs_loop, Edef( Easr (t_neq (t_var vs_i) (t_nat_const 3),
+    Eval (Eval (Eval (
+      Ecnt (Eval (Etyp (Esym hs_loop, ty_int), t_nat_const 17), Esym hs_break),
+        t_nat_const 3), t_nat_const 0), t_nat_const 5)
+  , hs_loop, Edef( Easr (t_neq (t_var vs_ia) (t_var vs_ka),
       Ebbx (Ecnt (Ecnt (Eval (Esym hs_if,
-          t_if (t_equ (t_var vs_i) (t_nat_const 0)) t_bool_true t_bool_false),
-        Ecnt (Eval (Esym hs_loop, t_var vs_i), Esym hs_re0)),
-        Eval (Esym hs_re0, t_var vs_i))))
-      , hs_re0, Easr (t_equ (t_nat_const 5) (t_var vs_j), Ebbx (Eval (Esym hs_ret, t_var vs_j)))))
+          t_if (t_equ (t_var vs_ia) (t_var vs_la)) t_bool_true t_bool_false),
+        Eval (Eval (Eval (
+          Ecnt (Eval (Etyp (Esym hs_loop, ty_var tv_a), t_var vs_ia), Esym hs_re0),
+            t_var vs_la), t_var vs_ma), t_var vs_ka)),
+        Eval (Esym hs_re0, t_var vs_ia))))
+      , hs_re0, Easr (t_equ (t_var vs_ma) (t_var vs_ja), Ebbx (Eval (Esym hs_ret, t_var vs_ja)))))
   , hs_break, Easr (t_equ (t_var vs_i) (t_nat_const 42), Ebbx (Esym hs_halt)))
   , hs_if, Edef (Edef (Ehol, hs_the0, Easr (t_equ (t_var vs_b) t_bool_true, Ebbx (Esym hs_then))),
                              hs_els0, Easr (t_equ (t_var vs_b) t_bool_false, Ebbx (Esym hs_else))))
