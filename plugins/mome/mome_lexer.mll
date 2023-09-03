@@ -109,6 +109,7 @@
   let fail_brc = "token '{' cannot be implicitly closed"
   let fail_sqb = "token '[' cannot be implicitly closed"
   let fail_if  = "token 'if' cannot be implicitly closed"
+  let fail_tab = "mixed space/tab indentation"
 
   let () =
     declare_box lang INIT ~lax:true ~iend:(FAIL fail_smash) ~ends:[EOF];
@@ -270,17 +271,13 @@
     let col = pos.pos_cnum - pos.pos_bol in
     add s true t (2 * (col + shift)) pos.pos_lnum
 
-  let check_indent s lb c =
-    let pos = lexeme_start_p lb in
-    if s.lline < pos.pos_lnum then
-    match s.ichar with
-    | (' ' | '\t') as d when c <> d ->
-        Loc.errorm "mixed tab/space indentation"
+  let check_indent s c = match s.ichar with
+    | (' ' | '\t') as d when c <> d -> fail fail_tab
     | _ -> s.ichar <- c
 
 }
 
-let space = [' ' '\t' '\r']
+let space = [' ' '\t']
 let quote = '\''
 
 let bin = ['0' '1']
@@ -315,20 +312,14 @@ let op_char_123 = op_char_12 | op_char_3
 let op_char_1234 = op_char_123 | op_char_4
 
 rule token st = parse
-  | '\r'+
+  | space+
       { token st lexbuf }
-  | ' '+
-      { check_indent st lexbuf ' '; token st lexbuf }
-  | '\t'+
-      { check_indent st lexbuf '\t'; token st lexbuf }
-  | '\n'
-      { new_line lexbuf; token st lexbuf }
-  | ";;" [^ '\n' ]* '\n'
-      { new_line lexbuf; token st lexbuf }
-  | "[@" space* ([^ ' ' '\n' ']']+ (' '+ [^ ' ' '\n' ']']+)* as lbl) space* ']'
+  | ";;" [^ '\r' '\n' ]*
+      { token st lexbuf }
+  | '\r'? '\n'
+      { new_line lexbuf; start st lexbuf }
+  | "[@" space* ([^ ' ' '\t' '\r' '\n' ']']+ (' '+ [^ ' ' '\t' '\r' '\n' ']']+)* as lbl) space* ']'
       { add st lexbuf (ATTRIBUTE lbl) }
-  | '_'
-      { add st lexbuf UNDERSCORE }
   | lident as id
       { add st lexbuf (try Hashtbl.find keywords id with Not_found -> LIDENT id) }
   | core_lident as id
@@ -371,6 +362,8 @@ rule token st = parse
         add st lexbuf (REAL l) }
   | "'" (lalpha suffix as id)
       { add st lexbuf (QUOTE_LIDENT id) }
+  | "_"
+      { add st lexbuf UNDERSCORE }
   | ","
       { add st lexbuf COMMA }
   | "("
@@ -456,6 +449,16 @@ rule token st = parse
   | _ as c
       { Lexlib.illegal_character c lexbuf }
 
+and start st = parse
+  | ' '+
+      { check_indent st ' ' ; token st lexbuf }
+  | '\t'+
+      { check_indent st '\t' ; token st lexbuf }
+  | ' '+ '\t' | '\t'+ ' '
+      { fail fail_tab }
+  | ""
+      { token st lexbuf }
+
 {
   let next st lb =
     if Queue.is_empty st.queue then token st lb;
@@ -465,6 +468,7 @@ rule token st = parse
     let st = create () in
     let lb = from_channel c in
     Why3.Loc.set_file file lb;
+    Why3.Loc.with_location (start st) lb;
     Why3.Loc.with_location (Mome_parser.top_level (next st)) lb
 
 (*
