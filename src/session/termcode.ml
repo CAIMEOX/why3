@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -1105,7 +1105,7 @@ module Pairing (Old: S)(New: S) = struct
     let allgoals = Hashtbl.fold add old_checksums newgoals in
     Hashtbl.clear old_checksums;
     (* phase 2: pair goals according to shapes *)
-    let compare e1 e2 = Pervasives.compare e1.shape e2.shape in
+    let compare e1 e2 = Stdlib.compare e1.shape e2.shape in
     let allgoals = List.sort compare allgoals in
     build_list allgoals;
     if allgoals <> [] then begin

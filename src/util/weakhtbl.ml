@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -34,14 +34,6 @@ module type S = sig
 
   val remove : 'a t -> key -> unit
     (* remove the value *)
-
-  val iter : (key -> 'a -> unit) -> 'a t -> unit
-
-  val fold : (key -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
-
-  val iterk : (key -> unit) -> 'a t -> unit
-
-  val foldk : (key -> 'b -> 'b) -> 'a t -> 'b -> 'b
 
   val length : 'a t -> int
 
@@ -94,12 +86,6 @@ module Make (S : Weakey) : S with type key = S.t = struct
   let set = H.replace
 
   let remove = H.remove
-
-  let iter = H.iter
-  let fold = H.fold
-
-  let iterk fn t = H.iter (fun k _ -> fn k) t
-  let foldk fn t = H.fold (fun k _ -> fn k) t
 
   let clear = H.clear
 

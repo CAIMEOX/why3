@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -192,6 +192,25 @@ let rec extract_param name stop_char =
         String.sub x (String.length name) (i - String.length name)
       else extract_param name stop_char l
   | [] -> ""
+
+module Stream = struct
+
+type 'a t = { mutable current : 'a option option; next : unit -> 'a option }
+
+let peek t =
+  match t.current with
+  | None ->
+      let v = t.next () in
+      t.current <- Some v;
+      v
+  | Some v -> v
+
+let junk t =
+  t.current <- None
+
+let from f = { current = None; next = f }
+
+end
 
 let get_request strm =
   let buff = Buffer.create 80 in

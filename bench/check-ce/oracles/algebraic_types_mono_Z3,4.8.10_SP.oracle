@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: BAD_CE
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 32-67)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 32-67)
@@ -7,11 +7,11 @@
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 32-67)
 File "bench/check-ce/algebraic_types_mono.mlw", line 6, characters 58-63:
 Goal G.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (127 steps).
 Sorry, we don't have a good counterexample for you :(
 
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 21-26)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 21-26)
@@ -20,7 +20,7 @@ Sorry, we don't have a good counterexample for you :(
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 21-26)
 File "bench/check-ce/algebraic_types_mono.mlw", line 10, characters 21-26:
 Goal g2.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (93 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -46,7 +46,7 @@ File algebraic_types_mono.mlw:
       A = UNDEFINED
       x = (B 2)
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 21-28)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 21-28)
@@ -55,7 +55,7 @@ File algebraic_types_mono.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 21-28)
 File "bench/check-ce/algebraic_types_mono.mlw", line 12, characters 21-28:
 Goal g4.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (110 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -80,7 +80,7 @@ File algebraic_types_mono.mlw:
     Property failure at postcondition of `g4'goal` with:
       x = A
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 21-31)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 21-31)
@@ -89,7 +89,7 @@ File algebraic_types_mono.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 21-31)
 File "bench/check-ce/algebraic_types_mono.mlw", line 16, characters 21-31:
 Goal g5.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (111 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -114,7 +114,7 @@ File algebraic_types_mono.mlw:
     Property failure at postcondition of `g5'goal` with:
       x = (Au 2 2)
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
@@ -123,11 +123,11 @@ File algebraic_types_mono.mlw:
   - Abstract RAC: NORMAL
 File "bench/check-ce/algebraic_types_mono.mlw", line 25, characters 29-38:
 Goal g1.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000009 steps).
 Sorry, we don't have a good counterexample for you :(
 
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 29-36)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 29-36)
@@ -136,7 +136,7 @@ Sorry, we don't have a good counterexample for you :(
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 29-36)
 File "bench/check-ce/algebraic_types_mono.mlw", line 27, characters 29-36:
 Goal g7.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (93 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:

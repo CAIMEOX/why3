@@ -1,8 +1,8 @@
 File "bench/check-ce/int_overflow.mlw", line 6, characters 27-42:
 Goal test0.
-Prover result is: Valid.
+Prover result is: Valid (114 steps).
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 9, characters 27-44)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 9, characters 27-44)
@@ -11,7 +11,7 @@ Prover result is: Valid.
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 9, characters 27-44)
 File "bench/check-ce/int_overflow.mlw", line 9, characters 27-44:
 Goal test1.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (110 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -36,7 +36,7 @@ File int_overflow.mlw:
     Property failure at postcondition of `test1'goal` with:
       x = 0
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: INCOMPLETE
   - Concrete RAC: INCOMPLETE (terminated because Postcondition of `test2'goal` cannot be evaluated)
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `test2'goal` cannot be evaluated)
@@ -45,18 +45,18 @@ File int_overflow.mlw:
   - Abstract RAC: INCOMPLETE (terminated because Postcondition of `test2'goal1` cannot be evaluated)
 File "bench/check-ce/int_overflow.mlw", line 14, characters 27-38:
 Goal test2.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (400021 steps).
 The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `test2'goal` cannot be evaluated):
 File int_overflow.mlw:
   Line 14:
-    x = 0
+    x : int = 0
 
 File "bench/check-ce/int_overflow.mlw", line 19, characters 43-53:
 Goal test_overflow.
-Prover result is: Valid.
+Prover result is: Valid (2463 steps).
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: BAD_CE
   - Concrete RAC: FAILURE (postcondition at unknown location)
   - Abstract RAC: FAILURE (postcondition at unknown location)
@@ -65,11 +65,11 @@ Prover result is: Valid.
   - Abstract RAC: NORMAL
 File "bench/check-ce/int_overflow.mlw", line 19, characters 48-62:
 Goal test_overflow.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (400021 steps).
 Sorry, we don't have a good counterexample for you :(
 
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: BAD_CE
   - Concrete RAC: FAILURE (postcondition at unknown location)
   - Abstract RAC: FAILURE (postcondition at unknown location)
@@ -78,11 +78,11 @@ Sorry, we don't have a good counterexample for you :(
   - Abstract RAC: NORMAL
 File "bench/check-ce/int_overflow.mlw", line 24, characters 45-56:
 Goal test_overflow2.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (400025 steps).
 Sorry, we don't have a good counterexample for you :(
 
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: BAD_CE
   - Concrete RAC: FAILURE (postcondition at unknown location)
   - Abstract RAC: FAILURE (postcondition at unknown location)
@@ -91,11 +91,11 @@ Sorry, we don't have a good counterexample for you :(
   - Abstract RAC: NORMAL
 File "bench/check-ce/int_overflow.mlw", line 24, characters 51-65:
 Goal test_overflow2.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (400025 steps).
 Sorry, we don't have a good counterexample for you :(
 
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 31, characters 33-49)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 31, characters 33-49)
@@ -104,7 +104,7 @@ Sorry, we don't have a good counterexample for you :(
   - Abstract RAC: NORMAL
 File "bench/check-ce/int_overflow.mlw", line 31, characters 33-49:
 Goal test_overflow_int16.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (400047 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -134,7 +134,7 @@ File int_overflow.mlw:
       y = 65535
       x = 1
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: BAD_CE
   - Concrete RAC: FAILURE (postcondition at unknown location)
   - Abstract RAC: FAILURE (postcondition at unknown location)
@@ -143,11 +143,11 @@ File int_overflow.mlw:
   - Abstract RAC: NORMAL
 File "bench/check-ce/int_overflow.mlw", line 36, characters 54-67:
 Goal test_overflow_int16_alt.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (400025 steps).
 Sorry, we don't have a good counterexample for you :(
 
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: BAD_CE
   - Concrete RAC: FAILURE (postcondition at unknown location)
   - Abstract RAC: FAILURE (postcondition at unknown location)
@@ -156,11 +156,11 @@ Sorry, we don't have a good counterexample for you :(
   - Abstract RAC: NORMAL
 File "bench/check-ce/int_overflow.mlw", line 36, characters 64-76:
 Goal test_overflow_int16_alt.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (400025 steps).
 Sorry, we don't have a good counterexample for you :(
 
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 42, characters 29-45)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 42, characters 29-45)
@@ -169,7 +169,7 @@ Sorry, we don't have a good counterexample for you :(
   - Abstract RAC: NORMAL
 File "bench/check-ce/int_overflow.mlw", line 42, characters 29-45:
 Goal test_overflow_int16_bis.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (400053 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -199,7 +199,7 @@ File int_overflow.mlw:
       y = 65535
       x = 1
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 49, characters 33-49)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 49, characters 33-49)
@@ -208,7 +208,7 @@ File int_overflow.mlw:
   - Abstract RAC: NORMAL
 File "bench/check-ce/int_overflow.mlw", line 49, characters 33-49:
 Goal test_overflow_int32.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (400047 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -238,7 +238,7 @@ File int_overflow.mlw:
       y = 2147483647
       x = 1
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 54, characters 48-64)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/int_overflow.mlw", line 54, characters 48-64)
@@ -247,7 +247,7 @@ File int_overflow.mlw:
   - Abstract RAC: NORMAL
 File "bench/check-ce/int_overflow.mlw", line 54, characters 48-64:
 Goal test_overflow_int32_bis.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (400053 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -279,9 +279,9 @@ File int_overflow.mlw:
 
 File "bench/check-ce/int_overflow.mlw", line 59, characters 88-108:
 Goal test_overflow_int32_bis_inline.
-Prover result is: Valid.
+Prover result is: Valid (2551 steps).
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: BAD_CE
   - Concrete RAC: FAILURE (postcondition at unknown location)
   - Abstract RAC: FAILURE (postcondition at unknown location)
@@ -290,7 +290,7 @@ Prover result is: Valid.
   - Abstract RAC: NORMAL
 File "bench/check-ce/int_overflow.mlw", line 59, characters 103-122:
 Goal test_overflow_int32_bis_inline.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (400031 steps).
 Sorry, we don't have a good counterexample for you :(
 
 

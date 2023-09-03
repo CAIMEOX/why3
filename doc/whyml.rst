@@ -247,7 +247,7 @@ choice.
 
 .. code-block:: console
 
-    > why3 prove -P alt-ergo einstein.why
+    $ why3 prove -P alt-ergo einstein.why
     einstein.why Goals G: Valid (1.27s, 989 steps)
 
 The source code for this puzzle is available in the source distribution
@@ -713,7 +713,7 @@ As long as ``s`` is not empty and its head is not zero, it increments
         ensures { ... same postcondition as in search_list ... }
       = let i = ref 0 in
         let s = ref l in
-        while !s <> Nil && head !s <> 0 do
+        while not (is_nil !s) && head !s <> 0 do
           invariant { ... }
           variant   { !s }
           i := !i + 1;

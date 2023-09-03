@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
   - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
@@ -7,7 +7,7 @@
   - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18)
 File "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18:
 Sub-goal Assertion of goal test1'vc.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (431 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -19,15 +19,15 @@ File int.mlw:
     one = 1
 File test_result_ce_value1.mlw:
   Line 8:
-    x = (-1)
-    x = (-1)
+    x = (- 1)
+    x = (- 1)
     Execution of main function `test1` with env:
-      x = (-1)
+      x = (- 1)
       zero = 0
       one = 1
   Line 10:
     (giant-step) execution of unimplemented function `id`
-      x = (-1)
+      x = (- 1)
     result of `id` = 0
   Line 9:
     (giant-step) execution of unimplemented function `id`
@@ -40,7 +40,7 @@ File test_result_ce_value1.mlw:
     Property failure at assertion with:
       a = 42
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
   - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
@@ -49,7 +49,7 @@ File test_result_ce_value1.mlw:
   - Abstract RAC: FAILURE (assertion at "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18)
 File "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18:
 Sub-goal Assertion of goal test1bis'vc.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (431 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -61,15 +61,15 @@ File int.mlw:
     one = 1
 File test_result_ce_value1.mlw:
   Line 14:
-    x = (-1)
-    x = (-1)
+    x = (- 1)
+    x = (- 1)
     Execution of main function `test1bis` with env:
-      x = (-1)
+      x = (- 1)
       zero = 0
       one = 1
   Line 15:
     (giant-step) execution of unimplemented function `id`
-      x = (-1)
+      x = (- 1)
     result of `id` = 0
     (giant-step) execution of unimplemented function `id`
       x = 0

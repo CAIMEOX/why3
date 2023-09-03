@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -16,12 +16,15 @@
   let () =
     List.iter (fun (x,y) -> Hashtbl.add keywords x y) Keywords.keyword_tokens
 
+  let warn_inexistent_file =
+    Loc.register_warning "inexistent_file" "Warn about inexistent file in source location"
+
   let resolve_file orig_file file =
     try
       Sysutil.resolve_from_paths [Filename.dirname orig_file] file
     with
     | e ->
-       Loc.warning "inexistent file in source location: %a" Exn_printer.exn_printer e;
+       Loc.warning ~id:warn_inexistent_file "inexistent file in source location: %a" Exn_printer.exn_printer e;
        file
 }
 
@@ -75,7 +78,8 @@ rule token = parse
         POSITION (Loc.user_position file (int_of_string bline)
                     (int_of_string bchar) (int_of_string eline) (int_of_string echar)) }
   | "[@" space* ([^ ' ' '\n' ']']+ (' '+ [^ ' ' '\n' ']']+)* as lbl) space* ']'
-      { ATTRIBUTE lbl }
+      { Lexlib.adjust_pos_utf8 lexbuf lbl;
+        ATTRIBUTE lbl }
   | '\n'
       { Lexing.new_line lexbuf; token lexbuf }
   | space+

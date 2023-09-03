@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -46,7 +46,7 @@ type rs_kind =
   | RKfunc    (* top-level let-function *)
   | RKpred    (* top-level let-predicate *)
   | RKlemma   (* top-level or local let-lemma *)
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 val rs_kind : rsymbol -> rs_kind
 
@@ -63,7 +63,7 @@ val create_rsymbol : preid -> ?ghost:bool -> ?kind:rs_kind -> cty -> rsymbol
 val create_constructor :
   constr:int -> preid -> itysymbol -> pvsymbol list -> rsymbol
 
-val create_projection : itysymbol -> pvsymbol -> rsymbol
+val create_projection : bool -> itysymbol -> pvsymbol -> rsymbol
 
 val restore_rs : lsymbol -> rsymbol
 (** raises [Not_found] if the argument is not a [rs_logic] *)
@@ -105,10 +105,10 @@ val create_prog_pattern :
 (** {2 Program expressions} *)
 
 type assertion_kind = Assert | Assume | Check
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 type for_direction = To | DownTo
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 type for_bounds = pvsymbol * for_direction * pvsymbol
 
@@ -118,6 +118,12 @@ type variant = term * lsymbol option (** tau * (tau -> tau -> prop) *)
 
 type assign = pvsymbol * rsymbol * pvsymbol (* region * field * value *)
 
+type expr_id = int
+
+val create_eid_attr : expr_id -> Ident.attribute
+(** [create_eid_attr id] generates an attribute corresponding to the
+   given expression identifier [id] *)
+
 type expr = private {
   e_node   : expr_node;
   e_ity    : ity;
@@ -125,6 +131,7 @@ type expr = private {
   e_effect : effect;
   e_attrs  : Sattr.t;
   e_loc    : Loc.position option;
+  e_id     : expr_id;
 }
 
 and expr_node =

@@ -650,8 +650,8 @@ conjunction and disjunction, respectively.
       : | "(" `ret_name` ("," `ret_name`)* ")"
     ret_type: "ghost"? `type`   ; unnamed result
     ret_name: "ghost"? `binder` ":" `type`   ; named result
-    spec: "requires" "{" `term` "}"   ; pre-condition
-      : | "ensures" "{" `term` "}"   ; post-condition
+    spec: "requires" ident? "{" `term` "}"   ; pre-condition
+      : | "ensures" ident? "{" `term` "}"   ; post-condition
       : | "returns" "{" ("|" `pattern` "->" `term`)+ "}"   ; post-condition
       : | "raises" "{" ("|" `pattern` "->" `term`)+ "}"   ; exceptional post-c.
       : | "raises" "{" `uqualid` ("," `uqualid`)* "}"   ; raised exceptions
@@ -663,8 +663,8 @@ conjunction and disjunction, respectively.
       : | ("reads" | "writes" | "alias") "{" "}"   ; empty effect
     path: `lqualid` ("." `lqualid`)*   ; v.field1.field2
     alias: `path` "with" `path`   ; arg1 with result
-    invariant: "invariant" "{" `term` "}"   ; loop and type invariant
-    variant: "variant" "{" `variant_term` ("," `variant_term`)* "}"   ; termination variant
+    invariant: "invariant" ident? "{" `term` "}"   ; loop and type invariant
+    variant: "variant" ident? "{" `variant_term` ("," `variant_term`)* "}"   ; termination variant
     variant_term: `term` ("with" `lqualid`)?   ; variant term + WF-order
 
 .. index:: pair: keyword; ghost
@@ -891,6 +891,7 @@ like in the following example:
 
 .. index:: collections
 .. index:: function literals
+.. _sec.functionliterals:
 
 Function literals
 ^^^^^^^^^^^^^^^^^
@@ -978,7 +979,7 @@ A WhyML input file is a (possibly empty) list of modules
 
 .. productionlist::
     file: `module`*
-    module: "module" `uident_nq` `attribute`* `decl`* "end"
+    module: "module" `uident_nq` `attribute`* (":" tqualid)? `decl`* "end"
     decl: "type" `type_decl` ("with" `type_decl`)*
       : | "constant" `constant_decl`
       : | "function" `function_decl` ("with" `logic_decl`)*
@@ -1603,7 +1604,7 @@ of the resulting module, the substitution being applied to their
 argument types, return type, and definition. For instance, we get a
 fresh function ``fast_exp`` of type ``int->int->int``.
 
-We can make plenty other instances of our module ``Exp``.
+We can make plenty other instances of our module ``Exp``.Module
 For instance, we get
 `Russian multiplication
 <https://en.wikipedia.org/wiki/Ancient_Egyptian_multiplication>`_ for free
@@ -1616,6 +1617,155 @@ by instantiating ``Exp`` with zero and addition instead.
       clone Exp with type t = int, val one = zero, val mul = (+)
       goal G: exp 2 3 = 6
     end
+
+It is also possible to substitute certain types of defined symbols :
+logical functions and predicates, (co)inductives, algebraic data types, immutable
+records without invariants, range and floating-point types can all be substituted
+by symbols with the exact same definition.
+
+.. code-block:: whyml
+
+    module A
+      use int.Int
+
+      predicate pos (n : int) =
+        n >= 0
+
+      function abs (n : int) =
+        if pos n then n else -n
+
+      type 'a list =
+        | Nil
+        | Cons 'a (list 'a)
+
+      type r = { a : int; b : string; }
+    end
+
+    module B
+      use int.Int
+
+      (* logical functions and predicates must be syntactically equal. *)
+      predicate pos (n : int) =
+        n >= 0
+
+      (* The substitution of pos is taken into account when checking
+       * that the definitions are identical. *)
+      function abs (n : int) =
+        if pos n then n else -n
+
+      (* For algebraic types, same definition means same constructors
+       * in the same order. *)
+      type 'a list =
+        | Nil
+        | Cons 'a (list 'a)
+
+      (* Similarly records' fields must be in the exact same order. *)
+      type r = { a : int; b : string; }
+
+      clone A with
+       predicate pos,
+       function abs,
+       type list,
+       type r
+    end
+
+Module interface
+^^^^^^^^^^^^^^^^
+
+Module interface allows to only use an high level view, the interface, of a
+module during the proof and the actual implementation during the extraction. It
+is based on the cloning mechanism for checking the correspondence between the
+implementation and the interface.
+
+For example the interface can model the datastructure with a simple finite set,
+and the inmplementation use an ordered list:
+
+.. code-block:: whyml
+
+    module Set
+
+      use set.Fset
+
+      type t = abstract { contents : fset int }
+
+      meta coercion function contents
+
+      val empty () : t
+        ensures { result = empty }
+
+      val add (x : int) (s : t) : t
+        ensures { result = add x s }
+
+      val mem (x : int) (s : t) : bool
+        ensures { result <-> mem x s }
+
+    end
+
+    (* Implementation of integer sets using ordered lists *)
+
+    module ListSet : Set
+
+      use int.Int
+      use set.Fset
+      use list.List
+      use list.Mem
+      use list.SortedInt
+
+      type elt = int
+
+      type t = { ghost contents : fset elt; list : list elt }
+      invariant { forall x. Fset.mem x contents <-> mem x list }
+      invariant { sorted list }
+      by { contents = empty; list = Nil }
+
+      meta coercion function contents
+
+      let empty () =
+        { contents = empty; list = Nil }
+
+      let rec add_list x ys
+        requires { sorted ys }
+        variant { ys }
+        ensures { forall y. mem y result <-> mem y ys \/ y = x }
+        ensures { sorted result }
+      = ...
+
+      let add x s
+        ensures { result = add x s }
+      =
+        { contents = add x s.contents; list = add_list x s.list }
+
+      let rec mem_list x ys
+        requires { sorted ys }
+        variant { ys }
+        ensures { result <-> mem x ys }
+      = ...
+
+      let mem x s =
+        mem_list x s.list
+
+    end
+
+    module Main
+
+      use ListSet
+
+      let main () =
+        let s = empty () in
+        let s = add 1 s in
+        let s = add 2 s in
+        let s = add 3 s in
+        let b1 = mem 3 s in
+        let b2 = mem 4 s in
+        assert { b1 = true /\ b2 = false };
+        (b1, b2)
+
+    end
+
+During the proof of the function `main`, only the specifiction defined in `Set``
+are present. So, for example, the generated goals are not polluted with the
+invariants of `ListSet`. However, during extraction the code of `ListSet` is
+used.
 
 .. index:: standard library
 

@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -38,9 +38,9 @@ module DetectProvers = struct
     let data = read_auto_detection_data config in
     let provers = find_provers data in
     let provers =
-      List.fold_left (fun acc (path, name, version) ->
-          { Partial.name; path; version; shortcut = None; manual = false } :: acc
-        ) [] provers in
+      List.map (fun (path, name, version) ->
+          { Partial.name; path; version; shortcut = None; manual = false }
+        ) provers in
     ignore (compute_builtin_prover provers config data);
     let config = remove_auto_provers config in
     let config = update_provers provers config in

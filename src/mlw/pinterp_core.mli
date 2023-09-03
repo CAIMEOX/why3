@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -39,8 +39,11 @@ module rec Value : sig
   }
   and field
   and value_desc =
-    | Vconstr of Expr.rsymbol * Expr.rsymbol list * field list
-    (** A record or variant *)
+    | Vconstr of Expr.rsymbol option * Expr.rsymbol list * field list
+    (** A constructor value (record or variant).
+        The first argument is optional to handle records without constructors
+        (e.g. when a type has an invariant, the constructor is not available
+        to avoid creating an object that does not respect the invariant). *)
     | Vnum of BigInt.t
     (** Any integer number *)
     | Vreal of Big_real.real
@@ -49,15 +52,17 @@ module rec Value : sig
     | Vstring of string
     | Vbool of bool
     | Vproj of Term.lsymbol * value
-    (** [Vproj (ls, v)] is af model projection, i.e.
-        {!const:Model_parser.model_value.Proj} originating from an meta
-        [model_projection]). The only valid operation is applying [ls],
-        resulting in [v]. *)
+    (** TODO/FIXME Was used to represent a model projection originating
+        from a meta [model_projection]).
+        Currently, projections are now handled using Vterm t with
+        t an epsilon term. *)
     | Varray of value array
     (** An array created in code *)
     | Vpurefun of Ty.ty (* type of the keys *) * value Mv.t * value
-    (** A pure, unary function is used to represent arrays from the prover
-        model/candidate counterexample. See {!type:Model_parser.model_array}. *)
+    (** TODO/FIXME Was used to represent arrays from the prover model.
+        Currently, arrays are now handled using Vterm t with
+        t a lambda term corresponding to the function defining the
+        mapping of array elements. *)
     | Vfun of value Term.Mvs.t (* closure values *) * Term.vsymbol * Expr.expr
     (** A function value *)
     | Vterm of Term.term
@@ -97,16 +102,14 @@ val num_value : Ity.ity -> BigInt.t -> value
 val float_value : Ity.ity -> big_float -> value
 val real_value : Big_real.real -> value
 
-val constr_value : Ity.ity -> Expr.rsymbol -> Expr.rsymbol list -> value list -> value
+val constr_value : Ity.ity -> Expr.rsymbol option -> Expr.rsymbol list -> value list -> value
 val purefun_value : result_ity:Ity.ity -> arg_ity:Ity.ity -> value Mv.t -> value -> value
 val unit_value : value
 
 val range_value : Ity.ity -> BigInt.t -> value
 (** Returns a range value, or raises [Incomplete] if the value is outside the range. *)
 
-val proj_value : Ity.ity -> Term.lsymbol -> value -> value option
-(** Returns a range value, or [None] if the type is a range, the value is
-   outside. *)
+val term_value : Ity.ity -> Term.term -> value
 
 (** {4 Snapshots}
 
@@ -137,7 +140,7 @@ module Log : sig
     | Exec_pure of (Term.lsymbol * exec_mode)
     | Exec_any of (Expr.rsymbol option * value Term.Mvs.t)
     | Iter_loop of exec_mode
-    | Exec_main of (Expr.rsymbol * value Term.Mvs.t * value_or_invalid Expr.Mrs.t)
+    | Exec_main of (Expr.rsymbol * value_or_invalid Term.Mls.t * value Term.Mvs.t * value_or_invalid Expr.Mrs.t)
     | Exec_stucked of (string * value Ident.Mid.t)
     | Exec_failed of (string * value Ident.Mid.t)
     | Exec_ended
@@ -159,7 +162,7 @@ module Log : sig
   val log_any_call : log_uc -> Expr.rsymbol option -> value Term.Mvs.t
                      -> Loc.position option -> unit
   val log_iter_loop : log_uc -> exec_mode -> Loc.position option -> unit
-  val log_exec_main : log_uc -> Expr.rsymbol -> value Term.Mvs.t -> value Lazy.t Expr.Mrs.t ->
+  val log_exec_main : log_uc -> Expr.rsymbol -> value Lazy.t Term.Mls.t -> value Term.Mvs.t -> value Lazy.t Expr.Mrs.t ->
                       Loc.position option -> unit
   val log_failed : log_uc -> string -> value Ident.Mid.t ->
                    Loc.position option -> unit
@@ -206,6 +209,8 @@ type env = {
   (** local functions *)
   vsenv    : value Term.Mvs.t;
   (** local variables *)
+  lsenv    : value Lazy.t Term.Mls.t;
+  (** global logical functions and constants *)
   rsenv    : value Lazy.t Expr.Mrs.t;
   (** global variables *)
   premises : premises;
@@ -221,6 +226,8 @@ val get_vs : env -> Term.Mvs.key -> Value.value
 val get_pvs : env -> Ity.pvsymbol -> Value.value
 
 val bind_vs : Term.Mvs.key -> value -> env -> env
+
+val bind_ls : Term.Mls.key -> value Lazy.t -> env -> env
 
 val bind_rs : Expr.Mrs.key -> value Lazy.t -> env -> env
 
@@ -271,7 +278,7 @@ type oracle = {
   for_variable:
     env -> ?check:check_value -> loc:Loc.position option -> Ident.ident -> Ity.ity -> value option;
   for_result:
-    env -> ?check:check_value -> loc:Loc.position -> call_id:int option -> Ity.ity -> value option;
+    env -> ?check:check_value -> loc:Loc.position -> call_id:Expr.expr_id option -> Ity.ity -> value option;
 }
 (** An oracle provides values during execution in {!Pinterp} for program
     parameters and during giant steps. The [check] is called on the value and

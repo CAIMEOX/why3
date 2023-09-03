@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -64,7 +64,7 @@ type rs_kind =
   | RKfunc    (* top-level let-function *)
   | RKpred    (* top-level let-predicate *)
   | RKlemma   (* top-level or local let-lemma *)
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 let rs_kind s = match s.rs_logic with
   | RLnone  -> RKnone
@@ -171,14 +171,14 @@ let rs_dup ({rs_name = {id_loc = loc}} as s) c =
       check_effects ?loc c;
       mk_rs id c RLlemma None
 
-let create_projection s v =
+let create_projection proj s v =
   let id = id_clone v.pv_vs.vs_name in
   let eff = eff_ghostify v.pv_ghost eff_empty in
   let tyl = List.map ity_var s.its_ts.ts_args in
   let rgl = List.map ity_reg s.its_regions in
   let ity = ity_app s tyl rgl in
   let arg = create_pvsymbol (id_fresh "arg") ity in
-  let ls = create_fsymbol id [arg.pv_vs.vs_ty] v.pv_vs.vs_ty in
+  let ls = create_fsymbol ~proj id [arg.pv_vs.vs_ty] v.pv_vs.vs_ty in
   let q = make_post (fs_app ls [t_var arg.pv_vs] v.pv_vs.vs_ty) in
   let c = create_cty [arg] [] [q] Mxs.empty Mpv.empty eff v.pv_ity in
   mk_rs ls.ls_name c (RLls ls) (Some v)
@@ -297,11 +297,16 @@ let create_prog_pattern pp ity mask =
 
 (** {2 Program expressions} *)
 
+type expr_id = int
+let next_expr_id = ref 0
+
+let create_eid_attr i = create_attribute (Ident.eid_attribute_prefix ^ string_of_int i)
+
 type assertion_kind = Assert | Assume | Check
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 type for_direction = To | DownTo
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 type for_bounds = pvsymbol * for_direction * pvsymbol
 
@@ -318,6 +323,7 @@ type expr = {
   e_effect : effect;
   e_attrs  : Sattr.t;
   e_loc    : Loc.position option;
+  e_id     : expr_id;
 }
 
 and expr_node =
@@ -473,13 +479,17 @@ let try_effect el fn x y =
 
 (* smart constructors *)
 
-let mk_expr node ity mask eff = {
-  e_node   = node;
-  e_ity    = ity;
-  e_mask   = mask_adjust eff ity mask;
-  e_effect = eff;
-  e_attrs  = Sattr.empty;
-  e_loc    = None;
+let mk_expr node ity mask eff =
+  let e_id = !next_expr_id in
+  incr next_expr_id;
+  {
+    e_node   = node;
+    e_ity    = ity;
+    e_mask   = mask_adjust eff ity mask;
+    e_effect = eff;
+    e_attrs  = Sattr.empty;
+    e_loc    = None;
+    e_id;
 }
 
 let mk_cexp node cty = {

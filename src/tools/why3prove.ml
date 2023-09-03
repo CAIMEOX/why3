@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -17,7 +17,7 @@ open Theory
 open Task
 
 let usage_msg =
-  "Usage: [[<file>|-] [-T <theory> [-G <goal>]...]...]...\n\
+  "[[<file>|-] [-T <theory> [-G <goal>]...]...]...\n\
    Run some transformation or prover on the given goals."
 
 let opt_queue = Queue.create ()
@@ -55,7 +55,7 @@ let add_opt_theory x =
   match !opt_input, p with
   | None, [] ->
       let msg = "Option '-T'/'--theory' with a non-qualified \
-                 argument requires an input file.@." in
+                 argument requires an input file." in
       raise (Getopt.GetoptFailure msg)
   | Some tlist, [] ->
       let glist = Queue.create () in
@@ -75,7 +75,7 @@ let add_opt_goal x =
   let glist = match !opt_theory, !opt_input with
     | None, None ->
         let msg = "Option '-G'/'--goal' requires an input file or a library \
-                   theory.@." in
+                   theory." in
         raise (Getopt.GetoptFailure msg)
     | None, Some _ ->
         add_opt_theory "Top";
@@ -125,7 +125,7 @@ let add_sub_goal s =
   else
     failure "Invalid argument"
 
-let opt_driver = ref []
+let opt_driver : string list ref = ref []
 let opt_parser = ref None
 let opt_prover = ref None
 let opt_output = ref None
@@ -155,7 +155,7 @@ let option_list =
     "<prover> prove or print (with -o) the selected goals";
     Key ('F', "format"), Hnd1 (AString, fun s -> opt_parser := Some s),
     "<format> select input format (default: \"why\")";
-    Key ('t', "timelimit"), Hnd1 (AInt, fun i -> opt_timelimit := Some i),
+    Key ('t', "timelimit"), Hnd1 (AFloat, fun i -> opt_timelimit := Some i),
     "<sec> set the prover's time limit (default=10, no limit=0)";
     Key ('s', "stepslimit"), Hnd1 (AInt, fun i -> opt_stepslimit := Some i),
     "<steps> set the prover's step limit (default: no limit)";
@@ -184,9 +184,9 @@ let option_list =
      reduction is insufficient, with optional, space-\n\
      separated time and memory limit (e.g. 'cvc4 2 1000')";
     KLong "rac-timelimit", Hnd1 (AInt, fun i -> opt_rac_timelimit := Some i),
-    "<seconds> Time limit in seconds for RAC (with --check-ce)";
+    "<sec> set the time limit for RAC (with --check-ce)";
     KLong "rac-steplimit", Hnd1 (AInt, fun i -> opt_rac_steplimit := Some i),
-    "<steps> Step limit for RAC (with --check-ce)";
+    "<steps> set the step limit for RAC (with --check-ce)";
     KLong "ce-log-verbosity", Hnd1(AInt, fun i -> opt_ce_log_verbosity := Some i),
     "<lvl> verbosity level for interpretation log of\n\
     counterexample solver model";
@@ -203,7 +203,7 @@ let config, env =
   Whyconf.Args.initialize option_list add_opt_file usage_msg
 
 let opt_driver = ref (match !opt_driver with
-  | f::ef -> Some (f, ef)
+  | f::ef -> Some (None,f,["",ef])
   | [] -> None)
 
 let () = try
@@ -249,7 +249,8 @@ let () = try
     let prover = Whyconf.filter_one_prover config filter_prover in
     let with_steps = !opt_stepslimit <> None in
     opt_command := Some (Whyconf.get_complete_command prover ~with_steps);
-    opt_driver := Some (prover.driver, prover.extra_drivers)
+    let (d,f) = prover.driver in
+    opt_driver := Some(d,f,prover.extra_drivers)
   | None ->
       ()
   end;
@@ -270,8 +271,8 @@ let () = try
     exit 1
 
 let timelimit = match !opt_timelimit with
-  | None -> 10
-  | Some i when i <= 0 -> 0
+  | None -> 10.
+  | Some i when i <= 0. -> 0.
   | Some i -> i
 
 let stepslimit = Opt.get_def 0 !opt_stepslimit
@@ -282,7 +283,7 @@ let memlimit = match !opt_memlimit with
   | Some i -> i
 
 let print_th_namespace fmt th =
-  Pretty.print_namespace fmt th.th_name.Ident.id_string th
+  Pretty.print_namespace th.th_name.Ident.id_string fmt th
 
 let really_do_task (task: task) =
   let t = task_goal_fmla task in
@@ -518,10 +519,10 @@ let do_input config env drv = function
 let () =
   try
     if (Util.terminal_has_color && !opt_color) then (
-      Format.set_formatter_tag_functions Util.ansi_color_tags;
+      Format.set_formatter_stag_functions Util.ansi_color_tags;
       set_mark_tags true );
     let main = Whyconf.get_main config in
-    let load (f,ef) = Driver.load_driver_file_and_extras main env f ef in
+    let load (d,f,ef) = Driver.load_driver_file_and_extras main env ~extra_dir:d f ef in
     let drv = Opt.map load !opt_driver in
     Queue.iter (do_input main env drv) opt_queue;
     if !unproved then exit 2

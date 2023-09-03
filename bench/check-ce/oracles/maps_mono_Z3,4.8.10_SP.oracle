@@ -1,0 +1,879 @@
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: STUCK (failure in postcondition of `set` at unknown location)
+- Selected model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 45, characters 14-54)
+  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `set` cannot be evaluated)
+File "bench/check-ce/maps_mono.mlw", line 45, characters 14-54:
+Sub-goal Postcondition of goal test_map'vc.
+Prover result is: Unknown (unknown) (5398 steps).
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
+File maps_mono.mlw:
+  Line 44:
+    x = {contents=
+         fun (x!039:int) ->
+          if x!039 = 0 then 2
+          else if x!039 = 8 then 10
+               else if x!039 = 5 then 6 else if x!039 = 1 then 3 else 2}
+    x = {contents=
+         fun (x!039:int) ->
+          if x!039 = 0 then 2
+          else if x!039 = 8 then 10
+               else if x!039 = 5 then 6 else if x!039 = 1 then 3 else 2}
+    Execution of main function `test_map` with env:
+      x = {contents=
+           fun (x!039:int) ->
+            if x!039 = 0 then 2
+            else if x!039 = 8 then 10
+                 else if x!039 = 5 then 6 else if x!039 = 1 then 3 else 2}
+      zero = 0
+      one = 1
+  Line 47:
+    Normal execution of function `(!)` with args:
+      r = {contents=
+           fun (x!039:int) ->
+            if x!039 = 0 then 2
+            else if x!039 = 8 then 10
+                 else if x!039 = 5 then 6 else if x!039 = 1 then 3 else 2}
+File ref.mlw:
+  Line 18:
+    Normal execution of function `contents` with args:
+      arg = {contents=
+             fun (x!039:int) ->
+              if x!039 = 0 then 2
+              else if x!039 = 8 then 10
+                   else if x!039 = 5 then 6 else if x!039 = 1 then 3 else 2}
+File maps_mono.mlw:
+  Line 47:
+    Normal execution of function `set` with args:
+      f = fun (x!039:int) ->
+           if x!039 = 0 then 2
+           else if x!039 = 8 then 10
+                else if x!039 = 5 then 6 else if x!039 = 1 then 3 else 2
+      x = 0
+      v = 3
+    Normal execution of function `(:=)` with args:
+      r = {contents=
+           fun (x!039:int) ->
+            if x!039 = 0 then 2
+            else if x!039 = 8 then 10
+                 else if x!039 = 5 then 6 else if x!039 = 1 then 3 else 2}
+      v = (fun y -> if pure { if y = x then True else False } then v
+             else f y) with f = fun (x!039:int) ->
+                                 if x!039 = 0 then 2
+                                 else if x!039 = 8 then 10
+                                      else if x!039 = 5 then 6
+                                           else if x!039 = 1 then 3 else 2, x = 0, v = 3
+  Line 45:
+    Property failure at postcondition of `test_map` with:
+      x = {contents=
+           (fun y -> if pure { if y = x then True else False } then v
+              else f y) with f = fun (x!039:int) ->
+                                  if x!039 = 0 then 2
+                                  else if x!039 = 8 then 10
+                                       else if x!039 = 5 then 6
+                                            else if x!039 = 1 then 3 else 2, x = 0, v = 3}
+
+<check_ce:categorization>Categorizations of models:
+- Selected model 0: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 51, characters 14-88)
+  - Abstract RAC: STUCK (failure in postcondition of `set1` at unknown location)
+- Checked model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 51, characters 14-88)
+  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `set1` cannot be evaluated)
+File "bench/check-ce/maps_mono.mlw", line 51, characters 14-88:
+Sub-goal Postcondition of goal test_map_multidim1'vc.
+Prover result is: Unknown (unknown) (5854 steps).
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
+File maps_mono.mlw:
+  Line 50:
+    x = {contents=
+         fun (x!091:int) ->
+          if x!091 = 3 then fun (x!092:int) -> if x!092 = 4 then 5 else 5
+          else if x!091 = 1 then fun (x!092:int) -> 2
+               else fun (x!092:int) -> if x!092 = 4 then 5 else 5}
+    x = {contents=
+         fun (x!091:int) ->
+          if x!091 = 3 then fun (x!092:int) -> if x!092 = 4 then 5 else 5
+          else if x!091 = 1 then fun (x!092:int) -> 2
+               else fun (x!092:int) -> if x!092 = 4 then 5 else 5}
+    Execution of main function `test_map_multidim1` with env:
+      x = {contents=
+           fun (x!091:int) ->
+            if x!091 = 3 then fun (x!092:int) -> if x!092 = 4 then 5 else 5
+            else if x!091 = 1 then fun (x!092:int) -> 2
+                 else fun (x!092:int) -> if x!092 = 4 then 5 else 5}
+      zero = 0
+      one = 1
+  Line 53:
+    Normal execution of function `(!)` with args:
+      r = {contents=
+           fun (x!091:int) ->
+            if x!091 = 3 then fun (x!092:int) -> if x!092 = 4 then 5 else 5
+            else if x!091 = 1 then fun (x!092:int) -> 2
+                 else fun (x!092:int) -> if x!092 = 4 then 5 else 5}
+File ref.mlw:
+  Line 18:
+    Normal execution of function `contents` with args:
+      arg = {contents=
+             fun (x!091:int) ->
+              if x!091 = 3 then fun (x!092:int) -> if x!092 = 4 then 5 else 5
+              else if x!091 = 1 then fun (x!092:int) -> 2
+                   else fun (x!092:int) -> if x!092 = 4 then 5 else 5}
+File maps_mono.mlw:
+  Line 53:
+    Normal execution of function `get` with args:
+      f = fun (x!091:int) ->
+           if x!091 = 3 then fun (x!092:int) -> if x!092 = 4 then 5 else 5
+           else if x!091 = 1 then fun (x!092:int) -> 2
+                else fun (x!092:int) -> if x!092 = 4 then 5 else 5
+      x = 1
+  Line 29:
+    Normal execution of function `(@)` with args:
+      u = fun (x!091:int) ->
+           if x!091 = 3 then fun (x!092:int) -> if x!092 = 4 then 5 else 5
+           else if x!091 = 1 then fun (x!092:int) -> 2
+                else fun (x!092:int) -> if x!092 = 4 then 5 else 5
+      u = 1
+  Line 53:
+    Normal execution of function `(!)` with args:
+      r = {contents=
+           fun (x!091:int) ->
+            if x!091 = 3 then fun (x!092:int) -> if x!092 = 4 then 5 else 5
+            else if x!091 = 1 then fun (x!092:int) -> 2
+                 else fun (x!092:int) -> if x!092 = 4 then 5 else 5}
+File ref.mlw:
+  Line 18:
+    Normal execution of function `contents` with args:
+      arg = {contents=
+             fun (x!091:int) ->
+              if x!091 = 3 then fun (x!092:int) -> if x!092 = 4 then 5 else 5
+              else if x!091 = 1 then fun (x!092:int) -> 2
+                   else fun (x!092:int) -> if x!092 = 4 then 5 else 5}
+File maps_mono.mlw:
+  Line 53:
+    Normal execution of function `set` with args:
+      f = fun (x!091:int) ->
+           if x!091 = 3 then fun (x!092:int) -> if x!092 = 4 then 5 else 5
+           else if x!091 = 1 then fun (x!092:int) -> 2
+                else fun (x!092:int) -> if x!092 = 4 then 5 else 5
+      x = 0
+      v = fun (x!091:int) -> 2
+    Normal execution of function `(:=)` with args:
+      r = {contents=
+           fun (x!091:int) ->
+            if x!091 = 3 then fun (x!092:int) -> if x!092 = 4 then 5 else 5
+            else if x!091 = 1 then fun (x!092:int) -> 2
+                 else fun (x!092:int) -> if x!092 = 4 then 5 else 5}
+      v = (fun y -> if pure { if y = x2 then True else False } then v1
+             else f1 y) with f1 = fun (x!091:int) ->
+                                   if x!091 = 3
+                                   then fun (x!092:int) ->
+                                         if x!092 = 4 then 5 else 5
+                                   else if x!091 = 1
+                                        then fun (x!092:int) -> 2
+                                        else fun (x!092:int) ->
+                                              if x!092 = 4 then 5 else 5, x2 = 0, v1 = fun
+                                                                    (x!091:
+                                                                    int) -> 2
+  Line 51:
+    Property failure at postcondition of `test_map_multidim1` with:
+      x = {contents=
+           (fun y -> if pure { if y = x2 then True else False } then v1
+              else f1 y) with f1 = fun (x!091:int) ->
+                                    if x!091 = 3
+                                    then fun (x!092:int) ->
+                                          if x!092 = 4 then 5 else 5
+                                    else if x!091 = 1
+                                         then fun (x!092:int) -> 2
+                                         else fun (x!092:int) ->
+                                               if x!092 = 4 then 5 else 5, x2 = 0, v1 = fun
+                                                                    (x!091:
+                                                                    int) -> 2}
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: STUCK (failure in postcondition of `set` at unknown location)
+- Selected model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 56, characters 14-88)
+  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `set` cannot be evaluated)
+File "bench/check-ce/maps_mono.mlw", line 56, characters 14-88:
+Sub-goal Postcondition of goal test_map_multidim2'vc.
+Prover result is: Unknown (unknown) (6959 steps).
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
+File maps_mono.mlw:
+  Line 55:
+    x = {contents=
+         fun (x!0151:int) ->
+          if x!0151 = 0
+          then fun (x!0152:int) ->
+                if x!0152 = 0 then 8
+                else if x!0152 = 9 then 11
+                     else if x!0152 = 16 then 18
+                          else if x!0152 = 25 then 26
+                               else if x!0152 = 22 then 23
+                                    else if x!0152 = 2 then 7 else 8
+          else if x!0151 = 12
+               then fun (x!0152:int) -> if x!0152 = 13 then 14 else 14
+               else if x!0151 = 1
+                    then fun (x!0152:int) -> if x!0152 = 1 then 3 else 3
+                    else fun (x!0152:int) ->
+                          if x!0152 = 0 then 8
+                          else if x!0152 = 9 then 11
+                               else if x!0152 = 16 then 18
+                                    else if x!0152 = 25 then 26
+                                         else if x!0152 = 22 then 23
+                                              else if x!0152 = 2 then 7
+                                                   else 8}
+    x = {contents=
+         fun (x!0151:int) ->
+          if x!0151 = 0
+          then fun (x!0152:int) ->
+                if x!0152 = 0 then 8
+                else if x!0152 = 9 then 11
+                     else if x!0152 = 16 then 18
+                          else if x!0152 = 25 then 26
+                               else if x!0152 = 22 then 23
+                                    else if x!0152 = 2 then 7 else 8
+          else if x!0151 = 12
+               then fun (x!0152:int) -> if x!0152 = 13 then 14 else 14
+               else if x!0151 = 1
+                    then fun (x!0152:int) -> if x!0152 = 1 then 3 else 3
+                    else fun (x!0152:int) ->
+                          if x!0152 = 0 then 8
+                          else if x!0152 = 9 then 11
+                               else if x!0152 = 16 then 18
+                                    else if x!0152 = 25 then 26
+                                         else if x!0152 = 22 then 23
+                                              else if x!0152 = 2 then 7
+                                                   else 8}
+    Execution of main function `test_map_multidim2` with env:
+      x = {contents=
+           fun (x!0151:int) ->
+            if x!0151 = 0
+            then fun (x!0152:int) ->
+                  if x!0152 = 0 then 8
+                  else if x!0152 = 9 then 11
+                       else if x!0152 = 16 then 18
+                            else if x!0152 = 25 then 26
+                                 else if x!0152 = 22 then 23
+                                      else if x!0152 = 2 then 7 else 8
+            else if x!0151 = 12
+                 then fun (x!0152:int) -> if x!0152 = 13 then 14 else 14
+                 else if x!0151 = 1
+                      then fun (x!0152:int) -> if x!0152 = 1 then 3 else 3
+                      else fun (x!0152:int) ->
+                            if x!0152 = 0 then 8
+                            else if x!0152 = 9 then 11
+                                 else if x!0152 = 16 then 18
+                                      else if x!0152 = 25 then 26
+                                           else if x!0152 = 22 then 23
+                                                else if x!0152 = 2 then 7
+                                                     else 8}
+      zero = 0
+      one = 1
+  Line 58:
+    Normal execution of function `(!)` with args:
+      r = {contents=
+           fun (x!0151:int) ->
+            if x!0151 = 0
+            then fun (x!0152:int) ->
+                  if x!0152 = 0 then 8
+                  else if x!0152 = 9 then 11
+                       else if x!0152 = 16 then 18
+                            else if x!0152 = 25 then 26
+                                 else if x!0152 = 22 then 23
+                                      else if x!0152 = 2 then 7 else 8
+            else if x!0151 = 12
+                 then fun (x!0152:int) -> if x!0152 = 13 then 14 else 14
+                 else if x!0151 = 1
+                      then fun (x!0152:int) -> if x!0152 = 1 then 3 else 3
+                      else fun (x!0152:int) ->
+                            if x!0152 = 0 then 8
+                            else if x!0152 = 9 then 11
+                                 else if x!0152 = 16 then 18
+                                      else if x!0152 = 25 then 26
+                                           else if x!0152 = 22 then 23
+                                                else if x!0152 = 2 then 7
+                                                     else 8}
+File ref.mlw:
+  Line 18:
+    Normal execution of function `contents` with args:
+      arg = {contents=
+             fun (x!0151:int) ->
+              if x!0151 = 0
+              then fun (x!0152:int) ->
+                    if x!0152 = 0 then 8
+                    else if x!0152 = 9 then 11
+                         else if x!0152 = 16 then 18
+                              else if x!0152 = 25 then 26
+                                   else if x!0152 = 22 then 23
+                                        else if x!0152 = 2 then 7 else 8
+              else if x!0151 = 12
+                   then fun (x!0152:int) -> if x!0152 = 13 then 14 else 14
+                   else if x!0151 = 1
+                        then fun (x!0152:int) -> if x!0152 = 1 then 3 else 3
+                        else fun (x!0152:int) ->
+                              if x!0152 = 0 then 8
+                              else if x!0152 = 9 then 11
+                                   else if x!0152 = 16 then 18
+                                        else if x!0152 = 25 then 26
+                                             else if x!0152 = 22 then 23
+                                                  else if x!0152 = 2 then 7
+                                                       else 8}
+File maps_mono.mlw:
+  Line 58:
+    Normal execution of function `get` with args:
+      f = fun (x!0151:int) ->
+           if x!0151 = 0
+           then fun (x!0152:int) ->
+                 if x!0152 = 0 then 8
+                 else if x!0152 = 9 then 11
+                      else if x!0152 = 16 then 18
+                           else if x!0152 = 25 then 26
+                                else if x!0152 = 22 then 23
+                                     else if x!0152 = 2 then 7 else 8
+           else if x!0151 = 12
+                then fun (x!0152:int) -> if x!0152 = 13 then 14 else 14
+                else if x!0151 = 1
+                     then fun (x!0152:int) -> if x!0152 = 1 then 3 else 3
+                     else fun (x!0152:int) ->
+                           if x!0152 = 0 then 8
+                           else if x!0152 = 9 then 11
+                                else if x!0152 = 16 then 18
+                                     else if x!0152 = 25 then 26
+                                          else if x!0152 = 22 then 23
+                                               else if x!0152 = 2 then 7
+                                                    else 8
+      x = 0
+  Line 29:
+    Normal execution of function `(@)` with args:
+      u = fun (x!0151:int) ->
+           if x!0151 = 0
+           then fun (x!0152:int) ->
+                 if x!0152 = 0 then 8
+                 else if x!0152 = 9 then 11
+                      else if x!0152 = 16 then 18
+                           else if x!0152 = 25 then 26
+                                else if x!0152 = 22 then 23
+                                     else if x!0152 = 2 then 7 else 8
+           else if x!0151 = 12
+                then fun (x!0152:int) -> if x!0152 = 13 then 14 else 14
+                else if x!0151 = 1
+                     then fun (x!0152:int) -> if x!0152 = 1 then 3 else 3
+                     else fun (x!0152:int) ->
+                           if x!0152 = 0 then 8
+                           else if x!0152 = 9 then 11
+                                else if x!0152 = 16 then 18
+                                     else if x!0152 = 25 then 26
+                                          else if x!0152 = 22 then 23
+                                               else if x!0152 = 2 then 7
+                                                    else 8
+      u = 0
+  Line 59:
+    Normal execution of function `set` with args:
+      f = fun (x!0151:int) ->
+           if x!0151 = 0 then 8
+           else if x!0151 = 9 then 11
+                else if x!0151 = 16 then 18
+                     else if x!0151 = 25 then 26
+                          else if x!0151 = 22 then 23
+                               else if x!0151 = 2 then 7 else 8
+      x = 0
+      v = 3
+  Line 60:
+    Normal execution of function `(!)` with args:
+      r = {contents=
+           fun (x!0151:int) ->
+            if x!0151 = 0
+            then fun (x!0152:int) ->
+                  if x!0152 = 0 then 8
+                  else if x!0152 = 9 then 11
+                       else if x!0152 = 16 then 18
+                            else if x!0152 = 25 then 26
+                                 else if x!0152 = 22 then 23
+                                      else if x!0152 = 2 then 7 else 8
+            else if x!0151 = 12
+                 then fun (x!0152:int) -> if x!0152 = 13 then 14 else 14
+                 else if x!0151 = 1
+                      then fun (x!0152:int) -> if x!0152 = 1 then 3 else 3
+                      else fun (x!0152:int) ->
+                            if x!0152 = 0 then 8
+                            else if x!0152 = 9 then 11
+                                 else if x!0152 = 16 then 18
+                                      else if x!0152 = 25 then 26
+                                           else if x!0152 = 22 then 23
+                                                else if x!0152 = 2 then 7
+                                                     else 8}
+File ref.mlw:
+  Line 18:
+    Normal execution of function `contents` with args:
+      arg = {contents=
+             fun (x!0151:int) ->
+              if x!0151 = 0
+              then fun (x!0152:int) ->
+                    if x!0152 = 0 then 8
+                    else if x!0152 = 9 then 11
+                         else if x!0152 = 16 then 18
+                              else if x!0152 = 25 then 26
+                                   else if x!0152 = 22 then 23
+                                        else if x!0152 = 2 then 7 else 8
+              else if x!0151 = 12
+                   then fun (x!0152:int) -> if x!0152 = 13 then 14 else 14
+                   else if x!0151 = 1
+                        then fun (x!0152:int) -> if x!0152 = 1 then 3 else 3
+                        else fun (x!0152:int) ->
+                              if x!0152 = 0 then 8
+                              else if x!0152 = 9 then 11
+                                   else if x!0152 = 16 then 18
+                                        else if x!0152 = 25 then 26
+                                             else if x!0152 = 22 then 23
+                                                  else if x!0152 = 2 then 7
+                                                       else 8}
+File maps_mono.mlw:
+  Line 60:
+    Normal execution of function `set` with args:
+      f = fun (x!0151:int) ->
+           if x!0151 = 0
+           then fun (x!0152:int) ->
+                 if x!0152 = 0 then 8
+                 else if x!0152 = 9 then 11
+                      else if x!0152 = 16 then 18
+                           else if x!0152 = 25 then 26
+                                else if x!0152 = 22 then 23
+                                     else if x!0152 = 2 then 7 else 8
+           else if x!0151 = 12
+                then fun (x!0152:int) -> if x!0152 = 13 then 14 else 14
+                else if x!0151 = 1
+                     then fun (x!0152:int) -> if x!0152 = 1 then 3 else 3
+                     else fun (x!0152:int) ->
+                           if x!0152 = 0 then 8
+                           else if x!0152 = 9 then 11
+                                else if x!0152 = 16 then 18
+                                     else if x!0152 = 25 then 26
+                                          else if x!0152 = 22 then 23
+                                               else if x!0152 = 2 then 7
+                                                    else 8
+      x = 0
+      v = (fun y -> if pure { if y = x then True else False } then v
+             else f y) with f = fun (x!0151:int) ->
+                                 if x!0151 = 0 then 8
+                                 else if x!0151 = 9 then 11
+                                      else if x!0151 = 16 then 18
+                                           else if x!0151 = 25 then 26
+                                                else if x!0151 = 22 then 23
+                                                     else if x!0151 = 2
+                                                          then 7 else 8, x = 0, v = 3
+    Normal execution of function `(:=)` with args:
+      r = {contents=
+           fun (x!0151:int) ->
+            if x!0151 = 0
+            then fun (x!0152:int) ->
+                  if x!0152 = 0 then 8
+                  else if x!0152 = 9 then 11
+                       else if x!0152 = 16 then 18
+                            else if x!0152 = 25 then 26
+                                 else if x!0152 = 22 then 23
+                                      else if x!0152 = 2 then 7 else 8
+            else if x!0151 = 12
+                 then fun (x!0152:int) -> if x!0152 = 13 then 14 else 14
+                 else if x!0151 = 1
+                      then fun (x!0152:int) -> if x!0152 = 1 then 3 else 3
+                      else fun (x!0152:int) ->
+                            if x!0152 = 0 then 8
+                            else if x!0152 = 9 then 11
+                                 else if x!0152 = 16 then 18
+                                      else if x!0152 = 25 then 26
+                                           else if x!0152 = 22 then 23
+                                                else if x!0152 = 2 then 7
+                                                     else 8}
+      v = (fun y -> if pure { if y = x2 then True else False } then v1
+             else f1 y) with f1 = fun (x!0151:int) ->
+                                   if x!0151 = 0
+                                   then fun (x!0152:int) ->
+                                         if x!0152 = 0 then 8
+                                         else if x!0152 = 9 then 11
+                                              else if x!0152 = 16 then 18
+                                                   else if x!0152 = 25
+                                                        then 26
+                                                        else if x!0152 = 22
+                                                             then 23
+                                                             else if 
+                                                                  x!0152 = 2
+                                                                  then 7
+                                                                  else 8
+                                   else if x!0151 = 12
+                                        then fun (x!0152:int) ->
+                                              if x!0152 = 13 then 14 else 14
+                                        else if x!0151 = 1
+                                             then fun (x!0152:int) ->
+                                                   if x!0152 = 1 then 3
+                                                   else 3
+                                             else fun (x!0152:int) ->
+                                                   if x!0152 = 0 then 8
+                                                   else if x!0152 = 9 then 11
+                                                        else if x!0152 = 16
+                                                             then 18
+                                                             else if 
+                                                                  x!0152 = 25
+                                                                  then 26
+                                                                  else 
+                                                                  if 
+                                                                  x!0152 = 22
+                                                                  then 23
+                                                                  else 
+                                                                  if 
+                                                                  x!0152 = 2
+                                                                  then 7
+                                                                  else 8, x2 = 0, v1 = (fun y1 -> if pure { 
+                                                                    if 
+                                                                    y1 = x
+                                                                    then True
+                                                                    else False } then v
+                                                                    else f y1) with f = fun
+                                                                    (x!0151:
+                                                                    int) ->
+                                                                    if 
+                                                                    x!0151 =
+                                                                    0 then 8
+                                                                    else 
+                                                                    if 
+                                                                    x!0151 =
+                                                                    9 then 11
+                                                                    else 
+                                                                    if 
+                                                                    x!0151 =
+                                                                    16
+                                                                    then 18
+                                                                    else 
+                                                                    if 
+                                                                    x!0151 =
+                                                                    25
+                                                                    then 26
+                                                                    else 
+                                                                    if 
+                                                                    x!0151 =
+                                                                    22
+                                                                    then 23
+                                                                    else 
+                                                                    if 
+                                                                    x!0151 =
+                                                                    2 then 7
+                                                                    else 8, x = 0, v = 3
+  Line 56:
+    Property failure at postcondition of `test_map_multidim2` with:
+      x = {contents=
+           (fun y -> if pure { if y = x2 then True else False } then v1
+              else f1 y) with f1 = fun (x!0151:int) ->
+                                    if x!0151 = 0
+                                    then fun (x!0152:int) ->
+                                          if x!0152 = 0 then 8
+                                          else if x!0152 = 9 then 11
+                                               else if x!0152 = 16 then 18
+                                                    else if x!0152 = 25
+                                                         then 26
+                                                         else if x!0152 = 22
+                                                              then 23
+                                                              else if 
+                                                                   x!0152 = 2
+                                                                   then 7
+                                                                   else 8
+                                    else if x!0151 = 12
+                                         then fun (x!0152:int) ->
+                                               if x!0152 = 13 then 14 else 14
+                                         else if x!0151 = 1
+                                              then fun (x!0152:int) ->
+                                                    if x!0152 = 1 then 3
+                                                    else 3
+                                              else fun (x!0152:int) ->
+                                                    if x!0152 = 0 then 8
+                                                    else if x!0152 = 9
+                                                         then 11
+                                                         else if x!0152 = 16
+                                                              then 18
+                                                              else if 
+                                                                   x!0152 =
+                                                                   25 then 26
+                                                                   else 
+                                                                   if 
+                                                                   x!0152 =
+                                                                   22 then 23
+                                                                   else 
+                                                                   if 
+                                                                   x!0152 = 2
+                                                                   then 7
+                                                                   else 8, x2 = 0, v1 = (fun y1 -> if pure { 
+                                                                    if 
+                                                                    y1 = x
+                                                                    then True
+                                                                    else False } then v
+                                                                    else f y1) with f = fun
+                                                                    (x!0151:
+                                                                    int) ->
+                                                                    if 
+                                                                    x!0151 =
+                                                                    0 then 8
+                                                                    else 
+                                                                    if 
+                                                                    x!0151 =
+                                                                    9 then 11
+                                                                    else 
+                                                                    if 
+                                                                    x!0151 =
+                                                                    16
+                                                                    then 18
+                                                                    else 
+                                                                    if 
+                                                                    x!0151 =
+                                                                    25
+                                                                    then 26
+                                                                    else 
+                                                                    if 
+                                                                    x!0151 =
+                                                                    22
+                                                                    then 23
+                                                                    else 
+                                                                    if 
+                                                                    x!0151 =
+                                                                    2 then 7
+                                                                    else 8, x = 0, v = 3}
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: STUCK (failure in postcondition of `set` at unknown location)
+- Selected model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 63, characters 14-54)
+  - Abstract RAC: INCOMPLETE (terminated because Postcondition of `set` cannot be evaluated)
+File "bench/check-ce/maps_mono.mlw", line 63, characters 14-54:
+Sub-goal Postcondition of goal proj_map_test1'vc.
+Prover result is: Unknown (unknown) (5398 steps).
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
+File maps_mono.mlw:
+  Line 62:
+    x = {contents=
+         fun (x!0190:int) ->
+          if x!0190 = 0 then 2
+          else if x!0190 = 8 then 10
+               else if x!0190 = 5 then 6 else if x!0190 = 1 then 3 else 2}
+    x = {contents=
+         fun (x!0190:int) ->
+          if x!0190 = 0 then 2
+          else if x!0190 = 8 then 10
+               else if x!0190 = 5 then 6 else if x!0190 = 1 then 3 else 2}
+    Execution of main function `proj_map_test1` with env:
+      x = {contents=
+           fun (x!0190:int) ->
+            if x!0190 = 0 then 2
+            else if x!0190 = 8 then 10
+                 else if x!0190 = 5 then 6 else if x!0190 = 1 then 3 else 2}
+      zero = 0
+      one = 1
+  Line 65:
+    Normal execution of function `(!)` with args:
+      r = {contents=
+           fun (x!0190:int) ->
+            if x!0190 = 0 then 2
+            else if x!0190 = 8 then 10
+                 else if x!0190 = 5 then 6 else if x!0190 = 1 then 3 else 2}
+File ref.mlw:
+  Line 18:
+    Normal execution of function `contents` with args:
+      arg = {contents=
+             fun (x!0190:int) ->
+              if x!0190 = 0 then 2
+              else if x!0190 = 8 then 10
+                   else if x!0190 = 5 then 6 else if x!0190 = 1 then 3 else 2}
+File maps_mono.mlw:
+  Line 65:
+    Normal execution of function `set` with args:
+      f = fun (x!0190:int) ->
+           if x!0190 = 0 then 2
+           else if x!0190 = 8 then 10
+                else if x!0190 = 5 then 6 else if x!0190 = 1 then 3 else 2
+      x = 0
+      v = 3
+    Normal execution of function `(:=)` with args:
+      r = {contents=
+           fun (x!0190:int) ->
+            if x!0190 = 0 then 2
+            else if x!0190 = 8 then 10
+                 else if x!0190 = 5 then 6 else if x!0190 = 1 then 3 else 2}
+      v = (fun y -> if pure { if y = x then True else False } then v
+             else f y) with f = fun (x!0190:int) ->
+                                 if x!0190 = 0 then 2
+                                 else if x!0190 = 8 then 10
+                                      else if x!0190 = 5 then 6
+                                           else if x!0190 = 1 then 3 else 2, x = 0, v = 3
+  Line 63:
+    Property failure at postcondition of `proj_map_test1` with:
+      x = {contents=
+           (fun y -> if pure { if y = x then True else False } then v
+              else f y) with f = fun (x!0190:int) ->
+                                  if x!0190 = 0 then 2
+                                  else if x!0190 = 8 then 10
+                                       else if x!0190 = 5 then 6
+                                            else if x!0190 = 1 then 3 else 2, x = 0, v = 3}
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: STUCK (failure in postcondition of `set2` at unknown location)
+- Selected model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 68, characters 14-56)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 68, characters 14-56)
+File "bench/check-ce/maps_mono.mlw", line 68, characters 14-56:
+Sub-goal Postcondition of goal proj_map_test2'vc.
+Prover result is: Unknown (unknown) (5584 steps).
+The program does not comply to the verification goal, for example during the
+  following execution:
+File int.mlw:
+  Line 13:
+    Constant zero initialization
+    zero = 0
+  Line 14:
+    Constant one initialization
+    one = 1
+File maps_mono.mlw:
+  Line 67:
+    x = {contents=
+         fun (x!0229:int) ->
+          if x!0229 = 0 then False
+          else if x!0229 = 5 then True
+               else if x!0229 = 4 then True
+                    else if x!0229 = 1 then True else True}
+    x = {contents=
+         fun (x!0229:int) ->
+          if x!0229 = 0 then False
+          else if x!0229 = 5 then True
+               else if x!0229 = 4 then True
+                    else if x!0229 = 1 then True else True}
+    Execution of main function `proj_map_test2` with env:
+      x = {contents=
+           fun (x!0229:int) ->
+            if x!0229 = 0 then False
+            else if x!0229 = 5 then True
+                 else if x!0229 = 4 then True
+                      else if x!0229 = 1 then True else True}
+      zero = 0
+      one = 1
+  Line 70:
+    Normal execution of function `True` with args:
+    Normal execution of function `(!)` with args:
+      r = {contents=
+           fun (x!0229:int) ->
+            if x!0229 = 0 then False
+            else if x!0229 = 5 then True
+                 else if x!0229 = 4 then True
+                      else if x!0229 = 1 then True else True}
+File ref.mlw:
+  Line 18:
+    Normal execution of function `contents` with args:
+      arg = {contents=
+             fun (x!0229:int) ->
+              if x!0229 = 0 then False
+              else if x!0229 = 5 then True
+                   else if x!0229 = 4 then True
+                        else if x!0229 = 1 then True else True}
+File maps_mono.mlw:
+  Line 70:
+    Normal execution of function `set` with args:
+      f = fun (x!0229:int) ->
+           if x!0229 = 0 then False
+           else if x!0229 = 5 then True
+                else if x!0229 = 4 then True
+                     else if x!0229 = 1 then True else True
+      x = 0
+      v = true
+    Normal execution of function `(:=)` with args:
+      r = {contents=
+           fun (x!0229:int) ->
+            if x!0229 = 0 then False
+            else if x!0229 = 5 then True
+                 else if x!0229 = 4 then True
+                      else if x!0229 = 1 then True else True}
+      v = (fun y -> if pure { if y = x4 then True else False } then v2
+             else f2 y) with f2 = fun (x!0229:int) ->
+                                   if x!0229 = 0 then False
+                                   else if x!0229 = 5 then True
+                                        else if x!0229 = 4 then True
+                                             else if x!0229 = 1 then True
+                                                  else True, x4 = 0, v2 = true
+  Line 68:
+    Property failure at postcondition of `proj_map_test2` with:
+      x = {contents=
+           (fun y -> if pure { if y = x4 then True else False } then v2
+              else f2 y) with f2 = fun (x!0229:int) ->
+                                    if x!0229 = 0 then False
+                                    else if x!0229 = 5 then True
+                                         else if x!0229 = 4 then True
+                                              else if x!0229 = 1 then True
+                                                   else True, x4 = 0, v2 = true}
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: NORMAL
+- Selected model 1: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 79, characters 3-31)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/maps_mono.mlw", line 79, characters 3-31)
+File "bench/check-ce/maps_mono.mlw", line 79, characters 3-31:
+Goal t1.
+Prover result is: Unknown (unknown) (772 steps).
+The program does not comply to the verification goal, for example during the
+  following execution:
+File maps_mono.mlw:
+  Line 78:
+    t = fun (x!0243:int) ->
+         if x!0243 = 0 then 2 else if x!0243 = 4 then 5 else 2
+    i = 0
+    t = fun (x!0243:int) ->
+         if x!0243 = 0 then 2 else if x!0243 = 4 then 5 else 2
+    i = 0
+    Execution of main function `t1'goal` with env:
+      i = 0
+      t = fun (x!0243:int) ->
+           if x!0243 = 0 then 2 else if x!0243 = 4 then 5 else 2
+Unknown location:
+    Normal execution of function `Tuple0` with args:
+File maps_mono.mlw:
+  Line 79:
+    Property failure at postcondition of `t1'goal1` with:
+      i = 0
+      t = fun (x!0243:int) ->
+           if x!0243 = 0 then 2 else if x!0243 = 4 then 5 else 2
+

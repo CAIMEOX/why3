@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -38,6 +38,7 @@ type t =
       mutable current_tab : int;
       mutable verbose : int;
       mutable show_full_context : bool;
+      mutable show_uses_clones_metas : bool;
       mutable show_attributes : bool;
       mutable show_coercions : bool;
       mutable show_locs : bool;
@@ -61,7 +62,7 @@ type t =
       (* mutable altern_provers : altern_provers; *)
       (* mutable replace_prover : conf_replace_prover; *)
       mutable hidden_provers : string list;
-      mutable session_time_limit : int;
+      mutable session_time_limit : float;
       mutable session_mem_limit : int;
       mutable session_nb_processes : int;
     }
@@ -76,6 +77,7 @@ type ide = {
   ide_current_tab : int;
   ide_verbose : int;
   ide_show_full_context : bool;
+  ide_show_uses_clones_metas : bool;
   ide_show_attributes : bool;
   ide_show_coercions : bool;
   ide_show_locs : bool;
@@ -107,6 +109,7 @@ let default_ide =
     ide_current_tab = 0;
     ide_verbose = 0;
     ide_show_full_context = false;
+    ide_show_uses_clones_metas = false;
     ide_show_attributes = false;
     ide_show_coercions = true;
     ide_show_locs = false;
@@ -146,6 +149,9 @@ let load_ide section =
     ide_show_full_context =
       get_bool section ~default:default_ide.ide_show_full_context
         "show_full_context";
+    ide_show_uses_clones_metas =
+      get_bool section ~default:default_ide.ide_show_uses_clones_metas
+        "show_uses_clones_metas";
     ide_show_attributes =
       get_bool section ~default:default_ide.ide_show_attributes "print_attributes";
     ide_show_coercions =
@@ -230,6 +236,7 @@ let load_config config =
     font_size     = ide.ide_font_size;
     verbose       = ide.ide_verbose;
     show_full_context= ide.ide_show_full_context ;
+    show_uses_clones_metas = ide.ide_show_uses_clones_metas ;
     show_attributes   = ide.ide_show_attributes ;
     show_coercions = ide.ide_show_coercions ;
     show_locs     = ide.ide_show_locs ;
@@ -284,6 +291,7 @@ let get_config t =
   let ide = set_int ide "font_size" t.font_size in
   let ide = set_int ide "verbose" t.verbose in
   let ide = set_bool ide "show_full_context" t.show_full_context in
+  let ide = set_bool ide "show_uses_clones_metas" t.show_uses_clones_metas in
   let ide = set_bool ide "print_attributes" t.show_attributes in
   let ide = set_bool ide "print_coercions" t.show_coercions in
   let ide = set_bool ide "print_locs" t.show_locs in
@@ -655,10 +663,12 @@ let show_about_window ~parent () =
                 "Martin Clochard";
                 "Simon Cruanes";
                 "Sylvain Dailler";
+                "Xavier Denis";
                 "Clément Fumex";
                 "Léon Gondelman";
                 "David Hauzar";
                 "Daisuke Ishii";
+                "Jacques-Henri Jourdan";
                 "Johannes Kanig";
                 "Mikhail Mandrykin";
                 "David Mentré";
@@ -672,7 +682,7 @@ let show_about_window ~parent () =
                 "Piotr Trojanek";
                 "Makarius Wenzel";
                ]
-      ~copyright:"Copyright 2010-2022 Inria, CNRS, Paris-Saclay University"
+      ~copyright:"Copyright 2010-2023 Inria, CNRS, Paris-Saclay University"
       ~license:("See file " ^ Filename.concat Config.datadir "LICENSE")
       ~website:"http://why3.lri.fr/"
       ~website_label:"http://why3.lri.fr/"
@@ -721,10 +731,10 @@ let general_settings (c : t) (notebook:GPack.notebook) =
     ~packing:hb_pack () in
   let timelimit_spin = GEdit.spin_button ~digits:0 ~packing:hb#add () in
   timelimit_spin#adjustment#set_bounds ~lower:0. ~upper:86_400. ~step_incr:5. ();
-  timelimit_spin#adjustment#set_value (float_of_int c.session_time_limit);
+  timelimit_spin#adjustment#set_value (c.session_time_limit);
   let (_ : GtkSignal.id) =
     timelimit_spin#connect#value_changed ~callback:
-      (fun () -> c.session_time_limit <- timelimit_spin#value_as_int)
+      (fun () -> c.session_time_limit <- timelimit_spin#value)
   in
   (* mem limit *)
   let hb = GPack.hbox ~homogeneous:false ~packing:vb#add () in
@@ -881,6 +891,15 @@ let appearance_settings (c : t) (notebook:GPack.notebook) =
   let (_ : GtkSignal.id) =
     showfullcontext#connect#toggled ~callback:
       (fun () -> c.show_full_context <- not c.show_full_context)
+  in
+  let show_uses_clones_metas =
+    GButton.check_button ~label:"show uses, clones and metas"
+      ~packing:display_options_box#add ()
+      ~active:c.show_uses_clones_metas
+  in
+  let (_ : GtkSignal.id) =
+    show_uses_clones_metas#connect#toggled ~callback:
+      (fun () -> c.show_uses_clones_metas <- not c.show_uses_clones_metas)
   in
   let showattrs =
     GButton.check_button
@@ -1159,7 +1178,7 @@ let editors_page c (notebook:GPack.notebook) =
       editors (2, [], Meditor.empty, Meditor.empty)
   in
   let strings = "(default)" :: "--" :: (List.rev strings) in
-  let add_prover p pi =
+  let add_prover p _pi =
     let text = Pp.string_of_wnl Whyconf.print_prover p in
     let hb = GPack.hbox ~homogeneous:false ~packing:box_pack () in
     let hb_pack_fill_expand =
@@ -1174,7 +1193,8 @@ let editors_page c (notebook:GPack.notebook) =
     combo#set_row_separator_func
       (Some (fun m row -> m#get ~row ~column = "--"));
     let i =
-      try Meditor.find pi.editor indexes with Not_found -> 0
+      let ed = Whyconf.get_prover_editor c.config p in
+      try Meditor.find ed indexes with Not_found -> 0
     in
     combo#set_active i;
     let ( _ : GtkSignal.id) = combo#connect#changed
@@ -1192,8 +1212,7 @@ let editors_page c (notebook:GPack.notebook) =
 	    (* Debug.dprintf debug "prover %a: selected editor '%s'@." *)
             (*   print_prover p data; *)
             c.config <-
-              Whyconf.User.update_prover_editor c.config
-                p data
+              Whyconf.User.set_prover_editor c.config p data
       )
     in
     ()

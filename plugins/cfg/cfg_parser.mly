@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -64,9 +64,13 @@ vardecls:
 ;
 
 vardecl:
-  | g=ghost_opt VAR vl=attrs(lident_nq)* COLON t=ty SEMICOLON
-    { List.map (fun id -> (g,id,t)) vl }
+  | g=ghost_opt VAR vl=attrs(lident_nq)* COLON t=ty init=init_opt SEMICOLON
+    { List.map (fun id -> (g,id,t, init)) vl }
 ;
+
+init_opt:
+| /* epsilon */ { None }
+| EQUAL contract_expr { Some($2) }
 
 ghost_opt:
   | /* epsilon */ { false }
@@ -88,8 +92,10 @@ sequence:
 instr:
   | contract_expr
     { mk_cfginstr (CFGexpr $1) $startpos $endpos }
-  | INVARIANT ident LEFTBRC term RIGHTBRC
-    { mk_cfginstr (CFGinvariant [$2,$4]) $startpos $endpos }
+  | VARIANT LEFTBRC t=term RIGHTBRC
+    { mk_cfginstr (CFGinvariant [Variant, None, t, ref None]) $startpos $endpos }
+  | INVARIANT nm=option(ident) LEFTBRC t=term RIGHTBRC
+    { mk_cfginstr (CFGinvariant [Invariant, nm, t, ref None]) $startpos $endpos }
 ;
 
 terminator :

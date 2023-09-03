@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -33,11 +33,9 @@ let files = Queue.create ()
 let opt_stats = ref true
 let opt_force = ref false
 let opt_obsolete_only = ref false
+let opt_ignore_shapes = ref false
 let opt_use_steps = ref false
 let opt_merging_only = ref false
-(*
-let opt_bench = ref false
-*)
 let opt_provers = ref []
 let opt_verbose = ref true
 
@@ -60,7 +58,9 @@ let set_opt_smoke = function
   | Some _ -> assert false
   | None -> opt_smoke := SD_Top
 
-let usage_msg = "<dir>\nReplay the session stored in the given directory."
+let usage_msg =
+  "<session directory>\n\
+   Replay the session stored in the given directory."
 
 let option_list =
   let open Getopt in
@@ -70,6 +70,8 @@ let option_list =
     " replay using recorded number of proof steps (when\npossible)";
     KLong "obsolete-only", Hnd0 (fun () -> opt_obsolete_only := true),
     " replay only if session is obsolete";
+    KLong "ignore-shapes", Hnd0 (fun () -> opt_ignore_shapes := true),
+    " ignore shapes during session merging";
     KLong "merging-only", Hnd0 (fun () -> opt_merging_only := true),
     " check merging of session";
     Key ('P', "prover"),
@@ -143,7 +145,7 @@ let print_report ses (id,p,l,r) =
      begin
        match r with
        | C.Result(new_res,old_res) ->
-          printf "@[<h>%a instead of %a (timelimit=%d, memlimit=%d, steplimit=%d)@]@."
+          printf "@[<h>%a instead of %a (timelimit=%.2f, memlimit=%d, steplimit=%d)@]@."
                  print_result new_res print_result old_res
                  l.Call_provers.limit_time
                  l.Call_provers.limit_mem
@@ -354,7 +356,7 @@ let run_as_bench env_session =
     eprintf " done.@.";
     exit 0
   in
-  let limit = { Call_provers.empty_limit with Call_provers.limit_time = 2} in
+  let limit = { Call_provers.empty_limit with Call_provers.limit_time = 2.} in
   M.play_all env_session sched ~callback ~limit provers;
   main_loop ();
   eprintf "main replayer (in bench mode) exited unexpectedly@.";
@@ -381,7 +383,7 @@ let () =
     (* update the session *)
     let found_obs, found_detached =
       try
-        Controller_itp.reload_files cont
+        Controller_itp.reload_files ~ignore_shapes:!opt_ignore_shapes cont
       with
       | Controller_itp.Errors_list l ->
           List.iter (fun e -> Format.eprintf "%a@." Exn_printer.exn_printer e) l;

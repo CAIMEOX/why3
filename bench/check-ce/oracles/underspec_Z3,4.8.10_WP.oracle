@@ -1,8 +1,8 @@
 File "bench/check-ce/underspec.mlw", line 17, characters 27-33:
 Sub-goal Loop invariant init of goal f'vc.
-Prover result is: Valid.
+Prover result is: Valid (45 steps).
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
   - Abstract RAC: FAILURE (loop invariant preservation at "bench/check-ce/underspec.mlw", line 17, characters 18-33)
@@ -11,7 +11,7 @@ Prover result is: Valid.
   - Abstract RAC: STUCK (failure in loop invariant preservation after last iteration at "bench/check-ce/underspec.mlw", line 17, characters 18-33)
 File "bench/check-ce/underspec.mlw", line 17, characters 27-33:
 Sub-goal Loop invariant preservation of goal f'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000089 steps).
 The contracts of some function or loop are too weak, for example during the
   following execution:
 File int.mlw:
@@ -40,7 +40,7 @@ File underspec.mlw:
     result of `ref` = {contents= 0}
   Line 16:
     Giant-step iteration of loop
-    x1 = {contents= (-176)}
+    x1 = {contents= (- 176)}
     x2 = {contents= 0}
     i = 0
     Giant-step iteration of loop
@@ -50,9 +50,9 @@ File underspec.mlw:
       y = 0
   Line 19:
     Normal execution of function `contents` with args:
-      arg = {contents= (-176)}
+      arg = {contents= (- 176)}
     Normal execution of function `(+)` with args:
-      _ = (-176)
+      _ = (- 176)
       _ = 1
   Line 17:
     Property failure at loop invariant preservation with:
@@ -61,13 +61,13 @@ File underspec.mlw:
 
 File "bench/check-ce/underspec.mlw", line 17, characters 27-33:
 Sub-goal Loop invariant preservation of goal f'vc.
-Prover result is: Valid.
+Prover result is: Valid (1234 steps).
 
 File "bench/check-ce/underspec.mlw", line 31, characters 14-23:
 Sub-goal Postcondition of goal g'vc.
-Prover result is: Valid.
+Prover result is: Valid (147 steps).
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
   - Abstract RAC: FAILURE (assertion at "bench/check-ce/underspec.mlw", line 37, characters 13-18)
@@ -76,7 +76,7 @@ Prover result is: Valid.
   - Abstract RAC: STUCK (failure in postcondition of `g` at "bench/check-ce/underspec.mlw", line 31, characters 14-23)
 File "bench/check-ce/underspec.mlw", line 37, characters 13-18:
 Sub-goal Assertion of goal f'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000035 steps).
 The contracts of some function or loop are too weak, for example during the
   following execution:
 File int.mlw:

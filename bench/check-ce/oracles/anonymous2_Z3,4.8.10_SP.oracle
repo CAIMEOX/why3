@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: SW
   - Concrete RAC: NORMAL
   - Abstract RAC: FAILURE (assertion at "bench/check-ce/anonymous2.mlw", line 9, characters 11-16)
@@ -7,7 +7,7 @@
   - Abstract RAC: FAILURE (assertion at "bench/check-ce/anonymous2.mlw", line 9, characters 11-16)
 File "bench/check-ce/anonymous2.mlw", line 9, characters 11-16:
 Sub-goal Assertion of goal f'vc.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (181 steps).
 The contracts of some function or loop are too weak, for example during the
   following execution:
 File int.mlw:

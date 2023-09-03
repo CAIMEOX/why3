@@ -1,8 +1,8 @@
 File "bench/check-ce/if_decision_branch.mlw", line 19, characters 13-23:
 Sub-goal Postcondition of goal f'vc.
-Prover result is: Valid.
+Prover result is: Valid (133 steps).
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_decision_branch.mlw", line 19, characters 13-23)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_decision_branch.mlw", line 19, characters 13-23)
@@ -11,7 +11,7 @@ Prover result is: Valid.
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_decision_branch.mlw", line 19, characters 13-23)
 File "bench/check-ce/if_decision_branch.mlw", line 19, characters 13-23:
 Sub-goal Postcondition of goal f'vc.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (383 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:

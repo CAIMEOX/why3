@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -21,8 +21,6 @@ val map_fold_left :
 
 val map_fold_right :
   ('a -> 'acc -> 'b * 'acc) -> 'a list -> 'acc -> 'b list * 'acc
-
-val map_filter : ('a -> 'b option) -> 'a list -> 'b list
 
 val equal : ('a -> 'b -> bool) -> 'a list -> 'b list -> bool
 
@@ -65,10 +63,8 @@ val drop_while : ('a -> bool) -> 'a list -> 'a list
 val first_nth : ('a -> 'b option) -> 'a list -> int * 'b
 (** Combination of {!first} and {!find_nth}. *)
 
-val mapi : (int -> 'a -> 'b) -> 'a list -> 'b list
-val iteri : (int -> 'a -> unit) -> 'a list -> unit
 val fold_lefti : ('a -> int -> 'b -> 'a) -> 'a -> 'b list -> 'a
-(** Similar to [List.map], [List.iter], and [List.fold_left],
+(** Similar to [List.fold_left],
     but with element index passed as extra argument (in 0..len-1). *)
 
 val prefix : int -> 'a list -> 'a list

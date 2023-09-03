@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (assertion at "bench/check-ce/range_type_int.mlw", line 9, characters 12-27)
   - Abstract RAC: FAILURE (assertion at "bench/check-ce/range_type_int.mlw", line 9, characters 12-27)
@@ -7,7 +7,7 @@
   - Abstract RAC: FAILURE (assertion at "bench/check-ce/range_type_int.mlw", line 9, characters 12-27)
 File "bench/check-ce/range_type_int.mlw", line 9, characters 12-27:
 Sub-goal Assertion of goal f'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (253 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -19,13 +19,13 @@ File int.mlw:
     one = 1
 File range_type_int.mlw:
   Line 7:
-    x = {int32'int => 5}
-    x = {int32'int => 5}
+    x = epsilon x:int32. int32'int x = 5
+    x = epsilon x:int32. int32'int x = 5
     Execution of main function `f` with env:
-      x = {int32'int => 5}
+      x = epsilon x:int32. int32'int x = 5
       zero = 0
       one = 1
   Line 9:
     Property failure at assertion with:
-      x = {int32'int => 5}
+      x = epsilon x:int32. int32'int x = 5
 

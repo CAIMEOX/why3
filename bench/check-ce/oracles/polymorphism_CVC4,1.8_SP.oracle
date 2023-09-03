@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 7, characters 27-34)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 7, characters 27-34)
@@ -7,7 +7,7 @@
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 7, characters 27-34)
 File "bench/check-ce/polymorphism.mlw", line 7, characters 27-34:
 Goal gm.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (66 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File polymorphism.mlw:
@@ -23,7 +23,7 @@ File polymorphism.mlw:
     Property failure at postcondition of `gm'goal` with:
       x = (B 1)
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 11, characters 22-35)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 11, characters 22-35)
@@ -32,7 +32,7 @@ File polymorphism.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/polymorphism.mlw", line 11, characters 22-35)
 File "bench/check-ce/polymorphism.mlw", line 11, characters 22-35:
 Goal gm2.
-Prover result is: Unknown (sat).
+Prover result is: Unknown (sat) (92 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File polymorphism.mlw:
@@ -49,11 +49,11 @@ File polymorphism.mlw:
       False = UNDEFINED
       x = (C 0 true)
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
 File "bench/check-ce/polymorphism.mlw", line 15, characters 30-37:
 Goal g.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (160314 steps).
 

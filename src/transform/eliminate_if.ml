@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -63,11 +63,16 @@ and elim_f contF f = match f.t_node with
       TermTF.t_map_cont elim_tr elim_f contF f
 
 (* the only terms we still can meet are the terms in triggers *)
-and elim_tr contT t = match t.t_node with
+and elim_tr contT t =
+(* such production of failures is inadequate, see https://gitlab.inria.fr/why3/why3/-/issues/741
+
+So let's just keep the if in the triggers
+
+match t.t_node with
   | Tif _ ->
       Printer.unsupportedTerm t
         "cannot eliminate 'if-then-else' in trigger terms"
-  | _ -> TermTF.t_map_cont elim_tr elim_f contT t
+  | _ -> *) TermTF.t_map_cont elim_tr elim_f contT t
 
 let elim_f f = elim_f (fun f -> f) f
 

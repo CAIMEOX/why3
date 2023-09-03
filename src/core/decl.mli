@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -87,7 +87,7 @@ val pr_hash : prsymbol -> int
 type ind_decl = lsymbol * (prsymbol * term) list
 
 type ind_sign = Ind | Coind
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 type ind_list = ind_sign * ind_decl list
 
@@ -97,7 +97,7 @@ type prop_kind =
   | Plemma    (** prove, use as a premise *)
   | Paxiom    (** do not prove, use as a premise *)
   | Pgoal     (** prove, do not use as a premise *)
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 type prop_decl = prop_kind * prsymbol * term
 
@@ -168,6 +168,7 @@ exception BadRecordType of lsymbol * tysymbol
 exception BadRecordUnnamed of lsymbol * tysymbol
 exception RecordFieldMissing of lsymbol
 exception DuplicateRecordField of lsymbol
+exception UnexpectedProjOrConstr of lsymbol
 
 (** {2 Utilities} *)
 

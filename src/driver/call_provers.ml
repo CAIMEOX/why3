@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -15,6 +15,9 @@ open Model_parser
 let debug = Debug.register_info_flag "call_prover"
   ~desc:"Print@ debugging@ messages@ about@ prover@ calls@ \
          and@ keep@ temporary@ files."
+
+let debug_analyse_result = Debug.register_info_flag "analyse_result"
+  ~desc:"Print@ debugging@ messages@ about@ analysis@ of@ answers@ of@ provers."
 
 let debug_attrs = Debug.register_info_flag "print_model_attrs"
     ~desc:"Print@ attrs@ of@ identifiers@ and@ expressions@ in@ CE@ model."
@@ -44,18 +47,19 @@ type prover_result = {
 
 (* BEGIN{resourcelimit} anchor for automatic documentation, do not remove *)
 type resource_limit = {
-  limit_time  : int;
+  limit_time  : float;
   limit_mem   : int;
   limit_steps : int;
 }
 (* END{resourcelimit} anchor for automatic documentation, do not remove *)
 
-let empty_limit = { limit_time = 0 ; limit_mem = 0; limit_steps = 0 }
+let empty_limit = { limit_time = 0. ; limit_mem = 0; limit_steps = 0 }
 
 let limit_max =
   let single_limit_max a b = if a = 0 || b = 0 then 0 else max a b in
+  let single_limit_maxf a b = if a = 0. || b = 0. then 0. else max a b in
   fun a b ->
-    { limit_time = single_limit_max a.limit_time b.limit_time;
+    { limit_time = single_limit_maxf a.limit_time b.limit_time;
       limit_steps = single_limit_max a.limit_steps b.limit_steps;
       limit_mem = single_limit_max a.limit_mem b.limit_mem; }
 
@@ -223,11 +227,11 @@ let craft_efficient_re l =
 
 let debug_print_model ~print_attrs model =
   Debug.dprintf debug "Call_provers: %a@."
-    (print_model ~filter_similar:false ?me_name_trans:None ~print_attrs) model
+    (print_model ~filter_similar:false ~print_attrs) model
 
 type answer_or_model = Answer of prover_answer | Model of string
 
-let analyse_result exit_result res_parser get_counterexmp printing_info out =
+let analyse_result exit_result res_parser get_model out =
   let list_re = res_parser.prp_regexps in
   let re = craft_efficient_re list_re in
   let list_re = List.map (fun (a, b) -> Re.Str.regexp a, b) list_re in
@@ -243,40 +247,53 @@ let analyse_result exit_result res_parser get_counterexmp printing_info out =
       exit_result
   in
 
-  let merge_answers opt_ans1 opt_ans2 = match (opt_ans1,opt_ans2) with
-  | None, Some _ -> opt_ans2
-  | Some _, None -> opt_ans1
-  (* prefer any answer over HighFailure *)
-  | Some HighFailure, Some _ -> opt_ans2
-  | _ -> opt_ans1
+  let merge_answers ans1 opt_ans2 =
+    match opt_ans2 with
+    | None -> ans1
+    | Some ans2 ->
+        match ans1 with
+        (* prefer any answer over HighFailure *)
+        | HighFailure -> ans2
+        | _ -> ans1
   in
 
   let rec analyse saved_models saved_res l =
     match l with
     | [] ->
         Opt.get_def HighFailure saved_res, List.rev saved_models
-    (* FIXME (see https://gitlab.inria.fr/why3/why3/-/issues/648)
-        The following case is a specific treatment for cases when Answer HighFailure
+    | Answer Valid :: _ ->
+        (* answer Valid is always a priority *)
+        Valid, []
+    | Answer res :: (Answer HighFailure :: []) ->
+        Debug.dprintf debug_analyse_result
+          "@[[Call_provers.analyse_result] answer followed by HighFailure:@ @[%a@]@]@."
+          print_prover_answer res;
+        (* FIXME (see https://gitlab.inria.fr/why3/why3/-/issues/648)
+        This case is a specific treatment for cases when Answer HighFailure
         is appended at the end of result_list because signaled is true in the function
         parse_prover_run.
         Without this hack, if a regexp matches exactly the last line of the prover output
         and if Answer HighFailure has been appended at the end, we might end up with two
         consecutive answers in result_list that are ignored by the more general case
         Answer res1 :: (Answer res2 :: tl as tl1). *)
-    | Answer res :: (Answer HighFailure :: []) ->
-        Opt.get_def HighFailure (merge_answers (Some res) saved_res), List.rev saved_models
+        merge_answers res saved_res, List.rev saved_models
     | Answer res1 :: (Answer res2 :: tl as tl1) ->
-       Debug.dprintf debug "Call_provers: two consecutive answers: %a %a@."
+        Debug.dprintf debug_analyse_result
+          "@[[Call_provers.analyse_result] two consecutive answers:@ @[%a@] and @[%a@]@]@."
           print_prover_answer res1 print_prover_answer res2;
+        (* two consecutive answers may happen when one ask for (reason-unknown) *)
        begin
          match res1,res2 with
          | StepLimitExceeded, Unknown "resourceout"
          | Unknown _, Unknown "resourceout" ->
+             (* "resourceout" here is a reason given *)
             analyse saved_models saved_res (Answer StepLimitExceeded :: tl)
          | Timeout, Unknown "timeout"
          | Unknown _, Unknown "timeout" ->
+             (* "timeout" here is a reason given *)
             analyse saved_models saved_res (Answer Timeout :: tl)
          | (Unknown _, Unknown "")| (_, Unknown "(not unknown!)") ->
+             (* "(not unknown!)" is a reason given when previous answer was not unknown *)
             analyse saved_models saved_res (Answer res1 :: tl)
          | Unknown "", Unknown _ ->
             analyse saved_models saved_res tl1
@@ -290,31 +307,39 @@ let analyse_result exit_result res_parser get_counterexmp printing_info out =
             analyse saved_models saved_res tl1)
        end
     | Answer res :: Model model_str :: tl ->
-        if res = Valid then
-          (Valid, [])
-        else
-          if get_counterexmp then
-            begin
-            let m = res_parser.prp_model_parser printing_info model_str in
-            Debug.dprintf debug "Call_provers: model:@.";
-            debug_print_model ~print_attrs:false m;
-            analyse ((res, m) :: saved_models) (Some res) tl
-            end
-          else
-            analyse saved_models (merge_answers (Some res) saved_res) tl
+        Debug.dprintf debug_analyse_result
+          "@[[Call_provers.analyse_result] answer followed by model:@ @[%a@]@]@."
+          print_prover_answer res;
+        assert (res <> Valid);
+        record_model saved_models saved_res res model_str tl
     | Answer res :: tl ->
-        if res = Valid then
-          (Valid, [])
-        else
-          analyse saved_models (merge_answers (Some res) saved_res) tl
-    | Model _fail :: tl -> analyse saved_models saved_res tl
+        Debug.dprintf debug_analyse_result
+          "@[[Call_provers.analyse_result] answer not followed by model:@ @[%a@]@]@."
+          print_prover_answer res;
+        assert (res <> Valid);
+        analyse saved_models (Some (merge_answers res saved_res)) tl
+    | Model model_str :: tl ->
+        Debug.dprintf debug_analyse_result
+          "@[[Call_provers.analyse_result] model NOT PRECEDED by answer!@]@.";
+        (* this is not supposed to happen, but it happens. Possibly because the driver is missing
+           a regexp for a possible answer. Let us assume the answer is equivalent to unknown
+        *)
+        record_model saved_models saved_res (Unknown "unrecognized prover answer") model_str tl
+  and record_model saved_models saved_res res model_str tl =
+    match get_model with
+    | Some printing_info ->
+        let m = res_parser.prp_model_parser printing_info model_str in
+        Debug.dprintf debug "Call_provers: model:@.";
+        debug_print_model ~print_attrs:false m;
+        analyse ((res, m) :: saved_models) (Some res) tl
+    | None ->
+        analyse saved_models (Some (merge_answers res saved_res)) tl
   in
-
   analyse [] None result_list
 
 let backup_file f = f ^ ".save"
 
-let parse_prover_run res_parser signaled time out exitcode limit get_counterexmp printing_info =
+let parse_prover_run res_parser signaled time out exitcode limit get_model =
   Debug.dprintf debug "Call_provers: exited with status %Ld@." exitcode;
   (* the following conversion is incorrect (but does not fail) on 32bit, but if
      the incoming exitcode was really outside the bounds of [int], its exact
@@ -326,14 +351,15 @@ let parse_prover_run res_parser signaled time out exitcode limit get_counterexmp
       if signaled then [Answer HighFailure] else
       try [Answer (List.assoc int_exitcode res_parser.prp_exitcodes)]
       with Not_found -> []
-    in analyse_result exit_result res_parser get_counterexmp printing_info out
+    in analyse_result exit_result res_parser get_model out
   in
   Debug.dprintf debug "Call_provers: prover output:@\n%s@." out;
   let time = Opt.get_def (time) (grep_time out res_parser.prp_timeregexps) in
   let steps = Opt.get_def (-1) (grep_steps out res_parser.prp_stepregexps) in
-  let tlimit = float limit.limit_time in
+  let tlimit = limit.limit_time in
   let stepslimit = limit.limit_steps in
   let ans, time, steps =
+
     (* HighFailure or Unknown close to time limit are assumed to be timeouts *)
     if tlimit > 0.0 && time >= 0.9 *. tlimit -. 0.1 then
     match ans with
@@ -353,6 +379,8 @@ let parse_prover_run res_parser signaled time out exitcode limit get_counterexmp
       | _ -> ans, time, steps
       else ans, time, steps
   in
+  (* We avoid times smaller than 1/1000000s*)
+  let time = max 0.000001 time in
   { pr_answer = ans;
     pr_status = if signaled then Unix.WSIGNALED int_exitcode else Unix.WEXITED int_exitcode;
     pr_output = out;
@@ -361,9 +389,9 @@ let parse_prover_run res_parser signaled time out exitcode limit get_counterexmp
     pr_models = models;
   }
 
-let parse_prover_run res_parser signaled time outfile exitcode limit get_counterexmp printing_info =
+let parse_prover_run res_parser signaled time outfile exitcode limit get_model =
   if outfile = "" then
-    { pr_answer = Failure "interrupted";
+    { pr_answer = Unknown "empty prover answer";
       pr_status = Unix.WEXITED 1;
       pr_output = "";
       pr_time = time;
@@ -371,24 +399,28 @@ let parse_prover_run res_parser signaled time outfile exitcode limit get_counter
       pr_models = [] }
   else
     let out = read_and_delete_file outfile in
-    parse_prover_run res_parser signaled time out exitcode limit get_counterexmp printing_info
+    parse_prover_run res_parser signaled time out exitcode limit get_model
 
 let actualcommand ~config command limit file =
-  let stime = string_of_int limit.limit_time in
+  let stime = string_of_int (Float.to_int (Float.ceil limit.limit_time)) in
+  let stimef = string_of_float limit.limit_time in
+  let stimems = string_of_int (Float.to_int (limit.limit_time *. 1000.)) in
   let smem = string_of_int limit.limit_mem in
   let arglist = Cmdline.cmdline_split command in
   let use_stdin = ref true in
   let on_timelimit = ref false in
-  let cmd_regexp = Re.Str.regexp "%\\(.\\)" in
+  let cmd_regexp = Re.Str.regexp "%\\([.]?.\\)" in
   let replace s = match Re.Str.matched_group 1 s with
     | "%" -> "%"
     | "f" -> use_stdin := false; file
     | "t" -> on_timelimit := true; stime
+    | ".t" -> on_timelimit := true; stimef
+    | "T" -> on_timelimit := true; stimems
     | "m" -> smem
     | "l" -> Whyconf.libdir config
     | "d" -> Whyconf.datadir config
     | "S" -> string_of_int limit.limit_steps
-    | _ -> failwith "unknown specifier, use %%, %f, %t, %m, %l, %d or %S"
+    | _ -> failwith "unknown specifier, use %%, %f, %t, %.t, %T, %m, %l, %d or %S"
   in
   let args =
     List.map (Re.Str.global_substitute cmd_regexp replace) arglist
@@ -418,9 +450,9 @@ let adapt_limits limit on_timelimit =
     { limit with limit_time =
       (* for steps limit use 2 * t + 1 time *)
       if limit.limit_steps <> empty_limit.limit_steps
-      then (2 * limit.limit_time + 1)
+      then (2. *. limit.limit_time +. 1.)
       (* if prover implements time limit, use 4t + 1 *)
-      else if on_timelimit then 4 * limit.limit_time + 1
+      else if on_timelimit then 4. *. limit.limit_time +. 1.
       (* otherwise use t *)
       else limit.limit_time }
 
@@ -437,8 +469,7 @@ type save_data = {
   inplace         : bool;
   limit           : resource_limit;
   res_parser      : prover_result_parser;
-  printing_info   : Printer.printing_info;
-  get_counterexmp : bool;
+  get_model       : Printer.printing_info option;
 }
 
 let saved_data : (int, save_data) Hashtbl.t = Hashtbl.create 17
@@ -459,7 +490,7 @@ let handle_answer answer =
         if save.inplace then Sys.rename (backup_file save.vc_file) save.vc_file
       end;
       let ans = parse_prover_run save.res_parser timeout time out_file exit_code
-          save.limit save.get_counterexmp save.printing_info in
+          save.limit save.get_model in
       id, Some ans
   | Started id ->
       id, None
@@ -472,8 +503,7 @@ type prover_call =
   | EditorCall of int
 
 let call_on_file
-      ~config ~command ~limit ~res_parser ~get_counterexmp
-      ~printing_info ?(inplace=false) fin =
+      ~config ~command ~limit ~res_parser ~get_model ?(inplace=false) fin =
   let id = gen_id () in
   let cmd, use_stdin, on_timelimit =
     actualcommand ~cleanup:true ~inplace ~config command limit fin in
@@ -482,15 +512,14 @@ let call_on_file
     inplace         = inplace;
     limit           = limit;
     res_parser      = res_parser;
-    get_counterexmp = get_counterexmp;
-    printing_info   = printing_info
+    get_model       = get_model;
   } in
   Hashtbl.add saved_data id save;
   let limit = adapt_limits limit on_timelimit in
   let use_stdin = if use_stdin then Some fin else None in
   Debug.dprintf
     debug
-    "Request sent to prove_client:@ timelimit=%d@ memlimit=%d@ cmd=@[[%a]@]@."
+    "Request sent to prove_client:@ timelimit=%.2f@ memlimit=%d@ cmd=@[[%a]@]@."
     limit.limit_time limit.limit_mem
     (Pp.print_list Pp.comma Pp.string) cmd;
   let libdir = Whyconf.libdir config in
@@ -570,7 +599,7 @@ let rec wait_on_call = function
       let _, ret = Unix.waitpid [] pid in
       editor_result ret
 
-let call_on_buffer ~command ~config ~limit ~res_parser ~filename ~get_counterexmp ~printing_info
+let call_on_buffer ~command ~config ~limit ~res_parser ~filename ~get_model
     ~gen_new_file ?(inplace=false) buffer =
   let fin,cin =
     if gen_new_file then
@@ -584,7 +613,7 @@ let call_on_buffer ~command ~config ~limit ~res_parser ~filename ~get_counterexm
       end
   in
   Buffer.output_buffer cin buffer; close_out cin;
-  call_on_file ~command ~config ~limit ~res_parser ~get_counterexmp ~printing_info ~inplace fin
+  call_on_file ~command ~config ~limit ~res_parser ~get_model ~inplace fin
 
 let call_editor ~config ~command fin =
   let command, use_stdin, _ =

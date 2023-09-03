@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -16,17 +16,17 @@ open Format
 exception InvalidConstantLiteral of int * string
 
 type int_value = BigInt.t
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 type int_literal_kind =
   ILitUnk | ILitDec | ILitHex | ILitOct | ILitBin
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 type int_constant = {
   il_kind : int_literal_kind;
   il_int  : int_value;
 }
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 type real_value = private {
   rv_sig  : BigInt.t;
@@ -36,13 +36,13 @@ type real_value = private {
 
 type real_literal_kind =
   RLitUnk | RLitDec of int | RLitHex of int
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 type real_constant = {
   rl_kind : real_literal_kind;
   rl_real : real_value
 }
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 val neg_int : int_constant -> int_constant
 val abs_int : int_constant -> int_constant
@@ -127,7 +127,7 @@ type int_range = {
   ir_lower : BigInt.t;
   ir_upper : BigInt.t;
 }
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 val create_range : BigInt.t -> BigInt.t -> int_range
 
@@ -137,6 +137,7 @@ val check_range : int_constant -> int_range -> unit
 (** [check_range c ir] checks that [c] is in the range described by [ir].
     @raise OutOfRange if out of range. *)
 
+val int_range_equal : int_range -> int_range -> bool
 
 (** {2 Float checking} *)
 
@@ -144,7 +145,7 @@ type float_format = {
   fp_exponent_digits    : int;
   fp_significand_digits : int; (* counting the hidden bit *)
 }
-[@@deriving sexp_of]
+[@@deriving sexp]
 
 exception NonRepresentableFloat of real_constant
 
@@ -159,3 +160,5 @@ val compute_float : real_constant -> float_format -> bool * BigInt.t * BigInt.t
 val check_float : real_constant -> float_format -> unit
 (** [check_float c fp] is the same as [compute_float c fp]
     but does not return any value. *)
+
+val float_format_equal : float_format -> float_format -> bool

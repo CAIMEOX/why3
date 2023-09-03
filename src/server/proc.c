@@ -1,7 +1,7 @@
 /********************************************************************/
 /*                                                                  */
 /*  The Why3 Verification Platform   /   The Why3 Development Team  */
-/*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  */
+/*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  */
 /*                                                                  */
 /*  This software is distributed under the terms of the GNU Lesser  */
 /*  General Public License version 2.1, with the special exception  */
@@ -37,7 +37,8 @@ void init_process_list () {
 void kill_processes(int key, char *id) {
   for (int i = 0; i < processes->len; i++) {
     pproc p = processes->data[i];
-    if (p->client_key == key && !strcmp(p->task_id, id)) {
+    if (p->client_key == key &&
+	(id == NULL || !strcmp(p->task_id, id))) {
       os_kill(p);
     }
   }

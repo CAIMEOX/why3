@@ -1,11 +1,11 @@
 Warning, file "bench/check-ce/ref1.mlw", line 5, characters 6-7: unused variable x
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (assertion at "bench/check-ce/ref1.mlw", line 6, characters 11-16)
   - Abstract RAC: FAILURE (assertion at "bench/check-ce/ref1.mlw", line 6, characters 11-16)
 File "bench/check-ce/ref1.mlw", line 6, characters 11-16:
 Sub-goal Assertion of goal f'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000015 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 Unknown location:

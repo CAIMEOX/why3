@@ -14,15 +14,22 @@ import "z3_bv.gen"
 import "smt-libv2-floats.gen"
 import "discrimination.gen"
 
-transformation "remove_unused_keep_constants"
+(* Performed introductions depending on whether counterexamples are
+   requested, as said by the meta "get_counterexmp". When this meta
+   set, this transformation introduces the model variables that are
+   still embedded in the goal. When it is not set, it removes all
+   these unused-ce-related variables, even in the context.  *)
+transformation "counterexamples_dependent_intros"
+
 transformation "inline_trivial"
 transformation "eliminate_builtin"
+transformation "remove_unused_keep_constants"
 transformation "detect_polymorphism"
 transformation "eliminate_definition_conditionally"
 transformation "eliminate_inductive"
+transformation "eliminate_epsilon"
 transformation "eliminate_algebraic_if_poly"
 transformation "eliminate_literal"
-transformation "eliminate_epsilon"
 
 transformation "simplify_formula"
 (*transformation "simplify_trivial_quantification"*)
@@ -46,6 +53,7 @@ outofmemory "Cannot allocate memory"
 (* not convenient: is more a problem of fork
 outofmemory "error while loading shared libraries:.*failed to map segment from shared object"
 *)
+timeout "^timeout$"
 timeout "interrupted by timeout"
 steps ":rlimit-count +\\([0-9]+\\)" 1
 steplimitexceeded "Maximal allocation counts [0-9]+ have been exceeded"

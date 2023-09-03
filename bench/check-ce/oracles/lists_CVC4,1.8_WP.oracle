@@ -1,4 +1,4 @@
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 14, characters 26-39)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 14, characters 26-39)
@@ -7,7 +7,7 @@
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 14, characters 26-39)
 File "bench/check-ce/lists.mlw", line 14, characters 26-39:
 Goal g1.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (429 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -32,7 +32,7 @@ File lists.mlw:
     Property failure at postcondition of `g1'goal` with:
       l = Nil
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
@@ -41,7 +41,7 @@ File lists.mlw:
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 16, characters 26-39)
 File "bench/check-ce/lists.mlw", line 16, characters 26-39:
 Goal g2.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (598 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -53,10 +53,10 @@ File int.mlw:
     one = 1
 File lists.mlw:
   Line 16:
-    l = (Cons 3 Nil)
-    l = (Cons 3 Nil)
+    l = (Cons (- 1) Nil)
+    l = (Cons (- 1) Nil)
     Execution of main function `g2'goal` with env:
-      l = (Cons 3 Nil)
+      l = (Cons (- 1) Nil)
       zero = 0
       one = 1
 Unknown location:
@@ -64,15 +64,18 @@ Unknown location:
 File lists.mlw:
   Line 16:
     Property failure at postcondition of `g2'goal1` with:
-      l = (Cons 3 Nil)
+      l = (Cons (- 1) Nil)
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
+  - Concrete RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 25, characters 30-43)
+  - Abstract RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 25, characters 30-43)
+- Checked model 1: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 25, characters 30-43)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/lists.mlw", line 25, characters 30-43)
 File "bench/check-ce/lists.mlw", line 25, characters 30-43:
 Goal g1.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (2230 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -97,11 +100,16 @@ File lists.mlw:
     Property failure at postcondition of `g1'goal2` with:
       l = Nil1
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: BAD_CE
+  - Concrete RAC: NORMAL
+  - Abstract RAC: NORMAL
+- Selected model 1: BAD_CE
   - Concrete RAC: NORMAL
   - Abstract RAC: NORMAL
 File "bench/check-ce/lists.mlw", line 27, characters 30-43:
 Goal g2.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Unknown (unknown + incomplete) (2280 steps).
+Sorry, we don't have a good counterexample for you :(
+
 

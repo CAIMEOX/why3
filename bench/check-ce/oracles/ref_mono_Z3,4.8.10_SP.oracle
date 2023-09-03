@@ -1,16 +1,16 @@
 File "bench/check-ce/ref_mono.mlw", line 7, characters 39-55:
 Sub-goal Postcondition of goal ref1'vc.
-Prover result is: Valid.
+Prover result is: Valid (24 steps).
 
 File "bench/check-ce/ref_mono.mlw", line 9, characters 29-40:
 Sub-goal Postcondition of goal prefix !'vc.
-Prover result is: Valid.
+Prover result is: Valid (25 steps).
 
 File "bench/check-ce/ref_mono.mlw", line 11, characters 38-44:
 Sub-goal Postcondition of goal infix :='vc.
-Prover result is: Valid.
+Prover result is: Valid (52 steps).
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_mono.mlw", line 21, characters 14-25)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_mono.mlw", line 21, characters 14-25)
@@ -19,7 +19,7 @@ Prover result is: Valid.
   - Abstract RAC: STUCK (failure in postcondition of `(:=)` at "bench/check-ce/ref_mono.mlw", line 11, characters 38-44)
 File "bench/check-ce/ref_mono.mlw", line 21, characters 14-25:
 Sub-goal Postcondition of goal test_post'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000047 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -32,20 +32,20 @@ File int.mlw:
 File ref_mono.mlw:
   Line 20:
     x = 0
-    y = {contents= (-1)}
+    y = {contents= (- 1)}
     x = 0
-    y = {contents= (-1)}
+    y = {contents= (- 1)}
     Execution of main function `test_post` with env:
       x = 0
-      y = {contents= (-1)}
+      y = {contents= (- 1)}
       zero = 0
       one = 1
   Line 23:
     Normal execution of function `(!)` with args:
-      r = {contents= (-1)}
+      r = {contents= (- 1)}
   Line 9:
     Normal execution of function `contents` with args:
-      arg = {contents= (-1)}
+      arg = {contents= (- 1)}
   Line 23:
     Normal execution of function `(-)` with args:
       x = 0
@@ -61,16 +61,16 @@ File ref_mono.mlw:
   Line 23:
     Normal execution of function `(+)` with args:
       _ = (-1)
-      _ = (-1)
+      _ = (- 1)
     Normal execution of function `(:=)` with args:
-      r = {contents= (-1)}
+      r = {contents= (- 1)}
       v = (-2)
   Line 21:
     Property failure at postcondition of `test_post` with:
       x = 0
-      y = {contents= (-1)}
+      y = {contents= (- 1)}
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_mono.mlw", line 27, characters 14-29)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_mono.mlw", line 27, characters 14-29)
@@ -79,7 +79,7 @@ File ref_mono.mlw:
   - Abstract RAC: STUCK (failure in precondition of `test_post2` at "bench/check-ce/ref_mono.mlw", line 25, characters 6-16)
 File "bench/check-ce/ref_mono.mlw", line 27, characters 14-29:
 Sub-goal Postcondition of goal test_post2'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000068 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -131,7 +131,7 @@ File ref_mono.mlw:
       y = {contents= 42}
       y = {contents= 0}
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_mono.mlw", line 38, characters 12-36)
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/ref_mono.mlw", line 38, characters 12-36)
@@ -140,7 +140,7 @@ File ref_mono.mlw:
   - Abstract RAC: STUCK (failure in postcondition of `(:=)` at "bench/check-ce/ref_mono.mlw", line 11, characters 38-44)
 File "bench/check-ce/ref_mono.mlw", line 38, characters 12-36:
 Sub-goal Postcondition of goal incr'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000089 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -152,27 +152,27 @@ File int.mlw:
     one = 1
 File ref_mono.mlw:
   Line 35:
-    y = {contents= (-1)}
+    y = {contents= (- 1)}
   Line 37:
     x23 = {contents= 174}
     x23 = {contents= 174}
     Execution of main function `incr` with env:
-      y = {contents= (-1)}
+      y = {contents= (- 1)}
       x23 = {contents= 174}
       zero = 0
       one = 1
   Line 40:
     Normal execution of function `(!)` with args:
-      r = {contents= (-1)}
+      r = {contents= (- 1)}
   Line 9:
     Normal execution of function `contents` with args:
-      arg = {contents= (-1)}
+      arg = {contents= (- 1)}
   Line 40:
     Normal execution of function `(+)` with args:
-      _ = (-1)
+      _ = (- 1)
       _ = 1
     Normal execution of function `(:=)` with args:
-      r = {contents= (-1)}
+      r = {contents= (- 1)}
       v = 0
   Line 41:
     Normal execution of function `(!)` with args:
@@ -204,18 +204,18 @@ File ref_mono.mlw:
     Property failure at postcondition of `incr` with:
       x23 = {contents= 176}
       x23 = {contents= 174}
-      y = {contents= (-1)}
+      y = {contents= (- 1)}
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: BAD_CE
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_mono.mlw", line 48, characters 2-8)
-  - Abstract RAC: STUCK (failure in postcondition of `incr` at "bench/check-ce/ref_mono.mlw", line 38, characters 12-36)
+  - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_mono.mlw", line 51, characters 14-36)
 - Selected model 1: NC
   - Concrete RAC: FAILURE (loop invariant init at "bench/check-ce/ref_mono.mlw", line 51, characters 14-36)
   - Abstract RAC: STUCK (failure in postcondition of `incr` at "bench/check-ce/ref_mono.mlw", line 38, characters 12-36)
 File "bench/check-ce/ref_mono.mlw", line 51, characters 14-36:
 Sub-goal Loop invariant init of goal test_loop'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000063 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -289,9 +289,9 @@ File ref_mono.mlw:
 
 File "bench/check-ce/ref_mono.mlw", line 52, characters 12-14:
 Sub-goal Loop variant decrease of goal test_loop'vc.
-Prover result is: Valid.
+Prover result is: Valid (3036 steps).
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Checked model 0: BAD_CE
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_mono.mlw", line 48, characters 2-8)
   - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_mono.mlw", line 51, characters 14-36)
@@ -300,7 +300,7 @@ Prover result is: Valid.
   - Abstract RAC: STUCK (failure in postcondition of `incr` at "bench/check-ce/ref_mono.mlw", line 38, characters 12-36)
 File "bench/check-ce/ref_mono.mlw", line 51, characters 14-36:
 Sub-goal Loop invariant preservation of goal test_loop'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000123 steps).
 The program does not comply to the verification goal, for example during the
   following execution:
 File int.mlw:
@@ -372,7 +372,7 @@ File ref_mono.mlw:
       x = ref1'mk 0
       x = ref1'mk 2
 
-<check-ce-categorization>Categorizations of models:
+<check_ce:categorization>Categorizations of models:
 - Selected model 0: BAD_CE
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/ref_mono.mlw", line 48, characters 2-8)
   - Abstract RAC: FAILURE (loop invariant init at "bench/check-ce/ref_mono.mlw", line 51, characters 14-36)
@@ -381,7 +381,7 @@ File ref_mono.mlw:
   - Abstract RAC: STUCK (failure in postcondition of `incr` at "bench/check-ce/ref_mono.mlw", line 38, characters 12-36)
 File "bench/check-ce/ref_mono.mlw", line 45, characters 12-23:
 Sub-goal Postcondition of goal test_loop'vc.
-Prover result is: Unknown or time/memory/step limit.
+Prover result is: Step limit exceeded (3000098 steps).
 Sorry, we don't have a good counterexample for you :(
 
 

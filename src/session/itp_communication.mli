@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -131,6 +131,12 @@ type next_unproved_node_strat =
   | Next
   | Clever
 
+
+type config_param =
+  | Max_tasks of int
+  | Timelimit of float
+  | Memlimit of int
+
 type ide_request =
   | Command_req             of node_ID * string
   (* executes the given command on the given node. command is
@@ -139,14 +145,16 @@ type ide_request =
   | Add_file_req            of string
   (* The file argument should be absolute. Or, at least, contain the session
      directory path: relative path will be taken from there *)
-  | Set_config_param        of string * int
+  | Set_config_param        of config_param
   | Set_prover_policy       of Whyconf.prover * Whyconf.prover_upgrade_policy
   | Get_file_contents       of string
-  | Get_task                of node_ID * bool * bool
-  (** [Get_task(id,b,loc)] requests for the text of the task in node
-      [id].  When [b] is true then the
-      full context is show.  When [loc] is false the locations are not
-      returned *)
+  | Get_task                of node_ID * bool * bool * bool
+  (** [Get_task(id,full_ctx,show_clones,show_loc)] requests for the
+     text of the task in node [id].  When [full_ctx] is true then the
+     full context is show. When [show_clones] is true then
+     declarations for used and cloned theories, together with metas,
+     are show in comments. When [show_loc] is false the locations are not
+     returned. *)
   | Remove_subtree          of node_ID
   | Copy_paste              of node_ID * node_ID
   | Save_file_req           of string * string
@@ -156,6 +164,7 @@ type ide_request =
   (** [Find_ident_req (position)] *)
   | Unfocus_req
   | Save_req
+  | Export_as_zip
   | Reload_req
   | Check_need_saving_req
   | Exit_req

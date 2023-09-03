@@ -1,7 +1,7 @@
 (********************************************************************)
 (*                                                                  *)
 (*  The Why3 Verification Platform   /   The Why3 Development Team  *)
-(*  Copyright 2010-2022 --  Inria - CNRS - Paris-Saclay University  *)
+(*  Copyright 2010-2023 --  Inria - CNRS - Paris-Saclay University  *)
 (*                                                                  *)
 (*  This software is distributed under the terms of the GNU Lesser  *)
 (*  General Public License version 2.1, with the special exception  *)
@@ -32,6 +32,7 @@
        (* annotations *)
        "forall", FORALL; "exists", EXISTS; "then", THEN; "let", LET;
        "old", OLD; "at", AT; "variant", VARIANT; "call", CALL;
+       "by", BY; "so", SO;
       ];
    fun s -> try Hashtbl.find h s with Not_found -> IDENT s
 
