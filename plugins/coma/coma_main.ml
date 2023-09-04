@@ -35,12 +35,14 @@ end)
 
 module Shs = Hsym.S
 module Mhs = Hsym.M
+(*
 module Hhs = Hsym.H
 module Whs = Hsym.W
 
 let hs_equal : hsymbol -> hsymbol -> bool = (==)
 let hs_hash hs = id_hash hs.hs_name
 let hs_compare hs1 hs2 = id_compare hs1.hs_name hs2.hs_name
+*)
 
 let create_hsymbol id eff sg = {
   hs_name = id_register id;
@@ -212,9 +214,12 @@ let hs_else = create_hsymbol (id_fresh "else") [] SGend
 let hs_the0 = create_hsymbol (id_fresh "the0") [] SGend
 let hs_els0 = create_hsymbol (id_fresh "els0") [] SGend
 
-let vs_i = create_vsymbol (id_fresh "i") ty_int
-let vs_j = create_vsymbol (id_fresh "j") ty_int
-let vs_b = create_vsymbol (id_fresh "b") ty_bool
+let vs_ii = create_vsymbol (id_fresh "i") ty_int
+let vs_ji = create_vsymbol (id_fresh "j") ty_int
+let vs_pi = create_vsymbol (id_fresh "p") ty_int
+let vs_qi = create_vsymbol (id_fresh "q") ty_int
+
+let vs_bb = create_vsymbol (id_fresh "b") ty_bool
 
 let tv_a = tv_of_string "a"
 let vs_ia = create_vsymbol (id_fresh "i") (ty_var tv_a)
@@ -223,33 +228,61 @@ let vs_ka = create_vsymbol (id_fresh "k") (ty_var tv_a)
 let vs_la = create_vsymbol (id_fresh "l") (ty_var tv_a)
 let vs_ma = create_vsymbol (id_fresh "m") (ty_var tv_a)
 
+let tv_c = tv_of_string "c"
+let vs_uc = create_vsymbol (id_fresh "u") (ty_var tv_c)
+let vs_vc = create_vsymbol (id_fresh "v") (ty_var tv_c)
+
 let hs_if = create_hsymbol (id_fresh "if") []
-  (SGval (vs_b, SGcnt (hs_then, SGcnt (hs_else, SGend))))
+  (SGval (vs_bb, SGcnt (hs_then, SGcnt (hs_else, SGend))))
 
-let hs_break = create_hsymbol (id_fresh "break") [] (SGval (vs_i, SGend))
-let hs_ret = create_hsymbol (id_fresh "ret") [] (SGval (vs_ia, SGend))
-let hs_re0 = create_hsymbol (id_fresh "re0") [] (SGval (vs_ja, SGend))
+let hs_break = create_hsymbol (id_fresh "break") [vs_pi] (SGval (vs_ii, SGend))
 
-let hs_loop = create_hsymbol (id_fresh "loop") []
-  (SGtyp (tv_a, SGval (vs_ia, SGcnt (hs_ret,
+let hs_loop_ret = create_hsymbol (id_fresh "ret") [vs_pi] (SGval (vs_ia, SGend))
+let hs_loop_re0 = create_hsymbol (id_fresh "re0") [vs_pi] (SGval (vs_ja, SGend))
+let hs_loop = create_hsymbol (id_fresh "loop") [vs_pi]
+  (SGtyp (tv_a, SGval (vs_ia, SGcnt (hs_loop_ret,
     SGval (vs_ka, SGval (vs_la, SGval (vs_ma, SGend)))))))
+
+let hs_alloc_ret = create_hsymbol (id_fresh "alloc_ret") [] (SGref (vs_vc, SGend))
+let hs_alloc_re0 = create_hsymbol (id_fresh "alloc_re0") [] (SGref (vs_uc, SGend))
+let hs_alloc = create_hsymbol (id_fresh "alloc") []
+  (SGtyp (tv_c, SGval (vs_vc, SGcnt (hs_alloc_ret, SGend))))
+
+let hs_assign_ret = create_hsymbol (id_fresh "assign_ret") [vs_uc] SGend
+let hs_assign_re0 = create_hsymbol (id_fresh "assign_re0") [vs_uc] SGend
+let hs_assign = create_hsymbol (id_fresh "assign") []
+  (SGtyp (tv_c, SGref (vs_uc, SGval (vs_vc, SGcnt (hs_assign_ret, SGend)))))
+
 
 let expr1 =
   Edef (Edef (Edef (Edef (Edef (
-    Eval (Eval (Eval (
-      Ecnt (Eval (Etyp (Esym hs_loop, ty_int), t_nat_const 17), Esym hs_break),
-        t_nat_const 3), t_nat_const 0), t_nat_const 5)
-  , hs_loop, Edef( Easr (t_neq (t_var vs_ia) (t_var vs_ka),
-      Ebbx (Ecnt (Ecnt (Eval (Esym hs_if,
-          t_if (t_equ (t_var vs_ia) (t_var vs_la)) t_bool_true t_bool_false),
-        Eval (Eval (Eval (
-          Ecnt (Eval (Etyp (Esym hs_loop, ty_var tv_a), t_var vs_ia), Esym hs_re0),
-            t_var vs_la), t_var vs_ma), t_var vs_ka)),
-        Eval (Esym hs_re0, t_var vs_ia))))
-      , hs_re0, Easr (t_equ (t_var vs_ma) (t_var vs_ja), Ebbx (Eval (Esym hs_ret, t_var vs_ja)))))
-  , hs_break, Easr (t_equ (t_var vs_i) (t_nat_const 42), Ebbx (Esym hs_halt)))
-  , hs_if, Edef (Edef (Ehol, hs_the0, Easr (t_equ (t_var vs_b) t_bool_true, Ebbx (Esym hs_then))),
-                             hs_els0, Easr (t_equ (t_var vs_b) t_bool_false, Ebbx (Esym hs_else))))
+
+    Ecnt (Eval (Etyp (Esym hs_alloc, ty_int), t_nat_const 17),
+    Elam (SGref (vs_pi, SGend), Edef (Edef (Eval (Eval (Eval (
+        Ecnt (Eval (Etyp (Esym hs_loop, ty_int), t_var vs_pi), Esym hs_break),
+          t_nat_const 3), t_nat_const 0), t_nat_const 5)
+    , hs_loop, Edef( Easr (t_and (t_neq (t_var vs_ia) (t_var vs_ka))
+                                 (t_neq (t_var vs_pi) (t_nat_const 9)),
+        Ebbx (Ecnt (Ecnt (Eval (Esym hs_if,
+            t_if (t_equ (t_var vs_ia) (t_var vs_la)) t_bool_true t_bool_false),
+          Ecnt (Eval (Eref (Etyp (Esym hs_assign, ty_int), vs_pi), t_nat_const 2),
+          Elam (SGend, Eval (Eval (Eval (
+            Ecnt (Eval (Etyp (Esym hs_loop, ty_var tv_a), t_var vs_ia), Esym hs_loop_re0),
+              t_var vs_la), t_var vs_ma), t_var vs_ka)))),
+          Eval (Esym hs_loop_re0, t_var vs_ia))))
+        , hs_loop_re0, Easr (t_and (t_equ (t_var vs_ma) (t_var vs_ja))
+                                   (t_equ (t_nat_const 55) (t_var vs_pi)),
+            Ebbx (Eval (Esym hs_loop_ret, t_var vs_ja)))))
+    , hs_break, Easr (
+        t_and (t_equ (t_var vs_ii) (t_nat_const 42))
+              (t_equ (t_var vs_pi) (t_nat_const 37)), Ebbx (Esym hs_halt)))))
+
+  , hs_if, Edef (Edef (Ehol, hs_the0, Easr (t_equ (t_var vs_bb) t_bool_true, Ebbx (Esym hs_then))),
+                             hs_els0, Easr (t_equ (t_var vs_bb) t_bool_false, Ebbx (Esym hs_else))))
+  , hs_assign, Edef (Ehol, hs_assign_re0, Easr (t_equ (t_var vs_uc) (t_var vs_vc),
+                Ebbx (Esym hs_assign_ret))))
+  , hs_alloc, Edef (Ehol, hs_alloc_re0, Easr (t_equ (t_var vs_uc) (t_var vs_vc),
+                Ebbx (Eref (Esym hs_alloc_ret, vs_uc)))))
   , hs_halt, Ehol)
   , hs_fail, Easr (t_false, Ehol))
 
