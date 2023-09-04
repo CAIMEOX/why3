@@ -183,24 +183,26 @@ let rec vc pp dd c bl = function
   | Eany -> assert (bl = []); t_true
 
 and havoc c wr pl =
-  let set (c,vl) p =
+  let on_write (c,vl) p =
     let q = Mvs.find p c.c_vs in
     let id = id_clone (match q.t_node with
       | Tvar v -> v | _ -> p).vs_name in
     let r = create_vsymbol id (t_type q) in
     c_add_v p (t_var r) c, r::vl in
-  let c,vl = List.fold_left set (c,[]) wr in
-  let set (c,vl) = function
-    | Pt a ->
-        c_add_t a (ty_var (create_tvsymbol (id_clone a.tv_name))) c, vl
+  let on_param (c,vl) = function
+    | Pt u ->
+        let v = create_tvsymbol (id_clone u.tv_name) in
+        c_add_t u (ty_var v) c, vl
     | Pv v | Pr v ->
         let ty = t_inst c v.vs_ty in
         let u = create_vsymbol (id_clone v.vs_name) ty in
         c_add_v v (t_var u) c, u::vl
     | Pc (h,wr,pl) ->
-        let vcd s u bl = vc true true (prepare c s u) bl (fail pl) in
+        let d = fail pl in
+        let vcd s u bl = vc true true (prepare c s u) bl d in
         c_add_h h wr vcd c, vl in
-  let c,vl = List.fold_left set (c,vl) pl in
+  let c,vl = List.fold_left on_write (c,[]) wr in
+  let c,vl = List.fold_left on_param (c,vl) pl in
   c, List.rev vl
 
 let vc e = vc true true c_empty [] e
