@@ -68,7 +68,7 @@ and argument =
   | Ac of expr
 
 let arg_of_param = function
-  | Pt a -> At (ty_var a)
+  | Pt u -> At (ty_var u)
   | Pv v -> Av (t_var v)
   | Pr r -> Ar r
   | Pc (g,_,_) -> Ac (Esym g)
@@ -91,71 +91,76 @@ type binding =
 and closure = bool -> term Mvs.t -> binding list -> term
 
 type context = {
-  ctx_tsb : ty Mtv.t;
-  ctx_sbs : term Mvs.t;
-  ctx_cnt : (vsymbol Mvs.t * closure) Mhs.t;
-  ctx_prt : Shs.t; (* empty when ctx_str *)
-  ctx_str : bool;
+  c_tv : ty Mtv.t;
+  c_vs : term Mvs.t;
+  c_hs : (vsymbol Mvs.t * closure) Mhs.t;
+  c_lc : Shs.t;
+  c_gl : bool;
 }
 
-let ctx_empty = {
-  ctx_tsb = Mtv.empty;
-  ctx_sbs = Mvs.empty;
-  ctx_cnt = Mhs.empty;
-  ctx_prt = Shs.empty;
-  ctx_str = true;
+let c_empty = {
+  c_tv = Mtv.empty;
+  c_vs = Mvs.empty;
+  c_hs = Mhs.empty;
+  c_lc = Shs.empty;
+  c_gl = true;
 }
 
-let t_inst c t = t_ty_subst c.ctx_tsb c.ctx_sbs t
-let r_inst c r = t_ty_subst c.ctx_tsb c.ctx_sbs (t_var r)
+let t_inst c t = ty_inst c.c_tv t
+let v_inst c t = t_ty_subst c.c_tv c.c_vs t
+let r_inst c r = t_ty_subst c.c_tv c.c_vs (t_var r)
 
-let ctx_add_t a t c = { c with ctx_tsb = Mtv.add a t c.ctx_tsb }
-let ctx_add_v v t c = { c with ctx_sbs = Mvs.add v t c.ctx_sbs }
+let c_add_t u t c = { c with c_tv = Mtv.add u t c.c_tv }
+let c_add_v v t c = { c with c_vs = Mvs.add v t c.c_vs }
 
-let ctx_add_c h w m d c = let set w r = Mvs.add r (Mvs.find_def r r m) w in
-  { c with ctx_cnt = Mhs.add h (List.fold_left set Mvs.empty w, d) c.ctx_cnt;
-           ctx_prt = if c.ctx_str then Shs.empty else Shs.add h c.ctx_prt }
+let c_add_o h writes map vcd c =
+  let lc = if c.c_gl then Shs.empty else Shs.add h c.c_lc in
+  let set wr r = Mvs.add r (Mvs.find_def r r map) wr in
+  let wr = List.fold_left set Mvs.empty writes in
+  { c with c_hs = Mhs.add h (wr,vcd) c.c_hs; c_lc = lc }
 
-let prepare c s u = { c with
-  ctx_sbs = Mvs.set_union u c.ctx_sbs;
-  ctx_prt = if s then c.ctx_prt else Shs.empty;
-  ctx_str = s && c.ctx_str }
+let c_add_h h w d c = c_add_o h w Mvs.empty d c
+
+let prepare c safe update = { c with
+  c_vs = Mvs.set_union update c.c_vs;
+  c_lc = if safe then c.c_lc else Shs.empty;
+  c_gl = safe && c.c_gl }
 
 let consume c pl bl =
   let eat (c,m) p b = match p, b with
-    | Pt a, Bt t -> ctx_add_t a t c, m
-    | Pv v, Bv t -> ctx_add_v v t c, m
-    | Pr p, Br (q,r) -> ctx_add_v p q c, Mvs.add p r m
-    | Pc (h,w,_), Bc d -> ctx_add_c h w m d c, m
+    | Pt u, Bt t -> c_add_t u t c, m
+    | Pv v, Bv t -> c_add_v v t c, m
+    | Pr p, Br (q,r) -> c_add_v p q c, Mvs.add p r m
+    | Pc (h,w,_), Bc d -> c_add_o h w m d c, m
     | _ -> assert false in
   fst (List.fold_left2 eat (c, Mvs.empty) pl bl)
 
 let rec vc pp dd c bl = function
   | Esym h ->
-      let wr, vcd = Mhs.find h c.ctx_cnt in
-      let prot = c.ctx_str || Shs.mem h c.ctx_prt in
+      let wr, vcd = Mhs.find h c.c_hs in
+      let lc = c.c_gl || Shs.mem h c.c_lc in
       let conv p q up = Mvs.add q (r_inst c p) up in
-      vcd (pp && prot) (Mvs.fold conv wr Mvs.empty) bl
+      vcd (pp && lc) (Mvs.fold conv wr Mvs.empty) bl
   | Eapp (e, a) ->
       let b = match a with
-        | At t -> Bt (ty_inst c.ctx_tsb t)
-        | Av t -> Bv (t_inst c t)
+        | At t -> Bt (t_inst c t)
+        | Av t -> Bv (v_inst c t)
         | Ar r -> Br (r_inst c r, r)
         | Ac d -> Bc (fun s u bl -> vc pp dd (prepare c s u) bl d) in
       vc pp dd c (b::bl) e
   | Elam (pl, e) ->
       let c = consume c pl bl in
-      let pick_hs s = function
+      let get_hs s = function
         | Pc (h,_,_) -> Shs.add h s
         | Pt _ | Pv _ | Pr _ -> s in
-      let hs = List.fold_left pick_hs Shs.empty pl in
-      let cw = { c with ctx_prt = hs; ctx_str = false } in
+      let lc = List.fold_left get_hs Shs.empty pl in
+      let cw = { c with c_lc = lc; c_gl = false } in
       t_and_simp (vc pp dd c [] e) (vc (not pp) (not dd) cw [] e)
   | Edef (e, h, wr, pl, d) -> assert (bl = []);
       let vcd s u bl =
         let c = consume (prepare c s u) pl bl in
         vc true false c [] d in
-      let cl = ctx_add_c h wr Mvs.empty vcd c in
+      let cl = c_add_h h wr vcd c in
       let lhs = vc pp dd cl [] e in
       let cr,vl = havoc c wr pl in
       let rhs = vc false pp cr [] d in
@@ -165,40 +170,40 @@ let rec vc pp dd c bl = function
         let c = consume (prepare c s u) pl bl in
         let c,_ = havoc c [] [Pc (h, wr, pl)] in
         vc true false c [] d in
-      let c = ctx_add_c h wr Mvs.empty vcd c in
+      let c = c_add_h h wr vcd c in
       let lhs = vc pp dd c [] e in
       let cr,vl = havoc c wr pl in
       let rhs = vc false pp cr [] d in
       t_and_simp lhs (t_forall_close_simp vl [] rhs)
   | Easr (f, e) -> assert (bl = []);
-      (if pp && c.ctx_str then t_and_asym_simp else t_implies_simp)
-        (t_inst c f) (vc pp dd c [] e)
+      (if pp && c.c_gl then t_and_asym_simp else t_implies_simp)
+        (v_inst c f) (vc pp dd c [] e)
   | Ebox e -> assert (bl = []); vc dd dd c [] e
   | Ewox e -> assert (bl = []); vc pp pp c [] e
   | Eany -> assert (bl = []); t_true
 
 and havoc c wr pl =
   let set (c,vl) p =
-    let q = Mvs.find p c.ctx_sbs in
+    let q = Mvs.find p c.c_vs in
     let id = id_clone (match q.t_node with
       | Tvar v -> v | _ -> p).vs_name in
     let r = create_vsymbol id (t_type q) in
-    ctx_add_v p (t_var r) c, r::vl in
+    c_add_v p (t_var r) c, r::vl in
   let c,vl = List.fold_left set (c,[]) wr in
   let set (c,vl) = function
     | Pt a ->
-        ctx_add_t a (ty_var (create_tvsymbol (id_clone a.tv_name))) c, vl
+        c_add_t a (ty_var (create_tvsymbol (id_clone a.tv_name))) c, vl
     | Pv v | Pr v ->
-        let ty = ty_inst c.ctx_tsb v.vs_ty in
+        let ty = t_inst c v.vs_ty in
         let u = create_vsymbol (id_clone v.vs_name) ty in
-        ctx_add_v v (t_var u) c, u::vl
+        c_add_v v (t_var u) c, u::vl
     | Pc (h,wr,pl) ->
         let vcd s u bl = vc true true (prepare c s u) bl (fail pl) in
-        ctx_add_c h wr Mvs.empty vcd c, vl in
+        c_add_h h wr vcd c, vl in
   let c,vl = List.fold_left set (c,vl) pl in
   c, List.rev vl
 
-let vc e = vc true true ctx_empty [] e
+let vc e = vc true true c_empty [] e
 
 let (!) h = Esym h
 
@@ -230,16 +235,14 @@ let hs_out = create_hsymbol (id_fresh "out")
 let hs_loop = create_hsymbol (id_fresh "loop")
 
 let vs_ii = create_vsymbol (id_fresh "i") ty_int
-(*
 let vs_ji = create_vsymbol (id_fresh "j") ty_int
+(*
 let vs_ki = create_vsymbol (id_fresh "k") ty_int
 let vs_li = create_vsymbol (id_fresh "l") ty_int
 let vs_mi = create_vsymbol (id_fresh "m") ty_int
 *)
 let vs_pi = create_vsymbol (id_fresh "p") ty_int
-(*
 let vs_qi = create_vsymbol (id_fresh "q") ty_int
-*)
 
 let vs_bb = create_vsymbol (id_fresh "b") ty_bool
 
@@ -255,7 +258,7 @@ let vs_uc = create_vsymbol (id_fresh "u") (ty_var tv_c)
 let vs_vc = create_vsymbol (id_fresh "v") (ty_var tv_c)
 
 let expr1 =
-  !hs_alloc -- ty_int -+ t_nat_const 3 -* (lam [Pr vs_pi]
+  !hs_alloc -- ty_int -+ t_nat_const 1 -* lam [Pr vs_pi] (
     !hs_loop -- ty_int -+ t_var vs_pi -* !hs_out -+
                               t_nat_const 3 -+ t_nat_const 0 -+ t_nat_const 5
     << def hs_loop [vs_pi] [Pt tv_a; Pv vs_ia; Pc (hs_ret,[vs_pi],[Pv vs_ja]);
@@ -264,10 +267,10 @@ let expr1 =
                    (t_neq (t_var vs_pi) (t_nat_const 9)))
           (Ebox (!hs_if -+ (t_if (t_equ (t_var vs_ia) (t_var vs_la))
                                 t_bool_true t_bool_false) -*
-             (lam [] (!hs_assign -- ty_int -& vs_pi -+ t_nat_const 2 -*
-                (lam [] (!hs_loop -- ty_var tv_a -+ t_var vs_ia -* !hs_ret
-                  -+ t_var vs_la -+ t_var vs_ma -+ t_var vs_ka)))) -*
-             (lam [] (!hs_ret -+ t_var vs_ia))))
+             lam [] (!hs_assign -- ty_int -& vs_pi -+ t_nat_const 2 -*
+                lam [] (!hs_loop -- ty_var tv_a -+ t_var vs_ia -* !hs_ret
+                  -+ t_var vs_la -+ t_var vs_ma -+ t_var vs_ka)) -*
+             lam [] (!hs_ret -+ t_var vs_ia)))
         >> def hs_ret [vs_pi] [Pv vs_ja]
           (asrt (t_and (t_equ (t_var vs_ma) (t_var vs_ja))
                        (t_equ (t_nat_const 55) (t_var vs_pi)))
@@ -275,6 +278,40 @@ let expr1 =
     >> def hs_out [vs_pi] [Pv vs_ii]
       (asrt (t_and (t_equ (t_var vs_ii) (t_nat_const 42))
                    (t_equ (t_var vs_pi) (t_nat_const 37))) (Ebox !hs_halt)))
+  >> def hs_assign [] [Pt tv_c; Pr vs_uc; Pv vs_vc; Pc (hs_ret,[vs_uc],[])]
+      (Eany >> def hs_ret [vs_uc] [] (asrt (t_equ (t_var vs_uc) (t_var vs_vc))
+                                              (Ebox (!hs_ret))))
+  >> def hs_alloc [] [Pt tv_c; Pv vs_vc; Pc (hs_ret,[],[Pr vs_uc])]
+      (Eany >> def hs_ret [] [Pr vs_uc] (asrt (t_equ (t_var vs_uc) (t_var vs_vc))
+                                              (Ebox (!hs_ret -& vs_uc))))
+  >> def hs_if [] [Pv vs_bb; Pc (hs_then,[],[]); Pc (hs_else,[],[])]
+      (Eany >> def hs_then [] [] (asrt (t_equ (t_var vs_bb) t_bool_true) (Ebox !hs_then))
+            >> def hs_else [] [] (asrt (t_equ (t_var vs_bb) t_bool_false) (Ebox !hs_else)))
+  >> def hs_fail [] [] (asrt t_false Eany)
+  >> def hs_halt [] [] (Ewox Eany)
+
+let expr2 =
+  !hs_alloc -- ty_int -+ t_nat_const 1 -* lam [Pr vs_qi] (
+    !hs_loop -& vs_qi -- ty_int -+ t_var vs_qi -*
+                          lam [Pv vs_ji] (!hs_out -& vs_qi -+ t_var vs_ji) -+
+                              t_nat_const 3 -+ t_nat_const 0 -+ t_nat_const 5)
+  << def hs_loop [] [Pr vs_pi; Pt tv_a; Pv vs_ia; Pc (hs_ret,[vs_pi],[Pv vs_ja]);
+                                              Pv vs_ka; Pv vs_la; Pv vs_ma]
+        (asrt (t_and (t_neq (t_var vs_ia) (t_var vs_ka))
+                  (t_neq (t_var vs_pi) (t_nat_const 9)))
+        (Ebox (!hs_if -+ (t_if (t_equ (t_var vs_ia) (t_var vs_la))
+                              t_bool_true t_bool_false) -*
+            lam [] (!hs_assign -- ty_int -& vs_pi -+ t_nat_const 2 -*
+              lam [] (!hs_loop -& vs_pi -- ty_var tv_a -+ t_var vs_ia -* !hs_ret
+                -+ t_var vs_la -+ t_var vs_ma -+ t_var vs_ka)) -*
+            lam [] (!hs_ret -+ t_var vs_ia)))
+      >> def hs_ret [vs_pi] [Pv vs_ja]
+        (asrt (t_and (t_equ (t_var vs_ma) (t_var vs_ja))
+                      (t_equ (t_nat_const 55) (t_var vs_pi)))
+                                  (Ebox (!hs_ret -+ t_var vs_ja))))
+  >> def hs_out [] [Pr vs_pi; Pv vs_ii]
+      (asrt (t_and (t_equ (t_var vs_ii) (t_nat_const 42))
+                   (t_equ (t_var vs_pi) (t_nat_const 37))) (Ebox !hs_halt))
   >> def hs_assign [] [Pt tv_c; Pr vs_uc; Pv vs_vc; Pc (hs_ret,[vs_uc],[])]
       (Eany >> def hs_ret [vs_uc] [] (asrt (t_equ (t_var vs_uc) (t_var vs_vc))
                                               (Ebox (!hs_ret))))
@@ -309,9 +346,7 @@ let mk_env {Theory.th_export = ns_int} = {
 
 let mk_goal tuc s e =
   let prs = Decl.create_prsymbol (id_fresh ("vc_" ^ s)) in
-  let vcf = vc e in
-  Format.printf "@[%a@]@." Pretty.print_term vcf;
-  Theory.add_prop_decl tuc Decl.Pgoal prs vcf
+  Theory.add_prop_decl tuc Decl.Pgoal prs (vc e)
 
 let read_channel env path _file _c =
 (*
@@ -324,6 +359,7 @@ let read_channel env path _file _c =
   let tuc = Theory.use_export tuc Theory.bool_theory in
   let tuc = Theory.use_export tuc th_int in
   let tuc = mk_goal tuc "expr1" expr1 in
+  let tuc = mk_goal tuc "expr2" expr2 in
   Mstr.singleton "Coma" (Theory.close_theory tuc)
 
 let () = Env.register_format Env.base_language "coma" ["coma"] read_channel
