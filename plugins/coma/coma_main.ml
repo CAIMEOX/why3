@@ -109,11 +109,6 @@ let c_add_o h writes map vcd c =
 
 let c_add_h h w d c = c_add_o h w Mvs.empty d c
 
-let prepare c safe update = { c with
-  c_vs = Mvs.set_union update c.c_vs;
-  c_lc = if safe then c.c_lc else Shs.empty;
-  c_gl = safe && c.c_gl }
-
 let consume c pl bl =
   let eat (c,m) p b = match p, b with
     | Pt u, Bt t -> c_add_t u t c, m
@@ -134,7 +129,7 @@ let rec vc pp dd c bl = function
         | At t -> Bt (t_inst c t)
         | Av t -> Bv (v_inst c t)
         | Ar r -> Br (r_inst c r, r)
-        | Ac d -> Bc (fun s u bl -> vc pp dd (prepare c s u) bl d) in
+        | Ac d -> Bc (closure pp dd c [] d) in
       vc pp dd c (b::bl) e
   | Elam (pl, e) ->
       let c = consume c pl bl in
@@ -147,8 +142,8 @@ let rec vc pp dd c bl = function
       let cr = if flat then c else
         let pc_of_def (h,wr,pl,_) = Pc (h,wr,pl) in
         fst (havoc c [] (List.map pc_of_def dfl)) in
-      let spec c (h,wr,pl,d) = c_add_h h wr (fun s u bl ->
-        vc true false (consume (prepare cr s u) pl bl) [] d) c in
+      let spec c (h,wr,pl,d) =
+        c_add_h h wr (closure true false cr pl d) c in
       let cl = List.fold_left spec c dfl in
       let impl (_,wr,pl,d) =
         let c,vl = havoc (if flat then c else cl) wr pl in
@@ -163,6 +158,13 @@ let rec vc pp dd c bl = function
   | Ebox e -> assert (bl = []); vc dd dd c [] e
   | Ewox e -> assert (bl = []); vc pp pp c [] e
   | Eany   -> assert (bl = []); t_true
+
+and closure pp dd c pl d safe update bl =
+  let c = { c with c_gl = safe && c.c_gl;
+    c_lc = if safe then c.c_lc else Shs.empty;
+    c_vs = Mvs.set_union update c.c_vs } in
+  if pl = [] then vc pp dd c bl d else
+  vc pp dd (consume c pl bl) [] d
 
 and havoc c wr pl =
   let on_write (vl,c) p =
@@ -191,8 +193,7 @@ and havoc c wr pl =
               Some (h, wr, pl, Ebox d)
           | Pt _ | Pv _ | Pr _ -> None) pl in
         let d = Edef (Ecut (t_false, Eany), true, dfl) in
-        vl, c_add_h h wr (fun s u bl ->
-          vc true true (consume (prepare c s u) pl bl) [] d) c in
+        vl, c_add_h h wr (closure true true c pl d) c in
   let vl,c = List.fold_left on_write ([],c) wr in
   let vl,c = List.fold_left on_param (vl,c) pl in
   c, List.rev vl
