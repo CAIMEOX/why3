@@ -103,7 +103,7 @@ let c_add_v v t c = { c with c_vs = Mvs.add v t c.c_vs }
 
 let c_add_o h writes map vcd c =
   let lc = if c.c_gl then Shs.empty else Shs.add h c.c_lc in
-  let set wr r = Mvs.add r (Mvs.find_def r r map) wr in
+  let set wr r = Mvs.add (Mvs.find_def r r map) r wr in
   let wr = List.fold_left set Mvs.empty writes in
   { c with c_hs = Mhs.add h (wr,vcd) c.c_hs; c_lc = lc }
 
@@ -122,8 +122,7 @@ let rec vc pp dd c bl = function
   | Esym h ->
       let wr, vcd = Mhs.find h c.c_hs in
       let lc = c.c_gl || Shs.mem h c.c_lc in
-      let conv p q up = Mvs.add q (r_inst c p) up in
-      vcd (pp && lc) (Mvs.fold conv wr Mvs.empty) bl
+      vcd (pp && lc) (Mvs.map (r_inst c) wr) bl
   | Eapp (e, a) ->
       let b = match a with
         | At t -> Bt (t_inst c t)
