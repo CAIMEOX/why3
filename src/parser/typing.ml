@@ -30,9 +30,11 @@ let debug_parse_only = Debug.register_flag "parse_only"
 let debug_type_only  = Debug.register_flag "type_only"
   ~desc:"Stop@ after@ type-checking."
 
-
 let warn_useless_at = Loc.register_warning "useless_at"
   "Warn about `at'/`old' operators used in locations where they have no impact."
+
+let warn_unused_expression = Loc.register_warning "unused_expression"
+  "Warn about unused expressions"
 
 (** symbol lookup *)
 
@@ -486,7 +488,7 @@ let rec dterm ns km crcmap gvars at denv {term_desc = desc; term_loc = loc} =
             Dterm.dterm crcmap ~loc (DTapp (pj,[v])) in
       let cs, fl = parse_record ~loc ns km get_val fl in
       if not !used then
-        Loc.warning ~loc:e1_loc "unused expression (every field is overwritten)";
+        Loc.warning ~id:warn_unused_expression ~loc:e1_loc "unused expression (every field is overwritten)";
       let d = DTapp (cs, fl) in
       if re then d else mk_let crcmap ~loc "_q " e1 d
   | Ptree.Tat (e1, ({id_str = l; id_loc = loc} as id)) ->
@@ -1043,7 +1045,7 @@ let rec dexpr muc denv {expr_desc = desc; expr_loc = loc} =
         | Some e -> dexpr muc denv e in
       let cs,fl = parse_record ~loc muc get_val fl in
       if not !used then
-        Loc.warning ~loc:e1_loc "unused expression (every field is overwritten)";
+        Loc.warning ~id:warn_unused_expression ~loc:e1_loc "unused expression (every field is overwritten)";
       let d = expr_app loc (DEsym (RS cs)) fl in
       if re then d else mk_let ~loc "_q " e1 d
   | Ptree.Elet (id, gh, kind, e1, e2) ->
@@ -1316,6 +1318,7 @@ let add_types muc tdl =
   let def = List.fold_left add Mstr.empty tdl in
   let hts = Hstr.create 5 in
   let htd = Hstr.create 5 in
+  let meta_records = ref [] in
   let rec visit ~alias ~alg x d = if not (Hstr.mem htd x) then
     let id = create_user_id d.td_ident and loc = d.td_loc in
     let args = List.map (fun id -> tv_of_string id.id_str) d.td_params in
@@ -1375,6 +1378,8 @@ let add_types muc tdl =
           let {id_str = nm; id_loc = loc} = fd.f_ident in
           (* add proper attribute for later printing in dotted notation `t.id` *)
           let id = add_is_field_attr fd.f_ident in
+          (* create metas for recovering record values from cex generation *)
+          meta_records := id :: !meta_records;
           let id = create_user_id id in
           let ity = parse ~loc ~alias ~alg fd.f_pty in
           let ghost = d.td_vis = Abstract || fd.f_ghost in
@@ -1450,7 +1455,12 @@ let add_types muc tdl =
   Mstr.iter (visit ~alias:Mstr.empty ~alg:Mstr.empty) def;
   let tdl = List.map (fun d -> Hstr.find htd d.td_ident.id_str) tdl in
   let add muc d = add_pdecl ~vc:true muc d in
-  List.fold_left add muc (create_type_decl tdl)
+  let muc = List.fold_left add muc (create_type_decl tdl) in
+  let add muc fid =
+    let ls = find_fsymbol muc.muc_theory (Qident fid) in
+    add_meta muc Theory.meta_record [MAls ls]
+  in
+  List.fold_left add muc !meta_records
 
 
 let tyl_of_params {muc_theory = tuc} pl =

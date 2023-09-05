@@ -14,35 +14,45 @@ open Why3session_lib
 open Session_itp
 
 let usage_msg =
-  "<files>\n\
-  \ Generate a fresh session containing the specified files."
+  "-o <dir> <files>\n\
+   Generate a fresh session containing the specified files."
 
 let provers = ref []
 let opt_outputdir = ref None
 let opt_timelimit = ref None
 let opt_stepslimit = ref None
 let opt_memlimit = ref None
+let opt_trans = ref [("split_vc",[])]
+let has_opt_trans = ref false
+
+let add_opt_trans x =
+  if not !has_opt_trans then (has_opt_trans := true; opt_trans := []);
+  match String.split_on_char ' ' x with
+  | [] -> assert false
+  | name :: args ->
+      opt_trans := (name, args) :: !opt_trans
 
 let spec =
   let open Getopt in
   [
     ( Key ('P', "provers"),
       Hnd1 (AList (':', AString), fun p -> provers := p),
-      "<prover1:prover2...> Specify provers" );
+      "<prover1:prover2...> specify provers" );
     ( Key ('o', "output-dir"),
       Hnd1 (AString, fun s -> opt_outputdir := Some s),
-      "<dir> set the output dir" );
+      "<dir> set the output directory" );
     ( Key ('t', "timelimit"),
       Hnd1 (AFloat, fun i -> opt_timelimit := Some i),
       "<sec> set the prover's time limit" );
     ( Key ('s', "stepslimit"),
       Hnd1 (AInt, fun i -> opt_stepslimit := Some i),
       "<steps> set the prover's step limit (no limit by default)" );
+    ( Key ('a', "apply-transform"), Hnd1 (AString, add_opt_trans),
+    "<transf> apply a transformation to every task. Default: split_vc");
     ( Key ('m', "memlimit"),
       Hnd1 (AInt, fun i -> opt_memlimit := Some i),
       "<MB> set the prover's memlimit" );
   ]
-
 
 open Format
 
@@ -104,24 +114,23 @@ let run () =
     let file = add_file_section ~file_is_detached session f theories format in
     let theories = file_theories file in
 
-    (* Apply split_vc on goal then call each specified prover on the generated
-         subgoals *)
-    let add_proof_attempt g =
-      let l =
-        apply_trans_to_goal ~allow_no_effect:true session env "split_vc" [] g
+    (* Apply all transformations and add proof attempts to the leafs *)
+    let rec add_proof_attempt opt_trans g =
+      match opt_trans with
+      | [] -> (* When no transformations are left, add proof attempts *)
+           List.iter (fun p ->
+              let _ = graft_proof_attempt session g p.Whyconf.prover ~limit in
+              ()) provers
+      | (tname, targs) :: more_trans -> (* Apply tname and call recursively *)
+      let new_task_list =
+        apply_trans_to_goal ~allow_no_effect:true session env tname targs g
       in
-      let tsid = graft_transf session g "split_vc" [] l in
-      List.iter
-        (fun g ->
-           List.iter
-             (fun p ->
-                let _ = graft_proof_attempt session g p.Whyconf.prover ~limit in
-                ())
-             provers)
-        (get_sub_tasks session tsid)
+      let tsid = graft_transf session g tname targs new_task_list in
+      let new_proof_nodes = (get_sub_tasks session tsid) in
+      List.iter (add_proof_attempt more_trans) new_proof_nodes
     in
     List.iter
-      (fun th -> List.iter add_proof_attempt (theory_goals th))
+      (fun th -> List.iter (add_proof_attempt !opt_trans) (theory_goals th) )
       theories
   in
   (* FIXME: if the file is already present in the session, a new
@@ -139,7 +148,8 @@ let run () =
 let cmd =
   {
     cmd_spec = spec;
-    cmd_desc = "Create a session, arguments are source files to add";
+    cmd_desc = "create a session";
+    cmd_usage = usage_msg;
     cmd_name = "create";
     cmd_run = run;
   }
