@@ -63,6 +63,7 @@ type symbols = {
   udouble_symbols : ufloat_symbols;
   single_symbols : ieee_symbols;
   double_symbols : ieee_symbols;
+  naming_table : Trans.naming_table;
 }
 
 let symbols = ref None
@@ -71,30 +72,11 @@ let symbols = ref None
    |t - x| <= rel * x' + cst *)
 type error_fmla = term * term * term * term
 
-(** We have different errors formulas for a term depending of the occurence of
-    underflows. This is useful when performing several multiplications in a row.
-    For instance, when we have "a * b * c" then if an underflow occur, it is
-    either on "a * b" or on "b * c", but not on both. More generally, if a
-    underflow happens when we have several multiplications then the float number
-    computed will always be 0, no matter where the underflow occured. Therefore,
-    we can bound the "underflow error" by "eta + eta |c|". This is preferable
-    than using only one formula because it avoids mixing eta and epsilon, giving
-    us very slightly better but more importantly simpler error bound. When we
-    need to find a general bound for a term, we just need to combine the
-    no_underflow and the underflow errors. *)
-type error = {
-  no_underflow : error_fmla;
-      (* An underflow error of "[ (ab,cd); (cd,ab); (abcd;1) ]" means we
-         potentially have an underflow on "ab" with error "eta|cd|", on "cd"
-         with error "eta|ab|" and on "(ab)(cd)" with error "eta". *)
-  underflow : (term * term) list;
-}
-
 (* This type corresponds to the numeric info we have on a real of float term *)
 type term_info = {
   (* "(<=, y)" means "|to_real x| <= y" *)
   ineqs : (lsymbol * term) list;
-  error : error option;
+  error : error_fmla option;
   (* If x has an ieee_post, it means it is the result of an arithmetic FP
      operation *)
   ieee_post : (lsymbol * term * term) option;
@@ -299,25 +281,8 @@ let to_real ieee_type t =
    cst error in no_underflow, effectively keeping only one error bound. This is
    done when we want to use the bound error of t to compute a new bound for
    something else than multiplication *)
-let get_info info ?(merge_underflows = false) t =
-  try
-    let t_info = Mterm.find t info in
-    if merge_underflows then
-      match t_info.error with
-      | None -> t_info
-      | Some error ->
-        let a, b, c, cst = error.no_underflow in
-        let cst =
-          List.fold_left (fun t (_, err) -> t +. err) cst error.underflow
-        in
-        {
-          ineqs = t_info.ineqs;
-          error = Some { no_underflow = (a, b, c, cst); underflow = [] };
-          ieee_post = t_info.ieee_post;
-        }
-    else
-      t_info
-  with
+let get_info info t =
+  try Mterm.find t info with
   | Not_found -> { ineqs = []; error = None; ieee_post = None }
 
 let add_ineq info t ls t' =
@@ -504,8 +469,7 @@ let apply_args f t t_info =
   let to_real = to_real (get_ts t) in
   match t_info.error with
   | None -> f t (to_real t) zero (abs (to_real t)) zero
-  | Some error ->
-    let exact_t, rel_err, t', cst_err = error.no_underflow in
+  | Some (exact_t, rel_err, t', cst_err) ->
     if is_zero rel_err then
       assert false
     else
@@ -514,191 +478,122 @@ let apply_args f t t_info =
 (* Generates the formula for the forward error of r = x .* y. 2 formulas are
    created, one that matches the multiplication theorem and one with a bit of
    simplification. *)
-let get_mul_forward_error prove_overflow info x y r =
+let get_mul_forward_error prove_overflow info x y r s1 s2 =
+  if prove_overflow then
+    assert false
+  else
+    assert false
+
+(* let ts = get_ts r in *)
+(* let eps = eps ts in *)
+(* let eta = eta ts in *)
+(* let to_real = to_real ts in *)
+(* let x_info = get_info info x in *)
+(* let y_info = get_info info y in *)
+(* let attrs = Sattr.empty in *)
+(* match (x_info.error, y_info.error) with *)
+(* | None, None -> *)
+(*   let left = abs (to_real r -. (to_real x *. to_real y)) in *)
+(*   let right = eps *. abs (to_real x *. to_real y) in *)
+(*   let info = *)
+(*     add_error info r *)
+(*       (to_real x *. to_real y, eps, abs (to_real x *. to_real y), eta) *)
+(*   in *)
+(*   let attrs = Sattr.add mul_basic_attr attrs in *)
+(*   let pr = create_prsymbol (id_fresh ~attrs "MulErrBasic") in *)
+(*   ( info, *)
+(*     [ *)
+(*       [ *)
+(*         Decl.create_prop_decl Pgoal pr *)
+(*           (t_or (left <=. right) *)
+(*              (t_and (t_equ (to_real r) zero) (left <=. eta))); *)
+(*       ]; *)
+(*     ] ) *)
+(* | _ -> *)
+(* let combine_errors_with_multiplication t1 exact_t1 t1_factor t1' t1_cst t2 *)
+(*       exact_t2 t2_factor t2' t2_cst r = *)
+(*     let rel_err = *)
+(*       eps *)
+(*       +. (t1_factor +. t2_factor +. (t1_factor *. t2_factor)) *)
+(*          *. (one +. eps) *)
+(*     in *)
+(*     let cst_err = *)
+(*       (((t2_cst +. (t2_cst *. t1_factor)) *. t1') *)
+(*       +. ((t1_cst +. (t1_cst *. t2_factor)) *. t2') *)
+(*       +. (t1_cst *. t2_cst)) *)
+(*       *. (one +. eps) *)
+(*     in *)
+(*     let rel_err' = *)
+(*       eps *)
+(*       ++. (t1_factor ++. t2_factor ++. (t1_factor **. t2_factor)) *)
+(*           **. (one ++. eps) *)
+(*     in *)
+(*     let cst_err' = *)
+(*       (((t2_cst ++. (t2_cst **. t1_factor)) **. t1') *)
+(*       ++. ((t1_cst ++. (t1_cst **. t2_factor)) **. t2') *)
+(*       ++. (t1_cst **. t2_cst)) *)
+(*       **. (one ++. eps) *)
+(*     in *)
+(*     let left = abs (to_real r -. (exact_t1 *. exact_t2)) in *)
+(*     let right = (rel_err *. (t1' *. t2')) +. cst_err in *)
+(*     let right' = (rel_err' **. t1' **. t2') ++. cst_err' in *)
+(*     let info = *)
+(* add_error info r (exact_t1 *. exact_t2, rel_err', t1' *. t2', cst_err') *)
+(*     in *)
+(*     let pr1 = create_prsymbol (id_fresh ~attrs "MulErrCombine") in *)
+(*     let pr2 = create_prsymbol (id_fresh "MulErrCombine") in *)
+(*     let f1 = *)
+(*       t_or (left <=. right) *)
+(*         (t_and (t_equ (to_real r) zero) (t_or f (left <=. eta))) *)
+(*     in *)
+(*     let f3 = t_and undeflow_fmla no_underflow_fmla in *)
+(* (* First we prove that each possible case implies a certain error bound *) (*
+   (except for eta). Then we prove that we have either one of this bound *) (*
+   at then end (this time including eta). *) *)
+(*     let l = *)
+(*       [ *)
+(*         [ Decl.create_prop_decl Pgoal pr1 f3 ]; *)
+(*         [ Decl.create_prop_decl Pgoal pr2 f1 ]; *)
+(*       ] *)
+(*     in *)
+(*     if t_equal right right' then *)
+(*       (info, l) *)
+(*     else *)
+(*       (* f' is the same as f but with bounds simplified if possible *) *)
+(*       let f' = *)
+(*         t_or (left <=. right') *)
+(*           (t_and (t_equ (to_real r) zero) (t_or f (left <=. eta))) *)
+(*       in *)
+(*       let pr' = create_prsymbol (id_fresh "MulErrCombineSimplified") in *)
+(*       (info, l @ [ [ Decl.create_prop_decl Pgoal pr' f' ] ]) *)
+(*   in *)
+(*   let combine_errors_with_multiplication = *)
+(*     apply_args combine_errors_with_multiplication x x_info *)
+(*   in *)
+(*   let combine_errors_with_multiplication = *)
+(*     apply_args combine_errors_with_multiplication y y_info *)
+(*   in *)
+(*   combine_errors_with_multiplication r *)
+
+(* Generates the formula for the forward error of r = x .- y *)
+let get_sub_forward_error prove_overflow info x y r s1 s2 =
   if prove_overflow then
     assert false
   else
     let ts = get_ts r in
     let eps = eps ts in
-    let eta = eta ts in
     let to_real = to_real ts in
     let x_info = get_info info x in
     let y_info = get_info info y in
-    let attrs = Sattr.empty in
-    match (x_info.error, y_info.error) with
-    | None, None ->
-      let left = abs (to_real r -. (to_real x *. to_real y)) in
-      let right = eps *. abs (to_real x *. to_real y) in
-      let info =
-        add_error info r
-          {
-            no_underflow =
-              (to_real x *. to_real y, eps, abs (to_real x *. to_real y), zero);
-            underflow = [ (to_real x *. to_real y, one) ];
-          }
-      in
-      let attrs = Sattr.add mul_basic_attr attrs in
-      let pr = create_prsymbol (id_fresh ~attrs "MulErrBasic") in
-      ( info,
-        [
-          [
-            Decl.create_prop_decl Pgoal pr
-              (t_or (left <=. right)
-                 (t_and (t_equ (to_real r) zero) (left <=. eta)));
-          ];
-        ] )
-    | _ ->
-      let combine_errors_with_multiplication t1 exact_t1 t1_factor t1' t1_cst t2
-          exact_t2 t2_factor t2' t2_cst r =
-        let rel_err =
-          eps
-          +. (t1_factor +. t2_factor +. (t1_factor *. t2_factor))
-             *. (one +. eps)
-        in
-        let cst_err =
-          (((t2_cst +. (t2_cst *. t1_factor)) *. t1')
-          +. ((t1_cst +. (t1_cst *. t2_factor)) *. t2')
-          +. (t1_cst *. t2_cst))
-          *. (one +. eps)
-        in
-        let rel_err' =
-          eps
-          ++. (t1_factor ++. t2_factor ++. (t1_factor **. t2_factor))
-              **. (one ++. eps)
-        in
-        let cst_err' =
-          (((t2_cst ++. (t2_cst **. t1_factor)) **. t1')
-          ++. ((t1_cst ++. (t1_cst **. t2_factor)) **. t2')
-          ++. (t1_cst **. t2_cst))
-          **. (one ++. eps)
-        in
-        let left = abs (to_real r -. (exact_t1 *. exact_t2)) in
-        let right = (rel_err *. (t1' *. t2')) +. cst_err in
-        let right' = (rel_err' **. t1' **. t2') ++. cst_err' in
-        let x_underflow =
-          match x_info.error with
-          | None -> []
-          | Some error -> error.underflow
-        in
-        let y_underflow =
-          match y_info.error with
-          | None -> []
-          | Some error -> error.underflow
-        in
-        let t_or_simp f1 f2 =
-          match f1.t_node with
-          | Ttrue -> f2
-          | _ -> t_or f1 f2
-        in
-        (* "h" is the conjuction of all possible previous underflows on "x" and
-           "y". It will be used as hypothesis to prove "f". "f" is a conjunction
-           of all the possible bounds for the new operation when an underflow
-           occurs has previously occured *)
-        let generate_underflow_fmlas exact_t1 t1 exact_t2
-            (f_with_hyps, f, underflow) (t, value) =
-          let ineq = left <=. eta **. value **. abs exact_t2 in
-          ( t_and_simp f_with_hyps
-              (t_implies (abs (to_real t1 -. exact_t1) <=. eta **. value) ineq),
-            t_or_simp f ineq,
-            (t, value **. abs exact_t2) :: underflow )
-        in
-        let f_with_hyps, f, underflow =
-          List.fold_left
-            (generate_underflow_fmlas exact_t1 t1 exact_t2)
-            (t_true, t_true, []) x_underflow
-        in
-        let f'_with_hyps, f, underflow =
-          List.fold_left
-            (generate_underflow_fmlas exact_t2 t2 exact_t1)
-            (t_true, t_true, []) y_underflow
-        in
-        let underflow = (exact_t1 *. exact_t2, one) :: underflow in
-        let info =
-          add_error info r
-            {
-              no_underflow =
-                (exact_t1 *. exact_t2, rel_err', t1' *. t2', cst_err');
-              underflow;
-            }
-        in
-        let undeflow_fmla = t_and f_with_hyps f'_with_hyps in
-        let b1 =
-          abs (to_real t1 -. exact_t1) <=. (t1_factor *. t1') +. t1_cst
-        in
-        let b2 =
-          abs (to_real t2 -. exact_t2) <=. (t2_factor *. t2') +. t2_cst
-        in
-        let h' =
-          match x_info.error with
-          | None -> b2
-          | Some _ -> (
-            match y_info.error with
-            | None -> b1
-            | Some _ -> t_and b1 b2)
-        in
-        let no_underflow_fmla = t_implies h' (left <=. right) in
-        let attrs = Sattr.add mul_combine_attr attrs in
-        let pr1 = create_prsymbol (id_fresh ~attrs "MulErrCombine") in
-        let pr2 = create_prsymbol (id_fresh "MulErrCombine") in
-        let f1 =
-          t_or (left <=. right)
-            (t_and (t_equ (to_real r) zero) (t_or f (left <=. eta)))
-        in
-        let f3 = t_and undeflow_fmla no_underflow_fmla in
-        (* First we prove that each possible case implies a certain error bound
-           (except for eta). Then we prove that we have either one of this bound
-           at then end (this time including eta). *)
-        let l =
-          [
-            [ Decl.create_prop_decl Pgoal pr1 f3 ];
-            [ Decl.create_prop_decl Pgoal pr2 f1 ];
-          ]
-        in
-        if t_equal right right' then
-          (info, l)
-        else
-          (* f' is the same as f but with bounds simplified if possible *)
-          let f' =
-            t_or (left <=. right')
-              (t_and (t_equ (to_real r) zero) (t_or f (left <=. eta)))
-          in
-          let pr' = create_prsymbol (id_fresh "MulErrCombineSimplified") in
-          (info, l @ [ [ Decl.create_prop_decl Pgoal pr' f' ] ])
-      in
-      let combine_errors_with_multiplication =
-        apply_args combine_errors_with_multiplication x x_info
-      in
-      let combine_errors_with_multiplication =
-        apply_args combine_errors_with_multiplication y y_info
-      in
-      combine_errors_with_multiplication r
-
-(* Generates the formula for the forward error of r = x .- y *)
-let get_sub_forward_error prove_overflow info x y r =
-  if prove_overflow then
-    assert false
-  else
-    let ts = get_ts r in
-    let eps = eps ts in
-    let to_real = to_real ts in
-    let x_info = get_info info ~merge_underflows:true x in
-    let y_info = get_info info ~merge_underflows:true y in
-    let attrs = Sattr.empty in
     match (x_info.error, y_info.error) with
     | None, None ->
       let left = abs (to_real r -. (to_real x -. to_real y)) in
       let right = eps *. abs (to_real x +. to_real y) in
       let info =
         add_error info r
-          {
-            no_underflow =
-              (to_real x -. to_real y, eps, abs (to_real x -. to_real y), zero);
-            underflow = [];
-          }
+          (to_real x -. to_real y, eps, abs (to_real x -. to_real y), zero)
       in
-      let attrs = Sattr.add sub_basic_attr attrs in
-      let pr = create_prsymbol (id_fresh ~attrs "SubErrBasic") in
-      (info, [ [ Decl.create_prop_decl Pgoal pr (left <=. right) ] ])
+      (info, Some (left <=. right), Strategy.Sdo_nothing)
     | _ ->
       let combine_errors_with_substraction _t1 exact_t1 t1_factor t1' t1_cst _t2
           exact_t2 t2_factor t2' t2_cst r =
@@ -716,22 +611,37 @@ let get_sub_forward_error prove_overflow info x y r =
         let total_err' = (rel_err' **. (t1' ++. t2')) ++. cst_err' in
         let left = abs (to_real r -. (exact_t1 -. exact_t2)) in
         let info =
-          add_error info r
-            {
-              no_underflow =
-                (exact_t1 -. exact_t2, rel_err', t1' +. t2', cst_err');
-              underflow = [];
-            }
+          add_error info r (exact_t1 -. exact_t2, rel_err', t1' +. t2', cst_err')
         in
-        let attrs = Sattr.add sub_combine_attr attrs in
-        let pr = create_prsymbol (id_fresh ~attrs "SubErrCombine") in
-        let l = [ [ Decl.create_prop_decl Pgoal pr (left <=. total_err) ] ] in
+        let get_float_name =
+          get_float_name (Opt.get !symbols).naming_table.Trans.printer
+        in
+        let args = List.fold_left get_float_name "" [ x; y ] in
+        let s =
+          Strategy.Sapply_trans
+            ( "apply",
+              [ "add_combine"; "with"; args ],
+              [
+                Sdo_nothing;
+                s1;
+                s2;
+                Sdo_nothing;
+                Sdo_nothing;
+                Sdo_nothing;
+                Sdo_nothing;
+                Sdo_nothing;
+                Sdo_nothing;
+              ] )
+        in
         if t_equal total_err total_err' then
-          (info, l)
+          (info, Some (left <=. total_err), s)
         else
-          let pr' = create_prsymbol (id_fresh "SubErrCombine") in
           ( info,
-            l @ [ [ Decl.create_prop_decl Pgoal pr' (left <=. total_err') ] ] )
+            Some (left <=. total_err'),
+            Strategy.Sapply_trans
+              ( "assert",
+                [ Format.asprintf "%a" Pretty.print_term (left <=. total_err) ],
+                [ s ] ) )
       in
       let combine_errors_with_substraction =
         apply_args combine_errors_with_substraction x x_info
@@ -742,7 +652,7 @@ let get_sub_forward_error prove_overflow info x y r =
       combine_errors_with_substraction r
 
 (* Generates the formula for the forward error of r = x .- y *)
-let get_add_forward_error prove_overflow info x y r =
+let get_add_forward_error prove_overflow info x y r s1 s2 =
   if prove_overflow then
     assert false
   (* apply_addition_thm_for_overflow symbols info f x y r *)
@@ -750,24 +660,17 @@ let get_add_forward_error prove_overflow info x y r =
     let ts = get_ts r in
     let eps = eps ts in
     let to_real = to_real ts in
-    let x_info = get_info info ~merge_underflows:true x in
-    let y_info = get_info info ~merge_underflows:true y in
-    let attrs = Sattr.empty in
+    let x_info = get_info info x in
+    let y_info = get_info info y in
     match (x_info.error, y_info.error) with
     | None, None ->
       let left = abs (to_real r -. (to_real x +. to_real y)) in
       let right = eps *. abs (to_real x +. to_real y) in
       let info =
         add_error info r
-          {
-            no_underflow =
-              (to_real x +. to_real y, eps, abs (to_real x +. to_real y), zero);
-            underflow = [];
-          }
+          (to_real x +. to_real y, eps, abs (to_real x +. to_real y), zero)
       in
-      let attrs = Sattr.add add_basic_attr attrs in
-      let pr = create_prsymbol (id_fresh ~attrs "AddErrBasic") in
-      (info, [ [ Decl.create_prop_decl Pgoal pr (left <=. right) ] ])
+      (info, Some (left <=. right), Strategy.Sdo_nothing)
     | _ ->
       let combine_errors_with_addition _t1 exact_t1 t1_factor t1' t1_cst _t2
           exact_t2 t2_factor t2' t2_cst r =
@@ -785,22 +688,37 @@ let get_add_forward_error prove_overflow info x y r =
         let total_err' = (rel_err' **. (t1' ++. t2')) ++. cst_err' in
         let left = abs (to_real r -. (exact_t1 +. exact_t2)) in
         let info =
-          add_error info r
-            {
-              no_underflow =
-                (exact_t1 +. exact_t2, rel_err', t1' +. t2', cst_err');
-              underflow = [];
-            }
+          add_error info r (exact_t1 +. exact_t2, rel_err', t1' +. t2', cst_err')
         in
-        let attrs = Sattr.add add_combine_attr attrs in
-        let pr = create_prsymbol (id_fresh ~attrs "AddErrCombine") in
-        let l = [ [ Decl.create_prop_decl Pgoal pr (left <=. total_err) ] ] in
-        if t_equal total_err total_err' || true then
-          (info, l)
+        let get_float_name =
+          get_float_name (Opt.get !symbols).naming_table.Trans.printer
+        in
+        let args = List.fold_left get_float_name "" [ x; y ] in
+        let s =
+          Strategy.Sapply_trans
+            ( "apply",
+              [ "add_combine"; "with"; args ],
+              [
+                Sdo_nothing;
+                s1;
+                s2;
+                Sdo_nothing;
+                Sdo_nothing;
+                Sdo_nothing;
+                Sdo_nothing;
+                Sdo_nothing;
+                Sdo_nothing;
+              ] )
+        in
+        if t_equal total_err total_err' then
+          (info, Some (left <=. total_err), s)
         else
-          let pr' = create_prsymbol (id_fresh "AddErrCombine") in
           ( info,
-            l @ [ [ Decl.create_prop_decl Pgoal pr' (left <=. total_err') ] ] )
+            Some (left <=. total_err'),
+            Strategy.Sapply_trans
+              ( "assert",
+                [ Format.asprintf "%a" Pretty.print_term (left <=. total_err) ],
+                [ s ] ) )
       in
       let combine_errors_with_addition =
         apply_args combine_errors_with_addition x x_info
@@ -812,24 +730,24 @@ let get_add_forward_error prove_overflow info x y r =
 
 (* r is a result of FP arithmetic operation involving t1 and t2 *)
 (* Compute new inequalities on r based on what we know on t1 and t2 *)
-let use_ieee_thms prove_overflow info ieee_symbol t1 t2 r :
-    term_info Mterm.t * decl list list =
+let use_ieee_thms prove_overflow info ieee_symbol t1 t2 r s1 s2 :
+    term_info Mterm.t * term option * Strategy.strat =
   let symbols = Opt.get !symbols in
   if
     ls_equal ieee_symbol symbols.single_symbols.add_post
     || ls_equal ieee_symbol symbols.double_symbols.add_post
   then
-    get_add_forward_error prove_overflow info t1 t2 r
+    get_add_forward_error prove_overflow info t1 t2 r s1 s2
   else if
     ls_equal ieee_symbol symbols.single_symbols.sub_post
     || ls_equal ieee_symbol symbols.double_symbols.sub_post
   then
-    get_sub_forward_error prove_overflow info t1 t2 r
+    get_sub_forward_error prove_overflow info t1 t2 r s1 s2
   else if
     ls_equal ieee_symbol symbols.single_symbols.mul_post
     || ls_equal ieee_symbol symbols.double_symbols.mul_post
   then
-    get_mul_forward_error prove_overflow info t1 t2 r
+    get_mul_forward_error prove_overflow info t1 t2 r s1 s2
   else
     failwith "Unsupported symbol"
 
@@ -841,86 +759,33 @@ let use_ieee_thms prove_overflow info ieee_symbol t1 t2 r :
    `t` to get a formula relating `t` to `v`. *)
 (* TODO: Avoid traversing the same term twice. *)
 let rec get_error_fmlas prove_overflow info t :
-    term_info Mterm.t * decl list list =
+    term_info Mterm.t * term option * Strategy.strat =
   let apply = get_error_fmlas prove_overflow in
   let t_info = get_info info t in
   match t_info.ieee_post with
   | Some (ieee_post, t1, t2) ->
-    let info, l1 = apply info t1 in
-    let info, l2 = apply info t2 in
-    let info, formulas = use_ieee_thms prove_overflow info ieee_post t1 t2 t in
-    let prev =
-      match l1 with
-      | [] -> []
-      | _ -> List.nth l1 (List.length l1 - 1)
+    let info, f1, s1 = apply info t1 in
+    let info, f2, s2 = apply info t2 in
+    (* TODO: Maybe those asserts are redundant, try to remove them *)
+    let s1 =
+      match f1 with
+      | None -> s1
+      | Some f1 ->
+        Sapply_trans
+          ("assert", [ Format.asprintf "%a" Pretty.print_term f1 ], [ s1 ])
     in
-    let prev =
-      match l2 with
-      | [] -> prev
-      | _ -> prev @ List.nth l2 (List.length l2 - 1)
+    let s2 =
+      match f2 with
+      | None -> s2
+      | Some f2 ->
+        Sapply_trans
+          ("assert", [ Format.asprintf "%a" Pretty.print_term f2 ], [ s2 ])
     in
-    (* The bounds we prove on "t" depend on the ones we have computed on "t1"
-       and "t2", so we add them as axioms *)
-    let l, _ =
-      List.fold_left
-        (fun (l1, prev) l2 ->
-          let l =
-            List.fold_left
-              (fun l decl ->
-                match decl.d_node with
-                | Dprop (Pgoal, pr, f) -> Decl.create_prop_decl Paxiom pr f :: l
-                | _ -> l)
-              l2 prev
-          in
-          (l1 @ [ l ], l2))
-        (l1 @ l2, prev)
-        formulas
-    in
-    (info, l)
-  | None -> (* TODO *) (info, [])
-
-(* The second part of the transformation looks for the floats that are in the
-   goal. For each of float `f'`, it tries to compute a formula of the form |f' -
-   f| <= A|f| + B where `f` is the real value approximated by `f'`. For this,
-   forward error propagation is performed using theorems on the basic float
-   operations as well as the triangle inequality with the data contained in
-   `info`. For each new formula created, a proof tree is generated with the
-   necessary steps to prove it. *)
-let compute_errors env (info, goal) =
-  let goal = Opt.get goal in
-  let pr, goal =
-    match goal.d_node with
-    | Dprop (kind, pr, f) when kind = Pgoal -> (pr, f)
-    | _ -> assert false
-  in
-  let floats = get_floats goal in
-  let prove_overflow =
-    match goal.t_node with
-    | Tapp (ls, _) when is_ieee_pre ls -> true
-    | _ -> false
-  in
-  let l, hyps =
-    List.fold_left
-      (fun (l, hyps) t ->
-        let _, l' = get_error_fmlas prove_overflow info t in
-        match l' with
-        | [] -> (l, hyps)
-        | _ ->
-          let prev = List.nth l' (List.length l' - 1) in
-          let hyps =
-            List.fold_left
-              (fun hyps decl ->
-                match decl.d_node with
-                | Dprop (Pgoal, pr, f) -> create_prop_decl Paxiom pr f :: hyps
-                | _ -> hyps)
-              hyps prev
-          in
-          (l @ l', hyps))
-      ([], []) floats
-  in
-  let g = Decl.create_prop_decl Decl.Pgoal pr goal in
-  let f _ _ = l @ [ List.rev (g :: hyps) ] in
-  Trans.compose_l (Trans.goal_l f) (Trans.store (apply_theorems env info))
+    use_ieee_thms prove_overflow info ieee_post t1 t2 t s1 s2
+    (* (info, l) *)
+  | None ->
+    (* TODO *)
+    (info, None, Strategy.Sdo_nothing)
 
 let get_term_for_info t1 =
   match t1.t_node with
@@ -975,7 +840,7 @@ let parse_and_add_error_fmla info t1 t1' t2 =
   in
   let error_fmla, _ = parse t2 in
   let t1 = get_term_for_info t1 in
-  add_error info t1 { no_underflow = error_fmla; underflow = [] }
+  add_error info t1 error_fmla
 
 let rec collect info f =
   match f.t_node with
@@ -997,7 +862,7 @@ let rec collect info f =
   | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls (Opt.get !symbols).fw_error
     ->
     let t1 = get_term_for_info t1 in
-    add_error info t1 { no_underflow = (t2, t4, abs t3, zero); underflow = [] }
+    add_error info t1 (t2, t4, abs t3, zero)
   | Tapp (ls, [ t1; t2; t3 ]) when is_ieee_post ls ->
     add_ieee_post info ls t3 t1 t2
   | _ -> info
@@ -1011,129 +876,162 @@ let rec collect info f =
  * - *_post_ieee r x y : r is the result of a floating point computation
  *   involving x and y
  *)
-let collect_info d (info, _) =
+let collect_info info d =
   match d.d_node with
-  | Dprop (kind, _, f) when kind = Paxiom || kind = Plemma ->
-    (collect info f, None)
-  | Dprop (kind, _, _) when kind = Pgoal -> (info, Some d)
-  | _ -> (info, None)
+  | Dprop (kind, _, f) when kind = Paxiom || kind = Plemma -> collect info f
+  | Dprop (kind, _, _) when kind = Pgoal -> info
+  | _ -> info
 
-let init_symbols env =
-  let real = Env.read_theory env [ "real" ] "Real" in
-  let lt = ns_find_ls real.th_export [ Ident.op_infix "<" ] in
-  let le = ns_find_ls real.th_export [ Ident.op_infix "<=" ] in
-  let gt = ns_find_ls real.th_export [ Ident.op_infix ">" ] in
-  let ge = ns_find_ls real.th_export [ Ident.op_infix ">=" ] in
-  let real_infix = Env.read_theory env [ "real" ] "RealInfix" in
-  let lt_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "<." ] in
-  let le_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "<=." ] in
-  let gt_infix = ns_find_ls real_infix.th_export [ Ident.op_infix ">." ] in
-  let ge_infix = ns_find_ls real_infix.th_export [ Ident.op_infix ">=." ] in
-  let add = ns_find_ls real.th_export [ Ident.op_infix "+" ] in
-  let sub = ns_find_ls real.th_export [ Ident.op_infix "-" ] in
-  let mul = ns_find_ls real.th_export [ Ident.op_infix "*" ] in
-  let div = ns_find_ls real.th_export [ Ident.op_infix "/" ] in
-  let minus = ns_find_ls real.th_export [ Ident.op_prefix "-" ] in
-  let add_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "+." ] in
-  let sub_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "-." ] in
-  let mul_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "*." ] in
-  let div_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "/." ] in
-  let minus_infix = ns_find_ls real_infix.th_export [ Ident.op_prefix "-." ] in
-  let real_abs = Env.read_theory env [ "real" ] "Abs" in
-  let abs = ns_find_ls real_abs.th_export [ "abs" ] in
-  let usingle = Env.read_theory env [ "ufloat" ] "USingle" in
-  let f s = ns_find_ls usingle.th_export [ s ] in
-  let usingle_symbols =
-    {
-      ufloat_type = ns_find_ts usingle.th_export [ "usingle" ];
-      to_real = f "to_real";
-      uadd = f "uadd";
-      usub = f "usub";
-      umul = f "umul";
-      udiv = f "udiv";
-    }
-  in
-  let udouble = Env.read_theory env [ "ufloat" ] "UDouble" in
-  let f s = ns_find_ls udouble.th_export [ s ] in
-  let udouble_symbols =
-    {
-      ufloat_type = ns_find_ts udouble.th_export [ "udouble" ];
-      to_real = f "to_real";
-      uadd = f "uadd";
-      usub = f "usub";
-      umul = f "umul";
-      udiv = f "udiv";
-    }
-  in
-  let safe32 = Env.read_theory env [ "cfloat" ] "Safe32" in
-  let f s = ns_find_ls safe32.th_export [ s ] in
-  let single_symbols =
-    {
-      ieee_type = ns_find_ts safe32.th_export [ "t" ];
-      to_real = f "to_real";
-      add_post = f "safe32_add_post";
-      sub_post = f "safe32_sub_post";
-      mul_post = f "safe32_mul_post";
-      div_post = f "safe32_div_post";
-      add_pre = f "safe32_add_pre";
-      sub_pre = f "safe32_sub_pre";
-      mul_pre = f "safe32_mul_pre";
-      div_pre = f "safe32_div_pre";
-    }
-  in
-  let safe64 = Env.read_theory env [ "cfloat" ] "Safe64" in
-  let f s = ns_find_ls safe64.th_export [ s ] in
-  let double_symbols =
-    {
-      ieee_type = ns_find_ts safe64.th_export [ "t" ];
-      to_real = f "to_real";
-      add_post = f "safe64_add_post";
-      sub_post = f "safe64_sub_post";
-      mul_post = f "safe64_mul_post";
-      div_post = f "safe64_div_post";
-      add_pre = f "safe64_add_pre";
-      sub_pre = f "safe64_sub_pre";
-      mul_pre = f "safe64_mul_pre";
-      div_pre = f "safe64_div_pre";
-    }
-  in
-  let safe64_lemmas = Env.read_theory env [ "safe64_lemmas" ] "Safe64Lemmas" in
-  let fw_error = ns_find_ls safe64_lemmas.th_export [ "fw_error" ] in
-  symbols :=
-    Some
+let init = ref false
+
+(* TODO: Change naming_table also when init is true *)
+let init_symbols env naming_table =
+  if !init = false then
+    let real = Env.read_theory env [ "real" ] "Real" in
+    let lt = ns_find_ls real.th_export [ Ident.op_infix "<" ] in
+    let le = ns_find_ls real.th_export [ Ident.op_infix "<=" ] in
+    let gt = ns_find_ls real.th_export [ Ident.op_infix ">" ] in
+    let ge = ns_find_ls real.th_export [ Ident.op_infix ">=" ] in
+    let real_infix = Env.read_theory env [ "real" ] "RealInfix" in
+    let lt_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "<." ] in
+    let le_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "<=." ] in
+    let gt_infix = ns_find_ls real_infix.th_export [ Ident.op_infix ">." ] in
+    let ge_infix = ns_find_ls real_infix.th_export [ Ident.op_infix ">=." ] in
+    let add = ns_find_ls real.th_export [ Ident.op_infix "+" ] in
+    let sub = ns_find_ls real.th_export [ Ident.op_infix "-" ] in
+    let mul = ns_find_ls real.th_export [ Ident.op_infix "*" ] in
+    let div = ns_find_ls real.th_export [ Ident.op_infix "/" ] in
+    let minus = ns_find_ls real.th_export [ Ident.op_prefix "-" ] in
+    let add_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "+." ] in
+    let sub_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "-." ] in
+    let mul_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "*." ] in
+    let div_infix = ns_find_ls real_infix.th_export [ Ident.op_infix "/." ] in
+    let minus_infix =
+      ns_find_ls real_infix.th_export [ Ident.op_prefix "-." ]
+    in
+    let real_abs = Env.read_theory env [ "real" ] "Abs" in
+    let abs = ns_find_ls real_abs.th_export [ "abs" ] in
+    let usingle = Env.read_theory env [ "ufloat" ] "USingle" in
+    let f s = ns_find_ls usingle.th_export [ s ] in
+    let usingle_symbols =
       {
-        add;
-        sub;
-        mul;
-        div;
-        minus;
-        add_infix;
-        sub_infix;
-        mul_infix;
-        div_infix;
-        minus_infix;
-        lt;
-        lt_infix;
-        le;
-        le_infix;
-        gt;
-        gt_infix;
-        ge;
-        ge_infix;
-        abs;
-        fw_error;
-        usingle_symbols;
-        udouble_symbols;
-        single_symbols;
-        double_symbols;
+        ufloat_type = ns_find_ts usingle.th_export [ "usingle" ];
+        to_real = f "to_real";
+        uadd = f "uadd";
+        usub = f "usub";
+        umul = f "umul";
+        udiv = f "udiv";
       }
+    in
+    let udouble = Env.read_theory env [ "ufloat" ] "UDouble" in
+    let f s = ns_find_ls udouble.th_export [ s ] in
+    let udouble_symbols =
+      {
+        ufloat_type = ns_find_ts udouble.th_export [ "udouble" ];
+        to_real = f "to_real";
+        uadd = f "uadd";
+        usub = f "usub";
+        umul = f "umul";
+        udiv = f "udiv";
+      }
+    in
+    let safe32 = Env.read_theory env [ "cfloat" ] "Safe32" in
+    let f s = ns_find_ls safe32.th_export [ s ] in
+    let single_symbols =
+      {
+        ieee_type = ns_find_ts safe32.th_export [ "t" ];
+        to_real = f "to_real";
+        add_post = f "safe32_add_post";
+        sub_post = f "safe32_sub_post";
+        mul_post = f "safe32_mul_post";
+        div_post = f "safe32_div_post";
+        add_pre = f "safe32_add_pre";
+        sub_pre = f "safe32_sub_pre";
+        mul_pre = f "safe32_mul_pre";
+        div_pre = f "safe32_div_pre";
+      }
+    in
+    let safe64 = Env.read_theory env [ "cfloat" ] "Safe64" in
+    let f s = ns_find_ls safe64.th_export [ s ] in
+    let double_symbols =
+      {
+        ieee_type = ns_find_ts safe64.th_export [ "t" ];
+        to_real = f "to_real";
+        add_post = f "safe64_add_post";
+        sub_post = f "safe64_sub_post";
+        mul_post = f "safe64_mul_post";
+        div_post = f "safe64_div_post";
+        add_pre = f "safe64_add_pre";
+        sub_pre = f "safe64_sub_pre";
+        mul_pre = f "safe64_mul_pre";
+        div_pre = f "safe64_div_pre";
+      }
+    in
+    let safe64_lemmas =
+      Env.read_theory env [ "safe64_lemmas" ] "Safe64Lemmas"
+    in
+    let fw_error = ns_find_ls safe64_lemmas.th_export [ "fw_error" ] in
+    symbols :=
+      Some
+        {
+          add;
+          sub;
+          mul;
+          div;
+          minus;
+          add_infix;
+          sub_infix;
+          mul_infix;
+          div_infix;
+          minus_infix;
+          lt;
+          lt_infix;
+          le;
+          le_infix;
+          gt;
+          gt_infix;
+          ge;
+          ge_infix;
+          abs;
+          fw_error;
+          usingle_symbols;
+          udouble_symbols;
+          single_symbols;
+          double_symbols;
+          naming_table;
+        }
 
-let numeric env =
-  init_symbols env;
-  Trans.bind
-    (Trans.fold_decl collect_info (Mterm.empty, None))
-    (compute_errors env)
-
-let () =
-  Trans.register_env_transform_l "fw_error_propagation" numeric
-    ~desc:"Apply forward error propagation"
+let f env task =
+  let naming_table = Args_wrapper.build_naming_tables task in
+  init_symbols env naming_table;
+  let goal = task_goal_fmla task in
+  let floats = get_floats goal in
+  let prove_overflow =
+    match goal.t_node with
+    | Tapp (ls, _) when is_ieee_pre ls -> true
+    | _ -> false
+  in
+  let info = List.fold_left collect_info Mterm.empty (task_decls task) in
+  (* For each float `f'` of the goal, we try to compute a formula of the form
+     |f' - f| <= A|f| + B where `f` is the real value which is approximated by
+     the float `f'`. For this, forward error propagation is performed using
+     theorems on the basic float operations as well as the triangle inequality
+     with the data contained in `info`. For each new formula created, a proof
+     tree is generated with the necessary steps to prove it. *)
+  let f, strats =
+    List.fold_left
+      (fun (f, l) t ->
+        match get_error_fmlas prove_overflow info t with
+        | _, None, _ -> (f, l)
+        | _, Some f', s -> (t_and_simp f f', s :: l))
+      (t_true, []) floats
+  in
+  if List.length strats = 0 then
+    Strategy.Sdo_nothing
+  else if List.length strats = 1 then
+    Strategy.Sapply_trans
+      ("assert", [ Format.asprintf "%a" Pretty.print_term f ], strats)
+  else
+    let s = Strategy.Sapply_trans ("split_vc", [], List.rev strats) in
+    Strategy.Sapply_trans
+      ("assert", [ Format.asprintf "%a" Pretty.print_term f ], [ s ])
