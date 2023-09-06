@@ -376,105 +376,102 @@ let apply_args f t t_info =
 (* Generates the formula for the forward error of r = x .* y. 2 formulas are
    created, one that matches the multiplication theorem and one with a bit of
    simplification. *)
-let get_mul_forward_error prove_overflow info x y r s1 s2 =
+let mul_forward_error prove_overflow info x y r s1 s2 =
   if prove_overflow then
     assert false
   else
-    assert false
-
-(* let ts = get_ts r in *)
-(* let eps = eps ts in *)
-(* let eta = eta ts in *)
-(* let to_real = to_real ts in *)
-(* let x_info = get_info info x in *)
-(* let y_info = get_info info y in *)
-(* let attrs = Sattr.empty in *)
-(* match (x_info.error, y_info.error) with *)
-(* | None, None -> *)
-(*   let left = abs (to_real r -. (to_real x *. to_real y)) in *)
-(*   let right = eps *. abs (to_real x *. to_real y) in *)
-(*   let info = *)
-(*     add_error info r *)
-(*       (to_real x *. to_real y, eps, abs (to_real x *. to_real y), eta) *)
-(*   in *)
-(*   let attrs = Sattr.add mul_basic_attr attrs in *)
-(*   let pr = create_prsymbol (id_fresh ~attrs "MulErrBasic") in *)
-(*   ( info, *)
-(*     [ *)
-(*       [ *)
-(*         Decl.create_prop_decl Pgoal pr *)
-(*           (t_or (left <=. right) *)
-(*              (t_and (t_equ (to_real r) zero) (left <=. eta))); *)
-(*       ]; *)
-(*     ] ) *)
-(* | _ -> *)
-(* let combine_errors_with_multiplication t1 exact_t1 t1_factor t1' t1_cst t2 *)
-(*       exact_t2 t2_factor t2' t2_cst r = *)
-(*     let rel_err = *)
-(*       eps *)
-(*       +. (t1_factor +. t2_factor +. (t1_factor *. t2_factor)) *)
-(*          *. (one +. eps) *)
-(*     in *)
-(*     let cst_err = *)
-(*       (((t2_cst +. (t2_cst *. t1_factor)) *. t1') *)
-(*       +. ((t1_cst +. (t1_cst *. t2_factor)) *. t2') *)
-(*       +. (t1_cst *. t2_cst)) *)
-(*       *. (one +. eps) *)
-(*     in *)
-(*     let rel_err' = *)
-(*       eps *)
-(*       ++. (t1_factor ++. t2_factor ++. (t1_factor **. t2_factor)) *)
-(*           **. (one ++. eps) *)
-(*     in *)
-(*     let cst_err' = *)
-(*       (((t2_cst ++. (t2_cst **. t1_factor)) **. t1') *)
-(*       ++. ((t1_cst ++. (t1_cst **. t2_factor)) **. t2') *)
-(*       ++. (t1_cst **. t2_cst)) *)
-(*       **. (one ++. eps) *)
-(*     in *)
-(*     let left = abs (to_real r -. (exact_t1 *. exact_t2)) in *)
-(*     let right = (rel_err *. (t1' *. t2')) +. cst_err in *)
-(*     let right' = (rel_err' **. t1' **. t2') ++. cst_err' in *)
-(*     let info = *)
-(* add_error info r (exact_t1 *. exact_t2, rel_err', t1' *. t2', cst_err') *)
-(*     in *)
-(*     let pr1 = create_prsymbol (id_fresh ~attrs "MulErrCombine") in *)
-(*     let pr2 = create_prsymbol (id_fresh "MulErrCombine") in *)
-(*     let f1 = *)
-(*       t_or (left <=. right) *)
-(*         (t_and (t_equ (to_real r) zero) (t_or f (left <=. eta))) *)
-(*     in *)
-(*     let f3 = t_and undeflow_fmla no_underflow_fmla in *)
-(* (* First we prove that each possible case implies a certain error bound *) (*
-   (except for eta). Then we prove that we have either one of this bound *) (*
-   at then end (this time including eta). *) *)
-(*     let l = *)
-(*       [ *)
-(*         [ Decl.create_prop_decl Pgoal pr1 f3 ]; *)
-(*         [ Decl.create_prop_decl Pgoal pr2 f1 ]; *)
-(*       ] *)
-(*     in *)
-(*     if t_equal right right' then *)
-(*       (info, l) *)
-(*     else *)
-(*       (* f' is the same as f but with bounds simplified if possible *) *)
-(*       let f' = *)
-(*         t_or (left <=. right') *)
-(*           (t_and (t_equ (to_real r) zero) (t_or f (left <=. eta))) *)
-(*       in *)
-(*       let pr' = create_prsymbol (id_fresh "MulErrCombineSimplified") in *)
-(*       (info, l @ [ [ Decl.create_prop_decl Pgoal pr' f' ] ]) *)
-(*   in *)
-(*   let combine_errors_with_multiplication = *)
-(*     apply_args combine_errors_with_multiplication x x_info *)
-(*   in *)
-(*   let combine_errors_with_multiplication = *)
-(*     apply_args combine_errors_with_multiplication y y_info *)
-(*   in *)
-(*   combine_errors_with_multiplication r *)
+    let ts = get_ts r in
+    let eps = eps ts in
+    let eta = eta ts in
+    let to_real = to_real ts in
+    let x_info = get_info info x in
+    let y_info = get_info info y in
+    match (x_info.error, y_info.error) with
+    | None, None ->
+      let left = abs (to_real r -. (to_real x *. to_real y)) in
+      let right = (eps *. abs (to_real x *. to_real y)) +. eta in
+      let info =
+        add_error info r
+          (to_real x *. to_real y, eps, abs (to_real x *. to_real y), eta)
+      in
+      (info, Some (left <=. right), Strategy.Sdo_nothing)
+    | _ ->
+      let combine_errors_with_multiplication t1 exact_t1 t1_factor t1' t1_cst t2
+          exact_t2 t2_factor t2' t2_cst r =
+        let rel_err =
+          eps
+          +. (t1_factor +. t2_factor +. (t1_factor *. t2_factor))
+             *. (one +. eps)
+        in
+        let cst_err =
+          (((t2_cst +. (t2_cst *. t1_factor)) *. t1')
+          +. ((t1_cst +. (t1_cst *. t2_factor)) *. t2')
+          +. (t1_cst *. t2_cst))
+          *. (one +. eps)
+          +. eta
+        in
+        let rel_err' =
+          eps
+          ++. (t1_factor ++. t2_factor ++. (t1_factor **. t2_factor))
+              **. (one ++. eps)
+        in
+        let rec extract_eta t =
+          if t_equal eta t then
+            match t.t_node with
+            | Tapp (ls, [ t1; t2 ]) when is_mul_ls ls -> assert false
+            | _ -> assert false
+        in
+        let _ = extract_eta t2_cst in
+        let cst_err' =
+          (((one ++. eps) **. (t2_cst ++. (t2_cst **. t1_factor))) **. t1')
+          ++. (((one ++. eps) **. (t1_cst ++. (t1_cst **. t2_factor))) **. t2')
+          ++. ((one ++. eps) **. t1_cst **. t2_cst)
+          ++. eta
+        in
+        let left = abs (to_real r -. (exact_t1 *. exact_t2)) in
+        let right = (rel_err *. (t1' *. t2')) +. cst_err in
+        let right' = (rel_err' **. t1' **. t2') ++. cst_err' in
+        let info =
+          add_error info r (exact_t1 *. exact_t2, rel_err', t1' *. t2', cst_err')
+        in
+        let get_float_name = get_float_name (Opt.get !symbols).printer in
+        let args = List.fold_left get_float_name "" [ x; y ] in
+        let s =
+          Strategy.Sapply_trans
+            ( "apply",
+              [ "mul_combine"; "with"; args ],
+              [
+                Sdo_nothing;
+                s1;
+                s2;
+                Sdo_nothing;
+                Sdo_nothing;
+                Sdo_nothing;
+                Sdo_nothing;
+                Sdo_nothing;
+                Sdo_nothing;
+              ] )
+        in
+        if t_equal right right' then
+          (info, Some (left <=. right), s)
+        else
+          ( info,
+            Some (left <=. right'),
+            Strategy.Sapply_trans
+              ( "assert",
+                [ Format.asprintf "%a" print_term (left <=. right) ],
+                [ s ] ) )
+      in
+      let combine_errors_with_multiplication =
+        apply_args combine_errors_with_multiplication x x_info
+      in
+      let combine_errors_with_multiplication =
+        apply_args combine_errors_with_multiplication y y_info
+      in
+      combine_errors_with_multiplication r
 
 (* Generates the formula for the forward error of r = x .- y *)
-let get_sub_forward_error prove_overflow info x y r s1 s2 =
+let sub_forward_error prove_overflow info x y r s1 s2 =
   if prove_overflow then
     assert false
   else
@@ -548,7 +545,7 @@ let get_sub_forward_error prove_overflow info x y r s1 s2 =
       combine_errors_with_substraction r
 
 (* Generates the formula for the forward error of r = x .- y *)
-let get_add_forward_error prove_overflow info x y r s1 s2 =
+let add_forward_error prove_overflow info x y r s1 s2 =
   if prove_overflow then
     assert false
   (* apply_addition_thm_for_overflow symbols info f x y r *)
@@ -631,17 +628,17 @@ let use_ieee_thms prove_overflow info ieee_symbol t1 t2 r s1 s2 :
     ls_equal ieee_symbol symbols.single_symbols.add_post
     || ls_equal ieee_symbol symbols.double_symbols.add_post
   then
-    get_add_forward_error prove_overflow info t1 t2 r s1 s2
+    add_forward_error prove_overflow info t1 t2 r s1 s2
   else if
     ls_equal ieee_symbol symbols.single_symbols.sub_post
     || ls_equal ieee_symbol symbols.double_symbols.sub_post
   then
-    get_sub_forward_error prove_overflow info t1 t2 r s1 s2
+    sub_forward_error prove_overflow info t1 t2 r s1 s2
   else if
     ls_equal ieee_symbol symbols.single_symbols.mul_post
     || ls_equal ieee_symbol symbols.double_symbols.mul_post
   then
-    get_mul_forward_error prove_overflow info t1 t2 r s1 s2
+    mul_forward_error prove_overflow info t1 t2 r s1 s2
   else
     failwith "Unsupported symbol"
 
