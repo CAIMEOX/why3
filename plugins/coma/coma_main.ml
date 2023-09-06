@@ -192,7 +192,7 @@ let rec vc pp dd c bl = function
       | Cz (h, zm, pl) when safe ->
           let c,_,_,_ = consume c pl bl in
           let add v z f = t_and_simp (t_equ (t_var z) (r_inst c v)) f in
-          { wp = t_true; sp = Mhs.singleton h (Mvs.fold add zm t_true) }
+          { wp = t_true; sp = Mhs.singleton h (Mvs.fold_right add zm t_true) }
       | Cz _ -> w_true
       end
   | Eapp (e, a) ->
