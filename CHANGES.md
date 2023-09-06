@@ -9,6 +9,8 @@ Core
     solvers, the one reported by the Why3 server, and not the one
     reported by Alt-Ergo itself. The use of the `time` regexp in
     driver files should be considered as deprecated.
+  * New function `fold_right` in Extset and Extmap, to traverse the
+    collection in the reverse order.
 
 MLCFG language
   * `variant` clauses are supported with the `stackify` backend.
