@@ -415,13 +415,13 @@ let mul_forward_error prove_overflow info x y r s1 s2 =
           ++. (t1_factor ++. t2_factor ++. (t1_factor **. t2_factor))
               **. (one ++. eps)
         in
-        let rec extract_eta t =
-          if t_equal eta t then
-            match t.t_node with
-            | Tapp (ls, [ t1; t2 ]) when is_mul_ls ls -> assert false
-            | _ -> assert false
-        in
-        let _ = extract_eta t2_cst in
+        (* let rec extract_eta t = *)
+        (*   if t_equal eta t then *)
+        (*     match t.t_node with *)
+        (*     | Tapp (ls, [ t1; t2 ]) when is_mul_ls ls -> assert false *)
+        (*     | _ -> assert false *)
+        (* in *)
+        (* let _ = extract_eta t2_cst in *)
         let cst_err' =
           (((one ++. eps) **. (t2_cst ++. (t2_cst **. t1_factor))) **. t1')
           ++. (((one ++. eps) **. (t1_cst ++. (t1_cst **. t2_factor))) **. t2')
@@ -923,3 +923,7 @@ let f env task =
     let s = Strategy.Sapply_trans ("split_vc", [], List.rev strats) in
     Strategy.Sapply_trans
       ("assert", [ Format.asprintf "%a" print_term f ], [ s ])
+
+let () =
+  Strategy.register_strat "numeric" f
+    ~desc:"Compute@ forward@ error@ of@ float@ computations."

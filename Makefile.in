@@ -295,8 +295,7 @@ LIB_TRANSFORM = simplify_formula inlining split_goal \
 		generic_arg_trans_utils case apply subst \
 		introduction ind_itp destruct cut congruence \
 		intro_vc_vars_counterexmp prepare_for_counterexmp \
-		induction induction_pr reflection keep_only_arithmetic \
-		numeric
+		induction induction_pr reflection keep_only_arithmetic
 
 LIB_PRINTER = cntexmp_printer alt_ergo why3printer smtv1 smtv2 coq\
 	      pvs isabelle \
@@ -305,7 +304,7 @@ LIB_PRINTER = cntexmp_printer alt_ergo why3printer smtv1 smtv2 coq\
 LIB_SESSION = compress xml termcode session_itp \
               strategy strategy_parser controller_itp \
 	      server_utils itp_communication \
-	      itp_server json_util unix_scheduler
+	      itp_server json_util unix_scheduler numeric
 
 LIB_CMIONLY = driver/driver_ast
 
