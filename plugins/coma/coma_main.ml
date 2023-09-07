@@ -150,7 +150,7 @@ let c_add_t c u t = { c with c_tv = Mtv.add u t c.c_tv }
 let c_add_v c v t = { c with c_vs = Mvs.add v t c.c_vs }
 
 let c_add_h out (c,zl,hl,pm) h pp dd cc wr pl e =
-  let to_merge = (* (let s = h.hs_name.id_string in s <> "" && s.[0] = '_') && *)
+  let to_merge = (let s = h.hs_name.id_string in s <> "" && s.[0] = '_') &&
     List.for_all (function Pv _ | Pr _ -> true | Pt _ | Pc _ -> false) pl &&
     (cc.c_gl || not (Shs.is_empty cc.c_lc)) && substantial pp dd e in
   let update up p = Mvs.add (Mvs.find_def p p pm) p up in
