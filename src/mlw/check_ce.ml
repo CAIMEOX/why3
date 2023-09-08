@@ -35,13 +35,29 @@ let string_of_verdict = function
   | INCOMPLETE _ -> "INCOMPLETE"
   | BAD_CE _ -> "BAD_CE"
 
-let report_verdict ?check_ce fmt = function
+let report_verdict ?check_ce fmt (c,log) =
+  match c with
   | NC ->
      Format.fprintf fmt
        "The@ program@ does@ not@ comply@ to@ the@ verification@ goal"
   | SW ->
-     Format.fprintf fmt
-       "The@ contracts@ of@ some@ function@ or@ loop@ are@ too weak"
+    let calls = Pinterp_core.Log.get_exec_calls_and_loops log in
+    let print_oloc =
+       Pp.print_option_or_default "unknown location" Loc.pp_position in
+    let print_rs fmt rs =
+      match rs with
+      | None -> Format.fprintf fmt "Anonymous function"
+      | Some rs -> Format.fprintf fmt "Function '%a'" print_rs rs in
+    let print_call fmt call =
+      match call.Log.log_desc with
+      | Log.Exec_call (rs,_,_) ->
+         Format.fprintf fmt "%a at %a" print_rs rs print_oloc call.Log.log_loc
+      | Log.Iter_loop _ ->
+         Format.fprintf fmt "Loop at %a" print_oloc call.Log.log_loc
+      | _ -> assert false in
+    Format.fprintf fmt
+      "The@ contracts@ of@ the@ following@ functions/loops@ are@ too@ weak :@.  @[%a@]@."
+       (pp_print_list print_call) calls
   | NC_SW ->
      Format.fprintf fmt
        ("The@ program@ does@ not@ comply@ to@ the@ verification@ \
@@ -183,7 +199,7 @@ let classify ~vc_term_loc ~vc_term_attrs ~normal_result ~giant_step_result =
 
 let print_model_classification ?verb_lvl ?json ?check_ce fmt (m, c) =
   fprintf fmt "@ @[<hov2>%a%t@]"
-    (report_verdict ?check_ce) (fst c)
+    (report_verdict ?check_ce) c
     (fun fmt ->
        match fst c with
        | NC | SW | NC_SW ->
