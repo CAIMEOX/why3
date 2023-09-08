@@ -160,7 +160,7 @@ let c_add_h out (c,zl,hl,pm) h pp dd cc wr pl e =
     let dup v = create_vsymbol (id_clone v.vs_name) (t_inst c v.vs_ty) in
     let dup (zl,zm) v = let z = dup v in z::zl, Mvs.add v (t_var z) zm in
     let zl,zm = List.fold_left (fun acc -> function Pt _ | Pc _ -> assert false
-      | Pv v | Pr v -> dup acc v) (List.fold_left dup ([], Mvs.empty) wr) pl in
+      | Pv v | Pr v -> dup acc v) (List.fold_left dup (zl, Mvs.empty) wr) pl in
     let bl = if out then List.map (function Pt _ | Pc _ -> assert false
       | Pr v -> Br (Mvs.find v zm,v) | Pv v -> Bv (Mvs.find v zm)) pl else [] in
     let up = if out then Mvs.map (fun p -> Mvs.find p zm) up else zm in
