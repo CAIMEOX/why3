@@ -419,13 +419,27 @@ let mk_env {Theory.th_export = ns_int} = {
 }
 *)
 
+open Ptree
+open Coma_syntax
+
+let vc tuc e = match e.pexpr_desc with
+  | PEcut (t, _) ->
+      Typing.type_fmla_in_namespace (Theory.get_namespace tuc) tuc.uc_known
+        tuc.uc_crcmap t
+  | _ ->
+      t_true (* FIXME *)
+
 let mk_goal tuc s e =
   let prs = Decl.create_prsymbol (id_fresh ("vc_" ^ s)) in
-  Theory.add_prop_decl tuc Decl.Pgoal prs (vc e)
+  Theory.add_prop_decl tuc Decl.Pgoal prs (vc tuc e)
 
-let read_channel env path _file _c =
+let add_vc tuc d =
+  let d = d.pdefn_desc in
+  mk_goal tuc d.pdefn_name.id_str d.pdefn_body
+
+let read_channel env path file c =
+  let ast = Coma_lexer.parse_channel file c in
 (*
-  let ast = Coma_lexer.parse file c in
   Format.printf "@[%a@]@." (fun fmt l ->
     List.iter (fun d -> Coma_syntax.print_decl fmt d) l) ast;
 *)
@@ -433,8 +447,9 @@ let read_channel env path _file _c =
   let tuc = Theory.create_theory ~path (id_fresh "Coma") in
   let tuc = Theory.use_export tuc Theory.bool_theory in
   let tuc = Theory.use_export tuc th_int in
-  let tuc = mk_goal tuc "expr1" expr1 in
-  let tuc = mk_goal tuc "expr2" expr2 in
+  let tuc = List.fold_left add_vc tuc ast in
+  (* let tuc = mk_goal tuc "expr1" expr1 in *)
+  (* let tuc = mk_goal tuc "expr2" expr2 in *)
   Mstr.singleton "Coma" (Theory.close_theory tuc)
 
 let () = Env.register_format Env.base_language "coma" ["coma"] read_channel
