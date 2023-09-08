@@ -16,8 +16,21 @@ Prover result is: Valid (1536 steps).
 File "bench/check-ce/while_mono.mlw", line 12, characters 27-36:
 Sub-goal Loop invariant preservation of goal f'vc.
 Prover result is: Unknown (sat) (1789 steps).
-The contracts of some function or loop are too weak, for example during the
-  following execution:
+The contracts of the following functions/loops are too weak :
+  Function 't'mk' at "bench/check-ce/while_mono.mlw", line 7, characters 11-20
+  Function 't'mk' at "bench/check-ce/while_mono.mlw", line 8, characters 11-20
+  Function 't'mk' at "bench/check-ce/while_mono.mlw", line 9, characters 10-19
+  Loop at "bench/check-ce/while_mono.mlw", line 10, character 2 to line 18, character 6
+  Function 'c' at "bench/check-ce/while_mono.mlw", line 10, characters 8-11
+  Function '(<)' at "bench/check-ce/while_mono.mlw", line 10, characters 8-15
+  Loop at "bench/check-ce/while_mono.mlw", line 10, character 2 to line 18, character 6
+  Function 'c' at "bench/check-ce/while_mono.mlw", line 13, characters 7-10
+  Function '(=)' at "bench/check-ce/while_mono.mlw", line 13, characters 7-14
+  Function 'c' at "bench/check-ce/while_mono.mlw", line 14, characters 14-18
+  Function '(+)' at "bench/check-ce/while_mono.mlw", line 14, characters 14-22
+  Function 'c' at "bench/check-ce/while_mono.mlw", line 17, characters 11-14
+  Function '(+)' at "bench/check-ce/while_mono.mlw", line 17, characters 11-18
+, for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

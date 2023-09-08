@@ -16,8 +16,21 @@ Prover result is: Valid (544 steps).
 File "bench/check-ce/while.mlw", line 10, characters 25-32:
 Sub-goal Loop invariant preservation of goal f'vc.
 Prover result is: Step limit exceeded (3000127 steps).
-The contracts of some function or loop are too weak, for example during the
-  following execution:
+The contracts of the following functions/loops are too weak :
+  Function 'ref' at "bench/check-ce/while.mlw", line 5, characters 15-16
+  Function 'ref' at "bench/check-ce/while.mlw", line 6, characters 15-16
+  Function 'ref' at "bench/check-ce/while.mlw", line 7, characters 14-15
+  Loop at "bench/check-ce/while.mlw", line 8, character 2 to line 16, character 6
+  Function 'contents' at "bench/check-ce/while.mlw", line 8, characters 8-9
+  Function '(<)' at "bench/check-ce/while.mlw", line 8, characters 8-13
+  Loop at "bench/check-ce/while.mlw", line 8, character 2 to line 16, character 6
+  Function 'contents' at "bench/check-ce/while.mlw", line 11, characters 7-8
+  Function '(=)' at "bench/check-ce/while.mlw", line 11, characters 7-12
+  Function 'contents' at "bench/check-ce/while.mlw", line 12, characters 12-14
+  Function '(+)' at "bench/check-ce/while.mlw", line 12, characters 12-18
+  Function 'contents' at "bench/check-ce/while.mlw", line 15, characters 9-10
+  Function '(+)' at "bench/check-ce/while.mlw", line 15, characters 9-14
+, for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

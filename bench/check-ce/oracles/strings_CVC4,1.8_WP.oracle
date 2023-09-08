@@ -44,8 +44,8 @@ The following counterexample model could not be verified
   (both RAC terminated because Postcondition of `T3'goal1` cannot be evaluated):
 File strings.mlw:
   Line 8:
-    s1 : string = "A"
-    s2 : string = "B"
+    s1 : string = "B"
+    s2 : string = "A"
 
 <check_ce:categorization>Categorizations of models:
 - Checked model 0: INCOMPLETE
