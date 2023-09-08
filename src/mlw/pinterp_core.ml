@@ -646,6 +646,11 @@ module Log = struct
     Mstr.map (Mint.map List.rev)
       (List.fold_right aux log Mstr.empty)
 
+  let get_exec_calls_and_loops log =
+    List.filter (fun entry ->
+                  match entry.log_desc with
+                  | Exec_call _ | Iter_loop _ -> true
+                  | _ -> false) log
 end
 
 type bunch = term list list ref
