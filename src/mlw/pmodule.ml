@@ -489,6 +489,7 @@ let unit_module =
 let itd_ref =
   let tv = create_tvsymbol (id_fresh "a") in
   let attrs = Sattr.singleton is_field_id_attr in
+  let attrs = Sattr.add mlw_builtin_attr attrs in
   let id_contents = id_fresh ~attrs "contents" in
   let pj = create_pvsymbol id_contents (ity_var tv) in
   create_plain_record_decl ~priv:false ~mut:true (id_fresh "ref")
@@ -505,7 +506,9 @@ let ls_ref_proj = ls_of_rs rs_ref_proj
 let rs_ref_ld, rs_ref =
   let cty = rs_ref_cons.rs_cty in
   let ityl = List.map (fun v -> v.pv_ity) cty.cty_args in
-  let_sym (id_fresh "ref") (c_app rs_ref_cons [] ityl cty.cty_result)
+  let attrs = Sattr.singleton Expr.mlw_builtin_attr in
+  let id = id_fresh ~attrs "ref" in
+  let_sym id (c_app rs_ref_cons [] ityl cty.cty_result)
 
 let ref_module =
   let add uc d = add_pdecl_raw ~warn:false uc d in

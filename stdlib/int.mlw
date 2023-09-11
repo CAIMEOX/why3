@@ -13,10 +13,10 @@ module Int
   let constant zero : int = 0
   let constant one  : int = 1
 
-  val (=) (x y : int) : bool ensures { result <-> x = y }
+  val (=) [@stdlib] (x y : int) : bool ensures { result <-> x = y }
 
   val function  (-_) int : int
-  val function  (+)  int int : int
+  val function  (+) [@stdlib] int int : int
   val function  (*)  int int : int
   val predicate (<)  int int : bool
 

@@ -649,7 +649,11 @@ module Log = struct
   let get_exec_calls_and_loops log =
     List.filter (fun entry ->
                   match entry.log_desc with
-                  | Exec_call _ | Iter_loop _ -> true
+                  | Exec_call (Some rs, _, _) when not
+                    (Sattr.mem Expr.mlw_builtin_attr rs.rs_name.id_attrs || Sattr.mem (Ident.create_attribute "stdlib") rs.rs_name.id_attrs)
+                    -> true
+                  | Exec_call (None, _ , _) -> true
+                  | Iter_loop _ -> true
                   | _ -> false) log
 end
 
