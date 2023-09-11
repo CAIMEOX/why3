@@ -328,7 +328,7 @@ let tv_c = tv_of_string "c"
 let vs_uc = create_vsymbol (id_fresh "u") (ty_var tv_c)
 let vs_vc = create_vsymbol (id_fresh "v") (ty_var tv_c)
 
-let expr1 =
+let _expr1 =
   !hs_alloc -- ty_int -+ t_nat_const 1 -* lam [Pr vs_pi] (
     !hs_loop -- ty_int -+ t_var vs_pi -* !hs_out -+
                               t_nat_const 3 -+ t_nat_const 0 -+ t_nat_const 5
@@ -363,7 +363,7 @@ let expr1 =
   >> def hs_fail [] [] (cut t_false Eany)
   >> def hs_halt [] [] (Ewox Eany)
 
-let expr2 =
+let _expr2 =
   !hs_alloc -- ty_int -+ t_nat_const 1 -* lam [Pr vs_qi] (
     !hs_loop -& vs_qi -- ty_int -+ t_var vs_qi -*
                           lam [Pv vs_ji] (!hs_out -& vs_qi -+ t_var vs_ji) -+
@@ -439,10 +439,15 @@ let add_vc tuc d =
 
 let read_channel env path file c =
   let ast = Coma_lexer.parse_channel file c in
-(*
-  Format.printf "@[%a@]@." (fun fmt l ->
-    List.iter (fun d -> Coma_syntax.print_decl fmt d) l) ast;
-*)
+
+  Format.printf "@[%a@]@."
+    (fun fmt l ->
+       Format.pp_print_list
+       ~pp_sep:(fun fmt () -> Format.fprintf fmt "\n\n")
+       (fun fmt d -> Coma_syntax.pp_def fmt d)
+       fmt l)
+    ast;
+
   let th_int = Env.read_theory env ["int"] "Int" in
   let tuc = Theory.create_theory ~path (id_fresh "Coma") in
   let tuc = Theory.use_export tuc Theory.bool_theory in

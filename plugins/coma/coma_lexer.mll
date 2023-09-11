@@ -263,6 +263,8 @@ rule token = parse
       { QUESTION }
   | "/"
       { SLASH }
+  | "--" [ ^ '\n' ]*
+      { token lexbuf }
 (* end coma *)
   | op_char_pref op_char_4* quote* as s
       { OPPREF s }

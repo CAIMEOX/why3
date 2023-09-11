@@ -52,3 +52,57 @@ and pdefn_desc = {
   pdefn_body   : pexpr;
 }
 
+open Format
+
+let rec pp_param fmt = function
+  | PPt i -> fprintf fmt "<%s>" i.id_str
+  | PPv i -> fprintf fmt "%s" i.id_str
+  | PPr i -> fprintf fmt "&%s" i.id_str
+  | PPc (i, w, pl) -> fprintf fmt "(%s [%a] %a)" i.id_str pp_writes w pp_params pl
+
+and pp_writes fmt w =
+  let pp_sep fmt () = fprintf fmt " " in
+  let pp_v fmt s = fprintf fmt "%s" s.id_str in
+  pp_print_list ~pp_sep pp_v fmt w
+
+and pp_params fmt pl =
+  let pp_sep fmt () = fprintf fmt " " in
+  pp_print_list ~pp_sep pp_param fmt pl
+
+let pp_set fmt sl =
+  let pp_sep fmt () = fprintf fmt "@\n" in
+  let pp_v fmt (s, _) = fprintf fmt "/ &%s = {} " s.id_str in
+  pp_print_list ~pp_sep pp_v fmt sl
+
+let rec pp_expr fmt e = match e.pexpr_desc with
+  | PEsym i -> fprintf fmt "%s" i.id_str
+  | PEapp (e, arg) -> fprintf fmt "%a %a" pp_expr e pp_arg arg
+  | PElam (p, e) -> fprintf fmt "(fun @[%a@] →@ @[%a@])" pp_params p pp_expr e
+  | PEdef (e, _, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_defs l
+  | PEset (e, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_set l
+  | PEcut (_t, e) -> fprintf fmt "{ϕ} @[%a@]" pp_expr e
+  | PEbox e -> fprintf fmt "↑ @[%a@]" pp_expr e
+  | PEwox e -> fprintf fmt "↓ @[%a@]" pp_expr e
+  | PEany -> fprintf fmt "any"
+
+and pp_arg fmt = function
+  | At _pty -> fprintf fmt "<>"
+  | Av _term -> fprintf fmt "{}"
+  | Ar i -> fprintf fmt "&%s" i.id_str
+  | Ac e ->
+      match e.pexpr_desc with
+      | PEsym i -> fprintf fmt "%s" i.id_str
+      | _ -> fprintf fmt "(%a)" pp_expr e
+
+and pp_def fmt def =
+  let def = def.pdefn_desc in
+  fprintf fmt "%s [%a] %a =@\n  @[%a@]"
+    def.pdefn_name.id_str
+    pp_writes def.pdefn_writes
+    pp_params def.pdefn_params
+    pp_expr def.pdefn_body
+
+and pp_defs fmt l =
+  let pp_sep fmt () = fprintf fmt "@\n" in
+  let pp_v fmt d = fprintf fmt "/ %a" pp_def d in
+  pp_print_list ~pp_sep pp_v fmt l
