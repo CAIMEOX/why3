@@ -20,14 +20,8 @@ Prover result is: Valid (1102 steps).
 File "bench/check-ce/while1.mlw", line 5, characters 12-22:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown (unknown + incomplete) (1166 steps).
-The contracts of the following functions/loops are too weak :
-  Function 'ref' at "bench/check-ce/while1.mlw", line 6, characters 16-17
-  Function 'ref' at "bench/check-ce/while1.mlw", line 7, characters 16-17
-  Loop at "bench/check-ce/while1.mlw", line 8, character 4 to line 13, character 8
-  Function 'contents' at "bench/check-ce/while1.mlw", line 8, characters 10-11
-  Function '(<)' at "bench/check-ce/while1.mlw", line 8, characters 10-15
-  Function 'contents' at "bench/check-ce/while1.mlw", line 14, characters 4-5
-, for example during the following execution:
+The contracts of some function or loop are too weak, for example during the
+  following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

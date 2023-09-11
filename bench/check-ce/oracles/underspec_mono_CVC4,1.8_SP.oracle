@@ -12,15 +12,8 @@ Prover result is: Valid (137 steps).
 File "bench/check-ce/underspec_mono.mlw", line 19, characters 27-35:
 Sub-goal Loop invariant preservation of goal f'vc.
 Prover result is: Unknown (sat) (645 steps).
-The contracts of the following functions/loops are too weak :
-  Function 't'mk' at "bench/check-ce/underspec_mono.mlw", line 16, characters 13-22
-  Function 't'mk' at "bench/check-ce/underspec_mono.mlw", line 17, characters 13-22
-  Loop at "bench/check-ce/underspec_mono.mlw", line 18, character 4 to line 24, character 8
-  Loop at "bench/check-ce/underspec_mono.mlw", line 18, character 4 to line 24, character 8
-  Function '(=)' at "bench/check-ce/underspec_mono.mlw", line 20, characters 9-14
-  Function 'c' at "bench/check-ce/underspec_mono.mlw", line 21, characters 16-20
-  Function '(+)' at "bench/check-ce/underspec_mono.mlw", line 21, characters 16-24
-, for example during the following execution:
+The contracts of some function or loop are too weak, for example during the
+  following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -78,10 +71,8 @@ Prover result is: Valid (251 steps).
 File "bench/check-ce/underspec_mono.mlw", line 43, characters 13-20:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown (sat) (253 steps).
-The contracts of the following functions/loops are too weak :
-  Function 'Tuple0' at "bench/check-ce/underspec_mono.mlw", line 42, characters 6-8
-  Function 'g' at "bench/check-ce/underspec_mono.mlw", line 42, characters 4-8
-, for example during the following execution:
+The contracts of some function or loop are too weak, for example during the
+  following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

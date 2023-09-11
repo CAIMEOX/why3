@@ -16,11 +16,8 @@ Prover result is: Valid (480 steps).
 File "bench/check-ce/for1_mono.mlw", line 6, characters 12-22:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown (sat) (360 steps).
-The contracts of the following functions/loops are too weak :
-  Function 't'mk' at "bench/check-ce/for1_mono.mlw", line 7, characters 10-19
-  Loop at "bench/check-ce/for1_mono.mlw", line 8, character 4 to line 11, character 8
-  Function 'c' at "bench/check-ce/for1_mono.mlw", line 12, characters 4-7
-, for example during the following execution:
+The contracts of some function or loop are too weak, for example during the
+  following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

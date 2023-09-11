@@ -12,15 +12,8 @@ Prover result is: Valid (246 steps).
 File "bench/check-ce/for.mlw", line 8, characters 25-31:
 Sub-goal Loop invariant preservation of goal f'vc.
 Prover result is: Unknown (unknown + incomplete) (533 steps).
-The contracts of the following functions/loops are too weak :
-  Function 'ref' at "bench/check-ce/for.mlw", line 5, characters 15-16
-  Function 'ref' at "bench/check-ce/for.mlw", line 6, characters 15-16
-  Loop at "bench/check-ce/for.mlw", line 7, character 2 to line 13, character 6
-  Loop at "bench/check-ce/for.mlw", line 7, character 2 to line 13, character 6
-  Function '(=)' at "bench/check-ce/for.mlw", line 9, characters 7-12
-  Function 'contents' at "bench/check-ce/for.mlw", line 10, characters 12-14
-  Function '(+)' at "bench/check-ce/for.mlw", line 10, characters 12-18
-, for example during the following execution:
+The contracts of some function or loop are too weak, for example during the
+  following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
