@@ -49,9 +49,9 @@ module IntPathWeight
   use list.List
   use list.Append
 
-  val function weight vertex vertex : int
+  val function weight [@stdlib] vertex vertex : int
 
-  function path_weight (l: list vertex) (dst: vertex) : int = match l with
+  function path_weight [@stdlib] (l: list vertex) (dst: vertex) : int = match l with
     | Nil -> 0
     | Cons x Nil -> weight x dst
     | Cons x ((Cons y _) as r) -> weight x y + path_weight r dst

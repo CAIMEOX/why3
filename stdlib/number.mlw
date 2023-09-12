@@ -108,7 +108,7 @@ module Gcd
   use export int.Int
   use Divisibility
 
-  function gcd int int : int
+  function gcd [@stdlib] int int : int
 
   axiom gcd_nonneg: forall a b: int. 0 <= gcd a b
   axiom gcd_def1  : forall a b: int. divides (gcd a b) a

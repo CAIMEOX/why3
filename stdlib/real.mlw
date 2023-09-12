@@ -13,11 +13,11 @@ module Real
   constant zero : real = 0.0
   constant one  : real = 1.0
 
-  val (=) (x y : real) : bool ensures { result <-> x = y }
+  val (=) [@stdlib] (x y : real) : bool ensures { result <-> x = y }
 
-  val function  (-_) real : real
-  val function  (+)  real real : real
-  val function  (*)  real real : real
+  val function  (-_) [@stdlib] real : real
+  val function  (+)  [@stdlib] real real : real
+  val function  (*)  [@stdlib] real real : real
   val predicate (<)  real real : bool
 
   let predicate (>)  (x y : real) = y < x
@@ -41,11 +41,11 @@ module Real
   meta "remove_unused:keep" predicate (>)
   meta "remove_unused:keep" predicate (>=)
 
- let (-) (x y : real)
+ let (-) [@stdlib] (x y : real)
     ensures { result = x - y }
   = x + -y
 
-  val (/) (x y:real) : real
+  val (/) [@stdlib] (x y:real) : real
     requires { y <> 0.0 }
     ensures  { result = x / y }
 
@@ -66,20 +66,20 @@ module RealInfix
 
   use Real
 
-  let function (+.) (x:real) (y:real) : real = x + y
-  let function (-.) (x:real) (y:real) : real = x - y
-  let function ( *.) (x:real) (y:real) : real = x * y
-  function (/.) (x:real) (y:real) : real = x / y
-  let function (-._) (x:real) : real = - x
-  function inv (x:real) : real = Real.inv x
+  let function (+.) [@stdlib] (x:real) (y:real) : real = x + y
+  let function (-.) [@stdlib] (x:real) (y:real) : real = x - y
+  let function ( *.) [@stdlib] (x:real) (y:real) : real = x * y
+  function (/.) [@stdlib] (x:real) (y:real) : real = x / y
+  let function (-._) [@stdlib] (x:real) : real = - x
+  function inv [@stdlib] (x:real) : real = Real.inv x
 
-  let (=.) (x:real) (y:real) = x = y
+  let (=.) [@stdlib] (x:real) (y:real) = x = y
   let predicate (<=.) (x:real) (y:real) = x <= y
   let predicate (>=.) (x:real) (y:real) = x >= y
   let predicate ( <.) (x:real) (y:real) = x < y
   let predicate ( >.) (x:real) (y:real) = x > y
 
-  val (/.) (x y:real) : real
+  val (/.) [@stdlib] (x y:real) : real
     requires { y <> 0.0 }
     ensures  { result = x /. y }
 
@@ -91,7 +91,7 @@ module Abs
 
   use Real
 
-  function abs(x : real) : real = if x >= 0.0 then x else -x
+  function abs [@stdlib] (x : real) : real = if x >= 0.0 then x else -x
 
   lemma Abs_le: forall x y:real. abs x <= y <-> -y <= x <= y
 
@@ -126,7 +126,7 @@ module FromInt
   use int.Int as Int
   use Real
 
-  function from_int int : real
+  function from_int [@stdlib] int : real
 
   axiom Zero: from_int 0 = 0.0
   axiom One: from_int 1 = 1.0
@@ -155,7 +155,7 @@ module Truncate
   use FromInt
 
   (** rounds towards zero *)
-  function truncate real : int
+  function truncate [@stdlib] real : int
 
   axiom Truncate_int :
     forall i:int. truncate (from_int i) = i
@@ -180,8 +180,8 @@ module Truncate
   axiom Truncate_monotonic_int2:
     forall x:real, i:int. from_int i <= x -> Int.(<=) i (truncate x)
 
-  function floor real : int
-  function ceil real : int
+  function floor [@stdlib] real : int
+  function ceil [@stdlib] real : int
   (** roundings up and down *)
 
   axiom Floor_int :
@@ -210,9 +210,9 @@ module Square
 
   use Real
 
-  function sqr (x : real) : real = x * x
+  function sqr [@stdlib] (x : real) : real = x * x
 
-  val function sqrt real : real
+  val function sqrt [@stdlib] real : real
 
   axiom Sqrt_positive:
     forall x:real. x >= 0.0 -> sqrt x >= 0.0
@@ -238,13 +238,13 @@ module ExpLog
 
   use Real
 
-  val function exp real : real
+  val function exp [@stdlib] real : real
   axiom Exp_zero : exp(0.0) = 1.0
   axiom Exp_sum : forall x y:real. exp (x+y) = exp x * exp y
 
   constant e : real = exp 1.0
 
-  val function log real : real
+  val function log [@stdlib] real : real
   axiom Log_one : log 1.0 = 0.0
   axiom Log_mul :
     forall x y:real. x > 0.0 /\ y > 0.0 -> log (x*y) = log x + log y
@@ -253,8 +253,8 @@ module ExpLog
 
   axiom Exp_log: forall x:real. x > 0.0 -> exp (log x) = x
 
-  function log2 (x : real) : real = log x / log 2.0
-  function log10 (x : real) : real = log x / log 10.0
+  function log2 [@stdlib] (x : real) : real = log x / log 2.0
+  function log10 [@stdlib] (x : real) : real = log x / log 10.0
 
 end
 
@@ -281,7 +281,7 @@ module PowerReal
   use Real
   use ExpLog
 
-  function pow real real : real
+  function pow [@stdlib] real real : real
 
   axiom Pow_def:
     forall x y:real. x > 0.0 -> pow x y = exp (y * log x)
@@ -333,8 +333,8 @@ module Trigonometry
   use Square
   use Abs
 
-  function cos real : real
-  function sin real : real
+  function cos [@stdlib] real : real
+  function sin [@stdlib] real : real
 
   axiom Pythagorean_identity:
     forall x:real. sqr (cos x) + sqr (sin x) = 1.0
@@ -378,8 +378,8 @@ module Trigonometry
   axiom Sin_sum:
     forall x y:real. sin (x+y) = sin x * cos y + cos x * sin y
 
-  function tan (x : real) : real = sin x / cos x
-  function atan real : real
+  function tan [@stdlib] (x : real) : real = sin x / cos x
+  function atan [@stdlib] real : real
   axiom Tan_atan:
     forall x:real. tan (atan x) = x
 
@@ -397,15 +397,15 @@ module Hyperbolic
   use Square
   use ExpLog
 
-  function sinh (x : real) : real = 0.5 * (exp x - exp (-x))
-  function cosh (x : real) : real = 0.5 * (exp x + exp (-x))
-  function tanh (x : real) : real = sinh x / cosh x
+  function sinh [@stdlib] (x : real) : real = 0.5 * (exp x - exp (-x))
+  function cosh [@stdlib] (x : real) : real = 0.5 * (exp x + exp (-x))
+  function tanh [@stdlib] (x : real) : real = sinh x / cosh x
 
-  function asinh (x : real) : real = log (x + sqrt (sqr x + 1.0))
-  function acosh (x : real) : real
+  function asinh [@stdlib] (x : real) : real = log (x + sqrt (sqr x + 1.0))
+  function acosh [@stdlib] (x : real) : real
   axiom Acosh_def:
     forall x:real. x >= 1.0 -> acosh x = log (x + sqrt (sqr x - 1.0))
-  function atanh (x : real) : real
+  function atanh [@stdlib] (x : real) : real
   axiom Atanh_def:
     forall x:real. -1.0 < x < 1.0 -> atanh x = 0.5 * log ((1.0+x)/(1.0-x))
 
@@ -423,8 +423,8 @@ module Polar
   use Square
   use Trigonometry
 
-  function hypot (x y : real) : real = sqrt (sqr x + sqr y)
-  function atan2 real real : real
+  function hypot [@stdlib] (x y : real) : real = sqrt (sqr x + sqr y)
+  function atan2 [@stdlib] real real : real
 
   axiom X_from_polar:
     forall x y:real. x = hypot x y * cos (atan2 y x)

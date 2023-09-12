@@ -61,15 +61,15 @@ module Set
   let constant all: set 'a = const true
 
   (** addition *)
-  function add (x: 'a) (s: set 'a): set 'a = s[x <- true]
+  function add [@stdlib] (x: 'a) (s: set 'a): set 'a = s[x <- true]
 
-  function singleton (x: 'a): set 'a = add x empty
+  function singleton [@stdlib] (x: 'a): set 'a = add x empty
 
   lemma mem_singleton:
     forall x, y: 'a. mem y (singleton x) -> y = x
 
   (** removal *)
-  function remove (x: 'a) (s: set 'a): set 'a = s[x <- false]
+  function remove [@stdlib] (x: 'a) (s: set 'a): set 'a = s[x <- false]
 
   lemma add_remove:
     forall x: 'a, s: set 'a. mem x s -> add x (remove x s) = s
@@ -81,7 +81,7 @@ module Set
     forall x: 'a, s: set 'a. subset (remove x s) s
 
   (** union *)
-  function union (s1 s2: set 'a): set 'a
+  function union [@stdlib] (s1 s2: set 'a): set 'a
   = fun x -> mem x s1 \/ mem x s2
 
   lemma subset_union_1:
@@ -90,7 +90,7 @@ module Set
     forall s1 s2: set 'a. subset s2 (union s1 s2)
 
   (** intersection *)
-  function inter (s1 s2: set 'a): set 'a
+  function inter [@stdlib] (s1 s2: set 'a): set 'a
   = fun x -> mem x s1 /\ mem x s2
 
   lemma subset_inter_1:
@@ -99,18 +99,18 @@ module Set
     forall s1 s2: set 'a. subset (inter s1 s2) s2
 
   (** difference *)
-  function diff (s1 s2: set 'a): set 'a
+  function diff [@stdlib] (s1 s2: set 'a): set 'a
   = fun x -> mem x s1 /\ not (mem x s2)
 
   lemma subset_diff:
     forall s1 s2: set 'a. subset (diff s1 s2) s1
 
   (** complement *)
-  function complement (s: set 'a): set 'a
+  function complement [@stdlib] (s: set 'a): set 'a
   = fun x -> not (mem x s)
 
   (** arbitrary element *)
-  function pick (s: set 'a): 'a
+  function pick [@stdlib] (s: set 'a): 'a
 
   axiom pick_def: forall s: set 'a. not (is_empty s) -> mem (pick s) s
 
@@ -128,13 +128,13 @@ module Set
     forall s1 s2: set 'a. disjoint (diff s1 s2) s2
 
   (** `{ (x, y) | x in s1 /\ y in s2 }` *)
-  function product (s1: set 'a) (s2: set 'b) : set ('a, 'b)
+  function product [@stdlib] (s1: set 'a) (s2: set 'b) : set ('a, 'b)
   axiom product_def:
     forall s1: set 'a, s2: set 'b, x : 'a, y : 'b.
     mem (x, y) (product s1 s2) <-> mem x s1 /\ mem y s2
 
   (** `{ x | x in s /\ p x }` *)
-  function filter (s: set 'a) (p: 'a -> bool) : set 'a
+  function filter [@stdlib] (s: set 'a) (p: 'a -> bool) : set 'a
   axiom filter_def:
     forall s: set 'a, p: 'a -> bool, x: 'a. mem x (filter s p) <-> mem x s /\ p x
 
@@ -142,7 +142,7 @@ module Set
     forall s: set 'a, p: 'a -> bool. subset (filter s p) s
 
   (** `{ f x | x in U }` *)
-  function map (f: 'a -> 'b) (u: set 'a) : set 'b =
+  function map [@stdlib] (f: 'a -> 'b) (u: set 'a) : set 'b =
     fun (y: 'b) -> exists x: 'a. mem x u /\ y = f x
 
   lemma mem_map:
@@ -202,7 +202,7 @@ module Cardinal
 
   use int.Int
 
-  function cardinal (set 'a): int
+  function cardinal [@stdlib] (set 'a): int
 
   axiom cardinal_nonneg:
     forall s: set 'a. cardinal s >= 0
@@ -291,17 +291,17 @@ module Fset
     forall s: fset 'a. is_empty s -> s = empty
 
   (** addition *)
-  function add (x: 'a) (s: fset 'a) : fset 'a
+  function add [@stdlib] (x: 'a) (s: fset 'a) : fset 'a
   axiom add_def:
     forall x: 'a, s: fset 'a, y: 'a. mem y (add x s) <-> (mem y s \/ y = x)
 
-  function singleton (x: 'a): fset 'a = add x empty
+  function singleton [@stdlib] (x: 'a): fset 'a = add x empty
 
   lemma mem_singleton:
     forall x, y: 'a. mem y (singleton x) -> y = x
 
   (** removal *)
-  function remove (x: 'a) (s: fset 'a) : fset 'a
+  function remove [@stdlib] (x: 'a) (s: fset 'a) : fset 'a
   axiom remove_def:
     forall x: 'a, s: fset 'a, y: 'a. mem y (remove x s) <-> (mem y s /\ y <> x)
 
@@ -315,7 +315,7 @@ module Fset
     forall x: 'a, s: fset 'a. subset (remove x s) s
 
   (** union *)
-  function union (s1 s2: fset 'a): fset 'a
+  function union [@stdlib] (s1 s2: fset 'a): fset 'a
   axiom union_def:
     forall s1 s2: fset 'a, x: 'a. mem x (union s1 s2) <-> mem x s1 \/ mem x s2
 
@@ -325,7 +325,7 @@ module Fset
     forall s1 s2: fset 'a. subset s2 (union s1 s2)
 
   (** intersection *)
-  function inter (s1 s2: fset 'a): fset 'a
+  function inter [@stdlib] (s1 s2: fset 'a): fset 'a
   axiom inter_def:
     forall s1 s2: fset 'a, x: 'a. mem x (inter s1 s2) <-> mem x s1 /\ mem x s2
 
@@ -335,7 +335,7 @@ module Fset
     forall s1 s2: fset 'a. subset (inter s1 s2) s2
 
   (** difference *)
-  function diff (s1 s2: fset 'a): fset 'a
+  function diff [@stdlib] (s1 s2: fset 'a): fset 'a
   axiom diff_def:
     forall s1 s2: fset 'a, x: 'a. mem x (diff s1 s2) <-> mem x s1 /\ not (mem x s2)
 
@@ -343,7 +343,7 @@ module Fset
     forall s1 s2: fset 'a. subset (diff s1 s2) s1
 
   (** arbitrary element *)
-  function pick (s: fset 'a): 'a
+  function pick [@stdlib] (s: fset 'a): 'a
 
   axiom pick_def: forall s: fset 'a. not (is_empty s) -> mem (pick s) s
 
@@ -361,7 +361,7 @@ module Fset
     forall s1 s2: fset 'a. disjoint (diff s1 s2) s2
 
   (** `{ x | x in s /\ p x }` *)
-  function filter (s: fset 'a) (p: 'a -> bool) : fset 'a
+  function filter [@stdlib] (s: fset 'a) (p: 'a -> bool) : fset 'a
   axiom filter_def:
     forall s: fset 'a, p: 'a -> bool, x: 'a. mem x (filter s p) <-> mem x s /\ p x
 
@@ -369,7 +369,7 @@ module Fset
     forall s: fset 'a, p: 'a -> bool. subset (filter s p) s
 
   (** `{ f x | x in U }` *)
-  function map (f: 'a -> 'b) (u: fset 'a) : fset 'b
+  function map [@stdlib] (f: 'a -> 'b) (u: fset 'a) : fset 'b
   axiom map_def:
     forall f: 'a -> 'b, u: fset 'a, y: 'b.
     mem y (map f u) <-> exists x: 'a. mem x u /\ y = f x
@@ -382,7 +382,7 @@ module Fset
 
   use int.Int
 
-  function cardinal (fset 'a) : int
+  function cardinal [@stdlib] (fset 'a) : int
 
   axiom cardinal_nonneg:
     forall s: fset 'a. cardinal s >= 0
@@ -457,19 +457,19 @@ module FsetInt
   use int.Int
   use export Fset
 
-  function min_elt (s: fset int) : int
+  function min_elt [@stdlib] (s: fset int) : int
 
   axiom min_elt_def:
     forall s: fset int. not (is_empty s) ->
     mem (min_elt s) s /\ forall x. mem x s -> min_elt s <= x
 
-  function max_elt (s: fset int) : int
+  function max_elt [@stdlib] (s: fset int) : int
 
   axiom max_elt_def:
     forall s: fset int. not (is_empty s) ->
     mem (max_elt s) s /\ forall x. mem x s -> x <= max_elt s
 
-  function interval (l r: int) : fset int
+  function interval [@stdlib] (l r: int) : fset int
   axiom interval_def:
     forall l r x. mem x (interval l r) <-> l <= x < r
 
@@ -485,7 +485,7 @@ module FsetSum
   use int.Int
   use Fset
 
-  function sum (fset 'a) ('a -> int) : int
+  function sum [@stdlib] (fset 'a) ('a -> int) : int
   (** `sum s f` is the sum `\sum_{mem x s} f x` *)
 
   axiom sum_def_empty:
@@ -527,7 +527,7 @@ module SetApp
 
   type elt
 
-  val eq (x y: elt) : bool
+  val eq [@stdlib] (x y: elt) : bool
     ensures { result <-> x = y }
 
   type set = abstract {
@@ -535,57 +535,57 @@ module SetApp
   }
   meta coercion function to_fset
 
-  val ghost function mk (s: fset elt) : set
+  val ghost function mk [@stdlib] (s: fset elt) : set
     ensures { result.to_fset = s }
 
-  val mem (x: elt) (s: set) : bool
+  val mem [@stdlib] (x: elt) (s: set) : bool
     ensures { result <-> mem x s }
 
-  val (==) (s1 s2: set) : bool
+  val (==) [@stdlib] (s1 s2: set) : bool
     ensures { result <-> s1 == s2 }
 
-  val subset (s1 s2: set) : bool
+  val subset [@stdlib] (s1 s2: set) : bool
     ensures { result <-> subset s1 s2 }
 
-  val empty () : set
+  val empty [@stdlib] () : set
     ensures { result.to_fset = empty }
     ensures { cardinal result = 0 }
 
-  val is_empty (s: set) : bool
+  val is_empty [@stdlib] (s: set) : bool
     ensures { result <-> is_empty s }
 
-  val add (x: elt) (s: set) : set
+  val add [@stdlib] (x: elt) (s: set) : set
     ensures { result = add x s }
     ensures { if mem x s then cardinal result = cardinal s
                          else cardinal result = cardinal s + 1 }
 
-  let singleton (x: elt) : set
+  let singleton [@stdlib] (x: elt) : set
     ensures { result = singleton x }
     ensures { cardinal result = 1 }
   = add x (empty ())
 
-  val remove (x: elt) (s: set): set
+  val remove [@stdlib] (x: elt) (s: set): set
     ensures { result = remove x s }
     ensures { if mem x s then cardinal result = cardinal s - 1
                          else cardinal result = cardinal s }
 
-  val union (s1 s2: set): set
+  val union [@stdlib] (s1 s2: set): set
     ensures { result = union s1 s2 }
 
-  val inter (s1 s2: set) : set
+  val inter [@stdlib] (s1 s2: set) : set
     ensures { result = inter s1 s2 }
 
-  val diff (s1 s2: set) : set
+  val diff [@stdlib] (s1 s2: set) : set
     ensures { result = diff s1 s2 }
 
-  val function choose (s: set) : elt
+  val function choose [@stdlib] (s: set) : elt
     requires { not (is_empty s) }
     ensures  { mem result s }
 
-  val disjoint (s1 s2: set) : bool
+  val disjoint [@stdlib] (s1 s2: set) : bool
     ensures { result <-> disjoint s1 s2 }
 
-  val cardinal (s: set) : int (* Peano.t *)
+  val cardinal [@stdlib] (s: set) : int (* Peano.t *)
     ensures { result = cardinal s }
 
 end
@@ -599,15 +599,15 @@ module SetAppInt
 
   clone export SetApp with type elt = int, val eq = Int.(=), axiom .
 
-  val min_elt (s: set) : int
+  val min_elt [@stdlib] (s: set) : int
     requires { not (is_empty s) }
     ensures  { result = min_elt s }
 
-  val max_elt (s: set) : int
+  val max_elt [@stdlib] (s: set) : int
     requires { not (is_empty s) }
     ensures  { result = max_elt s }
 
-  val interval (l r: int) : set
+  val interval [@stdlib] (l r: int) : set
     ensures  { result = interval l r }
     ensures  { cardinal result = if l <= r then r - l else 0 }
 
@@ -622,7 +622,7 @@ module SetImp
 
   type elt
 
-  val eq (x y: elt) : bool
+  val eq [@stdlib] (x y: elt) : bool
     ensures { result <-> x = y }
 
   type set = abstract {
@@ -630,60 +630,60 @@ module SetImp
   }
   meta coercion function to_fset
 
-  val mem (x: elt) (s: set) : bool
+  val mem [@stdlib] (x: elt) (s: set) : bool
     ensures { result <-> mem x s }
 
-  val (==) (s1 s2: set) : bool
+  val (==) [@stdlib] (s1 s2: set) : bool
     ensures { result <-> s1 == s2 }
 
-  val subset (s1 s2: set) : bool
+  val subset [@stdlib] (s1 s2: set) : bool
     ensures { result <-> subset s1 s2 }
 
-  val empty () : set
+  val empty [@stdlib] () : set
     ensures { result = empty }
     ensures { cardinal result = 0 }
 
-  val clear (s: set) : unit
+  val clear [@stdlib] (s: set) : unit
     writes  { s }
     ensures { s = empty }
 
-  val is_empty (s: set) : bool
+  val is_empty [@stdlib] (s: set) : bool
     ensures { result <-> is_empty s }
 
-  val add (x: elt) (s: set) : unit
+  val add [@stdlib] (x: elt) (s: set) : unit
     writes  { s }
     ensures { s = add x (old s) }
     ensures { if mem x (old s) then cardinal s = cardinal (old s)
                                else cardinal s = cardinal (old s) + 1 }
 
-  let singleton (x: elt) : set
+  let singleton [@stdlib] (x: elt) : set
     ensures { result = singleton x }
     ensures { cardinal result = 1 }
   = let s = empty () in
     add x s;
     s
 
-  val remove (x: elt) (s: set) : unit
+  val remove [@stdlib] (x: elt) (s: set) : unit
     writes  { s }
     ensures { s = remove x (old s) }
     ensures { if mem x (old s) then cardinal s = cardinal (old s) - 1
                                else cardinal s = cardinal (old s) }
 
-  val function choose (s: set) : elt
+  val function choose [@stdlib] (s: set) : elt
     requires { not (is_empty s) }
     ensures  { mem result s }
 
-  val choose_and_remove (s: set) : elt
+  val choose_and_remove [@stdlib] (s: set) : elt
     requires { not (is_empty s) }
     writes   { s }
     ensures  { result = choose (old s) }
     ensures  { mem result (old s) }
     ensures  { s = remove result (old s) }
 
-  val disjoint (s1 s2: set) : bool
+  val disjoint [@stdlib] (s1 s2: set) : bool
     ensures { result <-> disjoint s1 s2 }
 
-  val cardinal (s: set) : int (* Peano.t? *)
+  val cardinal [@stdlib] (s: set) : int (* Peano.t? *)
     ensures { result = cardinal s }
 
 end

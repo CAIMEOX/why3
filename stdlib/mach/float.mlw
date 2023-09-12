@@ -31,7 +31,7 @@ module Single
   predicate add_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x +. t'real  y)
 
-  val safe_add (x y: t) : t
+  val safe_add [@stdlib] (x y: t) : t
     requires { [@expl:floating-point overflow]
                add_pre_ieee x y \/ add_pre_real x y }
     ensures  { add_post_ieee x y result /\ add_post_real x y result }
@@ -48,7 +48,7 @@ module Single
   predicate sub_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x -. t'real  y)
 
-  val safe_sub (x y: t) : t
+  val safe_sub [@stdlib] (x y: t) : t
     requires { [@expl:floating-point overflow]
                sub_pre_ieee x y \/ sub_pre_real x y }
     ensures  { sub_post_ieee x y result /\ sub_post_real x y result }
@@ -65,7 +65,7 @@ module Single
   predicate mul_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x *. t'real  y)
 
-  val safe_mul (x y: t) : t
+  val safe_mul [@stdlib] (x y: t) : t
     requires { [@expl:floating-point overflow]
                mul_pre_ieee x y \/ mul_pre_real x y }
     ensures  { mul_post_ieee x y result /\ mul_post_real x y result }
@@ -82,7 +82,7 @@ module Single
   predicate div_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x /. t'real  y)
 
-  val safe_div (x y: t) : t
+  val safe_div [@stdlib] (x y: t) : t
     requires { [@expl:floating-point overflow]
                div_pre_ieee x y \/ div_pre_real x y }
     ensures  { div_post_ieee x y result /\ div_post_real x y result }
@@ -111,7 +111,7 @@ module Double
   predicate add_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x +. t'real  y)
 
-  val safe_add (x y: t) : t
+  val safe_add [@stdlib] (x y: t) : t
     requires { [@expl:floating-point overflow]
                add_pre_ieee x y \/ add_pre_real x y }
     ensures  { add_post_ieee x y result /\ add_post_real x y result }
@@ -128,7 +128,7 @@ module Double
   predicate sub_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x -. t'real  y)
 
-  val safe_sub (x y: t) : t
+  val safe_sub [@stdlib] (x y: t) : t
     requires { [@expl:floating-point overflow]
                sub_pre_ieee x y \/ sub_pre_real x y }
     ensures  { sub_post_ieee x y result /\ sub_post_real x y result }
@@ -145,7 +145,7 @@ module Double
   predicate mul_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x *. t'real  y)
 
-  val safe_mul (x y: t) : t
+  val safe_mul [@stdlib] (x y: t) : t
     requires { [@expl:floating-point overflow]
                mul_pre_ieee x y \/ mul_pre_real x y }
     ensures  { mul_post_ieee x y result /\ mul_post_real x y result }
@@ -162,7 +162,7 @@ module Double
   predicate div_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x /. t'real  y)
 
-  val safe_div (x y: t) : t
+  val safe_div [@stdlib] (x y: t) : t
     requires { [@expl:floating-point overflow]
                div_pre_ieee x y \/ div_pre_real x y }
     ensures  { div_post_ieee x y result /\ div_post_real x y result }

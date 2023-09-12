@@ -6,7 +6,7 @@ module Pow2int
 
   use int.Int
 
-  function pow2 (i:int) : int
+  function pow2 [@stdlib] (i:int) : int
 
   axiom Power_0 : pow2 0 = 1
   meta "remove_unused:dependency" axiom Power_0, function pow2
@@ -185,7 +185,7 @@ module BV_Gen
 
   (** `nth b n` is the `n`-th bit of `b`. Bit 0 is
       the least significant bit *)
-  val function nth t int : bool
+  val function nth [@stdlib] t int : bool
 
   axiom nth_out_of_bound: forall x n. n < 0 \/ n >= size -> nth x n = False
 
@@ -205,25 +205,25 @@ module BV_Gen
 
   (* /!\ NOTE : both bw_and and bw_or don't need guard on n because of
   nth out of bound axiom *)
-  val function bw_and (v1 v2 : t) : t
+  val function bw_and [@stdlib] (v1 v2 : t) : t
   axiom Nth_bw_and:
     forall v1 v2:t, n:int. 0 <= n < size ->
       nth (bw_and v1 v2) n = andb (nth v1 n) (nth v2 n)
   meta "remove_unused:dependency" axiom Nth_bw_and, function bw_and
 
-  val function bw_or (v1 v2 : t) : t
+  val function bw_or [@stdlib] (v1 v2 : t) : t
   axiom Nth_bw_or:
     forall v1 v2:t, n:int. 0 <= n < size ->
       nth (bw_or v1 v2) n = orb (nth v1 n) (nth v2 n)
   meta "remove_unused:dependency" axiom Nth_bw_or, function bw_or
 
-  val function bw_xor (v1 v2 : t) : t
+  val function bw_xor [@stdlib] (v1 v2 : t) : t
   axiom Nth_bw_xor:
     forall v1 v2:t, n:int. 0 <= n < size ->
       nth (bw_xor v1 v2) n = xorb (nth v1 n) (nth v2 n)
   meta "remove_unused:dependency" axiom Nth_bw_xor, function bw_xor
 
-  val function bw_not (v : t) : t
+  val function bw_not [@stdlib] (v : t) : t
   axiom Nth_bw_not:
     forall v:t, n:int. 0 <= n < size ->
       nth (bw_not v) n = notb (nth v n)
@@ -238,7 +238,7 @@ module BV_Gen
       equal to `x`, whereas in this theory it is 0.
   *)
 
-  val function lsr t int : t
+  val function lsr [@stdlib] t int : t
 
   axiom Lsr_nth_low:
     forall b:t,n s:int. 0 <= s -> 0 <= n -> n+s < size ->
@@ -253,7 +253,7 @@ module BV_Gen
   lemma lsr_zeros: forall x. lsr x 0 = x
   meta "remove_unused:dependency" lemma lsr_zeros, function lsr
 
-  val function asr t int : t
+  val function asr [@stdlib] t int : t
 
   axiom Asr_nth_low:
     forall b:t,n s:int. 0 <= s -> 0 <= n < size -> n+s < size ->
@@ -268,7 +268,7 @@ module BV_Gen
   lemma asr_zeros: forall x. asr x 0 = x
   meta "remove_unused:dependency" lemma asr_zeros, function asr
 
-  val function lsl t int : t
+  val function lsl [@stdlib] t int : t
 
   axiom Lsl_nth_high:
     forall b:t,n s:int. 0 <= s <= n < size ->
@@ -286,14 +286,14 @@ module BV_Gen
   use int.EuclideanDivision
 (*  use int.ComputerDivision as CD*)
 
-  function rotate_right t int : t
+  function rotate_right [@stdlib] t int : t
 
   axiom Nth_rotate_right :
     forall v n i. 0 <= i < size -> 0 <= n ->
       nth (rotate_right v n) i = nth v (mod (i + n) size)
   meta "remove_unused:dependency" axiom Nth_rotate_right, function rotate_right
 
-  function rotate_left t int : t
+  function rotate_left [@stdlib] t int : t
 
   axiom Nth_rotate_left :
     forall v n i. 0 <= i < size -> 0 <= n ->
@@ -319,11 +319,11 @@ module BV_Gen
 
   predicate is_signed_positive t
 
-  function to_uint t : int
+  function to_uint [@stdlib] t : int
   val to_uint (x:t) : int  ensures { result = to_uint x }
   val function of_int int : t
 
-  function to_int (x:t) : int =
+  function to_int [@stdlib] (x:t) : int =
     if (is_signed_positive x) then (to_uint x) else (- (two_power_size - (to_uint x)))
   val to_int (x:t) : int ensures { result = to_int x }
 
@@ -418,7 +418,7 @@ let predicate sle (v1 v2 : t) =
 
   (** Arithmetic operators *)
 
-  val function add (v1 v2 : t) : t
+  val function add [@stdlib] (v1 v2 : t) : t
   axiom to_uint_add:
     forall v1 v2. to_uint (add v1 v2) =  mod (Int.(+) (to_uint v1) (to_uint v2)) two_power_size
   meta "remove_unused:dependency" axiom to_uint_add, function add
@@ -428,7 +428,7 @@ let predicate sle (v1 v2 : t) =
       to_uint (add v1 v2) = to_uint v1 + to_uint v2
   meta "remove_unused:dependency" lemma to_uint_add_bounded, function add
 
-  val function sub (v1 v2 : t) : t
+  val function sub [@stdlib] (v1 v2 : t) : t
   axiom to_uint_sub:
     forall v1 v2. to_uint (sub v1 v2) = mod (Int.(-) (to_uint v1) (to_uint v2)) two_power_size
   meta "remove_unused:dependency" axiom to_uint_sub  , function sub
@@ -439,12 +439,12 @@ let predicate sle (v1 v2 : t) =
   meta "remove_unused:dependency" lemma to_uint_sub_bounded, function sub
 
 
-  val function neg (v1 : t) : t
+  val function neg [@stdlib] (v1 : t) : t
   axiom to_uint_neg:
     forall v. to_uint (neg v) = mod (Int.(-_) (to_uint v)) two_power_size
   meta "remove_unused:dependency" axiom to_uint_neg, function neg
 
-  val function mul (v1 v2 : t) : t
+  val function mul [@stdlib] (v1 v2 : t) : t
   axiom to_uint_mul:
     forall v1 v2. to_uint (mul v1 v2) = mod (Int.( * ) (to_uint v1) (to_uint v2)) two_power_size
   meta "remove_unused:dependency" axiom to_uint_mul, function mul
@@ -454,17 +454,17 @@ let predicate sle (v1 v2 : t) =
       to_uint (mul v1 v2) = to_uint v1 * to_uint v2
   meta "remove_unused:dependency" lemma to_uint_mul_bounded, function mul
 
-  val function udiv (v1 v2 : t) : t
+  val function udiv [@stdlib] (v1 v2 : t) : t
   axiom to_uint_udiv:
     forall v1 v2. to_uint (udiv v1 v2) = div (to_uint v1) (to_uint v2)
   meta "remove_unused:dependency" axiom to_uint_udiv, function udiv
 
-  val function urem (v1 v2 : t) : t
+  val function urem [@stdlib] (v1 v2 : t) : t
   axiom to_uint_urem:
     forall v1 v2. to_uint (urem v1 v2) = mod (to_uint v1) (to_uint v2)
   meta "remove_unused:dependency" axiom to_uint_urem, function urem
 
-  val function sdiv (v1 v2 : t) : t
+  val function sdiv [@stdlib] (v1 v2 : t) : t
 (* not yet realized
   axiom to_int_sdiv:
     forall v1 v2. to_int (sdiv v1 v2) = CD.mod (CD.div (to_int v1) (to_int v2)) two_power_size
@@ -474,7 +474,7 @@ let predicate sle (v1 v2 : t) =
     to_int (sdiv v1 v2) = CD.div (to_int v1) (to_int v2)
 *)
 
-  val function srem (v1 v2 : t) : t
+  val function srem [@stdlib] (v1 v2 : t) : t
 (* not yet realized
   axiom to_int_srem:
     forall v1 v2. to_int (srem v1 v2) = CD.mod (to_int v1) (to_int v2)
@@ -483,7 +483,7 @@ let predicate sle (v1 v2 : t) =
   (** Bitvector alternatives for shifts, rotations and nth *)
 
   (** logical shift right *)
-  val function lsr_bv t t : t
+  val function lsr_bv [@stdlib] t t : t
 
   axiom lsr_bv_is_lsr:
     forall x n.
@@ -496,7 +496,7 @@ let predicate sle (v1 v2 : t) =
   meta "remove_unused:dependency" axiom to_uint_lsr, function lsr_bv
 
   (** arithmetic shift right *)
-  val function asr_bv t t : t
+  val function asr_bv [@stdlib] t t : t
 
   axiom asr_bv_is_asr:
     forall x n.
@@ -504,7 +504,7 @@ let predicate sle (v1 v2 : t) =
   meta "remove_unused:dependency" axiom asr_bv_is_asr, function asr_bv
 
   (** logical shift left *)
-  val function lsl_bv t t : t
+  val function lsl_bv [@stdlib] t t : t
 
   axiom lsl_bv_is_lsl:
     forall x n.
@@ -518,9 +518,9 @@ let predicate sle (v1 v2 : t) =
 
   (** rotations *)
 
-  val function rotate_right_bv (v n : t) : t
+  val function rotate_right_bv [@stdlib] (v n : t) : t
 
-  val function rotate_left_bv (v n : t) : t
+  val function rotate_left_bv [@stdlib] (v n : t) : t
 
   axiom rotate_left_bv_is_rotate_left :
     forall v n. rotate_left_bv v n = rotate_left v (to_uint n)
@@ -532,7 +532,7 @@ let predicate sle (v1 v2 : t) =
   meta "remove_unused:dependency" axiom rotate_right_bv_is_rotate_right, function rotate_right_bv
   meta "remove_unused:dependency" axiom rotate_right_bv_is_rotate_right, function rotate_right
 
-  val function nth_bv t t: bool
+  val function nth_bv [@stdlib] t t: bool
 
   axiom nth_bv_def:
     forall x i.
@@ -576,7 +576,7 @@ let predicate sle (v1 v2 : t) =
     forall x y : t [x == y]. x == y -> x = y
   meta "remove_unused:dependency" axiom Extensionality, predicate (==)
 
-  val eq (v1 v2 : t) : bool
+  val eq [@stdlib] (v1 v2 : t) : bool
     ensures { result <-> v1 = v2 }
 
 end
@@ -760,12 +760,12 @@ module BVConverter_Gen
 
   predicate in_small_range bigBV
 
-  function to_uint_small smallBV : int
-  function to_uint_big bigBV : int
+  function to_uint_small [@stdlib] smallBV : int
+  function to_uint_big [@stdlib] bigBV : int
 
-  val function toBig smallBV : bigBV   (* unsigned, that is "zero extend" *)
-  val function stoBig smallBV : bigBV  (* signed, that is "sign extend" *)
-  val function toSmall bigBV : smallBV
+  val function toBig [@stdlib] smallBV : bigBV   (* unsigned, that is "zero extend" *)
+  val function stoBig [@stdlib] smallBV : bigBV  (* signed, that is "sign extend" *)
+  val function toSmall [@stdlib] bigBV : smallBV
 
   axiom toSmall_to_uint :
     forall x:bigBV. in_small_range x ->

@@ -27,24 +27,24 @@ module BVCheck_Gen
   constant zeros           : t
   constant minus_one : t
 
-  function to_uint t   : int
-  function to_int t   : int
-  function of_int  int : t
+  function to_uint [@stdlib] t   : int
+  function to_int [@stdlib] t   : int
+  function of_int [@stdlib]  int : t
 
-  function add  t t : t
-  function sub  t t : t
-  function mul  t t : t
-  function udiv t t : t
-  function urem t t : t
-  function sdiv t t : t
-  function srem t t : t
+  function add  [@stdlib] t t : t
+  function sub  [@stdlib] t t : t
+  function mul  [@stdlib] t t : t
+  function udiv [@stdlib] t t : t
+  function urem [@stdlib] t t : t
+  function sdiv [@stdlib] t t : t
+  function srem [@stdlib] t t : t
 
-  function lsl    t int : t
-  function lsl_bv t t   : t
-  function lsr    t int : t
-  function lsr_bv t t   : t
-  function asr    t int : t
-  function asr_bv t t   : t
+  function lsl    [@stdlib] t int : t
+  function lsl_bv [@stdlib] t t   : t
+  function lsr    [@stdlib] t int : t
+  function lsr_bv [@stdlib] t t   : t
+  function asr    [@stdlib] t int : t
+  function asr_bv [@stdlib] t t   : t
 
   predicate ule t t
   predicate ult t t
@@ -58,8 +58,8 @@ module BVCheck_Gen
 
   use bv.BV128 as BV128
 
-  function sto_bv128 t : BV128.t
-  function uto_bv128 t : BV128.t
+  function sto_bv128 [@stdlib] t : BV128.t
+  function uto_bv128 [@stdlib] t : BV128.t
 
   constant min_sint : t
   constant max_sint : t
@@ -69,7 +69,7 @@ module BVCheck_Gen
   constant max_uint_as_bv128 : BV128.t = uto_bv128 max_uint
 
   (** unsigned addition forbidding overflows *)
-  val u_add (a b:t) : t
+  val u_add [@stdlib] (a b:t) : t
     requires { [@expl:arithmetic overflow]
                   to_uint a + to_uint b < two_power_size
                \/ BV128.ule (BV128.add (uto_bv128 a) (uto_bv128 b)) max_uint_as_bv128 }
@@ -77,7 +77,7 @@ module BVCheck_Gen
     ensures  { result = add a b }
 
   (** signed addition forbidding overflows *)
-  val s_add (a b:t) : t
+  val s_add [@stdlib] (a b:t) : t
     requires { [@expl:arithmetic overflow]
       - two_power_size_minus_one <= to_int a + to_int b < two_power_size_minus_one
       \/ let r = BV128.add (sto_bv128 a) (sto_bv128 b) in
@@ -86,13 +86,13 @@ module BVCheck_Gen
     ensures  { result = add a b }
 
   (** unsigned subtraction with overflow check *)
-  val u_sub (a b:t) : t
+  val u_sub [@stdlib] (a b:t) : t
     requires { [@expl:arithmetic overflow] to_uint a >= to_uint b \/ uge a b }
     ensures  { result = sub a b }
     ensures  { to_uint result = to_uint a - to_uint b }
 
   (** signed subtraction with overflow check *)
-  val s_sub (a b:t) : t
+  val s_sub [@stdlib] (a b:t) : t
     requires { [@expl:arithmetic overflow]
       - two_power_size_minus_one <= to_int a - to_int b < two_power_size_minus_one
       \/ let r = BV128.sub (sto_bv128 a) (sto_bv128 b) in
@@ -101,7 +101,7 @@ module BVCheck_Gen
     ensures  { to_int result = to_int a - to_int b }
 
   (** unsigned multiplication with overflow check *)
-  val u_mul (a b:t) : t
+  val u_mul [@stdlib] (a b:t) : t
     requires { [@expl:arithmetic overflow]
                   to_uint a * to_uint b < two_power_size
                \/ BV128.ule (BV128.mul (uto_bv128 a) (uto_bv128 b)) max_uint_as_bv128 }
@@ -109,7 +109,7 @@ module BVCheck_Gen
     ensures  { to_int result = to_uint a * to_uint b }
 
   (** signed multiplication with overflow check *)
-  val s_mul (a b:t) : t
+  val s_mul [@stdlib] (a b:t) : t
     requires { [@expl:arithmetic overflow]
       - two_power_size_minus_one <= to_int a * to_int b < two_power_size_minus_one
       \/ let r = BV128.mul (sto_bv128 a) (sto_bv128 b) in
@@ -122,7 +122,7 @@ module BVCheck_Gen
   (** A logical shift left requiring the second argument to be smaller than bitvector size.
       For this function we do not forbid overflow: bits can be ``lost'' on the left.
       This function corresponds to the left shifting [<<] of unsigned ints in C or Java *)
-  val u_lsl (a b:t) : t
+  val u_lsl [@stdlib] (a b:t) : t
     requires { [@expl:out-of-bounds shifting]
                 ult b bv_size \/ to_uint b < size }
     ensures  { result = lsl_bv a b }
@@ -131,7 +131,7 @@ module BVCheck_Gen
   (** Alternative logical shift left, still requiring the second argument to be smaller
       than bitvector size, but also forbidding overflow.
       This function corresponds to the left shifting [<<] of signed ints in C or Java *)
-  val s_lsl (a b:t) : t
+  val s_lsl [@stdlib] (a b:t) : t
     requires { [@expl:out-of-bounds shifting]
                 ult b bv_size \/ to_uint b < size }
     requires { [@expl:out-of-bounds shifting]
@@ -147,7 +147,7 @@ module BVCheck_Gen
       No overflow can occur anyway.
       This function corresponds to the (logical) right shifting [>>] of unsigned ints in C
       or Java. *)
-  val u_lsr (a b:t) : t
+  val u_lsr [@stdlib] (a b:t) : t
     requires { [@expl:out-of-bounds shifting]
                 ult b bv_size \/ to_uint b < size }
     ensures  { result = lsr_bv a b }
@@ -157,7 +157,7 @@ module BVCheck_Gen
       argument to be smaller than bitvector size.  This function
       corresponds to the arithmetic right shifting [>>>] of signed
       ints in Java, that does not exist in C. *)
-  val s_asr (a b:t) : t
+  val s_asr [@stdlib] (a b:t) : t
     requires { [@expl:out-of-bounds shifting]
                 ult b bv_size \/ to_uint b < size }
     ensures  { result = asr_bv a b }
@@ -166,7 +166,7 @@ module BVCheck_Gen
   (** The shift right function for signed int, requirings the second
       argument to be smaller than bitvector size, and that the first argument in non-negative.
       This function corresponds to the right shifting [>>] of signed ints in C. *)
-  val s_asr_strict (a b:t) : t
+  val s_asr_strict [@stdlib] (a b:t) : t
     requires { [@expl:out-of-bounds shifting]
                 ult b bv_size \/ to_uint b < size }
     requires { [@expl:out-of-bounds shifting]
@@ -177,13 +177,13 @@ module BVCheck_Gen
   use int.EuclideanDivision as ED
 
   (** unsigned division requires the second argument to be non-zero *)
-  val u_div (a b:t) : t
+  val u_div [@stdlib] (a b:t) : t
     requires { [@expl:division by zero] b <> zeros \/ to_uint b <> 0 }
     ensures  { to_uint result = ED.div (to_uint a) (to_uint b) }
     ensures  { result = udiv a b }
 
   (** unsigned remainder requires the second argument to be non-zero *)
-  val u_rem (a b:t) : t
+  val u_rem [@stdlib] (a b:t) : t
     requires { [@expl:remainder by zero] b <> zeros  \/ to_uint b <> 0 }
     ensures  { to_uint result = ED.mod (to_uint a) (to_uint b) }
     ensures  { result = urem a b }
@@ -192,7 +192,7 @@ module BVCheck_Gen
 
   (** signed division requires the second argument to be non-zero, but also that
       either the dividend is not [min_int] or the divisor is not [-1] *)
-  val s_div (a b:t) : t
+  val s_div [@stdlib] (a b:t) : t
     requires { [@expl:division by zero] b <> zeros  \/ to_int b <> 0 }
     requires { [@expl:signed division overflow check] (a <> min_sint \/ b <> minus_one)
                 \/ (to_int a <> to_int min_sint \/ to_int b <> -1)}
@@ -200,47 +200,47 @@ module BVCheck_Gen
     ensures  { result = sdiv a b }
 
   (** signed remainder requires the second argument to be non-zero *)
-  val s_rem (a b:t) : t
+  val s_rem [@stdlib] (a b:t) : t
     requires { [@expl:remainder by zero] b <> zeros \/ to_int b <> 0 }
     ensures  { to_int result = CD.mod (to_int a) (to_int b) }
     ensures  { result = srem a b }
 
   (** comparison operators have no preconditions *)
-  val us_eq (a b:t) : bool
+  val us_eq [@stdlib] (a b:t) : bool
     ensures { result <-> a = b }
 
-  val us_ne (a b:t) : bool
+  val us_ne [@stdlib] (a b:t) : bool
     ensures { result <-> a <> b }
 
-  val u_le (a b:t) : bool
+  val u_le [@stdlib] (a b:t) : bool
     ensures { result <-> to_uint a <= to_uint b }
     ensures { result <-> ule a b }
 
-  val u_lt (a b:t) : bool
+  val u_lt [@stdlib] (a b:t) : bool
     ensures { result <-> to_uint a < to_uint b }
     ensures { result <-> ult a b }
 
-  val u_ge (a b:t) : bool
+  val u_ge [@stdlib] (a b:t) : bool
     ensures { result <-> to_uint a >= to_uint b }
     ensures { result <-> uge a b }
 
-  val u_gt (a b:t) : bool
+  val u_gt [@stdlib] (a b:t) : bool
     ensures { result <-> to_uint a > to_uint b }
     ensures { result <-> ugt a b }
 
-  val s_le (a b:t) : bool
+  val s_le [@stdlib] (a b:t) : bool
     ensures { result <-> to_int a <= to_int b }
     ensures { result <-> sle a b }
 
-  val s_lt (a b:t) : bool
+  val s_lt [@stdlib] (a b:t) : bool
     ensures { result <-> to_int a < to_int b }
     ensures { result <-> slt a b }
 
-  val s_ge (a b:t) : bool
+  val s_ge [@stdlib] (a b:t) : bool
     ensures { result <-> to_int a >= to_int b }
     ensures { result <-> sge a b }
 
-  val s_gt (a b:t) : bool
+  val s_gt [@stdlib] (a b:t) : bool
     ensures { result <-> to_int a > to_int b }
     ensures { result <-> sgt a b }
 

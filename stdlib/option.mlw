@@ -14,7 +14,7 @@ module Map
 
   use Option
 
-  function map (f: 'a -> 'b) (o: option 'a) : option 'b
+  function map [@stdlib] (f: 'a -> 'b) (o: option 'a) : option 'b
   = match o with None -> None | Some x -> Some (f x) end
 
 end

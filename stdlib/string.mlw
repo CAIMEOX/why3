@@ -74,7 +74,7 @@ module String
   constant empty : string = ""
   (** the empty string. *)
 
-  function concat string string : string
+  function concat [@stdlib] string string : string
   (** `concat s1 s2` is the concatenation of `s1` and `s2`.  *)
 
   axiom concat_assoc: forall s1 s2 s3.
@@ -83,7 +83,7 @@ module String
   axiom concat_empty: forall s.
     concat s empty = concat empty s = s
 
-  function length string : int
+  function length [@stdlib] string : int
   (** `length s` is the length of the string `s`. *)
 
   (* axiom length_nonneg: forall s. length s >= 0 *)
@@ -127,7 +127,7 @@ module String
   axiom le_trans: forall s1 s2 s3.
     le s1 s2 && le s2 s3 -> le s1 s3
 
-  function s_at string int : string
+  function s_at [@stdlib] string int : string
   (** `s_at s i` is:
 
        (1) `empty`, if either `i < 0` or `i >= length s`;
@@ -150,7 +150,7 @@ module String
     forall i. (0 <= i < length s1 -> s_at s i = s_at s1 i) &&
               (length s1 <= i < length s -> s_at s i = s_at s2 (i - length s1))
 
-  function substring string int int : string
+  function substring [@stdlib] string int int : string
   (** `substring s i x` is:
 
       (1) the `empty` string if `i < 0`, `i >= length s`, or `x <= 0`;
@@ -257,7 +257,7 @@ module String
   (*** axiom at_contains: forall s1 s2.
     contains s1 s2 && length s2 = 1 -> exists i. s_at s1 i = s2 *)
 
-  function indexof string string int : int
+  function indexof [@stdlib] string string int : int
   (** `indexof s1 s2 i` is:
 
       (1) the first occurence of `s2` in `s1` after `i`, if `0 <= i <=
@@ -300,7 +300,7 @@ module String
     0 <= i <= length s1 && contains (substring s1 i (length s1 - i)) s2 ->
       i <= indexof s1 s2 i <= length s1
 
-  function replace string string string : string
+  function replace [@stdlib] string string string : string
   (** `replace s1 s2 s3` is:
 
       (1) `concat s3 s1`, if `s2 = empty`;
@@ -326,7 +326,7 @@ module String
                (substring s1 (j + length s2) (length s1 - j - length s2))
 
   (*** Not in SMT-LIB standard, but in CVC4 *)
-  function replaceall string string string : string
+  function replaceall [@stdlib] string string string : string
   (** `replaceall s1 s2 s3` is:
 
       (1) `s1`, if `s2 = empty`;
@@ -340,7 +340,7 @@ module String
   axiom not_contains_replaceall: forall s1 s2 s3.
     not (contains s1 s2) -> replaceall s1 s2 s3 = s1
 
-  function to_int string : int
+  function to_int [@stdlib] string : int
   (** `to_int s` is:
 
       (1) an `int` consisting on the digits of `s`, if `s` contains
@@ -369,7 +369,7 @@ module String
       corresponds to a decimal digit, that is, to a code point in the
       range 0x30 ... 0x39 *)
 
-  function from_int int : string
+  function from_int [@stdlib] int : string
   (** `from_int i` is:
 
       (1) the corresponding string in the decimal notation if `i >= 0`;
@@ -401,17 +401,17 @@ module Char
   axiom char_eq: forall c1 c2.
     c1.contents = c2.contents -> c1 = c2
 
-  function code char : int
+  function code [@stdlib] char : int
 
   axiom code: forall c. 0 <= code c < 256
 
-  function chr (n: int) : char
+  function chr [@stdlib] (n: int) : char
 
   axiom code_chr: forall n. 0 <= n < 256 -> code (chr n) = n
 
   axiom chr_code: forall c. chr (code c) = c
 
-  function get (s: string) (i: int) : char
+  function get [@stdlib] (s: string) (i: int) : char
 
   axiom get: forall s i.
     0 <= i < length s -> (get s i).contents = s_at s i
@@ -431,7 +431,7 @@ module Char
     forall i. length s1 <= i < length s1 + length s2 ->
       get s3 i = get s2 (i - length s1)
 
-  function ([]) (s: string) (i: int) : char = get s i
+  function ([]) [@stdlib] (s: string) (i: int) : char = get s i
 
   predicate eq_string (s1 s2: string) = length s1 = length s2 &&
     (forall i. 0 <= i < length s1 -> get s1 i = get s2 i)
@@ -439,7 +439,7 @@ module Char
   axiom extensionality [@W:non_conservative_extension:N]:
     forall s1 s2. eq_string s1 s2 -> s1 = s2
 
-  function make (size: int) (v: char) : string
+  function make [@stdlib] (size: int) (v: char) : string
 
   axiom make_length: forall size v. size >= 0 ->
     length (make size v) = size
@@ -463,40 +463,40 @@ module OCaml
 
   (* In OCaml max_string_length is 144_115_188_075_855_863 *)
 
-  val eq_char (c1 c2: char) : bool
+  val eq_char [@stdlib] (c1 c2: char) : bool
     ensures { result <-> c1 = c2 }
 
-  val get (s: string) (i: int63) : char
+  val get [@stdlib] (s: string) (i: int63) : char
     requires { 0 <= i < length s }
     ensures  { result = get s i }
 
-  let ([]) (s: string) (i: int63) : char
+  let ([]) [@stdlib] (s: string) (i: int63) : char
     requires { 0 <= i < length s }
     ensures  { result = get s i }
   = get s i
 
-  val code (c: char) : int63
+  val code [@stdlib] (c: char) : int63
     ensures { result = code c }
 
-  val chr (n: int63) : char
+  val chr [@stdlib] (n: int63) : char
     requires { 0 <= n < 256 }
     ensures  { result = chr n }
 
-  val (=) (x y: string) : bool
+  val (=) [@stdlib] (x y: string) : bool
     ensures { result <-> x = y }
 
-  val partial length (s: string) : int63
+  val partial length [@stdlib] (s: string) : int63
     ensures { result = length s >= 0 }
 
-  val sub (s: string) (start: int63) (len: int63) : string
+  val sub [@stdlib] (s: string) (start: int63) (len: int63) : string
     requires { 0 <= start <= length s }
     requires { 0 <= len <= length s - start }
     ensures  { result = substring s start len }
 
-  val concat (s1 s2: string) : string
+  val concat [@stdlib] (s1 s2: string) : string
     ensures  { result = concat s1 s2 }
 
-  val make (size: int63) (v: char) : string
+  val make [@stdlib] (size: int63) (v: char) : string
     requires { 0 <= size }
     ensures  { result = make size v }
 
@@ -517,36 +517,36 @@ module StringBuffer
   }
   meta coercion function str
 
-  val create (_: int63) : buffer
+  val create [@stdlib] (_: int63) : buffer
     ensures { result.str = "" }
 
-  val length (b: buffer) : int63
+  val length [@stdlib] (b: buffer) : int63
     ensures { result = length b.str }
 
-  val contents (b: buffer) : string
+  val contents [@stdlib] (b: buffer) : string
     ensures { result = b.str }
 
-  val clear (b: buffer) : unit
+  val clear [@stdlib] (b: buffer) : unit
     writes  { b }
     ensures { b.str = "" }
 
-  val reset (b: buffer) : unit
+  val reset [@stdlib] (b: buffer) : unit
     writes  { b }
     ensures { b.str = "" }
 
-  val sub (b: buffer) (ofs len: int63) : string
+  val sub [@stdlib] (b: buffer) (ofs len: int63) : string
     requires { 0 <= ofs /\ 0 <= len /\ ofs + len <= length b.str }
     ensures  { result = substring b.str ofs len }
 
-  val add_char (b: buffer) (c: char) : unit
+  val add_char [@stdlib] (b: buffer) (c: char) : unit
     writes   { b }
     ensures  { b.str = concat (old b.str) c.Char.contents }
 
-  val add_string (b: buffer) (s: string) : unit
+  val add_string [@stdlib] (b: buffer) (s: string) : unit
     writes   { b }
     ensures  { b.str = concat (old b.str) s }
 
-  val truncate (b: buffer) (n: int63) : unit
+  val truncate [@stdlib] (b: buffer) (n: int63) : unit
     requires { 0 <= n <= length b.str }
     writes   { b }
     ensures  { b.str = substring (old b.str) 0 n }
@@ -578,25 +578,25 @@ module RegExpr
   type re
   (** type for regular expressions *)
 
-  function to_re string : re
+  function to_re [@stdlib] string : re
   (** string to regular expression injection *)
 
-  predicate in_re string re
+  predicate in_re [@stdlib] string re
   (** regular expression membership *)
 
-  function concat re re : re
+  function concat [@stdlib] re re : re
   (** regular expressions concatenation, left associativity *)
 
-  function union re re : re
+  function union [@stdlib] re re : re
   (** regular expressions union, left associativity *)
 
-  function inter re re : re
+  function inter [@stdlib] re re : re
   (** regular expressions intersection, left associativity *)
 
-  function star re : re
+  function star [@stdlib] re : re
   (** Kleene closure *)
 
-  function plus re : re
+  function plus [@stdlib] re : re
   (** Kleene cross *)
   (*** forall re. plus re = concat re (star re) *)
 
@@ -609,22 +609,22 @@ module RegExpr
   constant all : re = star allchar
   (** the set of all strings *)
 
-  function opt re : re
+  function opt [@stdlib] re : re
   (** regular expression option *)
   (*** forall re. opt re = union re (to_re "") *)
 
-  function range string string : re
+  function range [@stdlib] string string : re
   (** `range s1 s2` is the set of singleton strings such that all
   element `s` of `range s1 s2` satisfies the condition `Str.<= s1 s`
   and `Str.<= s s2`. *)
 
-  function power int re : re
+  function power [@stdlib] int re : re
   (** `power n r` is the `n`th power of `r`; `n` must be an
       integer literal. *)
   (*** power 0 e = to_re ""
      power n e = concat e (power (n-1) e) *)
 
-  function loop int int re : re
+  function loop [@stdlib] int int re : re
   (** `loop n1 n2 r = if n1 > ne then none else
                     if n1 = n2 then power n1 r else
                     union (power n1 e) (loop (n1+1) n2 e)` *)

@@ -6,7 +6,7 @@
 module Assoc
 
   type t
-  function op t t : t
+  function op [@stdlib] t t : t
   axiom Assoc : forall x y z : t. op (op x y) z = op x (op y z)
 
 end
@@ -16,7 +16,7 @@ end
 module Comm
 
   type t
-  function op t t : t
+  function op [@stdlib] t t : t
   axiom Comm : forall x y : t. op x y = op y x
 
 end
@@ -57,7 +57,7 @@ end
 module Group
 
   clone export Monoid with axiom Assoc, axiom Unit_def_l, axiom Unit_def_r
-  function inv t : t
+  function inv [@stdlib] t : t
   axiom Inv_def_l : forall x:t. op (inv x) x = unit
   axiom Inv_def_r : forall x:t. op x (inv x) = unit
 
@@ -83,9 +83,9 @@ module Ring
 
   type t
   constant zero : t
-  function (+) t t : t
-  function (-_) t : t
-  function (*) t t : t
+  function (+) [@stdlib] t t : t
+  function (-_) [@stdlib] t : t
+  function (*) [@stdlib] t t : t
 
   clone export CommutativeGroup with type t = t,
                                 constant unit = zero,
@@ -149,12 +149,12 @@ module Field
 
   clone export UnitaryCommutativeRing with axiom .
 
-  function inv t : t
+  function inv [@stdlib] t : t
 
   axiom Inverse : forall x:t. x <> zero -> x * inv x = one
 
-  function (-) (x y : t) : t = x + -y
-  function (/) (x y : t) : t = x * inv y
+  function (-) [@stdlib] (x y : t) : t = x + -y
+  function (/) [@stdlib] (x y : t) : t = x * inv y
 
   lemma add_div :
     forall x y z : t. z <> zero -> (x+y)/z = x/z + y/z

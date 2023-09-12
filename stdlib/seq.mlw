@@ -16,17 +16,17 @@ module Seq
   (** `seq 'a` is an infinite type *)
   meta "infinite_type" type seq
 
-  val function length (seq 'a) : int
+  val function length [@stdlib] (seq 'a) : int
 
   axiom length_nonnegative:
     forall s: seq 'a. 0 <= length s
 
-  val function get (seq 'a) int : 'a
+  val function get [@stdlib] (seq 'a) int : 'a
     (* FIXME requires { 0 <= i < length s } *)
   (** `get s i` is the `i+1`-th element of sequence `s`
       (the first element has index 0) *)
 
-  let function ([]) (s: seq 'a) (i: int) : 'a =
+  let function ([]) [@stdlib] (s: seq 'a) (i: int) : 'a =
     get s i
 
   (** equality is extensional *)
@@ -36,7 +36,7 @@ module Seq
     ensures { result -> s1 = s2 }
 
   (** sequence comprehension *)
-  val function create (len: int) (f: int -> 'a) : seq 'a
+  val function create [@stdlib] (len: int) (f: int -> 'a) : seq 'a
     requires { 0 <= len }
     ensures { length result = len }
     ensures { forall i. 0 <= i < len -> result[i] = f i }
@@ -55,7 +55,7 @@ module Seq
 
   (** `set s i v` is a new sequence `u` such that
       `u[i] = v` and `u[j] = s[j]` otherwise *)
-  let function set (s:seq 'a) (i:int) (v:'a) : seq 'a
+  let function set [@stdlib] (s:seq 'a) (i:int) (v:'a) : seq 'a
     requires { 0 <= i < length s }
     ensures { length result = length s }
     ensures { result[i] = v }
@@ -64,26 +64,26 @@ module Seq
     create s.length (fun j -> if j = i then v else s[j])
 
   (* FIXME: not a real alias because of spec, but should be. *)
-  let function ([<-]) (s: seq 'a) (i: int) (v: 'a) : seq 'a
+  let function ([<-]) [@stdlib] (s: seq 'a) (i: int) (v: 'a) : seq 'a
     requires { 0 <= i < length s }
    = set s i v
 
   (** singleton sequence *)
-  let function singleton (v:'a) : seq 'a
+  let function singleton [@stdlib] (v:'a) : seq 'a
     ensures { length result = 1 }
     ensures { result[0] = v }
   = while false do variant { 0 } () done;
     create 1 (fun _ -> v)
 
   (** insertion of elements on both sides *)
-  let function cons (x:'a) (s:seq 'a) : seq 'a
+  let function cons [@stdlib] (x:'a) (s:seq 'a) : seq 'a
     ensures { length result = 1 + length s }
     ensures { result[0] = x }
     ensures { forall i. 0 < i <= length s -> result[i] = s[i-1] }
   = while false do variant { 0 } () done;
     create (1 + length s) (fun i -> if i = 0 then x else s[i-1])
 
-  let function snoc (s:seq 'a) (x:'a) : seq 'a
+  let function snoc [@stdlib] (s:seq 'a) (x:'a) : seq 'a
     ensures { length result = 1 + length s }
     ensures { result[length s] = x }
     ensures { forall i. 0 <= i < length s -> result[i] = s[i] }
@@ -92,7 +92,7 @@ module Seq
 
   (** `s[i..j]` is the sub-sequence of `s` from element `i` included
       to element `j` excluded *)
-  let function ([..]) (s:seq 'a) (i:int) (j:int) : seq 'a
+  let function ([..]) [@stdlib] (s:seq 'a) (i:int) (j:int) : seq 'a
     requires { 0 <= i <= j <= length s }
     ensures { length result = j - i }
     ensures { forall k. 0 <= k < j - i -> result[k] = s[i + k] }
@@ -100,17 +100,17 @@ module Seq
     create (j-i) (fun k -> s[i+k])
 
   (* FIXME: spec/alias *)
-  let function ([_..]) (s: seq 'a) (i: int) : seq 'a
+  let function ([_..]) [@stdlib] (s: seq 'a) (i: int) : seq 'a
     requires { 0 <= i <= length s }
   = s[i .. length s]
 
   (* FIXME: spec/alias *)
-  let function ([.._]) (s: seq 'a) (j: int) : seq 'a
+  let function ([.._]) [@stdlib] (s: seq 'a) (j: int) : seq 'a
     requires { 0 <= j <= length s }
   = s[0 .. j]
 
   (** concatenation *)
-  let function (++) (s1:seq 'a) (s2:seq 'a) : seq 'a
+  let function (++) [@stdlib] (s1:seq 'a) (s2:seq 'a) : seq 'a
     ensures { length result = length s1 + length s2 }
     ensures { forall i. 0 <= i < length s1 -> result[i] = s1[i] }
     ensures { forall i. length s1 <= i < length result ->
@@ -213,7 +213,7 @@ module ToList
   use Seq
   use list.List
 
-  val function to_list (a: seq 'a) : list 'a
+  val function to_list [@stdlib] (a: seq 'a) : list 'a
 
   axiom to_list_empty:
     to_list (empty: seq 'a) = (Nil: list 'a)
@@ -250,7 +250,7 @@ module OfList
   use Seq
   use list.Append
 
-  let rec function of_list (l: list 'a) : seq 'a = match l with
+  let rec function of_list [@stdlib] (l: list 'a) : seq 'a = match l with
     | Nil -> empty
     | Cons x r -> cons x (of_list r)
     end
@@ -327,7 +327,7 @@ module Reverse
   use int.Int
   use Seq
 
-  let function reverse (s: seq 'a) : seq 'a =
+  let function reverse [@stdlib] (s: seq 'a) : seq 'a =
     create (length s) (fun i -> s[length s - 1 - i])
 
 end
@@ -338,7 +338,7 @@ module ToFset
   use Mem
   use Seq
 
-  val function to_set (s: seq 'a) : fset 'a
+  val function to_set [@stdlib] (s: seq 'a) : fset 'a
 
   axiom to_set_empty: to_set (empty: seq 'a) = (Fset.empty: fset 'a)
 
@@ -413,7 +413,7 @@ module Sum
   use Seq
   use int.Sum as S
 
-  function sum (s: seq int) : int = S.sum (fun i -> s[i]) 0 (length s)
+  function sum [@stdlib] (s: seq int) : int = S.sum (fun i -> s[i]) 0 (length s)
 
   lemma sum_snoc:
     forall s x. sum (snoc s x) = sum s + x
@@ -432,11 +432,11 @@ module Occ
   use int.NumOf as N
   use Seq
 
-  function iseq (x: 'a) (s: seq 'a) : int->bool = fun i -> s[i] = x
+  function iseq [@stdlib] (x: 'a) (s: seq 'a) : int->bool = fun i -> s[i] = x
 
-  function occ (x: 'a) (s: seq 'a) (l u: int) : int = N.numof (iseq x s) l u
+  function occ [@stdlib] (x: 'a) (s: seq 'a) (l u: int) : int = N.numof (iseq x s) l u
 
-  function occ_all (x: 'a) (s: seq 'a) : int =
+  function occ_all [@stdlib] (x: 'a) (s: seq 'a) : int =
     occ x s 0 (length s)
 
   lemma occ_cons:
@@ -573,7 +573,7 @@ module FoldLeft
   use int.Int
 
   (** `fold_left f a [b1; ...; bn]` is `f (... (f (f a b1) b2) ...) bn` *)
-  let rec function fold_left (f: 'a -> 'b -> 'a) (acc: 'a) (s: seq 'b) : 'a
+  let rec function fold_left [@stdlib] (f: 'a -> 'b -> 'a) (acc: 'a) (s: seq 'b) : 'a
     variant { length s }
   = if length s = 0 then acc else fold_left f (f acc s[0]) s[1 ..]
 
@@ -596,7 +596,7 @@ module FoldRight
   use int.Int
 
   (** `fold_right f [a1; ...; an] b` is `f a1 (f a2 (... (f an b) ...))` *)
-  let rec function fold_right (f: 'b -> 'a -> 'a) (s: seq 'b) (acc: 'a) : 'a
+  let rec function fold_right [@stdlib] (f: 'b -> 'a -> 'a) (s: seq 'b) (acc: 'a) : 'a
     variant { length s }
   = if length s = 0 then acc
     else let acc = f s[length s - 1] acc in fold_right f s[.. length s - 1] acc

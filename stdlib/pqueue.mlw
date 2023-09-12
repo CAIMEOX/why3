@@ -27,10 +27,10 @@ module Pqueue
 
   (** {3 Operations} *)
 
-  val create () : t ensures { result = empty }
+  val create [@stdlib] () : t ensures { result = empty }
   (** create a fresh, empty queue *)
 
-  val push (x: elt) (q: t) : unit
+  val push [@stdlib] (x: elt) (q: t) : unit
     writes  { q }
     ensures { length q = 1 + length (old q) }
     ensures { occ_all x q = 1 + occ_all x (old q) }
@@ -40,7 +40,7 @@ module Pqueue
   exception Empty
   (** exception raised by `pop` and `peek` to signal an empty queue *)
 
-  val pop (q: t) : elt
+  val pop [@stdlib] (q: t) : elt
     writes {q}
     ensures { length (old q) > 0 }
     ensures { result = (old q)[0] }
@@ -48,38 +48,38 @@ module Pqueue
     raises  { Empty -> q = old q = empty }
   (** remove and return the minimal element *)
 
-  val safe_pop (q: t) : elt
+  val safe_pop [@stdlib] (q: t) : elt
     requires { length q > 0 }
     writes   { q }
     ensures  { result = (old q)[0] }
     ensures  { q = (old q)[1..] }
   (** remove and return the minimal element *)
 
-  val peek (q: t) : elt
+  val peek [@stdlib] (q: t) : elt
     ensures { length q > 0 }
     ensures { result = q[0] }
     raises  { Empty -> q = empty }
   (** return the minimal element, without modifying the queue *)
 
-  val safe_peek (q: t) : elt
+  val safe_peek [@stdlib] (q: t) : elt
     requires { length q > 0 }
     ensures { result = q[0] }
   (** return the minimal element, without modifying the queue *)
 
-  val clear (q: t) : unit
+  val clear [@stdlib] (q: t) : unit
     writes  { q }
     ensures { q = empty }
   (** empty the queue *)
 
-  val copy (q: t) : t
+  val copy [@stdlib] (q: t) : t
     ensures { result == q }
   (** return a fresh copy of the queue *)
 
-  val is_empty (q: t) : bool
+  val is_empty [@stdlib] (q: t) : bool
     ensures { result <-> q = empty }
   (** check whether the queue is empty *)
 
-  val length (q: t) : int
+  val length [@stdlib] (q: t) : int
     ensures { result = length q }
   (** return the number of elements in the queue *)
 
@@ -99,7 +99,7 @@ module Harness
 
   clone Pqueue as PQ with type elt = int, predicate le = (<=)
 
-  let heapsort (a: array int) : unit
+  let heapsort [@stdlib] (a: array int) : unit
     ensures { sorted a }
     ensures { permut_all (old a) a }
   = let n = length a in
@@ -149,11 +149,11 @@ module PqueueNoDup
 
   (** {3 Operations} *)
 
-  val create () : t
+  val create [@stdlib] () : t
     ensures { result = empty }
   (** create a fresh, empty queue *)
 
-  val push (x: elt) (q: t) : unit
+  val push [@stdlib] (x: elt) (q: t) : unit
     writes  { q }
     ensures { q = add x (old q) }
   (** push an element in a queue *)
@@ -165,44 +165,44 @@ module PqueueNoDup
      mem x s /\ forall e: elt. mem e s -> le x e
   (** property of the element returned by `pop` and `peek` *)
 
-  val pop (q: t) : elt
+  val pop [@stdlib] (q: t) : elt
     writes  { q }
     ensures { q = remove result (old q) }
     ensures { minimal_elt result (old q) }
     raises  { Empty -> q = old q = empty }
   (** remove and returns the minimal element *)
 
-  val safe_pop (q: t) : elt
+  val safe_pop [@stdlib] (q: t) : elt
     writes  { q }
     requires { not q = empty }
     ensures { q = remove result (old q) }
     ensures { minimal_elt result (old q) }
   (** remove and returns the minimal element *)
 
-  val peek (q: t) : elt
+  val peek [@stdlib] (q: t) : elt
     ensures { minimal_elt result q }
     raises  { Empty -> q = empty }
   (** return the minimal element, without modifying the queue *)
 
-  val safe_peek (q: t) : elt
+  val safe_peek [@stdlib] (q: t) : elt
     requires { not q = empty }
     ensures { minimal_elt result q }
   (** return the minimal element, without modifying the queue *)
 
-  val clear (q: t) : unit
+  val clear [@stdlib] (q: t) : unit
     writes  { q }
     ensures { q = empty }
   (** empty the queue *)
 
-  val copy (q: t) : t
+  val copy [@stdlib] (q: t) : t
     ensures { result = q }
   (** return a fresh copy of the queue *)
 
-  val is_empty (q: t) : bool
+  val is_empty [@stdlib] (q: t) : bool
     ensures { result <-> q = empty }
   (** check whether the queue is empty *)
 
-  val length (q: t) : int
+  val length [@stdlib] (q: t) : int
     ensures { result = cardinal q }
   (** return the number of elements in the queue *)
 

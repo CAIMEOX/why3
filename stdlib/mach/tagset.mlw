@@ -20,7 +20,7 @@ module S
 
   val constant dummy: key
 
-  val function tag (k:key): Int63.int63
+  val function tag [@stdlib] (k:key): Int63.int63
       ensures { k<>dummy -> 0 <= result < Int63.max_int63 }
 
   axiom tag_correct: forall x y. tag x = tag y -> x = y
@@ -59,23 +59,23 @@ module TagSetIntf
       iterated = any iteration_state;
     }
 
-  val create () : t
+  val create [@stdlib] () : t
    ensures { result.elts = S.empty }
 
-  val function mem (k: key) (h: t) : bool
+  val function mem [@stdlib] (k: key) (h: t) : bool
    requires { k <> S.dummy }
    ensures { result = S.mem k h.elts }
 
-  val function max_tags (h: t) : Int63.int63
+  val function max_tags [@stdlib] (h: t) : Int63.int63
     ensures { forall v. S.mem v h.elts -> tag v <= result }
     ensures { -1 <= result  < Int63.max_int63 }
 
-  val add (h: t) (k: key): unit
+  val add [@stdlib] (h: t) (k: key): unit
     requires { k <> S.dummy }
     ensures { h.elts = S.add k (old h.elts) }
     writes { h.elts, h.iterated }
 
-  val remove (h: t) (k: key): unit
+  val remove [@stdlib] (h: t) (k: key): unit
     requires { k <> S.dummy }
     ensures { h.elts = S.remove k (old h.elts) }
     writes { h.elts, h.iterated }
@@ -97,7 +97,7 @@ module TagSetIntf
 
   scope Iterator
 
-     val create (h:t) : iterator
+     val create [@stdlib] (h:t) : iterator
           ensures { result.seen = S.empty }
           ensures { result.todo = h.elts }
           ensures { result.all = h.elts }
@@ -105,10 +105,10 @@ module TagSetIntf
 
       predicate is_empty (i:iterator) = S.is_empty i.todo
 
-      val is_empty (i:iterator) : bool
+      val is_empty [@stdlib] (i:iterator) : bool
           ensures { result = (S.is_empty i.todo) }
 
-      val next (i:iterator) : key
+      val next [@stdlib] (i:iterator) : key
           requires { not (S.is_empty i.todo) }
           writes { i.seen, i.todo }
           ensures { S.mem result (old i.todo) }
@@ -155,7 +155,7 @@ module TagSet
        }
    invariant { elts = iterated.elts' }
 
-  let create () : t
+  let create [@stdlib] () : t
    ensures { result.elts = S.empty }
    =
    let iterated =  {
@@ -168,17 +168,17 @@ module TagSet
       iterated = iterated;
    }
 
-  let function mem (k: key) (h: t) : bool
+  let function mem [@stdlib] (k: key) (h: t) : bool
    requires { k <> S.dummy }
    ensures { result = S.mem k h.elts } =
      tag k < Array.length h.iterated.value && Array.(S.tag h.iterated.value[tag k] <> S.tag S.dummy)
 
-  let function max_tags (h: t) : Int63.int63
+  let function max_tags [@stdlib] (h: t) : Int63.int63
     ensures { forall v. S.mem v h.elts -> tag v <= result }
     ensures { -1 <= result  < Int63.max_int63 } =
     Array.(length h.iterated.value) - 1
 
-  let resize (h:t) (k:key) : unit
+  let resize [@stdlib] (h:t) (k:key) : unit
      requires { k <> S.dummy }
      ensures { tag k < Array.(length h.iterated.value) }
     =
@@ -192,7 +192,7 @@ module TagSet
     end
 
 
-  let add (h: t) (k: key): unit
+  let add [@stdlib] (h: t) (k: key): unit
     requires { k <> S.dummy }
     ensures { h.elts = S.add k (old h.elts) }
     writes { h.elts , h.iterated } =
@@ -206,7 +206,7 @@ module TagSet
            value = h.iterated.value;
          }
 
-  let remove (k: key) (h: t) : unit
+  let remove [@stdlib] (k: key) (h: t) : unit
    requires { k <> S.dummy }
    ensures { h.elts = S.remove k h.elts } =
     if tag k < Array.length h.iterated.value then begin
@@ -247,7 +247,7 @@ module TagSet
 
   scope Iterator
 
-      let create (h:t) : iterator
+      let create [@stdlib] (h:t) : iterator
           ensures { result.seen = S.empty }
           ensures { result.todo = h.elts }
           ensures { result.all = h.elts }
@@ -271,7 +271,7 @@ module TagSet
 
       predicate is_empty (i:iterator) = S.is_empty i.todo
 
-      let is_empty (i:iterator) : bool
+      let is_empty [@stdlib] (i:iterator) : bool
           ensures { result = (S.is_empty i.todo) } =
           if i.offset = Array.length i.iterating.value
           then begin
@@ -286,7 +286,7 @@ module TagSet
             False
           end
 
-      let next (i:iterator) : key
+      let next [@stdlib] (i:iterator) : key
           requires { not (S.is_empty i.todo) }
           writes { i.seen, i.todo, i.offset }
           ensures { S.mem result (old i.todo) }

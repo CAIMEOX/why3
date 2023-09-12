@@ -20,13 +20,13 @@ module Size
   use list.List
   use int.Int
 
-  let rec function size_forest (f: forest 'a) : int
+  let rec function size_forest [@stdlib] (f: forest 'a) : int
     ensures { result >= 0 }
   = match f with
     | Nil      -> 0
     | Cons t f -> size_tree t + size_forest f
     end
-  with function size_tree (t: tree 'a) : int
+  with function size_tree [@stdlib] (t: tree 'a) : int
     ensures { result > 0 }
   = match t with
     | Node _ f -> 1 + size_forest f
@@ -53,7 +53,7 @@ module SizeForest
   use Forest
   use int.Int
 
-  let rec function size_forest (f: forest 'a) : int
+  let rec function size_forest [@stdlib] (f: forest 'a) : int
     ensures { result >= 0 }
   = match f with
     | E -> 0

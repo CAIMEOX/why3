@@ -5,8 +5,8 @@ module Injective
 
   type a
   type v
-  function to_ a : v
-  function from v : a
+  function to_ [@stdlib] a : v
+  function from [@stdlib] v : a
 
   axiom Inj : forall x : a. from(to_ x) = x
 
@@ -19,8 +19,8 @@ module Surjective
 
   type a
   type v
-  function to_ a : v
-  function from v : a
+  function to_ [@stdlib] a : v
+  function from [@stdlib] v : a
 
   clone export Injective with type v = a, type a = v,
     function to_ = from, function from = to_, axiom Inj

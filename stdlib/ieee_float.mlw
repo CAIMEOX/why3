@@ -70,29 +70,29 @@ module GenericFloat
 
   (** {3 Operators} *)
 
-  val function add mode t t : t
-  val function sub mode t t : t
-  val function mul mode t t : t
-  val function div mode t t : t
+  val function add [@stdlib] mode t t : t
+  val function sub [@stdlib] mode t t : t
+  val function mul [@stdlib] mode t t : t
+  val function div [@stdlib] mode t t : t
     (** The four basic operations, rounded in the given mode *)
 
-  val function abs         t   : t   (** Absolute value *)
-  val function neg         t   : t   (** Opposite *)
-  val function fma  mode t t t : t   (** Fused multiply-add: x * y + z *)
-  val function sqrt mode   t   : t   (** Square root *)
+  val function abs  [@stdlib]        t   : t   (** Absolute value *)
+  val function neg  [@stdlib]        t   : t   (** Opposite *)
+  val function fma  [@stdlib] mode t t t : t   (** Fused multiply-add: x * y + z *)
+  val function sqrt [@stdlib] mode   t   : t   (** Square root *)
 
-  let function (.-_) (x:t)   : t = neg x
-  let function (.+)  (x y:t) : t = add RNE x y
-  let function (.-)  (x y:t) : t = sub RNE x y
-  let function (.*)  (x y:t) : t = mul RNE x y
-  let function (./)  (x y:t) : t = div RNE x y
+  let function (.-_) [@stdlib] (x:t)   : t = neg x
+  let function (.+)  [@stdlib] (x y:t) : t = add RNE x y
+  let function (.-)  [@stdlib] (x y:t) : t = sub RNE x y
+  let function (.*)  [@stdlib] (x y:t) : t = mul RNE x y
+  let function (./)  [@stdlib] (x y:t) : t = div RNE x y
     (** Notations for operations in the default mode RNE *)
 
-  val function roundToIntegral mode t : t
+  val function roundToIntegral [@stdlib] mode t : t
     (** Rounding to an integer *)
 
-  function min       t t : t
-  function max       t t : t
+  function min [@stdlib]       t t : t
+  function max [@stdlib]       t t : t
   (** Minimum and Maximum
 
      Note that we have to follow IEEE-754 and SMTLIB here. Two things to
@@ -168,7 +168,7 @@ module GenericFloat
   (* to unsigned integer bitvector   - see Float_BV_Converter *)
   (* to signed integer bitvector                              *)
   (* to real *)
-  function to_real   t    : real
+  function to_real [@stdlib]   t    : real
 
   (** {2 Part II - Private Axiomatisation} *)
 
@@ -191,7 +191,7 @@ module GenericFloat
   (*    float32 : 0x1ffffff * 2^103                                         *)
   (*    float64 : 0x3fffffffffffff * 2^970                                  *)
   (* also note that this function never yields a subnormal, or a NaN, or -0 *)
-  function of_int (m:mode) (x:int) : t
+  function of_int [@stdlib] (m:mode) (x:int) : t
 
   (** {3 Conversions to other sorts} *)
 
@@ -205,7 +205,7 @@ module GenericFloat
   (* not hold:                                                             *)
   (*    to_int +INF < 2 ** 2048     // nope                                *)
   (*    to_int +INF > 0             // nope                                *)
-  function to_int (m:mode) (x:t) : int
+  function to_int [@stdlib] (m:mode) (x:t) : int
 
   axiom zero_of_int : forall m. zeroF = of_int m 0
 
@@ -218,7 +218,7 @@ module GenericFloat
   (*                                                                       *)
   (* Note that this means round (+INF) > 0 is not true.                    *)
   (* Note also this means round (2*INF) > round (INF) is not true either.  *)
-  function round mode real : real
+  function round [@stdlib] mode real : real
 
   constant max_real : real (* defined when cloning *)
   constant max_int  : int  (* defined when cloning *)
@@ -804,23 +804,23 @@ module Float_BV_Converter
   (* with unsigned int as bitvector *)
   type t                        (* float *)
 
-  val function of_ubv8  mode BV8.t  : t
-  val function of_ubv16 mode BV16.t : t
-  val function of_ubv32 mode BV32.t : t
-  val function of_ubv64 mode BV64.t : t
+  val function of_ubv8  [@stdlib] mode BV8.t  : t
+  val function of_ubv16 [@stdlib] mode BV16.t : t
+  val function of_ubv32 [@stdlib] mode BV32.t : t
+  val function of_ubv64 [@stdlib] mode BV64.t : t
 
-  val function to_ubv8  mode t : BV8.t
-  val function to_ubv16 mode t : BV16.t
-  val function to_ubv32 mode t : BV32.t
-  val function to_ubv64 mode t : BV64.t
+  val function to_ubv8  [@stdlib] mode t : BV8.t
+  val function to_ubv16 [@stdlib] mode t : BV16.t
+  val function to_ubv32 [@stdlib] mode t : BV32.t
+  val function to_ubv64 [@stdlib] mode t : BV64.t
 
   use real.RealInfix
   use real.FromInt as FromInt
 
   predicate is_finite t
   predicate le t t
-  function to_real         t : real
-  function round   mode real : real
+  function to_real [@stdlib]         t : real
+  function round [@stdlib]   mode real : real
 
   (** of unsigned bv axioms  *)
   (* only true for big enough floats...  *)
@@ -941,8 +941,8 @@ module FloatConverter
 
   use export RoundingMode
 
-  function to_float64 mode Float32.t : Float64.t
-  function to_float32 mode Float64.t : Float32.t
+  function to_float64 [@stdlib] mode Float32.t : Float64.t
+  function to_float32 [@stdlib] mode Float64.t : Float32.t
 
   lemma round_double_single :
   forall m1 m2:mode, x:real.

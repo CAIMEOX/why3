@@ -13,14 +13,14 @@ module Cursor
 
   predicate complete  (cursor 'a)
 
-  val next (c: cursor 'a) : 'a
+  val next [@stdlib] (c: cursor 'a) : 'a
     requires { not (complete c) }
     requires { permitted c }
     writes   { c.visited }
     ensures  { c.visited = snoc (old c).visited result }
     ensures  { permitted c }
 
-  val has_next (c: cursor 'a) : bool
+  val has_next [@stdlib] (c: cursor 'a) : bool
     requires { permitted c }
     ensures  { result <-> not (complete c) }
 
@@ -45,7 +45,7 @@ module ListCursor
   predicate complete  (c: cursor 'a) =
     length c.visited = length c.collection
 
-  val create (l: list 'a) : cursor 'a
+  val create [@stdlib] (l: list 'a) : cursor 'a
     ensures { permitted result }
     ensures { result.visited = empty }
     ensures { result.collection = l }
@@ -78,7 +78,7 @@ module ArrayCursor
   predicate complete  (c: cursor 'a) =
     length c.visited = length c.collection
 
-  val create (a: array 'a) : cursor 'a
+  val create [@stdlib] (a: array 'a) : cursor 'a
     ensures { permitted result }
     ensures { result.visited = empty }
     ensures { result.collection = to_seq a }

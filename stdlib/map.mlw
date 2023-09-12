@@ -8,14 +8,14 @@ module Map
 
   type map 'a 'b = 'a -> 'b
 
-  let function get (f: map 'a 'b) (x: 'a) : 'b = f x
+  let function get [@stdlib] (f: map 'a 'b) (x: 'a) : 'b = f x
 
-  let ghost function set (f: map 'a 'b) (x: 'a) (v: 'b) : map 'a 'b =
+  let ghost function set [@stdlib] (f: map 'a 'b) (x: 'a) (v: 'b) : map 'a 'b =
     fun y -> if pure {y = x} then v else f y
 
   (** syntactic sugar *)
-  let function ([]) (f: map 'a 'b) (x: 'a) : 'b = f x
-  let ghost function ([<-]) (f: map 'a 'b) (x: 'a) (v: 'b) : map 'a 'b = set f x v
+  let function ([]) [@stdlib] (f: map 'a 'b) (x: 'a) : 'b = f x
+  let ghost function ([<-]) [@stdlib] (f: map 'a 'b) (x: 'a) (v: 'b) : map 'a 'b = set f x v
 
 end
 
@@ -23,7 +23,7 @@ module Const
 
   use Map
 
-  let function const (v: 'b) : map 'a 'b = fun _ -> v
+  let function const [@stdlib] (v: 'b) : map 'a 'b = fun _ -> v
 
 end
 
@@ -94,7 +94,7 @@ module MapSum
   use Map
 
   (** `sum m l h` is the sum of `m[i]` for `l <= i < h` *)
-  function sum (m: map int int) (l h: int) : int = S.sum (get m) l h
+  function sum [@stdlib] (m: map int int) (l h: int) : int = S.sum (get m) l h
 
 end
 
@@ -106,7 +106,7 @@ module Occ
   use int.Int
   use Map
 
-  function occ (v: 'a) (m: map int 'a) (l u: int) : int
+  function occ [@stdlib] (v: 'a) (m: map int 'a) (l u: int) : int
     (** number of occurrences of `v` in `m` between `l` included and `u` excluded *)
 
   axiom occ_empty:

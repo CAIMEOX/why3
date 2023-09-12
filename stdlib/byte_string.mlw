@@ -10,7 +10,7 @@ module CString
 
   exception Break
 
-  let (=) (s1 s2: cstring) : bool
+  let (=) [@stdlib] (s1 s2: cstring) : bool
     ensures {result <-> array_eq s1 s2}
   = if s1.length <> s2.length then false else
       try
@@ -25,7 +25,7 @@ module CString
         true
       with Break -> false end
 
-  let function concat (s1 s2: cstring) : cstring
+  let function concat [@stdlib] (s1 s2: cstring) : cstring
     ensures { result.length = s1.length + s2.length }
     ensures { forall i. 0 <= i < s1.length -> result[i] = s1[i] }
     ensures { forall i. s1.length <= i < result.length ->
