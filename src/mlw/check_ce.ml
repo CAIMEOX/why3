@@ -47,8 +47,7 @@ let report_verdict ?check_ce fmt (c,log) =
     let print_call fmt call =
       match call.Log.log_desc with
       | Log.Exec_call (Some rs,_,_)  ->
-        (* Format.fprintf fmt "Function '%a' at %a" print_rs rs print_oloc call.Log.log_loc *)
-        Format.fprintf fmt "Function '%a' at %a with attrs %a@." print_rs rs print_oloc call.Log.log_loc Pretty.print_attrs rs.rs_name.id_attrs
+        Format.fprintf fmt "Function '%a' at %a" print_rs rs print_oloc call.Log.log_loc
       | Log.Exec_call (None,_,_) -> Format.fprintf fmt "Anonymous function at %a" print_oloc call.Log.log_loc
       | Log.Iter_loop _ ->
          Format.fprintf fmt "Loop at %a" print_oloc call.Log.log_loc

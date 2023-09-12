@@ -177,6 +177,11 @@ val is_field_id_attr: attribute
   (** indicates that the related ident is a field name, and its applications
       should be printed in dotted notation *)
 
+val stdlib_attr : attribute
+(** indicates that the related ident comes from a function of the Why3 stdlib.
+    This is useful when filtering functions that are listed as potential
+    culprits in counterexamples *)
+
 val eid_attribute_prefix : string
 (** the prefix string for expression identifiers in attributes *)
 
