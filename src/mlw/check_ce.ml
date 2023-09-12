@@ -35,31 +35,33 @@ let string_of_verdict = function
   | INCOMPLETE _ -> "INCOMPLETE"
   | BAD_CE _ -> "BAD_CE"
 
+let print_call fmt call =
+  let print_oloc =
+    Pp.print_option_or_default "unknown location" Loc.pp_position in
+  match call.Log.log_desc with
+  | Log.Exec_call (Some rs,_,_)  ->
+    Format.fprintf fmt "Function '%a' at %a" print_rs rs print_oloc call.Log.log_loc
+  | Log.Exec_call (None,_,_) -> Format.fprintf fmt "Anonymous function at %a" print_oloc call.Log.log_loc
+  | Log.Iter_loop _ ->
+     Format.fprintf fmt "Loop at %a" print_oloc call.Log.log_loc
+  | _ -> ()
+
 let report_verdict ?check_ce fmt (c,log) =
   match c with
   | NC ->
      Format.fprintf fmt
-       "The@ program@ does@ not@ comply@ to@ the@ verification@ goal"
+       "The@ program@ does@ not@ comply@ to@ the@ verification@ goal.@."
   | SW ->
     let calls = Pinterp_core.Log.get_exec_calls_and_loops log in
-    let print_oloc =
-       Pp.print_option_or_default "unknown location" Loc.pp_position in
-    let print_call fmt call =
-      match call.Log.log_desc with
-      | Log.Exec_call (Some rs,_,_)  ->
-        Format.fprintf fmt "Function '%a' at %a" print_rs rs print_oloc call.Log.log_loc
-      | Log.Exec_call (None,_,_) -> Format.fprintf fmt "Anonymous function at %a" print_oloc call.Log.log_loc
-      | Log.Iter_loop _ ->
-         Format.fprintf fmt "Loop at %a" print_oloc call.Log.log_loc
-      | _ -> () in
     Format.fprintf fmt
       "The@ contracts@ of@ the@ following@ functions/loops@ are@ too@ weak :@.  @[%a@]@."
        (pp_print_list print_call) calls
   | NC_SW ->
-     Format.fprintf fmt
-       ("The@ program@ does@ not@ comply@ to@ the@ verification@ \
-         goal,@ or@ the@ contracts@ of@ some@ loop@ or@ function@ are@ \
-         too@ weak")
+    let calls = Pinterp_core.Log.get_exec_calls_and_loops log in
+    Format.fprintf fmt
+      "The@ program@ does@ not@ comply@ to@ the@ verification@ goal,@ or@ the@\
+        contracts@ of@ the@ following@ functions/loops@ are@ too@ weak :@.  @[- %a@]@."
+       (pp_print_list print_call) calls
   | BAD_CE _ ->
      Format.fprintf fmt
        "Sorry,@ we@ don't@ have@ a@ good@ counterexample@ for@ you@ :("
@@ -200,7 +202,7 @@ let print_model_classification ?verb_lvl ?json ?check_ce fmt (m, c) =
     (fun fmt ->
        match fst c with
        | NC | SW | NC_SW ->
-           fprintf fmt ",@ for@ example@ during@ the@ following@ execution:"
+          fprintf fmt "This@ can@ happen@ for@ example@ during@ the@ following@ execution:"
        | INCOMPLETE _ ->
            pp_print_string fmt ":"
        | _ -> ());

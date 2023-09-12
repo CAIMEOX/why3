@@ -9,8 +9,8 @@ Warning, file "bench/check-ce/615.mlw", line 2, characters 9-10: unused variable
 File "bench/check-ce/615.mlw", line 3, characters 12-28:
 Sub-goal Check of goal f'vc.
 Prover result is: Unknown (sat) (179 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

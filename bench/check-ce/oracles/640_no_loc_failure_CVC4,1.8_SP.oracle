@@ -8,8 +8,8 @@
 File "bench/check-ce/640_no_loc_failure.mlw", line 5, characters 39-65:
 Goal wrong.
 Prover result is: Unknown (unknown + incomplete) (13375 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
