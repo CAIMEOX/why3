@@ -9,17 +9,35 @@
 (*                                                                  *)
 (********************************************************************)
 
-(*- exemple :
+(*- syntax exemple :
 
-      rev_append [] {l0 r0} =
-        loop
-        / loop = { rev l ++ r = rev l0 ++ r0 }
-            ! unList {l} (fun {h t} -> assign &r {cons h r}
-                               (fun -> assign &l {t} (loop)))
-                         (out)
-        / out = { r = rev l0 ++ r0 } ? halt
-        / &r = {r0}
-        / &l = {l0}
+insert {x: int} {l: list int} (return {o: list int}) =
+    { sorted l }
+    ! unList <int> {l}
+             (fun {h: int} {t: list int} ->
+                if {x < h}
+                   (fun -> break {cons x l})
+                   (fun -> insert {x} {t} (fun {r: list int} -> break {cons h r})))
+             (fun -> break {cons x nil})
+    / break {r: list int} = { sorted r and permut r (cons x l) } ! return {r}
+
+
+postIncr (&r: int) (return [r] {p: int}) =
+    (fun {v: int} ->
+        ! assign <int> &r {r+1} (break)
+        / break [r] = { r = v+1 } ! return {v}) {r}
+
+
+
+rev_append [] {l0 r0} =
+  loop
+  / loop = { rev l ++ r = rev l0 ++ r0 }
+      ! unList {l} (fun {h t} -> assign &r {cons h r} (fun -> assign &l {t} (loop)))
+                   (out)
+  / out = { r = rev l0 ++ r0 } ? halt
+  / &r = {r0}
+  / &l = {l0}
+
  -*)
 
 %{
@@ -130,10 +148,17 @@ coma_tvar:
 coma_param:
 | LT l=coma_tvar* GT
   { l }
-| LEFTBRC lid=lident+ RIGHTBRC
+| AMP x=lident
+  { [PPr x] }
+| LEFTPAR AMP lid=separated_nonempty_list(AMP, lident) oftyp? RIGHTPAR
+  { List.map (fun id -> PPr id) lid }
+| LEFTBRC lid=lident+ oftyp? RIGHTBRC
   { List.map (fun id -> PPv id) lid }
 | LEFTPAR id=lident w=prewrites p=coma_params RIGHTPAR
   { [PPc (id, w, p)] }
+
+oftyp:
+| COLON ty {}
 
 /* silent Menhir's errors about unreachable non terminal symbols */
 

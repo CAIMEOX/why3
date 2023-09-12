@@ -77,7 +77,7 @@ let pp_set fmt sl =
 let rec pp_expr fmt e = match e.pexpr_desc with
   | PEsym i -> fprintf fmt "%s" i.id_str
   | PEapp (e, arg) -> fprintf fmt "%a %a" pp_expr e pp_arg arg
-  | PElam (p, e) -> fprintf fmt "(fun @[%a@] →@ @[%a@])" pp_params p pp_expr e
+  | PElam (p, e) -> fprintf fmt "(fun @[%a@] → @[%a@])" pp_params p pp_expr e
   | PEdef (e, _, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_defs l
   | PEset (e, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_set l
   | PEcut (_t, e) -> fprintf fmt "{ϕ} @[%a@]" pp_expr e
