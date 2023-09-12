@@ -18,12 +18,12 @@ module Int
   val function  (-_) [@stdlib] int : int
   val function  (+)  [@stdlib] int int : int
   val function  (*)  [@stdlib] int int : int
-  val predicate (<)  int int : bool
+  val predicate (<)  [@stdlib] int int : bool
 
   let function  (-)  [@stdlib] (x y : int) = x + -y
-  let predicate (>)  (x y : int) = y < x
-  let predicate (<=) (x y : int) = x < y || x = y
-  let predicate (>=) (x y : int) = y <= x
+  let predicate (>)  [@stdlib] (x y : int) = y < x
+  let predicate (<=) [@stdlib] (x y : int) = x < y || x = y
+  let predicate (>=) [@stdlib] (x y : int) = y <= x
 
   clone export algebra.OrderedUnitaryCommutativeRing with
     type t = int, constant zero = zero, constant one = one,
@@ -88,7 +88,7 @@ module Lex2
 
   use Int
 
-  predicate lt_nat (x y: int) = 0 <= y /\ x < y
+  predicate lt_nat [@stdlib] (x y: int) = 0 <= y /\ x < y
 
   clone export relations.Lex with type t1 = int, type t2 = int,
     predicate rel1 = lt_nat, predicate rel2 = lt_nat
@@ -571,14 +571,14 @@ module IntInf
         end
     end
 
-  let predicate eq (x y: t) =
+  let predicate eq [@stdlib] (x y: t) =
     match x, y with
       | Infinite, Infinite -> true
       | Finite x, Finite y -> x = y
       | _, _ -> false
     end
 
-  let predicate lt (x y: t) =
+  let predicate lt [@stdlib] (x y: t) =
     match x with
       | Infinite -> false
       | Finite x ->
@@ -588,7 +588,7 @@ module IntInf
         end
     end
 
-  let predicate le (x y: t) = lt x y || eq x y
+  let predicate le [@stdlib] (x y: t) = lt x y || eq x y
 
   clone export relations.TotalOrder with type t = t, predicate rel = le,
     lemma Refl, lemma Antisymm, lemma Trans, lemma Total
@@ -673,7 +673,7 @@ module WFltof
 
   axiom f_nonneg: forall x. 0 <= f x
 
-  predicate ltof (x y: t) = f x < f y
+  predicate ltof [@stdlib] (x y: t) = f x < f y
 
   let rec lemma acc_ltof (n: int)
     requires { 0 <= n }

@@ -18,11 +18,11 @@ module Real
   val function  (-_) [@stdlib] real : real
   val function  (+)  [@stdlib] real real : real
   val function  (*)  [@stdlib] real real : real
-  val predicate (<)  real real : bool
+  val predicate (<)  [@stdlib] real real : bool
 
-  let predicate (>)  (x y : real) = y < x
-  let predicate (<=) (x y : real) = x < y || x = y
-  let predicate (>=) (x y : real) = y <= x
+  let predicate (>)  [@stdlib] (x y : real) = y < x
+  let predicate (<=) [@stdlib] (x y : real) = x < y || x = y
+  let predicate (>=) [@stdlib] (x y : real) = y <= x
 
   clone export algebra.OrderedField with type t = real,
     constant zero = zero, constant one = one,
@@ -74,10 +74,10 @@ module RealInfix
   function inv [@stdlib] (x:real) : real = Real.inv x
 
   let (=.) [@stdlib] (x:real) (y:real) = x = y
-  let predicate (<=.) (x:real) (y:real) = x <= y
-  let predicate (>=.) (x:real) (y:real) = x >= y
-  let predicate ( <.) (x:real) (y:real) = x < y
-  let predicate ( >.) (x:real) (y:real) = x > y
+  let predicate (<=.) [@stdlib] (x:real) (y:real) = x <= y
+  let predicate (>=.) [@stdlib] (x:real) (y:real) = x >= y
+  let predicate ( <.) [@stdlib] (x:real) (y:real) = x < y
+  let predicate ( >.) [@stdlib] (x:real) (y:real) = x > y
 
   val (/.) [@stdlib] (x y:real) : real
     requires { y <> 0.0 }
