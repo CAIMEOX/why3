@@ -10,34 +10,6 @@
 (********************************************************************)
 
 (*- syntax exemple :
-
-insert {x: int} {l: list int} (return {o: list int}) =
-    { sorted l }
-    ! unList <int> {l}
-             (fun {h: int} {t: list int} ->
-                if {x < h}
-                   (fun -> break {cons x l})
-                   (fun -> insert {x} {t} (fun {r: list int} -> break {cons h r})))
-             (fun -> break {cons x nil})
-    / break {r: list int} = { sorted r and permut r (cons x l) } ! return {r}
-
-
-postIncr (&r: int) (return [r] {p: int}) =
-    (fun {v: int} ->
-        ! assign <int> &r {r+1} (break)
-        / break [r] = { r = v+1 } ! return {v}) {r}
-
-
-
-rev_append [] {l0 r0} =
-  loop
-  / loop = { rev l ++ r = rev l0 ++ r0 }
-      ! unList {l} (fun {h t} -> assign &r {cons h r} (fun -> assign &l {t} (loop)))
-                   (out)
-  / out = { r = rev l0 ++ r0 } ? halt
-  / &r = {r0}
-  / &l = {l0}
-
  -*)
 
 %{
@@ -79,8 +51,8 @@ coma_prog:
   { e }
 | e=coma_prog SLASH d=local_defn
   { mk_pexpr (PEdef (e, false, [d])) $startpos $endpos }
-| e=coma_prog SLASH AMP id=lident EQUAL LEFTBRC t=term RIGHTBRC
-  { mk_pexpr (PEset (e, [id, t])) $startpos $endpos }
+| e=coma_prog SLASH AMP id=lident ty=oftyp EQUAL LEFTBRC t=term RIGHTBRC
+  { mk_pexpr (PEset (e, [id, t, ty])) $startpos $endpos }
 
 coma_expr:
 | d = coma_desc
@@ -127,15 +99,15 @@ prewrites_:
 
 coma_arg:
 | LT ty=ty GT
-  { At ty }
+  { PAt ty }
 | LEFTBRC t=term RIGHTBRC
-  { Av t }
+  { PAv t }
 | AMP x=lident
-  { Ar x }
+  { PAr x }
 | LEFTPAR e=coma_prog RIGHTPAR
-  { Ac e }
+  { PAc e }
 | c=coma_closure
-  { Ac c }
+  { PAc c }
 
 coma_params:
 | pl=coma_param*
@@ -148,17 +120,17 @@ coma_tvar:
 coma_param:
 | LT l=coma_tvar* GT
   { l }
-| AMP x=lident
-  { [PPr x] }
-| LEFTPAR AMP lid=separated_nonempty_list(AMP, lident) oftyp? RIGHTPAR
-  { List.map (fun id -> PPr id) lid }
-| LEFTBRC lid=lident+ oftyp? RIGHTBRC
-  { List.map (fun id -> PPv id) lid }
+/* | AMP x=lident
+  { [PPr x] } */
+| LEFTPAR AMP lid=separated_nonempty_list(AMP, lident) t=oftyp RIGHTPAR
+  { List.map (fun id -> PPr (id, t)) lid }
+| LEFTBRC lid=lident+ t=oftyp RIGHTBRC
+  { List.map (fun id -> PPv (id, t)) lid }
 | LEFTPAR id=lident w=prewrites p=coma_params RIGHTPAR
   { [PPc (id, w, p)] }
 
 oftyp:
-| COLON ty {}
+| COLON t=ty { t }
 
 /* silent Menhir's errors about unreachable non terminal symbols */
 

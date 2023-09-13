@@ -14,8 +14,8 @@ open Ptree
 
 type pparam =
   | PPt of ident (* < 'a > *)
-  | PPv of ident (* x *)
-  | PPr of ident (* &r *)
+  | PPv of ident * pty (* x *)
+  | PPr of ident * pty (* &r *)
   | PPc of ident * ident list * pparam list (* x [x...] p... *)
 
 type pexpr = {
@@ -28,17 +28,17 @@ and pexpr_desc =
   | PEapp of pexpr * pargument (* e <ty>... t... | e... *)
   | PElam of pparam list * pexpr (* fun pl -> e *)
   | PEdef of pexpr * bool * pdefn list (* e / rec? h p = e and ... *)
-  | PEset of pexpr * (ident * term) list (* assign ... *)
+  | PEset of pexpr * (ident * term * pty) list (* assign ... *)
   | PEcut of term * pexpr (* { t } e *)
   | PEbox of pexpr (* ! e *)
   | PEwox of pexpr (* ? e *)
   | PEany (* any *)
 
 and pargument =
-  | At of pty (* < ty > *)
-  | Av of term (* t *)
-  | Ar of ident (* &r *)
-  | Ac of pexpr (* (e) *)
+  | PAt of pty (* < ty > *)
+  | PAv of term (* t *)
+  | PAr of ident (* &r *)
+  | PAc of pexpr (* (e) *)
 
 and pdefn = {
   pdefn_desc   : pdefn_desc;
@@ -56,8 +56,8 @@ open Format
 
 let rec pp_param fmt = function
   | PPt i -> fprintf fmt "<%s>" i.id_str
-  | PPv i -> fprintf fmt "%s" i.id_str
-  | PPr i -> fprintf fmt "&%s" i.id_str
+  | PPv (i, _) -> fprintf fmt "%s" i.id_str
+  | PPr (i, _) -> fprintf fmt "&%s" i.id_str
   | PPc (i, w, pl) -> fprintf fmt "(%s [%a] %a)" i.id_str pp_writes w pp_params pl
 
 and pp_writes fmt w =
@@ -71,7 +71,7 @@ and pp_params fmt pl =
 
 let pp_set fmt sl =
   let pp_sep fmt () = fprintf fmt "@\n" in
-  let pp_v fmt (s, _) = fprintf fmt "/ &%s = {} " s.id_str in
+  let pp_v fmt (s, _, _) = fprintf fmt "/ &%s = {} " s.id_str in
   pp_print_list ~pp_sep pp_v fmt sl
 
 let rec pp_expr fmt e = match e.pexpr_desc with
@@ -80,16 +80,16 @@ let rec pp_expr fmt e = match e.pexpr_desc with
   | PElam (p, e) -> fprintf fmt "(fun @[%a@] → @[%a@])" pp_params p pp_expr e
   | PEdef (e, _, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_defs l
   | PEset (e, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_set l
-  | PEcut (_t, e) -> fprintf fmt "{ϕ} @[%a@]" pp_expr e
+  | PEcut (t, e) -> fprintf fmt "{ϕ} @[%a@]" pp_expr e
   | PEbox e -> fprintf fmt "↑ @[%a@]" pp_expr e
   | PEwox e -> fprintf fmt "↓ @[%a@]" pp_expr e
   | PEany -> fprintf fmt "any"
 
 and pp_arg fmt = function
-  | At _pty -> fprintf fmt "<>"
-  | Av _term -> fprintf fmt "{}"
-  | Ar i -> fprintf fmt "&%s" i.id_str
-  | Ac e ->
+  | PAt _pty -> fprintf fmt "<>"
+  | PAv _term -> fprintf fmt "{}"
+  | PAr i -> fprintf fmt "&%s" i.id_str
+  | PAc e ->
       match e.pexpr_desc with
       | PEsym i -> fprintf fmt "%s" i.id_str
       | _ -> fprintf fmt "(%a)" pp_expr e
