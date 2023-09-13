@@ -650,7 +650,7 @@ module Log = struct
     List.filter (fun entry ->
                   match entry.log_desc with
                   | Exec_call (Some rs, _, _) when not
-                    (Sattr.mem Expr.mlw_builtin_attr rs.rs_name.id_attrs ||
+                    (Sattr.mem builtin_attr rs.rs_name.id_attrs ||
                      Sattr.mem Ident.stdlib_attr rs.rs_name.id_attrs)
                     -> true
                   | Exec_call (None, _ , _) -> true

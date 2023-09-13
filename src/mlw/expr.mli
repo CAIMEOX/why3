@@ -124,11 +124,6 @@ val create_eid_attr : expr_id -> Ident.attribute
 (** [create_eid_attr id] generates an attribute corresponding to the
    given expression identifier [id] *)
 
-val mlw_builtin_attr : Ident.attribute
-(** indicates that the related ident comes from a mlw builtin, for instance the
-    builtin `ref` which initializes a reference. This is useful when filtering
-    functions that are listed as potential culprits in counterexamples *)
-
 type expr = private {
   e_node   : expr_node;
   e_ity    : ity;

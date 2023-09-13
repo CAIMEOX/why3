@@ -45,8 +45,8 @@ bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/exp
 File "bench/check-ce/petiot2018/experiments/isqrt-S1.mlw", line 10, characters 19-31:
 Sub-goal Loop invariant init of goal isqrt'vc.
 Prover result is: Unknown (sat).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File isqrt-S1.mlw:
   Line 3:
     Execution of main function `isqrt` with env:
@@ -96,8 +96,8 @@ bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/exp
 File "bench/check-ce/petiot2018/experiments/isqrt-S2.mlw", line 13, characters 19-35:
 Sub-goal Loop invariant init of goal isqrt'vc.
 Prover result is: Unknown (sat).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File isqrt-S2.mlw:
   Line 3:
     Execution of main function `isqrt` with env:
@@ -147,8 +147,8 @@ bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/exp
 File "bench/check-ce/petiot2018/experiments/isqrt-S3.mlw", line 13, characters 15-30:
 Sub-goal Loop invariant init of goal isqrt'vc.
 Prover result is: Unknown (sat).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File isqrt-S3.mlw:
   Line 3:
     Execution of main function `isqrt` with env:
@@ -198,8 +198,8 @@ bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/exp
 File "bench/check-ce/petiot2018/experiments/isqrt-S4.mlw", line 11, characters 19-31:
 Sub-goal Loop invariant preservation of goal isqrt'vc.
 Prover result is: Unknown (sat).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File isqrt-S4.mlw:
   Line 3:
     Execution of main function `isqrt` with env:
@@ -333,8 +333,21 @@ bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/exp
 File "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 11, characters 19-31:
 Sub-goal Loop invariant preservation of goal isqrt'vc.
 Prover result is: Unknown (sat).
-The contracts of some function or loop are too weak, for example during the
-  following execution:
+The contracts of the following functions/loops are too weak :
+  - Function 'int_ref' at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 6, characters 10-19
+  - Function 'int_ref' at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 7, characters 10-25
+  - Function 'int_ref' at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 8, characters 10-30
+  - Loop at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 9, character 2 to line 18, character 6
+  - Function '(!)' at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 9, characters 8-10
+  - Loop at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 9, character 2 to line 18, character 6
+  - Function '(!)' at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 15, characters 14-16
+  - Function '(!)' at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 15, characters 9-11
+  - Function '(:=)' at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 15, characters 4-16
+  - Function '(!)' at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 16, characters 9-11
+  - Function '(:=)' at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 16, characters 4-15
+  - Function '(!)' at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 17, characters 9-11
+  - Function '(:=)' at "bench/check-ce/petiot2018/experiments/isqrt-S5.mlw", line 17, characters 4-15
+This can happen for example during the following execution:
 File isqrt-S5.mlw:
   Line 3:
     Execution of main function `isqrt` with env:
@@ -424,8 +437,8 @@ bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/exp
 File "bench/check-ce/petiot2018/experiments/isqrt-S6.mlw", line 5, characters 12-62:
 Sub-goal Postcondition of goal isqrt'vc.
 Prover result is: Unknown (sat).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File isqrt-S6.mlw:
   Line 3:
     Execution of main function `isqrt` with env:
@@ -576,8 +589,14 @@ bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/exp
 File "bench/check-ce/petiot2018/experiments/isqrt-S7.mlw", line 5, characters 12-62:
 Sub-goal Postcondition of goal isqrt'vc.
 Prover result is: Unknown (sat).
-The contracts of some function or loop are too weak, for example during the
-  following execution:
+The contracts of the following functions/loops are too weak :
+  - Function 'int_ref' at "bench/check-ce/petiot2018/experiments/isqrt-S7.mlw", line 6, characters 10-19
+  - Function 'int_ref' at "bench/check-ce/petiot2018/experiments/isqrt-S7.mlw", line 7, characters 10-25
+  - Function 'int_ref' at "bench/check-ce/petiot2018/experiments/isqrt-S7.mlw", line 8, characters 10-30
+  - Loop at "bench/check-ce/petiot2018/experiments/isqrt-S7.mlw", line 9, character 2 to line 18, character 6
+  - Function '(!)' at "bench/check-ce/petiot2018/experiments/isqrt-S7.mlw", line 9, characters 8-10
+  - Function '(!)' at "bench/check-ce/petiot2018/experiments/isqrt-S7.mlw", line 19, characters 2-4
+This can happen for example during the following execution:
 File isqrt-S7.mlw:
   Line 3:
     Execution of main function `isqrt` with env:
@@ -630,8 +649,8 @@ bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/exp
 File "bench/check-ce/petiot2018/experiments/isqrt-S8.mlw", line 5, characters 12-62:
 Sub-goal Postcondition of goal isqrt'vc.
 Prover result is: Unknown (sat).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File isqrt-S8.mlw:
   Line 3:
     Execution of main function `isqrt` with env:
@@ -713,8 +732,8 @@ bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/exp
 File "bench/check-ce/petiot2018/experiments/isqrt-S9.mlw", line 14, characters 10-16:
 Sub-goal Loop variant decrease of goal isqrt'vc.
 Prover result is: Unknown (sat).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File isqrt-S9.mlw:
   Line 3:
     Execution of main function `isqrt` with env:
@@ -916,8 +935,21 @@ bin/why3 prove --library=bench/check-ce/petiot2018 bench/check-ce/petiot2018/exp
 File "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 14, characters 14-16:
 Sub-goal Loop variant decrease of goal isqrt'vc.
 Prover result is: Unknown (sat).
-The contracts of some function or loop are too weak, for example during the
-  following execution:
+The contracts of the following functions/loops are too weak :
+  - Function 'int_ref' at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 6, characters 10-19
+  - Function 'int_ref' at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 7, characters 10-25
+  - Function 'int_ref' at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 8, characters 10-30
+  - Loop at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 9, character 2 to line 18, character 6
+  - Function '(!)' at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 9, characters 8-10
+  - Loop at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 9, character 2 to line 18, character 6
+  - Function '(!)' at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 15, characters 14-16
+  - Function '(!)' at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 15, characters 9-11
+  - Function '(:=)' at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 15, characters 4-16
+  - Function '(!)' at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 16, characters 9-11
+  - Function '(:=)' at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 16, characters 4-15
+  - Function '(!)' at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 17, characters 9-11
+  - Function '(:=)' at "bench/check-ce/petiot2018/experiments/isqrt-S10.mlw", line 17, characters 4-15
+This can happen for example during the following execution:
 File isqrt-S10.mlw:
   Line 3:
     Execution of main function `isqrt` with env:

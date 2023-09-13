@@ -149,8 +149,8 @@ Prover result is: Valid.
 File "bench/check-ce/petiot2018/experiments/rgf-R1.mlw", line 41, characters 2-8:
 Sub-goal Precondition of goal f'vc.
 Prover result is: Unknown (unknown).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File rgf-R1.mlw:
   Line 24:
     Execution of main function `f` with env:
@@ -390,8 +390,8 @@ Prover result is: Valid.
 File "bench/check-ce/petiot2018/experiments/rgf-R4.mlw", line 41, characters 2-8:
 Sub-goal Precondition of goal f'vc.
 Prover result is: Unknown (unknown).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File rgf-R4.mlw:
   Line 24:
     Execution of main function `f` with env:

@@ -12,7 +12,7 @@ let f ()
     x.c
 
 (*
-counterexamle: `x = 0`, `i = 2` at beggining of loop.
+counterexample: `x = 0`, `i = 2` at beggining of loop.
 
 The execution of `f` with the counterexample:
 - terminates normally if executed concretly;

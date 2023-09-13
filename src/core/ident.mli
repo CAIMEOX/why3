@@ -182,6 +182,12 @@ val stdlib_attr : attribute
     This is useful when filtering functions that are listed as potential
     culprits in counterexamples *)
 
+val builtin_attr : attribute
+(** indicates that the related ident comes from a builtin of the language, for
+    instance the builtin `ref` in WhyML.
+    This is useful when filtering functions that are listed as potential
+    culprits in counterexamples *)
+
 val eid_attribute_prefix : string
 (** the prefix string for expression identifiers in attributes *)
 

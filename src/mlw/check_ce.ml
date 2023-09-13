@@ -40,10 +40,10 @@ let print_call fmt call =
     Pp.print_option_or_default "unknown location" Loc.pp_position in
   match call.Log.log_desc with
   | Log.Exec_call (Some rs,_,_)  ->
-    Format.fprintf fmt "Function '%a' at %a" print_rs rs print_oloc call.Log.log_loc
-  | Log.Exec_call (None,_,_) -> Format.fprintf fmt "Anonymous function at %a" print_oloc call.Log.log_loc
+    Format.fprintf fmt "  - Function '%a' at %a" print_rs rs print_oloc call.Log.log_loc
+  | Log.Exec_call (None,_,_) -> Format.fprintf fmt "  - Anonymous function at %a" print_oloc call.Log.log_loc
   | Log.Iter_loop _ ->
-     Format.fprintf fmt "Loop at %a" print_oloc call.Log.log_loc
+     Format.fprintf fmt "  - Loop at %a" print_oloc call.Log.log_loc
   | _ -> ()
 
 let report_verdict ?check_ce fmt (c,log) =
@@ -54,13 +54,20 @@ let report_verdict ?check_ce fmt (c,log) =
   | SW ->
     let calls = Pinterp_core.Log.get_exec_calls_and_loops log in
     Format.fprintf fmt
-      "The@ contracts@ of@ the@ following@ functions/loops@ are@ too@ weak :@.  @[%a@]@."
+      "The@ contracts@ of@ the@ following@ functions/loops@ are@ too@ weak :@.@[%a@]@."
        (pp_print_list print_call) calls
   | NC_SW ->
     let calls = Pinterp_core.Log.get_exec_calls_and_loops log in
-    Format.fprintf fmt
-      "The@ program@ does@ not@ comply@ to@ the@ verification@ goal,@ or@ the@\
-        contracts@ of@ the@ following@ functions/loops@ are@ too@ weak :@.  @[- %a@]@."
+    if List.length calls = 0 then
+      (* In this case, either the contracts of the stdlib/builtin functions are
+         too weak or the program is non conforming. We make the assumption that
+         our functions are always correctly specified so we choose the latter. *)
+      Format.fprintf fmt
+       "The@ program@ does@ not@ comply@ to@ the@ verification@ goal.@."
+    else
+      Format.fprintf fmt
+      "The@ program@ does@ not@ comply@ to@ the@ verification@ goal,@ or@ the@ \
+        contracts@ of@ the@ following@ functions/loops@ are@ too@ weak :@.@[%a@]@."
        (pp_print_list print_call) calls
   | BAD_CE _ ->
      Format.fprintf fmt
