@@ -8,8 +8,8 @@
 File "bench/check-ce/integers.mlw", line 5, characters 50-61:
 Goal g_lab.
 Prover result is: Unknown (sat) (92 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -42,8 +42,8 @@ File integers.mlw:
 File "bench/check-ce/integers.mlw", line 7, characters 43-54:
 Goal g_no_lab.
 Prover result is: Unknown (sat) (92 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -76,8 +76,8 @@ File integers.mlw:
 File "bench/check-ce/integers.mlw", line 11, characters 30-38:
 Goal g2_lab.
 Prover result is: Unknown (sat) (88 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -113,8 +113,8 @@ File integers.mlw:
 File "bench/check-ce/integers.mlw", line 22, characters 2-45:
 Goal newgoal.
 Prover result is: Unknown (sat) (299 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

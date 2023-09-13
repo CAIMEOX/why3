@@ -175,8 +175,8 @@ File strings.mlw:
 File "bench/check-ce/strings.mlw", line 16, characters 60-79:
 Goal T11.
 Prover result is: Unknown (unknown + incomplete) (1206 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -226,8 +226,8 @@ File strings.mlw:
 File "bench/check-ce/strings.mlw", line 18, characters 22-28:
 Goal T13.
 Prover result is: Unknown (unknown + incomplete) (1000 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -260,8 +260,8 @@ File strings.mlw:
 File "bench/check-ce/strings.mlw", line 19, characters 22-34:
 Goal T14.
 Prover result is: Unknown (unknown + incomplete) (983 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -294,8 +294,8 @@ File strings.mlw:
 File "bench/check-ce/strings.mlw", line 20, characters 24-45:
 Goal T15.
 Prover result is: Unknown (unknown + incomplete) (1236 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

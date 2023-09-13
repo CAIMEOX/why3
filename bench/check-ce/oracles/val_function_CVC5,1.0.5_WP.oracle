@@ -32,8 +32,8 @@ File val_function.mlw:
 File "bench/check-ce/val_function.mlw", line 16, characters 12-24:
 Sub-goal Postcondition of goal main_g'vc.
 Prover result is: Unknown (unknown + incomplete) (327 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

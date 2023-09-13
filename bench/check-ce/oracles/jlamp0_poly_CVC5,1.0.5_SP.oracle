@@ -8,8 +8,8 @@
 File "bench/check-ce/jlamp0_poly.mlw", line 12, characters 13-26:
 Sub-goal Assertion of goal p1'vc.
 Prover result is: Unknown (unknown + incomplete) (592 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -65,8 +65,8 @@ File jlamp0_poly.mlw:
 File "bench/check-ce/jlamp0_poly.mlw", line 10, characters 15-29:
 Sub-goal Postcondition of goal p1'vc.
 Prover result is: Unknown (unknown + incomplete) (871 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -157,8 +157,8 @@ File jlamp0_poly.mlw:
 File "bench/check-ce/jlamp0_poly.mlw", line 22, characters 18-31:
 Sub-goal Loop invariant init of goal p2'vc.
 Prover result is: Unknown (unknown + incomplete) (368 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -220,8 +220,8 @@ Sorry, we don't have a good counterexample for you :(
 File "bench/check-ce/jlamp0_poly.mlw", line 22, characters 18-31:
 Sub-goal Loop invariant preservation of goal p2'vc.
 Prover result is: Unknown (unknown + incomplete) (923 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

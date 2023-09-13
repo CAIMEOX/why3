@@ -8,8 +8,8 @@
 File "bench/check-ce/logic_constant.mlw", line 9, characters 11-17:
 Sub-goal Assertion of goal main'vc.
 Prover result is: Unknown (sat) (187 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

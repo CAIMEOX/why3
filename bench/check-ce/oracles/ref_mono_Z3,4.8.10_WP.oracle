@@ -20,8 +20,8 @@ Prover result is: Valid (52 steps).
 File "bench/check-ce/ref_mono.mlw", line 21, characters 14-25:
 Sub-goal Postcondition of goal test_post'vc.
 Prover result is: Step limit exceeded (3000047 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -80,8 +80,8 @@ File ref_mono.mlw:
 File "bench/check-ce/ref_mono.mlw", line 27, characters 14-29:
 Sub-goal Postcondition of goal test_post2'vc.
 Prover result is: Step limit exceeded (3000068 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -141,8 +141,8 @@ File ref_mono.mlw:
 File "bench/check-ce/ref_mono.mlw", line 38, characters 12-36:
 Sub-goal Postcondition of goal incr'vc.
 Prover result is: Step limit exceeded (3000089 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -216,8 +216,8 @@ File ref_mono.mlw:
 File "bench/check-ce/ref_mono.mlw", line 51, characters 14-36:
 Sub-goal Loop invariant init of goal test_loop'vc.
 Prover result is: Step limit exceeded (3000063 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -301,8 +301,8 @@ Prover result is: Valid (3036 steps).
 File "bench/check-ce/ref_mono.mlw", line 51, characters 14-36:
 Sub-goal Loop invariant preservation of goal test_loop'vc.
 Prover result is: Step limit exceeded (3000123 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

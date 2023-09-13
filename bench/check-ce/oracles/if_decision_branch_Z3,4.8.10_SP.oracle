@@ -8,8 +8,8 @@
 File "bench/check-ce/if_decision_branch.mlw", line 19, characters 13-23:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown (sat) (689 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

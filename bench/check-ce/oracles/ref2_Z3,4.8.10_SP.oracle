@@ -4,12 +4,12 @@
   - Abstract RAC: FAILURE (assertion at "bench/check-ce/ref2.mlw", line 7, characters 11-16)
 - Checked model 1: NC
   - Concrete RAC: FAILURE (assertion at "bench/check-ce/ref2.mlw", line 7, characters 11-16)
-  - Abstract RAC: STUCK (failure in postcondition of `(:=)` at "WHY3DATA/stdlib/ref.mlw", line 20, characters 39-44)
+  - Abstract RAC: STUCK (failure in postcondition of `(:=)` at "WHY3DATA/stdlib/ref.mlw", line 20, characters 49-54)
 File "bench/check-ce/ref2.mlw", line 7, characters 11-16:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Step limit exceeded (3000018 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 Unknown location:
     _ = ()
 File ref2.mlw:

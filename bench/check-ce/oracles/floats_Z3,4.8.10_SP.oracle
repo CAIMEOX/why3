@@ -8,8 +8,8 @@
 File "bench/check-ce/floats.mlw", line 5, characters 40-52:
 Goal g1.
 Prover result is: Unknown (sat) (1200 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -51,8 +51,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 7, characters 40-53:
 Goal g2.
 Prover result is: Unknown (sat) (1242 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -94,8 +94,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 9, characters 24-42:
 Goal g3.
 Prover result is: Unknown (sat) (564 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -137,8 +137,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 11, characters 24-43:
 Goal g4.
 Prover result is: Unknown (sat) (456 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -180,8 +180,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 13, characters 24-43:
 Goal g5.
 Prover result is: Unknown (sat) (1162 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -223,8 +223,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 15, characters 24-30:
 Goal g6.
 Prover result is: Unknown (sat) (739 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -266,8 +266,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 17, characters 40-64:
 Goal g7.
 Prover result is: Unknown (sat) (58478 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -310,8 +310,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 19, characters 24-60:
 Goal g8.
 Prover result is: Unknown (sat) (397 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -370,8 +370,8 @@ Prover result is: Step limit exceeded (100021 steps).
 File "bench/check-ce/floats.mlw", line 26, characters 24-47:
 Goal g11.
 Prover result is: Unknown (sat) (446 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -413,8 +413,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 29, characters 24-54:
 Goal g12.
 Prover result is: Unknown (sat) (456 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -456,8 +456,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 32, characters 24-47:
 Goal g13.
 Prover result is: Unknown (sat) (456 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -499,8 +499,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 41, characters 40-52:
 Goal g1.
 Prover result is: Unknown (sat) (1904 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -542,8 +542,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 43, characters 40-53:
 Goal g2.
 Prover result is: Unknown (sat) (1946 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -585,8 +585,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 45, characters 24-42:
 Goal g3.
 Prover result is: Unknown (sat) (756 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -628,8 +628,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 47, characters 24-43:
 Goal g4.
 Prover result is: Unknown (sat) (584 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -671,8 +671,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 49, characters 24-43:
 Goal g5.
 Prover result is: Unknown (sat) (1868 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -714,8 +714,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 51, characters 24-30:
 Goal g6.
 Prover result is: Unknown (sat) (1325 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -765,8 +765,8 @@ Prover result is: Step limit exceeded (100028 steps).
 File "bench/check-ce/floats.mlw", line 55, characters 24-60:
 Goal g8.
 Prover result is: Unknown (sat) (525 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -825,8 +825,8 @@ Prover result is: Step limit exceeded (100021 steps).
 File "bench/check-ce/floats.mlw", line 62, characters 24-48:
 Goal g11.
 Prover result is: Unknown (sat) (574 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -868,8 +868,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 65, characters 24-62:
 Goal g12.
 Prover result is: Unknown (sat) (584 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -911,8 +911,8 @@ File floats.mlw:
 File "bench/check-ce/floats.mlw", line 68, characters 24-48:
 Goal g13.
 Prover result is: Unknown (sat) (584 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

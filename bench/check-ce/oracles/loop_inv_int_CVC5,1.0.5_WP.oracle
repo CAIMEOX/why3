@@ -12,8 +12,8 @@ Prover result is: Valid (295 steps).
 File "bench/check-ce/loop_inv_int.mlw", line 13, characters 16-25:
 Sub-goal Loop invariant preservation of goal f'vc.
 Prover result is: Unknown (unknown + incomplete) (639 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -119,8 +119,8 @@ Prover result is: Valid (303 steps).
 File "bench/check-ce/loop_inv_int.mlw", line 34, characters 16-25:
 Sub-goal Loop invariant preservation of goal f'vc.
 Prover result is: Unknown (unknown + incomplete) (606 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

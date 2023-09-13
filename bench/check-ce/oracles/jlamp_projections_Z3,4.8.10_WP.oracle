@@ -12,8 +12,8 @@ Prover result is: Valid (35 steps).
 File "bench/check-ce/jlamp_projections.mlw", line 29, characters 2-18:
 Sub-goal Integer overflow of goal p3'vc.
 Prover result is: Unknown (sat) (752 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -62,8 +62,8 @@ Prover result is: Valid (35 steps).
 File "bench/check-ce/jlamp_projections.mlw", line 42, characters 7-24:
 Sub-goal Integer overflow of goal p3'vc.
 Prover result is: Unknown (sat) (811 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -133,8 +133,8 @@ Prover result is: Valid (45 steps).
 File "bench/check-ce/jlamp_projections.mlw", line 54, characters 21-39:
 Sub-goal Integer overflow of goal p4'vc.
 Prover result is: Unknown (sat) (998 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

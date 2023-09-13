@@ -12,8 +12,8 @@ Prover result is: Valid (59 steps).
 File "bench/check-ce/records_inv.mlw", line 16, characters 14-24:
 Sub-goal Postcondition of goal record_match_eval_test1'vc.
 Prover result is: Unknown (unknown + incomplete) (326 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -49,8 +49,8 @@ File records_inv.mlw:
 File "bench/check-ce/records_inv.mlw", line 24, characters 14-24:
 Sub-goal Postcondition of goal record_match_eval_test2'vc.
 Prover result is: Unknown (unknown + incomplete) (241 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -83,8 +83,8 @@ File records_inv.mlw:
 File "bench/check-ce/records_inv.mlw", line 31, characters 9-25:
 Sub-goal Precondition of goal record_match_eval_test3'vc.
 Prover result is: Unknown (unknown + incomplete) (224 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -131,8 +131,8 @@ Prover result is: Valid (1097 steps).
 File "bench/check-ce/records_inv.mlw", line 36, characters 9-26:
 Sub-goal Precondition of goal record_match_eval_test4'vc.
 Prover result is: Unknown (unknown + incomplete) (224 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -179,8 +179,8 @@ Prover result is: Valid (1147 steps).
 File "bench/check-ce/records_inv.mlw", line 42, characters 9-26:
 Sub-goal Precondition of goal record_match_eval_test44'vc.
 Prover result is: Unknown (unknown + incomplete) (224 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -231,8 +231,8 @@ Prover result is: Valid (1022 steps).
 File "bench/check-ce/records_inv.mlw", line 51, characters 9-26:
 Sub-goal Precondition of goal test_record_match_eval_test5'vc.
 Prover result is: Unknown (unknown + incomplete) (227 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -282,8 +282,8 @@ Prover result is: Valid (1204 steps).
 File "bench/check-ce/records_inv.mlw", line 66, characters 14-24:
 Sub-goal Postcondition of goal record_match_eval_test1'vc.
 Prover result is: Unknown (sat) (276 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -319,8 +319,8 @@ File records_inv.mlw:
 File "bench/check-ce/records_inv.mlw", line 74, characters 14-24:
 Sub-goal Postcondition of goal record_match_eval_test2'vc.
 Prover result is: Unknown (sat) (220 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -353,8 +353,8 @@ File records_inv.mlw:
 File "bench/check-ce/records_inv.mlw", line 79, characters 14-17:
 Sub-goal Postcondition of goal record_match_eval_test3'vc.
 Prover result is: Unknown (sat) (268 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -385,8 +385,8 @@ File records_inv.mlw:
 File "bench/check-ce/records_inv.mlw", line 84, characters 14-22:
 Sub-goal Postcondition of goal record_match_eval_test4'vc.
 Prover result is: Unknown (sat) (293 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

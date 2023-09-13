@@ -12,8 +12,8 @@ Prover result is: Valid (52 steps).
 File "bench/check-ce/jlamp0_mono.mlw", line 17, characters 13-26:
 Sub-goal Assertion of goal p1'vc.
 Prover result is: Unknown (sat) (704 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -65,8 +65,8 @@ File jlamp0_mono.mlw:
 File "bench/check-ce/jlamp0_mono.mlw", line 15, characters 15-29:
 Sub-goal Postcondition of goal p1'vc.
 Prover result is: Unknown (sat) (1552 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -129,8 +129,8 @@ File jlamp0_mono.mlw:
 File "bench/check-ce/jlamp0_mono.mlw", line 27, characters 18-31:
 Sub-goal Loop invariant init of goal p2'vc.
 Prover result is: Unknown (sat) (322 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -192,8 +192,8 @@ Sorry, we don't have a good counterexample for you :(
 File "bench/check-ce/jlamp0_mono.mlw", line 27, characters 18-31:
 Sub-goal Loop invariant preservation of goal p2'vc.
 Prover result is: Unknown (sat) (1364 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -265,8 +265,8 @@ Prover result is: Valid (320 steps).
 File "bench/check-ce/jlamp0_mono.mlw", line 41, characters 18-31:
 Sub-goal Loop invariant init of goal p3'vc.
 Prover result is: Unknown (sat) (463 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -330,8 +330,8 @@ Sorry, we don't have a good counterexample for you :(
 File "bench/check-ce/jlamp0_mono.mlw", line 41, characters 18-31:
 Sub-goal Loop invariant preservation of goal p3'vc.
 Prover result is: Unknown (sat) (1464 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

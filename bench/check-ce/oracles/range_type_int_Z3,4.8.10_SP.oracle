@@ -8,8 +8,8 @@
 File "bench/check-ce/range_type_int.mlw", line 9, characters 12-27:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown (sat) (387 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

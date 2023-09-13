@@ -12,8 +12,8 @@ Prover result is: Valid (302 steps).
 File "bench/check-ce/let_function_logic.mlw", line 12, characters 12-24:
 Sub-goal Postcondition of goal main'vc.
 Prover result is: Unknown (unknown + incomplete) (368 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

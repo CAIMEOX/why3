@@ -8,8 +8,8 @@
 File "bench/check-ce/threshold.mlw", line 11, characters 11-20:
 Sub-goal Integer overflow of goal f'vc.
 Prover result is: Unknown (unknown + incomplete) (716 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -58,8 +58,8 @@ File threshold.mlw:
 File "bench/check-ce/threshold.mlw", line 9, characters 13-33:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown (unknown + incomplete) (1647 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -120,8 +120,8 @@ File threshold.mlw:
 File "bench/check-ce/threshold.mlw", line 30, characters 11-24:
 Sub-goal Arithmetic overflow of goal f'vc.
 Prover result is: Unknown (unknown + incomplete) (31057 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -161,8 +161,8 @@ File threshold.mlw:
 File "bench/check-ce/threshold.mlw", line 27, characters 13-45:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown (unknown + incomplete) (46780 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

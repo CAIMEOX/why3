@@ -8,8 +8,8 @@
 File "bench/check-ce/global_logic_constant.mlw", line 9, characters 14-24:
 Sub-goal Postcondition of goal f1'vc.
 Prover result is: Unknown (sat) (144 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -44,8 +44,8 @@ File global_logic_constant.mlw:
 File "bench/check-ce/global_logic_constant.mlw", line 15, characters 14-24:
 Sub-goal Postcondition of goal f2'vc.
 Prover result is: Unknown (unknown + incomplete) (322 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

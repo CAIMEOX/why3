@@ -12,8 +12,8 @@ Prover result is: Valid (50 steps).
 File "bench/check-ce/int_overflow.mlw", line 9, characters 27-44:
 Goal test1.
 Prover result is: Unknown (sat) (98 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -105,8 +105,8 @@ Sorry, we don't have a good counterexample for you :(
 File "bench/check-ce/int_overflow.mlw", line 31, characters 33-49:
 Goal test_overflow_int16.
 Prover result is: Unknown (unknown + incomplete) (110591 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -170,8 +170,8 @@ Sorry, we don't have a good counterexample for you :(
 File "bench/check-ce/int_overflow.mlw", line 42, characters 29-45:
 Goal test_overflow_int16_bis.
 Prover result is: Unknown (unknown + incomplete) (110428 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -209,8 +209,8 @@ File int_overflow.mlw:
 File "bench/check-ce/int_overflow.mlw", line 49, characters 33-49:
 Goal test_overflow_int32.
 Prover result is: Unknown (unknown + incomplete) (110591 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -248,8 +248,8 @@ File int_overflow.mlw:
 File "bench/check-ce/int_overflow.mlw", line 54, characters 48-64:
 Goal test_overflow_int32_bis.
 Prover result is: Unknown (unknown + incomplete) (110428 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

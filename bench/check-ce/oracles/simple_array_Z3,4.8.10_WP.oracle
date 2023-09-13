@@ -8,8 +8,8 @@
 File "bench/check-ce/simple_array.mlw", line 6, characters 3-31:
 Goal t1.
 Prover result is: Unknown (sat) (147 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File simple_array.mlw:
   Line 5:
     t = fun (x!04:int) -> if x!04 = 0 then 3 else 2

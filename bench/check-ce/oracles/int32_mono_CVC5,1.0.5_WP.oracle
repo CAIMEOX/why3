@@ -12,8 +12,8 @@ Prover result is: Valid (416 steps).
 File "bench/check-ce/int32_mono.mlw", line 9, characters 14-32:
 Sub-goal Postcondition of goal dummy_update'vc.
 Prover result is: Unknown (unknown + incomplete) (736 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

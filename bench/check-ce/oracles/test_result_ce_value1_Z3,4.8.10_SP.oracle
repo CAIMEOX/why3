@@ -8,8 +8,8 @@
 File "bench/check-ce/test_result_ce_value1.mlw", line 12, characters 11-18:
 Sub-goal Assertion of goal test1'vc.
 Prover result is: Unknown (sat) (431 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -50,8 +50,8 @@ File test_result_ce_value1.mlw:
 File "bench/check-ce/test_result_ce_value1.mlw", line 16, characters 11-18:
 Sub-goal Assertion of goal test1bis'vc.
 Prover result is: Unknown (sat) (431 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

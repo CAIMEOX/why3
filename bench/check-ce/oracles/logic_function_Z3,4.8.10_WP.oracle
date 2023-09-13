@@ -8,8 +8,8 @@
 File "bench/check-ce/logic_function.mlw", line 8, characters 11-20:
 Sub-goal Assertion of goal main_g'vc.
 Prover result is: Unknown (sat) (123 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -42,8 +42,8 @@ File logic_function.mlw:
 File "bench/check-ce/logic_function.mlw", line 14, characters 11-24:
 Sub-goal Assertion of goal main_h'vc.
 Prover result is: Unknown (sat) (169 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -82,8 +82,8 @@ File logic_function.mlw:
 File "bench/check-ce/logic_function.mlw", line 21, characters 11-19:
 Sub-goal Assertion of goal main_f'vc.
 Prover result is: Unknown (sat) (170 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -116,8 +116,8 @@ File logic_function.mlw:
 File "bench/check-ce/logic_function.mlw", line 22, characters 11-19:
 Sub-goal Assertion of goal main_f'vc.
 Prover result is: Unknown (sat) (241 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

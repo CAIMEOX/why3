@@ -8,8 +8,8 @@
 File "bench/check-ce/record_nested_one_field.mlw", line 14, characters 14-51:
 Sub-goal Postcondition of goal test_post'vc.
 Prover result is: Unknown (unknown + incomplete) (1578 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

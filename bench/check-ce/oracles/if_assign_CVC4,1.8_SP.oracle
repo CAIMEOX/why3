@@ -8,8 +8,8 @@
 File "bench/check-ce/if_assign.mlw", line 10, characters 12-23:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown (unknown + incomplete) (995 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -57,8 +57,8 @@ File if_assign.mlw:
 File "bench/check-ce/if_assign.mlw", line 16, characters 12-23:
 Sub-goal Postcondition of goal fTest1'vc.
 Prover result is: Unknown (unknown + incomplete) (1122 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -110,8 +110,8 @@ File if_assign.mlw:
 File "bench/check-ce/if_assign.mlw", line 28, characters 31-38:
 Sub-goal Assertion of goal fTest2'vc.
 Prover result is: Unknown (unknown + incomplete) (969 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -158,8 +158,8 @@ Prover result is: Valid (740 steps).
 File "bench/check-ce/if_assign.mlw", line 25, characters 12-23:
 Sub-goal Postcondition of goal fTest2'vc.
 Prover result is: Step limit exceeded (159831 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

@@ -8,8 +8,8 @@
 File "bench/check-ce/polymorphism.mlw", line 7, characters 27-34:
 Goal gm.
 Prover result is: Unknown (sat) (75 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File polymorphism.mlw:
   Line 7:
     x = (B 1)
@@ -33,8 +33,8 @@ File polymorphism.mlw:
 File "bench/check-ce/polymorphism.mlw", line 11, characters 22-35:
 Goal gm2.
 Prover result is: Unknown (sat) (101 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File polymorphism.mlw:
   Line 11:
     x = (C 0 true)

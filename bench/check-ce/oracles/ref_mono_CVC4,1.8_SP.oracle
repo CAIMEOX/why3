@@ -20,8 +20,8 @@ Prover result is: Valid (65 steps).
 File "bench/check-ce/ref_mono.mlw", line 21, characters 14-25:
 Sub-goal Postcondition of goal test_post'vc.
 Prover result is: Unknown (unknown + incomplete) (1644 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -80,8 +80,8 @@ File ref_mono.mlw:
 File "bench/check-ce/ref_mono.mlw", line 27, characters 14-29:
 Sub-goal Postcondition of goal test_post2'vc.
 Prover result is: Unknown (unknown + incomplete) (1724 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -141,8 +141,8 @@ File ref_mono.mlw:
 File "bench/check-ce/ref_mono.mlw", line 38, characters 12-36:
 Sub-goal Postcondition of goal incr'vc.
 Prover result is: Unknown (unknown + incomplete) (1906 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

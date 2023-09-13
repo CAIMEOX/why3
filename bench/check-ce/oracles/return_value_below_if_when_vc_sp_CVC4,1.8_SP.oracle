@@ -8,8 +8,8 @@
 File "bench/check-ce/return_value_below_if_when_vc_sp.mlw", line 7, characters 12-65:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Unknown (sat) (305 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
