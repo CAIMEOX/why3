@@ -12,8 +12,8 @@ Prover result is: Valid (54 steps).
 File "bench/check-ce/array_records_mono.mlw", line 49, characters 45-49:
 Sub-goal Index in array bounds of goal var_overwrite'vc.
 Prover result is: Unknown (unknown + incomplete) (573 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

@@ -8,8 +8,8 @@
 File "bench/check-ce/attributes_mono.mlw", line 13, characters 48-57:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Unknown (sat) (977 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -352,8 +352,8 @@ File attributes_mono.mlw:
 File "bench/check-ce/attributes_mono.mlw", line 25, characters 11-20:
 Sub-goal Assertion of goal g'vc.
 Prover result is: Unknown (sat) (539 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

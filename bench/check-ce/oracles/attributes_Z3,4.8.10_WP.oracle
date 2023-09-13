@@ -8,8 +8,8 @@
 File "bench/check-ce/attributes.mlw", line 11, characters 42-49:
 Sub-goal Assertion of goal f'vc.
 Prover result is: Step limit exceeded (3000103 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
@@ -354,8 +354,8 @@ File attributes.mlw:
 File "bench/check-ce/attributes.mlw", line 23, characters 11-18:
 Sub-goal Assertion of goal g'vc.
 Prover result is: Step limit exceeded (3000054 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization

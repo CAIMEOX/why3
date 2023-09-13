@@ -8,8 +8,8 @@
 File "bench/check-ce/bv32_mono.mlw", line 11, characters 14-31:
 Sub-goal Postcondition of goal dummy_update'vc.
 Prover result is: Unknown (unknown + incomplete) (12519 steps).
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File int.mlw:
   Line 13:
     Constant zero initialization
