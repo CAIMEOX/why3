@@ -4,7 +4,7 @@ module Option
 
   type option 'a = None | Some 'a
 
-  let predicate is_none (o: option 'a)
+  let predicate is_none [@stdlib] (o: option 'a)
     ensures { result <-> o = None }
   = match o with None -> true | Some _ -> false end
 

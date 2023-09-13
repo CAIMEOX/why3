@@ -8,8 +8,8 @@ module Parity
 
   use int.Int
 
-  predicate even (n: int) = exists k: int. n = 2 * k
-  predicate odd (n: int) = exists k: int. n = 2 * k + 1
+  predicate even [@stdlib] (n: int) = exists k: int. n = 2 * k
+  predicate odd [@stdlib] (n: int) = exists k: int. n = 2 * k + 1
 
   lemma even_or_odd: forall n: int. even n \/ odd n
 
@@ -39,7 +39,7 @@ module Divisibility
   use export int.Int
   use int.ComputerDivision
 
-  let predicate divides (d:int) (n:int)
+  let predicate divides [@stdlib] (d:int) (n:int)
     ensures { result <-> exists q:int. n = q * d }
   = if d = 0 then n = 0 else mod n d = 0
 
@@ -155,7 +155,7 @@ module Prime
   use export int.Int
   use Divisibility
 
-  predicate prime (p: int) =
+  predicate prime [@stdlib] (p: int) =
     2 <= p /\ forall n: int. 1 < n < p -> not (divides n p)
 
   lemma not_prime_1: not (prime 1)
@@ -187,7 +187,7 @@ module Coprime
   use Divisibility
   use Gcd
 
-  predicate coprime (a b: int) = gcd a b = 1
+  predicate coprime [@stdlib] (a b: int) = gcd a b = 1
 
   use Prime
 

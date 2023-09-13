@@ -20,7 +20,7 @@ module Matrix63
       result.rows = a.rows /\ result.columns = a.columns /\
       result.elts = M.set a.elts r (M.set (M.get a.elts r) c v) }
 
-  predicate valid_index (a: matrix 'a) (r c: int63) =
+  predicate valid_index [@stdlib] (a: matrix 'a) (r c: int63) =
     0 <= to_int r < to_int a.rows /\ 0 <= to_int c < to_int a.columns
 
   val get [@stdlib] (a: matrix 'a) (r c: int63) : 'a

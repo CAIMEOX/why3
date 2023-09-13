@@ -15,7 +15,7 @@ module Null
 
   type t 'a = abstract { v: t_model 'a }
 
-  let ghost predicate is_null (t: t 'a) =
+  let ghost predicate is_null [@stdlib] (t: t 'a) =
     match t.v with Null _ -> true | Value _ -> false end
 
   val create_null [@stdlib] () : t 'a

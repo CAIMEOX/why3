@@ -16,11 +16,11 @@ module Bag
 
   axiom occ_non_negative: forall b: bag 'a, x: 'a. nb_occ x b >= 0
 
-  predicate mem (x: 'a) (b: bag 'a) = nb_occ x b > 0
+  predicate mem [@stdlib] (x: 'a) (b: bag 'a) = nb_occ x b > 0
 
   (** equality of bags *)
 
-  predicate (==) (a b: bag 'a) =
+  predicate (==) [@stdlib] (a b: bag 'a) =
     forall x:'a. nb_occ x a = nb_occ x b
 
   axiom bag_extensionality: forall a b: bag 'a. a == b -> a = b

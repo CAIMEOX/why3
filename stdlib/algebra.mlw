@@ -127,7 +127,7 @@ module OrderedUnitaryCommutativeRing
 
   clone export UnitaryCommutativeRing with axiom .
 
-  predicate (<=) t t
+  predicate (<=) [@stdlib] t t
 
   clone export relations.TotalOrder with
     type t = t, predicate rel = (<=), axiom .
@@ -191,7 +191,7 @@ module OrderedField
 
   clone export Field with axiom .
 
-  predicate (<=) t t
+  predicate (<=) [@stdlib] t t
 
   clone export relations.TotalOrder with
     type t = t, predicate rel = (<=), axiom .

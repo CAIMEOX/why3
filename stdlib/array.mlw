@@ -204,12 +204,12 @@ module IntArraySorted
   use Array
   clone map.MapSorted as M with type elt = int, predicate le = (<=)
 
-  predicate sorted_sub (a : array int) (l u : int) =
+  predicate sorted_sub [@stdlib] (a : array int) (l u : int) =
     M.sorted_sub a.elts l u
   (** `sorted_sub a l u` is true whenever the array segment `a(l..u-1)`
       is sorted w.r.t order relation `le` *)
 
-  predicate sorted (a : array int) =
+  predicate sorted [@stdlib] (a : array int) =
     M.sorted_sub a.elts 0 a.length
   (** `sorted a` is true whenever the array `a` is sorted w.r.t `le` *)
 
@@ -222,14 +222,14 @@ module Sorted
 
   type elt
 
-  predicate le elt elt
+  predicate le [@stdlib] elt elt
 
-  predicate sorted_sub (a: array elt) (l u: int) =
+  predicate sorted_sub [@stdlib] (a: array elt) (l u: int) =
     forall i1 i2 : int. l <= i1 < i2 < u -> le a[i1] a[i2]
   (** `sorted_sub a l u` is true whenever the array segment `a(l..u-1)`
       is sorted w.r.t order relation `le` *)
 
-  predicate sorted (a: array elt) =
+  predicate sorted [@stdlib] (a: array elt) =
     forall i1 i2 : int. 0 <= i1 < i2 < length a -> le a[i1] a[i2]
   (** `sorted a` is true whenever the array `a` is sorted w.r.t `le` *)
 
@@ -243,11 +243,11 @@ module ArrayEq
   use Array
   use map.MapEq
 
-  predicate array_eq_sub (a1 a2: array 'a) (l u: int) =
+  predicate array_eq_sub [@stdlib] (a1 a2: array 'a) (l u: int) =
     a1.length = a2.length /\ 0 <= l <= a1.length /\ 0 <= u <= a1.length /\
     map_eq_sub a1.elts a2.elts l u
 
-  predicate array_eq (a1 a2: array 'a) =
+  predicate array_eq [@stdlib] (a1 a2: array 'a) =
     a1.length = a2.length /\ map_eq_sub a1.elts a2.elts 0 (length a1)
 
 end
@@ -258,7 +258,7 @@ module ArrayExchange
   use Array
   use map.MapExchange as M
 
-  predicate exchange (a1 a2: array 'a) (i j: int) =
+  predicate exchange [@stdlib] (a1 a2: array 'a) (i j: int) =
     a1.length = a2.length /\
     M.exchange a1.elts a2.elts 0 a1.length i j
   (** `exchange a1 a2 i j` means that arrays `a1` and `a2` only differ
@@ -277,14 +277,14 @@ module ArrayPermut
   use ArrayEq
   use export ArrayExchange
 
-  predicate permut (a1 a2: array 'a) (l u: int) =
+  predicate permut [@stdlib] (a1 a2: array 'a) (l u: int) =
     a1.length = a2.length /\ 0 <= l <= a1.length /\ 0 <= u <= a1.length /\
     M.permut a1.elts a2.elts l u
   (** `permut a1 a2 l u` is true when the segment
       `a1(l..u-1)` is a permutation of the segment `a2(l..u-1)`.
       Values outside of the interval `(l..u-1)` are ignored. *)
 
-  predicate permut_sub (a1 a2: array 'a) (l u: int) =
+  predicate permut_sub [@stdlib] (a1 a2: array 'a) (l u: int) =
     map_eq_sub a1.elts a2.elts 0 l /\
     permut a1 a2 l u /\
     map_eq_sub a1.elts a2.elts u (length a1)
@@ -292,7 +292,7 @@ module ArrayPermut
       `a1(l..u-1)` is a permutation of the segment `a2(l..u-1)`
       and values outside of the interval `(l..u-1)` are equal. *)
 
-  predicate permut_all (a1 a2: array 'a) =
+  predicate permut_all [@stdlib] (a1 a2: array 'a) =
     a1.length = a2.length /\ M.permut a1.elts a2.elts 0 a1.length
   (** `permut_all a1 a2 l u` is true when array `a1` is a permutation
       of array `a2`. *)
@@ -431,7 +431,7 @@ module Inversions
   use int.NumOf
 
   (* to prove termination, we count the total number of inversions *)
-  predicate inversion (a: array int) (i j: int) =
+  predicate inversion [@stdlib] (a: array int) (i j: int) =
     a[i] > a[j]
 
   function inversions_for [@stdlib] (a: array int) (i: int) : int =

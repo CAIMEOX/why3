@@ -20,8 +20,8 @@ module IntTrunc
 
   function to_int [@stdlib] (x : int) : int = x
 
-  predicate is_int int = true
-  predicate is_rat int = true
+  predicate is_int [@stdlib] int = true
+  predicate is_rat [@stdlib] int = true
 end
 
 module IntDivE
@@ -45,10 +45,10 @@ module Rat
 
   type rat
 
-  predicate (< ) (x y : rat)
-  predicate (> ) (x y : rat) = y < x
-  predicate (<=) (x y : rat) = x < y \/ x = y
-  predicate (>=) (x y : rat) = y <= x
+  predicate (< ) [@stdlib] (x y : rat)
+  predicate (> ) [@stdlib] (x y : rat) = y < x
+  predicate (<=) [@stdlib] (x y : rat) = x < y \/ x = y
+  predicate (>=) [@stdlib] (x y : rat) = y <= x
 
   clone export algebra.OrderedField
     with type t = rat, predicate (<=) = (<=)
@@ -75,8 +75,8 @@ module Rat
 
   function to_rat [@stdlib] (x : rat) : rat = x
 
-  predicate is_int (r : rat) = denominator r = 1
-  predicate is_rat rat = true
+  predicate is_int [@stdlib] (r : rat) = denominator r = 1
+  predicate is_rat [@stdlib] rat = true
 end
 
 module RatTrunc
@@ -134,8 +134,8 @@ module RealTrunc
 
   function to_int [@stdlib] (x : real) : int = Truncate.floor x
 
-  predicate is_int (r : real) = r = FromInt.from_int (Truncate.truncate r)
-  predicate is_rat (r : real) =
+  predicate is_int [@stdlib] (r : real) = r = FromInt.from_int (Truncate.truncate r)
+  predicate is_rat [@stdlib] (r : real) =
     exists n d : int. d <> 0 /\ r * FromInt.from_int d = FromInt.from_int n
 end
 

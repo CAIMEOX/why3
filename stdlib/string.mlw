@@ -93,7 +93,7 @@ module String
   axiom length_concat: forall s1 s2.
     length (concat s1 s2) = length s1 + length s2
 
-  predicate lt string string
+  predicate lt [@stdlib] string string
   (** `lt s1 s2` returns `True` iff `s1` is lexicographically smaller
   than `s2`. *)
 
@@ -108,7 +108,7 @@ module String
   axiom lt_trans: forall s1 s2 s3.
     lt s1 s2 && lt s2 s3 -> lt s1 s3
 
-  predicate le string string
+  predicate le [@stdlib] string string
   (** `le s1 s2` returns `True` iff `s1` is lexicographically smaller
   or equal than `s2`. *)
 
@@ -195,7 +195,7 @@ module String
     concat (substring s ofs len) (substring s (ofs+len) len') =
     substring s ofs (len + len')
 
-  predicate prefixof string string
+  predicate prefixof [@stdlib] string string
   (** `prefixof s1 s2` is `True` iff `s1` is a prefix of `s2`. *)
 
   axiom prefixof_substring: forall s1 s2.
@@ -210,7 +210,7 @@ module String
   axiom prefixof_empty2: forall s1.
     s1 <> empty -> not (prefixof s1 "")
 
-  predicate suffixof string string
+  predicate suffixof [@stdlib] string string
   (** `suffixof s1 s2` is `True` iff `s1` is a suffix of `s2`. *)
 
   axiom suffixof_substring: forall s1 s2.
@@ -225,7 +225,7 @@ module String
   axiom suffixof_empty2: forall s1.
     s1 <> empty -> not (suffixof s1 "")
 
-  predicate contains string string
+  predicate contains [@stdlib] string string
   (** `contains s1 s2` is `True` iff `s1` contains `s2`. *)
 
   axiom contains_prefixof: forall s1 s2.
@@ -364,7 +364,7 @@ module String
              -> to_int s = -1 *)
 
   (*** In SMT-Lib now *)
-  predicate is_digit (s:string) = 0 <= to_int s <= 9 && length s = 1
+  predicate is_digit [@stdlib] (s:string) = 0 <= to_int s <= 9 && length s = 1
   (** `is_digit s` returns `True` iff `s` is of length `1` and
       corresponds to a decimal digit, that is, to a code point in the
       range 0x30 ... 0x39 *)
@@ -433,7 +433,7 @@ module Char
 
   function ([]) [@stdlib] (s: string) (i: int) : char = get s i
 
-  predicate eq_string (s1 s2: string) = length s1 = length s2 &&
+  predicate eq_string [@stdlib] (s1 s2: string) = length s1 = length s2 &&
     (forall i. 0 <= i < length s1 -> get s1 i = get s2 i)
 
   axiom extensionality [@W:non_conservative_extension:N]:

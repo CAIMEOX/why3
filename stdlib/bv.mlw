@@ -317,7 +317,7 @@ module BV_Gen
 *)
   axiom max_int_val : max_int = two_power_size - 1
 
-  predicate is_signed_positive t
+  predicate is_signed_positive [@stdlib] t
 
   function to_uint [@stdlib] t : int
   val to_uint (x:t) : int  ensures { result = to_uint x }
@@ -336,7 +336,7 @@ module BV_Gen
   meta "remove_unused:dependency" axiom to_int_extensionality, function to_int
 
 (*  *)
-  predicate uint_in_range (i : int) = (Int.(<=) 0 i) /\ (Int.(<=) i max_int)
+  predicate uint_in_range [@stdlib] (i : int) = (Int.(<=) 0 i) /\ (Int.(<=) i max_int)
 (*  *)
 
   axiom to_uint_bounds :
@@ -370,7 +370,7 @@ module BV_Gen
 
   use export why3.WellFounded.WellFounded
 
-  let predicate ult (x y : t) =
+  let predicate ult [@stdlib] (x y : t) =
     Int.(<) (to_uint x) (to_uint y)
 
   (* note : the following must be a lemma so that it is cloned in the instances *)
@@ -378,37 +378,37 @@ module BV_Gen
   meta "vc:proved_wf" predicate ult, lemma ult_wf
   meta "remove_unused:dependency" lemma ult_wf, predicate ult
 
-  let predicate ule (x y : t) =
+  let predicate ule [@stdlib] (x y : t) =
     Int.(<=) (to_uint x) (to_uint y)
 
-  let predicate ugt (x y : t) =
+  let predicate ugt [@stdlib] (x y : t) =
     Int.(>) (to_uint x) (to_uint y)
 
   lemma ugt_wf : well_founded ugt
   meta "vc:proved_wf" predicate ugt, lemma ugt_wf
   meta "remove_unused:dependency" lemma ugt_wf, predicate ugt
 
-  let predicate uge (x y : t) =
+  let predicate uge [@stdlib] (x y : t) =
     Int.(>=) (to_uint x) (to_uint y)
 
-  let predicate slt (v1 v2 : t) =
+  let predicate slt [@stdlib] (v1 v2 : t) =
     Int.(<) (to_int v1) (to_int v2)
 
   lemma slt_wf : well_founded slt
   meta "vc:proved_wf" predicate slt, lemma slt_wf
   meta "remove_unused:dependency" lemma slt_wf, predicate slt
 
-let predicate sle (v1 v2 : t) =
+let predicate sle [@stdlib] (v1 v2 : t) =
     Int.(<=) (to_int v1) (to_int v2)
 
-  let predicate sgt (v1 v2 : t) =
+  let predicate sgt [@stdlib] (v1 v2 : t) =
     Int.(>) (to_int v1) (to_int v2)
 
   lemma sgt_wf : well_founded sgt
   meta "vc:proved_wf" predicate sgt, lemma sgt_wf
   meta "remove_unused:dependency" lemma sgt_wf, predicate sgt
 
-  let predicate sge (v1 v2 : t) =
+  let predicate sge [@stdlib] (v1 v2 : t) =
     Int.(>=) (to_int v1) (to_int v2)
 
   axiom positive_is_ge_zeros:
@@ -553,14 +553,14 @@ let predicate sle (v1 v2 : t) =
 
   (** equality axioms *)
 
-  predicate eq_sub_bv t t t t
+  predicate eq_sub_bv [@stdlib] t t t t
 
   axiom eq_sub_bv_def: forall a b i n.
     let mask = lsl_bv (sub (lsl_bv one n) one) i in
       eq_sub_bv a b i n = (bw_and b mask = bw_and a mask)
   meta "remove_unused:dependency" axiom eq_sub_bv_def, predicate eq_sub_bv
 
-  predicate eq_sub (a b:t) (i n:int) =
+  predicate eq_sub [@stdlib] (a b:t) (i n:int) =
     forall j. i <= j < i + n -> nth a j = nth b j
 
   axiom eq_sub_equiv: forall a b i n:t.
@@ -569,7 +569,7 @@ let predicate sle (v1 v2 : t) =
   meta "remove_unused:dependency" axiom eq_sub_equiv, predicate eq_sub_bv
   meta "remove_unused:dependency" axiom eq_sub_equiv, predicate eq_sub
 
-  predicate (==) (v1 v2 : t) =
+  predicate (==) [@stdlib] (v1 v2 : t) =
     eq_sub v1 v2 0 size
 
   axiom Extensionality [@W:non_conservative_extension:N] :
@@ -758,7 +758,7 @@ module BVConverter_Gen
   type bigBV
   type smallBV
 
-  predicate in_small_range bigBV
+  predicate in_small_range [@stdlib] bigBV
 
   function to_uint_small [@stdlib] smallBV : int
   function to_uint_big [@stdlib] bigBV : int
@@ -785,7 +785,7 @@ module BVConverter_128_256
   use BV128 as BV128
   use BV256 as BV256
 
-  predicate in_range (b : BV256.t) = BV256.ule b (0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF:BV256.t)
+  predicate in_range [@stdlib] (b : BV256.t) = BV256.ule b (0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF:BV256.t)
 
   clone export BVConverter_Gen with
     type bigBV = BV256.t,
@@ -802,7 +802,7 @@ module BVConverter_64_128
   use BV64 as BV64
   use BV128 as BV128
 
-  predicate in_range (b : BV128.t) = BV128.ule b (0xFFFF_FFFF_FFFF_FFFF:BV128.t)
+  predicate in_range [@stdlib] (b : BV128.t) = BV128.ule b (0xFFFF_FFFF_FFFF_FFFF:BV128.t)
 
   clone export BVConverter_Gen with
     type bigBV = BV128.t,
@@ -819,7 +819,7 @@ module BVConverter_32_128
   use BV32 as BV32
   use BV128 as BV128
 
-  predicate in_range (b : BV128.t) = BV128.ule b (0xFFFF_FFFF:BV128.t)
+  predicate in_range [@stdlib] (b : BV128.t) = BV128.ule b (0xFFFF_FFFF:BV128.t)
 
   clone export BVConverter_Gen with
     type bigBV = BV128.t,
@@ -836,7 +836,7 @@ module BVConverter_16_128
   use BV16 as BV16
   use BV128 as BV128
 
-  predicate in_range (b : BV128.t) = BV128.ule b (0xFFFF:BV128.t)
+  predicate in_range [@stdlib] (b : BV128.t) = BV128.ule b (0xFFFF:BV128.t)
 
   clone export BVConverter_Gen with
     type bigBV = BV128.t,
@@ -852,7 +852,7 @@ module BVConverter_8_128
   use BV8 as BV8
   use BV128 as BV128
 
-  predicate in_range (b : BV128.t) = BV128.ule b (0xFF:BV128.t)
+  predicate in_range [@stdlib] (b : BV128.t) = BV128.ule b (0xFF:BV128.t)
 
   clone export BVConverter_Gen with
     type bigBV = BV128.t,
@@ -868,7 +868,7 @@ module BVConverter_32_64
   use BV32 as BV32
   use BV64 as BV64
 
-  predicate in_range (b : BV64.t) = BV64.ule b (0xFFFF_FFFF:BV64.t)
+  predicate in_range [@stdlib] (b : BV64.t) = BV64.ule b (0xFFFF_FFFF:BV64.t)
 
   clone export BVConverter_Gen with
     type bigBV = BV64.t,
@@ -885,7 +885,7 @@ module BVConverter_16_64
   use BV16 as BV16
   use BV64 as BV64
 
-  predicate in_range (b : BV64.t) = BV64.ule b (0xFFFF:BV64.t)
+  predicate in_range [@stdlib] (b : BV64.t) = BV64.ule b (0xFFFF:BV64.t)
 
   clone export BVConverter_Gen with
     type bigBV = BV64.t,
@@ -901,7 +901,7 @@ module BVConverter_8_64
   use BV8 as BV8
   use BV64 as BV64
 
-  predicate in_range (b : BV64.t) = BV64.ule b (0xFF:BV64.t)
+  predicate in_range [@stdlib] (b : BV64.t) = BV64.ule b (0xFF:BV64.t)
 
   clone export BVConverter_Gen with
     type bigBV = BV64.t,
@@ -917,7 +917,7 @@ module BVConverter_16_32
   use BV16 as BV16
   use BV32 as BV32
 
-  predicate in_range (b : BV32.t) = BV32.ule b (0xFFFF:BV32.t)
+  predicate in_range [@stdlib] (b : BV32.t) = BV32.ule b (0xFFFF:BV32.t)
 
   clone export BVConverter_Gen with
     type bigBV = BV32.t,
@@ -933,7 +933,7 @@ module BVConverter_8_32
   use BV8 as BV8
   use BV32 as BV32
 
-  predicate in_range (b : BV32.t) = BV32.ule b (0xFF:BV32.t)
+  predicate in_range [@stdlib] (b : BV32.t) = BV32.ule b (0xFF:BV32.t)
 
   clone export BVConverter_Gen with
     type bigBV = BV32.t,
@@ -949,7 +949,7 @@ module BVConverter_8_16
   use BV8 as BV8
   use BV16 as BV16
 
-  predicate in_range (b : BV16.t) = BV16.ule b (0xFF:BV16.t)
+  predicate in_range [@stdlib] (b : BV16.t) = BV16.ule b (0xFF:BV16.t)
 
   clone export BVConverter_Gen with
     type bigBV = BV16.t,

@@ -154,7 +154,7 @@ module Python
 
   use seq.Permut
 
-  predicate is_permutation (l1 l2: list 'a)
+  predicate is_permutation [@stdlib] (l1 l2: list 'a)
   = ([@expl:equality of length] length l1 = length l2)
       /\ ([@expl:equality of elements] permut l1 l2 0 (length l2))
 

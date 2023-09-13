@@ -7,7 +7,7 @@ module List
 
   type list 'a = Nil | Cons 'a (list 'a)
 
-  let predicate is_nil (l:list 'a)
+  let predicate is_nil [@stdlib] (l:list 'a)
     ensures { result <-> l = Nil }
   =
     match l with Nil -> true | Cons _ _ -> false end
@@ -38,7 +38,7 @@ end
 module Mem
   use List
 
-  predicate mem (x: 'a) (l: list 'a) = match l with
+  predicate mem [@stdlib] (x: 'a) (l: list 'a) = match l with
     | Nil      -> false
     | Cons y r -> x = y \/ mem x r
     end
@@ -345,7 +345,7 @@ module Sorted
   use List
 
   type t
-  predicate le t t
+  predicate le [@stdlib] t t
   clone relations.Transitive with
     type t = t, predicate rel = le, axiom Trans
 
@@ -386,7 +386,7 @@ end
 module RevSorted
 
   type t
-  predicate le t t
+  predicate le [@stdlib] t t
   clone relations.Transitive with
     type t = t, predicate rel = le, axiom Trans
   predicate ge (x y: t) = le y x
@@ -396,7 +396,7 @@ module RevSorted
   clone Sorted as Incr with type t = t, predicate le = le, goal .
   clone Sorted as Decr with type t = t, predicate le = ge, goal .
 
-  predicate compat (s t: list t) =
+  predicate compat [@stdlib] (s t: list t) =
     match s, t with
     | Cons x _, Cons y _ -> le x y
     | _, _ -> true
@@ -458,7 +458,7 @@ module Permut
   use NumOcc
   use List
 
-  predicate permut (l1: list 'a) (l2: list 'a) =
+  predicate permut [@stdlib] (l1: list 'a) (l2: list 'a) =
     forall x: 'a. num_occ x l1 = num_occ x l2
 
   lemma Permut_refl: forall l: list 'a. permut l l

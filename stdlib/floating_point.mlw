@@ -102,7 +102,7 @@ module GenFloat
 
   constant max : real
 
-  predicate no_overflow (m:mode) (x:real) = abs (round m x) <= max
+  predicate no_overflow [@stdlib] (m:mode) (x:real) = abs (round m x) <= max
 
   axiom Bounded_real_no_overflow :
     forall m:mode, x:real. abs x <= max -> no_overflow m x
@@ -200,41 +200,41 @@ module GenFloatSpecStrict
   clone export GenFloat with axiom .
 
 
-  predicate of_real_post (m:mode) (x:real) (res:t) =
+  predicate of_real_post [@stdlib] (m:mode) (x:real) (res:t) =
     value res = round m x /\ exact res = x /\ model res = x
 
   (** {3 binary operations} *)
 
-  predicate add_post (m:mode) (x y res:t) =
+  predicate add_post [@stdlib] (m:mode) (x y res:t) =
     value res = round m (value x + value y) /\
     exact res = exact x + exact y /\
     model res = model x + model y
 
-  predicate sub_post (m:mode) (x y res:t) =
+  predicate sub_post [@stdlib] (m:mode) (x y res:t) =
     value res = round m (value x - value y) /\
     exact res = exact x - exact y /\
     model res = model x - model y
 
-  predicate mul_post (m:mode) (x y res:t) =
+  predicate mul_post [@stdlib] (m:mode) (x y res:t) =
     value res = round m (value x * value y) /\
     exact res = exact x * exact y /\
     model res = model x * model y
 
-  predicate div_post (m:mode) (x y res:t) =
+  predicate div_post [@stdlib] (m:mode) (x y res:t) =
     value res = round m (value x / value y) /\
     exact res = exact x / exact y /\
     model res = model x / model y
 
-  predicate neg_post (x res:t) =
+  predicate neg_post [@stdlib] (x res:t) =
     value res = - value x /\
     exact res = - exact x /\
     model res = - model x
 
   (** {3 Comparisons} *)
 
-  predicate lt (x:t) (y:t) = value x < value y
+  predicate lt [@stdlib] (x:t) (y:t) = value x < value y
 
-  predicate gt (x:t) (y:t) = value x > value y
+  predicate gt [@stdlib] (x:t) (y:t) = value x > value y
 
 
 end
@@ -287,32 +287,32 @@ module GenFloatFull
 
   function class [@stdlib] t : class
 
-  predicate is_finite (x:t) = class x = Finite
-  predicate is_infinite (x:t) = class x = Infinite
-  predicate is_NaN (x:t) = class x = NaN
-  predicate is_not_NaN (x:t) = is_finite x \/ is_infinite x
+  predicate is_finite [@stdlib] (x:t) = class x = Finite
+  predicate is_infinite [@stdlib] (x:t) = class x = Infinite
+  predicate is_NaN [@stdlib] (x:t) = class x = NaN
+  predicate is_not_NaN [@stdlib] (x:t) = is_finite x \/ is_infinite x
 
   lemma is_not_NaN: forall x:t. is_not_NaN x <-> not (is_NaN x)
 
   function sign [@stdlib] t  : sign
 
-  predicate same_sign_real (x:t) (y:real) =
+  predicate same_sign_real [@stdlib] (x:t) (y:real) =
     SpecialValues.same_sign_real (sign x) y
-  predicate same_sign (x:t) (y:t)  = sign x = sign y
-  predicate diff_sign (x:t) (y:t)  = sign x <> sign y
+  predicate same_sign [@stdlib] (x:t) (y:t)  = sign x = sign y
+  predicate diff_sign [@stdlib] (x:t) (y:t)  = sign x <> sign y
 
-  predicate sign_zero_result (m:mode) (x:t) =
+  predicate sign_zero_result [@stdlib] (m:mode) (x:t) =
     value x = 0.0 ->
     match m with
     | Down -> sign x = Neg
     | _ -> sign x = Pos
     end
 
-  predicate is_minus_infinity (x:t) = is_infinite x /\ sign x = Neg
-  predicate is_plus_infinity (x:t) = is_infinite x /\ sign x = Pos
-  predicate is_gen_zero (x:t) = is_finite x /\ value x = 0.0
-  predicate is_gen_zero_plus (x:t) = is_gen_zero x /\ sign x = Pos
-  predicate is_gen_zero_minus (x:t) = is_gen_zero x /\ sign x = Neg
+  predicate is_minus_infinity [@stdlib] (x:t) = is_infinite x /\ sign x = Neg
+  predicate is_plus_infinity [@stdlib] (x:t) = is_infinite x /\ sign x = Pos
+  predicate is_gen_zero [@stdlib] (x:t) = is_finite x /\ value x = 0.0
+  predicate is_gen_zero_plus [@stdlib] (x:t) = is_gen_zero x /\ sign x = Pos
+  predicate is_gen_zero_minus [@stdlib] (x:t) = is_gen_zero x /\ sign x = Neg
 
   (** {3 Useful lemmas on sign} *)
 
@@ -353,7 +353,7 @@ module GenFloatFull
 
   (** This predicate tells what is the result of a rounding in case
       of overflow *)
-  predicate overflow_value (m:mode) (x:t) =
+  predicate overflow_value [@stdlib] (m:mode) (x:t) =
     match m, sign x with
     | Down, Neg -> is_infinite x
     | Down, Pos -> is_finite x /\ value x = max
@@ -427,7 +427,7 @@ module GenFloatSpecFull
 
   (** {3 binary operations} *)
 
-  predicate add_post (m:mode) (x:t) (y:t) (r:t) =
+  predicate add_post [@stdlib] (m:mode) (x:t) (y:t) (r:t) =
     (is_NaN x \/ is_NaN y -> is_NaN r)
     /\
     (is_finite x /\ is_infinite y -> is_infinite r /\ same_sign r y)
@@ -450,7 +450,7 @@ module GenFloatSpecFull
     /\ exact r = exact x + exact y
     /\ model r = model x + model y
 
-  predicate sub_post (m:mode) (x:t) (y:t) (r:t) =
+  predicate sub_post [@stdlib] (m:mode) (x:t) (y:t) (r:t) =
     (is_NaN x \/ is_NaN y -> is_NaN r)
     /\
     (is_finite x /\ is_infinite y -> is_infinite r /\ diff_sign r y)
@@ -473,10 +473,10 @@ module GenFloatSpecFull
     /\ exact r = exact x - exact y
     /\ model r = model x - model y
 
-  predicate product_sign (z x y: t) =
+  predicate product_sign [@stdlib] (z x y: t) =
     (same_sign x y -> sign z = Pos) /\ (diff_sign x y -> sign z = Neg)
 
-  predicate mul_post (m:mode) (x:t) (y:t) (r:t) =
+  predicate mul_post [@stdlib] (m:mode) (x:t) (y:t) (r:t) =
     (is_NaN x \/ is_NaN y -> is_NaN r)
     /\ (is_gen_zero x /\ is_infinite y -> is_NaN r)
     /\ (is_finite x /\ is_infinite y /\ value x <> 0.0
@@ -493,7 +493,7 @@ module GenFloatSpecFull
     /\ exact r = exact x * exact y
     /\ model r = model x * model y
 
-  predicate neg_post (x:t) (r:t) =
+  predicate neg_post [@stdlib] (x:t) (r:t) =
     (is_NaN x -> is_NaN r)
     /\ (is_infinite x -> is_infinite r)
     /\ (is_finite x -> is_finite r /\ value r = - value x)
@@ -501,7 +501,7 @@ module GenFloatSpecFull
     /\ exact r = - exact x
     /\ model r = - model x
 
-  predicate div_post (m:mode) (x:t) (y:t) (r:t) =
+  predicate div_post [@stdlib] (m:mode) (x:t) (y:t) (r:t) =
     (is_NaN x \/ is_NaN y -> is_NaN r)
     /\ (is_finite x /\ is_infinite y -> is_gen_zero r)
     /\ (is_infinite x /\ is_finite y -> is_infinite r)
@@ -519,7 +519,7 @@ module GenFloatSpecFull
     /\ exact r = exact x / exact y
     /\ model r = model x / model y
 
-  predicate fma_post (m:mode) (x y z:t) (r:t) =
+  predicate fma_post [@stdlib] (m:mode) (x y z:t) (r:t) =
     (is_NaN x \/ is_NaN y \/ is_NaN z -> is_NaN r)
     /\ (is_gen_zero x /\ is_infinite y -> is_NaN r)
     /\ (is_infinite x /\ is_gen_zero y -> is_NaN r)
@@ -554,7 +554,7 @@ module GenFloatSpecFull
     /\ exact r = exact x * exact y + exact z
     /\ model r = model x * model y + model z
 
-  predicate sqrt_post (m:mode) (x:t) (r:t) =
+  predicate sqrt_post [@stdlib] (m:mode) (x:t) (r:t) =
     (is_NaN x -> is_NaN r)
     /\ (is_plus_infinity x -> is_plus_infinity r)
     /\ (is_minus_infinity x -> is_NaN r)
@@ -566,30 +566,30 @@ module GenFloatSpecFull
     /\ exact r = sqrt (exact x)
     /\ model r = sqrt (model x)
 
-  predicate of_real_exact_post (x:real) (r:t) =
+  predicate of_real_exact_post [@stdlib] (x:real) (r:t) =
     is_finite r /\ value r = x /\ exact r = x /\ model r = x
 
   (** {3 Comparisons} *)
 
-  predicate le (x:t) (y:t) =
+  predicate le [@stdlib] (x:t) (y:t) =
     (is_finite x /\ is_finite y /\ value x <= value y)
     \/ (is_minus_infinity x /\ is_not_NaN y)
     \/ (is_not_NaN x /\ is_plus_infinity y)
 
-  predicate lt (x:t) (y:t) =
+  predicate lt [@stdlib] (x:t) (y:t) =
     (is_finite x /\ is_finite y /\ value x < value y)
     \/ (is_minus_infinity x /\ is_not_NaN y /\ not (is_minus_infinity y))
     \/ (is_not_NaN x /\ not (is_plus_infinity x) /\ is_plus_infinity y)
 
-  predicate ge (x:t) (y:t) = le y x
+  predicate ge [@stdlib] (x:t) (y:t) = le y x
 
-  predicate gt (x:t) (y:t) = lt y x
+  predicate gt [@stdlib] (x:t) (y:t) = lt y x
 
-  predicate eq (x:t) (y:t) =
+  predicate eq [@stdlib] (x:t) (y:t) =
     (is_finite x /\ is_finite y /\ value x = value y) \/
     (is_infinite x /\ is_infinite y /\ same_sign x y)
 
-  predicate ne (x:t) (y:t) = not (eq x y)
+  predicate ne [@stdlib] (x:t) (y:t) = not (eq x y)
 
   lemma le_lt_trans:
     forall x y z:t. le x y /\ lt y z -> lt x z
@@ -660,7 +660,7 @@ module GenFloatSpecMultiRounding
   constant eps_normalized : real
   constant eta_normalized : real
 
-  predicate add_post (_m:mode) (x y res:t) =
+  predicate add_post [@stdlib] (_m:mode) (x y res:t) =
     ((* CASE 1 : normalized numbers *)
      (abs(value x + value y) >= min_normalized ->
       abs(value res - (value x + value y)) <= eps_normalized * abs(value x + value y))
@@ -674,7 +674,7 @@ module GenFloatSpecMultiRounding
     model res = model x + model y
 
 
-  predicate sub_post (_m:mode) (x y res:t) =
+  predicate sub_post [@stdlib] (_m:mode) (x y res:t) =
     ((* CASE 1 : normalized numbers *)
      (abs(value x - value y) >= min_normalized ->
       abs(value res - (value x - value y)) <= eps_normalized * abs(value x - value y))
@@ -688,7 +688,7 @@ module GenFloatSpecMultiRounding
     model res = model x - model y
 
 
-  predicate mul_post (_m:mode) (x y res:t) =
+  predicate mul_post [@stdlib] (_m:mode) (x y res:t) =
     ((* CASE 1 : normalized numbers *)
      (abs(value x * value y) >= min_normalized ->
       abs(value res - (value x * value y)) <= eps_normalized * abs(value x * value y))
@@ -700,7 +700,7 @@ module GenFloatSpecMultiRounding
    /\ model res = model x * model y
 
 
-  predicate neg_post (_m:mode) (x res:t) =
+  predicate neg_post [@stdlib] (_m:mode) (x res:t) =
    ((abs(value x) >= min_normalized ->
      abs(value res - (- value x)) <= eps_normalized * abs(- value x))
     /\
@@ -709,17 +709,17 @@ module GenFloatSpecMultiRounding
    /\ exact res = - exact x
    /\ model res = - model x
 
-  predicate of_real_post (m:mode) (x:real) (res:t) =
+  predicate of_real_post [@stdlib] (m:mode) (x:real) (res:t) =
     value res = round m x /\ exact res = x /\ model res = x
 
-  predicate of_real_exact_post (x:real) (r:t) =
+  predicate of_real_exact_post [@stdlib] (x:real) (r:t) =
     value r = x /\ exact r = x /\ model r = x
 
   (** {3 Comparisons} *)
 
-  predicate lt (x:t) (y:t) = value x < value y
+  predicate lt [@stdlib] (x:t) (y:t) = value x < value y
 
-  predicate gt (x:t) (y:t) = value x > value y
+  predicate gt [@stdlib] (x:t) (y:t) = value x > value y
 
 end
 

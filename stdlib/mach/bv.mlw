@@ -46,15 +46,15 @@ module BVCheck_Gen
   function asr    [@stdlib] t int : t
   function asr_bv [@stdlib] t t   : t
 
-  predicate ule t t
-  predicate ult t t
-  predicate uge t t
-  predicate ugt t t
+  predicate ule [@stdlib] t t
+  predicate ult [@stdlib] t t
+  predicate uge [@stdlib] t t
+  predicate ugt [@stdlib] t t
 
-  predicate sle t t
-  predicate slt t t
-  predicate sge t t
-  predicate sgt t t
+  predicate sle [@stdlib] t t
+  predicate slt [@stdlib] t t
+  predicate sge [@stdlib] t t
+  predicate sgt [@stdlib] t t
 
   use bv.BV128 as BV128
 

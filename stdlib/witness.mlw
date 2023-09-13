@@ -33,7 +33,7 @@ module Nat
 
   (** since a custom variant relation has to be a toplevel predicate symbol,
       we store the predicate `p` inside the variant expression *)
-  predicate r (x y: ((int->bool),int)) =
+  predicate r [@stdlib] (x y: ((int->bool),int)) =
     let p, x = x in
     let q, y = y in
     p = q && x = y+1 > 0 && not (p y)

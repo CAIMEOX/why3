@@ -9,8 +9,8 @@ module C
   use array.Array
   use map.Map
   use int.Int
-  predicate in_us_bounds (n:int) = 0 <= n <= UInt32.max_uint32
-  predicate in_bounds (n:int) = min_int32 <= n <= max_int32
+  predicate in_us_bounds [@stdlib] (n:int) = 0 <= n <= UInt32.max_uint32
+  predicate in_bounds [@stdlib] (n:int) = min_int32 <= n <= max_int32
   use ref.Ref
 
   type zone
@@ -37,7 +37,7 @@ module C
   val null [@stdlib] () : ptr 'a
     ensures { result.zone = null_zone }
 
-  val predicate is_not_null (p:ptr 'a) : bool
+  val predicate is_not_null [@stdlib] (p:ptr 'a) : bool
     ensures { result <-> p.zone <> null_zone }
 
   (** pointer incrementation *)
@@ -82,10 +82,10 @@ module C
  =
     set (incr p ofs) v
 
-  predicate valid_ptr_shift (p:ptr 'a) (i:int) =
+  predicate valid_ptr_shift [@stdlib] (p:ptr 'a) (i:int) =
     p.min <= p.offset + i < p.max
 
-  predicate valid (p:ptr 'a) (sz:int) =
+  predicate valid [@stdlib] (p:ptr 'a) (sz:int) =
     in_bounds sz /\ 0 <= sz /\ 0 <= p.min <= p.offset
     /\ p.offset + sz <= p.max <= plength p
 
@@ -311,7 +311,7 @@ module String [@W:non_conservative_extension:N]
   axiom strlen_invalid:
     forall s ofs. (forall i. 0 <= i -> code s[ofs + i] <> 0) -> strlen s ofs < 0
 
-  predicate valid_string (p: ptr char)
+  predicate valid_string [@stdlib] (p: ptr char)
     = strlen (pelts p) (offset p) >= 0
       /\ valid p (1 + strlen (pelts p) (offset p))
 

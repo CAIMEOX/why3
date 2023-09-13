@@ -51,7 +51,7 @@ module Bounded_int
   val to_int [@stdlib] (n:t) : int
     ensures { result = n }
 
-  predicate in_bounds (n:int) = min <= n <= max
+  predicate in_bounds [@stdlib] (n:int) = min <= n <= max
 
   axiom to_int_in_bounds: forall n:t. in_bounds n
 
@@ -384,7 +384,7 @@ module UInt32GMP
     ensures { to_int result
             = div (to_int l + (max_uint32+1) * to_int h) (to_int d) }
 
-  val predicate is_msb_set (x:uint32) : bool
+  val predicate is_msb_set [@stdlib] (x:uint32) : bool
     ensures { result <-> 2 * to_int x > max_uint32 }
 
   val count_leading_zeros [@stdlib] (x:uint32) : int32
@@ -645,7 +645,7 @@ module UInt64GMP
     ensures { to_int result
             = div (to_int l + (max_uint64+1) * to_int h) (to_int d) }
 
-  val predicate is_msb_set (x:uint64) : bool
+  val predicate is_msb_set [@stdlib] (x:uint64) : bool
     ensures { result <-> 2 * to_int x > max_uint64 }
 
   val count_leading_zeros [@stdlib] (x:uint64) : int32

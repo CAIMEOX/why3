@@ -103,7 +103,7 @@ module TagSetIntf
           ensures { result.all = h.elts }
           alias { result.iterating with h.iterated }
 
-      predicate is_empty (i:iterator) = S.is_empty i.todo
+      predicate is_empty [@stdlib] (i:iterator) = S.is_empty i.todo
 
       val is_empty [@stdlib] (i:iterator) : bool
           ensures { result = (S.is_empty i.todo) }
@@ -269,7 +269,7 @@ module TagSet
         }
 
 
-      predicate is_empty (i:iterator) = S.is_empty i.todo
+      predicate is_empty [@stdlib] (i:iterator) = S.is_empty i.todo
 
       let is_empty [@stdlib] (i:iterator) : bool
           ensures { result = (S.is_empty i.todo) } =

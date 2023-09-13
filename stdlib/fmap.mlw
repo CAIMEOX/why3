@@ -15,23 +15,23 @@ module Fmap
   }
   meta coercion function contents
 
-  predicate (==) (m1 m2: fmap 'k 'v) =
+  predicate (==) [@stdlib] (m1 m2: fmap 'k 'v) =
     S.(==) m1.domain m2.domain /\
     forall k. S.mem k m1.domain -> m1[k] = m2[k]
 
   axiom extensionality:
     forall m1 m2: fmap 'k 'v. m1 == m2 -> m1 = m2
 
-  predicate mem (k: 'k) (m: fmap 'k 'v) =
+  predicate mem [@stdlib] (k: 'k) (m: fmap 'k 'v) =
     S.mem k m.domain
 
-  predicate mapsto (k: 'k) (v: 'v) (m: fmap 'k 'v) =
+  predicate mapsto [@stdlib] (k: 'k) (v: 'v) (m: fmap 'k 'v) =
     mem k m /\ m[k] = v
 
   lemma mem_mapsto:
     forall k: 'k, m: fmap 'k 'v. mem k m -> mapsto k m[k] m
 
-  predicate is_empty (m: fmap 'k 'v) =
+  predicate is_empty [@stdlib] (m: fmap 'k 'v) =
     S.is_empty m.domain
 
   function mk [@stdlib] (d: S.fset 'k) (m: 'k -> 'v) : fmap 'k 'v

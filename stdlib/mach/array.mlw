@@ -333,7 +333,7 @@ module Array63Exchange
   use Array63
   use seq.Exchange as SE
 
-  predicate exchange (a1 a2: array 'a) (i j: int) =
+  predicate exchange [@stdlib] (a1 a2: array 'a) (i j: int) =
     SE.exchange a1.elts a2.elts i j
   (** `exchange a1 a2 i j` means that arrays `a1` and `a2` only differ
       by the swapping of elements at indices `i` and `j` *)
@@ -367,16 +367,16 @@ module Array63Permut
   use seq.Permut as SP
   use Array63Exchange
 
-  predicate permut (a1 a2: array 'a) (l u: int) =
+  predicate permut [@stdlib] (a1 a2: array 'a) (l u: int) =
     SP.permut a1.elts a2.elts l u
   (** `permut a1 a2 l u` is true when the segment
       `a1(l..u-1)` is a permutation of the segment `a2(l..u-1)`.
       Values outside of the interval `(l..u-1)` are ignored. *)
 
-  predicate array_eq (a1 a2: array 'a) (l u: int) =
+  predicate array_eq [@stdlib] (a1 a2: array 'a) (l u: int) =
     seq_eq_sub a1.elts a2.elts l u
 
-  predicate permut_sub (a1 a2: array 'a) (l u: int) =
+  predicate permut_sub [@stdlib] (a1 a2: array 'a) (l u: int) =
     seq_eq_sub a1.elts a2.elts 0 l /\
     permut a1 a2 l u /\
     seq_eq_sub a1.elts a2.elts u (length a1)
@@ -384,7 +384,7 @@ module Array63Permut
       `a1(l..u-1)` is a permutation of the segment `a2(l..u-1)`
       and values outside of the interval `(l..u-1)` are equal. *)
 
-  predicate permut_all (a1 a2: array 'a) =
+  predicate permut_all [@stdlib] (a1 a2: array 'a) =
     SP.permut a1.elts a2.elts 0 a1.length
   (** `permut_all a1 a2 l u` is true when array `a1` is a permutation
       of array `a2`. *)

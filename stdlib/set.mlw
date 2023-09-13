@@ -30,16 +30,16 @@ module Set
   meta "material_type_arg" type set, 0
 
   (** membership *)
-  predicate mem (x: 'a) (s: set 'a) = s[x]
+  predicate mem [@stdlib] (x: 'a) (s: set 'a) = s[x]
 
   (** equality *)
-  predicate (==) (s1 s2: set 'a) = forall x: 'a. mem x s1 <-> mem x s2
+  predicate (==) [@stdlib] (s1 s2: set 'a) = forall x: 'a. mem x s1 <-> mem x s2
 
   lemma extensionality:
     forall s1 s2: set 'a. s1 == s2 -> s1 = s2
 
   (** inclusion *)
-  predicate subset (s1 s2: set 'a) = forall x : 'a. mem x s1 -> mem x s2
+  predicate subset [@stdlib] (s1 s2: set 'a) = forall x : 'a. mem x s1 -> mem x s2
 
   lemma subset_refl:
     forall s: set 'a. subset s s
@@ -48,7 +48,7 @@ module Set
     forall s1 s2 s3: set 'a. subset s1 s2 -> subset s2 s3 -> subset s1 s3
 
   (** empty set *)
-  predicate is_empty (s: set 'a) = forall x: 'a. not (mem x s)
+  predicate is_empty [@stdlib] (s: set 'a) = forall x: 'a. not (mem x s)
 
   let constant empty: set 'a = const false
 
@@ -115,7 +115,7 @@ module Set
   axiom pick_def: forall s: set 'a. not (is_empty s) -> mem (pick s) s
 
   (** disjoint sets *)
-  predicate disjoint (s1 s2: set 'a) =
+  predicate disjoint [@stdlib] (s1 s2: set 'a) =
     forall x. not (mem x s1) \/ not (mem x s2)
 
   lemma disjoint_inter_empty:
@@ -155,7 +155,7 @@ module Cardinal
 
   use Set
 
-  predicate is_finite (s: set 'a)
+  predicate is_finite [@stdlib] (s: set 'a)
 
   axiom is_finite_empty:
     forall s: set 'a. is_empty s -> is_finite s
@@ -262,16 +262,16 @@ module Fset
   meta "material_type_arg" type fset, 0
 
   (** membership *)
-  predicate mem (x: 'a) (s: fset 'a) (* = s.to_map[x] *)
+  predicate mem [@stdlib] (x: 'a) (s: fset 'a) (* = s.to_map[x] *)
 
   (** equality *)
-  predicate (==) (s1 s2: fset 'a) = forall x: 'a. mem x s1 <-> mem x s2
+  predicate (==) [@stdlib] (s1 s2: fset 'a) = forall x: 'a. mem x s1 <-> mem x s2
 
   lemma extensionality:
     forall s1 s2: fset 'a. s1 == s2 -> s1 = s2
 
   (** inclusion *)
-  predicate subset (s1 s2: fset 'a) = forall x : 'a. mem x s1 -> mem x s2
+  predicate subset [@stdlib] (s1 s2: fset 'a) = forall x : 'a. mem x s1 -> mem x s2
 
   lemma subset_refl:
     forall s: fset 'a. subset s s
@@ -280,7 +280,7 @@ module Fset
     forall s1 s2 s3: fset 'a. subset s1 s2 -> subset s2 s3 -> subset s1 s3
 
   (** empty set *)
-  predicate is_empty (s: fset 'a) = forall x: 'a. not (mem x s)
+  predicate is_empty [@stdlib] (s: fset 'a) = forall x: 'a. not (mem x s)
 
   constant empty: fset 'a
   (* axiom empty_def: (empty: fset 'a).to_map = const false *)
@@ -348,7 +348,7 @@ module Fset
   axiom pick_def: forall s: fset 'a. not (is_empty s) -> mem (pick s) s
 
   (** disjoint sets *)
-  predicate disjoint (s1 s2: fset 'a) =
+  predicate disjoint [@stdlib] (s1 s2: fset 'a) =
     forall x. not (mem x s1) \/ not (mem x s2)
 
   lemma disjoint_inter_empty:
@@ -441,7 +441,7 @@ module FsetInduction
 
   type t
 
-  predicate p (fset t)
+  predicate p [@stdlib] (fset t)
 
   lemma Induction:
     (forall s: fset t. is_empty s -> p s) ->

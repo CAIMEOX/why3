@@ -11,7 +11,7 @@ module Matrix
                columns: int
   } invariant { 0 <= rows /\ 0 <= columns }
 
-  predicate valid_index (a: matrix 'a) (r c: int) =
+  predicate valid_index [@stdlib] (a: matrix 'a) (r c: int) =
     0 <= r < a.rows /\ 0 <= c < a.columns
 
   function get [@stdlib] (a: matrix 'a) (r c: int) : 'a =

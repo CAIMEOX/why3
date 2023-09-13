@@ -5,7 +5,7 @@ module Tree
 
   type tree 'a = Empty | Node (tree 'a) 'a (tree 'a)
 
-  let predicate is_empty (t:tree 'a)
+  let predicate is_empty [@stdlib] (t:tree 'a)
     ensures { result <-> t = Empty }
   = match t with Empty -> true | Node _ _ _ -> false end
 
@@ -44,7 +44,7 @@ module Occ
   lemma occ_nonneg:
     forall x: 'a, t: tree 'a. 0 <= occ x t
 
-  predicate mem (x: 'a) (t: tree 'a) =
+  predicate mem [@stdlib] (x: 'a) (t: tree 'a) =
     0 < occ x t
 
 end

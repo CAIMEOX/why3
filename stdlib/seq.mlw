@@ -30,7 +30,7 @@ module Seq
     get s i
 
   (** equality is extensional *)
-  val predicate (==) (s1 s2: seq 'a)
+  val predicate (==) [@stdlib] (s1 s2: seq 'a)
     ensures { result <-> length s1 = length s2 &&
               forall i: int. 0 <= i < length s1 -> s1[i] = s2[i] }
     ensures { result -> s1 = s2 }
@@ -258,7 +258,7 @@ module OfList
   lemma length_of_list:
     forall l: list 'a. length (of_list l) = L.length l
 
-  predicate point_wise (s: seq 'a) (l: list 'a) =
+  predicate point_wise [@stdlib] (s: seq 'a) (l: list 'a) =
     forall i. 0 <= i < L.length l -> Some (get s i) = nth i l
 
   lemma elts_seq_of_list: forall l: list 'a.
@@ -300,7 +300,7 @@ module Mem
   use int.Int
   use Seq
 
-  predicate mem (x: 'a) (s: seq 'a) =
+  predicate mem [@stdlib] (x: 'a) (s: seq 'a) =
     exists i: int. 0 <= i < length s && s[i] = x
 
   lemma mem_append : forall x: 'a, s1 s2.
@@ -316,7 +316,7 @@ module Distinct
   use int.Int
   use Seq
 
-  predicate distinct (s : seq 'a) =
+  predicate distinct [@stdlib] (s : seq 'a) =
     forall i j. 0 <= i < length s -> 0 <= j < length s ->
     i <> j -> s[i] <> s[j]
 
@@ -369,16 +369,16 @@ module Sorted
   use Seq
 
   type t
-  predicate le t t
+  predicate le [@stdlib] t t
   clone relations.TotalPreOrder as TO with
     type t = t, predicate rel = le, axiom .
 
-  predicate sorted_sub (s: seq t) (l u: int) =
+  predicate sorted_sub [@stdlib] (s: seq t) (l u: int) =
     forall i1 i2. l <= i1 <= i2 < u -> le s[i1] s[i2]
   (** `sorted_sub s l u` is true whenever the sub-sequence `s[l .. u-1]` is
       sorted  w.r.t. order relation `le` *)
 
-  predicate sorted (s: seq t) =
+  predicate sorted [@stdlib] (s: seq t) =
     sorted_sub s 0 (length s)
   (** `sorted s` is true whenever the sequence `s` is sorted w.r.t `le`  *)
 
@@ -471,7 +471,7 @@ module SeqEq
   use int.Int
   use Seq
 
-  predicate seq_eq_sub (s1 s2: seq 'a) (l u: int) =
+  predicate seq_eq_sub [@stdlib] (s1 s2: seq 'a) (l u: int) =
     forall i. l <= i < u -> s1[i] = s2[i]
 
 end
@@ -481,7 +481,7 @@ module Exchange
   use int.Int
   use Seq
 
-  predicate exchange (s1 s2: seq 'a) (i j: int) =
+  predicate exchange [@stdlib] (s1 s2: seq 'a) (i j: int) =
     length s1 = length s2 /\
     0 <= i < length s1 /\ 0 <= j < length s1 /\
     s1[i] = s2[j] /\ s1[j] = s2[i] /\
@@ -504,7 +504,7 @@ module Permut
   use SeqEq
   use export Exchange
 
-  predicate permut (s1 s2: seq 'a) (l u: int) =
+  predicate permut [@stdlib] (s1 s2: seq 'a) (l u: int) =
     length s1 = length s2 /\
     0 <= l <= length s1 /\ 0 <= u <= length s1 /\
     forall v: 'a. occ v s1 l u = occ v s2 l u
@@ -512,7 +512,7 @@ module Permut
   permutation of the segment `s2[l..u-1]`. Values outside this range are
   ignored. *)
 
-  predicate permut_sub (s1 s2: seq 'a) (l u: int) =
+  predicate permut_sub [@stdlib] (s1 s2: seq 'a) (l u: int) =
     seq_eq_sub s1 s2 0 l /\
     permut s1 s2 l u /\
     seq_eq_sub s1 s2 u (length s1)
@@ -520,7 +520,7 @@ module Permut
   permutation of the segment `s2[l..u-1]` and values outside this range
   are equal. *)
 
-  predicate permut_all (s1 s2: seq 'a) =
+  predicate permut_all [@stdlib] (s1 s2: seq 'a) =
     length s1 = length s2 /\ permut s1 s2 0 (length s1)
   (** `permut_all s1 s2` is true when sequence `s1` is a permutation of
   sequence `s2` *)

@@ -8,7 +8,7 @@ module Path
 
   type vertex
 
-  predicate edge vertex vertex
+  predicate edge [@stdlib] vertex vertex
 
   inductive path vertex (list vertex) vertex =
   | Path_empty:

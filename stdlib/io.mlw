@@ -1,5 +1,4 @@
 (** {1 Basic I/O Functions} *)
-
 module StdIO
 
   use string.String

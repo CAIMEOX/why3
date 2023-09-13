@@ -68,7 +68,7 @@ module MemForest
 
   use Forest
 
-  predicate mem_forest (n: 'a) (f: forest 'a) = match f with
+  predicate mem_forest [@stdlib] (n: 'a) (f: forest 'a) = match f with
     | E -> false
     | N i f1 f2 -> i = n || mem_forest n f1 || mem_forest n f2
     end
