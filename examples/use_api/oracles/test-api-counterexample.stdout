@@ -113,8 +113,8 @@ Model is [{"filename": "myfile.my_ext",
 
 == Check CE
 
-The program does not comply to the verification goal, for example during the
-  following execution:
+The program does not comply to the verification goal.
+This can happen for example during the following execution:
 File .:
   Line 0:
     Execution of main function `f` with env:
