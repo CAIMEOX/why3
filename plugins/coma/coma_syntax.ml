@@ -52,6 +52,8 @@ and pdefn_desc = {
   pdefn_body   : pexpr;
 }
 
+type pfile = decl list * pdefn list
+
 open Ty
 open Term
 

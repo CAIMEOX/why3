@@ -456,10 +456,6 @@ let rec check_param ~loc l r = match l,r with
   | Pr l, Pr r
   | Pv l, Pv r  when ty_equal l.vs_ty r.vs_ty -> ()
   | Pc (_, _, l), Pc (_, _, r) -> check_params ~loc l r
-  (* | Pv _, _
-  | Pr _, _
-  | Pt _, _
-  | Pc _, *)
   | _ -> Loc.errorm ~loc "type error"
 
 and check_params ~loc l r =
@@ -520,19 +516,15 @@ let rec type_expr tuc ctx { pexpr_desc=d; pexpr_loc=loc } =
       let e = type_prog ~loc tuc ctx e in
       Eset (e, [vs,tt]), []
   | PEset _ -> assert false
-
   | PEcut (t,e) ->
       let tt = type_fmla tuc ctx t in
       let e = type_prog ~loc tuc ctx e in
       Ecut (tt, e), []
-
   | PEdef (e, false, [d]) ->
       let ctx1, def = type_defn tuc ctx d in
       let e = type_prog ~loc:(e.pexpr_loc) tuc ctx1 e in
       Edef (e, false, [def]), []
-
   | PEdef _ -> assert false
-
   | PElam (pl, e) ->
     let ctx1, params = Lists.map_fold_left (type_param tuc) ctx pl in
     let e = type_prog ~loc:(e.pexpr_loc) tuc ctx1 e in
@@ -563,12 +555,22 @@ let mk_goal tuc s e =
 let add_vc tuc (s, _, _, d) = mk_goal tuc s.hs_name.id_string d
 
 let read_channel env path file c =
-  let ast = Coma_lexer.parse_channel file c in
+  let _, ast = Coma_lexer.parse_channel file c in
 
   let th_int = Env.read_theory env ["int"] "Int" in
+  let th_list = Env.read_theory env ["list"] "List" in
+  let th_sort = Env.read_theory env ["list"] "SortedInt" in
+  let th_perm = Env.read_theory env ["list"] "Permut" in
+  let th_rev = Env.read_theory env ["list"] "Reverse" in
+  let th_app = Env.read_theory env ["list"] "Append" in
   let tuc = Theory.create_theory ~path (id_fresh "Coma") in
   let tuc = Theory.use_export tuc Theory.bool_theory in
   let tuc = Theory.use_export tuc th_int in
+  let tuc = Theory.use_export tuc th_list in
+  let tuc = Theory.use_export tuc th_sort in
+  let tuc = Theory.use_export tuc th_perm in
+  let tuc = Theory.use_export tuc th_rev in
+  let tuc = Theory.use_export tuc th_app in
 
   let _, ast = Lists.map_fold_left (type_defn tuc) ctx0 ast in
 

@@ -9,12 +9,8 @@
 (*                                                                  *)
 (********************************************************************)
 
-(*- syntax exemple :
- -*)
-
 %{
 open Why3
-(* open Ptree *)
 open Coma_syntax
 
 let floc s e = Loc.extract (s,e)
@@ -26,16 +22,16 @@ let mk_defn d b e = { pdefn_desc = d; pdefn_loc = floc b e }
 
 %token BANG QUESTION SLASH
 
-%start <Coma_syntax.pdefn list> top_level
+%start <Coma_syntax.pfile> top_level
 %start <unit> dummy
 
 %%
 
 top_level:
-| defn* EOF   { $1 }
+| use_clone_parsing_only* defn* EOF   { $1,$2 }
 
 defn:
-| id=lident w=prewrites p=coma_params EQUAL e=coma_prog
+| LET id=lident w=prewrites p=coma_params EQUAL e=coma_prog
   { let d = { pdefn_name = id; pdefn_writes = w;
               pdefn_params = p; pdefn_body = e } in
     mk_defn d $startpos $endpos }
