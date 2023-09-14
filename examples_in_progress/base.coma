@@ -1,0 +1,58 @@
+use list.List
+
+let g = h {42} {55} &r
+    . &r: int = { 3 }
+    . h {x: int} {y: int} (&r: int) -> { 1 = 1 } ! any
+
+let g2 = h (any)
+    . h (o []) -> o
+
+
+let g3 = { 1 + 2 = 3 } ! h3 {1} (f)
+    . f {x y: int} -> any
+    . h3 {x: int} (o [] {x y: int}) -> o {x} {x}
+
+let insert {x: int} {l: list int} (return {o: list int}) =
+    { sorted l }
+    ! unList {l}
+             (fun {h: int} {t: list int} ->
+                if {x < h}
+                   (fun -> break {Cons x l})
+                   (fun -> insert {x} {t} (fun {r: list int} -> break {Cons h r})))
+             (fun -> break {Cons x Nil})
+    . break {r: list int} -> { sorted r && permut r (Cons x l) } ! return {r}
+
+    . unList {l: list int} (onCons [] {h: int} {t: list int}) (onNil []) ->
+      (any . oncons [] {h: int} {t: list int} -> { l <> Nil } ! oncons {h} {t}
+           . onnil  []                        -> { l =  Nil } ! onNil)
+    . if [] {b: bool} (then []) (else []) ->
+      (any . then [] -> {b} ! then
+           . else [] -> {not b} ! else)
+
+let postIncr (&r: int) =
+    (fun {v: int} ->
+        ! assign &r {r+1} (break)
+        . break [r] -> { r = v+1 } ! return {v}) {r}
+    . return [r] {p: int} -> any
+    . assign (&r : int) {v: int} (out [r])
+      -> (any . ret [r] -> { r = v } ! out)
+
+
+let rev_append [] {l0 r0: list int} =
+  loop
+  . loop = { reverse l ++ r = reverse l0 ++ r0 }
+      ! unList {l} (fun {h: int} {t: list int} -> assign &r {Cons h r} (fun -> assign &l {t} (loop)))
+                   (out)
+  . out -> { r = reverse l0 ++ r0 } ? halt
+  . &r: list int = {r0}
+  . &l: list int = {l0}
+  . assign (&r : list int) {v: list int} (out [r])
+    -> (any . ret [r] -> { r = v } ! out)
+  . unList {l: list int} (onCons [] {h: int} {t: list int}) (onNil []) ->
+    (any . oncons [] {h: int} {t: list int} -> { l <> Nil } ! oncons {h} {t}
+         . onnil  []                        -> { l =  Nil } ! onNil)
+  . halt [] ->
+      ? any
+
+  -- . &r0: list int = {Cons 1 Nil}
+  -- . &l0: list int = {Cons 1 Nil}
