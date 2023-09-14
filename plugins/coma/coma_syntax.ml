@@ -52,17 +52,49 @@ and pdefn_desc = {
   pdefn_body   : pexpr;
 }
 
+open Ty
+open Term
+
+type hsymbol = {
+  hs_name : Ident.ident;
+}
+
+type param =
+  | Pt of tvsymbol
+  | Pv of vsymbol
+  | Pr of vsymbol
+  | Pc of hsymbol * vsymbol list * param list
+
+type expr =
+  | Esym of hsymbol
+  | Eapp of expr * argument
+  | Elam of param list * expr
+  | Edef of expr * bool * defn list
+  | Eset of expr * (vsymbol * term) list
+  | Ecut of term * expr
+  | Ebox of expr
+  | Ewox of expr
+  | Eany
+
+and argument =
+  | At of ty
+  | Av of term
+  | Ar of vsymbol
+  | Ac of expr
+
+and defn = hsymbol * vsymbol list * param list * expr
+
 open Format
 
 let rec pp_param fmt = function
-  | PPt i -> fprintf fmt "<%s>" i.id_str
-  | PPv (i, _) -> fprintf fmt "%s" i.id_str
-  | PPr (i, _) -> fprintf fmt "&%s" i.id_str
-  | PPc (i, w, pl) -> fprintf fmt "(%s [%a] %a)" i.id_str pp_writes w pp_params pl
+  | Pt i -> fprintf fmt "<%a>" Pretty.print_tv i
+  | Pv i -> fprintf fmt "%a" Pretty.print_vs i
+  | Pr i -> fprintf fmt "&%a" Pretty.print_vs i
+  | Pc (i, w, pl) -> fprintf fmt "(%s [%a] %a)" i.hs_name.id_string pp_writes w pp_params pl
 
 and pp_writes fmt w =
   let pp_sep fmt () = fprintf fmt " " in
-  let pp_v fmt s = fprintf fmt "%s" s.id_str in
+  let pp_v fmt s = fprintf fmt "%a" Pretty.print_vs s in
   pp_print_list ~pp_sep pp_v fmt w
 
 and pp_params fmt pl =
@@ -71,36 +103,35 @@ and pp_params fmt pl =
 
 let pp_set fmt sl =
   let pp_sep fmt () = fprintf fmt "@\n" in
-  let pp_v fmt (s, _, _) = fprintf fmt "/ &%s = {} " s.id_str in
+  let pp_v fmt (s, t) = fprintf fmt "/ &%a = %a" Pretty.print_vs s Pretty.print_term t in
   pp_print_list ~pp_sep pp_v fmt sl
 
-let rec pp_expr fmt e = match e.pexpr_desc with
-  | PEsym i -> fprintf fmt "%s" i.id_str
-  | PEapp (e, arg) -> fprintf fmt "%a %a" pp_expr e pp_arg arg
-  | PElam (p, e) -> fprintf fmt "(fun @[%a@] → @[%a@])" pp_params p pp_expr e
-  | PEdef (e, _, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_defs l
-  | PEset (e, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_set l
-  | PEcut (t, e) -> fprintf fmt "{ϕ} @[%a@]" pp_expr e
-  | PEbox e -> fprintf fmt "↑ @[%a@]" pp_expr e
-  | PEwox e -> fprintf fmt "↓ @[%a@]" pp_expr e
-  | PEany -> fprintf fmt "any"
+let rec pp_expr fmt = function
+  | Esym i -> fprintf fmt "%s" i.hs_name.id_string
+  | Eapp (e, arg) -> fprintf fmt "%a %a" pp_expr e pp_arg arg
+  | Elam (p, e) -> fprintf fmt "(fun @[%a@] → @[%a@])" pp_params p pp_expr e
+  | Edef (e, _, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_defs l
+  | Eset (e, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_set l
+  | Ecut (t, e) -> fprintf fmt "{%a} @[%a@]" Pretty.print_term t pp_expr e
+  | Ebox e -> fprintf fmt "↑ @[%a@]" pp_expr e
+  | Ewox e -> fprintf fmt "↓ @[%a@]" pp_expr e
+  | Eany -> fprintf fmt "any"
 
 and pp_arg fmt = function
-  | PAt _pty -> fprintf fmt "<>"
-  | PAv _term -> fprintf fmt "{}"
-  | PAr i -> fprintf fmt "&%s" i.id_str
-  | PAc e ->
-      match e.pexpr_desc with
-      | PEsym i -> fprintf fmt "%s" i.id_str
+  | At ty -> fprintf fmt "<%a>" Pretty.print_ty ty
+  | Av t -> fprintf fmt "{%a}" Pretty.print_term t
+  | Ar i -> fprintf fmt "&%a" Pretty.print_vs i
+  | Ac e ->
+      match e with
+      | Esym i -> fprintf fmt "%s" i.hs_name.id_string
       | _ -> fprintf fmt "(%a)" pp_expr e
 
-and pp_def fmt def =
-  let def = def.pdefn_desc in
+and pp_def fmt (h, w, pl, e) =
   fprintf fmt "%s [%a] %a =@\n  @[%a@]"
-    def.pdefn_name.id_str
-    pp_writes def.pdefn_writes
-    pp_params def.pdefn_params
-    pp_expr def.pdefn_body
+    h.hs_name.id_string
+    pp_writes w
+    pp_params pl
+    pp_expr e
 
 and pp_defs fmt l =
   let pp_sep fmt () = fprintf fmt "@\n" in

@@ -14,10 +14,7 @@ open Wstdlib
 open Ident
 open Ty
 open Term
-
-type hsymbol = {
-  hs_name : ident;
-}
+open Coma_syntax
 
 module Hsym = MakeMSHW (struct
   type t = hsymbol
@@ -73,31 +70,6 @@ let w_forall vl w = {
   wp = t_forall_close_simp vl [] w.wp;
   sp = Mhs.map (t_exists_close_simp vl []) w.sp
 }
-
-type param =
-  | Pt of tvsymbol
-  | Pv of vsymbol
-  | Pr of vsymbol
-  | Pc of hsymbol * vsymbol list * param list
-
-type expr =
-  | Esym of hsymbol
-  | Eapp of expr * argument
-  | Elam of param list * expr
-  | Edef of expr * bool * defn list
-  | Eset of expr * (vsymbol * term) list
-  | Ecut of term * expr
-  | Ebox of expr
-  | Ewox of expr
-  | Eany
-
-and argument =
-  | At of ty
-  | Av of term
-  | Ar of vsymbol
-  | Ac of expr
-
-and defn = hsymbol * vsymbol list * param list * expr
 
 let eta h pl =
   let apply d p = Eapp (d, match p with
@@ -187,7 +159,7 @@ let rec vc pp dd c bl = function
         c_vs = Mvs.set_union (Mvs.map (r_inst c) wr) cc.c_vs;
         c_lc = if safe then cc.c_lc else Shs.empty;
         c_gl = safe && cc.c_gl } in
-      (match Mhs.find h c.c_hs with
+      (match (*Format.printf "%s---" h.hs_name.id_string*) Mhs.find h c.c_hs with
       | Co (pp,dd,cc,wr,d) ->
           vc pp dd (update cc wr) bl d
       | Cd (pp,dd,cc,wr,pl,d) ->
@@ -419,8 +391,6 @@ let mk_env {Theory.th_export = ns_int} = {
 }
 *)
 
-open Coma_syntax
-
 type vr = Ref of vsymbol | Var of vsymbol
 
 type ctx = {
@@ -435,7 +405,7 @@ let ctx0 = {
   hdls = Mstr.empty;
 }
 
-let add_handler hs w pl ctx =
+let add_hdl hs w pl ctx =
   let str = hs.hs_name.id_string in
   { ctx with hdls = Mstr.add str (hs, w, pl) ctx.hdls }
 
@@ -449,6 +419,9 @@ let add_ref vs ctx =
   { ctx with vars = Mstr.add str (Ref vs) ctx.vars;
              denv = Mstr.add str (Dterm.DTgvar vs) ctx.denv }
 
+open Ptree
+open Theory
+
 let rec type_param tuc ctx = function
   | PPv (id, ty) ->
       let ty = Typing.ty_of_pty tuc ty in
@@ -459,112 +432,147 @@ let rec type_param tuc ctx = function
       let vs = create_vsymbol (id_fresh ~loc:id.id_loc id.id_str) ty in
       add_ref vs ctx, Pr vs
   | PPc (id, w, pl) ->
-      let ctx1, params = Lists.map_fold_left (type_param tuc) ctx pl in
-      (* let *)
+      let _ctx1, params = Lists.map_fold_left (type_param tuc) ctx pl in
       let get_vs (id: Ptree.ident) =
         try match Mstr.find id.id_str ctx.vars with
           | Ref v -> v
-          | Var v -> Loc.errorm ~loc:id.id_loc "the variable %s is not a reference" id.id_str
+          | Var _ -> Loc.errorm ~loc:id.id_loc "the variable %s is not a reference" id.id_str
         with Not_found -> Loc.errorm ~loc:id.id_loc "unbounded variable %s" id.id_str
       in
       let w = List.map get_vs w in
-      let hs =
-        try
-          let h, _, _ = Mstr.find id.id_str ctx.hdls in
-          h
-        with Not_found -> Loc.errorm ~loc:id.id_loc "unbounded handler %s" id.id_str in
-      ctx, Pc (hs, w, params)
+      let hs = { hs_name = id_register (id_fresh ~loc:id.id_loc id.id_str) } in
+      (* Format.printf "{{{%s}}}" hs.hs_name.id_string; *)
+      add_hdl hs w params ctx, Pc (hs, w, params)
   | PPt i -> Loc.errorm ~loc:i.id_loc "polymorphism is not supported yet"
 
 let type_term tuc ctx t =
   Typing.type_term_in_denv (Theory.get_namespace tuc) tuc.uc_known tuc.uc_crcmap ctx.denv t
 
-let rec type_expr tuc ctx {pexpr_desc=d;pexpr_loc=loc} =
+let type_fmla tuc ctx t =
+  Typing.type_fmla_in_denv (Theory.get_namespace tuc) tuc.uc_known tuc.uc_crcmap ctx.denv t
+
+let rec check_param ~loc l r = match l,r with
+  | Pt _, Pt _ -> ()
+  | Pr l, Pr r
+  | Pv l, Pv r  when ty_equal l.vs_ty r.vs_ty -> ()
+  | Pc (_, _, l), Pc (_, _, r) -> check_params ~loc l r
+  (* | Pv _, _
+  | Pr _, _
+  | Pt _, _
+  | Pc _, *)
+  | _ -> Loc.errorm ~loc "type error"
+
+and check_params ~loc l r =
+  try List.iter2 (check_param ~loc) l r
+  with Invalid_argument _ -> Loc.errorm ~loc "bad arity: %d argument(s) expected, %d given" (List.length l) (List.length r)
+
+let rec type_expr tuc ctx { pexpr_desc=d; pexpr_loc=loc } =
   match d with
-  | PEsym id -> (
-      try
-        let h, _, pl = Mstr.find id.id_str ctx.hdls in
-        Esym h, pl
-      with Not_found -> Loc.errorm ~loc:id.id_loc "unbounded handler %s" id.id_str
-    )
+  | PEsym id ->
+      let h, _, pl =
+        try Mstr.find id.id_str ctx.hdls
+        with Not_found -> Loc.errorm ~loc:id.id_loc "unbounded handler %s" id.id_str in
+      Esym h, pl
   | PEapp (e, a) ->
       let e, te = type_expr tuc ctx e in
       (match te, a with
        | [], _ -> assert false
        | Pv vs :: tes, PAv t ->
-          let tt = type_term tuc ctx t in
-          Eapp (e, Av tt), tes
+           let tt = type_term tuc ctx t in
+           (match tt.t_ty with
+            | Some ty when ty_equal ty vs.vs_ty -> ()
+            | _ -> Loc.errorm ~loc:t.term_loc "type error in application"
+           );
+           Eapp (e, Av tt), tes
        | Pr rs :: tes, PAr id ->
            let s =
              try match Mstr.find id.id_str ctx.vars with
                | Ref v -> v
-               | Var v -> Loc.errorm ~loc:id.id_loc "the variable %s is not a reference" id.id_str
+               | Var _ -> Loc.errorm ~loc:id.id_loc "the variable %s is not a reference" id.id_str
              with Not_found -> Loc.errorm ~loc:id.id_loc "unbounded variable %s" id.id_str
            in
-           Eapp (e, Ar s), tes
-       | Pc _ :: tes, PAc _ -> assert false
-       | Pt ts :: t, PAt _ -> Loc.errorm ~loc:loc "polymorphism is not supported yet"
+           if ty_equal rs.vs_ty s.vs_ty then
+             Eapp (e, Ar s), tes
+           else
+             Loc.errorm ~loc:id.id_loc "type error in application"
+       | Pc (hs, vs, pl) :: tes, PAc ea ->
+           let ea, tea = type_expr tuc ctx ea in
+           check_params ~loc pl tea;
+           Eapp (e, Ac ea), tes
+       | Pt _ :: _tes, PAt _ -> Loc.errorm ~loc:loc "polymorphism is not supported yet"
        | _ ->  Loc.errorm ~loc "type error with the application")
   | PEany -> Eany, []
   | PEbox e ->
-      let e, te = type_expr tuc ctx e in
-      if Stdlib.(<>) te [] then Loc.errorm ~loc "every expression under a black box must be box-typed";
-      Ewox e, []
+      let e = type_prog ~loc tuc ctx e in
+      Ebox e, []
   | PEwox e ->
-      let e, te = type_expr tuc ctx e in
-      if Stdlib.(<>) te [] then Loc.errorm ~loc "every expression under a white box must be box-typed";
+      let e = type_prog ~loc tuc ctx e in
       Ewox e, []
-
   | PEset (e, [id,t,pty]) ->
       let tt = type_term tuc ctx t in
       let ty = Typing.ty_of_pty tuc pty in
+      (match tt.t_ty with
+       | Some tty when ty_equal tty ty -> ()
+       | _ -> Loc.errorm ~loc:id.id_loc "type error with &%s's assignation" id.id_str
+      );
       let vs = create_vsymbol (id_fresh ~loc:id.id_loc id.id_str) ty in
       let ctx = add_ref vs ctx in
-      let e, te = type_expr tuc ctx e in
-      if Stdlib.(<>) te [] then Loc.errorm ~loc "every expression under a white box must be box-typed";
-      Eset (e, [vs,tt]), te (* vérifier que bien typé *)
+      let e = type_prog ~loc tuc ctx e in
+      Eset (e, [vs,tt]), []
+  | PEset _ -> assert false
 
-  | _ -> assert false
-  (*
-  | PEcut (_,e) (* move later *)
-  | PEapp pexpr * pargument (* e <ty>... t... | e... *)
-  | PElam pparam list * pexpr (* fun pl -> e *)
-  | PEdef pexpr * bool * pdefn list (* e / rec? h p = e and ... *)
-   *)
+  | PEcut (t,e) ->
+      let tt = type_fmla tuc ctx t in
+      let e = type_prog ~loc tuc ctx e in
+      Ecut (tt, e), []
 
+  | PEdef (e, false, [d]) ->
+      let ctx1, def = type_defn tuc ctx d in
+      let e = type_prog ~loc:(e.pexpr_loc) tuc ctx1 e in
+      Edef (e, false, [def]), []
 
-let type_defn tuc ctx {pdefn_desc=d; pdefn_loc=loc} =
+  | PEdef _ -> assert false
+
+  | PElam (pl, e) ->
+    let ctx1, params = Lists.map_fold_left (type_param tuc) ctx pl in
+    let e = type_prog ~loc:(e.pexpr_loc) tuc ctx1 e in
+    Elam (params, e), params
+
+and type_prog ?loc tuc ctx d =
+  let e, te = type_expr tuc ctx d in
+  if Stdlib.(<>) te [] then Loc.errorm ?loc "every programm must be box-typed";
+  e
+
+and type_defn tuc ctx {pdefn_desc=d; pdefn_loc=loc} =
   let id = d.pdefn_name in
   let ident = id_register (id_fresh ~loc:id.id_loc id.id_str) in
   let h = { hs_name = ident } in
   let ctx1, params = Lists.map_fold_left (type_param tuc) ctx d.pdefn_params in
   let writes = [] in
-  let ctx1 = add_handler h writes params ctx1 in (* allow recursion *)
+  let ctx1 = add_hdl h writes params ctx1 in (* allow recursion *)
   let e, pl = type_expr tuc ctx1 d.pdefn_body in
 
   if Stdlib.(<>) pl [] then Loc.errorm ~loc "handler %s is not fully applied" id.id_str;
 
-  add_handler h writes params ctx, (h, writes, params, e)
-
-
-let vc tuc e = match e.pexpr_desc with
-  (* | PEcut (t, _) ->
-      Typing.type_fmla_in_namespace (Theory.get_namespace tuc) tuc.uc_known
-        tuc.uc_crcmap t *)
-  | _ ->
-      t_true (* FIXME *)
+  add_hdl h writes params ctx, (h, writes, params, e)
 
 let mk_goal tuc s e =
   let prs = Decl.create_prsymbol (id_fresh ("vc_" ^ s)) in
-  Theory.add_prop_decl tuc Decl.Pgoal prs (vc tuc e)
+  Theory.add_prop_decl tuc Decl.Pgoal prs (vc e)
 
-let add_vc tuc d =
-  let d = d.pdefn_desc in
-  mk_goal tuc d.pdefn_name.id_str d.pdefn_body
-
+let add_vc tuc (s, _, _, d) = mk_goal tuc s.hs_name.id_string d
 
 let read_channel env path file c =
   let ast = Coma_lexer.parse_channel file c in
+
+  let th_int = Env.read_theory env ["int"] "Int" in
+  let tuc = Theory.create_theory ~path (id_fresh "Coma") in
+  let tuc = Theory.use_export tuc Theory.bool_theory in
+  let tuc = Theory.use_export tuc th_int in
+
+  let _, ast = Lists.map_fold_left (type_defn tuc) ctx0 ast in
+
+  let ast = (create_hsymbol (id_fresh "dummy"), [], [], _expr2) :: ast in
 
   Format.printf "@[%a@]@."
     (fun fmt l ->
@@ -574,12 +582,6 @@ let read_channel env path file c =
        fmt l)
     ast;
 
-  let th_int = Env.read_theory env ["int"] "Int" in
-  let tuc = Theory.create_theory ~path (id_fresh "Coma") in
-  let tuc = Theory.use_export tuc Theory.bool_theory in
-  let tuc = Theory.use_export tuc th_int in
-
-  let _, _ast = Lists.map_fold_left (type_defn tuc) ctx0 ast in
 
   let tuc = List.fold_left add_vc tuc ast in
 

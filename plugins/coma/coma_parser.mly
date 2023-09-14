@@ -14,7 +14,7 @@
 
 %{
 open Why3
-open Ptree
+(* open Ptree *)
 open Coma_syntax
 
 let floc s e = Loc.extract (s,e)
