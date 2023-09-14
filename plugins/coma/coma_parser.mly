@@ -20,7 +20,7 @@ let mk_defn d b e = { pdefn_desc = d; pdefn_loc = floc b e }
 
 %}
 
-%token BANG QUESTION SLASH
+%token BANG QUESTION 
 
 %start <Coma_syntax.pfile> top_level
 %start <unit> dummy
@@ -28,7 +28,8 @@ let mk_defn d b e = { pdefn_desc = d; pdefn_loc = floc b e }
 %%
 
 top_level:
-| use_clone_parsing_only* defn* EOF   { $1,$2 }
+| use_clone_parsing_only* defn* EOF
+  { $1,$2 }
 
 defn:
 | LET id=lident w=prewrites p=coma_params EQUAL e=coma_prog
@@ -36,8 +37,8 @@ defn:
               pdefn_params = p; pdefn_body = e } in
     mk_defn d $startpos $endpos }
 
-local_defn:
-| id=lident w=prewrites p=coma_params EQUAL e=coma_expr
+local_defn(X):
+| id=lident w=prewrites p=coma_params X e=coma_expr
   { let d = { pdefn_name = id; pdefn_writes = w;
               pdefn_params = p; pdefn_body = e } in
     mk_defn d $startpos $endpos }
@@ -45,10 +46,15 @@ local_defn:
 coma_prog:
 | e=coma_expr
   { e }
-| e=coma_prog SLASH d=local_defn
-  { mk_pexpr (PEdef (e, false, [d])) $startpos $endpos }
-| e=coma_prog SLASH AMP id=lident ty=oftyp EQUAL LEFTBRC t=term RIGHTBRC
-  { mk_pexpr (PEset (e, [id, t, ty])) $startpos $endpos }
+| e=coma_prog DOT dl=separated_nonempty_list(BAR, local_defn(EQUAL))
+  { mk_pexpr (PEdef (e, false, dl)) $startpos $endpos }
+| e=coma_prog DOT dl=separated_nonempty_list(BAR, local_defn(ARROW))
+  { mk_pexpr (PEdef (e, true, dl)) $startpos $endpos }
+| e=coma_prog DOT l=separated_nonempty_list(BAR, coma_alloc)
+  { mk_pexpr (PEset (e, l)) $startpos $endpos }
+
+coma_alloc:
+| AMP id=lident ty=oftyp EQUAL LEFTBRC t=term RIGHTBRC { id, t, ty }
 
 coma_expr:
 | d = coma_desc
@@ -116,8 +122,6 @@ coma_tvar:
 coma_param:
 | LT l=coma_tvar* GT
   { l }
-/* | AMP x=lident
-  { [PPr x] } */
 | LEFTPAR AMP lid=separated_nonempty_list(AMP, lident) t=oftyp RIGHTPAR
   { List.map (fun id -> PPr (id, t)) lid }
 | LEFTBRC lid=lident+ t=oftyp RIGHTBRC

@@ -261,8 +261,10 @@ rule token = parse
       { BANG }
   | "?"
       { QUESTION }
-  | "/"
-      { SLASH }
+  (* | "/"
+      { SLASH } *)
+  (* | "/" space* "&"
+      { SLASHAMP } *)
   | "--" [ ^ '\n' ]*
       { token lexbuf }
 (* end coma *)

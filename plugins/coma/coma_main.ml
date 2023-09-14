@@ -520,11 +520,14 @@ let rec type_expr tuc ctx { pexpr_desc=d; pexpr_loc=loc } =
       let tt = type_fmla tuc ctx t in
       let e = type_prog ~loc tuc ctx e in
       Ecut (tt, e), []
-  | PEdef (e, false, [d]) ->
-      let ctx1, def = type_defn tuc ctx d in
+
+  | PEdef (e, tag, d) -> (* THE TAG *)
+      let ctx1, def = Lists.map_fold_left (type_defn tuc) ctx d in
       let e = type_prog ~loc:(e.pexpr_loc) tuc ctx1 e in
-      Edef (e, false, [def]), []
-  | PEdef _ -> assert false
+      Edef (e, tag, def), []
+
+  (* | PEdef _ -> assert false *)
+
   | PElam (pl, e) ->
     let ctx1, params = Lists.map_fold_left (type_param tuc) ctx pl in
     let e = type_prog ~loc:(e.pexpr_loc) tuc ctx1 e in
@@ -574,7 +577,7 @@ let read_channel env path file c =
 
   let _, ast = Lists.map_fold_left (type_defn tuc) ctx0 ast in
 
-  let ast = (create_hsymbol (id_fresh "dummy"), [], [], _expr2) :: ast in
+  (* let ast = (create_hsymbol (id_fresh "dummy"), [], [], _expr2) :: ast in *)
 
   Format.printf "@[%a@]@."
     (fun fmt l ->
