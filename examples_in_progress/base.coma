@@ -11,13 +11,18 @@ let if [] {b: bool} (then []) (else []) =
     any as then [] -> {b} ! then
         |  else [] -> {not b} ! else
 
-let type1 [] =
-    then as then [] = else
-        |  else [] = then
+let ok [] =
+    f1 as f1     = f2 (g)
+       |  f2 (g) = g
+       |  f3 (g) = f1
+       as g      -> h
+       as h      -> any
 
--- let ntype1 [] =
---     any as then [] -> else
---         |  else [] -> any
+-- uncomment ⤳ error
+let nok [] =
+    any as f      -> h
+        |  g      -> g
+        as h      -> any
 
 let unList {l: list int} (onCons [] {h: int} {t: list int}) (onNil []) =
     any
