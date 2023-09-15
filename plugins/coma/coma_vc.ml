@@ -236,12 +236,13 @@ and havoc c wr pl =
 let vc e = (vc true true c_empty [] e).wp
 
 
+(*
 let (!) h = Esym h
 
 let (--) e t = Eapp (e, At t)
 let (-+) e t = Eapp (e, Av t)
 let (-&) e r = Eapp (e, Ar r)
-let (-*) e d = Eapp (e, Ac d)
+let (-* ) e d = Eapp (e, Ac d)
 
 let (<>) e vtl         = Eset (e,vtl)
 let (>>) e (h,wr,pl,d) = Edef (e,true, [h,wr,pl,d])
@@ -361,7 +362,6 @@ let _expr2 =
   >> def hs_fail [] [] (cut t_false Eany)
   >> def hs_halt [] [] (Ewox Eany)
 
-(*
 type env = {
   ps_int_le : lsymbol;
   ps_int_ge : lsymbol;

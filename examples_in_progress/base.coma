@@ -29,7 +29,7 @@ let ok [] =
 
 let unList {l: list int} (onCons [] {h: int} {t: list int}) (onNil []) =
     any
-    as oncons [] {h: int} {t: list int} -> { l <> Nil } ! onCons {h} {t}
+    as oncons [] {h: int} {t: list int} -> { l = Cons h t } ! onCons {h} {t}
     as onnil  []                        -> { l =  Nil } ! onNil
 
 let assign_int (&r : int) {v: int} (out [r]) =
