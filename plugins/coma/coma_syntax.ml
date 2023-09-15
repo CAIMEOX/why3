@@ -52,7 +52,11 @@ and pdefn_desc = {
   pdefn_body   : pexpr;
 }
 
-type pfile = decl list * pdefn list
+type use =
+  | Puseexport of qualid
+  | Puseimport of bool * qualid * ident option
+
+type pfile = use list * pdefn list
 
 open Ty
 open Term

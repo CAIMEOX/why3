@@ -22,11 +22,24 @@ let mk_goal tuc s e =
 
 let add_vcf tuc name d = mk_goal tuc name d
 
+let qualid_last = function Qident x | Qdot (_, x) -> x
+let use_as q = function Some x -> x | None -> qualid_last q
+
+let read_thy env qualid = match qualid with
+  | Qdot (q, id) ->
+      Env.read_theory env (Typing.string_list_of_qualid q) id.id_str
+  | _ -> assert false
+
 let parse_simpl_use env tuc = function
-  | Duseimport (_, _, [Qdot (Qident l, m), _]) ->
-      let th = Env.read_theory env [l.id_str] m.id_str in
+  | Puseexport q ->
+      let th = read_thy env q in
       Theory.use_export tuc th
-  | _ -> Loc.errorm "unhandled usage of `use'"
+  | Puseimport (import, q, idas) ->
+      let import = import || idas = None in
+      let tuc = Theory.open_scope tuc (use_as q idas).id_str in
+      let th = read_thy env q in
+      let tuc = Theory.use_export tuc th in
+      Theory.close_scope ~import tuc
 
 let read_channel env path file c =
 

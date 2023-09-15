@@ -26,8 +26,17 @@ let mk_defn d loc = { pdefn_desc = d; pdefn_loc = Loc.extract loc }
 %%
 
 top_level:
-| use_clone_parsing_only* defn* EOF
+| uses* defn* EOF
   { $1, $2 }
+
+uses:
+| USE EXPORT tqualid
+    { Puseexport $3 }
+| USE boption(IMPORT) n = tqualid q = option(preceded(AS, uident))
+    { let loc = floc $startpos $endpos in
+      if $2 && q = None then Loc.warning ~loc ~id:warn_redundant_import
+        "the keyword `import' is redundant here and can be omitted";
+      (Puseimport ($2, n, q) ) }
 
 defn:
 | LET id=lident w=prewrites p=coma_params EQUAL e=coma_prog
