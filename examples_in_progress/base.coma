@@ -7,9 +7,12 @@ use list.Append
 
 -------------------------------------------------------------------------------
 
-let if [] {b: bool} (then []) (else []) =
-    any as then [] -> {b} ! then
-        |  else [] -> {not b} ! else
+-- let if (then) =
+--     any as then -> then
+
+let if {b: bool} (then) (else) =
+    any as then -> {b} ! then
+        |  else -> {not b} ! else
 
 let ok [] =
     f1 as f1     = f2 (g)
@@ -19,14 +22,14 @@ let ok [] =
        as h      -> any
 
 -- uncomment ⤳ error
-let nok [] =
-    any as f      -> h
-        |  g      -> g
-        as h      -> any
+-- let nok [] =
+--     any as f      -> h
+--         |  g      -> g
+--         as h      -> any
 
 let unList {l: list int} (onCons [] {h: int} {t: list int}) (onNil []) =
     any
-    as oncons [] {h: int} {t: list int} -> { l <> Nil } ! oncons {h} {t}
+    as oncons [] {h: int} {t: list int} -> { l <> Nil } ! onCons {h} {t}
     as onnil  []                        -> { l =  Nil } ! onNil
 
 let assign_int (&r : int) {v: int} (out [r]) =
@@ -35,30 +38,25 @@ let assign_int (&r : int) {v: int} (out [r]) =
 let assign_list (&r : list int) {v: list int} (out [r]) =
     any as ret [r] -> { r = v } ! out
 
-let unList {l: list int} (onCons [] {h: int} {t: list int}) (onNil []) =
-    any
-    as oncons [] {h: int} {t: list int} -> { l <> Nil } ! oncons {h} {t}
-    as onnil  []                        -> { l =  Nil } ! onNil
-
 let halt [] = ? any
 
 -------------------------------------------------------------------------------
 
--- let insert {x: int} {l: list int} (return {o: list int}) =
---     { sorted l }
---     ! unList {l}
---              (fun {h: int} {t: list int} ->
---                 if {x < h}
---                    (fun -> break {Cons x l})
---                    (fun -> insert {x} {t} (fun {r: list int} -> break {Cons h r})))
---              (fun -> break {Cons x Nil})
---     as break {r: list int} -> { sorted r && permut r (Cons x l) } ! return {r}
+let insert {x: int} {l: list int} (return {o: list int}) =
+    { sorted l }
+    ! unList {l}
+             (fun {h: int} {t: list int} ->
+                if {x < h}
+                   (fun -> break {Cons x l})
+                   (fun -> insert {x} {t} (fun {r: list int} -> break {Cons h r})))
+             (fun -> break {Cons x Nil})
+    as break {r: list int} -> { sorted r && permut r (Cons x l) } ! return {r}
 
--- let postIncr (&r: int) =
---     (fun {v: int} ->
---         ! assign_int &r {r+1} (break)
---         as break [r] -> { r = v+1 } ! return {v}) {r}
---     as return [r] {p: int} -> any
+let postIncr (&r: int) =
+    (fun {v: int} ->
+        ! assign_int &r {r+1} (break)
+        as break [r] -> { r = v+1 } ! return {v}) {r}
+    as return [r] {p: int} -> any
 
 let rev_append [] {l0 r0: list int} =
   loop
@@ -68,4 +66,3 @@ let rev_append [] {l0 r0: list int} =
   as out -> { r = reverse l0 ++ r0 } ? halt
   as &r: list int = {r0}
   as &l: list int = {l0}
-

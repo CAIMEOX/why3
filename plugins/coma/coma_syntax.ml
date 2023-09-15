@@ -61,6 +61,8 @@ type hsymbol = {
   hs_name : Ident.ident;
 }
 
+let create_hsymbol id = { hs_name = Ident.id_register id }
+
 type param =
   | Pt of tvsymbol
   | Pv of vsymbol
@@ -88,11 +90,16 @@ and defn = hsymbol * vsymbol list * param list * expr
 
 open Format
 
+let pr = Ident.create_ident_printer []
+
+let pp_hs fmt hs =
+  Format.fprintf fmt "%s" (Ident.id_unique pr hs.hs_name)
+
 let rec pp_param fmt = function
   | Pt i -> fprintf fmt "<%a>" Pretty.print_tv i
   | Pv i -> fprintf fmt "%a" Pretty.print_vs i
   | Pr i -> fprintf fmt "&%a" Pretty.print_vs i
-  | Pc (i, w, pl) -> fprintf fmt "(%s [%a] %a)" i.hs_name.id_string pp_writes w pp_params pl
+  | Pc (i, w, pl) -> fprintf fmt "(%a [%a] %a)" pp_hs i pp_writes w pp_params pl
 
 and pp_writes fmt w =
   let pp_sep fmt () = fprintf fmt " " in
@@ -109,10 +116,11 @@ let pp_set fmt sl =
   pp_print_list ~pp_sep pp_v fmt sl
 
 let rec pp_expr fmt = function
-  | Esym i -> fprintf fmt "%s" i.hs_name.id_string
+  | Esym i -> fprintf fmt "%a" pp_hs i
   | Eapp (e, arg) -> fprintf fmt "%a %a" pp_expr e pp_arg arg
   | Elam (p, e) -> fprintf fmt "(fun @[%a@] → @[%a@])" pp_params p pp_expr e
-  | Edef (e, _, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_defs l
+  | Edef (e, false, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_def1s l
+  | Edef (e, true, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_def2s l
   | Eset (e, l) -> fprintf fmt "%a@\n%a" pp_expr e pp_set l
   | Ecut (t, e) -> fprintf fmt "{%a} @[%a@]" Pretty.print_term t pp_expr e
   | Ebox e -> fprintf fmt "↑ @[%a@]" pp_expr e
@@ -125,17 +133,29 @@ and pp_arg fmt = function
   | Ar i -> fprintf fmt "&%a" Pretty.print_vs i
   | Ac e ->
       match e with
-      | Esym i -> fprintf fmt "%s" i.hs_name.id_string
+      | Esym i -> fprintf fmt "%a" pp_hs i
       | _ -> fprintf fmt "(%a)" pp_expr e
 
-and pp_def fmt (h, w, pl, e) =
-  fprintf fmt "%s [%a] %a =@\n  @[%a@]"
-    h.hs_name.id_string
+and pp_def1 fmt (h, w, pl, e) =
+  fprintf fmt "%a [%a] %a =@\n  @[%a@]"
+    pp_hs h
     pp_writes w
     pp_params pl
     pp_expr e
 
-and pp_defs fmt l =
+and pp_def2 fmt (h, w, pl, e) =
+  fprintf fmt "%a [%a] %a ->@\n  @[%a@]"
+    pp_hs h
+    pp_writes w
+    pp_params pl
+    pp_expr e
+
+and pp_def1s fmt l =
   let pp_sep fmt () = fprintf fmt "@\n" in
-  let pp_v fmt d = fprintf fmt "/ %a" pp_def d in
+  let pp_v fmt d = fprintf fmt "/ %a" pp_def1 d in
+  pp_print_list ~pp_sep pp_v fmt l
+
+and pp_def2s fmt l =
+  let pp_sep fmt () = fprintf fmt "@\n" in
+  let pp_v fmt d = fprintf fmt "/ %a" pp_def2 d in
   pp_print_list ~pp_sep pp_v fmt l

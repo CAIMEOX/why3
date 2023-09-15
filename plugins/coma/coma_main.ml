@@ -23,7 +23,7 @@ let mk_goal tuc s e =
 let add_vcf tuc name d = mk_goal tuc name d
 
 let parse_simpl_use env tuc = function
-  | Duseimport (_, _, [Qdot (Qident l, m), None]) ->
+  | Duseimport (_, _, [Qdot (Qident l, m), _]) ->
       let th = Env.read_theory env [l.id_str] m.id_str in
       Theory.use_export tuc th
   | _ -> Loc.errorm "unhandled usage of `use'"

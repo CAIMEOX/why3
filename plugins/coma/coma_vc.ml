@@ -22,7 +22,6 @@ let hs_hash hs = id_hash hs.hs_name
 let hs_compare hs1 hs2 = id_compare hs1.hs_name hs2.hs_name
 *)
 
-let create_hsymbol id = { hs_name = id_register id }
 
 (*
 let t_and_simp = t_and
@@ -149,7 +148,7 @@ let rec vc pp dd c bl = function
         c_vs = Mvs.set_union (Mvs.map (r_inst c) wr) cc.c_vs;
         c_lc = if safe then cc.c_lc else Shs.empty;
         c_gl = safe && cc.c_gl } in
-      (match Format.printf "%s---" h.hs_name.id_string; Mhs.find h c.c_hs with
+      (match Mhs.find h c.c_hs with
       | Co (pp,dd,cc,wr,d) ->
           vc pp dd (update cc wr) bl d
       | Cd (pp,dd,cc,wr,pl,d) ->
