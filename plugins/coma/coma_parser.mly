@@ -13,10 +13,8 @@
 open Why3
 open Coma_syntax
 
-let floc s e = Loc.extract (s,e)
-
-let mk_pexpr d b e = { pexpr_desc = d; pexpr_loc = floc b e }
-let mk_defn d b e = { pdefn_desc = d; pdefn_loc = floc b e }
+let mk_pexpr d loc = { pexpr_desc = d; pexpr_loc = Loc.extract loc }
+let mk_defn d loc = { pdefn_desc = d; pdefn_loc = Loc.extract loc }
 
 %}
 
@@ -29,36 +27,42 @@ let mk_defn d b e = { pdefn_desc = d; pdefn_loc = floc b e }
 
 top_level:
 | use_clone_parsing_only* defn* EOF
-  { $1,$2 }
+  { $1, $2 }
 
 defn:
 | LET id=lident w=prewrites p=coma_params EQUAL e=coma_prog
   { let d = { pdefn_name = id; pdefn_writes = w;
               pdefn_params = p; pdefn_body = e } in
-    mk_defn d $startpos $endpos }
+    mk_defn d $loc }
 
 local_defn(X):
 | id=lident w=prewrites p=coma_params X e=coma_expr
   { let d = { pdefn_name = id; pdefn_writes = w;
               pdefn_params = p; pdefn_body = e } in
-    mk_defn d $startpos $endpos }
+    mk_defn d $loc }
 
 coma_prog:
 | e=coma_expr
   { e }
-| e=coma_prog DOT dl=separated_nonempty_list(BAR, local_defn(EQUAL))
+/* | e=coma_prog DOT dl=separated_nonempty_list(BAR, local_defn(EQUAL))
   { mk_pexpr (PEdef (e, false, dl)) $startpos $endpos }
 | e=coma_prog DOT dl=separated_nonempty_list(BAR, local_defn(ARROW))
   { mk_pexpr (PEdef (e, true, dl)) $startpos $endpos }
 | e=coma_prog DOT l=separated_nonempty_list(BAR, coma_alloc)
-  { mk_pexpr (PEset (e, l)) $startpos $endpos }
+  { mk_pexpr (PEset (e, l)) $startpos $endpos } */
+| e=coma_prog AS dl=separated_nonempty_list(BAR, local_defn(EQUAL))
+  { mk_pexpr (PEdef (e, false, dl)) $loc }
+| e=coma_prog AS dl=separated_nonempty_list(BAR, local_defn(ARROW))
+  { mk_pexpr (PEdef (e, true, dl)) $loc }
+| e=coma_prog AS l=separated_nonempty_list(BAR, coma_alloc)
+  { mk_pexpr (PEset (e, l)) $loc }
 
 coma_alloc:
 | AMP id=lident ty=oftyp EQUAL LEFTBRC t=term RIGHTBRC { id, t, ty }
 
 coma_expr:
 | d = coma_desc
-  { mk_pexpr d $startpos $endpos }
+  { mk_pexpr d $loc }
 
 coma_desc:
 | LEFTBRC t=term RIGHTBRC e=coma_expr
@@ -68,13 +72,13 @@ coma_desc:
 | QUESTION e=coma_expr
   { PEwox e }
 | e=coma_expr2 al=coma_arg*
-  { let app e a = mk_pexpr (PEapp (e, a)) $startpos $endpos in
+  { let app e a = mk_pexpr (PEapp (e, a)) $loc in
     let e = List.fold_left app e al in
     e.pexpr_desc }
 
 coma_expr2:
 | d = coma_desc2
-  { mk_pexpr d $startpos $endpos }
+  { mk_pexpr d $loc }
 
 coma_desc2:
 | x=lident
@@ -89,7 +93,7 @@ coma_desc2:
 coma_closure:
 | LEFTPAR FUN p=coma_params ARROW e=coma_prog RIGHTPAR
   { let d = PElam (p, e) in
-    mk_pexpr d $startpos $endpos }
+    mk_pexpr d $loc }
 
 prewrites:
 | w = loption(prewrites_)
