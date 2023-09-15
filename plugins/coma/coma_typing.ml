@@ -41,6 +41,12 @@ let add_param ctx = function
 
 open Ptree
 
+let find_ref ctx (id: Ptree.ident) =
+  try match Mstr.find id.id_str ctx.vars with
+    | Ref v -> v
+    | Var _ -> Loc.errorm ~loc:id.id_loc "the variable %s is not a reference" id.id_str
+  with Not_found -> Loc.errorm ~loc:id.id_loc "unbound variable %s" id.id_str
+
 let rec type_param0 tuc ctx = function
   | PPv (id, ty) ->
       let ty = Typing.ty_of_pty tuc ty in
@@ -52,13 +58,7 @@ let rec type_param0 tuc ctx = function
       Pr vs
   | PPc (id, w, pl) ->
       let _ctx1, params = Lists.map_fold_left (type_param tuc) ctx pl in
-      let get_vs (id: Ptree.ident) =
-        try match Mstr.find id.id_str ctx.vars with
-          | Ref v -> v
-          | Var _ -> Loc.errorm ~loc:id.id_loc "the variable %s is not a reference" id.id_str
-        with Not_found -> Loc.errorm ~loc:id.id_loc "unbounded variable %s" id.id_str
-      in
-      let w = List.map get_vs w in
+      let w = List.map (find_ref ctx) w in
       let hs = create_hsymbol (id_fresh ~loc:id.id_loc id.id_str) in
       Pc (hs, w, params)
   | PPt i -> Loc.errorm ~loc:i.id_loc "polymorphism is not supported yet"
@@ -162,7 +162,7 @@ and type_defn tuc ctx notrec dl =
          let id, pl = d.pdefn_name, d.pdefn_params in
          let h = create_hsymbol (id_fresh ~loc:id.id_loc id.id_str) in
          let _, params = Lists.map_fold_left (type_param tuc) ctx0 pl in
-         let writes = [] in
+         let writes = List.map (find_ref ctx) d.pdefn_writes in
          add_hdl h writes params acc, (h, writes, params, loc, d.pdefn_body))
       ctx dl in
 
@@ -174,6 +174,3 @@ and type_defn tuc ctx notrec dl =
          h, writes, params, type_prog ~loc tuc ctx b)
       dl in
   ctx_full, defs
-
-  (* let writes = List.map (fun w -> ) d.pdefn_writes in *)
-  (* if Stdlib.(<>) pl [] then Loc.errorm ~loc "handler %s is not fully applied" id.id_str; *)
