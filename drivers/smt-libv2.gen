@@ -210,5 +210,6 @@ end
 
 theory map.Const
   meta "encoding:lskept" function const
-(*  syntax function const "(const[%t0] %1)" *)
+  meta "encoding:ignore_polymorphism_ls" function const
+  syntax function const "((as const %t0) %1)"
 end

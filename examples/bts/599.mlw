@@ -1,0 +1,5 @@
+
+use int.Int
+use map.Const
+
+goal g : (const 17) 42 > 0

@@ -21,7 +21,7 @@ end
 
 module Const
 
-  use Map
+  use export Map
 
   let function const (v: 'b) : map 'a 'b = fun _ -> v
 
@@ -221,4 +221,3 @@ module MapInjection
     injective m n <-> forall v:int. (occ v m 0 n <= 1)
 
 end
-

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="Z3" version="4.8.4" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="1" name="Z3" version="4.12.2" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="2" name="CVC4" version="1.8" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="3" name="Alt-Ergo" version="2.4.3" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="4" name="CVC4" version="1.7" timelimit="5" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
+<path name=".."/><path name="599.mlw"/>
+<theory name="Top" proved="true">
+ <goal name="g" proved="true">
+ <proof prover="0"><result status="valid" time="0.034994" steps="12"/></proof>
+ <proof prover="1"><result status="valid" time="0.016809" steps="26"/></proof>
+ <proof prover="2"><result status="valid" time="0.015810" steps="38"/></proof>
+ <proof prover="3"><result status="valid" time="0.014481" steps="2"/></proof>
+ <proof prover="4"><result status="valid" time="0.041217" steps="39"/></proof>
+ </goal>
+</theory>
+</file>
+</why3session>
