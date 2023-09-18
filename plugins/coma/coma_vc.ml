@@ -156,33 +156,34 @@ let rec havoc c wr pl =
     let u = c_clone_vs c v in
     c_add_vs c v (t_var u), u::vl in
   let on_param (c,vl as acc) = function
-    | Pc (h,_,pl) ->
-        c_add_hs c h (fun sf _ bl ->
-          let gl = sf && c.c_gl in
-          (* if gl then w_false else *)
-          w_and (if gl then w_false else w_true) (
-          let apply g c bl = c_find_hs c g c.c_gl c bl in
-          let lc = if sf then c.c_lc else Shs.empty in
-          let c = { c with c_lc = lc; c_gl = gl } in
-          (* TODO: suppress factorization *)
-          let c, close = consume c pl bl in
-          let expand h wr pl =
-            let h = c_find_hs c h in
-            let c, vl = havoc c wr pl in
-            let mkb = function
-              | Pt u -> Bt (c_find_tv c u)
-              | Pv v -> Bv (c_find_vs c v)
-              | Pr r -> Br (c_find_vs c r, r)
-              | Pc (g,_,_) -> Bc (c, apply g, false) in
-            w_forall vl (h true c (List.map mkb pl)) in
-          close (w_and_l (List.filter_map (function
-            | Pc (h,wr,pl) -> Some (expand h wr pl)
-            | Pt _ | Pv _ | Pr _ -> None) pl)))), vl
+    | Pc (h,_,pl) -> c_add_hs c h (undef c pl), vl
     | Pt v -> c_add_tv c v (ty_var (c_clone_tv v)), vl
     | Pv v | Pr v -> on_write acc v in
   let c_vl = List.fold_left on_write (c,[]) wr in
   let c,vl = List.fold_left on_param (c_vl) pl in
   c, List.rev vl
+
+and undef c pl sf _ bl =
+  let gl = sf && c.c_gl in
+  (* if gl then w_false else *)
+  w_and (if gl then w_false else w_true) (
+  let apply g c bl = c_find_hs c g c.c_gl c bl in
+  let lc = if sf then c.c_lc else Shs.empty in
+  let c = { c with c_lc = lc; c_gl = gl } in
+  (* TODO: suppress factorization *)
+  let c, close = consume c pl bl in
+  let expand h wr pl =
+    let h = c_find_hs c h in
+    let c, vl = havoc c wr pl in
+    let mkb = function
+      | Pt u -> Bt (c_find_tv c u)
+      | Pv v -> Bv (c_find_vs c v)
+      | Pr r -> Br (c_find_vs c r, r)
+      | Pc (g,_,_) -> Bc (c, apply g, false) in
+    w_forall vl (h true c (List.map mkb pl)) in
+  close (w_and_l (List.filter_map (function
+    | Pc (h,wr,pl) -> Some (expand h wr pl)
+    | Pt _ | Pv _ | Pr _ -> None) pl)))
 
 let substantial pp dd e c =
   let rec check = function
