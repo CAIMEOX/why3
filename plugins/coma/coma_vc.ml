@@ -34,7 +34,8 @@ type wpsp = {
   sp: term Mhs.t;
 }
 
-let w_true = { wp = t_true; sp = Mhs.empty }
+let w_true  = { wp = t_true;  sp = Mhs.empty }
+let w_false = { wp = t_false; sp = Mhs.empty }
 
 let w_and w1 w2 = {
   wp = t_and_simp w1.wp w2.wp;
@@ -154,8 +155,8 @@ let rec havoc it iv ih gl wr pl kk =
   w_forall (List.rev vl) (kk it iv ih)
 
 and undef it gl pl sf ir bl =
-(*   if sf && gl then { wp = t_false; sp = Mhs.empty } else *)
-  w_and { wp = if sf && gl then t_false else t_true ; sp = Mhs.empty } (
+(*   if sf && gl then w_false else *)
+  w_and (if sf && gl then w_false else w_true) (
   consume it ir Mhs.empty pl bl (fun it _ ih ->
     w_and_l (List.filter_map (function
       | Pt _ | Pv _ | Pr _ -> None
@@ -187,19 +188,21 @@ let rec vc pp dd it iv ih gl lc e bl = match e with
       let pl = List.map (fun (h,w,pl,_) -> Pc (h,w,pl)) dfl in
       let nc,_ = lc_update gl lc pl in
       let lc = if flat then lc else nc in
+      let rp = if flat then [] else pl in
       let spec ih (_,_,pl,d) = let lc,nc = lc_update gl lc pl in
         let kk sf iv bl = consume it iv ih pl bl (fun it iv ih ->
-          vc true false it iv ih (sf && gl) (if sf then lc else nc) d []) in
+          let gl = sf && gl and lc = if sf then lc else nc in
+          vc true false it iv ih gl lc d []) in
         Bc (iv, kk, substantial true false gl lc d) in
       let impl ih (_,wr,pl,d) = let lc,_ = lc_update gl lc pl in
         let kk it iv ih = vc false pp it iv ih gl lc d [] in
         havoc it iv ih gl wr pl kk in
-      havoc it iv ih gl [] (if flat then [] else pl) (fun it iv ih ->
+      havoc it iv ih gl [] rp (fun it iv ih ->
         let bl = List.map (spec ih) dfl in
         w_and_l (consume it iv ih pl bl (fun it iv ih ->
-            w_and_l (vc pp dd it iv ih gl nc e [] ::
-              if flat then [] else List.map (impl ih) dfl))
-           :: if flat then List.map (impl ih) dfl else []))
+          w_and_l (vc pp dd it iv ih gl nc e [] ::
+            if flat then [] else List.map (impl ih) dfl))
+          :: if flat then List.map (impl ih) dfl else []))
   | Eset (e,vtl) -> assert (bl = []);
       let set m (v,s) = Mvs.add v (v_inst it iv s) m in
       vc pp dd it (List.fold_left set iv vtl) ih gl lc e bl
