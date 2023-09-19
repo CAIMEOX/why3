@@ -103,6 +103,9 @@ let c_add_vs c v s = { c with c_vs = Mvs.add v s c.c_vs }
 let c_add_hs c h k = { c with c_hs = Mhs.add h k c.c_hs ;
   c_lc = if c.c_gl then Shs.empty else Shs.add h c.c_lc }
 
+let callsym sf h c bl =
+  c_find_hs c h (sf && (c.c_gl || Shs.mem h c.c_lc)) c bl
+
 let rec consume c pl bl =
   let eat (c,zl,hl,mr) p b = match p,b with
     | Pt u, Bt t -> c_add_tv c u t, zl, hl, mr
@@ -167,7 +170,6 @@ and undef c pl sf _ bl =
   let gl = sf && c.c_gl in
   (* if gl then w_false else *)
   w_and (if gl then w_false else w_true) (
-  let apply g c bl = c_find_hs c g c.c_gl c bl in
   let lc = if sf then c.c_lc else Shs.empty in
   let c = { c with c_lc = lc; c_gl = gl } in
   (* TODO: suppress factorization *)
@@ -179,7 +181,7 @@ and undef c pl sf _ bl =
       | Pt u -> Bt (c_find_tv c u)
       | Pv v -> Bv (c_find_vs c v)
       | Pr r -> Br (c_find_vs c r, r)
-      | Pc (g,_,_) -> Bc (c, apply g, false) in
+      | Pc (g,_,_) -> Bc (c, callsym true g, false) in
     w_forall vl (h true c (List.map mkb pl)) in
   close (w_and_l (List.filter_map (function
     | Pc (h,wr,pl) -> Some (expand h wr pl)
@@ -197,7 +199,7 @@ let substantial pp dd e c =
 
 let rec vc pp dd e c bl = match e with
   | Esym h ->
-      c_find_hs c h (pp && (c.c_gl || Shs.mem h c.c_lc)) c bl
+      callsym pp h c bl
   | Eapp (e, a) ->
       let b = match a with
         | At t -> Bt (c_inst_ty c t)
