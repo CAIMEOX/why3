@@ -203,7 +203,7 @@ let rec split_core (sp:split) (f:term) : split_ret =
   let bimap = bimap (fun _ t -> Zero t) cpy in
   let iclose = bimap ngt t_implies in
   let aclose = bimap cpy t_and in
-  let nclose ps = map (fun t -> Zero (t_attr_copy t t_true)) t_not ps in
+  let nclose ps = map (fun t -> Zero (t_attr_copy t t_true)) t_not_simp ps in
   let ret pos neg bwd fwd side cpos cneg =
       { pos; neg; bwd; fwd; side; cpos; cneg } in
   let r = match f.t_node with
