@@ -102,7 +102,7 @@ type classification = verdict * Log.exec_log
 (** The result of a classification based on normal and giant-step RAC execution
     is comprised of a verdict itself and the log of the relevant execution. *)
 
-val report_verdict : ?check_ce:bool -> classification Pp.pp
+val report_verdict : ?check_ce:bool -> Env.env -> classification Pp.pp
 (** Describe a verdict in a short sentence. *)
 
 val print_classification_log_or_model :
@@ -113,7 +113,7 @@ val print_classification_log_or_model :
     values are printed as JSON.) *)
 
 val print_model_classification :
-  ?verb_lvl:int -> ?json:[< `All | `Values ] -> ?check_ce:bool ->
+  ?verb_lvl:int -> ?json:[< `All | `Values ] -> ?check_ce:bool -> Env.env ->
   (model * classification) Pp.pp
 (** Print the classification with the classification log or model. *)
 

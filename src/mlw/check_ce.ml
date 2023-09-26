@@ -46,18 +46,18 @@ let print_call fmt call =
      Format.fprintf fmt "  - Loop at %a" print_oloc call.Log.log_loc
   | _ -> ()
 
-let report_verdict ?check_ce fmt (c,log) =
+let report_verdict ?check_ce env fmt (c,log) =
   match c with
   | NC ->
      Format.fprintf fmt
        "The@ program@ does@ not@ comply@ to@ the@ verification@ goal.@."
   | SW ->
-    let calls = Pinterp_core.Log.get_exec_calls_and_loops log in
+    let calls = Pinterp_core.Log.get_exec_calls_and_loops env log in
     Format.fprintf fmt
       "The@ contracts@ of@ the@ following@ functions/loops@ are@ too@ weak :@.@[%a@]@."
        (pp_print_list print_call) calls
   | NC_SW ->
-    let calls = Pinterp_core.Log.get_exec_calls_and_loops log in
+    let calls = Pinterp_core.Log.get_exec_calls_and_loops env log in
     if List.length calls = 0 then
       (* In this case, either the contracts of the stdlib/builtin functions are
          too weak or the program is non conforming. We make the assumption that
@@ -203,9 +203,9 @@ let classify ~vc_term_loc ~vc_term_attrs ~normal_result ~giant_step_result =
           BAD_CE giant_step_reason, giant_step_log
     end
 
-let print_model_classification ?verb_lvl ?json ?check_ce fmt (m, c) =
+let print_model_classification ?verb_lvl ?json ?check_ce env fmt (m, c) =
   fprintf fmt "@ @[<hov2>%a%t@]"
-    (report_verdict ?check_ce) c
+    (report_verdict ?check_ce env) c
     (fun fmt ->
        match fst c with
        | NC | SW | NC_SW ->
