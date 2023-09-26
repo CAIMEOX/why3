@@ -310,7 +310,7 @@ globals: <none>
 <rac:check_term_result>Assertion is ok at "examples/tests/rac.mlw", line 216, characters 13-23
 <rac:check_term_result>Postcondition of `f` is ok at "examples/tests/rac.mlw", line 217, characters 20-23
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 215, characters 47-52
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 217, characters 20-25
 <rac:check_term_result>Postcondition of `(+)` is ok at "examples/tests/rac.mlw", line 217, characters 4-25
 result: int = 43
@@ -343,11 +343,11 @@ globals: <none>
 <rac:check_term_result>Postcondition of `Tuple0` is ok at "command line expression to execute", line 1, characters 6-8
 <rac:check_term_result>Postcondition of `ref'mk` is ok at "examples/tests/rac.mlw", line 243, characters 12-17
 <rac:check_term_result>Postcondition of `ref` is ok at "examples/tests/rac.mlw", line 243, characters 12-17
-<rac:check_term_result>Postcondition of `contents` is ok at "WHY3DATA/stdlib/ref.mlw", line 18, characters 43-53
+<rac:check_term_result>Postcondition of `contents` is ok at "WHY3DATA/stdlib/ref.mlw", line 18, characters 33-43
 <rac:check_term_result>Postcondition of `(!)` is ok at "examples/tests/rac.mlw", line 244, characters 9-11
 <rac:check_term_result>Postcondition of `(+)` is ok at "examples/tests/rac.mlw", line 244, characters 9-15
 <rac:check_term_result>Postcondition of `(:=)` is ok at "examples/tests/rac.mlw", line 244, characters 4-15
-                       - Defined at "WHY3DATA/stdlib/ref.mlw", line 20, characters 49-54
+                       - Defined at "WHY3DATA/stdlib/ref.mlw", line 20, characters 39-44
 result: () = ()
 globals: myref -> {contents= 0}
 ** PolyRefContracts.test2a ()
@@ -452,12 +452,12 @@ globals: <none>
 <rac:check_term_result>Postcondition of `map_update` is ok at "examples/tests/rac.mlw", line 317, characters 11-29
 <rac:check_term_result>Postcondition of `f` is ok at "examples/tests/rac.mlw", line 323, characters 11-14
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 314, characters 23-28
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 314, characters 41-44
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 323, characters 11-16
 <rac:check_term_result>Postcondition of `f` is ok at "examples/tests/rac.mlw", line 323, characters 4-7
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 314, characters 23-28
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 323, characters 4-9
 <rac:check_term_result>Postcondition of `Tuple2` is ok at "examples/tests/rac.mlw", line 323, characters 4-16
 result: (int, int) = (111, 0)
@@ -482,12 +482,12 @@ globals: <none>
 <rac:check_term_result>Postcondition of `elts` is ok at "examples/tests/rac.mlw", line 354, characters 23-29
 <rac:check_term_result>Postcondition of `elts` is ok at "examples/tests/rac.mlw", line 355, characters 14-20
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 354, characters 53-58
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 354, characters 72-75
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 355, characters 14-22
 <rac:check_term_result>Postcondition of `elts` is ok at "examples/tests/rac.mlw", line 355, characters 4-10
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 354, characters 53-58
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 355, characters 4-12
 <rac:check_term_result>Postcondition of `Tuple2` is ok at "examples/tests/rac.mlw", line 355, characters 4-22
 result: (int, int) = (11, 0)
@@ -503,14 +503,14 @@ globals: <none>
 <rac:check_term_result>Postcondition of `map_update` is ok at "examples/tests/rac.mlw", line 346, characters 16-37
 <rac:check_term_result>Postcondition of `elts` is ok at "examples/tests/rac.mlw", line 341, characters 41-47
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 339, characters 23-28
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 339, characters 41-44
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 341, characters 41-49
 <rac:check_term_result>Postcondition of `([])` is ok at "examples/tests/rac.mlw", line 360, characters 10-14
                        - Defined at "examples/tests/rac.mlw", line 341, characters 41-49
 <rac:check_term_result>Postcondition of `elts` is ok at "examples/tests/rac.mlw", line 341, characters 41-47
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 339, characters 23-28
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 341, characters 41-49
 <rac:check_term_result>Postcondition of `([])` is ok at "examples/tests/rac.mlw", line 360, characters 4-8
                        - Defined at "examples/tests/rac.mlw", line 341, characters 41-49
@@ -534,7 +534,7 @@ globals: <none>
 <rac:check_term_result>Postcondition of `map_update` is ok at "examples/tests/rac.mlw", line 346, characters 16-37
 <rac:check_term_result>Postcondition of `elts` is ok at "examples/tests/rac.mlw", line 341, characters 41-47
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 339, characters 23-28
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 339, characters 41-44
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 341, characters 41-49
 <rac:check_term_result>Postcondition of `([])` is ok at "examples/tests/rac.mlw", line 368, characters 12-16
@@ -542,14 +542,14 @@ globals: <none>
 <rac:check_term_result>Assertion is ok at "examples/tests/rac.mlw", line 369, characters 13-18
 <rac:check_term_result>Postcondition of `elts` is ok at "examples/tests/rac.mlw", line 341, characters 41-47
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 339, characters 23-28
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 341, characters 41-49
 <rac:check_term_result>Postcondition of `([])` is ok at "examples/tests/rac.mlw", line 370, characters 12-16
                        - Defined at "examples/tests/rac.mlw", line 341, characters 41-49
 <rac:check_term_result>Assertion is ok at "examples/tests/rac.mlw", line 371, characters 13-19
 <rac:check_term_result>Postcondition of `elts` is ok at "examples/tests/rac.mlw", line 341, characters 41-47
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 339, characters 23-28
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 339, characters 41-44
 <rac:check_term_result>Postcondition of `(@)` is ok at "examples/tests/rac.mlw", line 341, characters 41-49
 <rac:check_term_result>Postcondition of `([])` is ok at "examples/tests/rac.mlw", line 372, characters 12-16
@@ -576,7 +576,7 @@ globals: <none>
 ** Ghost.test2 ()
 <rac:check_term_result>Postcondition of `Tuple0` is ok at "command line expression to execute", line 1, characters 6-8
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 430, characters 7-12
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Postcondition of `f1` is ok at "examples/tests/rac.mlw", line 433, characters 18-24
                        - Defined at "examples/tests/rac.mlw", line 430, characters 4-30
 <rac:check_term_result>Postcondition of `(+)` is ok at "examples/tests/rac.mlw", line 434, characters 4-9
@@ -698,15 +698,15 @@ Assertion failed at "examples/tests/rac.mlw", line 413, characters 13-26
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 466, characters 10-11
 <rac:check_term_result>Postcondition of `(>=)` is ok at "examples/tests/rac.mlw", line 466, characters 10-16
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 468, characters 11-12
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 468, characters 11-16
 <rac:check_term_result>Loop variant decrease is ok at "examples/tests/rac.mlw", line 467, characters 16-17
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 466, characters 10-11
 <rac:check_term_result>Postcondition of `(>=)` is ok at "examples/tests/rac.mlw", line 466, characters 10-16
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 468, characters 11-12
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 468, characters 11-16
 <rac:check_term_result>Loop variant decrease is ok at "examples/tests/rac.mlw", line 467, characters 16-17
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 466, characters 10-11
@@ -724,8 +724,8 @@ globals: <none>
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 475, characters 9-10
 <rac:check_term_result>Postcondition of `(>)` is ok at "examples/tests/rac.mlw", line 475, characters 9-14
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 476, characters 13-14
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 476, characters 13-18
 <rac:check_term_result>Loop variant decrease is ok at "examples/tests/rac.mlw", line 474, characters 16-17
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 473, characters 10-11
@@ -733,8 +733,8 @@ globals: <none>
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 475, characters 9-10
 <rac:check_term_result>Postcondition of `(>)` is ok at "examples/tests/rac.mlw", line 475, characters 9-14
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 478, characters 13-14
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 478, characters 13-18
 <rac:check_term_result>Loop variant decrease is ok at "examples/tests/rac.mlw", line 474, characters 16-17
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 473, characters 10-11
@@ -742,8 +742,8 @@ globals: <none>
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 475, characters 9-10
 <rac:check_term_result>Postcondition of `(>)` is ok at "examples/tests/rac.mlw", line 475, characters 9-14
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 478, characters 13-14
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 478, characters 13-18
 <rac:check_term_result>Loop variant decrease is ok at "examples/tests/rac.mlw", line 474, characters 16-17
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 473, characters 10-11
@@ -759,8 +759,8 @@ globals: <none>
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 484, characters 9-10
 <rac:check_term_result>Postcondition of `(>)` is ok at "examples/tests/rac.mlw", line 484, characters 9-14
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 485, characters 13-14
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 485, characters 13-18
 <rac:check_term_result>Loop variant decrease is ok at "examples/tests/rac.mlw", line 483, characters 16-17
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 482, characters 10-11
@@ -787,8 +787,8 @@ Loop variant decrease failed at "examples/tests/rac.mlw", line 483, characters 1
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 492, characters 9-10
 <rac:check_term_result>Postcondition of `(>)` is ok at "examples/tests/rac.mlw", line 492, characters 9-14
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 493, characters 13-14
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 493, characters 13-18
 <rac:check_term_result>Loop variant decrease is ok at "examples/tests/rac.mlw", line 491, characters 16-17
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 490, characters 10-11
@@ -798,8 +798,8 @@ Loop variant decrease failed at "examples/tests/rac.mlw", line 483, characters 1
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 494, characters 14-15
 <rac:check_term_result>Postcondition of `(>)` is ok at "examples/tests/rac.mlw", line 494, characters 14-19
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 495, characters 13-14
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 495, characters 13-18
 <rac:check_term_result>Loop variant decrease is ok at "examples/tests/rac.mlw", line 491, characters 16-17
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 490, characters 10-11
@@ -834,15 +834,15 @@ Loop variant decrease failed at "examples/tests/rac.mlw", line 491, characters 1
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 503, characters 10-11
 <rac:check_term_result>Postcondition of `(>=)` is ok at "examples/tests/rac.mlw", line 503, characters 10-16
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 505, characters 11-12
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 505, characters 11-16
 <rac:check_term_result>Loop variant decrease is ok at "examples/tests/rac.mlw", line 504, characters 16-21
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 503, characters 10-11
 <rac:check_term_result>Postcondition of `(>=)` is ok at "examples/tests/rac.mlw", line 503, characters 10-16
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 505, characters 11-12
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 505, characters 11-16
 <rac:check_term_result>Loop variant decrease is ok at "examples/tests/rac.mlw", line 504, characters 16-21
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 503, characters 10-11
@@ -851,22 +851,22 @@ Loop variant decrease failed at "examples/tests/rac.mlw", line 491, characters 1
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 509, characters 10-11
 <rac:check_term_result>Postcondition of `(>=)` is ok at "examples/tests/rac.mlw", line 509, characters 10-17
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 511, characters 11-12
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 511, characters 11-16
 <rac:check_term_result>Loop variant decrease is ok at "examples/tests/rac.mlw", line 510, characters 16-21
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 509, characters 10-11
 <rac:check_term_result>Postcondition of `(>=)` is ok at "examples/tests/rac.mlw", line 509, characters 10-17
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 511, characters 11-12
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 511, characters 11-16
 <rac:check_term_result>Loop variant decrease is ok at "examples/tests/rac.mlw", line 510, characters 16-21
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 509, characters 10-11
 <rac:check_term_result>Postcondition of `(>=)` is ok at "examples/tests/rac.mlw", line 509, characters 10-17
 <rac:check_term_result>Postcondition of `contents` is ok at "examples/tests/rac.mlw", line 511, characters 11-12
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 511, characters 11-16
 <rac:check_term_result>Loop variant decrease failed at "examples/tests/rac.mlw", line 510, characters 16-21
                        - Term: p (2 - i.contents) (2 - i1.contents) \/
@@ -908,13 +908,13 @@ globals: <none>
 * FunctionVariant
 ** FunctionVariant.test1 2
 <rac:check_term_result>Postcondition of `(>)` is ok at "examples/tests/rac.mlw", line 536, characters 7-12
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 536, characters 24-29
 <rac:check_term_result>Variant decrease is ok at "examples/tests/rac.mlw", line 535, characters 35-36
 <rac:check_term_result>Postcondition of `(>)` is ok at "examples/tests/rac.mlw", line 536, characters 7-12
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 536, characters 24-29
 <rac:check_term_result>Variant decrease is ok at "examples/tests/rac.mlw", line 535, characters 35-36
 <rac:check_term_result>Postcondition of `(>)` is ok at "examples/tests/rac.mlw", line 536, characters 7-12
@@ -922,13 +922,13 @@ result: int = 0
 globals: <none>
 ** FunctionVariant.test2 2
 <rac:check_term_result>Postcondition of `(>)` is ok at "examples/tests/rac.mlw", line 539, characters 7-12
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 539, characters 24-29
 <rac:check_term_result>Variant decrease is ok at "examples/tests/rac.mlw", line 538, characters 35-36
 <rac:check_term_result>Postcondition of `(>)` is ok at "examples/tests/rac.mlw", line 539, characters 7-12
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 539, characters 24-29
 <rac:check_term_result>Variant decrease is ok at "examples/tests/rac.mlw", line 538, characters 35-36
 <rac:check_term_result>Postcondition of `(>)` is ok at "examples/tests/rac.mlw", line 539, characters 7-12
@@ -940,59 +940,59 @@ Variant decrease failed at "examples/tests/rac.mlw", line 538, characters 35-36
 - Variables: i1 -> 0, i -> 0
 ** FunctionVariant.test3 2
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 542, characters 7-12
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 542, characters 38-43
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 542, characters 32-37
 <rac:check_term_result>Variant decrease is ok at "examples/tests/rac.mlw", line 543, characters 35-36
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 544, characters 7-12
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 544, characters 40-47
 <rac:check_term_result>Variant decrease is ok at "examples/tests/rac.mlw", line 543, characters 35-36
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 544, characters 7-12
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Variant decrease is ok at "examples/tests/rac.mlw", line 541, characters 35-36
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 542, characters 7-12
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 542, characters 38-43
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 542, characters 32-37
 <rac:check_term_result>Variant decrease is ok at "examples/tests/rac.mlw", line 543, characters 35-36
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 544, characters 7-12
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Variant decrease is ok at "examples/tests/rac.mlw", line 541, characters 35-36
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 542, characters 7-12
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 result: int = 0
 globals: <none>
 ** FunctionVariant.test4 2
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 547, characters 7-12
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 547, characters 38-43
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 547, characters 32-37
 <rac:check_term_result>Variant decrease is ok at "examples/tests/rac.mlw", line 548, characters 35-36
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 549, characters 13-20
 <rac:check_term_result>Variant decrease is ok at "examples/tests/rac.mlw", line 548, characters 35-36
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 549, characters 13-20
 <rac:check_term_result>Variant decrease is ok at "examples/tests/rac.mlw", line 548, characters 35-36
-<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 49-51
-<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 45-51
+<rac:check_term_result>Postcondition of `(-_)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 39-41
+<rac:check_term_result>Postcondition of `(+)` is ok at "WHY3DATA/stdlib/int.mlw", line 23, characters 35-41
 <rac:check_term_result>Postcondition of `(-)` is ok at "examples/tests/rac.mlw", line 549, characters 13-20
 <rac:check_term_result>Variant decrease failed at "examples/tests/rac.mlw", line 548, characters 35-36
                        - Term: 0 <= i /\ i1 < i \/
@@ -1004,7 +1004,7 @@ Variant decrease failed at "examples/tests/rac.mlw", line 548, characters 35-36
 - Variables: i1 -> 1, i -> 1, j1 -> (-2), j -> (-1)
 ** FunctionVariant.test5 2
 <rac:check_term_result>Postcondition of `(=)` is ok at "examples/tests/rac.mlw", line 552, characters 7-12
-                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 49-65
+                       - Defined at "WHY3DATA/stdlib/int.mlw", line 16, characters 39-55
 <rac:check_term_result>Variant decrease failed at "examples/tests/rac.mlw", line 553, characters 35-36
                        - Term: 0 <= i /\ i1 < i \/ i = i1 /\ false
                        - Variables: i1 -> 2, i -> 2
