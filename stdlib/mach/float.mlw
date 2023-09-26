@@ -22,8 +22,8 @@ module Single
   predicate add_pre_ieee [@stdlib] (x:t) (y:t) =
     t'isFinite (x .+ y)
 
-  predicate add_post_ieee [@stdlib] (x:t) (y:t) (r:t) =
-    r =  x .+ y
+  predicate add_post_ieee (x:t) (y:t) (r:t) =
+    r = x .+ y
 
   predicate add_pre_real [@stdlib] (x:t) (y:t) =
     no_overflow RNE (t'real x +. t'real y)
@@ -31,9 +31,12 @@ module Single
   predicate add_post_real [@stdlib] (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x +. t'real  y)
 
-  val safe_add [@stdlib] (x y: t) : t
+  val safe_add (x y: t) : t
+    requires { [@expl:finite floating-point number] t'isFinite x }
+    requires { [@expl:finite floating-point number] t'isFinite y }
     requires { [@expl:floating-point overflow]
                add_pre_ieee x y \/ add_pre_real x y }
+    ensures  { t'isFinite result }
     ensures  { add_post_ieee x y result /\ add_post_real x y result }
 
   predicate sub_pre_ieee [@stdlib] (x:t) (y:t) =
@@ -48,9 +51,12 @@ module Single
   predicate sub_post_real [@stdlib] (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x -. t'real  y)
 
-  val safe_sub [@stdlib] (x y: t) : t
+  val safe_sub (x y: t) : t
+    requires { [@expl:finite floating-point number] t'isFinite x }
+    requires { [@expl:finite floating-point number] t'isFinite y }
     requires { [@expl:floating-point overflow]
                sub_pre_ieee x y \/ sub_pre_real x y }
+    ensures  { t'isFinite result }
     ensures  { sub_post_ieee x y result /\ sub_post_real x y result }
 
   predicate mul_pre_ieee [@stdlib] (x:t) (y:t) =
@@ -65,9 +71,12 @@ module Single
   predicate mul_post_real [@stdlib] (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x *. t'real  y)
 
-  val safe_mul [@stdlib] (x y: t) : t
+  val safe_mul (x y: t) : t
+    requires { [@expl:finite floating-point number] t'isFinite x }
+    requires { [@expl:finite floating-point number] t'isFinite y }
     requires { [@expl:floating-point overflow]
                mul_pre_ieee x y \/ mul_pre_real x y }
+    ensures  { t'isFinite result }
     ensures  { mul_post_ieee x y result /\ mul_post_real x y result }
 
   predicate div_pre_ieee [@stdlib] (x:t) (y:t) =
@@ -82,9 +91,13 @@ module Single
   predicate div_post_real [@stdlib] (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x /. t'real  y)
 
-  val safe_div [@stdlib] (x y: t) : t
+  val safe_div (x y: t) : t
+    requires { [@expl:finite floating-point number] t'isFinite x }
+    requires { [@expl:finite floating-point number] t'isFinite y }
+    requires { [@expl:non-zero floating-point number] not (is_zero y) }
     requires { [@expl:floating-point overflow]
                div_pre_ieee x y \/ div_pre_real x y }
+    ensures  { t'isFinite result }
     ensures  { div_post_ieee x y result /\ div_post_real x y result }
 
 
@@ -111,9 +124,12 @@ module Double
   predicate add_post_real [@stdlib] (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x +. t'real  y)
 
-  val safe_add [@stdlib] (x y: t) : t
+  val safe_add (x y: t) : t
+    requires { [@expl:finite floating-point number] t'isFinite x }
+    requires { [@expl:finite floating-point number] t'isFinite y }
     requires { [@expl:floating-point overflow]
                add_pre_ieee x y \/ add_pre_real x y }
+    ensures  { t'isFinite result }
     ensures  { add_post_ieee x y result /\ add_post_real x y result }
 
   predicate sub_pre_ieee [@stdlib] (x:t) (y:t) =
@@ -128,9 +144,12 @@ module Double
   predicate sub_post_real [@stdlib] (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x -. t'real  y)
 
-  val safe_sub [@stdlib] (x y: t) : t
+  val safe_sub (x y: t) : t
+    requires { [@expl:finite floating-point number] t'isFinite x }
+    requires { [@expl:finite floating-point number] t'isFinite y }
     requires { [@expl:floating-point overflow]
                sub_pre_ieee x y \/ sub_pre_real x y }
+    ensures  { t'isFinite result }
     ensures  { sub_post_ieee x y result /\ sub_post_real x y result }
 
   predicate mul_pre_ieee [@stdlib] (x:t) (y:t) =
@@ -145,9 +164,12 @@ module Double
   predicate mul_post_real [@stdlib] (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x *. t'real  y)
 
-  val safe_mul [@stdlib] (x y: t) : t
+  val safe_mul (x y: t) : t
+    requires { [@expl:finite floating-point number] t'isFinite x }
+    requires { [@expl:finite floating-point number] t'isFinite y }
     requires { [@expl:floating-point overflow]
                mul_pre_ieee x y \/ mul_pre_real x y }
+    ensures  { t'isFinite result }
     ensures  { mul_post_ieee x y result /\ mul_post_real x y result }
 
   predicate div_pre_ieee [@stdlib] (x:t) (y:t) =
@@ -162,9 +184,13 @@ module Double
   predicate div_post_real [@stdlib] (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x /. t'real  y)
 
-  val safe_div [@stdlib] (x y: t) : t
+  val safe_div (x y: t) : t
+    requires { [@expl:finite floating-point number] t'isFinite x }
+    requires { [@expl:finite floating-point number] t'isFinite y }
+    requires { [@expl:non-zero floating-point number] not (is_zero y) }
     requires { [@expl:floating-point overflow]
                div_pre_ieee x y \/ div_pre_real x y }
+    ensures  { t'isFinite result }
     ensures  { div_post_ieee x y result /\ div_post_real x y result }
 
 

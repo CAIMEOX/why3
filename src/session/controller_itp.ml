@@ -244,7 +244,7 @@ let print_session fmt c =
     reloaded.
  *)
 
-let reload_files ?(hard_reload=false) ~ignore_shapes (c : controller) =
+let reload_files ?(hard_reload=false) ?reparse_file_fun ~ignore_shapes (c : controller) =
   let old_ses = c.controller_session in
   if hard_reload then begin
     c.controller_env <- Env.create_env (Env.get_loadpath c.controller_env);
@@ -255,12 +255,16 @@ let reload_files ?(hard_reload=false) ~ignore_shapes (c : controller) =
   (* FIXME: here we should compare [shape_version] with the version of shapes just loaded.
      OR: even better, this function has no reason to have a [shape_version] parameter
      and should always take the version from the file just loaded. *)
-  merge_files ~ignore_shapes c.controller_env c.controller_session old_ses
+  match reparse_file_fun with
+  | None ->
+      merge_files ~ignore_shapes c.controller_env c.controller_session old_ses
+  | Some reparse_file_fun ->
+      merge_files_gen ~ignore_shapes ~reparse_file_fun c.controller_env c.controller_session old_ses
 
 exception Errors_list of exn list
 
-let reload_files ?(hard_reload=false) ~ignore_shapes (c: controller) =
-  let errors, b1, b2 = reload_files c ~hard_reload ~ignore_shapes in
+let reload_files ?(hard_reload=false) ?reparse_file_fun ~ignore_shapes (c: controller) =
+  let errors, b1, b2 = reload_files ~hard_reload ?reparse_file_fun ~ignore_shapes c in
   match errors with
   | [] -> b1, b2
   | _ -> raise (Errors_list errors)
@@ -271,7 +275,8 @@ let add_file c ?format fname =
     try false,(Session_itp.read_file c.controller_env ~format fname), None
     with e -> true,([], format), Some e
   in
-  let (_ : file) = add_file_section c.controller_session fname ~file_is_detached theories format in
+  let fp = Sysutil.relativize_filename (get_dir c.controller_session) fname in
+  let (_ : file) = add_file_section c.controller_session fp ~file_is_detached theories format in
   errors
 
 let add_file c ?format fname =
@@ -836,17 +841,15 @@ let call_one_prover c (p, timelimit, memlimit, steplimit) ~callback ~notificatio
   let timelimit = Opt.get_def (Whyconf.timelimit main) timelimit in
   let memlimit = Opt.get_def (Whyconf.memlimit main) memlimit in
   let steplimit = Opt.get_def 0 steplimit in
-
   let limit = {
     Call_provers.limit_time = timelimit;
     limit_mem  = memlimit;
     limit_steps = steplimit;
   } in
-
   schedule_proof_attempt c g p ~limit ~callback ~notification
 
 let run_strategy_on_goal
-    c id strat ~callback_pa ~callback_tr ~callback ~notification =
+    c id strat ~callback_pa ~callback_tr ~callback ~notification ~removed =
   let rec exec_strategy pc strat g =
     if pc < 0 || pc >= Array.length strat then
       callback STShalt
@@ -861,7 +864,15 @@ let run_strategy_on_goal
            | UpgradeProver _ | Scheduled | Running -> (* nothing to do yet *) ()
            | Done { Call_provers.pr_answer = Call_provers.Valid } ->
               (* proof succeeded, nothing more to do *)
-              interrupt_proof_attempts_for_goal c g;
+               interrupt_proof_attempts_for_goal c g;
+               Hprover.iter (fun _pr pa ->
+                   let res = get_proof_attempt_node c.controller_session pa in
+                   match res.proof_state with
+                   | Some Call_provers.{ pr_answer = Valid } ->
+                       ()
+                   | _ ->
+                       remove_subtree ~notification ~removed c (APa pa))
+                 (get_proof_attempt_ids c.controller_session g);
               already_done := 0;
               callback STShalt
            | Interrupted ->
@@ -922,7 +933,6 @@ let schedule_tr_with_same_arguments
   let args = get_transf_args s tr in
   let name = get_transf_name s tr in
   let callback = callback name args in
-
   schedule_transformation c pn name args ~callback ~notification
 
 let proof_is_complete pa =
@@ -934,7 +944,6 @@ let proof_is_complete pa =
 
 
 let clean c ~removed nid =
-
   (* clean should not change proved status *)
   let notification any =
     Format.eprintf "Cleaning error: cleaning attempts to change status of node %a@." fprintf_any any
