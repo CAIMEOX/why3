@@ -28,7 +28,7 @@ module RoundingMode
      <li>RTZ : Round Towards Zero
      </ul>} *)
 
-  predicate to_nearest [@stdlib] (m:mode) = m = RNE \/ m = RNA
+  predicate to_nearest (m:mode) = m = RNE \/ m = RNA
 end
 
 module GenericFloat
@@ -70,29 +70,29 @@ module GenericFloat
 
   (** {3 Operators} *)
 
-  val function add [@stdlib] mode t t : t
-  val function sub [@stdlib] mode t t : t
-  val function mul [@stdlib] mode t t : t
-  val function div [@stdlib] mode t t : t
+  val function add mode t t : t
+  val function sub mode t t : t
+  val function mul mode t t : t
+  val function div mode t t : t
     (** The four basic operations, rounded in the given mode *)
 
-  val function abs  [@stdlib]        t   : t   (** Absolute value *)
-  val function neg  [@stdlib]        t   : t   (** Opposite *)
-  val function fma  [@stdlib] mode t t t : t   (** Fused multiply-add: x * y + z *)
-  val function sqrt [@stdlib] mode   t   : t   (** Square root *)
+  val function abs         t   : t   (** Absolute value *)
+  val function neg         t   : t   (** Opposite *)
+  val function fma  mode t t t : t   (** Fused multiply-add: x * y + z *)
+  val function sqrt mode   t   : t   (** Square root *)
 
-  let function (.-_) [@stdlib] (x:t)   : t = neg x
-  let function (.+)  [@stdlib] (x y:t) : t = add RNE x y
-  let function (.-)  [@stdlib] (x y:t) : t = sub RNE x y
-  let function (.*)  [@stdlib] (x y:t) : t = mul RNE x y
-  let function (./)  [@stdlib] (x y:t) : t = div RNE x y
+  let function (.-_) (x:t)   : t = neg x
+  let function (.+)  (x y:t) : t = add RNE x y
+  let function (.-)  (x y:t) : t = sub RNE x y
+  let function (.*)  (x y:t) : t = mul RNE x y
+  let function (./)  (x y:t) : t = div RNE x y
     (** Notations for operations in the default mode RNE *)
 
-  val function roundToIntegral [@stdlib] mode t : t
+  val function roundToIntegral mode t : t
     (** Rounding to an integer *)
 
-  function min [@stdlib]       t t : t
-  function max [@stdlib]       t t : t
+  function min       t t : t
+  function max       t t : t
   (** Minimum and Maximum
 
      Note that we have to follow IEEE-754 and SMTLIB here. Two things to
@@ -110,41 +110,41 @@ module GenericFloat
 
   (** {3 Comparisons} *)
 
-  val predicate le [@stdlib] t t
-  val predicate lt [@stdlib] t t
-  let predicate ge [@stdlib] (x:t) (y:t) = le y x
-  let predicate gt [@stdlib] (x:t) (y:t) = lt y x
-  val predicate eq [@stdlib] t t
+  val predicate le t t
+  val predicate lt t t
+  let predicate ge (x:t) (y:t) = le y x
+  let predicate gt (x:t) (y:t) = lt y x
+  val predicate eq t t
   (** equality on floats, different from = since not (eq NaN NaN) *)
 
-  let predicate (.<=) [@stdlib] (x:t) (y:t) = le x y
-  let predicate (.<)  [@stdlib] (x:t) (y:t) = lt x y
-  let predicate (.>=) [@stdlib] (x:t) (y:t) = ge x y
-  let predicate (.>)  [@stdlib] (x:t) (y:t) = gt x y
-  let predicate (.=)  [@stdlib] (x:t) (y:t) = eq x y
+  let predicate (.<=) (x:t) (y:t) = le x y
+  let predicate (.<)  (x:t) (y:t) = lt x y
+  let predicate (.>=) (x:t) (y:t) = ge x y
+  let predicate (.>)  (x:t) (y:t) = gt x y
+  let predicate (.=)  (x:t) (y:t) = eq x y
   (** Notations *)
 
 
   (** {3 Classification of numbers} *)
 
-  predicate is_normal [@stdlib]    t
-  predicate is_subnormal [@stdlib] t
-  val predicate is_zero [@stdlib]      t
-  val predicate is_infinite [@stdlib]  t
-  val predicate is_nan [@stdlib]       t
-  val predicate is_positive [@stdlib]  t
-  val predicate is_negative [@stdlib]  t
+  predicate is_normal    t
+  predicate is_subnormal t
+  val predicate is_zero      t
+  val predicate is_infinite  t
+  val predicate is_nan       t
+  val predicate is_positive  t
+  val predicate is_negative  t
 
   (** helper predicate for zeros, normals and subnormals. not defined
      so that the axiomatisation below can use it without talking about
      subnormals *)
-  predicate is_finite [@stdlib]    t
+  predicate is_finite    t
 
-  predicate is_plus_infinity  [@stdlib] (x:t) = is_infinite x /\ is_positive x
-  predicate is_minus_infinity [@stdlib] (x:t) = is_infinite x /\ is_negative x
-  predicate is_plus_zero      [@stdlib] (x:t) = is_zero x /\ is_positive x
-  predicate is_minus_zero     [@stdlib] (x:t) = is_zero x /\ is_negative x
-  predicate is_not_nan        [@stdlib] (x:t) = is_finite x \/ is_infinite x
+  predicate is_plus_infinity  (x:t) = is_infinite x /\ is_positive x
+  predicate is_minus_infinity (x:t) = is_infinite x /\ is_negative x
+  predicate is_plus_zero      (x:t) = is_zero x /\ is_positive x
+  predicate is_minus_zero     (x:t) = is_zero x /\ is_negative x
+  predicate is_not_nan        (x:t) = is_finite x \/ is_infinite x
 
   axiom is_not_nan: forall x:t. is_not_nan x <-> not (is_nan x)
 
@@ -168,7 +168,7 @@ module GenericFloat
   (* to unsigned integer bitvector   - see Float_BV_Converter *)
   (* to signed integer bitvector                              *)
   (* to real *)
-  function to_real [@stdlib]   t    : real
+  function to_real   t    : real
 
   (** {2 Part II - Private Axiomatisation} *)
 
@@ -191,7 +191,7 @@ module GenericFloat
   (*    float32 : 0x1ffffff * 2^103                                         *)
   (*    float64 : 0x3fffffffffffff * 2^970                                  *)
   (* also note that this function never yields a subnormal, or a NaN, or -0 *)
-  function of_int [@stdlib] (m:mode) (x:int) : t
+  function of_int (m:mode) (x:int) : t
 
   (** {3 Conversions to other sorts} *)
 
@@ -205,7 +205,7 @@ module GenericFloat
   (* not hold:                                                             *)
   (*    to_int +INF < 2 ** 2048     // nope                                *)
   (*    to_int +INF > 0             // nope                                *)
-  function to_int [@stdlib] (m:mode) (x:t) : int
+  function to_int (m:mode) (x:t) : int
 
   axiom zero_of_int : forall m. zeroF = of_int m 0
 
@@ -218,7 +218,7 @@ module GenericFloat
   (*                                                                       *)
   (* Note that this means round (+INF) > 0 is not true.                    *)
   (* Note also this means round (2*INF) > round (INF) is not true either.  *)
-  function round [@stdlib] mode real : real
+  function round mode real : real
 
   constant max_real : real (* defined when cloning *)
   constant max_int  : int  (* defined when cloning *)
@@ -228,14 +228,14 @@ module GenericFloat
   axiom max_int_spec : max_int = pow2 emax - pow2 (emax - sb)
   axiom max_real_int: max_real = FromInt.from_int max_int
 
-  predicate in_range [@stdlib] (x:real) = -. max_real <=. x <=. max_real
+  predicate in_range (x:real) = -. max_real <=. x <=. max_real
 
-  predicate in_int_range [@stdlib] (i:int) = - max_int <= i <= max_int
+  predicate in_int_range (i:int) = - max_int <= i <= max_int
 
   axiom is_finite: forall x:t. is_finite x -> in_range (to_real x)
 
   (* used as a condition to propagate is_finite *)
-  predicate no_overflow [@stdlib] (m:mode) (x:real) = in_range (round m x)
+  predicate no_overflow (m:mode) (x:real) = in_range (round m x)
 
   (* Axioms on round *)
 
@@ -266,7 +266,7 @@ module GenericFloat
   axiom pow2sb: pow2sb = pow2 sb
 
   (* range in which every integer is representable *)
-  predicate in_safe_int_range [@stdlib] (i: int) = - pow2sb <= i <= pow2sb
+  predicate in_safe_int_range (i: int) = - pow2sb <= i <= pow2sb
 
   (* round and integers *)
 
@@ -279,9 +279,9 @@ module GenericFloat
 
   (** Comparison predicates *)
 
-  predicate same_sign [@stdlib] (x y : t) =
+  predicate same_sign (x y : t) =
     (is_positive x /\ is_positive y) \/ (is_negative x /\ is_negative y)
-  predicate diff_sign [@stdlib] (x y : t) =
+  predicate diff_sign (x y : t) =
     (is_positive x /\ is_negative y) \/ (is_negative x /\ is_positive y)
 
   axiom feq_eq: forall x y.
@@ -370,7 +370,7 @@ module GenericFloat
       (is_finite x /\ is_finite y /\ same_sign x y) ->
         to_real x *. to_real y >=. 0.0
 
-  predicate product_sign [@stdlib] (z x y: t) =
+  predicate product_sign (z x y: t) =
     (same_sign x y -> is_positive z) /\ (diff_sign x y -> is_negative z)
 
   (** {3 Overflow} *)
@@ -378,7 +378,7 @@ module GenericFloat
   (* This predicate is used to tell what is the result of a rounding
      in case of overflow in the axioms specifying add/sub/mul and fma
      *)
-  predicate overflow_value [@stdlib] (m:mode) (x:t) =
+  predicate overflow_value (m:mode) (x:t) =
     match m with
     | RTN -> if is_positive x then is_finite x /\ to_real x = max_real
                               else is_infinite x
@@ -391,7 +391,7 @@ module GenericFloat
 
   (* This predicate is used to tell what is the sign of zero in the
      axioms specifying add and sub *)
-  predicate sign_zero_result [@stdlib] (m:mode) (x:t) =
+  predicate sign_zero_result (m:mode) (x:t) =
     is_zero x ->
     match m with
     | RTN -> is_negative x
@@ -513,7 +513,7 @@ module GenericFloat
     is_finite x /\ to_real x >=. 0. /\
     to_real (sqrt m x) = round m (S.sqrt (to_real x))
 
-  predicate same_sign_real [@stdlib] (x:t) (r:real) =
+  predicate same_sign_real (x:t) (r:real) =
     (is_positive x /\ r >. 0.0) \/ (is_negative x /\ r <. 0.0)
 
   axiom add_special: forall m:mode, x y:t [add m x y].
@@ -658,7 +658,7 @@ module GenericFloat
   use real.Truncate as Truncate
 
   (* This predicate specify if a float is finite and is an integer *)
-  predicate is_int [@stdlib] (x:t)
+  predicate is_int (x:t)
 
   (** characterizing integers *)
 
@@ -953,8 +953,8 @@ module FloatConverter
 
   use export RoundingMode
 
-  function to_float64 [@stdlib] mode Float32.t : Float64.t
-  function to_float32 [@stdlib] mode Float64.t : Float32.t
+  function to_float64 mode Float32.t : Float64.t
+  function to_float32 mode Float64.t : Float32.t
 
   lemma round_double_single :
   forall m1 m2:mode, x:real.

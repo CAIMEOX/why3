@@ -5,7 +5,7 @@
 
 module Witness
 
-  val ghost function witness [@stdlib] (p: 'a -> bool) : 'a
+  val ghost function witness (p: 'a -> bool) : 'a
     requires { exists x. p x }
     ensures  { p result }
 
@@ -33,12 +33,12 @@ module Nat
 
   (** since a custom variant relation has to be a toplevel predicate symbol,
       we store the predicate `p` inside the variant expression *)
-  predicate r [@stdlib] (x y: ((int->bool),int)) =
+  predicate r (x y: ((int->bool),int)) =
     let p, x = x in
     let q, y = y in
     p = q && x = y+1 > 0 && not (p y)
 
-  let function witness [@stdlib] (p: int -> bool) : int
+  let function witness (p: int -> bool) : int
     requires { exists n. n >= 0 /\ p n }
     ensures  { result >= 0 /\ p result }
   = let lemma l1 (x: int)

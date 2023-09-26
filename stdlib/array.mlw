@@ -17,17 +17,17 @@ module Array
                 length : int
   } invariant { 0 <= length }
 
-  function ([]) [@stdlib] (a: array 'a) (i: int) : 'a = a.elts i
+  function ([]) (a: array 'a) (i: int) : 'a = a.elts i
 
-  val ([]) [@stdlib] (a: array 'a) (i: int) : 'a
+  val ([]) (a: array 'a) (i: int) : 'a
     requires { [@expl:index in array bounds] 0 <= i < length a }
     ensures  { result = a[i] }
 
-  val ghost function ([<-]) [@stdlib] (a: array 'a) (i: int) (v: 'a): array 'a
+  val ghost function ([<-]) (a: array 'a) (i: int) (v: 'a): array 'a
     ensures { result.length = a.length }
     ensures { result.elts = Map.set a.elts i v }
 
-  val ([]<-) [@stdlib] (a: array 'a) (i: int) (v: 'a) : unit writes {a}
+  val ([]<-) (a: array 'a) (i: int) (v: 'a) : unit writes {a}
     requires { [@expl:index in array bounds] 0 <= i < length a }
     ensures  { a.elts = Map.set (old a).elts i v }
     ensures  { a = (old a)[i <- v] }
@@ -36,35 +36,35 @@ module Array
 
   exception OutOfBounds
 
-  let defensive_get [@stdlib] (a: array 'a) (i: int)
+  let defensive_get (a: array 'a) (i: int)
     ensures { 0 <= i < length a /\ result = a[i] }
     raises  { OutOfBounds -> i < 0 \/ i >= length a }
   = if i < 0 || i >= length a then raise OutOfBounds;
     a[i]
 
-  let defensive_set [@stdlib] (a: array 'a) (i: int) (v: 'a)
+  let defensive_set (a: array 'a) (i: int) (v: 'a)
     ensures { 0 <= i < length a }
     ensures { a = (old a)[i <- v] }
     raises  { OutOfBounds -> (i < 0 \/ i >= length a) /\ a = old a }
   = if i < 0 || i >= length a then raise OutOfBounds;
     a[i] <- v
 
-  function make [@stdlib] (n: int) (v: 'a) : array 'a
+  function make (n: int) (v: 'a) : array 'a
 
   axiom make_spec : forall n:int, v:'a.
     n >= 0 ->
     (forall i:int. 0 <= i < n -> (make n v)[i] = v) /\
     length (make n v) = n
 
-  val make [@stdlib] [@extraction:array_make] (n: int) (v: 'a) : array 'a
+  val make [@extraction:array_make] (n: int) (v: 'a) : array 'a
     requires { [@expl:array creation size] n >= 0 }
     ensures { forall i:int. 0 <= i < n -> result[i] = v }
     ensures { result.length = n }
 
-  val empty [@stdlib] () : array 'a
+  val empty () : array 'a
     ensures { result.length = 0 }
 
-  let copy [@stdlib] (a: array 'a) : array 'a
+  let copy (a: array 'a) : array 'a
     ensures  { length result = length a }
     ensures  { forall i:int. 0 <= i < length result -> result[i] = a[i] }
   =
@@ -79,7 +79,7 @@ module Array
       b
     end
 
-  let sub [@stdlib] (a: array 'a) (ofs: int) (len: int) : array 'a
+  let sub (a: array 'a) (ofs: int) (len: int) : array 'a
     requires { 0 <= ofs /\ 0 <= len /\ ofs + len <= length a }
     ensures  { length result = len }
     ensures  { forall i:int. 0 <= i < len -> result[i] = a[ofs + i] }
@@ -96,7 +96,7 @@ module Array
       b
     end
 
-  let fill [@stdlib] (a: array 'a) (ofs: int) (len: int) (v: 'a)
+  let fill (a: array 'a) (ofs: int) (len: int) (v: 'a)
     requires { 0 <= ofs /\ 0 <= len /\ ofs + len <= length a }
     ensures  { forall i:int.
       (0 <= i < ofs \/ ofs + len <= i < length a) -> a[i] = old a[i] }
@@ -109,7 +109,7 @@ module Array
       a[ofs + k] <- v
     done
 
-  let blit [@stdlib] (a1: array 'a) (ofs1: int)
+  let blit (a1: array 'a) (ofs1: int)
                  (a2: array 'a) (ofs2: int) (len: int) : unit writes {a2}
     requires { 0 <= ofs1 /\ 0 <= len /\ ofs1 + len <= length a1 }
     requires { 0 <= ofs2 /\             ofs2 + len <= length a2 }
@@ -124,7 +124,7 @@ module Array
       a2[ofs2 + i] <- a1[ofs1 + i];
     done
 
-  let append [@stdlib] (a1: array 'a) (a2: array 'a) : array 'a
+  let append (a1: array 'a) (a2: array 'a) : array 'a
     ensures { length result = length a1 + length a2 }
     ensures { forall i. 0 <= i < length a1 -> result[i] = a1[i] }
     ensures { forall i. 0 <= i < length a2 -> result[length a1 + i] = a2[i] }
@@ -137,7 +137,7 @@ module Array
       a
     end
 
-  let self_blit [@stdlib] (a: array 'a) (ofs1: int) (ofs2: int) (len: int) : unit
+  let self_blit (a: array 'a) (ofs1: int) (ofs2: int) (len: int) : unit
     writes {a}
     requires { 0 <= ofs1 /\ 0 <= len /\ ofs1 + len <= length a }
     requires { 0 <= ofs2 /\             ofs2 + len <= length a }
@@ -178,7 +178,7 @@ module Init
   use int.Int
   use export Array
 
-  let init [@stdlib] (n: int) (f: int -> 'a) : array 'a
+  let init (n: int) (f: int -> 'a) : array 'a
     requires { [@expl:array creation size] n >= 0 }
     ensures { forall i:int. 0 <= i < n -> result[i] = f i }
     ensures { result.length = n }
@@ -204,12 +204,12 @@ module IntArraySorted
   use Array
   clone map.MapSorted as M with type elt = int, predicate le = (<=)
 
-  predicate sorted_sub [@stdlib] (a : array int) (l u : int) =
+  predicate sorted_sub (a : array int) (l u : int) =
     M.sorted_sub a.elts l u
   (** `sorted_sub a l u` is true whenever the array segment `a(l..u-1)`
       is sorted w.r.t order relation `le` *)
 
-  predicate sorted [@stdlib] (a : array int) =
+  predicate sorted (a : array int) =
     M.sorted_sub a.elts 0 a.length
   (** `sorted a` is true whenever the array `a` is sorted w.r.t `le` *)
 
@@ -222,14 +222,14 @@ module Sorted
 
   type elt
 
-  predicate le [@stdlib] elt elt
+  predicate le elt elt
 
-  predicate sorted_sub [@stdlib] (a: array elt) (l u: int) =
+  predicate sorted_sub (a: array elt) (l u: int) =
     forall i1 i2 : int. l <= i1 < i2 < u -> le a[i1] a[i2]
   (** `sorted_sub a l u` is true whenever the array segment `a(l..u-1)`
       is sorted w.r.t order relation `le` *)
 
-  predicate sorted [@stdlib] (a: array elt) =
+  predicate sorted (a: array elt) =
     forall i1 i2 : int. 0 <= i1 < i2 < length a -> le a[i1] a[i2]
   (** `sorted a` is true whenever the array `a` is sorted w.r.t `le` *)
 
@@ -243,11 +243,11 @@ module ArrayEq
   use Array
   use map.MapEq
 
-  predicate array_eq_sub [@stdlib] (a1 a2: array 'a) (l u: int) =
+  predicate array_eq_sub (a1 a2: array 'a) (l u: int) =
     a1.length = a2.length /\ 0 <= l <= a1.length /\ 0 <= u <= a1.length /\
     map_eq_sub a1.elts a2.elts l u
 
-  predicate array_eq [@stdlib] (a1 a2: array 'a) =
+  predicate array_eq (a1 a2: array 'a) =
     a1.length = a2.length /\ map_eq_sub a1.elts a2.elts 0 (length a1)
 
 end
@@ -258,7 +258,7 @@ module ArrayExchange
   use Array
   use map.MapExchange as M
 
-  predicate exchange [@stdlib] (a1 a2: array 'a) (i j: int) =
+  predicate exchange (a1 a2: array 'a) (i j: int) =
     a1.length = a2.length /\
     M.exchange a1.elts a2.elts 0 a1.length i j
   (** `exchange a1 a2 i j` means that arrays `a1` and `a2` only differ
@@ -277,14 +277,14 @@ module ArrayPermut
   use ArrayEq
   use export ArrayExchange
 
-  predicate permut [@stdlib] (a1 a2: array 'a) (l u: int) =
+  predicate permut (a1 a2: array 'a) (l u: int) =
     a1.length = a2.length /\ 0 <= l <= a1.length /\ 0 <= u <= a1.length /\
     M.permut a1.elts a2.elts l u
   (** `permut a1 a2 l u` is true when the segment
       `a1(l..u-1)` is a permutation of the segment `a2(l..u-1)`.
       Values outside of the interval `(l..u-1)` are ignored. *)
 
-  predicate permut_sub [@stdlib] (a1 a2: array 'a) (l u: int) =
+  predicate permut_sub (a1 a2: array 'a) (l u: int) =
     map_eq_sub a1.elts a2.elts 0 l /\
     permut a1 a2 l u /\
     map_eq_sub a1.elts a2.elts u (length a1)
@@ -292,7 +292,7 @@ module ArrayPermut
       `a1(l..u-1)` is a permutation of the segment `a2(l..u-1)`
       and values outside of the interval `(l..u-1)` are equal. *)
 
-  predicate permut_all [@stdlib] (a1 a2: array 'a) =
+  predicate permut_all (a1 a2: array 'a) =
     a1.length = a2.length /\ M.permut a1.elts a2.elts 0 a1.length
   (** `permut_all a1 a2 l u` is true when array `a1` is a permutation
       of array `a2`. *)
@@ -325,7 +325,7 @@ module ArraySwap
   use Array
   use export ArrayExchange
 
-  let swap [@stdlib] (a:array 'a) (i:int) (j:int) : unit
+  let swap (a:array 'a) (i:int) (j:int) : unit
     requires { 0 <= i < length a /\ 0 <= j < length a }
     writes   { a }
     ensures  { exchange (old a) a i j }
@@ -343,7 +343,7 @@ module ArraySum
   use int.Sum as S
 
   (** `sum a l h` is the sum of `a[i]` for `l <= i < h` *)
-  function sum [@stdlib] (a: array int) (l h: int) : int = S.sum a.elts l h
+  function sum (a: array int) (l h: int) : int = S.sum a.elts l h
 
 end
 
@@ -354,7 +354,7 @@ module NumOf
   use int.NumOf as N
 
   (** the number of `a[i]` such that `l <= i < u` and `pr i a[i]` *)
-  function numof [@stdlib] (pr: int -> 'a -> bool) (a: array 'a) (l u: int) : int =
+  function numof (pr: int -> 'a -> bool) (a: array 'a) (l u: int) : int =
     N.numof (fun i -> pr i a[i]) l u
 
 end
@@ -364,7 +364,7 @@ module NumOfEq
   use int.NumOf as N
 
   (** the number of `a[i]` such that `l <= i < u` and `a[i] = v` *)
-  function numof [@stdlib] (a: array 'a) (v: 'a) (l u: int) : int =
+  function numof (a: array 'a) (v: 'a) (l u: int) : int =
     N.numof (fun i -> a[i] = v) l u
 
 end
@@ -374,7 +374,7 @@ module ToList
   use Array
   use list.List
 
-  let rec function to_list [@stdlib] (a: array 'a) (l u: int) : list 'a
+  let rec function to_list (a: array 'a) (l u: int) : list 'a
     requires { l >= 0 /\ u <= a.length }
     variant  { u - l }
   = if u <= l then Nil else Cons a[l] (to_list a (l+1) u)
@@ -394,24 +394,24 @@ module ToSeq
   use Array
   use seq.Seq as S
 
-  let rec function to_seq_sub [@stdlib] (a: array 'a) (l u: int) : S.seq 'a
+  let rec function to_seq_sub (a: array 'a) (l u: int) : S.seq 'a
     requires { l >= 0 /\ u <= a.length }
     variant { u - l }
   = if u <= l then S.empty else S.cons a[l] (to_seq_sub a (l+1) u)
 
-  let rec lemma to_seq_length [@stdlib] (a: array 'a) (l u: int)
+  let rec lemma to_seq_length (a: array 'a) (l u: int)
     requires { 0 <= l <= u <= length a }
     variant  { u - l }
     ensures  { S.length (to_seq_sub a l u) = u - l }
   = if l < u then to_seq_length a (l+1) u
 
-  let rec lemma to_seq_nth [@stdlib] (a: array 'a) (l i u: int)
+  let rec lemma to_seq_nth (a: array 'a) (l i u: int)
     requires { 0 <= l <= i < u <= length a }
     variant  { i - l }
     ensures  { S.get (to_seq_sub a l u) (i - l) = a[i] }
   = if l < i then to_seq_nth a (l+1) i u
 
-  let function to_seq [@stdlib] (a: array 'a) : S.seq 'a = to_seq_sub a 0 (length a)
+  let function to_seq (a: array 'a) : S.seq 'a = to_seq_sub a 0 (length a)
   meta coercion function to_seq
 
 end
@@ -431,13 +431,13 @@ module Inversions
   use int.NumOf
 
   (* to prove termination, we count the total number of inversions *)
-  predicate inversion [@stdlib] (a: array int) (i j: int) =
+  predicate inversion (a: array int) (i j: int) =
     a[i] > a[j]
 
-  function inversions_for [@stdlib] (a: array int) (i: int) : int =
+  function inversions_for (a: array int) (i: int) : int =
     numof (inversion a i) i (length a)
 
-  function inversions [@stdlib] (a: array int) : int =
+  function inversions (a: array int) : int =
     sum (inversions_for a) 0 (length a)
 
   (* the key lemma to prove termination: whenever we swap two consecutive

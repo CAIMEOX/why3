@@ -8,19 +8,19 @@ module Cursor
     ghost mutable visited : seq 'a;
   }
 
-  predicate permitted [@stdlib] (cursor 'a)
+  predicate permitted (cursor 'a)
   axiom permitted_empty: forall c: cursor 'a. c.visited = empty -> permitted c
 
-  predicate complete [@stdlib]  (cursor 'a)
+  predicate complete  (cursor 'a)
 
-  val next [@stdlib] (c: cursor 'a) : 'a
+  val next (c: cursor 'a) : 'a
     requires { not (complete c) }
     requires { permitted c }
     writes   { c.visited }
     ensures  { c.visited = snoc (old c).visited result }
     ensures  { permitted c }
 
-  val has_next [@stdlib] (c: cursor 'a) : bool
+  val has_next (c: cursor 'a) : bool
     requires { permitted c }
     ensures  { result <-> not (complete c) }
 
@@ -38,14 +38,14 @@ module ListCursor
     ghost         collection : list 'a;
   }
 
-  predicate permitted [@stdlib] (c: cursor 'a) =
+  predicate permitted (c: cursor 'a) =
     length c.visited <= length c.collection /\
     forall i. 0 <= i < length c.visited -> c.visited[i] = c.collection[i]
 
-  predicate complete [@stdlib]  (c: cursor 'a) =
+  predicate complete  (c: cursor 'a) =
     length c.visited = length c.collection
 
-  val create [@stdlib] (l: list 'a) : cursor 'a
+  val create (l: list 'a) : cursor 'a
     ensures { permitted result }
     ensures { result.visited = empty }
     ensures { result.collection = l }
@@ -71,14 +71,14 @@ module ArrayCursor
     ghost         collection : seq 'a;
   }
 
-  predicate permitted [@stdlib] (c: cursor 'a) =
+  predicate permitted (c: cursor 'a) =
     length c.visited <= length c.collection /\
     forall i. 0 <= i < length c.visited -> c.visited[i] = c.collection[i]
 
-  predicate complete [@stdlib]  (c: cursor 'a) =
+  predicate complete  (c: cursor 'a) =
     length c.visited = length c.collection
 
-  val create [@stdlib] (a: array 'a) : cursor 'a
+  val create (a: array 'a) : cursor 'a
     ensures { permitted result }
     ensures { result.visited = empty }
     ensures { result.collection = to_seq a }

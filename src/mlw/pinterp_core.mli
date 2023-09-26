@@ -182,6 +182,10 @@ module Log : sig
   val json_log : exec_log -> Json_base.json
   val print_log : ?verb_lvl:int -> json:bool -> exec_log Pp.pp
 
+  (** Used for counterexamples.
+      Returns the list of function calls and loops that are executed in the log.
+      The mlw builtins and functions from the stdlib are filtered out since they
+      are not considered as suspects in the counterexamples. *)
   val get_exec_calls_and_loops : exec_log -> log_entry list
 end
 

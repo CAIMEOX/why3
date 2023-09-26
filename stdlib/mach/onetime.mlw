@@ -18,78 +18,78 @@ module OneTime
   type t = abstract { v: int; mutable valid: bool }
   meta coercion function v
 
-  val to_int [@stdlib] (x: t) : int
+  val to_int (x: t) : int
     ensures { result = x.v }
 
-  val zero [@stdlib] (): t
+  val zero (): t
     ensures { result.valid }
     ensures { result.v = 0 }
 
-  val one [@stdlib] () : t
+  val one () : t
     ensures { result.valid }
     ensures { result.v = 1 }
 
-  val succ [@stdlib] (x: t) : t
+  val succ (x: t) : t
     requires { x.valid }
     writes   { x.valid }
     ensures  { result.valid /\ not x.valid }
     ensures  { result.v = x.v + 1 }
 
-  val pred [@stdlib] (x: t) : t
+  val pred (x: t) : t
     requires { x.valid }
     writes   { x.valid }
     ensures  { result.valid /\ not x.valid }
     ensures  { result.v = x.v - 1 }
 
-  val lt [@stdlib] (x y: t) : bool
+  val lt (x y: t) : bool
     ensures { result <-> x.v < y.v }
-  val le [@stdlib] (x y: t) : bool
+  val le (x y: t) : bool
     ensures { result <-> x.v <= y.v }
-  val gt [@stdlib] (x y: t) : bool
+  val gt (x y: t) : bool
     ensures { result <-> x.v > y.v }
-  val ge [@stdlib] (x y: t) : bool
+  val ge (x y: t) : bool
     ensures { result <-> x.v >= y.v }
-  val eq [@stdlib] (x y: t) : bool
+  val eq (x y: t) : bool
     ensures { result <-> x.v = y.v }
-  val ne [@stdlib] (x y: t) : bool
+  val ne (x y: t) : bool
     ensures { result <-> x.v <> y.v }
 
   use mach.peano.Peano as P
 
-  val to_peano [@stdlib] (x: t) : P.t
+  val to_peano (x: t) : P.t
     ensures { result.P.v = x.v }
 
-  val transfer [@stdlib] (x: t) : t
+  val transfer (x: t) : t
     requires { x.valid }
     writes   { x.valid }
     ensures  { result.valid /\ not x.valid }
     ensures  { result.v = x.v }
 
-  val neg [@stdlib] (x: t) : t
+  val neg (x: t) : t
     requires { x.valid }
     writes   { x.valid }
     ensures  { result.valid /\ not x.valid }
     ensures  { result.v = - x.v }
 
-  val abs [@stdlib] (x: t) : t
+  val abs (x: t) : t
     requires { x.valid }
     writes   { x.valid }
     ensures  { result.valid /\ not x.valid }
     ensures  { result.v = if x.v >= 0 then x.v else - x.v }
 
-  val add [@stdlib] (x y: t) : t
+  val add (x y: t) : t
     requires { x.valid /\ y.valid }
     writes   { x.valid, y.valid }
     ensures  { result.valid /\ not x.valid /\ not y.valid }
     ensures  { result.v = x.v + y.v }
 
-  val sub [@stdlib] (x y: t) : t
+  val sub (x y: t) : t
     requires { x.valid /\ y.valid }
     writes   { x.valid, y.valid }
     ensures  { result.valid /\ not x.valid /\ not y.valid }
     ensures  { result.v = x.v - y.v }
 
-  val split [@stdlib] (x: t) (p: P.t) : (t, t)
+  val split (x: t) (p: P.t) : (t, t)
     requires { x.valid }
     requires { 0 <= p.P.v <= x.v \/ x.v <= p.P.v <= 0 }
     writes   { x.valid }

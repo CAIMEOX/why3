@@ -5,31 +5,31 @@
 
 module Bool
 
-  let function andb [@stdlib] (x y : bool) : bool =
+  let function andb (x y : bool) : bool =
     match x with
     | True -> y
     | False -> False
     end
 
-  let function orb [@stdlib] (x y : bool) : bool =
+  let function orb (x y : bool) : bool =
     match x with
     | False -> y
     | True -> True
     end
 
-  let function notb [@stdlib] (x : bool) : bool =
+  let function notb (x : bool) : bool =
     match x with
     | False -> True
     | True  -> False
     end
 
-  let function xorb [@stdlib] (x y : bool) : bool =
+  let function xorb (x y : bool) : bool =
     match x with
     | False -> y
     | True -> notb y
     end
 
-  let function implb [@stdlib] (x y : bool) : bool =
+  let function implb (x y : bool) : bool =
     match x with
     | False -> True
     | True -> y
@@ -41,7 +41,7 @@ end
 
 module Ite
 
-  let function ite [@stdlib] (b:bool) (x y : 'a) : 'a =
+  let function ite (b:bool) (x y : 'a) : 'a =
     match b with
     | True  -> x
     | False -> y

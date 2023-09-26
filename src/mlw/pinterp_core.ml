@@ -649,10 +649,15 @@ module Log = struct
   let get_exec_calls_and_loops log =
     List.filter (fun entry ->
                   match entry.log_desc with
-                  | Exec_call (Some rs, _, _) when not
-                    (Sattr.mem builtin_attr rs.rs_name.id_attrs ||
-                     Sattr.mem Ident.stdlib_attr rs.rs_name.id_attrs)
-                    -> true
+                  | Exec_call (Some rs, _, _) ->
+                    let is_builtin = Sattr.mem builtin_attr rs.rs_name.id_attrs in
+                    let is_stdlib =
+                      try
+                        let rs_path,_,_ = Pmodule.restore_path rs.rs_name in
+                        let rs_path = List.fold_left Filename.concat "" rs_path in
+                        (Strings.has_prefix !Whyconf.stdlib_path rs_path)
+                      with | Not_found -> false in
+                    not (is_builtin || is_stdlib)
                   | Exec_call (None, _ , _) -> true
                   | Iter_loop _ -> true
                   | _ -> false) log

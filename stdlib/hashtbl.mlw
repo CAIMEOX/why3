@@ -20,40 +20,40 @@ module Hashtbl
 
   type t 'a = abstract { mutable contents: map key (list 'a) }
 
-  function ([]) [@stdlib] (h: t 'a) (k: key) : list 'a = Map.([]) h.contents k
+  function ([]) (h: t 'a) (k: key) : list 'a = Map.([]) h.contents k
 
-  val create [@stdlib] (_n:int) : t 'a ensures { forall k: key. result[k] = Nil }
+  val create (_n:int) : t 'a ensures { forall k: key. result[k] = Nil }
 
-  val clear [@stdlib] (h: t 'a) : unit writes {h} ensures { forall k: key. h[k] = Nil }
+  val clear (h: t 'a) : unit writes {h} ensures { forall k: key. h[k] = Nil }
 
-  val add [@stdlib] (h: t 'a) (k: key) (v: 'a) : unit writes {h}
+  val add (h: t 'a) (k: key) (v: 'a) : unit writes {h}
     ensures { h[k] = Cons v (old h)[k] }
     ensures { forall k': key. k' <> k -> h[k'] = (old h)[k'] }
 
-  val mem [@stdlib] (h: t 'a) (k: key) : bool
+  val mem (h: t 'a) (k: key) : bool
     ensures { result=True <-> h[k] <> Nil }
 
-  val find [@stdlib] (h: t 'a) (k: key) : 'a
+  val find (h: t 'a) (k: key) : 'a
     requires { h[k] <> Nil }
     ensures  { match h[k] with Nil -> false | Cons v _ -> result = v end }
 
-  val find_all [@stdlib] (h: t 'a) (k: key) : list 'a
+  val find_all (h: t 'a) (k: key) : list 'a
     ensures { result = h[k] }
 
   exception NotFound
 
-  val defensive_find [@stdlib] (h: t 'a) (k: key) : 'a
+  val defensive_find (h: t 'a) (k: key) : 'a
     ensures { match h[k] with Nil -> false | Cons v _ -> result = v end }
     raises  { NotFound -> h[k] = Nil }
 
-  val copy [@stdlib] (h: t 'a) : t 'a
+  val copy (h: t 'a) : t 'a
     ensures { forall k: key. result[k] = h[k] }
 
-  val remove [@stdlib] (h: t 'a) (k: key) : unit writes {h}
+  val remove (h: t 'a) (k: key) : unit writes {h}
     ensures { h[k] = match (old h)[k] with Nil -> Nil | Cons _ l -> l end }
     ensures { forall k': key. k' <> k -> h[k'] = (old h)[k'] }
 
-  val replace [@stdlib] (h: t 'a) (k: key) (v: 'a) : unit writes {h}
+  val replace (h: t 'a) (k: key) (v: 'a) : unit writes {h}
     ensures {
       h[k] = Cons v (match (old h)[k] with Nil -> Nil | Cons _ l -> l end) }
     ensures { forall k': key. k' <> k -> h[k'] = (old h)[k'] }

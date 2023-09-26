@@ -13,15 +13,15 @@ module Int
 end
 
 module IntTrunc
-  function floor [@stdlib] (x : int) : int = x
-  function ceiling [@stdlib] (x : int) : int = x
-  function truncate [@stdlib] (x : int) : int = x
-  function round [@stdlib] (x : int) : int = x
+  function floor (x : int) : int = x
+  function ceiling (x : int) : int = x
+  function truncate (x : int) : int = x
+  function round (x : int) : int = x
 
-  function to_int [@stdlib] (x : int) : int = x
+  function to_int (x : int) : int = x
 
-  predicate is_int [@stdlib] int = true
-  predicate is_rat [@stdlib] int = true
+  predicate is_int int = true
+  predicate is_rat int = true
 end
 
 module IntDivE
@@ -30,14 +30,14 @@ end
 
 module IntDivT
   (* TODO: divide and truncate *)
-  function div_t [@stdlib] (x y : int) : int
-  function mod_t [@stdlib] (x y : int) : int
+  function div_t (x y : int) : int
+  function mod_t (x y : int) : int
 end
 
 module IntDivF
   (* TODO: divide and floor *)
-  function div_f [@stdlib] (x y : int) : int
-  function mod_f [@stdlib] (x y : int) : int
+  function div_f (x y : int) : int
+  function mod_f (x y : int) : int
 end
 
 module Rat
@@ -45,18 +45,18 @@ module Rat
 
   type rat
 
-  predicate (< ) [@stdlib] (x y : rat)
-  predicate (> ) [@stdlib] (x y : rat) = y < x
-  predicate (<=) [@stdlib] (x y : rat) = x < y \/ x = y
-  predicate (>=) [@stdlib] (x y : rat) = y <= x
+  predicate (< ) (x y : rat)
+  predicate (> ) (x y : rat) = y < x
+  predicate (<=) (x y : rat) = x < y \/ x = y
+  predicate (>=) (x y : rat) = y <= x
 
   clone export algebra.OrderedField
     with type t = rat, predicate (<=) = (<=)
 
-  function frac [@stdlib] (n d : int) : rat
+  function frac (n d : int) : rat
 
-  function numerator [@stdlib] rat : int
-  function denominator [@stdlib] rat : int
+  function numerator rat : int
+  function denominator rat : int
 
   axiom inversion : forall r : rat. r = frac (numerator r) (denominator r)
   axiom dpositive : forall r : rat. Int.(>) (denominator r) 0
@@ -73,51 +73,51 @@ module Rat
   axiom proportion : forall n1 n2 d1 d2 : int. d1 <> 0 -> d2 <> 0 ->
     (frac n1 d1 = frac n2 d2 <-> Int.(*) n1 d2 = Int.(*) n2 d1)
 
-  function to_rat [@stdlib] (x : rat) : rat = x
+  function to_rat (x : rat) : rat = x
 
-  predicate is_int [@stdlib] (r : rat) = denominator r = 1
-  predicate is_rat [@stdlib] rat = true
+  predicate is_int (r : rat) = denominator r = 1
+  predicate is_rat rat = true
 end
 
 module RatTrunc
   use Rat
 
   (* TODO: axiomatize *)
-  function floor [@stdlib] (x : rat) : rat
-  function ceiling [@stdlib] (x : rat) : rat
-  function truncate [@stdlib] (x : rat) : rat
-  function round [@stdlib] (x : rat) : rat
+  function floor (x : rat) : rat
+  function ceiling (x : rat) : rat
+  function truncate (x : rat) : rat
+  function round (x : rat) : rat
 
-  function to_int [@stdlib] (x : rat) : int = numerator (floor x)
+  function to_int (x : rat) : int = numerator (floor x)
 end
 
 module RatDivE
   use Rat
 
   (* TODO: euclidean division *)
-  function div [@stdlib] (x y : rat) : rat
-  function mod [@stdlib] (x y : rat) : rat
+  function div (x y : rat) : rat
+  function mod (x y : rat) : rat
 end
 
 module RatDivT
   use Rat
 
   (* TODO: divide and truncate *)
-  function div_t [@stdlib] (x y : rat) : rat
-  function mod_t [@stdlib] (x y : rat) : rat
+  function div_t (x y : rat) : rat
+  function mod_t (x y : rat) : rat
 end
 
 module RatDivF
   use Rat
 
   (* TODO: divide and floor *)
-  function div_f [@stdlib] (x y : rat) : rat
-  function mod_f [@stdlib] (x y : rat) : rat
+  function div_f (x y : rat) : rat
+  function mod_f (x y : rat) : rat
 end
 
 module Real
   use export real.Real
-  function to_real [@stdlib] (x : real) : real = x
+  function to_real (x : real) : real = x
 end
 
 module RealTrunc
@@ -125,55 +125,55 @@ module RealTrunc
   use real.FromInt as FromInt
   use real.Truncate as Truncate
 
-  function floor [@stdlib] (x : real) : real = FromInt.from_int (Truncate.floor x)
-  function ceiling [@stdlib] (x : real) : real = FromInt.from_int (Truncate.ceil x)
-  function truncate [@stdlib] (x : real) : real = FromInt.from_int (Truncate.truncate x)
+  function floor (x : real) : real = FromInt.from_int (Truncate.floor x)
+  function ceiling (x : real) : real = FromInt.from_int (Truncate.ceil x)
+  function truncate (x : real) : real = FromInt.from_int (Truncate.truncate x)
 
   (* TODO : axiomatize *)
-  function round [@stdlib] (x : real) : real
+  function round (x : real) : real
 
-  function to_int [@stdlib] (x : real) : int = Truncate.floor x
+  function to_int (x : real) : int = Truncate.floor x
 
-  predicate is_int [@stdlib] (r : real) = r = FromInt.from_int (Truncate.truncate r)
-  predicate is_rat [@stdlib] (r : real) =
+  predicate is_int (r : real) = r = FromInt.from_int (Truncate.truncate r)
+  predicate is_rat (r : real) =
     exists n d : int. d <> 0 /\ r * FromInt.from_int d = FromInt.from_int n
 end
 
 module RealDivE
   (* TODO: euclidean division *)
-  function div [@stdlib] (x y : real) : real
-  function mod [@stdlib] (x y : real) : real
+  function div (x y : real) : real
+  function mod (x y : real) : real
 end
 
 module RealDivT
   (* TODO: divide and truncate *)
-  function div_t [@stdlib] (x y : real) : real
-  function mod_t [@stdlib] (x y : real) : real
+  function div_t (x y : real) : real
+  function mod_t (x y : real) : real
 end
 
 module RealDivF
   (* TODO: divide and floor *)
-  function div_f [@stdlib] (x y : real) : real
-  function mod_f [@stdlib] (x y : real) : real
+  function div_f (x y : real) : real
+  function mod_f (x y : real) : real
 end
 
 module IntToRat
   use Rat
 
-  function to_rat [@stdlib] (x : int) : rat = frac x 1
+  function to_rat (x : int) : rat = frac x 1
 end
 
 module IntToReal
   use real.FromInt as FromInt
 
-  function to_real [@stdlib] (x : int) : real = FromInt.from_int x
+  function to_real (x : int) : real = FromInt.from_int x
 end
 
 module RealToRat
   use Rat
 
   (* TODO: axiomatize *)
-  function to_rat [@stdlib] (x : real) : rat
+  function to_rat (x : real) : rat
 end
 
 module RatToReal
@@ -181,6 +181,6 @@ module RatToReal
   use real.Real
   use real.FromInt as FromInt
 
-  function to_real [@stdlib] (x : rat) : real =
+  function to_real (x : rat) : real =
     FromInt.from_int (numerator x) / FromInt.from_int (denominator x)
 end

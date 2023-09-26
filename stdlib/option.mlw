@@ -4,7 +4,7 @@ module Option
 
   type option 'a = None | Some 'a
 
-  let predicate is_none [@stdlib] (o: option 'a)
+  let predicate is_none (o: option 'a)
     ensures { result <-> o = None }
   = match o with None -> true | Some _ -> false end
 
@@ -14,7 +14,7 @@ module Map
 
   use Option
 
-  function map [@stdlib] (f: 'a -> 'b) (o: option 'a) : option 'b
+  function map (f: 'a -> 'b) (o: option 'a) : option 'b
   = match o with None -> None | Some x -> Some (f x) end
 
 end

@@ -15,20 +15,20 @@ module Null
 
   type t 'a = abstract { v: t_model 'a }
 
-  let ghost predicate is_null [@stdlib] (t: t 'a) =
+  let ghost predicate is_null (t: t 'a) =
     match t.v with Null _ -> true | Value _ -> false end
 
-  val create_null [@stdlib] () : t 'a
+  val create_null () : t 'a
     ensures { is_null result }
 
-  val eq_null [@stdlib] (n x: t 'a) : bool
+  val eq_null (n x: t 'a) : bool
     requires { is_null n }
     ensures  { result <-> x.v = n.v }
 
-  val create [@stdlib] (x: 'a) : t 'a
+  val create (x: 'a) : t 'a
     ensures { result.v = Value x }
 
-  val get [@stdlib] (t: t 'a) : 'a
+  val get (t: t 'a) : 'a
     requires { not (is_null t) }
     ensures  { t.v = Value result }
 

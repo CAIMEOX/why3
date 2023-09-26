@@ -5,7 +5,7 @@
 
 module EndoRelation
   type t
-  predicate rel [@stdlib] t t
+  predicate rel t t
 end
 
 module Reflexive
@@ -82,7 +82,7 @@ end
 module Inverse
   clone export EndoRelation
 
-  predicate inv_rel [@stdlib] (x y : t) = rel y x
+  predicate inv_rel (x y : t) = rel y x
 end
 
 (** {2 Closures} *)
@@ -124,8 +124,8 @@ module Lex
   type t1
   type t2
 
-  predicate rel1 [@stdlib] t1 t1
-  predicate rel2 [@stdlib] t2 t2
+  predicate rel1 t1 t1
+  predicate rel2 t2 t2
 
   inductive lex (t1, t2) (t1, t2) =
   | Lex_1: forall x1 x2 : t1, y1 y2 : t2.
@@ -140,12 +140,12 @@ end
 module MinMax
 
   type t
-  predicate le [@stdlib] t t
+  predicate le t t
 
   clone TotalOrder as TO with type t = t, predicate rel = le, axiom .
 
-  function min [@stdlib] (x y : t) : t = if le x y then x else y
-  function max [@stdlib] (x y : t) : t = if le x y then y else x
+  function min (x y : t) : t = if le x y then x else y
+  function max (x y : t) : t = if le x y then y else x
 
   lemma Min_r : forall x y:t. le y x -> min x y = y
   lemma Max_l : forall x y:t. le y x -> max x y = x

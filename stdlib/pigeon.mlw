@@ -41,7 +41,7 @@ module ListAndSet
 
   type t
 
-  predicate pigeon_set [@stdlib] (s: fset t) =
+  predicate pigeon_set (s: fset t) =
     forall l: list t.
     (forall e: t. Mem.mem e l -> mem e s) ->
     (length l > cardinal s) ->

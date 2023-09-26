@@ -19,16 +19,16 @@ module Single
   use real.RealInfix
   use export ieee_float.Float32
 
-  predicate add_pre_ieee [@stdlib] (x:t) (y:t) =
+  predicate add_pre_ieee (x:t) (y:t) =
     t'isFinite (x .+ y)
 
   predicate add_post_ieee (x:t) (y:t) (r:t) =
     r = x .+ y
 
-  predicate add_pre_real [@stdlib] (x:t) (y:t) =
+  predicate add_pre_real (x:t) (y:t) =
     no_overflow RNE (t'real x +. t'real y)
 
-  predicate add_post_real [@stdlib] (x:t) (y:t) (r:t) =
+  predicate add_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x +. t'real  y)
 
   val safe_add (x y: t) : t
@@ -39,16 +39,16 @@ module Single
     ensures  { t'isFinite result }
     ensures  { add_post_ieee x y result /\ add_post_real x y result }
 
-  predicate sub_pre_ieee [@stdlib] (x:t) (y:t) =
+  predicate sub_pre_ieee (x:t) (y:t) =
     t'isFinite (x .- y)
 
-  predicate sub_post_ieee [@stdlib] (x:t) (y:t) (r:t) =
+  predicate sub_post_ieee (x:t) (y:t) (r:t) =
     r =  x .- y
 
-  predicate sub_pre_real [@stdlib] (x:t) (y:t) =
+  predicate sub_pre_real (x:t) (y:t) =
     no_overflow RNE (t'real x -. t'real y)
 
-  predicate sub_post_real [@stdlib] (x:t) (y:t) (r:t) =
+  predicate sub_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x -. t'real  y)
 
   val safe_sub (x y: t) : t
@@ -59,16 +59,16 @@ module Single
     ensures  { t'isFinite result }
     ensures  { sub_post_ieee x y result /\ sub_post_real x y result }
 
-  predicate mul_pre_ieee [@stdlib] (x:t) (y:t) =
+  predicate mul_pre_ieee (x:t) (y:t) =
     t'isFinite (x .* y)
 
-  predicate mul_post_ieee [@stdlib] (x:t) (y:t) (r:t) =
+  predicate mul_post_ieee (x:t) (y:t) (r:t) =
     r =  x .* y
 
-  predicate mul_pre_real [@stdlib] (x:t) (y:t) =
+  predicate mul_pre_real (x:t) (y:t) =
     no_overflow RNE (t'real x *. t'real y)
 
-  predicate mul_post_real [@stdlib] (x:t) (y:t) (r:t) =
+  predicate mul_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x *. t'real  y)
 
   val safe_mul (x y: t) : t
@@ -79,16 +79,16 @@ module Single
     ensures  { t'isFinite result }
     ensures  { mul_post_ieee x y result /\ mul_post_real x y result }
 
-  predicate div_pre_ieee [@stdlib] (x:t) (y:t) =
+  predicate div_pre_ieee (x:t) (y:t) =
     t'isFinite (x ./ y)
 
-  predicate div_post_ieee [@stdlib] (x:t) (y:t) (r:t) =
+  predicate div_post_ieee (x:t) (y:t) (r:t) =
     r =  x ./ y
 
-  predicate div_pre_real [@stdlib] (x:t) (y:t) =
+  predicate div_pre_real (x:t) (y:t) =
     no_overflow RNE (t'real x /. t'real y)
 
-  predicate div_post_real [@stdlib] (x:t) (y:t) (r:t) =
+  predicate div_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x /. t'real  y)
 
   val safe_div (x y: t) : t
@@ -112,16 +112,16 @@ module Double
   use real.RealInfix
   use export ieee_float.Float64
 
-  predicate add_pre_ieee [@stdlib] (x:t) (y:t) =
+  predicate add_pre_ieee (x:t) (y:t) =
     t'isFinite (x .+ y)
 
-  predicate add_post_ieee [@stdlib] (x:t) (y:t) (r:t) =
+  predicate add_post_ieee (x:t) (y:t) (r:t) =
     r =  x .+ y
 
-  predicate add_pre_real [@stdlib] (x:t) (y:t) =
+  predicate add_pre_real (x:t) (y:t) =
     no_overflow RNE (t'real x +. t'real y)
 
-  predicate add_post_real [@stdlib] (x:t) (y:t) (r:t) =
+  predicate add_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x +. t'real  y)
 
   val safe_add (x y: t) : t
@@ -132,16 +132,16 @@ module Double
     ensures  { t'isFinite result }
     ensures  { add_post_ieee x y result /\ add_post_real x y result }
 
-  predicate sub_pre_ieee [@stdlib] (x:t) (y:t) =
+  predicate sub_pre_ieee (x:t) (y:t) =
     t'isFinite (x .- y)
 
-  predicate sub_post_ieee [@stdlib] (x:t) (y:t) (r:t) =
+  predicate sub_post_ieee (x:t) (y:t) (r:t) =
     r =  x .- y
 
-  predicate sub_pre_real [@stdlib] (x:t) (y:t) =
+  predicate sub_pre_real (x:t) (y:t) =
     no_overflow RNE (t'real x -. t'real y)
 
-  predicate sub_post_real [@stdlib] (x:t) (y:t) (r:t) =
+  predicate sub_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x -. t'real  y)
 
   val safe_sub (x y: t) : t
@@ -152,16 +152,16 @@ module Double
     ensures  { t'isFinite result }
     ensures  { sub_post_ieee x y result /\ sub_post_real x y result }
 
-  predicate mul_pre_ieee [@stdlib] (x:t) (y:t) =
+  predicate mul_pre_ieee (x:t) (y:t) =
     t'isFinite (x .* y)
 
-  predicate mul_post_ieee [@stdlib] (x:t) (y:t) (r:t) =
+  predicate mul_post_ieee (x:t) (y:t) (r:t) =
     r =  x .* y
 
-  predicate mul_pre_real [@stdlib] (x:t) (y:t) =
+  predicate mul_pre_real (x:t) (y:t) =
     no_overflow RNE (t'real x *. t'real y)
 
-  predicate mul_post_real [@stdlib] (x:t) (y:t) (r:t) =
+  predicate mul_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x *. t'real  y)
 
   val safe_mul (x y: t) : t
@@ -172,16 +172,16 @@ module Double
     ensures  { t'isFinite result }
     ensures  { mul_post_ieee x y result /\ mul_post_real x y result }
 
-  predicate div_pre_ieee [@stdlib] (x:t) (y:t) =
+  predicate div_pre_ieee (x:t) (y:t) =
     t'isFinite (x ./ y)
 
-  predicate div_post_ieee [@stdlib] (x:t) (y:t) (r:t) =
+  predicate div_post_ieee (x:t) (y:t) (r:t) =
     r =  x ./ y
 
-  predicate div_pre_real [@stdlib] (x:t) (y:t) =
+  predicate div_pre_real (x:t) (y:t) =
     no_overflow RNE (t'real x /. t'real y)
 
-  predicate div_post_real [@stdlib] (x:t) (y:t) (r:t) =
+  predicate div_post_real (x:t) (y:t) (r:t) =
     t'real r = round RNE (t'real x /. t'real  y)
 
   val safe_div (x y: t) : t

@@ -8,14 +8,14 @@ module Map
 
   type map 'a 'b = 'a -> 'b
 
-  let function get [@stdlib] (f: map 'a 'b) (x: 'a) : 'b = f x
+  let function get (f: map 'a 'b) (x: 'a) : 'b = f x
 
-  let ghost function set [@stdlib] (f: map 'a 'b) (x: 'a) (v: 'b) : map 'a 'b =
+  let ghost function set (f: map 'a 'b) (x: 'a) (v: 'b) : map 'a 'b =
     fun y -> if pure {y = x} then v else f y
 
   (** syntactic sugar *)
-  let function ([]) [@stdlib] (f: map 'a 'b) (x: 'a) : 'b = f x
-  let ghost function ([<-]) [@stdlib] (f: map 'a 'b) (x: 'a) (v: 'b) : map 'a 'b = set f x v
+  let function ([]) (f: map 'a 'b) (x: 'a) : 'b = f x
+  let ghost function ([<-]) (f: map 'a 'b) (x: 'a) (v: 'b) : map 'a 'b = set f x v
 
 end
 
@@ -23,13 +23,13 @@ module Const
 
   use Map
 
-  let function const [@stdlib] (v: 'b) : map 'a 'b = fun _ -> v
+  let function const (v: 'b) : map 'a 'b = fun _ -> v
 
 end
 
 module MapExt
 
-  predicate (==) [@stdlib] (m1 m2: 'a -> 'b) = forall x: 'a. m1 x = m2 x
+  predicate (==) (m1 m2: 'a -> 'b) = forall x: 'a. m1 x = m2 x
 
   lemma extensionality:
     forall m1 m2: 'a -> 'b. m1 == m2 -> m1 = m2
@@ -47,9 +47,9 @@ module MapSorted
 
   type elt
 
-  predicate le [@stdlib] elt elt
+  predicate le elt elt
 
-  predicate sorted_sub [@stdlib] (a : map int elt) (l u : int) =
+  predicate sorted_sub (a : map int elt) (l u : int) =
     forall i1 i2 : int. l <= i1 <= i2 < u -> le a[i1] a[i2]
   (** `sorted_sub a l u` is true whenever the array segment `a(l..u-1)`
       is sorted w.r.t order relation `le` *)
@@ -63,7 +63,7 @@ module MapEq
   use int.Int
   use Map
 
-  predicate map_eq_sub [@stdlib] (a1 a2 : map int 'a) (l u : int) =
+  predicate map_eq_sub (a1 a2 : map int 'a) (l u : int) =
     forall i:int. l <= i < u -> a1[i] = a2[i]
 
 end
@@ -73,7 +73,7 @@ module MapExchange
   use int.Int
   use Map
 
-  predicate exchange [@stdlib] (a1 a2: map int 'a) (l u i j: int) =
+  predicate exchange (a1 a2: map int 'a) (l u i j: int) =
     l <= i < u /\ l <= j < u /\
     a1[i] = a2[j] /\ a1[j] = a2[i] /\
     (forall k:int. l <= k < u -> k <> i -> k <> j -> a1[k] = a2[k])
@@ -94,7 +94,7 @@ module MapSum
   use Map
 
   (** `sum m l h` is the sum of `m[i]` for `l <= i < h` *)
-  function sum [@stdlib] (m: map int int) (l h: int) : int = S.sum (get m) l h
+  function sum (m: map int int) (l h: int) : int = S.sum (get m) l h
 
 end
 
@@ -106,7 +106,7 @@ module Occ
   use int.Int
   use Map
 
-  function occ [@stdlib] (v: 'a) (m: map int 'a) (l u: int) : int
+  function occ (v: 'a) (m: map int 'a) (l u: int) : int
     (** number of occurrences of `v` in `m` between `l` included and `u` excluded *)
 
   axiom occ_empty:
@@ -171,7 +171,7 @@ module MapPermut
   use Map
   use Occ
 
-  predicate permut [@stdlib] (m1 m2: map int 'a) (l u: int) =
+  predicate permut (m1 m2: map int 'a) (l u: int) =
     forall v: 'a. occ v m1 l u = occ v m2 l u
 
   lemma permut_trans: (* provable, yet useful *)
@@ -193,17 +193,17 @@ module MapInjection
   use int.Int
   use export Map
 
-  predicate injective [@stdlib] (a: map int int) (n: int) =
+  predicate injective (a: map int int) (n: int) =
     forall i j: int. 0 <= i < n -> 0 <= j < n -> i <> j -> a[i] <> a[j]
   (** `injective a n` is true when `a` is an injection
       on the domain `(0..n-1)` *)
 
-  predicate surjective [@stdlib] (a: map int int) (n: int) =
+  predicate surjective (a: map int int) (n: int) =
     forall i: int. 0 <= i < n -> exists j: int. (0 <= j < n /\ a[j] = i)
   (** `surjective a n` is true when `a` is a surjection
       from `(0..n-1)` to `(0..n-1)` *)
 
-  predicate range [@stdlib] (a: map int int) (n: int) =
+  predicate range (a: map int int) (n: int) =
     forall i: int. 0 <= i < n -> 0 <= a[i] < n
   (** `range a n` is true when `a` maps the domain
       `(0..n-1)` into `(0..n-1)` *)

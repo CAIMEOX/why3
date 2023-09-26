@@ -27,15 +27,15 @@ module State
 
   type state = private mutable { }
 
-  val create [@stdlib] (seed: int) : state
+  val create (seed: int) : state
 
-  val init [@stdlib] (s: state) (seed: int) : unit writes {s}
+  val init (s: state) (seed: int) : unit writes {s}
 
-  val self_init [@stdlib] (s: state) : unit writes {s}
+  val self_init (s: state) : unit writes {s}
 
-  val random_bool [@stdlib] (s: state) : bool writes {s}
+  val random_bool (s: state) : bool writes {s}
 
-  val random_int [@stdlib] (s: state) (n: int) : int writes {s}
+  val random_int (s: state) (n: int) : int writes {s}
     requires { 0 < n }
     ensures  { 0 <= result < n }
 
@@ -50,14 +50,14 @@ module Random
 
   val s: state
 
-  let init [@stdlib] (seed: int) = init s seed
+  let init (seed: int) = init s seed
 
-  let self_init [@stdlib] () = self_init s
+  let self_init () = self_init s
 
-  let random_bool [@stdlib] ()
+  let random_bool ()
   = random_bool s
 
-  let random_int [@stdlib] (n: int)
+  let random_int (n: int)
     requires { 0 < n }
     ensures  { 0 <= result < n }
   = random_int s n

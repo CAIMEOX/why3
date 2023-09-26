@@ -17,13 +17,13 @@ module Array32
                 length : int32;
   } invariant { 0 <= length }
 
-  function ([]) [@stdlib] (a: array 'a) (i: int) : 'a = a.elts i
+  function ([]) (a: array 'a) (i: int) : 'a = a.elts i
 
-  val ([]) [@stdlib] (a: array 'a) (i: int32) : 'a
+  val ([]) (a: array 'a) (i: int32) : 'a
     requires { [@expl:index in array bounds] 0 <= i < a.length }
     ensures  { result = a[i] }
 
-  val ([]<-) [@stdlib] (a: array 'a) (i: int32) (v: 'a) : unit writes {a}
+  val ([]<-) (a: array 'a) (i: int32) (v: 'a) : unit writes {a}
     requires { [@expl:index in array bounds] 0 <= i < a.length }
     ensures  { a.elts = M.set (old a.elts) i v }
 
@@ -31,43 +31,43 @@ module Array32
 
   exception OutOfBounds
 
-  let defensive_get [@stdlib] (a: array 'a) (i: int32)
+  let defensive_get (a: array 'a) (i: int32)
     ensures { 0 <= i < a.length }
     ensures { result = a[i] }
     raises  { OutOfBounds -> i < 0 \/ i >= a.length }
   = if i < of_int 0 || i >= length a then raise OutOfBounds;
     a[i]
 
-  let defensive_set [@stdlib] (a: array 'a) (i: int32) (v: 'a)
+  let defensive_set (a: array 'a) (i: int32) (v: 'a)
     ensures { 0 <= i < a.length }
     ensures { a.elts = M.set (old a.elts) i v }
     raises  { OutOfBounds -> (i < 0 \/ i >= a.length) /\ a = old a }
   = if i < of_int 0 || i >= length a then raise OutOfBounds;
     a[i] <- v
 
-  val make [@stdlib] [@extraction:array_make] (n: int32) (v: 'a) : array 'a
+  val make [@extraction:array_make] (n: int32) (v: 'a) : array 'a
     requires { [@expl:array creation size] n >= 0 }
     ensures  { forall i:int. 0 <= i < n -> result[i] = v }
     ensures  { result.length = n }
 
-  val append [@stdlib] (a1: array 'a) (a2: array 'a) : array 'a
+  val append (a1: array 'a) (a2: array 'a) : array 'a
     ensures { result.length = a1.length + a2.length }
     ensures { forall i:int. 0 <= i < a1.length -> result[i] = a1[i] }
     ensures { forall i:int. 0 <= i < a2.length ->
               result[a1.length + i] = a2[i] }
 
-  val sub [@stdlib] (a: array 'a) (ofs: int32) (len: int32) : array 'a
+  val sub (a: array 'a) (ofs: int32) (len: int32) : array 'a
     requires { 0 <= ofs /\ 0 <= len }
     requires { ofs + len <= a.length }
     ensures  { result.length = len }
     ensures  { forall i:int. 0 <= i < len ->
                result[i] = a[ofs + i] }
 
-  val copy [@stdlib] (a: array 'a) : array 'a
+  val copy (a: array 'a) : array 'a
     ensures  { result.length = a.length }
     ensures  { forall i:int. 0 <= i < result.length -> result[i] = a[i] }
 
-  val fill [@stdlib] (a: array 'a) (ofs: int32) (len: int32) (v: 'a) : unit writes {a}
+  val fill (a: array 'a) (ofs: int32) (len: int32) (v: 'a) : unit writes {a}
     requires { 0 <= ofs /\ 0 <= len }
     requires { ofs + len <= a.length }
     ensures  { forall i:int.
@@ -76,7 +76,7 @@ module Array32
     ensures  { forall i:int. ofs <= i < ofs + len ->
                a[i] = v }
 
-  val blit [@stdlib] (a1: array 'a) (ofs1: int32)
+  val blit (a1: array 'a) (ofs1: int32)
                  (a2: array 'a) (ofs2: int32) (len: int32) : unit writes {a2}
     requires { 0 <= ofs1 /\ 0 <= len }
     requires { ofs1 + len <= a1.length }
@@ -90,7 +90,7 @@ module Array32
       ofs2 <= i < ofs2 + len ->
       a2[i] = a1[ofs1 + i - ofs2] }
 
-  val self_blit [@stdlib] (a: array 'a) (ofs1: int32) (ofs2: int32) (len: int32) : unit
+  val self_blit (a: array 'a) (ofs1: int32) (ofs2: int32) (len: int32) : unit
     writes {a}
     requires { 0 <= ofs1 /\ 0 <= len /\
                ofs1 + len <= a.length }
@@ -117,13 +117,13 @@ module Array31
                 length : int31;
   } invariant { 0 <= length }
 
-  function ([]) [@stdlib] (a: array 'a) (i: int) : 'a = a.elts i
+  function ([]) (a: array 'a) (i: int) : 'a = a.elts i
 
-  val ([]) [@stdlib] (a: array 'a) (i: int31) : 'a
+  val ([]) (a: array 'a) (i: int31) : 'a
     requires { [@expl:index in array bounds] 0 <= i < a.length }
     ensures  { result = a[i] }
 
-  val ([]<-) [@stdlib] (a: array 'a) (i: int31) (v: 'a) : unit writes {a}
+  val ([]<-) (a: array 'a) (i: int31) (v: 'a) : unit writes {a}
     requires { [@expl:index in array bounds] 0 <= i < a.length }
     ensures  { a.elts = M.set (old a.elts) i v }
 
@@ -131,43 +131,43 @@ module Array31
 
   exception OutOfBounds
 
-  let defensive_get [@stdlib] (a: array 'a) (i: int31)
+  let defensive_get (a: array 'a) (i: int31)
     ensures { 0 <= i < a.length }
     ensures { result = a[i] }
     raises  { OutOfBounds -> i < 0 \/ i >= a.length }
   = if i < of_int 0 || i >= length a then raise OutOfBounds;
     a[i]
 
-  let defensive_set [@stdlib] (a: array 'a) (i: int31) (v: 'a)
+  let defensive_set (a: array 'a) (i: int31) (v: 'a)
     ensures { 0 <= i < a.length }
     ensures { a.elts = M.set (old a.elts) i v }
     raises  { OutOfBounds -> (i < 0 \/ i >= a.length) /\ a = old a }
   = if i < of_int 0 || i >= length a then raise OutOfBounds;
     a[i] <- v
 
-  val make [@stdlib] (n: int31) (v: 'a) : array 'a
+  val make (n: int31) (v: 'a) : array 'a
     requires { [@expl:array creation size] n >= 0 }
     ensures  { forall i:int. 0 <= i < n -> result[i] = v }
     ensures  { result.length = n }
 
-  val append [@stdlib] (a1: array 'a) (a2: array 'a) : array 'a
+  val append (a1: array 'a) (a2: array 'a) : array 'a
     ensures { result.length = a1.length + a2.length }
     ensures { forall i:int. 0 <= i < a1.length -> result[i] = a1[i] }
     ensures { forall i:int. 0 <= i < a2.length ->
               result[a1.length + i] = a2[i] }
 
-  val sub [@stdlib] (a: array 'a) (ofs: int31) (len: int31) : array 'a
+  val sub (a: array 'a) (ofs: int31) (len: int31) : array 'a
     requires { 0 <= ofs /\ 0 <= len }
     requires { ofs + len <= a.length }
     ensures  { result.length = len }
     ensures  { forall i:int. 0 <= i < len ->
                result[i] = a[ofs + i] }
 
-  val copy [@stdlib] (a: array 'a) : array 'a
+  val copy (a: array 'a) : array 'a
     ensures  { result.length = a.length }
     ensures  { forall i:int. 0 <= i < result.length -> result[i] = a[i] }
 
-  val fill [@stdlib] (a: array 'a) (ofs: int31) (len: int31) (v: 'a) : unit writes {a}
+  val fill (a: array 'a) (ofs: int31) (len: int31) (v: 'a) : unit writes {a}
     requires { 0 <= ofs /\ 0 <= len }
     requires { ofs + len <= a.length }
     ensures  { forall i:int.
@@ -176,7 +176,7 @@ module Array31
     ensures  { forall i:int. ofs <= i < ofs + len ->
                a[i] = v }
 
-  val blit [@stdlib] (a1: array 'a) (ofs1: int31)
+  val blit (a1: array 'a) (ofs1: int31)
                  (a2: array 'a) (ofs2: int31) (len: int31) : unit writes {a2}
     requires { 0 <= ofs1 /\ 0 <= len }
     requires { ofs1 + len <= a1.length }
@@ -190,7 +190,7 @@ module Array31
       ofs2 <= i < ofs2 + len ->
       a2[i] = a1[ofs1 + i - ofs2] }
 
-  val self_blit [@stdlib] (a: array 'a) (ofs1: int31) (ofs2: int31) (len: int31) : unit
+  val self_blit (a: array 'a) (ofs1: int31) (ofs2: int31) (len: int31) : unit
     writes {a}
     requires { 0 <= ofs1 /\ 0 <= len /\
                ofs1 + len <= a.length }
@@ -230,11 +230,11 @@ module Array63
 
   meta coercion function elts
 
-  val ([]) [@stdlib] (a: array 'a) (i: int63) : 'a
+  val ([]) (a: array 'a) (i: int63) : 'a
     requires { [@expl:index in array bounds] 0 <= i < a.length }
     ensures  { result = a[i] }
 
-  val ([]<-) [@stdlib] (a: array 'a) (i: int63) (v: 'a) : unit writes {a}
+  val ([]<-) (a: array 'a) (i: int63) (v: 'a) : unit writes {a}
     requires { [@expl:index in array bounds] 0 <= i < a.length }
     ensures  { a.elts = (old a.elts)[i <- v] }
 
@@ -242,42 +242,42 @@ module Array63
 
   exception OutOfBounds
 
-  let defensive_get [@stdlib] (a: array 'a) (i: int63)
+  let defensive_get (a: array 'a) (i: int63)
     ensures { 0 <= i < a.length }
     ensures { result = a[i] }
     raises  { OutOfBounds -> i < 0 \/ i >= a.length }
   = if i < 0 || i >= length a then raise OutOfBounds;
     a[i]
 
-  let defensive_set [@stdlib] (a: array 'a) (i: int63) (v: 'a)
+  let defensive_set (a: array 'a) (i: int63) (v: 'a)
     ensures { 0 <= i < a.length }
     ensures { a.elts = (old a.elts)[i <- v] }
     raises  { OutOfBounds -> (i < 0 \/ i >= a.length) /\ a = old a }
   = if i < 0 || i >= length a then raise OutOfBounds;
     a[i] <- v
 
-  val make [@stdlib] (n: int63) (v: 'a) : array 'a
+  val make (n: int63) (v: 'a) : array 'a
     requires { [@expl:array creation size] n >= 0 }
     ensures  { forall i:int. 0 <= i < n -> result[i] = v }
     ensures  { result.length = n }
 
-  val append [@stdlib] (a1: array 'a) (a2: array 'a) : array 'a
+  val append (a1: array 'a) (a2: array 'a) : array 'a
     ensures { result.length = a1.length + a2.length }
     ensures { forall i:int. 0 <= i < a1.length -> result[i] = a1[i] }
     ensures { forall i:int. 0 <= i < a2.length ->
               result[a1.length + i] = a2[i] }
 
-  val sub [@stdlib] (a: array 'a) (ofs: int63) (len: int63) : array 'a
+  val sub (a: array 'a) (ofs: int63) (len: int63) : array 'a
     requires { 0 <= ofs /\ 0 <= len }
     requires { ofs + len <= a.length }
     ensures  { result.length = len }
     ensures  { forall i:int. 0 <= i < len -> result[i] = a[ofs + i] }
 
-  val copy [@stdlib] (a: array 'a) : array 'a
+  val copy (a: array 'a) : array 'a
     ensures  { result.length = a.length }
     ensures  { forall i:int. 0 <= i < result.length -> result[i] = a[i] }
 
-  val fill [@stdlib] (a: array 'a) (ofs: int63) (len: int63) (v: 'a) : unit
+  val fill (a: array 'a) (ofs: int63) (len: int63) (v: 'a) : unit
     writes   { a }
     requires { 0 <= ofs /\ 0 <= len }
     requires { ofs + len <= a.length }
@@ -287,7 +287,7 @@ module Array63
     ensures  { forall i:int. ofs <= i < ofs + len ->
                a[i] = v }
 
-  val blit [@stdlib] (a1: array 'a) (ofs1: int63)
+  val blit (a1: array 'a) (ofs1: int63)
                  (a2: array 'a) (ofs2: int63) (len: int63) : unit writes {a2}
     requires { 0 <= ofs1 /\ 0 <= len }
     requires { ofs1 + len <= a1.length }
@@ -301,7 +301,7 @@ module Array63
       ofs2 <= i < ofs2 + len ->
       a2[i] = a1[ofs1 + i - ofs2] }
 
-  val self_blit [@stdlib] (a: array 'a) (ofs1: int63) (ofs2: int63) (len: int63) : unit
+  val self_blit (a: array 'a) (ofs1: int63) (ofs2: int63) (len: int63) : unit
     writes {a}
     requires { 0 <= ofs1 /\ 0 <= len /\
                ofs1 + len <= a.length }
@@ -313,7 +313,7 @@ module Array63
       ofs2 <= i < ofs2 + len ->
       a[i] = (old a)[ofs1 + i - ofs2] }
 
-  let init [@stdlib] (n: int63) (f: int63 -> 'a) : array 'a
+  let init (n: int63) (f: int63 -> 'a) : array 'a
     requires { [@expl:array creation size] n >= 0 }
     ensures  { forall i: int63. 0 <= i < n -> result[i] = f i }
     ensures  { length result = n }
@@ -333,7 +333,7 @@ module Array63Exchange
   use Array63
   use seq.Exchange as SE
 
-  predicate exchange [@stdlib] (a1 a2: array 'a) (i j: int) =
+  predicate exchange (a1 a2: array 'a) (i j: int) =
     SE.exchange a1.elts a2.elts i j
   (** `exchange a1 a2 i j` means that arrays `a1` and `a2` only differ
       by the swapping of elements at indices `i` and `j` *)
@@ -347,7 +347,7 @@ module Array63Swap
   use Array63
   use export Array63Exchange
 
-  let swap [@stdlib] (a:array 'a) (i j:int63) : unit
+  let swap (a:array 'a) (i j:int63) : unit
     requires { 0 <= i < length a /\ 0 <= j < length a }
     writes   { a }
     ensures  { exchange (old a) a i j }
@@ -367,16 +367,16 @@ module Array63Permut
   use seq.Permut as SP
   use Array63Exchange
 
-  predicate permut [@stdlib] (a1 a2: array 'a) (l u: int) =
+  predicate permut (a1 a2: array 'a) (l u: int) =
     SP.permut a1.elts a2.elts l u
   (** `permut a1 a2 l u` is true when the segment
       `a1(l..u-1)` is a permutation of the segment `a2(l..u-1)`.
       Values outside of the interval `(l..u-1)` are ignored. *)
 
-  predicate array_eq [@stdlib] (a1 a2: array 'a) (l u: int) =
+  predicate array_eq (a1 a2: array 'a) (l u: int) =
     seq_eq_sub a1.elts a2.elts l u
 
-  predicate permut_sub [@stdlib] (a1 a2: array 'a) (l u: int) =
+  predicate permut_sub (a1 a2: array 'a) (l u: int) =
     seq_eq_sub a1.elts a2.elts 0 l /\
     permut a1 a2 l u /\
     seq_eq_sub a1.elts a2.elts u (length a1)
@@ -384,7 +384,7 @@ module Array63Permut
       `a1(l..u-1)` is a permutation of the segment `a2(l..u-1)`
       and values outside of the interval `(l..u-1)` are equal. *)
 
-  predicate permut_all [@stdlib] (a1 a2: array 'a) =
+  predicate permut_all (a1 a2: array 'a) =
     SP.permut a1.elts a2.elts 0 a1.length
   (** `permut_all a1 a2 l u` is true when array `a1` is a permutation
       of array `a2`. *)
@@ -432,33 +432,33 @@ module ArrayInt63
 
   meta coercion function elts
 
-  val length [@stdlib] (a: array63) : int63
+  val length (a: array63) : int63
     ensures { to_int result = a.length }
 
-  val ([]) [@stdlib] (a: array63) (i: int63) : int63
+  val ([]) (a: array63) (i: int63) : int63
     requires { [@expl:index in array bounds] 0 <= i < a.length }
     ensures  { to_int result = a[i] }
 
-  val ([]<-) [@stdlib] (a: array63) (i: int63) (v: int63) : unit
+  val ([]<-) (a: array63) (i: int63) (v: int63) : unit
     requires { [@expl:index in array bounds] 0 <= i < a.length }
     writes   { a }
     ensures  { a.elts = (old a.elts)[i <- to_int v] }
 
-  val ghost set [@stdlib] (a: array63) (i: int63) (v: int63) : array63
+  val ghost set (a: array63) (i: int63) (v: int63) : array63
     requires { [@expl:index in array bounds] 0 <= i < a.length }
     ensures  { result.length = a.length }
     ensures  { result.elts = a.elts[i <- to_int v] }
 
-  val make [@stdlib] (n: int63) (v: int63) : array63
+  val make (n: int63) (v: int63) : array63
     requires { [@expl:array creation size] n >= 0 }
     ensures  { forall i. 0 <= i < n -> result[i] = to_int v }
     ensures  { result.length = n }
 
-  val copy [@stdlib] (a: array63) : array63
+  val copy (a: array63) : array63
     ensures  { result.length = a.length }
     ensures  { forall i. 0 <= i < result.length -> result[i] = a[i] }
 
-  let sub [@stdlib] (a: array63) (ofs: int63) (len: int63) : array63
+  let sub (a: array63) (ofs: int63) (len: int63) : array63
     requires { 0 <= ofs /\ 0 <= len /\ ofs + len <= length a }
     ensures  { length result = len }
     ensures  { forall i. 0 <= i < len -> result[i] = a[ofs + i] }
@@ -472,7 +472,7 @@ module ArrayInt63
 
   use seq.Exchange
 
-  let swap [@stdlib] (a:array63) (i j:int63) : unit
+  let swap (a:array63) (i j:int63) : unit
     requires { 0 <= i < length a /\ 0 <= j < length a }
     writes   { a }
     ensures  { exchange (old a) a i j }
@@ -480,7 +480,7 @@ module ArrayInt63
     a[i] <- a[j];
     a[j] <- v
 
-  let init [@stdlib] (n: int63) (f: int63 -> int63) : array63
+  let init (n: int63) (f: int63 -> int63) : array63
     requires { [@expl:array creation size] n >= 0 }
     ensures  { forall i: int63. 0 <= i < n -> result[i] = f i }
     ensures  { length result = n }

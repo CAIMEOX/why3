@@ -11,43 +11,43 @@ module Stack
 
   type t 'a = abstract { mutable elts: list 'a }
 
-  val create [@stdlib] () : t 'a ensures { result.elts = Nil }
+  val create () : t 'a ensures { result.elts = Nil }
 
-  val push [@stdlib] (x: 'a) (s: t 'a) : unit writes {s}
+  val push (x: 'a) (s: t 'a) : unit writes {s}
     ensures { s.elts = Cons x (old s.elts) }
 
   exception Empty
 
-  val pop [@stdlib] (s: t 'a) : 'a writes {s}
+  val pop (s: t 'a) : 'a writes {s}
     ensures { match old s.elts with Nil -> false
       | Cons x t -> result = x /\ s.elts = t end }
     raises  { Empty -> s.elts = old s.elts = Nil }
 
-  val top [@stdlib] (s: t 'a) : 'a
+  val top (s: t 'a) : 'a
     ensures { match s.elts with Nil -> false
       | Cons x _ -> result = x end }
     raises  { Empty -> s.elts = Nil }
 
-  val safe_pop [@stdlib] (s: t 'a) : 'a writes {s}
+  val safe_pop (s: t 'a) : 'a writes {s}
     requires { s.elts <> Nil }
     ensures { match old s.elts with Nil -> false
       | Cons x t -> result = x /\ s.elts = t end }
 
-  val safe_top [@stdlib] (s: t 'a) : 'a
+  val safe_top (s: t 'a) : 'a
     requires { s.elts <> Nil }
     ensures { match s.elts with Nil -> false
       | Cons x _ -> result = x end }
 
-  val clear [@stdlib] (s: t 'a) : unit writes {s} ensures { s.elts = Nil }
+  val clear (s: t 'a) : unit writes {s} ensures { s.elts = Nil }
 
-  val copy [@stdlib] (s: t 'a) : t 'a ensures { result = s }
+  val copy (s: t 'a) : t 'a ensures { result = s }
 
-  val is_empty [@stdlib] (s: t 'a) : bool
+  val is_empty (s: t 'a) : bool
     ensures { result = True <-> s.elts = Nil }
 
-  function length [@stdlib] (s: t 'a) : int = L.length s.elts
+  function length (s: t 'a) : int = L.length s.elts
 
-  val length [@stdlib] (s: t 'a) : Peano.t
+  val length (s: t 'a) : Peano.t
     ensures { result = L.length s.elts }
 
 end

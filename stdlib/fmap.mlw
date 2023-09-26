@@ -15,26 +15,26 @@ module Fmap
   }
   meta coercion function contents
 
-  predicate (==) [@stdlib] (m1 m2: fmap 'k 'v) =
+  predicate (==) (m1 m2: fmap 'k 'v) =
     S.(==) m1.domain m2.domain /\
     forall k. S.mem k m1.domain -> m1[k] = m2[k]
 
   axiom extensionality:
     forall m1 m2: fmap 'k 'v. m1 == m2 -> m1 = m2
 
-  predicate mem [@stdlib] (k: 'k) (m: fmap 'k 'v) =
+  predicate mem (k: 'k) (m: fmap 'k 'v) =
     S.mem k m.domain
 
-  predicate mapsto [@stdlib] (k: 'k) (v: 'v) (m: fmap 'k 'v) =
+  predicate mapsto (k: 'k) (v: 'v) (m: fmap 'k 'v) =
     mem k m /\ m[k] = v
 
   lemma mem_mapsto:
     forall k: 'k, m: fmap 'k 'v. mem k m -> mapsto k m[k] m
 
-  predicate is_empty [@stdlib] (m: fmap 'k 'v) =
+  predicate is_empty (m: fmap 'k 'v) =
     S.is_empty m.domain
 
-  function mk [@stdlib] (d: S.fset 'k) (m: 'k -> 'v) : fmap 'k 'v
+  function mk (d: S.fset 'k) (m: 'k -> 'v) : fmap 'k 'v
 
   axiom mk_domain:
     forall d: S.fset 'k, m: 'k -> 'v. domain (mk d m) = d
@@ -47,9 +47,9 @@ module Fmap
 
   axiom is_empty_empty: is_empty (empty: fmap 'k 'v)
 
-  function add [@stdlib] (k: 'k) (v: 'v) (m: fmap 'k 'v) : fmap 'k 'v
+  function add (k: 'k) (v: 'v) (m: fmap 'k 'v) : fmap 'k 'v
 
-  function ([<-]) [@stdlib] (m: fmap 'k 'v) (k: 'k) (v: 'v) : fmap 'k 'v =
+  function ([<-]) (m: fmap 'k 'v) (k: 'k) (v: 'v) : fmap 'k 'v =
     add k v m
 
   (*FIXME? (add k v m).contents = m.contents[k <- v] *)
@@ -65,12 +65,12 @@ module Fmap
 
   (* FIXME? find_opt (k: 'k) (m: fmap 'k 'v) : option 'v *)
 
-  function find [@stdlib] (k: 'k) (m: fmap 'k 'v) : 'v
+  function find (k: 'k) (m: fmap 'k 'v) : 'v
 
   axiom find_def:
     forall k, m: fmap 'k 'v. mem k m -> find k m = m[k]
 
-  function remove [@stdlib] (k: 'k) (m: fmap 'k 'v) : fmap 'k 'v
+  function remove (k: 'k) (m: fmap 'k 'v) : fmap 'k 'v
 
   axiom remove_contents:
     forall k, m: fmap 'k 'v, k1. mem k1 m -> k1 <> k -> (remove k m)[k1] = m[k1]
@@ -78,7 +78,7 @@ module Fmap
   axiom remove_domain:
     forall k, m: fmap 'k 'v. (remove k m).domain = S.remove k m.domain
 
-  function size [@stdlib] (m: fmap 'k 'v) : int =
+  function size (m: fmap 'k 'v) : int =
     S.cardinal m.domain
 
 end
@@ -100,7 +100,7 @@ module MapApp
 
   (* we enforce type `key` to have a decidable equality
      by requiring the following function *)
-  val eq [@stdlib] (x y: key) : bool
+  val eq (x y: key) : bool
     ensures { result <-> x = y }
 
   type t 'v = abstract {
@@ -108,34 +108,34 @@ module MapApp
   }
   meta coercion function to_fmap
 
-  val create [@stdlib] () : t 'v
+  val create () : t 'v
     ensures { result.to_fmap = empty }
 
-  val mem [@stdlib] (k: key) (m: t 'v) : bool
+  val mem (k: key) (m: t 'v) : bool
     ensures { result <-> mem k m }
 
-  val is_empty [@stdlib] (m: t 'v) : bool
+  val is_empty (m: t 'v) : bool
     ensures { result <-> is_empty m }
 
-  val add [@stdlib] (k: key) (v: 'v) (m: t 'v) : t 'v
+  val add (k: key) (v: 'v) (m: t 'v) : t 'v
     ensures { result = add k v m }
 
-  val find [@stdlib] (k: key) (m: t 'v) : 'v
+  val find (k: key) (m: t 'v) : 'v
     requires { mem k m }
     ensures  { result = m[k] }
     ensures  { result = find k m }
 
   use ocaml.Exceptions
 
-  val find_exn [@stdlib] (k: key) (m: t 'v) : 'v
+  val find_exn (k: key) (m: t 'v) : 'v
     ensures { S.mem k m.domain }
     ensures { result = m[k] }
     raises  { Not_found ->  not (S.mem k m.domain) }
 
-  val remove [@stdlib] (k: key) (m: t 'v) : t 'v
+  val remove (k: key) (m: t 'v) : t 'v
     ensures { result = remove k m }
 
-  val size [@stdlib] (m: t 'v) : int
+  val size (m: t 'v) : int
     ensures { result = size m }
 
 end
@@ -160,7 +160,7 @@ module MapImp
 
   type key
 
-  val eq [@stdlib] (x y: key) : bool
+  val eq (x y: key) : bool
     ensures { result <-> x = y }
 
   type t 'v = abstract {
@@ -168,39 +168,39 @@ module MapImp
   }
   meta coercion function to_fmap
 
-  val create [@stdlib] () : t 'v
+  val create () : t 'v
     ensures { result.to_fmap = empty }
 
-  val mem [@stdlib] (k: key) (m: t 'v) : bool
+  val mem (k: key) (m: t 'v) : bool
     ensures { result <-> mem k m }
 
-  val is_empty [@stdlib] (m: t 'v) : bool
+  val is_empty (m: t 'v) : bool
     ensures { result <-> is_empty m }
 
-  val add [@stdlib] (k: key) (v: 'v) (m: t 'v) : unit
+  val add (k: key) (v: 'v) (m: t 'v) : unit
     writes  { m }
     ensures { m = add k v (old m) }
 
-  val find [@stdlib] (k: key) (m: t 'v) : 'v
+  val find (k: key) (m: t 'v) : 'v
     requires { mem k m }
     ensures  { result = m[k] }
     ensures  { result = find k m }
 
   use ocaml.Exceptions
 
-  val find_exn [@stdlib] (k: key) (m: t 'v) : 'v
+  val find_exn (k: key) (m: t 'v) : 'v
     ensures { S.mem k m.domain }
     ensures { result = m[k] }
     raises  { Not_found ->  not (S.mem k m.domain) }
 
-  val remove [@stdlib] (k: key) (m: t 'v) : unit
+  val remove (k: key) (m: t 'v) : unit
     writes  { m }
     ensures { m = remove k (old m) }
 
-  val size [@stdlib] (m: t 'v) : int
+  val size (m: t 'v) : int
     ensures { result = size m }
 
-  val clear [@stdlib] (m: t 'v) : unit
+  val clear (m: t 'v) : unit
     writes  { m }
     ensures { m = empty }
 

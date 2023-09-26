@@ -4,6 +4,6 @@ type t = { mutable foo: unit }
 
 val t: t
 
-val print [@stdlib] (x:'a) : unit writes { t }
+val print (x:'a) : unit writes { t }
 
 end

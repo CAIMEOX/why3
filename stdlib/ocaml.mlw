@@ -25,17 +25,17 @@ module Pervasives
 
   use export Exceptions
 
-  val succ [@stdlib] (x: int63) : int63
+  val succ (x: int63) : int63
     requires { [@expl:integer overflow] in_bounds (to_int x + 1) }
     ensures  { to_int result = to_int x + 1 }
 
-  val pred [@stdlib] (x: int63) : int63
+  val pred (x: int63) : int63
     requires { [@expl:integer overflow] in_bounds (to_int x - 1) }
     ensures  { to_int result = to_int x - 1 }
 
   exception AssertFailure
 
-  val ocaml_assert [@stdlib] (_b: bool) : unit
+  val ocaml_assert (_b: bool) : unit
     raises { AssertFailure }
 
 end
@@ -54,6 +54,6 @@ module OCaml
 
   type int63 = Int63.int63
 
-  let function to_int [@stdlib] (n: Int63.int63) : int = Int63.to_int n
+  let function to_int (n: Int63.int63) : int = Int63.to_int n
 
 end

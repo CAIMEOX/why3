@@ -20,51 +20,51 @@ module Queue
 
   meta coercion function seq
 
-  val create [@stdlib] () : t 'a
+  val create () : t 'a
     ensures { result = empty }
 
-  val push [@stdlib] (x: 'a) (q: t 'a) : unit
+  val push (x: 'a) (q: t 'a) : unit
     writes { q }
     ensures { q = snoc (old q) x }
 
   exception Empty
 
-  val pop [@stdlib] (q: t 'a) : 'a
+  val pop (q: t 'a) : 'a
     writes { q }
     ensures { old q <> empty }
     ensures { result = (old q)[0] }
     ensures { q = (old q)[1 ..] }
     raises  { Empty -> q = old q = empty }
 
-  val peek [@stdlib] (q: t 'a) : 'a
+  val peek (q: t 'a) : 'a
     ensures { q <> empty }
     ensures { result = q[0] }
     raises  { Empty -> q = empty }
 
-  val safe_pop [@stdlib] (q: t 'a) : 'a
+  val safe_pop (q: t 'a) : 'a
     requires { q <> empty }
     writes { q }
     ensures { result = (old q)[0] }
     ensures { q = (old q)[1 ..] }
 
-  val safe_peek [@stdlib] (q: t 'a) : 'a
+  val safe_peek (q: t 'a) : 'a
     requires { q <> empty }
     ensures { result = q[0] }
 
-  val clear [@stdlib] (q: t 'a) : unit
+  val clear (q: t 'a) : unit
     writes  { q }
     ensures { q = empty }
 
-  val copy [@stdlib] (q: t 'a) : t 'a
+  val copy (q: t 'a) : t 'a
     ensures { result == q }
 
-  val is_empty [@stdlib] (q: t 'a) : bool
+  val is_empty (q: t 'a) : bool
     ensures { result <-> (q = empty) }
 
-  val length [@stdlib] (q: t 'a) : Peano.t
+  val length (q: t 'a) : Peano.t
     ensures { result = length q }
 
-  val transfer [@stdlib] (q1 q2: t 'a) : unit
+  val transfer (q1 q2: t 'a) : unit
     writes  { q1, q2 }
     ensures { q1 = empty }
     ensures { q2 = (old q2) ++ (old q1) }

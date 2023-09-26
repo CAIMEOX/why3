@@ -5,7 +5,7 @@ module Tree
 
   type tree 'a = Empty | Node (tree 'a) 'a (tree 'a)
 
-  let predicate is_empty [@stdlib] (t:tree 'a)
+  let predicate is_empty (t:tree 'a)
     ensures { result <-> t = Empty }
   = match t with Empty -> true | Node _ _ _ -> false end
 
@@ -18,7 +18,7 @@ module Size
   use Tree
   use int.Int
 
-  let rec function size [@stdlib] (t: tree 'a) : int = match t with
+  let rec function size (t: tree 'a) : int = match t with
     | Empty -> 0
     | Node l _ r -> 1 + size l + size r
   end
@@ -36,7 +36,7 @@ module Occ
   use Tree
   use int.Int
 
-  function occ [@stdlib] (x: 'a) (t: tree 'a) : int = match t with
+  function occ (x: 'a) (t: tree 'a) : int = match t with
     | Empty      -> 0
     | Node l y r -> (if y = x then 1 else 0) + occ x l + occ x r
   end
@@ -44,7 +44,7 @@ module Occ
   lemma occ_nonneg:
     forall x: 'a, t: tree 'a. 0 <= occ x t
 
-  predicate mem [@stdlib] (x: 'a) (t: tree 'a) =
+  predicate mem (x: 'a) (t: tree 'a) =
     0 < occ x t
 
 end
@@ -57,7 +57,7 @@ module Height
   use int.Int
   use int.MinMax
 
-  let rec function height [@stdlib] (t: tree 'a) : int = match t with
+  let rec function height (t: tree 'a) : int = match t with
     | Empty      -> 0
     | Node l _ r -> 1 + max (height l) (height r)
   end
@@ -75,7 +75,7 @@ module Inorder
   use list.List
   use list.Append
 
-  let rec function inorder [@stdlib] (t: tree 'a) : list 'a = match t with
+  let rec function inorder (t: tree 'a) : list 'a = match t with
     | Empty -> Nil
     | Node l x r -> inorder l ++ Cons x (inorder r)
   end
@@ -90,7 +90,7 @@ module Preorder
   use list.List
   use list.Append
 
-  let rec function preorder [@stdlib] (t: tree 'a) : list 'a = match t with
+  let rec function preorder (t: tree 'a) : list 'a = match t with
     | Empty -> Nil
     | Node l x r -> Cons x (preorder l ++ preorder r)
   end
@@ -120,7 +120,7 @@ module Zipper
     | Left  (zipper 'a) 'a (tree 'a)
     | Right (tree 'a)   'a (zipper 'a)
 
-  let rec function zip [@stdlib] (t: tree 'a) (z: zipper 'a) : tree 'a =
+  let rec function zip (t: tree 'a) (z: zipper 'a) : tree 'a =
     match z with
     | Top -> t
     | Left z x r -> zip (Node t x r) z
@@ -131,21 +131,21 @@ module Zipper
 
   type pointed 'a = (tree 'a, zipper 'a)
 
-  let function start [@stdlib] (t: tree 'a) : pointed 'a = (t, Top)
+  let function start (t: tree 'a) : pointed 'a = (t, Top)
 
-  let function up [@stdlib] (p: pointed 'a) : pointed 'a = match p with
+  let function up (p: pointed 'a) : pointed 'a = match p with
     | _, Top -> p (* do nothing *)
     | l, Left z x r | r, Right l x z -> (Node l x r, z)
   end
 
-  let function top [@stdlib] (p: pointed 'a) : tree 'a = let t, z = p in zip t z
+  let function top (p: pointed 'a) : tree 'a = let t, z = p in zip t z
 
-  let function down_left [@stdlib] (p: pointed 'a) : pointed 'a = match p with
+  let function down_left (p: pointed 'a) : pointed 'a = match p with
     | Empty, _ -> p (* do nothing *)
     | Node l x r, z -> (l, Left z x r)
   end
 
-  let function down_right [@stdlib] (p: pointed 'a) : pointed 'a = match p with
+  let function down_right (p: pointed 'a) : pointed 'a = match p with
     | Empty, _ -> p (* do nothing *)
     | Node l x r, z -> (r, Right l x z)
   end

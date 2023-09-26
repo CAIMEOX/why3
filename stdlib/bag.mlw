@@ -12,29 +12,29 @@ module Bag
 
   (** the most basic operation is the number of occurrences *)
 
-  function nb_occ [@stdlib] (x: 'a) (b: bag 'a): int
+  function nb_occ (x: 'a) (b: bag 'a): int
 
   axiom occ_non_negative: forall b: bag 'a, x: 'a. nb_occ x b >= 0
 
-  predicate mem [@stdlib] (x: 'a) (b: bag 'a) = nb_occ x b > 0
+  predicate mem (x: 'a) (b: bag 'a) = nb_occ x b > 0
 
   (** equality of bags *)
 
-  predicate (==) [@stdlib] (a b: bag 'a) =
+  predicate (==) (a b: bag 'a) =
     forall x:'a. nb_occ x a = nb_occ x b
 
   axiom bag_extensionality: forall a b: bag 'a. a == b -> a = b
 
   (** basic constructors of bags *)
 
-  function empty_bag [@stdlib]: bag 'a
+  function empty_bag: bag 'a
 
   axiom occ_empty: forall x: 'a. nb_occ x empty_bag = 0
 
   lemma is_empty: forall b: bag 'a.
     (forall x: 'a. nb_occ x b = 0) -> b = empty_bag
 
-  function singleton [@stdlib] (x: 'a) : bag 'a
+  function singleton (x: 'a) : bag 'a
 
   axiom occ_singleton: forall x y: 'a.
     (x = y /\ (nb_occ y (singleton x)) = 1) \/
@@ -48,7 +48,7 @@ module Bag
 
   (** union *)
 
-  function union [@stdlib] (bag 'a) (bag 'a) : bag 'a
+  function union (bag 'a) (bag 'a) : bag 'a
 
   axiom occ_union:
     forall x: 'a, a b: bag 'a.
@@ -69,7 +69,7 @@ module Bag
 
   (** add operation *)
 
-  function add [@stdlib] (x: 'a) (b: bag 'a) : bag 'a = union (singleton x) b
+  function add (x: 'a) (b: bag 'a) : bag 'a = union (singleton x) b
 
   lemma occ_add_eq:
     forall b: bag 'a, x y: 'a.
@@ -80,7 +80,7 @@ module Bag
 
   (** cardinality *)
 
-  function card [@stdlib] (bag 'a): int
+  function card (bag 'a): int
 
   axiom Card_nonneg: forall x: bag 'a. card x >= 0
   axiom Card_empty: card (empty_bag: bag 'a) = 0
@@ -94,7 +94,7 @@ module Bag
 
   use int.MinMax
 
-  function diff [@stdlib] (bag 'a) (bag 'a) : bag 'a
+  function diff (bag 'a) (bag 'a) : bag 'a
 
   axiom Diff_occ: forall b1 b2: bag 'a, x:'a.
     nb_occ x (diff b1 b2) = max 0 (nb_occ x b1 - nb_occ x b2)
@@ -112,7 +112,7 @@ module Bag
 
   (** intersection *)
 
-  function inter [@stdlib] (a b: bag 'a) : bag 'a
+  function inter (a b: bag 'a) : bag 'a
 
   axiom inter:
     forall x: 'a, a b: bag 'a.
@@ -120,7 +120,7 @@ module Bag
 
   (** arbitrary element *)
 
-  function choose [@stdlib] (b: bag 'a) : 'a
+  function choose (b: bag 'a) : 'a
 
   axiom choose_mem: forall b: bag 'a.
     empty_bag <> b -> mem (choose b) b

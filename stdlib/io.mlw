@@ -1,4 +1,5 @@
 (** {1 Basic I/O Functions} *)
+
 module StdIO
 
   use string.String
@@ -10,19 +11,19 @@ module StdIO
   val ghost bar:t
 
   (** prints a string to the standard output *)
-  val print_string [@stdlib] (s: string) : unit
+  val print_string (s: string) : unit
     writes { bar }
 
   (** prints a char to the standard output *)
-  val print_char [@stdlib] (c: char) : unit
+  val print_char (c: char) : unit
     writes { bar }
 
   (** prints a newline character to the standard output, and flushes it *)
-  val print_newline [@stdlib] (_u:unit) : unit
+  val print_newline (_u:unit) : unit
     writes { bar }
 
   (** prints a Why3 int to the standard output *)
-  val print_int [@stdlib] (i: int) : unit
+  val print_int (i: int) : unit
     writes { bar }
 
   (***
