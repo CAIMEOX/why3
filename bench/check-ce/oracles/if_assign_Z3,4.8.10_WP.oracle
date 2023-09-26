@@ -4,7 +4,7 @@
   - Abstract RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 10, characters 12-23)
 - Checked model 1: NC
   - Concrete RAC: FAILURE (postcondition at "bench/check-ce/if_assign.mlw", line 10, characters 12-23)
-  - Abstract RAC: STUCK (failure in postcondition of `(:=)` at "WHY3DATA/stdlib/ref.mlw", line 20, characters 49-54)
+  - Abstract RAC: STUCK (failure in postcondition of `(:=)` at "WHY3DATA/stdlib/ref.mlw", line 20, characters 39-44)
 File "bench/check-ce/if_assign.mlw", line 10, characters 12-23:
 Sub-goal Postcondition of goal f'vc.
 Prover result is: Step limit exceeded (3000024 steps).
