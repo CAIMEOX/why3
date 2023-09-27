@@ -9,6 +9,7 @@
 (*                                                                  *)
 (********************************************************************)
 
+open Strategy
 open Term
 open Decl
 open Ty
@@ -49,6 +50,8 @@ type symbols = {
   mul_infix : lsymbol;
   div_infix : lsymbol;
   minus_infix : lsymbol;
+  sin : lsymbol;
+  cos : lsymbol;
   lt : lsymbol;
   lt_infix : lsymbol;
   le : lsymbol;
@@ -67,6 +70,7 @@ type symbols = {
 }
 
 let symbols = ref None
+let ( !! ) s = Opt.get !s
 
 (* Forward error associated to a real term t, eg. (x, rel, x', cst) stands for
    |t - x| <= rel * x' + cst *)
@@ -394,7 +398,7 @@ let mul_forward_error prove_overflow info x y r s1 s2 =
         add_error info r
           (to_real x *. to_real y, eps, abs (to_real x *. to_real y), eta)
       in
-      (info, Some (left <=. right), Strategy.Sdo_nothing)
+      (info, Some (left <=. right), Sdo_nothing)
     | _ ->
       let combine_errors_with_multiplication t1 exact_t1 t1_factor t1' t1_cst t2
           exact_t2 t2_factor t2' t2_cst r =
@@ -437,7 +441,7 @@ let mul_forward_error prove_overflow info x y r s1 s2 =
         let get_float_name = get_float_name (Opt.get !symbols).printer in
         let args = List.fold_left get_float_name "" [ x; y ] in
         let s =
-          Strategy.Sapply_trans
+          Sapply_trans
             ( "apply",
               [ "mul_combine"; "with"; args ],
               [
@@ -457,7 +461,7 @@ let mul_forward_error prove_overflow info x y r s1 s2 =
         else
           ( info,
             Some (left <=. right'),
-            Strategy.Sapply_trans
+            Sapply_trans
               ( "assert",
                 [ Format.asprintf "%a" print_term (left <=. right) ],
                 [ s ] ) )
@@ -488,7 +492,7 @@ let sub_forward_error prove_overflow info x y r s1 s2 =
         add_error info r
           (to_real x -. to_real y, eps, abs (to_real x -. to_real y), zero)
       in
-      (info, Some (left <=. right), Strategy.Sdo_nothing)
+      (info, Some (left <=. right), Sdo_nothing)
     | _ ->
       let combine_errors_with_substraction _t1 exact_t1 t1_factor t1' t1_cst _t2
           exact_t2 t2_factor t2' t2_cst r =
@@ -511,7 +515,7 @@ let sub_forward_error prove_overflow info x y r s1 s2 =
         let get_float_name = get_float_name (Opt.get !symbols).printer in
         let args = List.fold_left get_float_name "" [ x; y ] in
         let s =
-          Strategy.Sapply_trans
+          Sapply_trans
             ( "apply",
               [ "add_combine"; "with"; args ],
               [
@@ -531,7 +535,7 @@ let sub_forward_error prove_overflow info x y r s1 s2 =
         else
           ( info,
             Some (left <=. total_err'),
-            Strategy.Sapply_trans
+            Sapply_trans
               ( "assert",
                 [ Format.asprintf "%a" print_term (left <=. total_err) ],
                 [ s ] ) )
@@ -563,7 +567,7 @@ let add_forward_error prove_overflow info x y r s1 s2 =
         add_error info r
           (to_real x +. to_real y, eps, abs (to_real x +. to_real y), zero)
       in
-      (info, Some (left <=. right), Strategy.Sdo_nothing)
+      (info, Some (left <=. right), Sdo_nothing)
     | _ ->
       let combine_errors_with_addition _t1 exact_t1 t1_factor t1' t1_cst _t2
           exact_t2 t2_factor t2' t2_cst r =
@@ -586,7 +590,7 @@ let add_forward_error prove_overflow info x y r s1 s2 =
         let get_float_name = get_float_name (Opt.get !symbols).printer in
         let args = List.fold_left get_float_name "" [ x; y ] in
         let s =
-          Strategy.Sapply_trans
+          Sapply_trans
             ( "apply",
               [ "add_combine"; "with"; args ],
               [
@@ -606,7 +610,7 @@ let add_forward_error prove_overflow info x y r s1 s2 =
         else
           ( info,
             Some (left <=. total_err'),
-            Strategy.Sapply_trans
+            Sapply_trans
               ( "assert",
                 [ Format.asprintf "%a" print_term (left <=. total_err) ],
                 [ s ] ) )
@@ -622,7 +626,7 @@ let add_forward_error prove_overflow info x y r s1 s2 =
 (* r is a result of FP arithmetic operation involving t1 and t2 *)
 (* Compute new inequalities on r based on what we know on t1 and t2 *)
 let use_ieee_thms prove_overflow info ieee_symbol t1 t2 r s1 s2 :
-    term_info Mterm.t * term option * Strategy.strat =
+    term_info Mterm.t * term option * strat =
   let symbols = Opt.get !symbols in
   if
     ls_equal ieee_symbol symbols.single_symbols.add_post
@@ -642,6 +646,44 @@ let use_ieee_thms prove_overflow info ieee_symbol t1 t2 r s1 s2 :
   else
     failwith "Unsupported symbol"
 
+let get_known_fn t =
+  match t.t_node with
+  | Tapp (ls, args) when ls_equal ls !!symbols.sin || ls_equal ls !!symbols.cos
+    ->
+    Some (ls, args)
+  | _ -> None
+
+let apply_sin_cos_thm info t exact_t fn args strats =
+  let arg = List.hd args in
+  let s = List.hd strats in
+  match (get_info info arg).error with
+  | Some (exact_arg, rel_err, arg', cst_err) ->
+    let exact_fn = fs_app fn [ exact_arg ] ty_real in
+    let left = abs (exact_t --. exact_fn) in
+    let right = (abs arg' **. rel_err) ++. cst_err in
+    let f = left <=. right in
+    let s =
+      Sapply_trans ("assert", [ Format.asprintf "%a" print_term f ], [ s ])
+    in
+    let left = abs (t -. exact_t) in
+    let _, rel_err, t', cst_err = Opt.get (get_info info t).error in
+    let right = (rel_err **. t') ++. cst_err ++. right in
+    let info = add_error info t (exact_t, rel_err, t', cst_err ++. right) in
+    (* let s = *)
+    (*   Sapply_trans *)
+    (*     ( "apply", *)
+    (*       [ "add_combine"; "with"; args ], *)
+    (*       [ s] *)
+    (*       ] ) *)
+    (info, Some (left <=. right), s)
+  | None -> (info, None, s)
+
+let use_known_thm info t exact_t fn args strats =
+  if ls_equal fn !!symbols.cos || ls_equal fn !!symbols.sin then
+    apply_sin_cos_thm info t exact_t fn args strats
+  else
+    assert false
+
 (* Generate error formulas recursively for a term `t` using basic floating point
    theorems as well as triangle inequality. This is recursive because if `t` is
    an approximation of a term `u` which itself is an approximation of a term
@@ -650,9 +692,17 @@ let use_ieee_thms prove_overflow info ieee_symbol t1 t2 r s1 s2 :
    `t` to get a formula relating `t` to `v`. *)
 (* TODO: Avoid traversing the same term twice. *)
 let rec get_error_fmlas prove_overflow info t :
-    term_info Mterm.t * term option * Strategy.strat =
+    term_info Mterm.t * term option * strat =
   let apply = get_error_fmlas prove_overflow in
   let t_info = get_info info t in
+  (* TODO: Write this function if possible instead of passing s1 and s2 *)
+  (* let combine (info,strat) t = *)
+  (*   let info, f, s = apply info t in *)
+  (*   let s = *)
+  (*     match f with *)
+  (*     | None -> s *)
+  (*     | Some f -> *)
+  (* Sapply_trans ("assert", [ Format.asprintf "%a" print_term f ], [ s ]) in *)
   match t_info.ieee_post with
   | Some (ieee_post, t1, t2) ->
     let info, f1, s1 = apply info t1 in
@@ -671,9 +721,28 @@ let rec get_error_fmlas prove_overflow info t :
         Sapply_trans ("assert", [ Format.asprintf "%a" print_term f2 ], [ s2 ])
     in
     use_ieee_thms prove_overflow info ieee_post t1 t2 t s1 s2
-  | None ->
-    (* TODO *)
-    (info, None, Strategy.Sdo_nothing)
+  | None -> (
+    match t_info.error with
+    | Some (exact_t, rel_err, t', cst_err) -> (
+      match get_known_fn exact_t with
+      | Some (fn, args) ->
+        let info, l =
+          List.fold_left
+            (fun (info, l) t ->
+              let info, f, s = apply info t in
+              let s =
+                match f with
+                | None -> s
+                | Some f ->
+                  Sapply_trans
+                    ("assert", [ Format.asprintf "%a" print_term f ], [ s ])
+              in
+              (info, s :: l))
+            (info, []) args
+        in
+        use_known_thm info t exact_t fn args (List.rev l)
+      | None -> (info, None, Sdo_nothing))
+    | None -> (info, None, Sdo_nothing))
 
 let get_term_for_info t1 =
   match t1.t_node with
@@ -859,6 +928,9 @@ let init_symbols env printer =
       Env.read_theory env [ "safe64_lemmas" ] "Safe64Lemmas"
     in
     let fw_error = ns_find_ls safe64_lemmas.th_export [ "fw_error" ] in
+    let trigo = Env.read_theory env [ "real" ] "Trigonometry" in
+    let sin = ns_find_ls trigo.th_export [ "sin" ] in
+    let cos = ns_find_ls trigo.th_export [ "cos" ] in
     symbols :=
       Some
         {
@@ -867,6 +939,8 @@ let init_symbols env printer =
           mul;
           div;
           minus;
+          sin;
+          cos;
           add_infix;
           sub_infix;
           mul_infix;
@@ -915,15 +989,13 @@ let f env task =
       (t_true, []) floats
   in
   if List.length strats = 0 then
-    Strategy.Sdo_nothing
+    Sdo_nothing
   else if List.length strats = 1 then
-    Strategy.Sapply_trans
-      ("assert", [ Format.asprintf "%a" print_term f ], strats)
+    Sapply_trans ("assert", [ Format.asprintf "%a" print_term f ], strats)
   else
-    let s = Strategy.Sapply_trans ("split_vc", [], List.rev strats) in
-    Strategy.Sapply_trans
-      ("assert", [ Format.asprintf "%a" print_term f ], [ s ])
+    let s = Sapply_trans ("split_vc", [], List.rev strats) in
+    Sapply_trans ("assert", [ Format.asprintf "%a" print_term f ], [ s ])
 
 let () =
-  Strategy.register_strat "numeric" f
+  register_strat "numeric" f
     ~desc:"Compute@ forward@ error@ of@ float@ computations."
