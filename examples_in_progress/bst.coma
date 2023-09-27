@@ -12,7 +12,7 @@ let if {b: bool} (then) (else) =
 let unTree {t: tree int} (onNode [] {v: int} {l r: tree int}) (onLeaf) =
   any as node {v: int} {l r: tree int} ->
            { t = Node l v r } ! onNode {v} {l} {r}
-       | leaf -> { t = Empty } ! onLeaf
+      |  leaf -> { t = Empty } ! onLeaf
 
 let remove_min {t: tree int} (return {m: int} {o: tree int}) =
   ({ t <> Empty } ! (unTree {t} (node) (fail)

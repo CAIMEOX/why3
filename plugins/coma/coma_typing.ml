@@ -81,7 +81,7 @@ let type_fmla tuc ctx t =
   Typing.type_fmla_in_denv (Theory.get_namespace tuc) Theory.(tuc.uc_known) Theory.(tuc.uc_crcmap) ctx.denv t
 
 let rec check_param ~loc l r = match l,r with
-  | Pt _l, Pt _r -> ()
+  | Pt l, Pt r -> ()
   | Pr l, Pr r
   | Pv l, Pv r  when ty_equal l.vs_ty r.vs_ty -> ()
   | Pc (_, _, l), Pc (_, _, r) -> check_params ~loc l r
@@ -97,10 +97,16 @@ and check_params ~loc l r =
 
 let rec type_expr tuc ctx { pexpr_desc=d; pexpr_loc=loc } =
   match d with
+  | PEbox e     -> let e = type_prog ~loc tuc ctx e in Ebox e, []
+  | PEwox e     -> let e = type_prog ~loc tuc ctx e in Ewox e, []
+  | PEcut (t,e) -> let e = type_prog ~loc tuc ctx e in Ecut (type_fmla tuc ctx t, e), []
+  | PEany       -> Eany, []
   | PEsym id ->
       let h, _, pl =
-        try Mstr.find id.id_str ctx.hdls
-        with Not_found -> Loc.errorm ~loc:id.id_loc "unbounded handler %s" id.id_str in
+        try
+          Mstr.find id.id_str ctx.hdls
+        with Not_found -> Loc.errorm ~loc:id.id_loc "unbounded handler %s" id.id_str
+      in
       Esym h, pl
   | PEapp (e, a) ->
       let e, te = type_expr tuc ctx e in
@@ -129,18 +135,7 @@ let rec type_expr tuc ctx { pexpr_desc=d; pexpr_loc=loc } =
            let _ty = Typing.ty_of_pty tuc pty in
            Loc.errorm ~loc:loc "polymorphism is not supported yet", tes
        | _ ->  Loc.errorm ~loc "type error with the application")
-  | PEany -> Eany, []
-  | PEbox e ->
-      let e = type_prog ~loc tuc ctx e in
-      Ebox e, []
-  | PEwox e ->
-      let e = type_prog ~loc tuc ctx e in
-      Ewox e, []
-  | PEcut (t,e) ->
-      let tt = type_fmla tuc ctx t in
-      let e = type_prog ~loc tuc ctx e in
-      Ecut (tt, e), []
-  | PEset (e, l) ->
+  | PEall (e, l) ->
       let f ctx (id, t, pty) =
         let tt = type_term tuc ctx t in
         let ty = Typing.ty_of_pty tuc pty in
@@ -149,6 +144,33 @@ let rec type_expr tuc ctx { pexpr_desc=d; pexpr_loc=loc } =
          | _ -> Loc.errorm ~loc:id.id_loc "type error with &%s's assignation" id.id_str);
         let vs = create_vsymbol (id_fresh ~loc:id.id_loc id.id_str) ty in
         add_ref vs ctx, (vs,tt)
+      in
+      let ctx, ll = Lists.map_fold_left f ctx l in
+      let e = type_prog ~loc tuc ctx e in
+      Eset (e, ll), []
+  | PEset (e, l) ->
+      let f ctx (id, t) =
+        let tt = type_term tuc ctx t in
+        let vs =
+           try match Mstr.find id.id_str ctx.vars, tt.t_ty with
+             | Ref v, Some tty when ty_equal tty v.vs_ty -> v
+             | (Var _ | Typ _),_ -> Loc.errorm ~loc:id.id_loc "the symbol %s is not a reference" id.id_str
+             | _ -> Loc.errorm ~loc:id.id_loc "type error with &%s's assignation" id.id_str;
+           with Not_found -> Loc.errorm ~loc:id.id_loc "unbounded variable %s" id.id_str in
+        add_ref vs ctx, (vs,tt)
+      in
+      let ctx, ll = Lists.map_fold_left f ctx l in
+      let e = type_prog ~loc tuc ctx e in
+      Eset (e, ll), []
+  | PElet (e, l) ->
+      let f ctx (id, t, pty) =
+        let tt = type_term tuc ctx t in
+        let ty = Typing.ty_of_pty tuc pty in
+        (match tt.t_ty with
+         | Some tty when ty_equal tty ty -> ()
+         | _ -> Loc.errorm ~loc:id.id_loc "type error with %s's assignation" id.id_str);
+        let vs = create_vsymbol (id_fresh ~loc:id.id_loc id.id_str) ty in
+        add_var vs ctx, (vs,tt)
       in
       let ctx, ll = Lists.map_fold_left f ctx l in
       let e = type_prog ~loc tuc ctx e in

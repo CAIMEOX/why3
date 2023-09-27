@@ -161,15 +161,16 @@ let rec havoc c wr pl =
     let u = c_clone_vs c v in
     c_add_vs c v (t_var u), u::vl in
   let on_param (c,vl as acc) = function
-    | Pc (h,_,pl) -> c_add_hs c h (undef c pl), vl
+    | Pc (h,_,pl) -> c_add_hs c h (undef h c pl), vl
     | Pt v -> c_add_tv c v (ty_var (c_clone_tv v)), vl
     | Pv v | Pr v -> on_write acc v in
   let c_vl = List.fold_left on_write (c,[]) wr in
   let c,vl = List.fold_left on_param (c_vl) pl in
   c, List.rev vl
 
-and undef c pl sf _ bl =
+and undef h c pl sf _ bl =
   let gl = sf && c.c_gl in
+  if gl then Loc.errorm ?loc:h.hs_name.id_loc "handler `%a' undefined" Coma_syntax.pp_hs h;
   (* if gl then w_false else *)
   w_and (if gl then w_false else w_true) (
   let lc = if sf then c.c_lc else Shs.empty in
