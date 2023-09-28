@@ -113,8 +113,9 @@ let pp_eqto fmt d = fprintf fmt "%s"          (if d then "→" else "=")
 let rec pp_hdl fmt (i, w, pl) = fprintf fmt "(%a @[<h>[%a]@]%a%a)" pp_hs i pp_prew w pp_osp (pl <> []) pp_prms pl
 
 and pp_prew fmt w =
+  let pp_sep fmt () = fprintf fmt " " in
   let pp_v fmt s = fprintf fmt "%a" Pretty.print_vs s in
-  pp_print_list ~pp_sep:pp_print_space pp_v fmt w
+  pp_print_list ~pp_sep pp_v fmt w
 
 and pp_prms fmt pl =
   let pp_sep fmt () = fprintf fmt " " in
@@ -127,19 +128,19 @@ and pp_param fmt = function
   | Pc h -> fprintf fmt "%a" pp_hdl  h
 
 let pp_set fmt sl =
-  let pp_sep fmt () = fprintf fmt "@\n" in
-  let pp_v fmt (s, t) = fprintf fmt "/ %a =@ %a" pp_ref s pp_term t in
+  let pp_sep fmt () = fprintf fmt "@ | " in
+  let pp_v fmt (s, t) = fprintf fmt "%a =@ %a" pp_ref s pp_term t in
   pp_print_list ~pp_sep pp_v fmt sl
 
 let rec pp_expr fmt = function
   | Eany           -> fprintf fmt "any"
   | Esym i         -> fprintf fmt "%a"             pp_hs i
-  | Ebox e         -> fprintf fmt "↑@ @[%a@]"      pp_expr e
-  | Ewox e         -> fprintf fmt "↓@ @[%a@]"      pp_expr e
-  | Eset (e, l)    -> fprintf fmt "%a@\n%a"        pp_expr e pp_set l
+  | Ebox e         -> fprintf fmt "(↑@ @[%a@])"    pp_expr e
+  | Ewox e         -> fprintf fmt "(↓@ @[%a@])"    pp_expr e
+  | Eset (e, l)    -> fprintf fmt "%a@\n[%a]"      pp_expr e pp_set l
   | Eapp (e, arg)  -> fprintf fmt "@[%a%a@[%a@]@]" pp_expr e pp_sp_nl2 () pp_arg arg
   | Ecut (t, e)    -> fprintf fmt "%a@ %a"         pp_term t pp_expr e
-  | Edef (e, b, l) -> fprintf fmt "%a@\n%a"        pp_expr e (pp_defs b)  l
+  | Edef (e, b, l) -> fprintf fmt "%a@\n[%a]"        pp_expr e (pp_defs b)  l
   | Elam (p, e)    -> fprintf fmt "(fu@[n %a%a→@ @[%a@]@])"  pp_prms p pp_osp (p <> []) pp_expr e
 
 and pp_arg fmt = function
@@ -152,7 +153,7 @@ and pp_arg fmt = function
       | _ -> fprintf fmt "(%a)" pp_expr e
 
 and pp_def direct fmt (h, w, pl, e) =
-  fprintf fmt "%a @[<h>[%a]@] %a%a%a%a@[%a@]"
+  fprintf fmt "%a [%a] %a%a%a%a@[%a@]"
     pp_hs h
     pp_prew w
     pp_prms pl
@@ -162,6 +163,6 @@ and pp_def direct fmt (h, w, pl, e) =
     pp_expr e
 
 and pp_defs direct fmt l =
-  let pp_sep fmt () = fprintf fmt "@\n" in
-  let pp_v fmt d = fprintf fmt "/ %a" (pp_def direct) d in
+  let pp_sep fmt () = fprintf fmt "@\n|" in
+  let pp_v fmt d = fprintf fmt " %a" (pp_def direct) d in
   pp_print_list ~pp_sep pp_v fmt l

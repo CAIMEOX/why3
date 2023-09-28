@@ -22,12 +22,12 @@ let hs_hash hs = id_hash hs.hs_name
 let hs_compare hs1 hs2 = id_compare hs1.hs_name hs2.hs_name
 *)
 
-(*
-let t_and_simp = t_and
+
+(* let t_and_simp = t_and
 let t_and_asym_simp = t_and_asym
 let t_implies_simp = t_implies
-let t_forall_close_simp = t_forall_close
-*)
+let t_forall_close_simp = t_forall_close *)
+
 
 type wpsp = {
   wp: term;
@@ -131,6 +131,7 @@ let rec consume merge c pl bl =
   c, discharge zl hl
 
 and factorize merge c zl0 hl h wr pl kk =
+  if true then kk,zl0,hl else
   if not merge || List.exists (function
     | Pt _ | Pc _ -> true | Pv _ | Pr _ -> false) pl then kk,zl0,hl else
   let dup (l,m) v = let z = c_clone_vs c v in z::l, Mvs.add v (t_var z) m in

@@ -60,8 +60,8 @@ coma_prog:
 coma_bloc:
 | LEFTSQ l=separated_nonempty_list(BAR, coma_alloc) RIGHTSQ
   { fun e -> (mk_pexpr (PEall (e, l)) $loc) }
-| LEFTSQ l=separated_nonempty_list(BAR, coma_set) RIGHTSQ
-  { fun e -> (mk_pexpr (PEset (e, l)) $loc) }
+/* | LEFTSQ l=separated_nonempty_list(BAR, coma_set) RIGHTSQ
+  { fun e -> (mk_pexpr (PEset (e, l)) $loc) } */
 | LEFTSQ l=separated_nonempty_list(BAR, coma_let) RIGHTSQ
   { fun e -> (mk_pexpr (PElet (e, l)) $loc) }
 | LEFTSQ dl=separated_nonempty_list(BAR, defn(EQUAL)) RIGHTSQ
@@ -75,7 +75,6 @@ coma_alloc:
 coma_let:
 | id=lident ty=oftyp EQUAL LEFTBRC t=term RIGHTBRC { id, t, ty }
 
-
 coma_set:
 | AMP id=lident LARROW LEFTBRC t=term RIGHTBRC { id, t }
 
@@ -86,6 +85,8 @@ coma_expr:
 coma_desc:
 | LEFTBRC t=term RIGHTBRC e=coma_expr
   { PEcut (t, e) }
+| LEFTSQ l=separated_nonempty_list(BAR, coma_set) RIGHTSQ e=coma_expr
+  { PEset (e, l) }
 | LEFTPAR BANG e=coma_prog RIGHTPAR
   { PEbox e }
 | LEFTPAR QUESTION e=coma_prog RIGHTPAR
@@ -134,6 +135,9 @@ coma_arg:
   { PAr x }
 | LEFTPAR e=coma_prog RIGHTPAR
   { PAc e }
+| li=lident
+  { let d = mk_pexpr (PEsym li) $loc in
+    PAc d }
 | c=coma_closure
   { PAc c }
 
