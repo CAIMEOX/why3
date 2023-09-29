@@ -61,6 +61,7 @@ echo ""
 
 echo "=== Checking good files (Coma) ==="
 coma_good ./examples/coma
+coma_good ./bench/plugins/coma/good
 echo ""
 
 echo "=== Checking replay (Coma) ==="

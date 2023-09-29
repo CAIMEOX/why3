@@ -58,10 +58,6 @@ coma_prog:
   { List.fold_left (fun acc b -> (b acc)) e bl }
 
 coma_bloc:
-| LEFTSQ l=separated_nonempty_list(BAR, coma_alloc) RIGHTSQ
-  { fun e -> (mk_pexpr (PEall (e, l)) $loc) }
-/* | LEFTSQ l=separated_nonempty_list(BAR, coma_set) RIGHTSQ
-  { fun e -> (mk_pexpr (PEset (e, l)) $loc) } */
 | LEFTSQ l=separated_nonempty_list(BAR, coma_let) RIGHTSQ
   { fun e -> (mk_pexpr (PElet (e, l)) $loc) }
 | LEFTSQ dl=separated_nonempty_list(BAR, defn(EQUAL)) RIGHTSQ
@@ -69,11 +65,9 @@ coma_bloc:
 | LEFTSQ dl=separated_nonempty_list(BAR, defn(ARROW)) RIGHTSQ
   { fun e -> (mk_pexpr (PEdef (e, true, dl)) $loc) }
 
-coma_alloc:
-| AMP id=lident ty=oftyp EQUAL LEFTBRC t=term RIGHTBRC { id, t, ty }
-
 coma_let:
-| id=lident ty=oftyp EQUAL LEFTBRC t=term RIGHTBRC { id, t, ty }
+| AMP id=lident ty=oftyp EQUAL LEFTBRC t=term RIGHTBRC { id, t, ty, true }
+| id=lident ty=oftyp EQUAL LEFTBRC t=term RIGHTBRC { id, t, ty, false }
 
 coma_set:
 | AMP id=lident LARROW LEFTBRC t=term RIGHTBRC { id, t }

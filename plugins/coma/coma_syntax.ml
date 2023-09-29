@@ -28,9 +28,8 @@ and pexpr_desc =
   | PEapp of pexpr * pargument (* e <ty>... t... | e... *)
   | PElam of pparam list * pexpr (* fun pl -> e *)
   | PEdef of pexpr * bool * pdefn list (* e / rec? h p = e and ... *)
-  | PEall of pexpr * (ident * term * pty) list
   | PEset of pexpr * (ident * term) list
-  | PElet of pexpr * (ident * term * pty) list
+  | PElet of pexpr * (ident * term * pty * bool) list
   | PEcut of term * pexpr (* { t } e *)
   | PEbox of pexpr (* ! e *)
   | PEwox of pexpr (* ? e *)

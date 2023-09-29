@@ -135,16 +135,17 @@ let rec type_expr tuc ctx { pexpr_desc=d; pexpr_loc=loc } =
            let _ty = Typing.ty_of_pty tuc pty in
            Loc.errorm ~loc:loc "polymorphism is not supported yet", tes
        | _ -> Loc.errorm ~loc "type error with the application")
-  | PEall (e, l) ->
+  | PElet (e, l) ->
       let ctx0 = ctx in
-      let f ctx (id, t, pty) =
+      let f ctx (id, t, pty, mut) =
         let tt = type_term tuc ctx0 t in
         let ty = Typing.ty_of_pty tuc pty in
         (match tt.t_ty with
          | Some tty when ty_equal tty ty -> ()
          | _ -> Loc.errorm ~loc:id.id_loc "type error with `&%s' assignation" id.id_str);
         let vs = create_vsymbol (id_fresh ~loc:id.id_loc id.id_str) ty in
-        add_ref vs ctx, (vs,tt)
+        let ctx = if mut then add_ref vs ctx else add_var vs ctx in
+        ctx, (vs,tt)
       in
       let ctx, ll = Lists.map_fold_left f ctx l in
       let e = type_prog ~loc tuc ctx e in
@@ -161,19 +162,6 @@ let rec type_expr tuc ctx { pexpr_desc=d; pexpr_loc=loc } =
         (vs,tt)
       in
       let ll = List.map f l in
-      let e = type_prog ~loc tuc ctx e in
-      Eset (e, ll), []
-  | PElet (e, l) ->
-      let f ctx (id, t, pty) =
-        let tt = type_term tuc ctx t in
-        let ty = Typing.ty_of_pty tuc pty in
-        (match tt.t_ty with
-         | Some tty when ty_equal tty ty -> ()
-         | _ -> Loc.errorm ~loc:id.id_loc "type error with `%s' assignation" id.id_str);
-        let vs = create_vsymbol (id_fresh ~loc:id.id_loc id.id_str) ty in
-        add_var vs ctx, (vs,tt)
-      in
-      let ctx, ll = Lists.map_fold_left f ctx l in
       let e = type_prog ~loc tuc ctx e in
       Eset (e, ll), []
   | PElam (pl, e) ->
