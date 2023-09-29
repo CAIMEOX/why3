@@ -50,8 +50,11 @@ type symbols = {
   mul_infix : lsymbol;
   div_infix : lsymbol;
   minus_infix : lsymbol;
+  sum : lsymbol;
   sin : lsymbol;
   cos : lsymbol;
+  exp : lsymbol;
+  log : lsymbol;
   lt : lsymbol;
   lt_infix : lsymbol;
   le : lsymbol;
@@ -61,7 +64,7 @@ type symbols = {
   ge : lsymbol;
   ge_infix : lsymbol;
   abs : lsymbol;
-  fw_error : lsymbol;
+  (* fw_error : lsymbol; *)
   usingle_symbols : ufloat_symbols;
   udouble_symbols : ufloat_symbols;
   single_symbols : ieee_symbols;
@@ -102,41 +105,34 @@ let is_zero t = t_equal zero t
 let is_one t = t_equal one t
 
 let abs t =
-  let symbols = Opt.get !symbols in
   match t.t_node with
   (* Don't add an abs symbol on top of another *)
-  | Tapp (ls, [ t ]) when ls_equal symbols.abs ls -> t
-  | _ -> fs_app symbols.abs [ t ] ty_real
+  | Tapp (ls, [ t ]) when ls_equal !!symbols.abs ls -> t
+  | _ -> fs_app !!symbols.abs [ t ] ty_real
 
 (* TODO: Add ge and gt later *)
 let is_ineq_ls ls =
-  let symbols = Opt.get !symbols in
+  let symbols = !!symbols in
   ls_equal ls symbols.lt || ls_equal ls symbols.le
   || ls_equal ls symbols.lt_infix
   || ls_equal ls symbols.le_infix
 (* || ls_equal ls symbols.gt || ls_equal ls symbols.ge *)
 
-let is_add_ls ls =
-  let symbols = Opt.get !symbols in
-  ls_equal ls symbols.add || ls_equal ls symbols.add_infix
+let is_add_ls ls = ls_equal ls !!symbols.add || ls_equal ls !!symbols.add_infix
+let is_sub_ls ls = ls_equal ls !!symbols.sub || ls_equal ls !!symbols.sub_infix
+let is_mul_ls ls = ls_equal ls !!symbols.mul || ls_equal ls !!symbols.mul_infix
 
-let is_sub_ls ls =
-  let symbols = Opt.get !symbols in
-  ls_equal ls symbols.sub || ls_equal ls symbols.sub_infix
+let is_minus_ls ls =
+  ls_equal ls !!symbols.minus || ls_equal ls !!symbols.minus_infix
 
-let is_mul_ls ls =
-  let symbols = Opt.get !symbols in
-  ls_equal ls symbols.mul || ls_equal ls symbols.mul_infix
-
-let is_abs_ls ls = ls_equal ls (Opt.get !symbols).abs
+let is_abs_ls ls = ls_equal ls !!symbols.abs
 
 let is_to_real_ls ls =
-  let symbols = Opt.get !symbols in
-  ls_equal ls symbols.single_symbols.to_real
-  || ls_equal ls symbols.double_symbols.to_real
+  ls_equal ls !!symbols.single_symbols.to_real
+  || ls_equal ls !!symbols.double_symbols.to_real
 
 let is_ieee_post ls =
-  let symbols = Opt.get !symbols in
+  let symbols = !!symbols in
   ls_equal ls symbols.single_symbols.add_post
   || ls_equal ls symbols.single_symbols.sub_post
   || ls_equal ls symbols.single_symbols.mul_post
@@ -147,7 +143,7 @@ let is_ieee_post ls =
   || ls_equal ls symbols.double_symbols.div_post
 
 let is_ieee_pre ls =
-  let symbols = Opt.get !symbols in
+  let symbols = !!symbols in
   ls_equal ls symbols.single_symbols.add_pre
   || ls_equal ls symbols.single_symbols.sub_pre
   || ls_equal ls symbols.single_symbols.mul_pre
@@ -157,7 +153,7 @@ let is_ieee_pre ls =
   || ls_equal ls symbols.double_symbols.mul_pre
   || ls_equal ls symbols.double_symbols.div_pre
 
-let add t1 t2 = fs_app (Opt.get !symbols).add [ t1; t2 ] ty_real
+let add t1 t2 = fs_app !!symbols.add [ t1; t2 ] ty_real
 
 let add_simp t1 t2 =
   if is_zero t1 then
@@ -167,17 +163,17 @@ let add_simp t1 t2 =
   else
     add t1 t2
 
-let sub t1 t2 = fs_app (Opt.get !symbols).sub [ t1; t2 ] ty_real
+let sub t1 t2 = fs_app !!symbols.sub [ t1; t2 ] ty_real
 
 let sub_simp t1 t2 =
   if is_zero t1 then
-    fs_app (Opt.get !symbols).minus [ t2 ] ty_real
+    fs_app !!symbols.minus [ t2 ] ty_real
   else if is_zero t2 then
     t1
   else
     sub t1 t2
 
-let mul t1 t2 = fs_app (Opt.get !symbols).mul [ t1; t2 ] ty_real
+let mul t1 t2 = fs_app !!symbols.mul [ t1; t2 ] ty_real
 
 let mul_simp t1 t2 =
   if is_zero t1 || is_zero t2 then
@@ -193,7 +189,7 @@ let mul_simp t1 t2 =
       abs (mul t1 t2)
     | _ -> mul t1 t2
 
-let div t1 t2 = fs_app (Opt.get !symbols).div [ t1; t2 ] ty_real
+let div t1 t2 = fs_app !!symbols.div [ t1; t2 ] ty_real
 
 let div_simp t1 t2 =
   if is_zero t1 then
@@ -203,6 +199,13 @@ let div_simp t1 t2 =
   else
     div t1 t2
 
+let minus t = fs_app !!symbols.minus [ t ] ty_real
+
+let minus_simp t =
+  match t.t_node with
+  | Tapp (ls, [ t' ]) when is_minus_ls ls -> t'
+  | _ -> minus t
+
 let ( +. ) x y = add x y
 let ( -. ) x y = sub x y
 let ( *. ) x y = mul x y
@@ -211,18 +214,17 @@ let ( ++. ) x y = add_simp x y
 let ( --. ) x y = sub_simp x y
 let ( **. ) x y = mul_simp x y
 let ( //. ) x y = div_simp x y
-let ( <=. ) x y = ps_app (Opt.get !symbols).le [ x; y ]
-let ( <. ) x y = ps_app (Opt.get !symbols).lt [ x; y ]
+let ( <=. ) x y = ps_app !!symbols.le [ x; y ]
+let ( <. ) x y = ps_app !!symbols.lt [ x; y ]
 
 let is_ty_float ty =
-  let symbols = Opt.get !symbols in
   match ty.ty_node with
   | Tyapp (v, []) ->
     if
-      ts_equal v symbols.single_symbols.ieee_type
-      || ts_equal v symbols.double_symbols.ieee_type
-      || ts_equal v symbols.usingle_symbols.ufloat_type
-      || ts_equal v symbols.udouble_symbols.ufloat_type
+      ts_equal v !!symbols.single_symbols.ieee_type
+      || ts_equal v !!symbols.double_symbols.ieee_type
+      || ts_equal v !!symbols.usingle_symbols.ufloat_type
+      || ts_equal v !!symbols.udouble_symbols.ufloat_type
     then
       true
     else
@@ -230,11 +232,10 @@ let is_ty_float ty =
   | _ -> false
 
 let eps ieee_type =
-  let symbols = Opt.get !symbols in
   let value =
-    if ts_equal ieee_type symbols.single_symbols.ieee_type then
+    if ts_equal ieee_type !!symbols.single_symbols.ieee_type then
       "-24"
-    else if ts_equal ieee_type symbols.double_symbols.ieee_type then
+    else if ts_equal ieee_type !!symbols.double_symbols.ieee_type then
       "-53"
     else
       failwith (Format.asprintf "Unsupported type %a" Pretty.print_ts ieee_type)
@@ -246,11 +247,10 @@ let eps ieee_type =
     ty_real
 
 let eta ieee_type =
-  let symbols = Opt.get !symbols in
   let value =
-    if ts_equal ieee_type symbols.single_symbols.ieee_type then
+    if ts_equal ieee_type !!symbols.single_symbols.ieee_type then
       "-150"
-    else if ts_equal ieee_type symbols.double_symbols.ieee_type then
+    else if ts_equal ieee_type !!symbols.double_symbols.ieee_type then
       "-1075"
     else
       failwith (Format.asprintf "Unsupported type %a" Pretty.print_ts ieee_type)
@@ -262,12 +262,11 @@ let eta ieee_type =
     ty_real
 
 let to_real ieee_type t =
-  let symbols = Opt.get !symbols in
   let to_real =
-    if ts_equal ieee_type symbols.single_symbols.ieee_type then
-      symbols.single_symbols.to_real
-    else if ts_equal ieee_type symbols.double_symbols.ieee_type then
-      symbols.double_symbols.to_real
+    if ts_equal ieee_type !!symbols.single_symbols.ieee_type then
+      !!symbols.single_symbols.to_real
+    else if ts_equal ieee_type !!symbols.double_symbols.ieee_type then
+      !!symbols.double_symbols.to_real
     else
       failwith (Format.asprintf "Unsupported type %a" Pretty.print_ts ieee_type)
   in
@@ -294,6 +293,12 @@ let add_ineq info t ls t' =
   Mterm.add t t_info info
 
 let add_error info t error =
+  let t =
+    match t.t_node with
+    | Tapp (ls, [ t ]) when is_to_real_ls ls -> t
+    | _ -> t
+  in
+  Format.printf "Add error on %a@." Pretty.print_term t;
   let t_info = get_info info t in
   let t_info =
     { ineqs = t_info.ineqs; error = Some error; ieee_post = t_info.ieee_post }
@@ -330,42 +335,38 @@ let rec get_floats t =
   | Tapp (_, tl) -> List.fold_left (fun l t -> l @ get_floats t) l tl
   | _ -> l
 
-let get_float_name printer s t =
+let rec print_term fmt t =
+  let id_unique = id_unique !!symbols.printer in
   match t.t_node with
-  | Tvar v ->
-    let name = id_unique printer v.vs_name in
-    if s = "" then
-      name
-    else
-      s ^ "," ^ name
-  | Tapp (ls, []) ->
-    let name = id_unique printer ls.ls_name in
-    if s = "" then
-      name
-    else
-      s ^ "," ^ name
-  | _ -> assert false
-
-let rec print_term printer fmt t =
-  let print_term = print_term printer in
-  match t.t_node with
-  | Tvar v -> Format.fprintf fmt "%s" (id_unique printer v.vs_name)
-  | Tapp (ls, []) -> Format.fprintf fmt "%s" (id_unique printer ls.ls_name)
+  | Tvar v -> Format.fprintf fmt "%s" (id_unique v.vs_name)
+  | Tapp (ls, []) -> Format.fprintf fmt "%s" (id_unique ls.ls_name)
   | Tapp (ls, tl) -> (
-    let s = id_unique printer ls.ls_name in
+    let s = id_unique ls.ls_name in
     match (Ident.sn_decode s, tl) with
     | Ident.SNinfix s, [ t1; t2 ] ->
       Format.fprintf fmt "(%a %s %a)" print_term t1 s print_term t2
+    | Ident.SNget s, [ t1; t2 ] ->
+      Format.fprintf fmt "%a@,[%a]%s" print_term t1 print_term t2 s
+    | Ident.SNupdate s, [ t1; t2; t3 ] ->
+      Format.fprintf fmt "%a@,[%a <-@ %a]%s" print_term t1 print_term t2
+        print_term t3 s
+    | Ident.SNprefix s, [ t ] -> Format.fprintf fmt "%s %a@." s print_term t
+    (* TODO: Other applications *)
     | _ ->
-      Format.fprintf fmt "(%s %a)"
-        (id_unique printer ls.ls_name)
+      Format.fprintf fmt "(%s %a)" (id_unique ls.ls_name)
         (Format.pp_print_list ~pp_sep:Pp.space print_term)
         tl)
   | _ -> Pretty.print_term fmt t
 
-let print_term fmt t =
-  let printer = (Opt.get !symbols).printer in
-  print_term printer fmt t
+let get_terms_names tlist =
+  List.fold_left
+    (fun s t ->
+      let s' = Format.asprintf "%a" print_term t in
+      if s = "" then
+        s'
+      else
+        s ^ "," ^ s')
+    "" tlist
 
 let apply_args f t t_info =
   let to_real = to_real (get_ts t) in
@@ -438,8 +439,7 @@ let mul_forward_error prove_overflow info x y r s1 s2 =
         let info =
           add_error info r (exact_t1 *. exact_t2, rel_err', t1' *. t2', cst_err')
         in
-        let get_float_name = get_float_name (Opt.get !symbols).printer in
-        let args = List.fold_left get_float_name "" [ x; y ] in
+        let args = get_terms_names [ x; y ] in
         let s =
           Sapply_trans
             ( "apply",
@@ -512,8 +512,7 @@ let sub_forward_error prove_overflow info x y r s1 s2 =
         let info =
           add_error info r (exact_t1 -. exact_t2, rel_err', t1' +. t2', cst_err')
         in
-        let get_float_name = get_float_name (Opt.get !symbols).printer in
-        let args = List.fold_left get_float_name "" [ x; y ] in
+        let args = get_terms_names [ x; y ] in
         let s =
           Sapply_trans
             ( "apply",
@@ -587,8 +586,7 @@ let add_forward_error prove_overflow info x y r s1 s2 =
         let info =
           add_error info r (exact_t1 +. exact_t2, rel_err', t1' +. t2', cst_err')
         in
-        let get_float_name = get_float_name (Opt.get !symbols).printer in
-        let args = List.fold_left get_float_name "" [ x; y ] in
+        let args = get_terms_names [ x; y ] in
         let s =
           Sapply_trans
             ( "apply",
@@ -648,39 +646,91 @@ let use_ieee_thms prove_overflow info ieee_symbol t1 t2 r s1 s2 :
 
 let get_known_fn t =
   match t.t_node with
-  | Tapp (ls, args) when ls_equal ls !!symbols.sin || ls_equal ls !!symbols.cos
-    ->
+  | Tapp (ls, args)
+    when ls_equal ls !!symbols.sin || ls_equal ls !!symbols.cos
+         || ls_equal ls !!symbols.sum || ls_equal ls !!symbols.log
+         || ls_equal ls !!symbols.exp ->
+    let args =
+      List.map
+        (fun arg ->
+          match arg.t_node with
+          | Tapp (ls, [ t ]) when is_to_real_ls ls -> t
+          | _ -> arg)
+        args
+    in
     Some (ls, args)
   | _ -> None
 
-let apply_sin_cos_thm info t exact_t fn args strats =
+let apply_sum_thm info t exact_t fn args strats =
+  let sum_fn = List.hd args in
+  match (get_info info sum_fn).error with
+  (* Does this happen ? We always use induction here, so addition theorem is
+     applied *)
+  | Some (exact_arg, rel_err, arg', cst_err) -> failwith "TODO : Sum with error"
+  | None -> (info, None, List.hd strats)
+
+let apply_exp_thm info t exact_t fn args strats =
   let arg = List.hd args in
-  let s = List.hd strats in
+  match (get_info info arg).error with
+  | Some (exact_arg, rel_err, arg', cst_err) -> failwith "TODO : Exp with error"
+  | None -> (info, None, List.hd strats)
+
+let apply_log_thm info t exact_t fn args strats =
+  let arg = List.hd args in
   match (get_info info arg).error with
   | Some (exact_arg, rel_err, arg', cst_err) ->
+    let to_real = to_real (get_ts t) in
     let exact_fn = fs_app fn [ exact_arg ] ty_real in
-    let left = abs (exact_t --. exact_fn) in
+    let left = abs (exact_t -. exact_fn) in
+    (* TODO: Log error when we have a relative error but no cst error *)
+    let right =
+      minus_simp
+        (fs_app fn [ one --. ((rel_err **. arg') ++. cst_err) ] ty_real)
+    in
+    (* |log (x') - log(x)| <= -log(1-err) *)
+    let f = left <=. right in
+    (* TODO: apply log thm ? *)
+    let s =
+      Sapply_trans ("assert", [ Format.asprintf "%a" print_term f ], strats)
+    in
+    let left = abs (to_real t -. exact_fn) in
+    let _, rel_err, t', cst_err = Opt.get (get_info info t).error in
+    let cst_err = right **. (one ++. rel_err) in
+    let right = (rel_err **. t') ++. cst_err in
+    let info = add_error info t (exact_fn, rel_err, t', cst_err) in
+    (info, Some (left <=. right), s)
+  | None -> (info, None, List.hd strats)
+
+let apply_sin_cos_thm info t exact_t fn args strats =
+  let arg = List.hd args in
+  match (get_info info arg).error with
+  | Some (exact_arg, rel_err, arg', cst_err) ->
+    let to_real = to_real (get_ts t) in
+    let exact_fn = fs_app fn [ exact_arg ] ty_real in
+    let left = abs (exact_t -. exact_fn) in
     let right = (abs arg' **. rel_err) ++. cst_err in
+    (* |sin (x') - sin(x)| <= |x' - x| *)
     let f = left <=. right in
     let s =
-      Sapply_trans ("assert", [ Format.asprintf "%a" print_term f ], [ s ])
+      Sapply_trans ("assert", [ Format.asprintf "%a" print_term f ], strats)
     in
-    let left = abs (t -. exact_t) in
+    let left = abs (to_real t -. exact_fn) in
     let _, rel_err, t', cst_err = Opt.get (get_info info t).error in
-    let right = (rel_err **. t') ++. cst_err ++. right in
-    let info = add_error info t (exact_t, rel_err, t', cst_err ++. right) in
-    (* let s = *)
-    (*   Sapply_trans *)
-    (*     ( "apply", *)
-    (*       [ "add_combine"; "with"; args ], *)
-    (*       [ s] *)
-    (*       ] ) *)
+    let cst_err = cst_err ++. right in
+    let right = (rel_err **. t') ++. cst_err in
+    let info = add_error info t (exact_fn, rel_err, t', cst_err) in
     (info, Some (left <=. right), s)
-  | None -> (info, None, s)
+  | None -> (info, None, List.hd strats)
 
 let use_known_thm info t exact_t fn args strats =
   if ls_equal fn !!symbols.cos || ls_equal fn !!symbols.sin then
     apply_sin_cos_thm info t exact_t fn args strats
+  else if ls_equal fn !!symbols.sum then
+    apply_sum_thm info t exact_t fn args strats
+  else if ls_equal fn !!symbols.exp then
+    apply_exp_thm info t exact_t fn args strats
+  else if ls_equal fn !!symbols.log then
+    apply_log_thm info t exact_t fn args strats
   else
     assert false
 
@@ -724,6 +774,8 @@ let rec get_error_fmlas prove_overflow info t :
   | None -> (
     match t_info.error with
     | Some (exact_t, rel_err, t', cst_err) -> (
+      (* TODO: Manage the recognition of functions during parsing (collect
+         function) ? *)
       match get_known_fn exact_t with
       | Some (fn, args) ->
         let info, l =
@@ -744,25 +796,39 @@ let rec get_error_fmlas prove_overflow info t :
       | None -> (info, None, Sdo_nothing))
     | None -> (info, None, Sdo_nothing))
 
-let get_term_for_info t1 =
-  match t1.t_node with
-  | Tapp (ls, [ t ]) when is_to_real_ls ls -> t
-  | _ -> t1
-
 (* Parse |t1 - t1'| <= t2 *)
 let parse_and_add_error_fmla info t1 t1' t2 =
+  let is_sum, _f, i, j =
+    match t1'.t_node with
+    | Tapp (ls, [ f; i; j ]) when ls_equal ls !!symbols.sum ->
+      (true, Some f, Some i, Some j)
+    | _ -> (false, None, None, None)
+  in
   let abs_err = (t1', zero, zero, t2) in
   let rec parse t =
     if t_equal t t1' then
       (abs_err, true)
     else
       match t.t_node with
-      | Tapp (_ls, [ t' ]) when is_abs_ls _ls ->
+      | Tapp (_ls, [ t' ]) when is_abs_ls _ls -> (
         if t_equal t' t1' then
           ((t1', one, t, zero), true)
         else
-          (* TODO: Look inside abs ? *)
-          (abs_err, false)
+          (* TODO: Rewrite this better, also compare f and f' *)
+          match t'.t_node with
+          | Tapp (ls, [ _f'; i'; j' ])
+            when ls_equal ls !!symbols.sum && is_sum
+                 && t_equal i' (Opt.get i)
+                 && t_equal j' (Opt.get j) ->
+            ((t1', one, t, zero), true)
+          | _ -> (abs_err, false))
+      (* TODO: We should also compare f and f', but we would need to inline them
+         before *)
+      | Tapp (ls, [ _f'; i'; j' ])
+        when ls_equal ls !!symbols.sum && is_sum
+             && t_equal i' (Opt.get i)
+             && t_equal j' (Opt.get j) ->
+        ((t1', one, t, zero), true)
       | Tapp (_ls, [ t3; t4 ]) when is_add_ls _ls ->
         let (a, factor, a', cst), _ = parse t3 in
         if is_zero factor then
@@ -796,7 +862,6 @@ let parse_and_add_error_fmla info t1 t1' t2 =
       | _ -> (abs_err, false)
   in
   let error_fmla, _ = parse t2 in
-  let t1 = get_term_for_info t1 in
   add_error info t1 error_fmla
 
 let rec collect info f =
@@ -806,20 +871,21 @@ let rec collect info f =
     collect info f2
   | Tapp (ls, [ t1; t2 ]) when is_ineq_ls ls -> (
     match t1.t_node with
-    | Tapp (_ls, [ t ]) when is_abs_ls ls -> (
+    | Tapp (ls, [ t ]) when is_abs_ls ls -> (
       match t.t_node with
       (* |to_real x| <= y *)
-      | Tapp (_ls, [ t ]) when is_to_real_ls _ls -> add_ineq info t ls t2
+      | Tapp (ls, [ t ]) when is_to_real_ls ls -> add_ineq info t ls t2
       (* |x' - x| <= A *)
-      | Tapp (_ls, [ t1'; t2' ]) when is_sub_ls _ls ->
+      | Tapp (ls, [ t1'; t2' ]) when is_sub_ls ls ->
+        Format.printf "Add error on %a ___ %a@." Pretty.print_term t1'
+          Pretty.print_term f;
         parse_and_add_error_fmla info t1' t2' t2
       | _ -> info)
     | _ -> info)
   (* Look for rel_error *)
-  | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls (Opt.get !symbols).fw_error
-    ->
-    let t1 = get_term_for_info t1 in
-    add_error info t1 (t2, t4, abs t3, zero)
+  (* | Tapp (ls, [ t1; t2; t3; t4 ]) when ls_equal ls !!symbols.fw_error -> *)
+  (*   let t1 = get_term_for_info t1 in *)
+  (*   add_error info t1 (t2, t4, abs t3, zero) *)
   | Tapp (ls, [ t1; t2; t3 ]) when is_ieee_post ls ->
     add_ieee_post info ls t3 t1 t2
   | _ -> info
@@ -924,13 +990,18 @@ let init_symbols env printer =
         div_pre = f "safe64_div_pre";
       }
     in
-    let safe64_lemmas =
-      Env.read_theory env [ "safe64_lemmas" ] "Safe64Lemmas"
-    in
-    let fw_error = ns_find_ls safe64_lemmas.th_export [ "fw_error" ] in
+    (* let safe64_lemmas = *)
+    (*   Env.read_theory env [ "safe64_lemmas" ] "Safe64Lemmas" *)
+    (* in *)
+    (* let fw_error = ns_find_ls safe64_lemmas.th_export [ "fw_error" ] in *)
+    let sum_th = Env.read_theory env [ "creal" ] "SumReal" in
+    let sum = ns_find_ls sum_th.th_export [ "sum" ] in
     let trigo = Env.read_theory env [ "real" ] "Trigonometry" in
     let sin = ns_find_ls trigo.th_export [ "sin" ] in
     let cos = ns_find_ls trigo.th_export [ "cos" ] in
+    let exp_log_th = Env.read_theory env [ "real" ] "ExpLog" in
+    let exp = ns_find_ls exp_log_th.th_export [ "exp" ] in
+    let log = ns_find_ls exp_log_th.th_export [ "log" ] in
     symbols :=
       Some
         {
@@ -939,8 +1010,11 @@ let init_symbols env printer =
           mul;
           div;
           minus;
+          sum;
           sin;
           cos;
+          exp;
+          log;
           add_infix;
           sub_infix;
           mul_infix;
@@ -955,7 +1029,7 @@ let init_symbols env printer =
           ge;
           ge_infix;
           abs;
-          fw_error;
+          (* fw_error; *)
           usingle_symbols;
           udouble_symbols;
           single_symbols;
