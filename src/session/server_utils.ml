@@ -464,9 +464,11 @@ let interp commands_table cont id s =
                | Some _ -> Strategies cmd
              else
               try
+                let s = List.hd (Strings.split ' ' s) in
+                let s = List.hd (Strings.split '\n' s) in
                 let s = Strategy.lookup_strat s in
                 match id with
-                | Some (Session_itp.APn id) -> Strat(cmd, s)
+                | Some (Session_itp.APn _) -> Strat(cmd, s)
                 | _ -> QError ("Please select a goal or trans node in the task tree")
               with | Strategy.UnknownStrat _ ->
                match cmd, args with
