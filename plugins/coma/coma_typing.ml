@@ -3,7 +3,9 @@ open Wstdlib
 open Ident
 open Ty
 open Term
+open Ptree
 open Coma_syntax
+
 
 type vr = Ref of vsymbol | Var of vsymbol | Typ of tvsymbol
 
@@ -43,8 +45,6 @@ let add_param ctx = function
   | Pr vs -> add_ref vs ctx
   | Pc (h, w, pl) -> add_hdl h w pl ctx
 
-open Ptree
-
 let find_ref ctx (id: Ptree.ident) =
   try match Mstr.find id.id_str ctx.vars with
     | Ref v -> v
@@ -67,7 +67,7 @@ let rec type_param0 tuc ctx = function
       let hs = create_hsymbol (id_fresh ~loc:id.id_loc id.id_str) in
       Pc (hs, w, params)
   | PPt id ->
-      let ts = create_tvsymbol (id_fresh ~loc:id.id_loc id.id_str) in
+      let ts = tv_of_string id.id_str in
       Pt ts
 
 and type_param tuc ctx p =
@@ -145,11 +145,11 @@ let rec type_expr tuc ctx { pexpr_desc=d; pexpr_loc=loc } =
          | _ -> Loc.errorm ~loc:id.id_loc "type error with `&%s' assignation" id.id_str);
         let vs = create_vsymbol (id_fresh ~loc:id.id_loc id.id_str) ty in
         let ctx = if mut then add_ref vs ctx else add_var vs ctx in
-        ctx, (vs,tt)
+        ctx, (vs,tt, mut)
       in
       let ctx, ll = Lists.map_fold_left f ctx l in
       let e = type_prog ~loc tuc ctx e in
-      Eset (e, ll), []
+      Elet (e, ll), []
   | PEset (e, l) ->
       let f (id, t) =
         let tt = type_term tuc ctx t in

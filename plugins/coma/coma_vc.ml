@@ -223,6 +223,9 @@ let rec vc pp dd e c bl = match e with
   | Eset (e,vtl) -> assert (bl = []);
       let add cc (v,s) = c_add_vs cc v (c_inst_t c s) in
       vc pp dd e (List.fold_left add c vtl) bl
+  | Elet (e,vtl) -> assert (bl = []);
+      let add cc (v,s,_) = c_add_vs cc v (c_inst_t c s) in
+      vc pp dd e (List.fold_left add c vtl) bl
   | Ecut (f,e) -> assert (bl = []);
       let f = t_attr_add stop_split f in
       (if pp && c.c_gl then w_and_asym else w_implies)
