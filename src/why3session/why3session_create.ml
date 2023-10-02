@@ -46,7 +46,7 @@ let spec =
       Hnd1 (AInt, fun i -> opt_stepslimit := Some i),
       "<steps> set the prover's step limit (no limit by default)" );
     ( Key ('a', "apply-transform"), Hnd1 (AString, add_opt_trans),
-    "<transf> apply a transformation to every task. Default: split_vc");
+    "<transf> apply a transformation to every task.");
     ( Key ('m', "memlimit"),
       Hnd1 (AInt, fun i -> opt_memlimit := Some i),
       "<MB> set the prover's memlimit" );
