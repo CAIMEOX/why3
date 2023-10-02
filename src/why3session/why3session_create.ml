@@ -22,11 +22,9 @@ let opt_outputdir = ref None
 let opt_timelimit = ref None
 let opt_stepslimit = ref None
 let opt_memlimit = ref None
-let opt_trans = ref [("split_vc",[])]
-let has_opt_trans = ref false
+let opt_trans = ref []
 
 let add_opt_trans x =
-  if not !has_opt_trans then (has_opt_trans := true; opt_trans := []);
   match String.split_on_char ' ' x with
   | [] -> assert false
   | name :: args ->
