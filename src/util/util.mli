@@ -127,3 +127,6 @@ val split_version : string ->  (string * int) list
 (** Split a version string into its components. For example, ["2.1~beta3"] is
     split into ["",2;".",1;"~beta",3]. When compared lexicographically, the
     resulting list respects the traditional ordering on version strings. *)
+
+val timings : string -> ('a -> 'b) -> 'a -> 'b
+val print_timings : unit -> unit

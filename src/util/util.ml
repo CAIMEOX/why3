@@ -144,3 +144,20 @@ let split_version s =
           aux_num (i + 1) (String.sub s j (i - j)) (Char.code c - Char.code '0')
       | _ -> aux_str (i + 1) j in
   aux_str 0 0
+
+let timings_map = Hashtbl.create 42
+let print_timings () =
+  Format.printf "Recorded cumulative timings:@.";
+  Hashtbl.iter (fun tr_name (time, n) ->
+    Format.printf "%s:@ count %d, time %f@." tr_name n time
+    ) timings_map
+
+let timings name f arg = 
+  let begin_time = Unix.times () in
+  let result = f arg in
+  let end_time = Unix.times () in
+  let t = Unix.(end_time.tms_utime -. begin_time.tms_utime)
+  in let old_t, old_n = try Hashtbl.find timings_map name
+  with Not_found -> 0.0, 0
+  in Hashtbl.replace timings_map name (old_t +. t, old_n + 1);
+  result
