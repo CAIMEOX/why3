@@ -107,7 +107,7 @@ let is_one t = t_equal one t
 let abs t =
   match t.t_node with
   (* Don't add an abs symbol on top of another *)
-  | Tapp (ls, [ t ]) when ls_equal !!symbols.abs ls -> t
+  | Tapp (ls, [ _ ]) when ls_equal !!symbols.abs ls -> t
   | _ -> fs_app !!symbols.abs [ t ] ty_real
 
 (* TODO: Add ge and gt later *)
@@ -661,7 +661,7 @@ let get_known_fn t =
     Some (ls, args)
   | _ -> None
 
-let apply_sum_thm info t exact_t fn args strats =
+let apply_sum_thm info t exact_t args strats =
   let sum_fn = List.hd args in
   match (get_info info sum_fn).error with
   (* Does this happen ? We always use induction here, so addition theorem is
@@ -669,23 +669,26 @@ let apply_sum_thm info t exact_t fn args strats =
   | Some (exact_arg, rel_err, arg', cst_err) -> failwith "TODO : Sum with error"
   | None -> (info, None, List.hd strats)
 
-let apply_exp_thm info t exact_t fn args strats =
+let apply_exp_thm info t exact_t args strats =
   let arg = List.hd args in
   match (get_info info arg).error with
   | Some (exact_arg, rel_err, arg', cst_err) -> failwith "TODO : Exp with error"
   | None -> (info, None, List.hd strats)
 
-let apply_log_thm info t exact_t fn args strats =
+let apply_log_thm info t exact_t args strats =
   let arg = List.hd args in
   match (get_info info arg).error with
   | Some (exact_arg, rel_err, arg', cst_err) ->
     let to_real = to_real (get_ts t) in
-    let exact_fn = fs_app fn [ exact_arg ] ty_real in
+    let exact_fn = fs_app !!symbols.log [ exact_arg ] ty_real in
     let left = abs (exact_t -. exact_fn) in
     (* TODO: Log error when we have a relative error but no cst error *)
     let right =
-      minus_simp
-        (fs_app fn [ one --. ((rel_err **. arg') ++. cst_err) ] ty_real)
+      exact_fn
+      ++. minus_simp
+            (fs_app !!symbols.log
+               [ one --. ((rel_err **. arg') ++. cst_err) ]
+               ty_real)
     in
     (* |log (x') - log(x)| <= -log(1-err) *)
     let f = left <=. right in
@@ -701,36 +704,73 @@ let apply_log_thm info t exact_t fn args strats =
     (info, Some (left <=. right), s)
   | None -> (info, None, List.hd strats)
 
-let apply_sin_cos_thm info t exact_t fn args strats =
-  let arg = List.hd args in
+(* t the application of a sin/cos approximation to arg.
+ * exact_t is the application of the real sin/cos fn to arg.
+ * fn is the real function, eg. sin or cos.
+ * If arg is an approximation of a real value, then we combine the error of t
+   with the error of arg.
+ *)
+let apply_sin_cos_thm info t exact_t fn arg strats =
   match (get_info info arg).error with
-  | Some (exact_arg, rel_err, arg', cst_err) ->
+  | Some (exact_arg, arg_rel_err, arg', arg_cst_err) ->
     let to_real = to_real (get_ts t) in
-    let exact_fn = fs_app fn [ exact_arg ] ty_real in
-    let left = abs (exact_t -. exact_fn) in
-    let right = (abs arg' **. rel_err) ++. cst_err in
-    (* |sin (x') - sin(x)| <= |x' - x| *)
-    let f = left <=. right in
-    let s =
-      Sapply_trans ("assert", [ Format.asprintf "%a" print_term f ], strats)
+    let exact_fn =
+      t_app_infer fs_func_app
+        [ t_app_partial fn [] [ ty_real ] (Some ty_real); exact_arg ]
     in
-    let left = abs (to_real t -. exact_fn) in
-    let _, rel_err, t', cst_err = Opt.get (get_info info t).error in
-    let cst_err = cst_err ++. right in
-    let right = (rel_err **. t') ++. cst_err in
-    let info = add_error info t (exact_fn, rel_err, t', cst_err) in
-    (info, Some (left <=. right), s)
+    Format.printf "The app is : %a@." Pretty.print_term exact_fn;
+    let exact_fn = fs_app fn [ exact_arg ] ty_real in
+    (* let tv1 = ty_var (create_tvsymbol (id_fresh "a")) in *)
+    (* let tv2 = ty_var (create_tvsymbol (id_fresh "b")) in *)
+    (* let exact_fn = fs_app fs_func_app [ exact_fn ] (ty_func tv1 tv2) in *)
+    (* let exact_fn = t_func_app exact_fn exact_arg in *)
+    let s = Sapply_trans ("apply", [ "sin_error_propagation" ], strats) in
+    let my_t =
+      match t.t_node with
+      | Tapp (ls, [ arg ]) ->
+        t_app_infer fs_func_app
+          [
+            t_app_partial ls [] [ Opt.get t.t_ty ] (Some (Opt.get t.t_ty)); arg;
+          ]
+      | _ -> assert false
+    in
+    (* let left = abs (to_real t -. exact_fn) in *)
+    let left = abs (to_real my_t -. exact_fn) in
+    let _, fn_rel_err, t', fn_cst_err = Opt.get (get_info info t).error in
+    (* TODO: t' is not always equal to abs exact_fn, manage that *)
+    let cst_err =
+      (((arg_rel_err *. arg') +. arg_cst_err) *. (one +. fn_rel_err))
+      +. fn_cst_err
+    in
+    let cst_err_simp =
+      (((arg_rel_err **. arg') ++. arg_cst_err) **. (one ++. fn_rel_err))
+      ++. fn_cst_err
+    in
+    let total_err = (abs exact_fn *. fn_rel_err) +. cst_err in
+    let total_err_simp = (abs exact_fn **. fn_rel_err) ++. cst_err_simp in
+    let info =
+      add_error info t (exact_fn, fn_rel_err, abs exact_fn, cst_err_simp)
+    in
+    if t_equal total_err total_err_simp then
+      (info, Some (left <=. total_err), s)
+    else
+      ( info,
+        Some (left <=. total_err_simp),
+        Sapply_trans
+          ( "assert",
+            [ Format.asprintf "%a" print_term (left <=. total_err) ],
+            [ s ] ) )
   | None -> (info, None, List.hd strats)
 
 let use_known_thm info t exact_t fn args strats =
   if ls_equal fn !!symbols.cos || ls_equal fn !!symbols.sin then
-    apply_sin_cos_thm info t exact_t fn args strats
+    apply_sin_cos_thm info t exact_t fn (List.hd args) strats
   else if ls_equal fn !!symbols.sum then
-    apply_sum_thm info t exact_t fn args strats
+    apply_sum_thm info t exact_t args strats
   else if ls_equal fn !!symbols.exp then
-    apply_exp_thm info t exact_t fn args strats
+    apply_exp_thm info t exact_t args strats
   else if ls_equal fn !!symbols.log then
-    apply_log_thm info t exact_t fn args strats
+    apply_log_thm info t exact_t args strats
   else
     assert false
 
