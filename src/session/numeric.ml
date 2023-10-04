@@ -298,7 +298,7 @@ let add_error info t error =
     | Tapp (ls, [ t ]) when is_to_real_ls ls -> t
     | _ -> t
   in
-  Format.printf "Add error on %a@." Pretty.print_term t;
+  (* Format.printf "Add error on %a@." Pretty.print_term t; *)
   let t_info = get_info info t in
   let t_info =
     { ineqs = t_info.ineqs; error = Some error; ieee_post = t_info.ieee_post }
@@ -344,13 +344,18 @@ let rec print_term fmt t =
     let s = id_unique ls.ls_name in
     match (Ident.sn_decode s, tl) with
     | Ident.SNinfix s, [ t1; t2 ] ->
-      Format.fprintf fmt "(%a %s %a)" print_term t1 s print_term t2
+      Format.fprintf fmt "((%a) %s (%a))" print_term t1 s print_term t2
     | Ident.SNget s, [ t1; t2 ] ->
       Format.fprintf fmt "%a@,[%a]%s" print_term t1 print_term t2 s
     | Ident.SNupdate s, [ t1; t2; t3 ] ->
       Format.fprintf fmt "%a@,[%a <-@ %a]%s" print_term t1 print_term t2
         print_term t3 s
     | Ident.SNprefix s, [ t ] -> Format.fprintf fmt "%s %a@." s print_term t
+    | Ident.SNword s, [ t ] when Sattr.mem is_field_id_attr ls.ls_name.id_attrs
+      ->
+      Format.fprintf fmt "%a.%s" print_term t s
+    | Ident.SNword s, tl ->
+      Format.fprintf fmt "%s@ (%a)" s (Pp.print_list Pp.space print_term) tl
     (* TODO: Other applications *)
     | _ ->
       Format.fprintf fmt "(%s %a)" (id_unique ls.ls_name)
@@ -714,28 +719,8 @@ let apply_sin_cos_thm info t exact_t fn arg strats =
   match (get_info info arg).error with
   | Some (exact_arg, arg_rel_err, arg', arg_cst_err) ->
     let to_real = to_real (get_ts t) in
-    let exact_fn =
-      t_app_infer fs_func_app
-        [ t_app_partial fn [] [ ty_real ] (Some ty_real); exact_arg ]
-    in
-    Format.printf "The app is : %a@." Pretty.print_term exact_fn;
     let exact_fn = fs_app fn [ exact_arg ] ty_real in
-    (* let tv1 = ty_var (create_tvsymbol (id_fresh "a")) in *)
-    (* let tv2 = ty_var (create_tvsymbol (id_fresh "b")) in *)
-    (* let exact_fn = fs_app fs_func_app [ exact_fn ] (ty_func tv1 tv2) in *)
-    (* let exact_fn = t_func_app exact_fn exact_arg in *)
     let s = Sapply_trans ("apply", [ "sin_error_propagation" ], strats) in
-    let my_t =
-      match t.t_node with
-      | Tapp (ls, [ arg ]) ->
-        t_app_infer fs_func_app
-          [
-            t_app_partial ls [] [ Opt.get t.t_ty ] (Some (Opt.get t.t_ty)); arg;
-          ]
-      | _ -> assert false
-    in
-    (* let left = abs (to_real t -. exact_fn) in *)
-    let left = abs (to_real my_t -. exact_fn) in
     let _, fn_rel_err, t', fn_cst_err = Opt.get (get_info info t).error in
     (* TODO: t' is not always equal to abs exact_fn, manage that *)
     let cst_err =
@@ -751,6 +736,27 @@ let apply_sin_cos_thm info t exact_t fn arg strats =
     let info =
       add_error info t (exact_fn, fn_rel_err, abs exact_fn, cst_err_simp)
     in
+    (* TODO: We need to assert the bound on (fun y -> sin' y) @ x instead of
+       sin' x to match the form of the sin lemma applied earlier. Maybe there is
+       a better solution we can find here *)
+    let t_func_app =
+      match t.t_node with
+      | Tapp (ls, [ arg ]) ->
+        t_app fs_func_app
+          [
+            t_app_partial ls [] [ Opt.get t.t_ty ] (Some (Opt.get t.t_ty)); arg;
+          ]
+          t.t_ty
+      | _ -> assert false
+    in
+    let left = abs (to_real t_func_app -. exact_fn) in
+    let s =
+      Sapply_trans
+        ( "assert",
+          [ Format.asprintf "%a" print_term (left <=. total_err) ],
+          [ s ] )
+    in
+    let left = abs (to_real t -. exact_fn) in
     if t_equal total_err total_err_simp then
       (info, Some (left <=. total_err), s)
     else
